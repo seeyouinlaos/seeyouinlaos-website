@@ -57,7 +57,7 @@
   --a-edge: max(var(--a-gut), calc((100% - var(--a-frame)) / 2 + var(--a-gut)));
   /* the destination chapter's column: 1000 px, never closer to the screen than the gutter (it used to be a bare 1000 px
      with no padding, so between 900 and 1128 px every chapter ran from the screen's own edge) */
-  --a-dest-w: min(1000px, calc(100% - 2 * var(--a-gut)));
+  --a-dest-w: calc(min(100%, var(--a-frame)) - 2 * var(--a-gut));   /* the content wall (layout QA agent, 25 Sep 2026: was a 1000 px cap inside it) */
 }
 
 /* ---------------------------------------------------------------- header
@@ -378,12 +378,12 @@ a.am { display: block; text-decoration: none; }
 @media (min-width: 600px) and (max-width: 767px) {
   :root { --a-gut: 34px; --a-rhythm: 110px; }
   .a-hero h1 { font-size: 38px; }
-  .a-lede { max-width: 620px; margin-left: auto; margin-right: auto; }
-  .a-pair { max-width: 640px; margin-left: auto; margin-right: auto; }
+  /* THE SMALL TABLET ON THE WALL (the site-wide layout QA agent, 25 Sep 2026 · the Owner's 24 Sep rule "from 600 px the
+     wall"): the editorial sections no longer centre a 620 / 640 px column inside it — from ~710 px that column left the
+     wall's axis. The lede keeps its reading measure on the left axis; the photographs span the wall. */
   .a-pair .am { aspect-ratio: 3 / 2; }
-  .a-duo { max-width: 640px; margin-left: auto; margin-right: auto; gap: 20px; }
+  .a-duo { gap: 20px; }
   .a-duo .am { aspect-ratio: 4 / 3; }
-  .a-close, .slist { max-width: 640px; margin-left: auto; margin-right: auto; }
   .a-band { height: 360px; }
 }
 /* THE WALL ON A SMALL TABLET (Owner, 24 Sep 2026 · iPad mini upright is 744 px). Below 600 px the approved iPhone
@@ -475,10 +475,11 @@ a.am { display: block; text-decoration: none; }
   .vars .var .vt { width: 88px !important; height: 62px !important; }
 }
 
-/* tablet: the shop shell keeps an editorial measure instead of a 640 px column
-   floating in the middle of a 768 px screen */
+/* tablet: the shop shell stands on the wall (the site-wide layout QA agent, 25 Sep 2026): no page's main is a 640 or 680 px
+   column centred in a 600–767 px screen any more — its gutter is the wall's, as on the phone and from 768 px */
 @media (min-width: 600px) and (max-width: 767px) {
-  body:has(#items) main, body:has(.vars) main { max-width: 680px !important; padding-left: 34px !important; padding-right: 34px !important; }
+  main { max-width: none !important; }
+  body:has(#items) main, body:has(.vars) main { padding-left: var(--a-gut) !important; padding-right: var(--a-gut) !important; }
   .p { padding: 30px 0; }
   .buy { padding: 34px 30px 36px; }
 }
@@ -647,7 +648,7 @@ html[data-session="in"] [data-private-cta] { display: none !important; }
 .a-sec > .dgal, .a-sec > .refgal { padding: 0 var(--a-gut); }
 /* THE DESTINATION CHAPTER (Owner, 21 Sep 2026): one component for every city, stacked and identical — the clip edge to edge, the
    words beneath, the gallery, a rule and the way in. Never a left / right alternation. */
-.a-dest .am { position: relative; overflow: hidden; margin: 0 var(--a-gut); aspect-ratio: 4 / 5; background: #E7E3DB center/cover no-repeat; }
+.a-dest > .am { position: relative; overflow: hidden; margin: 0 var(--a-gut); aspect-ratio: 4 / 5; background: #E7E3DB center/cover no-repeat; }
 .a-dest .am video.am-clip { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .a-dest-text { padding: 26px var(--a-gut) 0; }
 .a-dest-text h2 { margin: 6px 0 12px; }
@@ -655,9 +656,11 @@ html[data-session="in"] [data-private-cta] { display: none !important; }
 .a-dest .refgal { margin-top: 26px; }
 .a-dest-foot { padding: 0 var(--a-gut); margin-top: 26px; }
 .a-dest-foot hr { border: 0; border-top: 1px solid var(--a-rule, #E1DCD3); margin: 0 0 18px; }
-@media (min-width: 768px) { .a-dest .am { aspect-ratio: 16 / 10; } }
+@media (min-width: 768px) { .a-dest > .am { aspect-ratio: 16 / 10; } }
 @media (min-width: 900px) {
-  .a-dest .am { max-width: var(--a-dest-w); margin: 0 auto; aspect-ratio: 16 / 9; }
+  /* the chapter's own photograph only (> .am): its frame never leaks into the gallery's slides, which it once narrowed by
+     two gutters and centred inside each slide (layout QA agent, 25 Sep 2026) */
+  .a-dest > .am { max-width: var(--a-dest-w); margin: 0 auto; aspect-ratio: 16 / 9; }
   .a-dest-text, .a-dest-foot { max-width: var(--a-dest-w); margin-left: auto; margin-right: auto; padding-left: 0; padding-right: 0; }
   .a-dest-text { padding-top: 34px; }
 }
@@ -668,7 +671,7 @@ html[data-session="in"] [data-private-cta] { display: none !important; }
 .a-dest .refgal .atrk, .a-dest .refgal .arow, .a-dest .acar .atrk { width: 100%; max-width: none; margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 0; scroll-padding-left: 0; }
 @media (min-width: 900px) { .a-dest > .refgal, .a-dest > .a-galcap { max-width: var(--a-dest-w); padding: 0; } }
 .a-galcap { padding: 0 var(--a-gut); margin-top: 12px; font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--a-mute); }
-@media (min-width: 900px) { .a-sec > .refgal, .a-galcap { max-width: 1000px; margin-left: auto; margin-right: auto; } }
+@media (min-width: 900px) { .a-sec > .refgal, .a-galcap { max-width: var(--a-dest-w); margin-left: auto; margin-right: auto; } }   /* the wall, never a 1000 px cap inside it (layout QA agent, 25 Sep 2026) */
 .refgal .atrk { padding-left: 0; scroll-padding-left: 0; }
 .refgal .aslide { flex: 0 0 72%; margin: 0; }
 .refgal .aslide .am { aspect-ratio: 3 / 4; background: #E7E3DB; }
@@ -712,19 +715,24 @@ html[data-session="in"] [data-private-cta] { display: none !important; }
    frame's focal point is its own per class (--fp-tp · --fp-tl · --fp-d on the layer); the geometry is pure CSS from the
    viewport, so a frame never moves once painted (no layout shift), and a photograph is only positioned — never stretched,
    distorted, extended or blur-filled. These rules stand after every earlier hero rule on purpose. */
+/* THE HERO ON THE WALL (the site-wide layout QA agent, 25 Sep 2026): the first page's hero system of the same day is now
+   every page's. From 768 px the frame is the content wall itself — the header's menu and bag edges, never a second
+   centred cap (the former 720 · 880 · 1000 px) — and its words begin on the same left edge. Upright tablets keep 4 : 5;
+   landscape tablets and desktops frame 4 : 3, bounded by the screen's height but never shallower than 3 : 2. */
+@media (min-width: 768px) {
+  .a-hero .am, .a-hero .ah { max-width: none; margin-left: 0; margin-right: 0; }
+  .a-hero .am { max-height: max(480px, calc((min(100vw, var(--a-frame)) - 2 * var(--a-gut)) * 2 / 3), calc(100svh - 160px)); }
+}
 @media (min-width: 768px) and (orientation: portrait) {
-  .a-hero .am { aspect-ratio: 4 / 5; max-width: 720px; margin-left: auto; margin-right: auto; }
-  .a-hero .ah { max-width: 720px; margin-left: auto; margin-right: auto; }   /* the words begin at the frame's own left edge */
+  .a-hero .am { aspect-ratio: 4 / 5; }
   .a-hero .am, .a-hero-slide { background-position: var(--fp-tp, var(--fp-p, center)); }
 }
 @media (min-width: 768px) and (orientation: landscape) {
-  .a-hero .am { aspect-ratio: 3 / 2; max-width: 880px; margin-left: auto; margin-right: auto; }
-  .a-hero .ah { max-width: 880px; margin-left: auto; margin-right: auto; }
+  .a-hero .am { aspect-ratio: 4 / 3; }
   .a-hero .am, .a-hero-slide { background-position: var(--fp-tl, var(--fp-p, center)); }
 }
 @media (min-width: 1200px) {
-  .a-hero .am { aspect-ratio: 3 / 2; max-width: 1000px; margin-left: auto; margin-right: auto; }
-  .a-hero .ah { max-width: 1000px; margin-left: auto; margin-right: auto; }
+  .a-hero .am { aspect-ratio: 4 / 3; }
   .a-hero .am, .a-hero-slide { background-position: var(--fp-d, var(--fp-p, center)); }
 }
 
@@ -1117,16 +1125,11 @@ body:has(.prep-bar) header.hd::before { display: none; }
      "Discover the journey" and the destinations. The first page now carries a scale of its own on the same tokens —
      every section of the page reads them — bounded at both ends so a tall monitor never grows the gaps.
    ========================================================================== */
-main.a-home { --a-rhythm: 56px; --a-gap-media: 64px; }
-@media (min-width: 600px) { main.a-home { --a-rhythm: 64px; --a-gap-media: 72px; } }
-@media (min-width: 768px) { main.a-home { --a-rhythm: 72px; --a-gap-media: 80px; } }
-@media (min-width: 900px) { main.a-home { --a-rhythm: clamp(80px, 6vw, 104px); --a-gap-media: clamp(88px, 6.5vw, 112px); } }
-@media (min-width: 768px) {
-  main.a-home .a-hero .am, main.a-home .a-hero .ah { max-width: none; }
-  /* never shallower than the former 3 : 2 (the frame's own width × 2 / 3), up to 4 : 3 where the screen is tall enough */
-  main.a-home .a-hero .am { max-height: max(480px, calc((min(100vw, var(--a-frame)) - 2 * var(--a-gut)) * 2 / 3), calc(100svh - 160px)); }
-}
-@media (min-width: 768px) and (orientation: landscape), (min-width: 1200px) {
-  main.a-home .a-hero .am { aspect-ratio: 4 / 3; }
-}
+/* PROMOTED (the site-wide layout QA agent, 25 Sep 2026): the rhythm below and the hero frame (THE HERO ON THE WALL, above)
+   are the whole site's system now — every editorial page reads the same tokens, so no page keeps the old screen of Ivory
+   between its sections. Stated on :root, after every earlier token, so it is the one scale. */
+:root { --a-rhythm: 56px; --a-gap-media: 64px; }
+@media (min-width: 600px) { :root { --a-rhythm: 64px; --a-gap-media: 72px; } }
+@media (min-width: 768px) { :root { --a-rhythm: 72px; --a-gap-media: 80px; } }
+@media (min-width: 900px) { :root { --a-rhythm: clamp(80px, 6vw, 104px); --a-gap-media: clamp(88px, 6.5vw, 112px); } }
 

@@ -1,0 +1,28 @@
+<!doctype html>
+<!-- THE AUDITOR'S SELF-TEST (layout QA agent, 25 Sep 2026): one seeded fault per rule, and correct blocks beside them.
+     Every audit renders this first; it must find every .bad (by the type named in data-expect) and never a .good —
+     otherwise the audit refuses to report a pass. Never served (src/ is outside the Worker's assets). -->
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root { --a-gut: 24px; --a-frame: 1180px; --a-rhythm: 64px; --a-gap-media: 72px; }
+@media (min-width: 768px) { :root { --a-gut: 44px; } }
+* { box-sizing: border-box; }
+body { margin: 0; background: #F2ECE1; font: 14px/1.6 sans-serif; }
+header.hd { display: flex; justify-content: space-between; padding: 10px max(var(--a-gut), calc((100% - var(--a-frame)) / 2 + var(--a-gut))); }
+main > * { max-width: var(--a-frame); margin-left: auto; margin-right: auto; padding-left: var(--a-gut); padding-right: var(--a-gut); margin-top: 24px; margin-bottom: 0; }
+.card { background: #fff; padding: 16px; }
+</style></head><body>
+<header class="hd"><a class="hb" href="#">Menu</a><a class="bag" href="#">Bag</a></header>
+<main>
+  <section class="good"><p class="good">Text on the wall.</p><div class="good am" style="height:80px;background:#ccc"></div></section>
+  <section class="good"><div class="card good"><p class="good">Text on the card's own edge.</p></div></section>
+  <section style="padding-left:calc(var(--a-gut) + 40px)"><p class="bad" data-expect="AXIS_WALL">A second inner wall.</p></section>
+  <section><div class="am bad" data-expect="MEDIA_WALL" style="max-width:300px;margin:0 auto;height:80px;background:#ccc"></div></section>
+  <section><p class="bad" data-expect="AXIS_CENTERED" style="text-align:center">A centred line on the page.</p></section>
+  <section><div class="bad" data-expect="TEXT_CLIPPED" style="overflow:hidden;width:120px;white-space:nowrap">A line far longer than its box, cut off</div></section>
+  <section><img class="bad" data-expect="MEDIA_DISTORTED" alt="" style="width:200px;height:200px;display:block" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='100'><rect width='200' height='100' fill='%23999'/></svg>"></section>
+  <section><img class="bad" data-expect="MEDIA_BROKEN" alt="" style="width:100px;height:60px;display:block" src="data:image/png;base64,AAAA"></section>
+  <section><div class="bad" data-expect="OUTSIDE_WALL" style="width:calc(100% + 60px);height:20px;background:#333"></div></section>
+  <section class="bad" data-expect="SECTION_OVERLAP" style="margin-top:-60px;height:40px"><p>Sits on the section above.</p></section>
+</main>
+</body></html>

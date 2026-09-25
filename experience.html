@@ -8,11 +8,11 @@
 <meta name="robots" content="noindex">
 <title>Experience · See You In Laos</title>
 <link rel="stylesheet" href="assets/recon.css?v=05778142">
-<link rel="stylesheet" href="assets/aman.css?v=0674a096">
+<link rel="stylesheet" href="assets/aman.css?v=7639b113">
 <style>
 /* ONE place: its photographs, its words, and — where the hosts offer it — the
    Journey action. Same grammar as every editorial page; nothing new is invented. */
-.x-wrap { max-width: 1180px; margin: 0 auto; }
+.x-wrap { max-width: var(--a-frame, 1180px); margin: 0 auto; }   /* the page frame (1280 px from 1600): the gallery and the words share one wall */
 .x-gal { margin: 0 0 34px; }
 .x-head { padding: 0 var(--a-gut); max-width: 760px; }
 .x-head .a-eyebrow { margin-bottom: 14px; }
@@ -83,14 +83,16 @@
 .x-contact { font-size: 13.5px; line-height: 1.75; }
 .x-contact a { color: var(--a-ink); overflow-wrap: anywhere; }
 .x-kv .v { overflow-wrap: anywhere; }
-@media (min-width: 900px) { .x-clip { margin: 0 auto 44px; } .x-clip .am { aspect-ratio: 16 / 10; } }
+@media (min-width: 900px) { .x-clip { margin: 0 0 44px var(--a-gut); } .x-clip .am { aspect-ratio: 16 / 10; } }   /* the film on the reading column's left axis, never re-centred (layout QA agent, 25 Sep 2026) */
 .x-none { padding: 80px var(--a-gut); max-width: 760px; }
 @media (min-width: 900px) {
   .x-gal { margin-bottom: 44px; }
   .x-head h1 { font-size: 40px; }
-  .x-head, .x-sec, .x-back { max-width: 760px; margin-left: auto; margin-right: auto; padding: 0; }
+  /* THE READING COLUMN ON THE WALL'S LEFT AXIS (the site-wide layout QA agent, 25 Sep 2026): 760 px from the same left
+     edge as the gallery above it, never re-centred (it began 146 px inside the photograph's edge at 1440) */
+  .x-head, .x-sec, .x-back { max-width: 760px; margin-left: var(--a-gut); margin-right: auto; padding: 0; }
   .x-sec { margin-top: 64px; }
-  .x-sel { max-width: 760px; margin: 76px auto 0; padding: 40px 44px 44px; }
+  .x-sel { max-width: 760px; margin: 76px auto 0 var(--a-gut); padding: 40px 44px 44px; }
   .x-kv > div { grid-template-columns: 160px minmax(0, 1fr); }
 }
 </style>

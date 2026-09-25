@@ -78,8 +78,8 @@
 
   /* alignment is achieved with axes, never with centring: nothing on a desktop
      page is centred except a button's own label */
-  .intro, .ot, .backrow, .ok, .rsvline, .enq, .lede, .ed .cap, .plane h2,
-  main > p[style*="text-align:center"] { text-align: left !important; }
+  .intro, .ot, .backrow, .ok, .rsvline, .enq, .lede, .ed .cap, .ed .body, .plane h2,
+  main > h2, main > p[style*="text-align:center"] { text-align: left !important; }
   .chg { margin-left: 0; margin-right: auto; }
   .backrow { text-align: left; }
   /* a reading column is bounded, never re-centred inside its own section */
@@ -91,7 +91,7 @@
   .intro { max-width: 34em; margin: 0; padding: 52px 0 4px; }
   .wrap { max-width: 42em; margin: 0; padding: 0; }
   .facts { margin-top: 6px; }
-  .frow { padding: 15px 2px; }
+  .frow { padding: 15px 0; }
 
   /* PLANE — a light surface across the screen, with its reading column on the
      same left axis as everything else. THE WALL (Owner, 24 Sep 2026): the box
@@ -112,9 +112,13 @@
   .grp .amen { max-width: none; }
   .grp .amen li { margin-bottom: 12px; }
 
-  .inc p { padding: 15px 2px; }
+  .inc p { padding: 15px 0; }
+  /* ONE GUTTER (the site-wide layout QA agent, 25 Sep 2026): the shell's main carries the gutter from 768 px; a page's own
+     phone gutter — a plain section, the contact block, the details rule — never stacks a second one inside it */
+  main > section:not([class]), .contact, .detail-h { margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 0; }
+  /* (the shared carousel inside the shell: see the rule after this block — it holds from 600 px) */
   .ed { margin-top: var(--d-rhythm); }
-  .ed .ph { max-width: none; margin: 0; aspect-ratio: 16 / 9; }
+  .ed .ph { width: 100%; max-width: none; margin: 0; aspect-ratio: 16 / 9; }   /* the whole wall: the phone's own inset width no longer survives (layout QA agent, 25 Sep 2026) */
   .ed .cap { text-align: left; margin: 14px 0 0; }
   .ed .body { max-width: 34em; margin: 0; }
 
@@ -164,3 +168,10 @@
 
 /* the shared editorial footer lives in assets/aman.css — one footer for the
    whole website, editorial shell and shop shell alike. */
+
+/* ONE GUTTER FOR A CAROUSEL IN THE SHOP SHELL (the site-wide layout QA agent, 25 Sep 2026): the shared carousel's frame
+   (aman.css) is written for a section that spans the screen and takes the gutter off both sides; inside the shell the page
+   already stands on the wall — from the small tablet (600 px) on, the rail, its heading and its controls take its width. */
+@media (min-width: 600px) {
+  main .acar .atrk, main .acar .arow, main .acar .a-head { width: auto; max-width: none; margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 0; scroll-padding-left: 0; }
+}

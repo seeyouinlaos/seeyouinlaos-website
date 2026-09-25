@@ -672,6 +672,33 @@ gate('P7', 'Dress Code imagery real (23 — resort-01 retired by the owner), no 
   gate('I1', 'Infrastructure freeze: one Worker, one public origin, frozen bindings, auth and email, GitHub Pages disabled', r.status === 0, lines[lines.length - 1].replace(/^INFRASTRUCTURE FREEZE: /, '') + (r.status === 0 ? '' : ' · ' + lines.filter((l) => /^FAIL/.test(l)).join(' · ')));
 }
 
+/* GATE L2 — THE SITE-WIDE LAYOUT CONTRACT (Owner, 25 Sep 2026 · the layout QA agent; docs/LAYOUT-QA.md): every served page
+ * is in the layout route manifest or excluded with a reason (the new-route guard); every exception of the contract is a
+ * named primitive with its reason; and the rendered audits were run on exactly the layout that ships — the recorded FAST
+ * gate and FULL release-acceptance audit carry the current layout fingerprint (contract · rules · manifest · every
+ * stylesheet · every page's own <style>), every state, both engines, both languages, and zero unexplained violations. */
+{
+  const R = require('./layout-routes.cjs');
+  const core = require('./layout-qa/core.cjs');
+  const problems = [...R.coverage().problems, ...core.contractProblems()];
+  const fp = core.fingerprint();
+  for (const mode of ['FAST', 'FULL']) {
+    const f = path.join(ROOT, 'docs', 'acceptance', 'layout', 'LAST-' + mode + '-AUDIT.json');
+    if (!fs.existsSync(f)) { problems.push('no recorded ' + mode + ' layout audit (node src/layout-qa/audit.mjs --' + mode.toLowerCase() + ' --record)'); continue; }
+    const rec = JSON.parse(fs.readFileSync(f, 'utf8'));
+    if (rec.fingerprint !== fp) problems.push('the ' + mode + ' layout audit (' + rec.fingerprint + ') was run on another layout than this one (' + fp + ') — run it again');
+    if (rec.unexplained !== 0) problems.push('the ' + mode + ' layout audit has ' + rec.unexplained + ' unexplained violation(s)');
+    if (!['chromium', 'webkit'].every((e) => (rec.engines || []).includes(e)) || !['en', 'th'].every((l) => (rec.langs || []).includes(l))) problems.push('the ' + mode + ' layout audit did not cover Chromium + WebKit, English + Thai');
+    if (mode === 'FULL') {
+      const missing = R.STATES.map((s) => s.id).filter((s) => !(rec.states || []).includes(s));
+      if (missing.length) problems.push('the FULL layout audit skipped states: ' + missing.join(', '));
+      if (rec.widths !== core.fullWidths().length) problems.push('the FULL layout audit covered ' + rec.widths + ' widths, the matrix has ' + core.fullWidths().length);
+    }
+  }
+  gate('L2', 'Layout contract: every page audited, every exception a named primitive, fast gate and full audit on this exact layout with zero unexplained violations', problems.length === 0,
+    problems.length ? problems.join(' · ') : 'fingerprint ' + fp + ' · ' + R.ROUTES.length + ' routes · ' + R.STATES.length + ' states · ' + core.fullWidths().length + ' widths · 0 unexplained');
+}
+
 let failed = 0;
 for (const r of results) {
   if (!r.ok) failed++;

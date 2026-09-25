@@ -491,7 +491,7 @@ body.prep-steps-open { overflow: hidden; }   /* the page is held while the index
    and the frame for a product structure that genuinely needs the width
    (.prep-sec.wide) — never a different content width per step. */
 @media (min-width: 900px) {
-  .prep-head, .prep-sec, .prep-foot, .prep-gate, .p-block, .p-for, .prep-col { max-width: 860px; }
+  .prep-head, .prep-sec, .prep-foot, .prep-gate, .prep-gate-note, .p-block, .p-for, .prep-col { max-width: 860px; }   /* the gate's note too (layout QA agent, 25 Sep 2026: it alone ran the whole frame) */
   /* a product structure that genuinely needs the width — the long table with
      its 24 chairs a side — may use the frame; nothing else does */
   .prep-sec.wide { max-width: none; }
@@ -927,6 +927,12 @@ body.prep-steps-open .prep-bar { top: var(--hd-h, 0px); }
   .prep-bar-foot:not(:has(.prep-send-upd)) .prep-save-btn { grid-column: 2; }
   .prep-bar-foot .prep-bar-r { grid-row: 1 / span 2; grid-column: 5; justify-self: end; }
   .prep-bar-foot .prep-save-state.is-failed, .prep-bar-foot .prep-merge { grid-row: 3; grid-column: 1 / -1; }
+  /* THE BAR'S LEFT AXIS (the site-wide layout QA agent, 25 Sep 2026): the space between the pieces travels with the pieces
+     that exist. A column gap stood after the first column even while it was empty — no trip state and no saved time yet —
+     and put SAVE MY PROGRESS 16 px off the axis every other line of the bar starts on. */
+  .prep-bar-foot { column-gap: 0; }
+  .prep-bar-foot .prep-state, .prep-bar-foot .prep-save-state:not(:empty):not(.is-failed):not(.prep-merge), .prep-bar-foot .prep-send-upd { margin-right: var(--s4); }
+  .prep-bar-foot .prep-bar-r { margin-left: var(--s4); }
 }
 @media (max-width: 767px) {
   .prep-bar-in { padding-top: var(--s3); padding-bottom: var(--s2); }
@@ -1092,3 +1098,10 @@ body.seatbar-on .prep-foot .prep-foot-note { display: none; }
    outranked [hidden] — Review hid the button while nothing had changed since the last send, yet it stayed on screen. */
 [hidden] { display: none; }
 .p-act[hidden], .p-link[hidden], .p-card[hidden], .p-kv[hidden] { display: none; }
+
+/* ONE GUTTER FOR A CAROUSEL IN A STEP (the site-wide layout QA agent, 25 Sep 2026): the shared carousel's frame (aman.css)
+   is written for a section that spans the screen and removes the gutter from both sides; inside a step page the page already
+   stands on the wall, so the rail, its heading and its controls take the page's width — never the wall minus two gutters. */
+@media (min-width: 600px) {
+  .prep-page .acar .atrk, .prep-page .acar .arow, .prep-page .acar .a-head { width: auto; max-width: none; margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 0; scroll-padding-left: 0; }
+}

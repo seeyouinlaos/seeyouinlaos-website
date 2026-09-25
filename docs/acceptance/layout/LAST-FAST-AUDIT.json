@@ -1,0 +1,41 @@
+{
+ "mode": "fast",
+ "fingerprint": "a38d148acfe23ba1",
+ "origin": "local stage",
+ "finished": "2026-09-25T21:25:14.398Z",
+ "engines": [
+  "chromium",
+  "webkit"
+ ],
+ "langs": [
+  "en",
+  "th"
+ ],
+ "states": [
+  "signed-out",
+  "menu-open",
+  "fresh",
+  "sent",
+  "steps-open"
+ ],
+ "skippedStates": [],
+ "routes": 23,
+ "measurements": 854,
+ "loads": 854,
+ "widths": 8,
+ "unexplained": 0,
+ "rootCauses": [],
+ "exceptions": {
+  ".acar .atrk, .refgal .atrk, .others .oc": 260,
+  ".a-duo .a-map": 14,
+  "footer.sfoot": 770,
+  ".a-band": 30,
+  "button, .p-act, .a-cta, .cta, .x-cta, .dcta": 1440,
+  ".prep-head .p-media": 418,
+  ".intro, .lede, .plane h2, .ed .body, .ok, main > h2, main > p": 228,
+  "main > .media": 10,
+  ".jbar": 364,
+  "section.buy, section.plane": 60,
+  "main > .gal": 20
+ }
+}

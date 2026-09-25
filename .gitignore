@@ -37,3 +37,6 @@ docs/REVIEW-VIENTIANE-PASS.md
 docs/acceptance/2026-09-24-window-007/visual/
 docs/acceptance/2026-09-24-window-007/out/*.png
 docs/acceptance/2026-09-24-window-007/out/*.pdf
+
+# the layout QA agent's diagnostic artifacts (reports, annotated screenshots) — local QA evidence, never committed
+qa-artifacts/

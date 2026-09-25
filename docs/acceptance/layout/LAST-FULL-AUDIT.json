@@ -1,0 +1,46 @@
+{
+ "mode": "full",
+ "fingerprint": "a38d148acfe23ba1",
+ "origin": "local stage",
+ "finished": "2026-09-25T22:51:15.102Z",
+ "engines": [
+  "chromium",
+  "webkit"
+ ],
+ "langs": [
+  "en",
+  "th"
+ ],
+ "states": [
+  "signed-out",
+  "menu-open",
+  "fresh",
+  "planning",
+  "declined",
+  "mixed",
+  "sent",
+  "menu-open-guest",
+  "steps-open"
+ ],
+ "skippedStates": [],
+ "routes": 23,
+ "measurements": 23900,
+ "loads": 9960,
+ "widths": 61,
+ "unexplained": 0,
+ "rootCauses": [],
+ "exceptions": {
+  ".acar .atrk, .refgal .atrk, .others .oc": 6468,
+  ".a-duo .a-map": 244,
+  "footer.sfoot": 21948,
+  ".a-band": 504,
+  "button, .p-act, .a-cta, .cta, .x-cta, .dcta": 50370,
+  ".x-clip .am": 40,
+  ".prep-head .p-media": 8230,
+  ".intro, .lede, .plane h2, .ed .body, .ok, main > h2, main > p": 7426,
+  "main > .media": 168,
+  ".jbar": 11804,
+  "section.buy, section.plane": 1802,
+  "main > .gal": 504
+ }
+}

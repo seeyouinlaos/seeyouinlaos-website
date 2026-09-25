@@ -43,10 +43,14 @@ test('THE FRAME PER VIEWPORT CLASS (Owner, 21 Sep 2026): the phone keeps its squ
   assert.match(css, /\.a-hero \.am, \.a-hero-slide \{ background-position: var\(--fp-p, center\); \}/);
   const at = (q) => { const i = css.indexOf(q); assert.ok(i > 0, q); return css.slice(i, css.indexOf('\n}', i)); };
   const tp = at('@media (min-width: 768px) and (orientation: portrait) {'), tl = at('@media (min-width: 768px) and (orientation: landscape) {'), d = at('@media (min-width: 1200px) {');
-  assert.match(tp, /\.a-hero \.am \{ aspect-ratio: 4 \/ 5; max-width: 720px; margin-left: auto; margin-right: auto; \}/); assert.match(tp, /background-position: var\(--fp-tp, var\(--fp-p, center\)\)/);
-  assert.match(tl, /\.a-hero \.am \{ aspect-ratio: 3 \/ 2; max-width: 880px; margin-left: auto; margin-right: auto; \}/); assert.match(tl, /background-position: var\(--fp-tl, var\(--fp-p, center\)\)/);
-  assert.match(d, /\.a-hero \.am \{ aspect-ratio: 3 \/ 2; max-width: 1000px; margin-left: auto; margin-right: auto; \}/); assert.match(d, /background-position: var\(--fp-d, var\(--fp-p, center\)\)/);
-  for (const blk of [tp, tl, d]) { assert.match(blk, /\.a-hero \.ah \{ max-width: \d+px; margin-left: auto; margin-right: auto; \}/, 'the words begin at the frame\'s edge'); assert.doesNotMatch(blk, /transform|scale\(|filter|blur|object-fit: fill|background-size/, 'positioned only'); }
+  /* SUPERSEDED IN PART (Owner, 25 Sep 2026 · the first page as one system, promoted site-wide by the layout QA agent): the
+     frame closes on the content wall — no 720 / 880 / 1000 px cap — and landscape screens frame 4 : 3 (never shallower
+     than 3 : 2, the max-height floor). The per-class focal points and "positioned only" stand. */
+  assert.match(tp, /\.a-hero \.am \{ aspect-ratio: 4 \/ 5; \}/); assert.match(tp, /background-position: var\(--fp-tp, var\(--fp-p, center\)\)/);
+  assert.match(tl, /\.a-hero \.am \{ aspect-ratio: 4 \/ 3; \}/); assert.match(tl, /background-position: var\(--fp-tl, var\(--fp-p, center\)\)/);
+  assert.match(d, /\.a-hero \.am \{ aspect-ratio: 4 \/ 3; \}/); assert.match(d, /background-position: var\(--fp-d, var\(--fp-p, center\)\)/);
+  assert.match(css, /\.a-hero \.am, \.a-hero \.ah \{ max-width: none; margin-left: 0; margin-right: 0; \}/, 'the words begin at the frame\'s edge, which is the wall\'s');
+  for (const blk of [tp, tl, d]) assert.doesNotMatch(blk, /transform|scale\(|filter|blur|object-fit: fill|background-size/, 'positioned only');
   const last16 = css.lastIndexOf('.a-hero .am { width: 100%; aspect-ratio: 16 / 9; }'), first16 = css.indexOf('.a-hero .am { aspect-ratio: 16 / 9; }');
   assert.ok(css.indexOf('@media (min-width: 768px) and (orientation: portrait) {') > Math.max(last16, first16), 'the per-class frames stand after every 16:9 rule — the cascade decides');
 });
