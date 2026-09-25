@@ -64,7 +64,7 @@ test('THE RULE · one definition in the stage graph: a member counts for a stage
   assert.equal(capNeed({}, 'prewed', 2), 2, 'unknown: the engine keeps its own rule');
 });
 
-test('SERAY\'S CASE · A joining, B NOT joining, still one couple: the Worker says 1 for every stay, names B "not-joining", and a booking takes ONE place even when a stale page asks for two', async () => {
+test('THE REPORTED CASE · A joining, B NOT joining, still one couple: the Worker says 1 for every stay, names B "not-joining", and a booking takes ONE place even when a stale page asks for two', async () => {
   const h = await harness();
   assert.equal((await h.answer(h.A, ALL)).status, 200); assert.equal((await h.answer(h.B, NONE)).status, 200);
   const d = (await h.draft(h.A)).d;
