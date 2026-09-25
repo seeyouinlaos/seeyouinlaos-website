@@ -44,7 +44,7 @@ the same colour.
 
 | | meaning | where it appears today |
 |---|---|---|
-| **A** | **CURRENT** — where the guest is now | hero pagination, card-gallery point, navigation `aria-current`, the open step |
+| **A** | **CURRENT** — where the guest is now | hero pagination, card-gallery point, the open step — never the menu (Owner, 25 Sep 2026: the current page is the quieter word there, no point) |
 | **B** | **SELECTED** — what the guest chose | selected option, held room, confirmed line, active Discover category |
 | **C** | **PROGRESS** — how far something has really run | availability ring, planning hairline, the calendar dot |
 | **D** | **PUNCTUATION** — the end of one action | the primary action's full stop on hover and focus |

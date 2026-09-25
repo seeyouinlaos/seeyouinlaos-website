@@ -58,7 +58,10 @@
       '<div><h4>Guest Relations</h4>' +
         '<a href="mailto:guest.relation.seeyouinlaos@gmail.com">guest.relation.seeyouinlaos@gmail.com</a></div>' +
     '</div>' +
-    '<p class="sf-legal">Sunday, 28 February 2027 · Vientiane, Laos</p>';
+    '<p class="sf-legal">Sunday, 28 February 2027 · Vientiane, Laos</p>' +
+    /* LANGUAGE AND CURRENCY, the footer's closing row (Owner, 25 Sep 2026): the menu's own choice — the same [data-prefs] block,
+       the same siyl.lang / siyl.cur, painted by assets/i18n/siyl-i18n.js; never a second preference */
+    '<div class="sf-prefs" data-prefs>' + (window.SIYL_I18N ? window.SIYL_I18N.prefsHtml() : '') + '</div>';
   document.body.append(footer);
   var badgeScript = document.createElement('script');
   badgeScript.src = 'assets/bag.js';

@@ -91,20 +91,27 @@ header.hd::before {
    section still travels at the moment of the jump, and a quiet gap. Native anchor navigation, no script scroll. */
 html { scroll-padding-top: calc(92px + env(safe-area-inset-top, 0px)); }   /* the step pages set their own (prep.css, loaded after) */
 
-/* ------------------------------------------------------------ full-screen menu
-   Single column · large breathing room · hairline rows · chevron where a
-   submenu exists. No two-column mega-menu, no dashboard nav, no language bar. */
+/* ------------------------------------------------------------ the menu
+   A PANEL, NOT A PAGE (Owner, 25 Sep 2026): the menu is a layer that comes in from the right over a quiet scrim — the page
+   stays visible beside it, so the guest never loses where they are. Single column · hairline rows · chevron where a
+   submenu exists; it scrolls inside itself when it is taller than the screen. No two-column mega-menu, no dashboard nav. */
 .a-scrim { position: fixed; inset: 0; background: rgba(30,30,30,.28); z-index: 88; opacity: 0; pointer-events: none; transition: opacity .45s; }
 .a-menu {
-  position: fixed; inset: 0; z-index: 89; background: var(--a-ground);
-  overflow-y: auto; -webkit-overflow-scrolling: touch;
-  opacity: 0; visibility: hidden; transform: translateY(-10px);
+  --a-gut: 26px;
+  position: fixed; top: 0; right: 0; bottom: 0; left: auto; z-index: 89;
+  width: min(86vw, 440px); max-width: 100%; height: 100%; height: 100dvh; box-sizing: border-box;
+  background: var(--a-ground); box-shadow: -1px 0 0 var(--a-line);
+  overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  opacity: 0; visibility: hidden; transform: translateX(18px);
   transition: opacity .5s cubic-bezier(.4,0,.2,1), transform .5s cubic-bezier(.4,0,.2,1), visibility .5s;
 }
+@media (min-width: 600px) { .a-menu { --a-gut: 36px; width: min(72vw, 480px); } }
+@media (min-width: 900px) { .a-menu { --a-gut: 48px; width: min(46vw, 560px); } }
 body.a-open { overflow: hidden; }
 body.a-open .a-menu { opacity: 1; visibility: visible; transform: none; }
 body.a-open .a-scrim { opacity: 1; pointer-events: auto; }
-.a-mhd { display: flex; align-items: center; justify-content: space-between; padding: 26px var(--a-gut) 22px; }
+.a-mhd { display: flex; align-items: center; justify-content: space-between; padding: calc(22px + env(safe-area-inset-top, 0px)) var(--a-gut) 18px; }
 .a-mhd .a-brand { font-family: 'PP Editorial Old', Georgia, serif; font-weight: 200; font-size: 19px; letter-spacing: .3px; color: var(--a-ink); text-decoration: none; }
 .a-mhd .a-brand .dot { color: var(--a-red); }
 .a-mx { background: none; border: 0; cursor: pointer; min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: flex-end; font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: 2.2px; text-transform: uppercase; color: var(--a-mute); }
@@ -223,10 +230,9 @@ input:focus-visible, .siyl-inv input:focus { outline: 1px solid var(--a-ink); ou
 @media (min-width: 900px) {
   :root { --a-gut: 64px; --a-rhythm: 150px; }
   header.hd { padding: calc(8px + env(safe-area-inset-top, 0px)) var(--a-gut) 0; }
-  .a-mhd { padding: 30px var(--a-gut) 26px; }
-  .a-mnav { max-width: 760px; margin: 0 auto; padding-top: 40px; }
-  .a-mrow > a { min-height: 78px; font-size: 32px; }
-  .a-mfoot { max-width: 760px; margin: 0 auto; }
+  .a-mhd { padding: calc(28px + env(safe-area-inset-top, 0px)) var(--a-gut) 22px; }
+  .a-mnav { padding-top: 24px; }
+  .a-mrow > a { min-height: 70px; font-size: 29px; }
 
   .acar .a-head { max-width: 1180px; margin: 0 auto 34px; padding: 0 var(--a-gut); }
   .acar .a-head h2 { font-size: 32px; }
@@ -567,7 +573,7 @@ a.am { display: block; text-decoration: none; }
   .a-hero { margin-top: 30px; }
 
   /* the shared footer sits on the same edges */
-  .sfoot-in, .sfoot .sf-legal { max-width: var(--a-frame); padding-left: var(--a-gut); padding-right: var(--a-gut); }
+  .sfoot-in, .sfoot .sf-legal, .sfoot .sf-prefs { max-width: var(--a-frame); padding-left: var(--a-gut); padding-right: var(--a-gut); }
 }
 
 /* the shop shell's own tablet composition is replaced by the frame at 768 */
@@ -1025,18 +1031,10 @@ html[data-session="in"] [data-private-cta] { display: none !important; }
 .a-menu a:focus-visible, .a-menu button:focus-visible { outline: 2px solid var(--focus); outline-offset: 4px; }
 input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--focus); outline-offset: 0; border-color: var(--cherry); }
 
-/* ---- A · CURRENT · the global navigation --------------------------------- */
-/* the page the guest is on carries the full stop; every other word stays Ink */
-.a-mrow > a[aria-current] { color: var(--a-ink); position: relative; }
-.a-mrow > a[aria-current]::after {
-  content: ''; position: absolute; left: 50%; bottom: -7px; width: 5px; height: 5px; margin-left: -2.5px;
-  border-radius: 50%; background: var(--cherry);
-}
-.a-menu a[aria-current], .a-menu a.is-current { position: relative; }
-.a-menu a[aria-current]::before, .a-menu a.is-current::before {
-  content: ''; position: absolute; left: -14px; top: .62em; width: 5px; height: 5px;
-  border-radius: 50%; background: var(--cherry);
-}
+/* ---- the global navigation carries NO Cherry point (Owner, 25 Sep 2026) --------------------------------------------
+   The two points the menu used to draw beside and beneath the current page (a ::before and an ::after, both from this
+   section) read as stray marks, not as a place. The page the guest is on is simply the quieter word (.a-mrow > a[aria-current]
+   above, --a-mute); Cherry keeps its meanings everywhere else. */
 /* the bag: a count is a state, so the badge is the full stop with a number in it */
 [data-bag-badge] { background: var(--cherry) !important; color: #FFFFFF !important; }
 
@@ -1075,6 +1073,13 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px
 .a-pref button:focus-visible{outline:2px solid #74070E;outline-offset:2px}
 .a-pref-n{font-size:12px;line-height:1.5;color:#6B6964;margin:0;max-width:34ch}
 .a-mfoot .a-pref-n{text-transform:none;letter-spacing:normal;font-size:12px;color:#6B6964}
+/* THE FOOTER'S LANGUAGE AND CURRENCY (Owner, 25 Sep 2026): the same choice as the menu's — one [data-prefs] block filled by
+   assets/i18n/siyl-i18n.js, the same siyl.lang / siyl.cur — as the footer's closing row, inside its frame */
+.sfoot .sf-prefs{max-width:var(--a-frame);margin:0 auto;padding:0 var(--a-gut) calc(40px + env(safe-area-inset-bottom, 0px));box-sizing:border-box}
+.sfoot .sf-prefs .a-prefs{margin:0;padding-top:26px;border-top:1px solid var(--a-line);gap:18px}
+.sfoot .sf-prefs .a-pref-l{font-size:10px;letter-spacing:2.2px}
+.sfoot .sf-prefs .a-pref-n,.sfoot .sf-prefs p{display:block;font-size:12px;line-height:1.5;color:#6B6964}
+@media (min-width:600px){.sfoot .sf-prefs .a-prefs{flex-direction:row;flex-wrap:wrap;column-gap:48px}.sfoot .sf-prefs .a-pref-n{flex:0 0 100%}}
 
 /* THE FOOTER'S COMPOSITIONS (Owner, 24 Sep 2026). Six blocks — the wordmark, four columns of places, Guest Relations —
    used to be poured into a four-track grid from 900 px, so two of them always fell onto a stray second row. Each width

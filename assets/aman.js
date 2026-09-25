@@ -1,6 +1,6 @@
 /* ============================================================================
    SEE YOU IN LAOS — shared Aman-grammar behaviour.
-   ONE full-screen menu and ONE horizontal carousel for the whole website,
+   ONE menu panel and ONE horizontal carousel for the whole website,
    editorial shell and shop shell alike. Presentation only: no commerce, no
    pricing, no persistence — the Journey engine is untouched.
    ========================================================================== */
