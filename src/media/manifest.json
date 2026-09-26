@@ -1,0 +1,5780 @@
+{
+ "about": "THE SITE-WIDE MEDIA CONTRACT (Owner, 26 Sep 2026 · the Media Asset Agent). Every Owner collection of the Drive media library that the website uses — the numbered folder, each source by its stable Drive file id, what it is, where on the website it stands (route · component · role), the local delivery asset, the focal point per viewport class and the last synchronised source state. The roles are the website's display contracts, measured from the rendered components: a source's own aspect ratio never redefines the layout. src/media/agent.mjs is the engine, src/media/media-qa.mjs the gate (release gate M2), docs/MEDIA-ASSET-AGENT.md the manual. Never served (src/ is outside the Worker's assets) — no Drive id or URL reaches a page.",
+ "library": {
+  "title": "H&S media library",
+  "excluded": [
+   "999 - Archive"
+  ],
+  "rule": "'999 - Archive' is the Owner's private working area and permanently outside the agent's authority: it is excluded in the very query that lists the library (not title contains 'Archive' / '999') and never opened, listed, searched, compared, downloaded or used — not even read-only.",
+  "folderIds": "local only: src/media-library.private.json (the library root and each collection folder; git-ignored as src/*.private.json, never committed) — the agent lists a folder by it, read-only"
+ },
+ "classes": {
+  "p": "phone 390 × 844",
+  "tp": "tablet portrait 834 × 1194",
+  "tl": "tablet landscape 1194 × 834",
+  "d": "desktop 1440 × 900 (px at the widest frame)"
+ },
+ "roles": {
+  "hero-slide": {
+   "routes": [
+    "/index.html"
+   ],
+   "component": ".a-hero .am [data-hero-show] — the first page's slideshow",
+   "geometry": {
+    "p": 1,
+    "tp": 0.8,
+    "tl": 1.501,
+    "d": 1.422
+   },
+   "px": {
+    "p": [
+     342,
+     342
+    ],
+    "tp": [
+     746,
+     933
+    ],
+    "tl": [
+     1052,
+     701
+    ],
+    "d": [
+     1152,
+     864
+    ]
+   },
+   "behaviour": "slideshow: a photograph holds 3 s; a film plays over its poster, always starting muted, and the show moves on at its end; Play / Pause on every film, Sound on / Mute only with an audio track; reduced motion starts nothing (assets/hero-show.js)",
+   "builder": "src/build-hero.cjs",
+   "playback": "show"
+  },
+  "page-hero": {
+   "routes": [
+    "/destination.html",
+    "/voyage.html",
+    "/accommodation.html",
+    "/experiences.html"
+   ],
+   "component": ".a-hero .am — a page's opening photograph",
+   "geometry": {
+    "p": 1,
+    "tp": 0.8,
+    "tl": 1.501,
+    "d": 1.422
+   },
+   "px": {
+    "p": [
+     342,
+     342
+    ],
+    "tp": [
+     746,
+     933
+    ],
+    "tl": [
+     1052,
+     701
+    ],
+    "d": [
+     1152,
+     864
+    ]
+   },
+   "behaviour": "a still photograph"
+  },
+  "destination-film": {
+   "routes": [
+    "/destination.html"
+   ],
+   "component": ".a-dest > .am[data-video] — a city chapter's ambient film over its photograph",
+   "geometry": {
+    "p": 0.8,
+    "tp": 1.601,
+    "tl": 1.777,
+    "d": 1.777
+   },
+   "px": {
+    "p": [
+     342,
+     428
+    ],
+    "tp": [
+     746,
+     466
+    ],
+    "tl": [
+     1052,
+     592
+    ],
+    "d": [
+     1152,
+     648
+    ]
+   },
+   "behaviour": "a silent ambient film over its photograph (assets/aman.js: muted loop, no controls, aria-hidden, pauses off screen, the photograph on reduced motion or Save-Data); the file keeps the source sound, the module never plays it",
+   "playback": "ambient"
+  },
+  "destination-clip": {
+   "routes": [
+    "/destination.html"
+   ],
+   "component": ".a-dest .a-clip[data-clip] — a city chapter's editorial film (Lijiang: Impression Lijiang)",
+   "behaviour": "the editorial clip (assets/clip.js): muted by itself, Play / Pause always, Sound on / Mute only with an audio track; the guest's own tap alone may unmute",
+   "playback": "clip",
+   "geometry": {
+    "p": 0.8,
+    "tp": 1.601,
+    "tl": 1.777,
+    "d": 1.777
+   },
+   "px": {
+    "p": [
+     342,
+     428
+    ],
+    "tp": [
+     746,
+     466
+    ],
+    "tl": [
+     1052,
+     592
+    ],
+    "d": [
+     1152,
+     648
+    ]
+   }
+  },
+  "destination-gallery-item": {
+   "routes": [
+    "/destination.html",
+    "/voyage.html",
+    "/dress.html"
+   ],
+   "component": ".refgal .aslide .am — a chapter's reference gallery",
+   "geometry": {
+    "p": 0.75,
+    "tp": 0.75,
+    "tl": 0.75,
+    "d": 0.75
+   },
+   "px": {
+    "p": [
+     246,
+     328
+    ],
+    "tp": [
+     365,
+     487
+    ],
+    "tl": [
+     340,
+     453
+    ],
+    "d": [
+     373,
+     498
+    ]
+   },
+   "behaviour": "a rail of 3 : 4 photographs, one visual row; the frame is the gallery's, never the source's",
+   "focalDefault": "50% 12%"
+  },
+  "destination-map": {
+   "routes": [
+    "/destination.html"
+   ],
+   "component": ".a-dest-map",
+   "geometry": {
+    "p": 1,
+    "tp": 1,
+    "tl": 1,
+    "d": 1
+   },
+   "px": {
+    "p": [
+     342,
+     342
+    ],
+    "tp": [
+     746,
+     746
+    ],
+    "tl": [
+     1052,
+     1052
+    ],
+    "d": [
+     1152,
+     1152
+    ]
+   },
+   "behaviour": "a map shown whole",
+   "crop": "none"
+  },
+  "card": {
+   "routes": [
+    "/index.html",
+    "/accommodation.html"
+   ],
+   "component": ".acar .aslide .am — a destination, journey or stay card",
+   "geometry": {
+    "p": 1.25,
+    "tp": 1.25,
+    "tl": 1.25,
+    "d": 1.25
+   },
+   "px": {
+    "p": [
+     318,
+     254
+    ],
+    "tp": [
+     463,
+     370
+    ],
+    "tl": [
+     652,
+     522
+    ],
+    "d": [
+     714,
+     571
+    ]
+   },
+   "behaviour": "a 5 : 4 card photograph; a destination card may carry an ambient film (assets/aman.js: muted loop, no controls, aria-hidden) — the file keeps the source sound, the module never plays it",
+   "playback": "ambient"
+  },
+  "journey-card-gallery": {
+   "routes": [
+    "/index.html"
+   ],
+   "component": ".acar .aslide .cg — a journey chapter's card gallery (assets/cardgal.js)",
+   "geometry": {
+    "p": 1.25,
+    "tp": 1.25,
+    "tl": 1.25,
+    "d": 1.25
+   },
+   "px": {
+    "p": [
+     318,
+     254
+    ],
+    "tp": [
+     463,
+     370
+    ],
+    "tl": [
+     652,
+     522
+    ],
+    "d": [
+     714,
+     571
+    ]
+   },
+   "behaviour": "a 5 : 4 card gallery, one frame at a time"
+  },
+  "editorial-pair": {
+   "routes": [
+    "/index.html",
+    "/voyage.html",
+    "/experiences.html"
+   ],
+   "component": ".a-pair .am — photograph beside its words",
+   "geometry": {
+    "p": 1,
+    "tp": 0.8,
+    "tl": 0.8,
+    "d": 0.8
+   },
+   "px": {
+    "p": [
+     342,
+     342
+    ],
+    "tp": [
+     351,
+     439
+    ],
+    "tl": [
+     494,
+     618
+    ],
+    "d": [
+     540,
+     676
+    ]
+   },
+   "behaviour": "a still photograph beside its text column"
+  },
+  "venue-map": {
+   "routes": [
+    "/index.html"
+   ],
+   "component": ".a-duo .a-map / the venue stage (assets/venue.js)",
+   "geometry": {
+    "p": 0.855,
+    "tp": 0.855,
+    "tl": 0.855,
+    "d": 0.855
+   },
+   "px": {
+    "p": [
+     342,
+     400
+    ],
+    "tp": [
+     633,
+     740
+    ],
+    "tl": [
+     494,
+     578
+    ],
+    "d": [
+     540,
+     632
+    ]
+   },
+   "behaviour": "the aerial shown whole at its own ratio (Owner, 22 Sep 2026) — never cover-cropped (the stage chooses the wide or the tall frame of the same aerial)",
+   "crop": "none"
+  },
+  "product-gallery": {
+   "routes": [
+    "/journeys.html"
+   ],
+   "component": ".p .pgal .ph — a journey product's gallery",
+   "geometry": {
+    "p": 1.25,
+    "tp": 1.5,
+    "tl": 1.5,
+    "d": 1.5
+   },
+   "px": {
+    "p": [
+     342,
+     274
+    ],
+    "tp": [
+     300,
+     200
+    ],
+    "tl": [
+     360,
+     240
+    ],
+    "d": [
+     420,
+     280
+    ]
+   },
+   "behaviour": "a product's photographs, 1 / n, arrows and swipe"
+  },
+  "room-gallery": {
+   "routes": [
+    "/room.html",
+    "/transport.html"
+   ],
+   "component": ".gal .ph — a room's or a leg's gallery",
+   "geometry": {
+    "p": 1.25,
+    "tp": 1.5,
+    "tl": 1.5,
+    "d": 1.5
+   },
+   "px": {
+    "p": [
+     342,
+     274
+    ],
+    "tp": [
+     746,
+     497
+    ],
+    "tl": [
+     1052,
+     701
+    ],
+    "d": [
+     1152,
+     768
+    ]
+   },
+   "behaviour": "a product page's photographs, 1 / n, arrows and swipe"
+  },
+  "experience-film": {
+   "routes": [
+    "/experience.html"
+   ],
+   "component": ".x-film — a club's or restaurant's film",
+   "geometry": {
+    "p": 0.5625,
+    "tp": 0.5625,
+    "tl": 0.5625,
+    "d": 0.5625
+   },
+   "px": {
+    "p": [
+     342,
+     608
+    ],
+    "tp": [
+     329,
+     585
+    ],
+    "tl": [
+     244,
+     434
+    ],
+    "d": [
+     244,
+     434
+    ]
+   },
+   "behaviour": "the editorial clip (assets/clip.js): muted by itself, Play / Pause, Sound on / Mute only with an audio track",
+   "playback": "clip"
+  },
+  "venue-zone-photo": {
+   "routes": [
+    "/index.html"
+   ],
+   "component": ".venue-photo — a venue place's photograph in the venue stage (assets/venue.js)",
+   "behaviour": "a 4 : 3 photograph, cover, centred; thumbnails switch it",
+   "geometry": {
+    "p": 1.333,
+    "tp": 1.333,
+    "tl": 1.333,
+    "d": 1.333
+   },
+   "px": {
+    "p": [
+     342,
+     257
+    ],
+    "tp": [
+     746,
+     560
+    ],
+    "tl": [
+     581,
+     436
+    ],
+    "d": [
+     572,
+     429
+    ]
+   }
+  },
+  "editorial-band": {
+   "routes": [
+    "/voyage.html"
+   ],
+   "component": ".a-band — a full-width photograph band between sections",
+   "behaviour": "a fixed-height band, cover, centred — the widest crop on the site",
+   "geometry": {
+    "p": 1.3,
+    "tp": 1.963,
+    "tl": 3.15,
+    "d": 2.922
+   },
+   "px": {
+    "p": [
+     390,
+     300
+    ],
+    "tp": [
+     746,
+     380
+    ],
+    "tl": [
+     1052,
+     334
+    ],
+    "d": [
+     1052,
+     360
+    ]
+   }
+  }
+ },
+ "collections": {
+  "001": {
+   "title": "001 - Main -  Hero ",
+   "formerTitle": "000 - Hero Image",
+   "status": "synced",
+   "role": "hero-slide",
+   "slot": {
+    "route": "/index.html",
+    "component": ".a-hero",
+    "builder": "src/build-hero.cjs"
+   },
+   "order": "explicit",
+   "orderNote": "Owner, 26 Sep 2026 (Haruthai): the main video (Drive id 1TcVUGDzOHp7qdsO-5ekMXEYV38SCL1B6) plays LAST; the others in Drive title order. The items array is the canonical Hero order. Renamed in Drive on 26 Sep 2026 (same bytes): \"000 - Hero_Main_Video 01\" is the main video, \"000 - Hero_Main_Video 02\" the former \"000_Hero\", \"001 – 004 - Hero\" the former \"001_Hero – 004_Hero\" — the explicit order is unchanged (a rename never reorders an explicit collection).",
+   "syncedAt": "2026-09-26T07:00:00Z",
+   "items": [
+    {
+     "driveId": "1dVV9IIciEtL4H6bYAbSsfNH3pattxCRv",
+     "title": "000 - Hero_Main_Video 02",
+     "modifiedTime": "2026-09-26T08:07:35.559Z",
+     "size": 2245022,
+     "kind": "video",
+     "audio": false,
+     "width": 720,
+     "height": 960,
+     "duration": 16.28,
+     "asset": "assets/video/hero-000.mp4",
+     "poster": "assets/images/hero/hero-000-poster.jpg",
+     "alt": "A terrace over the sea at sunset",
+     "focal": {
+      "p": "50% 80%",
+      "tp": "50% 60%",
+      "tl": "50% 80%",
+      "d": "50% 80%"
+     },
+     "videoFrames": 488,
+     "audioFrames": 0,
+     "fps": 29.978,
+     "codec": "h264",
+     "bitrate": 1100131,
+     "audioBitrate": 0,
+     "formerTitle": "000_Hero",
+     "status": "synced",
+     "slots": [
+      {
+       "route": "/index.html",
+       "role": "hero-slide"
+      }
+     ],
+     "display": {
+      "w": 720,
+      "h": 960
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "x": 0.0424,
+       "y": 0.2878,
+       "w": 0.6446,
+       "h": 0.5315
+      }
+     },
+     "review": {
+      "/index.html hero-slide": {
+       "verdict": "kept",
+       "why": "the couple on the deck, the parasols, the rock and the sea stay whole at every class; the sunset sky above is the lost strip at the wide classes",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": {
+        "p": "50% 80%",
+        "tp": "50% 60%",
+        "tl": "50% 80%",
+        "d": "50% 80%"
+       }
+      }
+     }
+    },
+    {
+     "driveId": "1QXnBX3bSc-eRh784izVIRCh1nd8T2W8N",
+     "title": "001 - Hero",
+     "modifiedTime": "2026-09-26T08:07:55.570Z",
+     "size": 297168,
+     "kind": "image",
+     "width": 1086,
+     "height": 1448,
+     "asset": "assets/images/hero/hero-001.jpg",
+     "focal": {
+      "p": "50% 38%",
+      "tp": "50% 36%",
+      "tl": "50% 34%",
+      "d": "50% 34%"
+     },
+     "formerTitle": "001_Hero",
+     "status": "synced",
+     "slots": [
+      {
+       "route": "/index.html",
+       "role": "hero-slide"
+      }
+     ],
+     "display": {
+      "w": 1086,
+      "h": 1448
+     },
+     "vision": {
+      "faces": [
+       {
+        "x": 0.2307,
+        "y": 0.2733,
+        "w": 0.3655,
+        "h": 0.3057
+       }
+      ],
+      "salient": {
+       "x": 0.2257,
+       "y": 0.2632,
+       "w": 0.4369,
+       "h": 0.4507
+      }
+     }
+    },
+    {
+     "driveId": "1IGPaasGq_jTYKRZbjd6ntdQx1aKp4Cnt",
+     "title": "002 - Hero",
+     "modifiedTime": "2026-09-26T08:08:01.732Z",
+     "size": 248140,
+     "kind": "image",
+     "width": 1086,
+     "height": 1448,
+     "asset": "assets/images/hero/hero-002.jpg",
+     "focal": {
+      "p": "50% 30%",
+      "tp": "50% 30%",
+      "tl": "50% 24%",
+      "d": "50% 24%"
+     },
+     "formerTitle": "002_Hero",
+     "status": "synced",
+     "slots": [
+      {
+       "route": "/index.html",
+       "role": "hero-slide"
+      }
+     ],
+     "display": {
+      "w": 1086,
+      "h": 1448
+     },
+     "vision": {
+      "faces": [
+       {
+        "x": 0.1608,
+        "y": 0.3554,
+        "w": 0.3213,
+        "h": 0.2688
+       }
+      ],
+      "salient": {
+       "x": 0.131,
+       "y": 0.1656,
+       "w": 0.6581,
+       "h": 0.5541
+      }
+     },
+     "review": {
+      "/index.html hero-slide": {
+       "verdict": "kept",
+       "why": "both faces and the ring hand stay whole; the lost strip at tablet landscape is the lower sweater",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": {
+        "p": "50% 30%",
+        "tp": "50% 30%",
+        "tl": "50% 24%",
+        "d": "50% 24%"
+       }
+      }
+     }
+    },
+    {
+     "driveId": "1w_QZk6Fd6VqxyEkdVVbZMEPK7bFSPzOf",
+     "title": "003 - Hero",
+     "modifiedTime": "2026-09-26T08:08:08.166Z",
+     "size": 287254,
+     "kind": "image",
+     "width": 1086,
+     "height": 1448,
+     "asset": "assets/images/hero/hero-003.jpg",
+     "focal": {
+      "p": "50% 36%",
+      "tp": "50% 34%",
+      "tl": "50% 30%",
+      "d": "50% 30%"
+     },
+     "formerTitle": "003_Hero",
+     "status": "synced",
+     "slots": [
+      {
+       "route": "/index.html",
+       "role": "hero-slide"
+      }
+     ],
+     "display": {
+      "w": 1086,
+      "h": 1448
+     },
+     "vision": {
+      "faces": [
+       {
+        "x": 0.2298,
+        "y": 0.343,
+        "w": 0.3263,
+        "h": 0.2729
+       }
+      ],
+      "salient": {
+       "x": 0.2031,
+       "y": 0.2103,
+       "w": 0.4829,
+       "h": 0.5035
+      }
+     }
+    },
+    {
+     "driveId": "10FahWqof9xxYBAk19aK86t8g-Z83_zqW",
+     "title": "004 - Hero",
+     "modifiedTime": "2026-09-26T08:08:13.329Z",
+     "size": 228684,
+     "kind": "image",
+     "width": 941,
+     "height": 1254,
+     "asset": "assets/images/hero/hero-004.jpg",
+     "focal": {
+      "p": "50% 55%",
+      "tp": "50% 50%",
+      "tl": "50% 50%",
+      "d": "50% 50%"
+     },
+     "formerTitle": "004_Hero",
+     "status": "synced",
+     "slots": [
+      {
+       "route": "/index.html",
+       "role": "hero-slide"
+      }
+     ],
+     "display": {
+      "w": 941,
+      "h": 1254
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "x": 0.2837,
+       "y": 0.2942,
+       "w": 0.3887,
+       "h": 0.4114
+      }
+     }
+    },
+    {
+     "driveId": "1TcVUGDzOHp7qdsO-5ekMXEYV38SCL1B6",
+     "title": "000 - Hero_Main_Video 01",
+     "modifiedTime": "2026-09-26T08:07:49.882Z",
+     "size": 8189146,
+     "kind": "video",
+     "audio": true,
+     "width": 1276,
+     "height": 718,
+     "duration": 31.97,
+     "asset": "assets/video/hero-000-main.mp4",
+     "poster": "assets/images/hero/hero-000-main-poster.jpg",
+     "alt": "Bangkok at night, a short film",
+     "focal": {
+      "p": "50% 50%",
+      "tp": "50% 50%",
+      "tl": "50% 50%",
+      "d": "50% 50%"
+     },
+     "videoFrames": 959,
+     "audioFrames": 691,
+     "fps": 30,
+     "codec": "h264",
+     "bitrate": 1984031,
+     "audioBitrate": 58487,
+     "formerTitle": "000 - Hero_Main_Video",
+     "status": "synced",
+     "slots": [
+      {
+       "route": "/index.html",
+       "role": "hero-slide"
+      }
+     ],
+     "display": {
+      "w": 1276,
+      "h": 718
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "x": 0.2656,
+       "y": 0.0602,
+       "w": 0.5376,
+       "h": 0.9389
+      }
+     },
+     "review": {
+      "/index.html hero-slide": {
+       "verdict": "kept",
+       "why": "the stream of traffic and the film's own caption stay centred at tablet portrait; the side buildings are the lost strips",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": {
+        "p": "50% 50%",
+        "tp": "50% 50%",
+        "tl": "50% 50%",
+        "d": "50% 50%"
+       }
+      }
+     }
+    }
+   ]
+  },
+  "002": {
+   "title": "002 - A - Main - Where the journey takes us",
+   "place": "The first page · \"Where the journey takes us\" — the destination cards and their ambient films",
+   "slot": {
+    "route": "/index.html"
+   },
+   "role": "card",
+   "order": "title-ascending",
+   "items": [
+    {
+     "driveId": "1ss8EyZqh-_wwclmLrIrssuhkswffUc0E",
+     "title": "01 - Thailand - Bangkok",
+     "path": "",
+     "mimeType": "video/mp4",
+     "size": 8189146,
+     "modifiedTime": "2026-09-26T07:08:15.350Z",
+     "kind": "video",
+     "status": "unresolved"
+    },
+    {
+     "driveId": "1M28a7NbWmexKdbMpQKNc-FJnhHfb0PH3",
+     "title": "02 - Laos - Vientiane.mp4",
+     "path": "",
+     "mimeType": "video/mp4",
+     "size": 18901028,
+     "modifiedTime": "2026-09-26T07:17:48.349Z",
+     "kind": "video",
+     "status": "unresolved"
+    },
+    {
+     "driveId": "1sSlqH2TK-30XiVMAVDadqh_suJw0CxUA",
+     "title": "03 - China - Kunming .mp4\"",
+     "path": "",
+     "mimeType": "video/mp4",
+     "size": 5834312,
+     "modifiedTime": "2026-09-26T07:17:03.094Z",
+     "kind": "video",
+     "w": 720,
+     "h": 960,
+     "aspect": 0.75,
+     "width": 720,
+     "height": 960,
+     "fps": 30,
+     "duration": 17.57,
+     "videoFrames": 527,
+     "codec": "h264",
+     "bitrate": 2610388,
+     "audio": true,
+     "audioFrames": 381,
+     "audioBitrate": 39197,
+     "status": "unresolved",
+     "note": "the same photograph or film as assets/video/kunming-card.mp4 (on the website elsewhere)"
+    },
+    {
+     "driveId": "1-dGMxgs9D98bywatVxXyEB5DdQbDKdPC",
+     "title": "04 - China - Lijiang",
+     "path": "",
+     "mimeType": "video/mp4",
+     "size": 8364170,
+     "modifiedTime": "2026-09-26T07:22:59.684Z",
+     "kind": "video",
+     "status": "unresolved"
+    }
+   ],
+   "question": "Four city films (Bangkok = the Hero's main film · Vientiane · Kunming · Lijiang) for a rail of three cards (Bangkok · Vientiane · China): does the rail become four cards, and does China show the Lijiang film?",
+   "status": "unresolved",
+   "syncedAt": "2026-09-26T13:30:00Z"
+  },
+  "003": {
+   "title": "003 - Main - The Wedding",
+   "place": "The first page · \"The Wedding\" — the photograph beside the words",
+   "slot": {
+    "route": "/index.html"
+   },
+   "role": "editorial-pair",
+   "order": "title-ascending",
+   "items": [
+    {
+     "driveId": "1E2wc0rnny59dLPRUc-6N6POYUNiKJ7I0",
+     "title": "002 - Main - The Wedding.jpeg",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 235007,
+     "modifiedTime": "2026-09-26T07:31:15.785Z",
+     "kind": "image",
+     "w": 1024,
+     "h": 765,
+     "aspect": 1.339,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    }
+   ],
+   "status": "pending",
+   "syncedAt": "2026-09-26T13:30:00Z"
+  },
+  "004": {
+   "title": "004 - Main - The venue  Souphattra Heritage Vientiane",
+   "place": "The first page · the venue — Souphattra Heritage from above (assets/venue.js)",
+   "slot": {
+    "route": "/index.html"
+   },
+   "role": "venue-map",
+   "order": "title-ascending",
+   "items": [
+    {
+     "driveId": "1VIz9oIZDOUlktJD7pase7e4UilhvsO9j",
+     "title": "Copy of Heritage_0631.jpg",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 1135232,
+     "modifiedTime": "2026-09-06T17:22:51.265Z",
+     "kind": "image",
+     "w": 2560,
+     "h": 1440,
+     "aspect": 1.778,
+     "status": "synced",
+     "asset": "assets/images/venue/souphattra-aerial-1600.jpg",
+     "match": {
+      "bits": 0,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/index.html",
+       "role": "venue-map",
+       "focal": "50% 50%"
+      }
+     ]
+    }
+   ],
+   "status": "synced",
+   "syncedAt": "2026-09-26T13:30:00Z"
+  },
+  "005": {
+   "title": "005 - Main - The Journey",
+   "place": "The first page · \"The journey in three chapters\" — Before · The Wedding · After card galleries (assets/cardgal.js)",
+   "slot": {
+    "route": "/index.html"
+   },
+   "role": "journey-card-gallery",
+   "order": "title-ascending",
+   "items": [
+    {
+     "driveId": "14JXTVeQLIbZwhU6xemY0cxBHgOvhIpw1",
+     "title": "000 - Before Wedding_Main_Video 01",
+     "path": "001 - Before Wedding",
+     "mimeType": "video/quicktime",
+     "size": 10339106,
+     "modifiedTime": "2026-09-26T08:26:19.206Z",
+     "kind": "video",
+     "status": "unresolved",
+     "note": "a chapter film for a card gallery that shows photographs only today"
+    },
+    {
+     "driveId": "1ON8S6EqEtEwxYUjvPu4zVoZ_JK4FuyC1",
+     "title": "001 - Before Wedding",
+     "path": "001 - Before Wedding",
+     "mimeType": "image/jpeg",
+     "size": 198400,
+     "modifiedTime": "2026-09-26T08:20:15.370Z",
+     "kind": "image",
+     "w": 1024,
+     "h": 765,
+     "aspect": 1.339,
+     "status": "synced",
+     "asset": "assets/images/city/001-bangkok-g01-chao-phraya-express-boat.jpg",
+     "match": {
+      "bits": 0,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "destination-gallery-item",
+       "focal": "50% 12%"
+      },
+      {
+       "route": "/index.html",
+       "role": "journey-card-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 1024,
+      "h": 765
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.9738,
+       "w": 0.7978,
+       "x": 0.0806,
+       "y": 0.0252
+      }
+     },
+     "review": {
+      "/destination.html destination-gallery-item": {
+       "verdict": "kept",
+       "why": "the riverside hotel tower and the spires stay whole; only open sky and the far right river bank fall outside",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 12%"
+      }
+     }
+    },
+    {
+     "driveId": "1FarLxzdunxSQN6dWJAg4ygSBM1AIZ5LZ",
+     "title": "002 - Before Wedding",
+     "path": "001 - Before Wedding",
+     "mimeType": "image/jpeg",
+     "size": 2804877,
+     "modifiedTime": "2026-09-26T08:20:26.393Z",
+     "kind": "image",
+     "w": 2400,
+     "h": 1792,
+     "aspect": 1.339,
+     "status": "synced",
+     "asset": "assets/images/city/001-bangkok-g02-iconsiam-skyline.jpg",
+     "match": {
+      "bits": 1,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "destination-gallery-item",
+       "focal": "50% 12%"
+      },
+      {
+       "route": "/index.html",
+       "role": "journey-card-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 1600,
+      "h": 1195
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.9467,
+       "w": 0.8433,
+       "x": 0.0781,
+       "y": 0.0533
+      }
+     },
+     "review": {
+      "/destination.html destination-gallery-item": {
+       "verdict": "kept",
+       "why": "both towers stand whole in the frame; the lost sides are low river-front buildings",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 12%"
+      }
+     }
+    },
+    {
+     "driveId": "1ko5KidXa8dKH74qw9zgbEApvHFy7qIsG",
+     "title": "003 - Before Wedding",
+     "path": "001 - Before Wedding",
+     "mimeType": "image/jpeg",
+     "size": 215734,
+     "modifiedTime": "2026-09-26T08:20:44.627Z",
+     "kind": "image",
+     "w": 1024,
+     "h": 765,
+     "aspect": 1.339,
+     "status": "synced",
+     "asset": "assets/images/city/001-bangkok-g03-wires-and-train.jpg",
+     "match": {
+      "bits": 0,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "destination-gallery-item",
+       "focal": "50% 12%"
+      },
+      {
+       "route": "/index.html",
+       "role": "journey-card-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 1024,
+      "h": 765
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.6259,
+       "w": 0.8098,
+       "x": 0.136,
+       "y": 0.2496
+      }
+     },
+     "review": {
+      "/destination.html destination-gallery-item": {
+       "verdict": "kept",
+       "why": "the train front in the alley stays whole; the lost sides are dark alley walls",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 12%"
+      }
+     }
+    },
+    {
+     "driveId": "1nKolE2s2QWHplvh9IdW7n9Aj4poeEgG_",
+     "title": "004 - Before Wedding",
+     "path": "001 - Before Wedding",
+     "mimeType": "image/jpeg",
+     "size": 173404,
+     "modifiedTime": "2026-09-26T08:20:50.324Z",
+     "kind": "image",
+     "w": 1024,
+     "h": 765,
+     "aspect": 1.339,
+     "status": "synced",
+     "asset": "assets/images/city/001-bangkok-g04-alley-train.jpg",
+     "match": {
+      "bits": 1,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "destination-gallery-item",
+       "focal": "72% 50%"
+      },
+      {
+       "route": "/index.html",
+       "role": "journey-card-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 1024,
+      "h": 765
+     },
+     "vision": {
+      "faces": [
+       {
+        "h": 0.0683,
+        "w": 0.0457,
+        "x": 0.7758,
+        "y": 0.517
+       }
+      ],
+      "salient": {
+       "h": 0.448,
+       "w": 0.7401,
+       "x": 0.2286,
+       "y": 0.324
+      }
+     },
+     "review": {
+      "/destination.html destination-gallery-item": {
+       "verdict": "kept",
+       "why": "the train and the man beside it stay inside (72% 50% already aims the frame at them)",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "72% 50%"
+      }
+     }
+    },
+    {
+     "driveId": "18mbyNzw_7o8Az4yUBAA9hH5rBcbHg9JJ",
+     "title": "005 - Before Wedding",
+     "path": "001 - Before Wedding",
+     "mimeType": "image/jpeg",
+     "size": 2566717,
+     "modifiedTime": "2026-09-26T08:20:57.184Z",
+     "kind": "image",
+     "w": 2400,
+     "h": 1792,
+     "aspect": 1.339,
+     "status": "synced",
+     "asset": "assets/images/city/001-bangkok-g05-mahanakhon-skytrain.jpg",
+     "match": {
+      "bits": 0,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "destination-gallery-item",
+       "focal": "50% 12%"
+      },
+      {
+       "route": "/index.html",
+       "role": "journey-card-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 1600,
+      "h": 1195
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.7794,
+       "w": 0.6453,
+       "x": 0.1526,
+       "y": 0.1127
+      }
+     }
+    },
+    {
+     "driveId": "1eumO049DgsF60kXDIEkfr4QTaodkyPgm",
+     "title": "000 - Wedding_Main_Video 01",
+     "path": "002 - Wedding",
+     "mimeType": "video/mp4",
+     "size": 920307,
+     "modifiedTime": "2026-09-26T08:27:50.979Z",
+     "kind": "video",
+     "w": 720,
+     "h": 900,
+     "aspect": 0.8,
+     "width": 720,
+     "height": 900,
+     "fps": 30,
+     "duration": 14.77,
+     "videoFrames": 443,
+     "codec": "h264",
+     "bitrate": 429904,
+     "audio": true,
+     "audioFrames": 320,
+     "audioBitrate": 61101,
+     "status": "unresolved",
+     "note": "a chapter film for a card gallery that shows photographs only today"
+    },
+    {
+     "driveId": "1nWkEWPqueIHpTBKzJJ0NX_IS25kJfvGO",
+     "title": "001 - Wedding",
+     "path": "002 - Wedding",
+     "mimeType": "image/jpeg",
+     "size": 3820714,
+     "modifiedTime": "2026-09-26T08:27:11.152Z",
+     "kind": "image",
+     "w": 2400,
+     "h": 1792,
+     "aspect": 1.339,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1_Ud2ypf6ckOcd25CeHWilrfNgcCQ3hd8",
+     "title": "002 - Wedding",
+     "path": "002 - Wedding",
+     "mimeType": "image/jpeg",
+     "size": 375532,
+     "modifiedTime": "2026-09-26T08:27:16.755Z",
+     "kind": "image",
+     "w": 1334,
+     "h": 2000,
+     "aspect": 0.667,
+     "status": "pending",
+     "note": "the same photograph as assets/images/hero/hero-arrival.jpg (on disk, not yet placed) — a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1QM0P-e-nGzrZrEYZdW95j0vXUsBvmWio",
+     "title": "003 - Wedding",
+     "path": "002 - Wedding",
+     "mimeType": "image/jpeg",
+     "size": 294807,
+     "modifiedTime": "2026-09-26T08:27:22.209Z",
+     "kind": "image",
+     "w": 1170,
+     "h": 1553,
+     "aspect": 0.753,
+     "status": "synced",
+     "asset": "assets/images/event/056-wedding-dinner-08-long-table-candlelight.jpg",
+     "match": {
+      "bits": 1,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/voyage.html",
+       "role": "destination-gallery-item",
+       "focal": "50% 12%"
+      }
+     ],
+     "display": {
+      "w": 1170,
+      "h": 1553
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.7202,
+       "w": 0.7321,
+       "x": 0.0203,
+       "y": 0
+      }
+     }
+    },
+    {
+     "driveId": "1QHvyoeSsMctiG5D_cib7X5ZFaoG1iUfn",
+     "title": "004 - Wedding",
+     "path": "002 - Wedding",
+     "mimeType": "image/jpeg",
+     "size": 160537,
+     "modifiedTime": "2026-09-26T08:27:27.259Z",
+     "kind": "image",
+     "w": 1170,
+     "h": 1494,
+     "aspect": 0.783,
+     "status": "synced",
+     "asset": "assets/images/event/056-wedding-dinner-09-lilies.jpg",
+     "match": {
+      "bits": 0,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/voyage.html",
+       "role": "destination-gallery-item",
+       "focal": "50% 12%"
+      }
+     ],
+     "display": {
+      "w": 1170,
+      "h": 1494
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.6636,
+       "w": 0.8674,
+       "x": 0.0999,
+       "y": 0.1181
+      }
+     }
+    },
+    {
+     "driveId": "1Sh8ycW8yVwXauk0K4dTmLnn2FDsqi0rM",
+     "title": "005 - Wedding",
+     "path": "002 - Wedding",
+     "mimeType": "image/jpeg",
+     "size": 213129,
+     "modifiedTime": "2026-09-26T08:27:32.220Z",
+     "kind": "image",
+     "w": 1170,
+     "h": 1666,
+     "aspect": 0.702,
+     "status": "synced",
+     "asset": "assets/images/event/056-wedding-dinner-10-lilies-at-night.jpg",
+     "match": {
+      "bits": 0,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/voyage.html",
+       "role": "destination-gallery-item",
+       "focal": "50% 12%"
+      }
+     ],
+     "display": {
+      "w": 1124,
+      "h": 1600
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.71,
+       "w": 0.8287,
+       "x": 0.0883,
+       "y": 0.1602
+      }
+     }
+    },
+    {
+     "driveId": "1Am9gt9joKbl9xCKgCed70Lw_ixNpI5bd",
+     "title": "000 - After Wedding_Main_Video 01",
+     "path": "003 - After Wedding",
+     "mimeType": "video/mp4",
+     "size": 4481397,
+     "modifiedTime": "2026-09-26T08:38:59.105Z",
+     "kind": "video",
+     "w": 720,
+     "h": 1280,
+     "aspect": 0.562,
+     "width": 720,
+     "height": 1280,
+     "fps": 30,
+     "duration": 12.57,
+     "videoFrames": 377,
+     "codec": "h264",
+     "bitrate": 2774634,
+     "audio": true,
+     "audioFrames": 298,
+     "audioBitrate": 70357,
+     "status": "unresolved",
+     "note": "a chapter film for a card gallery that shows photographs only today"
+    },
+    {
+     "driveId": "1sEuYPoMF2ioO8z_ng2zMXlgJ3jSAwWaH",
+     "title": "001 - After Wedding",
+     "path": "003 - After Wedding",
+     "mimeType": "image/jpeg",
+     "size": 628547,
+     "modifiedTime": "2026-09-26T08:32:12.061Z",
+     "kind": "image",
+     "w": 1440,
+     "h": 1438,
+     "aspect": 1.001,
+     "status": "synced",
+     "asset": "assets/images/city/004-lijiang-aw-01.jpg",
+     "match": {
+      "bits": 0,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/index.html",
+       "role": "journey-card-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 1280,
+      "h": 1278
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.6545,
+       "w": 0.4734,
+       "x": 0.2625,
+       "y": 0.178
+      }
+     }
+    },
+    {
+     "driveId": "170xEFwgmJjRc5EE_9k-2XIwV55idneJo",
+     "title": "002 - After Wedding",
+     "path": "003 - After Wedding",
+     "mimeType": "image/jpeg",
+     "size": 226301,
+     "modifiedTime": "2026-09-26T08:32:17.663Z",
+     "kind": "image",
+     "w": 1080,
+     "h": 1080,
+     "aspect": 1,
+     "status": "synced",
+     "asset": "assets/images/city/004-lijiang-aw-06.jpg",
+     "match": {
+      "bits": 0,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/index.html",
+       "role": "journey-card-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 1080,
+      "h": 1080
+     },
+     "vision": {
+      "faces": [
+       {
+        "h": 0.0717,
+        "w": 0.0642,
+        "x": 0.5323,
+        "y": 0.4346
+       }
+      ],
+      "salient": {
+       "h": 0.4353,
+       "w": 0.5686,
+       "x": 0.1511,
+       "y": 0.2512
+      }
+     }
+    },
+    {
+     "driveId": "1G2WhdsG-vWyTQdPfA_hz7ztmBPZC-ki7",
+     "title": "003 - After Wedding",
+     "path": "003 - After Wedding",
+     "mimeType": "image/jpeg",
+     "size": 238936,
+     "modifiedTime": "2026-09-26T08:32:22.316Z",
+     "kind": "image",
+     "w": 1440,
+     "h": 1798,
+     "aspect": 0.801,
+     "status": "synced",
+     "asset": "assets/images/city/004-lijiang-aw-04.jpg",
+     "match": {
+      "bits": 2,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/index.html",
+       "role": "journey-card-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 1025,
+      "h": 1280
+     },
+     "vision": {
+      "faces": [
+       {
+        "h": 0.103,
+        "w": 0.1154,
+        "x": 0.3787,
+        "y": 0.318
+       }
+      ],
+      "salient": {
+       "h": 0.4706,
+       "w": 0.4746,
+       "x": 0.1899,
+       "y": 0.1774
+      }
+     }
+    },
+    {
+     "driveId": "1Ic_WsAKJON-5eQnOzaSSFGsxLAIgVBti",
+     "title": "004 - After Wedding",
+     "path": "003 - After Wedding",
+     "mimeType": "image/jpeg",
+     "size": 373059,
+     "modifiedTime": "2026-09-26T08:32:27.334Z",
+     "kind": "image",
+     "w": 1080,
+     "h": 1350,
+     "aspect": 0.8,
+     "status": "synced",
+     "asset": "assets/images/city/004-lijiang-aw-02.jpg",
+     "match": {
+      "bits": 0,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/index.html",
+       "role": "journey-card-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 1024,
+      "h": 1280
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.8188,
+       "w": 0.9397,
+       "x": 0.0002,
+       "y": 0.0684
+      }
+     },
+     "review": {
+      "/index.html journey-card-gallery": {
+       "verdict": "kept",
+       "why": "the vendor under her hat and the stall stay whole; the lost strips are shelves above and the floor below",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 50%"
+      }
+     }
+    },
+    {
+     "driveId": "1oIFlo6PtNd9t4MKAdJqp6IH6TPtk0dEM",
+     "title": "005 - After Wedding",
+     "path": "003 - After Wedding",
+     "mimeType": "image/jpeg",
+     "size": 353753,
+     "modifiedTime": "2026-09-26T08:32:31.657Z",
+     "kind": "image",
+     "w": 1080,
+     "h": 1350,
+     "aspect": 0.8,
+     "status": "synced",
+     "asset": "assets/images/city/004-lijiang-aw-03.jpg",
+     "match": {
+      "bits": 0,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/index.html",
+       "role": "journey-card-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 1024,
+      "h": 1280
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.6675,
+       "w": 0.8949,
+       "x": 0.0602,
+       "y": 0.2041
+      }
+     }
+    }
+   ],
+   "question": "Each chapter folder carries a film (\"… Main_Video\"): does the chapter card show its film first (muted, like the Hero), or stay photographs only? The photographs themselves follow the folders at the next synchronisation.",
+   "status": "partial",
+   "syncedAt": "2026-09-26T13:30:00Z"
+  },
+  "010": {
+   "title": "010 - A - Destinations - Hero ",
+   "place": "Destinations · the page's opening picture",
+   "slot": {
+    "route": "/destination.html"
+   },
+   "role": "page-hero",
+   "order": "title-ascending",
+   "items": [
+    {
+     "driveId": "1aeKoaoqgBq-x4Haw9a3ri1Z-RJe9RrPg",
+     "title": "000 - A - Destinations_Main_Video 01",
+     "path": "",
+     "mimeType": "video/mp4",
+     "size": 4550439,
+     "modifiedTime": "2026-09-26T08:49:05.763Z",
+     "kind": "video",
+     "w": 1280,
+     "h": 720,
+     "aspect": 1.778,
+     "width": 1280,
+     "height": 720,
+     "fps": 30,
+     "duration": 30.77,
+     "videoFrames": 923,
+     "codec": "h264",
+     "bitrate": 1114802,
+     "audio": true,
+     "audioFrames": 665,
+     "audioBitrate": 61295,
+     "status": "unresolved"
+    },
+    {
+     "driveId": "10-kzkc5mehLViKvcqfbNd3rpZnyfpW8g",
+     "title": "001 - A - Destinations",
+     "path": "",
+     "mimeType": "image/png",
+     "size": 2750591,
+     "modifiedTime": "2026-09-26T08:49:48.503Z",
+     "kind": "image",
+     "w": 1122,
+     "h": 1402,
+     "aspect": 0.8,
+     "status": "unresolved"
+    },
+    {
+     "driveId": "1WbLwTNU5LEjof9HjZYS8ZtSmL1XV3uvI",
+     "title": "002 - A - Destinations",
+     "path": "",
+     "mimeType": "image/png",
+     "size": 2773928,
+     "modifiedTime": "2026-09-26T08:49:56.443Z",
+     "kind": "image",
+     "w": 1122,
+     "h": 1402,
+     "aspect": 0.8,
+     "status": "unresolved"
+    },
+    {
+     "driveId": "1vsYL-NONgH5L5pmPCM3xa3XwI8JQpetn",
+     "title": "003 - A - Destinations",
+     "path": "",
+     "mimeType": "image/png",
+     "size": 2584141,
+     "modifiedTime": "2026-09-26T08:50:05.786Z",
+     "kind": "image",
+     "w": 1122,
+     "h": 1402,
+     "aspect": 0.8,
+     "status": "unresolved"
+    },
+    {
+     "driveId": "1Liiyqu3DeJc_269zRg73VY_2ubgyNAnL",
+     "title": "004 - A - Destinations",
+     "path": "",
+     "mimeType": "image/png",
+     "size": 2300021,
+     "modifiedTime": "2026-09-26T08:50:11.507Z",
+     "kind": "image",
+     "w": 1122,
+     "h": 1402,
+     "aspect": 0.8,
+     "status": "unresolved"
+    },
+    {
+     "driveId": "1r0X2kHeWmuSJyRbdpu_QsLgLzrc4WEd5",
+     "title": "005 - A - Destinations",
+     "path": "",
+     "mimeType": "image/png",
+     "size": 2644771,
+     "modifiedTime": "2026-09-26T08:50:17.888Z",
+     "kind": "image",
+     "w": 1122,
+     "h": 1402,
+     "aspect": 0.8,
+     "status": "unresolved"
+    },
+    {
+     "driveId": "1cdo6GwnZcxIUphSIICZIE7nrLDAz_Izz",
+     "title": "006 - A - Destinations",
+     "path": "",
+     "mimeType": "image/png",
+     "size": 2502037,
+     "modifiedTime": "2026-09-26T08:50:23.288Z",
+     "kind": "image",
+     "w": 1122,
+     "h": 1402,
+     "aspect": 0.8,
+     "status": "unresolved"
+    },
+    {
+     "driveId": "1YpTeuf4zJwgi8oSTiFXsyGDuwQAdfRgk",
+     "title": "007 - A - Destinations",
+     "path": "",
+     "mimeType": "image/png",
+     "size": 3075510,
+     "modifiedTime": "2026-09-26T08:50:28.622Z",
+     "kind": "image",
+     "w": 1122,
+     "h": 1402,
+     "aspect": 0.8,
+     "status": "unresolved"
+    }
+   ],
+   "question": "Seven portrait photographs and a film for a page opening that is one still picture today: one chosen photograph, or the Hero's slideshow (as the first page)?",
+   "status": "unresolved",
+   "syncedAt": "2026-09-26T13:30:00Z"
+  },
+  "011": {
+   "title": "011 - Destination - Bangkok",
+   "place": "Destinations · Bangkok chapter — film and gallery",
+   "slot": {
+    "route": "/destination.html"
+   },
+   "role": "destination-gallery-item",
+   "order": "title-ascending",
+   "items": [
+    {
+     "driveId": "1MQhdnfagieEJ7zPwza8aBuSu8XgacNmr",
+     "title": "000 - Bangkok_Main_Video 01",
+     "path": "",
+     "mimeType": "video/mp4",
+     "size": 4788575,
+     "modifiedTime": "2026-09-26T08:54:40.267Z",
+     "kind": "video",
+     "w": 720,
+     "h": 1280,
+     "aspect": 0.562,
+     "width": 720,
+     "height": 1280,
+     "fps": 30,
+     "duration": 15.03,
+     "videoFrames": 451,
+     "codec": "h264",
+     "bitrate": 2469672,
+     "audio": true,
+     "audioFrames": 327,
+     "audioBitrate": 70746,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "12dVkb61eVrHxEwj_dzP6om5of5RAK7ys",
+     "title": "001 - Bangkok",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 198400,
+     "modifiedTime": "2026-09-26T08:55:14.266Z",
+     "kind": "image",
+     "w": 1024,
+     "h": 765,
+     "aspect": 1.339,
+     "status": "synced",
+     "asset": "assets/images/city/001-bangkok-g01-chao-phraya-express-boat.jpg",
+     "match": {
+      "bits": 0,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "destination-gallery-item",
+       "focal": "50% 12%"
+      },
+      {
+       "route": "/index.html",
+       "role": "journey-card-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 1024,
+      "h": 765
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.9738,
+       "w": 0.7978,
+       "x": 0.0806,
+       "y": 0.0252
+      }
+     },
+     "review": {
+      "/destination.html destination-gallery-item": {
+       "verdict": "kept",
+       "why": "the riverside hotel tower and the spires stay whole; only open sky and the far right river bank fall outside",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 12%"
+      }
+     }
+    },
+    {
+     "driveId": "1RrSgzqDE1ZrYrfGSQj_HRUVJ4eRjjVuL",
+     "title": "002 - Bangkok",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 2804877,
+     "modifiedTime": "2026-09-26T08:55:19.868Z",
+     "kind": "image",
+     "w": 2400,
+     "h": 1792,
+     "aspect": 1.339,
+     "status": "synced",
+     "asset": "assets/images/city/001-bangkok-g02-iconsiam-skyline.jpg",
+     "match": {
+      "bits": 1,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "destination-gallery-item",
+       "focal": "50% 12%"
+      },
+      {
+       "route": "/index.html",
+       "role": "journey-card-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 1600,
+      "h": 1195
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.9467,
+       "w": 0.8433,
+       "x": 0.0781,
+       "y": 0.0533
+      }
+     },
+     "review": {
+      "/destination.html destination-gallery-item": {
+       "verdict": "kept",
+       "why": "both towers stand whole in the frame; the lost sides are low river-front buildings",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 12%"
+      }
+     }
+    },
+    {
+     "driveId": "1xPpjkIaGnukYz33Rb9tHGho4g8f_PwQZ",
+     "title": "003 - Bangkok",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 215734,
+     "modifiedTime": "2026-09-26T08:55:24.325Z",
+     "kind": "image",
+     "w": 1024,
+     "h": 765,
+     "aspect": 1.339,
+     "status": "synced",
+     "asset": "assets/images/city/001-bangkok-g03-wires-and-train.jpg",
+     "match": {
+      "bits": 0,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "destination-gallery-item",
+       "focal": "50% 12%"
+      },
+      {
+       "route": "/index.html",
+       "role": "journey-card-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 1024,
+      "h": 765
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.6259,
+       "w": 0.8098,
+       "x": 0.136,
+       "y": 0.2496
+      }
+     },
+     "review": {
+      "/destination.html destination-gallery-item": {
+       "verdict": "kept",
+       "why": "the train front in the alley stays whole; the lost sides are dark alley walls",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 12%"
+      }
+     }
+    },
+    {
+     "driveId": "1AgqA7XtsZ4IrtOcixOH6vcwt_jJbD8Ps",
+     "title": "004 - Bangkok",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 173404,
+     "modifiedTime": "2026-09-26T08:55:28.792Z",
+     "kind": "image",
+     "w": 1024,
+     "h": 765,
+     "aspect": 1.339,
+     "status": "synced",
+     "asset": "assets/images/city/001-bangkok-g04-alley-train.jpg",
+     "match": {
+      "bits": 1,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "destination-gallery-item",
+       "focal": "72% 50%"
+      },
+      {
+       "route": "/index.html",
+       "role": "journey-card-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 1024,
+      "h": 765
+     },
+     "vision": {
+      "faces": [
+       {
+        "h": 0.0683,
+        "w": 0.0457,
+        "x": 0.7758,
+        "y": 0.517
+       }
+      ],
+      "salient": {
+       "h": 0.448,
+       "w": 0.7401,
+       "x": 0.2286,
+       "y": 0.324
+      }
+     },
+     "review": {
+      "/destination.html destination-gallery-item": {
+       "verdict": "kept",
+       "why": "the train and the man beside it stay inside (72% 50% already aims the frame at them)",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "72% 50%"
+      }
+     }
+    },
+    {
+     "driveId": "1u0jaBtosVGyIIVhbwdUKZYSM8jLTRWWV",
+     "title": "005 - Bangkok",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 2566717,
+     "modifiedTime": "2026-09-26T08:55:34.243Z",
+     "kind": "image",
+     "w": 2400,
+     "h": 1792,
+     "aspect": 1.339,
+     "status": "synced",
+     "asset": "assets/images/city/001-bangkok-g05-mahanakhon-skytrain.jpg",
+     "match": {
+      "bits": 0,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "destination-gallery-item",
+       "focal": "50% 12%"
+      },
+      {
+       "route": "/index.html",
+       "role": "journey-card-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 1600,
+      "h": 1195
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.7794,
+       "w": 0.6453,
+       "x": 0.1526,
+       "y": 0.1127
+      }
+     }
+    }
+   ],
+   "status": "partial",
+   "syncedAt": "2026-09-26T13:30:00Z"
+  },
+  "012": {
+   "title": "012 - Destination - Nong Khai",
+   "place": "Destinations · Nong Khai — no chapter on the website yet",
+   "slot": {
+    "route": "/destination.html"
+   },
+   "role": null,
+   "order": "title-ascending",
+   "items": [
+    {
+     "driveId": "1141cWD_EAtAqviPQJw5Jyhv1bksuUZwT",
+     "title": "001 - Nong Khai",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 331385,
+     "modifiedTime": "2026-09-26T09:01:50.469Z",
+     "kind": "image",
+     "w": 1440,
+     "h": 1200,
+     "aspect": 1.2,
+     "status": "unresolved",
+     "note": "the same photograph or film as assets/images/hero/hero-journey.jpg (unused on the website today)"
+    },
+    {
+     "driveId": "1Z-SHeli4btdps-E6jofjgiEMwYU-dZ3Y",
+     "title": "002 - Nong Khai",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 196595,
+     "modifiedTime": "2026-09-26T09:01:56.477Z",
+     "kind": "image",
+     "w": 1848,
+     "h": 968,
+     "aspect": 1.909,
+     "status": "unresolved"
+    },
+    {
+     "driveId": "14Gor0cX30rLbg-a7xoiJQsDXYpOOjjLH",
+     "title": "003 - Nong Khai",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 120775,
+     "modifiedTime": "2026-09-26T09:02:01.246Z",
+     "kind": "image",
+     "w": 1280,
+     "h": 720,
+     "aspect": 1.778,
+     "status": "unresolved"
+    }
+   ],
+   "question": "Nong Khai has no chapter on Destinations: a new chapter, or a place inside Vientiane / The Journey?",
+   "status": "unresolved",
+   "syncedAt": "2026-09-26T13:30:00Z"
+  },
+  "013": {
+   "title": "013 - Destination - Vientiane",
+   "place": "Destinations · Vientiane chapter — film and gallery",
+   "slot": {
+    "route": "/destination.html"
+   },
+   "role": "destination-gallery-item",
+   "order": "title-ascending",
+   "items": [
+    {
+     "driveId": "1UQn3L-tj4zpwB5n-MOZyxfRUfQ6LWAYI",
+     "title": "000 - Vientiane_Main_Video 01",
+     "path": "",
+     "mimeType": "video/mp4",
+     "size": 2856450,
+     "modifiedTime": "2026-09-26T09:02:26.903Z",
+     "kind": "video",
+     "w": 720,
+     "h": 1280,
+     "aspect": 0.562,
+     "width": 720,
+     "height": 1280,
+     "fps": 24,
+     "duration": 16.83,
+     "videoFrames": 404,
+     "codec": "h264",
+     "bitrate": 1279774,
+     "audio": true,
+     "audioFrames": 365,
+     "audioBitrate": 71824,
+     "status": "synced",
+     "asset": "assets/video/vientiane-card.mp4",
+     "match": {
+      "bits": 4,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "destination-film",
+       "focal": "50% 50%"
+      },
+      {
+       "route": "/index.html",
+       "role": "card",
+       "focal": "50% 50%"
+      }
+     ]
+    },
+    {
+     "driveId": "1f1B9S1JguAu_lgwdV3oDEAmS01WBeA-U",
+     "title": "001 - Vientiane",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 3333990,
+     "modifiedTime": "2026-09-26T09:02:32.691Z",
+     "kind": "image",
+     "w": 2400,
+     "h": 1792,
+     "aspect": 1.339,
+     "status": "synced",
+     "asset": "assets/images/city/002-vientiane-g01-aerial-dusk.jpg",
+     "match": {
+      "bits": 1,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "destination-gallery-item",
+       "focal": "50% 12%"
+      }
+     ],
+     "display": {
+      "w": 1600,
+      "h": 1195
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.8422,
+       "w": 0.8401,
+       "x": 0.0696,
+       "y": 0.0821
+      }
+     },
+     "review": {
+      "/destination.html destination-gallery-item": {
+       "verdict": "kept",
+       "why": "the avenue, Patuxai and the fountain stay centred; the lost sides are suburbs at dusk",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 12%"
+      }
+     }
+    },
+    {
+     "driveId": "1k9b4uHQ26GUa8NcjSxwHnolrwqpaOuO6",
+     "title": "002 - Vientiane",
+     "path": "",
+     "mimeType": "image/png",
+     "size": 2887021,
+     "modifiedTime": "2026-09-26T09:02:37.305Z",
+     "kind": "image",
+     "w": 941,
+     "h": 1672,
+     "aspect": 0.563,
+     "status": "synced",
+     "asset": "assets/images/city/002-vientiane-g02-patuxai-from-above.jpg",
+     "match": {
+      "bits": 0,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "destination-gallery-item",
+       "focal": "50% 50%",
+       "focalWhy": "the whole oval park with the fountain; the top-weighted 50% 12% cut the fountain in half"
+      }
+     ],
+     "display": {
+      "w": 900,
+      "h": 1600
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.899,
+       "w": 0.8256,
+       "x": 0.1207,
+       "y": 0.0341
+      }
+     },
+     "review": {
+      "/destination.html destination-gallery-item": {
+       "verdict": "kept",
+       "why": "refocused to 50% 50%: the whole oval park with Patuxai and the fountain; only the roundabout edges fall outside",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 50%"
+      }
+     }
+    },
+    {
+     "driveId": "1KQ5q6FuELWyORWqzf_BuZe0gGgDECezf",
+     "title": "003 - Vientiane",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 3031616,
+     "modifiedTime": "2026-09-26T09:02:42.209Z",
+     "kind": "image",
+     "w": 2400,
+     "h": 1792,
+     "aspect": 1.339,
+     "status": "synced",
+     "asset": "assets/images/city/002-vientiane-g03-patuxai.jpg",
+     "match": {
+      "bits": 0,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "destination-gallery-item",
+       "focal": "50% 12%"
+      }
+     ],
+     "display": {
+      "w": 1600,
+      "h": 1195
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.9243,
+       "w": 0.761,
+       "x": 0.1111,
+       "y": 0
+      }
+     },
+     "review": {
+      "/destination.html destination-gallery-item": {
+       "verdict": "kept",
+       "why": "Patuxai stands whole; the lost sides are lamp posts and sky",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 12%"
+      }
+     }
+    },
+    {
+     "driveId": "15rjYYywgkQlxrkqM-Tkrw1AfGIuP1Pgm",
+     "title": "004 - Vientiane",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 2753035,
+     "modifiedTime": "2026-09-26T09:02:47.162Z",
+     "kind": "image",
+     "w": 2400,
+     "h": 1792,
+     "aspect": 1.339,
+     "status": "synced",
+     "asset": "assets/images/city/002-vientiane-g04-reclining-buddha.jpg",
+     "match": {
+      "bits": 0,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "destination-gallery-item",
+       "focal": "50% 12%"
+      }
+     ],
+     "display": {
+      "w": 1600,
+      "h": 1195
+     },
+     "vision": {
+      "faces": [
+       {
+        "h": 0.2363,
+        "w": 0.1582,
+        "x": 0.3393,
+        "y": 0.403
+       }
+      ],
+      "salient": {
+       "h": 0.6611,
+       "w": 0.8755,
+       "x": 0,
+       "y": 0.2798
+      }
+     },
+     "review": {
+      "/destination.html destination-gallery-item": {
+       "verdict": "kept",
+       "why": "the Buddha's face (the detected head) and the gilded upper body stay inside; the lost sides are foliage",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 12%"
+      }
+     }
+    },
+    {
+     "driveId": "1IdlLKUxysqmzMe-1URgm2xuf0UIDOK0_",
+     "title": "005 - Vientiane",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 2737432,
+     "modifiedTime": "2026-09-26T09:02:52.080Z",
+     "kind": "image",
+     "w": 2400,
+     "h": 1792,
+     "aspect": 1.339,
+     "status": "synced",
+     "asset": "assets/images/city/002-vientiane-g05-pha-that-luang-gate.jpg",
+     "match": {
+      "bits": 1,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "destination-gallery-item",
+       "focal": "50% 12%"
+      }
+     ],
+     "display": {
+      "w": 1600,
+      "h": 1195
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.8043,
+       "w": 0.6357,
+       "x": 0.1807,
+       "y": 0.0634
+      }
+     }
+    },
+    {
+     "driveId": "1GKmi-TJsFiOSQNE2M2ohLI4M00739ptA",
+     "title": "006 - Vientiane",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 3257078,
+     "modifiedTime": "2026-09-26T09:02:57.030Z",
+     "kind": "image",
+     "w": 2400,
+     "h": 1792,
+     "aspect": 1.339,
+     "status": "synced",
+     "asset": "assets/images/city/002-vientiane-g06-street.jpg",
+     "match": {
+      "bits": 0,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "destination-gallery-item",
+       "focal": "50% 12%"
+      }
+     ],
+     "display": {
+      "w": 1600,
+      "h": 1195
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.6548,
+       "w": 0.6625,
+       "x": 0.0709,
+       "y": 0.2847
+      }
+     },
+     "review": {
+      "/destination.html destination-gallery-item": {
+       "verdict": "kept",
+       "why": "the walker in the white hat and the house stay inside; the lost sides are parked cars and trees",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 12%"
+      }
+     }
+    }
+   ],
+   "status": "synced",
+   "syncedAt": "2026-09-26T13:30:00Z"
+  },
+  "014": {
+   "title": "014 - Destination - Kunming",
+   "place": "Destinations · Kunming chapter — film, map and gallery",
+   "slot": {
+    "route": "/destination.html"
+   },
+   "role": "destination-gallery-item",
+   "order": "title-ascending",
+   "items": [
+    {
+     "driveId": "1zzSLgfYlcMpqHsiYbn0Xkj58R4wKKPL9",
+     "title": "000 - Kunming_Main_Video 01",
+     "path": "",
+     "mimeType": "video/mp4",
+     "size": 5834312,
+     "modifiedTime": "2026-09-26T08:57:11.810Z",
+     "kind": "video",
+     "w": 720,
+     "h": 960,
+     "aspect": 0.75,
+     "width": 720,
+     "height": 960,
+     "fps": 30,
+     "duration": 17.57,
+     "videoFrames": 527,
+     "codec": "h264",
+     "bitrate": 2610388,
+     "audio": true,
+     "audioFrames": 381,
+     "audioBitrate": 39197,
+     "status": "synced",
+     "asset": "assets/video/kunming-card.mp4",
+     "match": {
+      "bits": 1,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "destination-film",
+       "focal": "50% 50%"
+      }
+     ]
+    },
+    {
+     "driveId": "10u2AkFUQBkGWGc95tym7AGGqiV91cpDR",
+     "title": "001 - Kunming",
+     "path": "",
+     "mimeType": "image/png",
+     "size": 1296699,
+     "modifiedTime": "2026-09-26T08:57:30.509Z",
+     "kind": "image",
+     "w": 1254,
+     "h": 1254,
+     "aspect": 1,
+     "status": "synced",
+     "asset": "assets/images/city/003-yunnan-map.jpg",
+     "match": {
+      "bits": 8,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "destination-map",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 1254,
+      "h": 1254
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.8761,
+       "w": 0.9086,
+       "x": 0.0015,
+       "y": 0.0438
+      }
+     }
+    },
+    {
+     "driveId": "1ONndcl0Yui4ZewwfzMpPywjqdP8061WO",
+     "title": "002 - Kunming",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 542792,
+     "modifiedTime": "2026-09-26T08:57:35.898Z",
+     "kind": "image",
+     "w": 1320,
+     "h": 1760,
+     "aspect": 0.75,
+     "status": "synced",
+     "asset": "assets/images/city/003-kunming-jacaranda-01.jpg",
+     "match": {
+      "bits": 0,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "destination-gallery-item",
+       "focal": "50% 12%"
+      }
+     ],
+     "display": {
+      "w": 1320,
+      "h": 1760
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.8706,
+       "w": 0.8027,
+       "x": 0.1153,
+       "y": 0
+      }
+     }
+    },
+    {
+     "driveId": "1x32V_Sdoh2RKrVnv1xE310AyR-2kOmS2",
+     "title": "003 - Kunming",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 594757,
+     "modifiedTime": "2026-09-26T08:57:41.033Z",
+     "kind": "image",
+     "w": 1320,
+     "h": 1760,
+     "aspect": 0.75,
+     "status": "synced",
+     "asset": "assets/images/city/003-kunming-jacaranda-02.jpg",
+     "match": {
+      "bits": 0,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "destination-gallery-item",
+       "focal": "50% 12%"
+      }
+     ],
+     "display": {
+      "w": 1320,
+      "h": 1760
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.7126,
+       "w": 0.9173,
+       "x": 0.0002,
+       "y": 0.136
+      }
+     }
+    },
+    {
+     "driveId": "109O2PzVNv9vybrDslIAXiEjJ-XdTcCyv",
+     "title": "004 - Kunming",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 303110,
+     "modifiedTime": "2026-09-26T08:57:48.022Z",
+     "kind": "image",
+     "w": 1320,
+     "h": 1760,
+     "aspect": 0.75,
+     "status": "synced",
+     "asset": "assets/images/city/003-kunming-jacaranda-03.jpg",
+     "match": {
+      "bits": 0,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "destination-gallery-item",
+       "focal": "50% 12%"
+      }
+     ],
+     "display": {
+      "w": 1320,
+      "h": 1760
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.8476,
+       "w": 0.9355,
+       "x": 0,
+       "y": 0.0421
+      }
+     }
+    },
+    {
+     "driveId": "1K19a_NmCXtClWcti0mGV_tGK-2l7mnhk",
+     "title": "005 - Kunming",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 632375,
+     "modifiedTime": "2026-09-26T08:57:53.759Z",
+     "kind": "image",
+     "w": 1320,
+     "h": 1760,
+     "aspect": 0.75,
+     "status": "synced",
+     "asset": "assets/images/city/003-kunming-jacaranda-04.jpg",
+     "match": {
+      "bits": 1,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "destination-gallery-item",
+       "focal": "50% 12%"
+      }
+     ],
+     "display": {
+      "w": 1320,
+      "h": 1760
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.9632,
+       "w": 0.8878,
+       "x": 0.0634,
+       "y": 0.0363
+      }
+     }
+    },
+    {
+     "driveId": "1fU2cZ46jzz85jw7B8JGggj9qR8T0Ue7P",
+     "title": "006 - Kunming",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 483603,
+     "modifiedTime": "2026-09-26T08:57:59.635Z",
+     "kind": "image",
+     "w": 1320,
+     "h": 1760,
+     "aspect": 0.75,
+     "status": "synced",
+     "asset": "assets/images/city/003-kunming-jacaranda-05.jpg",
+     "match": {
+      "bits": 0,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "destination-gallery-item",
+       "focal": "50% 12%"
+      }
+     ],
+     "display": {
+      "w": 1320,
+      "h": 1760
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.998,
+       "w": 0.7584,
+       "x": 0.1298,
+       "y": 0
+      }
+     }
+    },
+    {
+     "driveId": "1NZ2d7lFIM_RCcZs3R45KD4QArgHc2J4c",
+     "title": "007 - Kunming",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 364780,
+     "modifiedTime": "2026-09-26T08:58:04.122Z",
+     "kind": "image",
+     "w": 1320,
+     "h": 1760,
+     "aspect": 0.75,
+     "status": "synced",
+     "asset": "assets/images/city/003-kunming-jacaranda-06.jpg",
+     "match": {
+      "bits": 0,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "destination-gallery-item",
+       "focal": "50% 12%"
+      }
+     ],
+     "display": {
+      "w": 1320,
+      "h": 1760
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.6948,
+       "w": 0.9498,
+       "x": 0.0004,
+       "y": 0.024
+      }
+     }
+    }
+   ],
+   "status": "synced",
+   "syncedAt": "2026-09-26T13:30:00Z"
+  },
+  "015": {
+   "title": "015 - Destination - Lijiang",
+   "place": "Destinations · Lijiang chapter — films and gallery",
+   "slot": {
+    "route": "/destination.html"
+   },
+   "role": "destination-gallery-item",
+   "order": "title-ascending",
+   "items": [
+    {
+     "driveId": "1RM13DkQ3hNoefJnl35S5THw_gefrXhze",
+     "title": "000 - Lijiang_Main_Video 01",
+     "path": "",
+     "mimeType": "video/mp4",
+     "size": 8364170,
+     "modifiedTime": "2026-09-26T09:00:43.914Z",
+     "kind": "video",
+     "status": "unresolved"
+    },
+    {
+     "driveId": "1o-Hv4guYSN94Fo4WsR7xxZuY7OgJrB2j",
+     "title": "000 - Lijiang_Main_Video 02",
+     "path": "",
+     "mimeType": "video/mp4",
+     "size": 2669320,
+     "modifiedTime": "2026-09-26T09:00:56.962Z",
+     "kind": "video",
+     "w": 1280,
+     "h": 720,
+     "aspect": 1.778,
+     "width": 1280,
+     "height": 720,
+     "fps": 30,
+     "duration": 11.4,
+     "videoFrames": 342,
+     "codec": "h264",
+     "bitrate": 1818845,
+     "audio": true,
+     "audioFrames": 248,
+     "audioBitrate": 46458,
+     "status": "unresolved"
+    },
+    {
+     "driveId": "1I2lVnMPv3wn5qE-sMhu-fkD_MZa8dtYP",
+     "title": "000 - Lijiang_Main_Video 03",
+     "path": "",
+     "mimeType": "video/mp4",
+     "size": 1487123,
+     "modifiedTime": "2026-09-26T09:01:04.182Z",
+     "kind": "video",
+     "w": 1280,
+     "h": 720,
+     "aspect": 1.778,
+     "width": 1280,
+     "height": 720,
+     "fps": 30,
+     "duration": 10.53,
+     "videoFrames": 316,
+     "codec": "h264",
+     "bitrate": 1081064,
+     "audio": true,
+     "audioFrames": 229,
+     "audioBitrate": 40508,
+     "status": "unresolved"
+    },
+    {
+     "driveId": "1yJmPKKeoa6Tm6nPTMKa9o2nHa-ejqJam",
+     "title": "000 - Lijiang_Main_Video 04",
+     "path": "",
+     "mimeType": "video/mp4",
+     "size": 1097270,
+     "modifiedTime": "2026-09-26T09:01:08.913Z",
+     "kind": "video",
+     "w": 1280,
+     "h": 720,
+     "aspect": 1.778,
+     "width": 1280,
+     "height": 720,
+     "fps": 29.971,
+     "duration": 10.24,
+     "videoFrames": 307,
+     "codec": "h264",
+     "bitrate": 785628,
+     "audio": true,
+     "audioFrames": 223,
+     "audioBitrate": 63279,
+     "status": "unresolved"
+    },
+    {
+     "driveId": "1-4K-9tKcrMxVtRP_KblfF9GvCPzzfjN1",
+     "title": "000 - Lijiang_Main_Video 05",
+     "path": "",
+     "mimeType": "video/mp4",
+     "size": 3141749,
+     "modifiedTime": "2026-09-26T09:01:14.303Z",
+     "kind": "video",
+     "w": 1280,
+     "h": 720,
+     "aspect": 1.778,
+     "width": 1280,
+     "height": 720,
+     "fps": 30,
+     "duration": 10,
+     "videoFrames": 300,
+     "codec": "h264",
+     "bitrate": 2461943,
+     "audio": true,
+     "audioFrames": 218,
+     "audioBitrate": 43461,
+     "status": "unresolved"
+    },
+    {
+     "driveId": "1d2qkEv7rNsctHjzhPlSo7INVIYDFUcyp",
+     "title": "001 - Lijiang",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 393947,
+     "modifiedTime": "2026-09-26T09:01:20.375Z",
+     "kind": "image",
+     "w": 1440,
+     "h": 810,
+     "aspect": 1.778,
+     "status": "unresolved"
+    },
+    {
+     "driveId": "1ReQad9Yz7cPTh-Ir38mFwAbNIc23whN7",
+     "title": "002 - Lijiang",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 297787,
+     "modifiedTime": "2026-09-26T09:01:27.757Z",
+     "kind": "image",
+     "w": 1440,
+     "h": 810,
+     "aspect": 1.778,
+     "status": "unresolved"
+    }
+   ],
+   "question": "Five films and two photographs for the Lijiang chapter, which today carries the Impression Lijiang film and a gallery: which film leads, and do the others form a film gallery?",
+   "status": "unresolved",
+   "syncedAt": "2026-09-26T13:30:00Z"
+  },
+  "020": {
+   "title": "020 - A - The Journey - Accommodation · Bangkok - Before the Wedding",
+   "place": "The Journey · U Sathorn Bangkok (Before the Wedding) — The Journey's stay gallery and the room pages (src/stay-media.json · uSathorn)",
+   "slot": {
+    "route": "/journeys.html"
+   },
+   "role": "product-gallery",
+   "order": "title-ascending",
+   "items": [
+    {
+     "driveId": "1XK1Y3LZErXPhL7UrJhf9pwWjkTpq_X7Z",
+     "title": "001 - U Sathorn Bangkok",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 632901,
+     "modifiedTime": "2026-09-26T09:25:28.344Z",
+     "kind": "image",
+     "w": 1365,
+     "h": 1365,
+     "aspect": 1,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1POyVtgrPSb7de0GeZ8nTLDSXDQO-Bx8D",
+     "title": "002 - U Sathorn Bangkok",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 602022,
+     "modifiedTime": "2026-09-26T09:26:51.478Z",
+     "kind": "image",
+     "w": 1365,
+     "h": 1365,
+     "aspect": 1,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "10jugiGJ6fWpB8LPsDUNbQ87hTxqN2Kgu",
+     "title": "003 - U Sathorn Bangkok",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 512937,
+     "modifiedTime": "2026-09-26T09:26:57.234Z",
+     "kind": "image",
+     "w": 1365,
+     "h": 1365,
+     "aspect": 1,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1mSTPOtMIN7_Ctji-BKz0_0ZzWUk30KJA",
+     "title": "004 - U Sathorn Bangkok",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 753094,
+     "modifiedTime": "2026-09-26T09:27:02.247Z",
+     "kind": "image",
+     "w": 1365,
+     "h": 1365,
+     "aspect": 1,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1_9wSh-oxuKLCiUjAbLN0ThwdXARKmfdY",
+     "title": "005 - U Sathorn Bangkok",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 851840,
+     "modifiedTime": "2026-09-26T09:27:07.707Z",
+     "kind": "image",
+     "w": 1365,
+     "h": 1365,
+     "aspect": 1,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1UDnRXrIDwilJ0-dvQbjm2Ju-IHV2cAfu",
+     "title": "006 - U Sathorn Bangkok",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 661071,
+     "modifiedTime": "2026-09-26T09:27:12.879Z",
+     "kind": "image",
+     "w": 1365,
+     "h": 1365,
+     "aspect": 1,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    }
+   ],
+   "status": "pending",
+   "syncedAt": "2026-09-26T13:30:00Z"
+  },
+  "021": {
+   "title": "021 - The Journey - Travel · Bangkok → Vientiane",
+   "place": "The Journey · Special Express No. 25 — the train's gallery (assets/transport-data.js · train)",
+   "slot": {
+    "route": "/journeys.html"
+   },
+   "role": "product-gallery",
+   "order": "title-ascending",
+   "items": [
+    {
+     "driveId": "1yUBHUXaVws4uE_uV4LWtJFHbRQvssUTO",
+     "title": "001 - Special Express No. 25",
+     "path": "",
+     "mimeType": "image/webp",
+     "size": 397190,
+     "modifiedTime": "2026-09-26T09:41:33.924Z",
+     "kind": "image",
+     "w": 1440,
+     "h": 960,
+     "aspect": 1.5,
+     "status": "synced",
+     "asset": "assets/images/transport/train-no25-srt-train.jpg",
+     "match": {
+      "bits": 0,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      },
+      {
+       "route": "/transport.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 1440,
+      "h": 960
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.5935,
+       "w": 0.3733,
+       "x": 0.3074,
+       "y": 0.3455
+      }
+     },
+     "alsoShownAs": "a small thumbnail in assets/bag.js, assets/pricing.js, your-journey.html (not a composition slot)"
+    },
+    {
+     "driveId": "1E8QY9527P1r-327ozJwPsYhLbd-5VHRs",
+     "title": "002 - Special Express No. 25",
+     "path": "",
+     "mimeType": "image/png",
+     "size": 2269621,
+     "modifiedTime": "2026-09-26T09:41:53.407Z",
+     "kind": "image",
+     "w": 1537,
+     "h": 1023,
+     "aspect": 1.502,
+     "status": "pending",
+     "note": "the same photograph as assets/images/train/srt-sleeper-cabin.jpg (on disk, not yet placed) — a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "126nyDJWn8QCKzSCdJ3CPe6EX7vIKyirV",
+     "title": "003 - Special Express No. 25",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 433632,
+     "modifiedTime": "2026-09-26T09:43:58.081Z",
+     "kind": "image",
+     "w": 1440,
+     "h": 1919,
+     "aspect": 0.75,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1PaUeB2XpeoEGTzXlJHLKoBAHf7D-6uyD",
+     "title": "004 - Special Express No. 25",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 421672,
+     "modifiedTime": "2026-09-26T09:43:53.192Z",
+     "kind": "image",
+     "w": 1440,
+     "h": 1920,
+     "aspect": 0.75,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1dRsuDzx6nrU2OGmRiShK5FIdF-Bt983S",
+     "title": "005 - Special Express No. 25",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 301288,
+     "modifiedTime": "2026-09-26T09:43:45.142Z",
+     "kind": "image",
+     "w": 1440,
+     "h": 1799,
+     "aspect": 0.8,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1lTB5KWLUoFzFgxZ0wMvqee9fAOmzUwjJ",
+     "title": "006 - Special Express No. 25",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 397354,
+     "modifiedTime": "2026-09-26T09:43:39.426Z",
+     "kind": "image",
+     "w": 1440,
+     "h": 1800,
+     "aspect": 0.8,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1M394QNq50_h8VUB1lmt8nuqSAXXo6yKY",
+     "title": "007 - Special Express No. 25",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 263324,
+     "modifiedTime": "2026-09-26T09:43:32.423Z",
+     "kind": "image",
+     "w": 1440,
+     "h": 1800,
+     "aspect": 0.8,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1PRh_kSX1bFfKdIy5ma9mykGBU3a6QzhI",
+     "title": "008 - Special Express No. 25",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 199498,
+     "modifiedTime": "2026-09-26T09:43:27.481Z",
+     "kind": "image",
+     "w": 1440,
+     "h": 1800,
+     "aspect": 0.8,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    }
+   ],
+   "status": "partial",
+   "syncedAt": "2026-09-26T13:30:00Z"
+  },
+  "022": {
+   "title": "022 - The Journey - Accommodation · Vientiane - Pre-Wedding Stay",
+   "place": "The Journey · Souphattra Heritage, Pre-Wedding Stay (src/stay-media.json · souphattra)",
+   "slot": {
+    "route": "/journeys.html"
+   },
+   "role": "product-gallery",
+   "order": "title-ascending",
+   "items": [
+    {
+     "driveId": "10r3vBadSJ50RiZeV4YKYfZpaeRPsgSAT",
+     "title": "001 - Souphattra Heritage",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 363358,
+     "modifiedTime": "2026-09-26T09:44:33.642Z",
+     "kind": "image",
+     "w": 1920,
+     "h": 1920,
+     "aspect": 1,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1k-5g60u0hIi2Ez6PCGmKXR5sRyY7Krcc",
+     "title": "002 - Souphattra Heritage",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 209876,
+     "modifiedTime": "2026-09-26T09:44:40.319Z",
+     "kind": "image",
+     "w": 1024,
+     "h": 683,
+     "aspect": 1.499,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1pTzQswtYwQv_nL6NTXtNRQyHlkKvmr-6",
+     "title": "003 - Souphattra Heritage",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 303417,
+     "modifiedTime": "2026-09-26T09:44:45.089Z",
+     "kind": "image",
+     "w": 2048,
+     "h": 1365,
+     "aspect": 1.5,
+     "status": "synced",
+     "asset": "assets/images/venue/lobby-gallery-wall-1000.jpg",
+     "match": {
+      "bits": 1,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/index.html",
+       "role": "venue-zone-photo",
+       "focal": "50% 50%"
+      }
+     ]
+    },
+    {
+     "driveId": "1ZB81Z0JIuE4X7rpIakG2OWYjW77IlMoo",
+     "title": "004 - Souphattra Heritage",
+     "path": "",
+     "mimeType": "image/webp",
+     "size": 89358,
+     "modifiedTime": "2026-09-26T09:44:49.597Z",
+     "kind": "image",
+     "w": 1024,
+     "h": 683,
+     "aspect": 1.499,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1TCozr65dNM7EIdesnPLMpJ4lPwevmzpf",
+     "title": "005 - Souphattra Heritage",
+     "path": "",
+     "mimeType": "image/webp",
+     "size": 268174,
+     "modifiedTime": "2026-09-26T09:44:54.741Z",
+     "kind": "image",
+     "w": 2560,
+     "h": 1707,
+     "aspect": 1.5,
+     "status": "synced",
+     "asset": "assets/images/souphattra/heritage-balconies.jpg",
+     "match": {
+      "bits": 1,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      },
+      {
+       "route": "/index.html",
+       "role": "venue-zone-photo",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 2000,
+      "h": 1334
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.8029,
+       "w": 0.8203,
+       "x": 0.105,
+       "y": 0.057
+      }
+     }
+    },
+    {
+     "driveId": "1ZXRzVOhgA1aOwW6AaAzyWaAdIAll6a-f",
+     "title": "006 - Souphattra Heritage",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 645199,
+     "modifiedTime": "2026-09-26T09:45:01.230Z",
+     "kind": "image",
+     "w": 1707,
+     "h": 2560,
+     "aspect": 0.667,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1zmLhHEJiRNCEAxfdDqTTIDkSEcLjTbiW",
+     "title": "007 - Souphattra Heritage",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 51741,
+     "modifiedTime": "2026-09-26T09:45:07.047Z",
+     "kind": "image",
+     "w": 768,
+     "h": 512,
+     "aspect": 1.5,
+     "status": "synced",
+     "asset": "assets/images/rooms/heritage-grand-premier-4.jpg",
+     "match": {
+      "bits": 2,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/room.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 1600,
+      "h": 1067
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.6115,
+       "w": 0.8372,
+       "x": 0.1448,
+       "y": 0.2142
+      }
+     }
+    },
+    {
+     "driveId": "1s0SJ5thb9ewpROy32i4F4qOOT7bJmrjW",
+     "title": "008 - Souphattra Heritage",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 551969,
+     "modifiedTime": "2026-09-26T09:45:12.045Z",
+     "kind": "image",
+     "w": 1707,
+     "h": 2560,
+     "aspect": 0.667,
+     "status": "synced",
+     "asset": "assets/images/rooms/heritage-grand-premier-7.jpg",
+     "match": {
+      "bits": 1,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/room.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 1067,
+      "h": 1600
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.7368,
+       "w": 0.6614,
+       "x": 0.2307,
+       "y": 0.0513
+      }
+     },
+     "review": {
+      "/room.html room-gallery": {
+       "verdict": "kept",
+       "why": "the veranda seat, cushions, plant and the view across stay whole; the ceiling fan and floor tiles are the lost strips",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 50%"
+      }
+     }
+    },
+    {
+     "driveId": "1Ymv5U-z-itn8DixIxueOJw55wUutbEfV",
+     "title": "009 - Souphattra Heritage",
+     "path": "",
+     "mimeType": "image/webp",
+     "size": 66808,
+     "modifiedTime": "2026-09-26T09:45:17.241Z",
+     "kind": "image",
+     "w": 2560,
+     "h": 1707,
+     "aspect": 1.5,
+     "status": "synced",
+     "asset": "assets/images/souphattra/heritage-arches-dusk.jpg",
+     "match": {
+      "bits": 0,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/index.html",
+       "role": "journey-card-gallery",
+       "focal": "50% 50%"
+      },
+      {
+       "route": "/voyage.html",
+       "role": "editorial-band",
+       "focal": "50% 30%",
+       "focalWhy": "the arched windows keep their arches in the widest band crops (tablet landscape, desktop); centred, only their middles showed"
+      },
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      },
+      {
+       "route": "/room.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 2000,
+      "h": 1334
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.7994,
+       "w": 0.6025,
+       "x": 0.3657,
+       "y": 0.079
+      }
+     },
+     "review": {
+      "/voyage.html editorial-band": {
+       "verdict": "kept",
+       "why": "refocused to 50% 30% for the band: the arched windows keep their arches at the widest crops; the phone crop keeps both windows",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 30%"
+      }
+     }
+    },
+    {
+     "driveId": "1mtfaiPAjX5HT1q8_vu-Mtk4phtxiTAY1",
+     "title": "010 - Souphattra Heritage",
+     "path": "",
+     "mimeType": "image/webp",
+     "size": 72902,
+     "modifiedTime": "2026-09-26T09:45:22.932Z",
+     "kind": "image",
+     "w": 2560,
+     "h": 1707,
+     "aspect": 1.5,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    }
+   ],
+   "status": "partial",
+   "syncedAt": "2026-09-26T13:30:00Z"
+  },
+  "023": {
+   "title": "023 - The Journey - Accommodation · Vientiane - Wedding Stay",
+   "place": "The Journey · Souphattra Heritage, Wedding Stay (the same house as 022)",
+   "slot": {
+    "route": "/journeys.html"
+   },
+   "role": "product-gallery",
+   "order": "title-ascending",
+   "items": [
+    {
+     "driveId": "1AfzsOkVMmntItk5jTuAz5JZsufWbOnIP",
+     "title": "001 - Souphattra Heritage",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 363358,
+     "modifiedTime": "2026-09-26T09:46:24.604Z",
+     "kind": "image",
+     "w": 1920,
+     "h": 1920,
+     "aspect": 1,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1s7S3Jsapiq38YGD_jnMptrlsIGRfCzqb",
+     "title": "002 - Souphattra Heritage",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 209876,
+     "modifiedTime": "2026-09-26T09:46:31.218Z",
+     "kind": "image",
+     "w": 1024,
+     "h": 683,
+     "aspect": 1.499,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1WfpU77v_jsCfCKsT2kAlbP0KZkFk-C9g",
+     "title": "003 - Souphattra Heritage",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 303417,
+     "modifiedTime": "2026-09-26T09:46:36.135Z",
+     "kind": "image",
+     "w": 2048,
+     "h": 1365,
+     "aspect": 1.5,
+     "status": "synced",
+     "asset": "assets/images/venue/lobby-gallery-wall-1000.jpg",
+     "match": {
+      "bits": 1,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/index.html",
+       "role": "venue-zone-photo",
+       "focal": "50% 50%"
+      }
+     ]
+    },
+    {
+     "driveId": "1EI7wQnAqIkq1z40PV6aUUfcFITaVwbQN",
+     "title": "004 - Souphattra Heritage",
+     "path": "",
+     "mimeType": "image/webp",
+     "size": 89358,
+     "modifiedTime": "2026-09-26T09:46:41.655Z",
+     "kind": "image",
+     "w": 1024,
+     "h": 683,
+     "aspect": 1.499,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1n4-2q5IgdTW6MeiuKzp9z6WXTYxtP89Q",
+     "title": "005 - Souphattra Heritage",
+     "path": "",
+     "mimeType": "image/webp",
+     "size": 268174,
+     "modifiedTime": "2026-09-26T09:46:46.287Z",
+     "kind": "image",
+     "w": 2560,
+     "h": 1707,
+     "aspect": 1.5,
+     "status": "synced",
+     "asset": "assets/images/souphattra/heritage-balconies.jpg",
+     "match": {
+      "bits": 1,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      },
+      {
+       "route": "/index.html",
+       "role": "venue-zone-photo",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 2000,
+      "h": 1334
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.8029,
+       "w": 0.8203,
+       "x": 0.105,
+       "y": 0.057
+      }
+     }
+    },
+    {
+     "driveId": "1oOhVJ5EgBcVHZcL6vcVINnsg2Dwq_4H0",
+     "title": "006 - Souphattra Heritage",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 645199,
+     "modifiedTime": "2026-09-26T09:46:50.098Z",
+     "kind": "image",
+     "w": 1707,
+     "h": 2560,
+     "aspect": 0.667,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "17tQVf1WwihYiVlvoHlX1asA_FHUjjkj8",
+     "title": "007 - Souphattra Heritage",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 51741,
+     "modifiedTime": "2026-09-26T09:46:54.153Z",
+     "kind": "image",
+     "w": 768,
+     "h": 512,
+     "aspect": 1.5,
+     "status": "synced",
+     "asset": "assets/images/rooms/heritage-grand-premier-4.jpg",
+     "match": {
+      "bits": 2,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/room.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 1600,
+      "h": 1067
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.6115,
+       "w": 0.8372,
+       "x": 0.1448,
+       "y": 0.2142
+      }
+     }
+    },
+    {
+     "driveId": "15TPXtYzG27Qx85GI1IHGjVHmcoUDnrnt",
+     "title": "008 - Souphattra Heritage",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 551969,
+     "modifiedTime": "2026-09-26T09:46:58.584Z",
+     "kind": "image",
+     "w": 1707,
+     "h": 2560,
+     "aspect": 0.667,
+     "status": "synced",
+     "asset": "assets/images/rooms/heritage-grand-premier-7.jpg",
+     "match": {
+      "bits": 1,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/room.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 1067,
+      "h": 1600
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.7368,
+       "w": 0.6614,
+       "x": 0.2307,
+       "y": 0.0513
+      }
+     },
+     "review": {
+      "/room.html room-gallery": {
+       "verdict": "kept",
+       "why": "the veranda seat, cushions, plant and the view across stay whole; the ceiling fan and floor tiles are the lost strips",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 50%"
+      }
+     }
+    },
+    {
+     "driveId": "1wLc-QXmG3Q1QPT0TrVQ8ilkCHfIjBFr4",
+     "title": "009 - Souphattra Heritage",
+     "path": "",
+     "mimeType": "image/webp",
+     "size": 66808,
+     "modifiedTime": "2026-09-26T09:47:03.783Z",
+     "kind": "image",
+     "w": 2560,
+     "h": 1707,
+     "aspect": 1.5,
+     "status": "synced",
+     "asset": "assets/images/souphattra/heritage-arches-dusk.jpg",
+     "match": {
+      "bits": 0,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/index.html",
+       "role": "journey-card-gallery",
+       "focal": "50% 50%"
+      },
+      {
+       "route": "/voyage.html",
+       "role": "editorial-band",
+       "focal": "50% 30%",
+       "focalWhy": "the arched windows keep their arches in the widest band crops (tablet landscape, desktop); centred, only their middles showed"
+      },
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      },
+      {
+       "route": "/room.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 2000,
+      "h": 1334
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.7994,
+       "w": 0.6025,
+       "x": 0.3657,
+       "y": 0.079
+      }
+     },
+     "review": {
+      "/voyage.html editorial-band": {
+       "verdict": "kept",
+       "why": "refocused to 50% 30% for the band: the arched windows keep their arches at the widest crops; the phone crop keeps both windows",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 30%"
+      }
+     }
+    },
+    {
+     "driveId": "1vdmEJi64hdOhd5z7vKxVCCnJZkZS-fWr",
+     "title": "010 - Souphattra Heritage",
+     "path": "",
+     "mimeType": "image/webp",
+     "size": 72902,
+     "modifiedTime": "2026-09-26T09:47:07.582Z",
+     "kind": "image",
+     "w": 2560,
+     "h": 1707,
+     "aspect": 1.5,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    }
+   ],
+   "sharedWith": "022",
+   "note": "the same ten photographs as 022 (the same house), under their own Drive ids",
+   "status": "partial",
+   "syncedAt": "2026-09-26T13:30:00Z"
+  },
+  "024": {
+   "title": "024 - The Journey - Accommodation · Vientiane - Guest House complimentary",
+   "place": "The Journey · Guest House complimentary (src/stay-media.json · guestHouse)",
+   "slot": {
+    "route": "/journeys.html"
+   },
+   "role": "product-gallery",
+   "order": "title-ascending",
+   "items": [
+    {
+     "driveId": "1h6bWrHzNJFze6RQg9zvOPTc2ncUo3bys",
+     "title": "001 - Guest House complimentary",
+     "path": "",
+     "mimeType": "image/avif",
+     "size": 34938,
+     "modifiedTime": "2026-09-26T09:58:14.308Z",
+     "kind": "image",
+     "w": 720,
+     "h": 540,
+     "aspect": 1.333,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "11XM6e38Qgx2lrF-HIQ7dzsHV6-qnkcHd",
+     "title": "002 - Guest House complimentary",
+     "path": "",
+     "mimeType": "image/avif",
+     "size": 10670,
+     "modifiedTime": "2026-09-26T09:58:20.587Z",
+     "kind": "image",
+     "w": 720,
+     "h": 541,
+     "aspect": 1.331,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1FAJ7p5NMZAVVTzBkMOKTz2jRMdL7F6jZ",
+     "title": "003 - Guest House complimentary",
+     "path": "",
+     "mimeType": "image/avif",
+     "size": 48631,
+     "modifiedTime": "2026-09-26T09:58:25.433Z",
+     "kind": "image",
+     "w": 2560,
+     "h": 3202,
+     "aspect": 0.8,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1dxIm53XJ_MB-0dFaxUn8QdLZFTBNlGe3",
+     "title": "004 - Guest House complimentary",
+     "path": "",
+     "mimeType": "image/avif",
+     "size": 130145,
+     "modifiedTime": "2026-09-26T09:58:30.521Z",
+     "kind": "image",
+     "w": 2560,
+     "h": 3409,
+     "aspect": 0.751,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1RlJaZ0j2DF5ALRjjvBNvIxmDB_hYby27",
+     "title": "005 - Guest House complimentary",
+     "path": "",
+     "mimeType": "image/avif",
+     "size": 48059,
+     "modifiedTime": "2026-09-26T09:58:34.881Z",
+     "kind": "image",
+     "w": 2560,
+     "h": 1924,
+     "aspect": 1.331,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1zc8dBbO36sBbEHtn3gfX3s2_6vzxPWDP",
+     "title": "006 - Guest House complimentary",
+     "path": "",
+     "mimeType": "image/avif",
+     "size": 22488,
+     "modifiedTime": "2026-09-26T09:58:39.878Z",
+     "kind": "image",
+     "w": 720,
+     "h": 541,
+     "aspect": 1.331,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1hfnguBfuD7cb6inqkTLCoSn8USVuoCIT",
+     "title": "007 - Guest House complimentary",
+     "path": "",
+     "mimeType": "image/avif",
+     "size": 87337,
+     "modifiedTime": "2026-09-26T09:58:43.963Z",
+     "kind": "image",
+     "w": 2560,
+     "h": 1923,
+     "aspect": 1.331,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "162ddD4i18OYMMbG_WmVFqPuKpN1basNt",
+     "title": "008 - Guest House complimentary",
+     "path": "",
+     "mimeType": "image/avif",
+     "size": 127970,
+     "modifiedTime": "2026-09-26T09:58:49.460Z",
+     "kind": "image",
+     "w": 2560,
+     "h": 1920,
+     "aspect": 1.333,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1m8L5lfRAKTPsHeuyQF2KTbt-0IMU7o8w",
+     "title": "009 - Guest House complimentary",
+     "path": "",
+     "mimeType": "image/avif",
+     "size": 85760,
+     "modifiedTime": "2026-09-26T09:58:54.552Z",
+     "kind": "image",
+     "w": 2560,
+     "h": 3200,
+     "aspect": 0.8,
+     "status": "synced",
+     "asset": "assets/images/guesthouse/guesthouse-04.jpg",
+     "match": {
+      "bits": 0,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      },
+      {
+       "route": "/room.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 720,
+      "h": 900
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.7935,
+       "w": 0.7926,
+       "x": 0.0712,
+       "y": 0.084
+      }
+     },
+     "review": {
+      "/journeys.html product-gallery": {
+       "verdict": "kept",
+       "why": "the view through the wooden doors to the stupa stays whole; the door frames are the lost strips",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 50%"
+      },
+      "/room.html room-gallery": {
+       "verdict": "kept",
+       "why": "the view through the wooden doors to the stupa stays whole; the door frames are the lost strips",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 50%"
+      }
+     }
+    },
+    {
+     "driveId": "1SkxzO4bbd1kV2tSu8Refsiri4jMDpRAf",
+     "title": "010 - Guest House complimentary",
+     "path": "",
+     "mimeType": "image/avif",
+     "size": 122494,
+     "modifiedTime": "2026-09-26T09:59:02.135Z",
+     "kind": "image",
+     "w": 2560,
+     "h": 1924,
+     "aspect": 1.331,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1y1v_rY841JMbPYEBoUJ3euwdmVUuuUXI",
+     "title": "011 - Guest House complimentary",
+     "path": "",
+     "mimeType": "image/avif",
+     "size": 97049,
+     "modifiedTime": "2026-09-26T09:59:10.104Z",
+     "kind": "image",
+     "w": 2560,
+     "h": 1920,
+     "aspect": 1.333,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1mENFmZzl3FRpxLosx4vy6xdzvbNQkH_C",
+     "title": "012 - Guest House complimentary",
+     "path": "",
+     "mimeType": "image/avif",
+     "size": 112368,
+     "modifiedTime": "2026-09-26T09:59:14.671Z",
+     "kind": "image",
+     "w": 2560,
+     "h": 3200,
+     "aspect": 0.8,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1wVXSkEL1igEIH-W0gvXf4wDGfp_-wog4",
+     "title": "013 - Guest House complimentary",
+     "path": "",
+     "mimeType": "image/avif",
+     "size": 57707,
+     "modifiedTime": "2026-09-26T09:59:19.345Z",
+     "kind": "image",
+     "w": 2560,
+     "h": 1924,
+     "aspect": 1.331,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1io0Jd3pY_GKdsoMoud2XN4sCm1boXsvQ",
+     "title": "014 - Guest House complimentary",
+     "path": "",
+     "mimeType": "image/png",
+     "size": 306826,
+     "modifiedTime": "2026-09-26T10:04:31.885Z",
+     "kind": "image",
+     "w": 3200,
+     "h": 2400,
+     "aspect": 1.333,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    }
+   ],
+   "status": "partial",
+   "syncedAt": "2026-09-26T13:30:00Z"
+  },
+  "025": {
+   "title": "025 - The Journey - Travel · Vientiane → Kunming",
+   "place": "The Journey · MU9646 Vientiane → Kunming (assets/transport-data.js)",
+   "slot": {
+    "route": "/journeys.html"
+   },
+   "role": "product-gallery",
+   "order": "title-ascending",
+   "items": [
+    {
+     "driveId": "1mLlUaULDmEbi-TGwGDEI0rI8OSrDE0sY",
+     "title": "001 - MU9646 · Vientiane → Kunming - Business Class",
+     "path": "",
+     "mimeType": "image/webp",
+     "size": 24522,
+     "modifiedTime": "2026-09-26T10:01:28.485Z",
+     "kind": "image",
+     "w": 740,
+     "h": 514,
+     "aspect": 1.44,
+     "status": "synced",
+     "asset": "assets/images/transport/mu9632-business-2.jpg",
+     "match": {
+      "bits": 39,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      },
+      {
+       "route": "/transport.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 740,
+      "h": 449
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.8478,
+       "w": 0.9022,
+       "x": 0.0641,
+       "y": 0.0756
+      }
+     },
+     "review": {
+      "/journeys.html product-gallery": {
+       "verdict": "kept",
+       "why": "the seat, table and bed position stay whole",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 50%"
+      },
+      "/transport.html room-gallery": {
+       "verdict": "kept",
+       "why": "the seat, table and bed position stay whole",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 50%"
+      }
+     }
+    },
+    {
+     "driveId": "14EZCu1v5RCbpTmm9vxpp7YmOxyxWnduo",
+     "title": "002 - MU9646 · Vientiane → Kunming  - Business Class",
+     "path": "",
+     "mimeType": "image/webp",
+     "size": 29882,
+     "modifiedTime": "2026-09-26T10:01:33.604Z",
+     "kind": "image",
+     "w": 740,
+     "h": 514,
+     "aspect": 1.44,
+     "status": "synced",
+     "asset": "assets/images/transport/mu9632-business-1.jpg",
+     "match": {
+      "bits": 51,
+      "confirmedByEye": true
+     },
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      },
+      {
+       "route": "/transport.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 740,
+      "h": 454
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.6748,
+       "w": 0.7967,
+       "x": 0.1188,
+       "y": 0.1953
+      }
+     },
+     "alsoShownAs": "a small thumbnail in assets/bag.js, assets/pricing.js, your-journey.html (not a composition slot)"
+    },
+    {
+     "driveId": "18s19zSvGgAsbbUB9P6qz39q-wdzBuZ11",
+     "title": "003 - MU9646 · Vientiane → Kunming  - Business Class",
+     "path": "",
+     "mimeType": "image/webp",
+     "size": 111524,
+     "modifiedTime": "2026-09-26T10:01:36.916Z",
+     "kind": "image",
+     "w": 1400,
+     "h": 972,
+     "aspect": 1.44,
+     "status": "synced",
+     "asset": "assets/images/transport/mu9632-business-3.jpg",
+     "match": {
+      "bits": 47,
+      "confirmedByEye": true
+     },
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      },
+      {
+       "route": "/transport.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 1400,
+      "h": 858
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.6389,
+       "w": 0.48,
+       "x": 0.3267,
+       "y": 0.0799
+      }
+     }
+    },
+    {
+     "driveId": "1iVXRPG2yQRm-JJDelLphstO1qcmAiiMk",
+     "title": "004 - MU9646 · Vientiane → Kunming  - Business Class",
+     "path": "",
+     "mimeType": "image/webp",
+     "size": 27266,
+     "modifiedTime": "2026-09-26T10:01:40.164Z",
+     "kind": "image",
+     "w": 740,
+     "h": 523,
+     "aspect": 1.415,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1Ko-CVVjv7FkFVZrayNlQALuu-Can0Zbv",
+     "title": "005 - MU9646 · Vientiane → Kunming  - Economy Flexible",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 535926,
+     "modifiedTime": "2026-09-26T10:03:14.130Z",
+     "kind": "image",
+     "w": 1500,
+     "h": 1016,
+     "aspect": 1.476,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1AEGcLeewuJB64xnIElMhkH7ZjbuLjMIz",
+     "title": "006 - MU9646 · Vientiane → Kunming  - Economy Flexible",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 379362,
+     "modifiedTime": "2026-09-26T10:03:22.331Z",
+     "kind": "image",
+     "w": 1500,
+     "h": 1125,
+     "aspect": 1.333,
+     "status": "synced",
+     "asset": "assets/images/transport/mu5924-economy-cabin-1.jpg",
+     "match": {
+      "bits": 50,
+      "confirmedByEye": true
+     },
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      },
+      {
+       "route": "/transport.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 1500,
+      "h": 1057
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.6223,
+       "w": 0.8608,
+       "x": 0.064,
+       "y": 0.0984
+      }
+     },
+     "alsoShownAs": "a small thumbnail in assets/bag.js, assets/pricing.js, your-journey.html (not a composition slot)"
+    },
+    {
+     "driveId": "1XIu8Uq0EHmzxdoXCHAW4CmGmDV4dez3V",
+     "title": "007 - MU9646 · Vientiane → Kunming  - Economy Flexible",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 358003,
+     "modifiedTime": "2026-09-26T10:03:29.701Z",
+     "kind": "image",
+     "w": 1500,
+     "h": 1125,
+     "aspect": 1.333,
+     "status": "synced",
+     "asset": "assets/images/transport/mu5924-economy-cabin-2.jpg",
+     "match": {
+      "bits": 46,
+      "confirmedByEye": true
+     },
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      },
+      {
+       "route": "/transport.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 1500,
+      "h": 1057
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.6963,
+       "w": 0.7681,
+       "x": 0.1382,
+       "y": 0.0142
+      }
+     }
+    },
+    {
+     "driveId": "13g3QrmhA0eRvrLoG8PyPrdRLB8GbnWjh",
+     "title": "008 - MU9646 · Vientiane → Kunming  - Economy Flexible",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 404024,
+     "modifiedTime": "2026-09-26T10:03:46.107Z",
+     "kind": "image",
+     "w": 1500,
+     "h": 1125,
+     "aspect": 1.333,
+     "status": "synced",
+     "asset": "assets/images/transport/mu5924-economy-meal.jpg",
+     "match": {
+      "bits": 51,
+      "confirmedByEye": true
+     },
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      },
+      {
+       "route": "/transport.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 1500,
+      "h": 1057
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.7889,
+       "w": 0.8092,
+       "x": 0.0609,
+       "y": 0.0749
+      }
+     }
+    }
+   ],
+   "status": "partial",
+   "syncedAt": "2026-09-26T13:30:00Z"
+  },
+  "026": {
+   "title": "026 - The Journey - Accommodation · Kunming",
+   "place": "The Journey · Wanxiang Yueju Kunming (src/stay-media.json · wanxiang)",
+   "slot": {
+    "route": "/journeys.html"
+   },
+   "role": "product-gallery",
+   "order": "title-ascending",
+   "items": [
+    {
+     "driveId": "1uAHIJdDGhEQYG9JyQ6nH7SKLfFFx1jgI",
+     "title": "001 - Wanxiang Yueju · Kunming",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 137808,
+     "modifiedTime": "2026-09-26T10:39:03.097Z",
+     "kind": "image",
+     "w": 960,
+     "h": 576,
+     "aspect": 1.667,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1zCWj5Hj5W9yc9BGCDVw3nf5AFW9mz_1H",
+     "title": "002 - Wanxiang Yueju · Kunming",
+     "path": "",
+     "mimeType": "image/webp",
+     "size": 82234,
+     "modifiedTime": "2026-09-26T10:38:57.210Z",
+     "kind": "image",
+     "w": 1137,
+     "h": 853,
+     "aspect": 1.333,
+     "status": "synced",
+     "asset": "assets/images/kunming/penang-5.jpg",
+     "match": {
+      "bits": 11,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/room.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 1412,
+      "h": 1036
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.4182,
+       "w": 0.96,
+       "x": 0,
+       "y": 0.3083
+      }
+     }
+    },
+    {
+     "driveId": "1-CerB6jYmPw3lqZM0Mc5WktANo0riMA6",
+     "title": "003 - Wanxiang Yueju · Kunming",
+     "path": "",
+     "mimeType": "image/webp",
+     "size": 62850,
+     "modifiedTime": "2026-09-26T10:38:52.199Z",
+     "kind": "image",
+     "w": 1137,
+     "h": 853,
+     "aspect": 1.333,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1QL7zmcste7yT4bhvfFtyegcRg2Yd4iev",
+     "title": "004 - Wanxiang Yueju · Kunming",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 71505,
+     "modifiedTime": "2026-09-26T10:38:46.039Z",
+     "kind": "image",
+     "w": 1024,
+     "h": 683,
+     "aspect": 1.499,
+     "status": "synced",
+     "asset": "assets/images/kunming/solarium-5.jpg",
+     "match": {
+      "bits": 6,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/room.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 1416,
+      "h": 938
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.7867,
+       "w": 0.7875,
+       "x": 0.0314,
+       "y": 0.0468
+      }
+     }
+    },
+    {
+     "driveId": "1cV5V6Rj0_f2DG4cr8CiLLiQgvNGUCVYL",
+     "title": "005 - Wanxiang Yueju · Kunming",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 68381,
+     "modifiedTime": "2026-09-26T10:38:39.851Z",
+     "kind": "image",
+     "w": 1024,
+     "h": 768,
+     "aspect": 1.333,
+     "status": "synced",
+     "asset": "assets/images/kunming/standardsingle-3.jpg",
+     "match": {
+      "bits": 14,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/room.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 1414,
+      "h": 1044
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.7291,
+       "w": 0.8209,
+       "x": 0.0502,
+       "y": 0.1415
+      }
+     }
+    },
+    {
+     "driveId": "18bWFbNMv0aiikgJcgHTReLFtwU8awj5_",
+     "title": "006 - Wanxiang Yueju · Kunming",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 89413,
+     "modifiedTime": "2026-09-26T10:38:34.848Z",
+     "kind": "image",
+     "w": 1024,
+     "h": 683,
+     "aspect": 1.499,
+     "status": "synced",
+     "asset": "assets/images/kunming/italian-3.jpg",
+     "match": {
+      "bits": 12,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/room.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 1600,
+      "h": 1000
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.8844,
+       "w": 0.7853,
+       "x": 0.0892,
+       "y": 0.076
+      }
+     }
+    },
+    {
+     "driveId": "1c8lwFoyMBjiSXFPpakaMihnholpP5NMD",
+     "title": "007 - Wanxiang Yueju · Kunming",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 71007,
+     "modifiedTime": "2026-09-26T10:30:14.617Z",
+     "kind": "image",
+     "w": 960,
+     "h": 576,
+     "aspect": 1.667,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1KliYzp69joqBaPjkVcZCN2qiHwTPfZOp",
+     "title": "008 - Wanxiang Yueju · Kunming",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 22740,
+     "modifiedTime": "2026-09-26T10:30:19.498Z",
+     "kind": "image",
+     "w": 500,
+     "h": 375,
+     "aspect": 1.333,
+     "status": "synced",
+     "asset": "assets/images/kunming/smartfamily-5.jpg",
+     "match": {
+      "bits": 21,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/room.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 1412,
+      "h": 1035
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.6224,
+       "w": 0.8732,
+       "x": 0.1239,
+       "y": 0.2101
+      }
+     }
+    },
+    {
+     "driveId": "1Fc5ZdUcSWH8hwpGYd7N5A-qF0B9FGxNv",
+     "title": "009 - Wanxiang Yueju · Kunming",
+     "path": "",
+     "mimeType": "image/png",
+     "size": 306556,
+     "modifiedTime": "2026-09-26T10:30:24.106Z",
+     "kind": "image",
+     "w": 2048,
+     "h": 848,
+     "aspect": 2.415,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    }
+   ],
+   "status": "partial",
+   "syncedAt": "2026-09-26T13:30:00Z"
+  },
+  "027": {
+   "title": "027 - The Journey - Travel · Kunming → Lijiang",
+   "place": "The Journey · C86 Kunming → Lijiang (assets/transport-data.js)",
+   "slot": {
+    "route": "/journeys.html"
+   },
+   "role": "product-gallery",
+   "order": "title-ascending",
+   "items": [
+    {
+     "driveId": "1ccdWXAzuDGqy_9S44rfjhCxreeEQYB0C",
+     "title": "001 - C86 · Kunming → Lijiang",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 86355,
+     "modifiedTime": "2026-09-26T09:56:17.249Z",
+     "kind": "image",
+     "w": 750,
+     "h": 422,
+     "aspect": 1.777,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1OsjORLYVNqr7W-Q4AFioFaouuY3fPLHU",
+     "title": "002 - C86 · Kunming → Lijiang",
+     "path": "",
+     "mimeType": "image/png",
+     "size": 1815716,
+     "modifiedTime": "2026-09-26T09:56:22.883Z",
+     "kind": "image",
+     "w": 1201,
+     "h": 794,
+     "aspect": 1.513,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1ph5fyiNeC2w65dhj60k37zhVEUSFHZV_",
+     "title": "004 - C86 · Kunming → Lijiang",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 266438,
+     "modifiedTime": "2026-09-26T09:56:33.370Z",
+     "kind": "image",
+     "w": 2048,
+     "h": 1536,
+     "aspect": 1.333,
+     "status": "synced",
+     "asset": "assets/images/transport/c642-business-cabin-2.jpg",
+     "match": {
+      "bits": 0,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      },
+      {
+       "route": "/transport.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 1600,
+      "h": 1200
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.7335,
+       "w": 0.5676,
+       "x": 0.1218,
+       "y": 0.1415
+      }
+     }
+    },
+    {
+     "driveId": "125E-FbU_ut8_3BexRhzk46dwuro3TCXe",
+     "title": "006 - C86 · Kunming → Lijiang",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 113211,
+     "modifiedTime": "2026-09-26T09:56:43.037Z",
+     "kind": "image",
+     "w": 700,
+     "h": 496,
+     "aspect": 1.411,
+     "status": "synced",
+     "asset": "assets/images/transport/c642-train-snow-mountain.jpg",
+     "match": {
+      "bits": 1,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      },
+      {
+       "route": "/transport.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 700,
+      "h": 496
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.7361,
+       "w": 0.7777,
+       "x": 0.0309,
+       "y": 0.1453
+      }
+     },
+     "alsoShownAs": "a small thumbnail in assets/bag.js, assets/pricing.js, your-journey.html (not a composition slot)"
+    },
+    {
+     "driveId": "1TSzU0PXzbdkJY7DeV0Me9N-SiDeEcfgI",
+     "title": "007 - C86 · Kunming → Lijiang",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 117805,
+     "modifiedTime": "2026-09-26T09:56:47.934Z",
+     "kind": "image",
+     "w": 700,
+     "h": 496,
+     "aspect": 1.411,
+     "status": "synced",
+     "asset": "assets/images/transport/c642-gorge-bridge.jpg",
+     "match": {
+      "bits": 55,
+      "confirmedByEye": true
+     },
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      },
+      {
+       "route": "/transport.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 700,
+      "h": 461
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.8143,
+       "w": 0.9784,
+       "x": 0.0216,
+       "y": 0.0695
+      }
+     },
+     "review": {
+      "/journeys.html product-gallery": {
+       "verdict": "kept",
+       "why": "the train on the arch bridge over the river stays whole; the lost sides are mountain slope",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 50%"
+      },
+      "/transport.html room-gallery": {
+       "verdict": "kept",
+       "why": "the train on the arch bridge over the river stays whole; the lost sides are mountain slope",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 50%"
+      }
+     }
+    },
+    {
+     "driveId": "14WD_1EG9URpP5S7yzhpnZ0za8KIzTpbk",
+     "title": "008 - C86 · Kunming → Lijiang",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 112264,
+     "modifiedTime": "2026-09-26T09:56:52.264Z",
+     "kind": "image",
+     "w": 700,
+     "h": 496,
+     "aspect": 1.411,
+     "status": "synced",
+     "asset": "assets/images/transport/c642-train-forest.jpg",
+     "match": {
+      "bits": 2,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      },
+      {
+       "route": "/transport.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 700,
+      "h": 496
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.8246,
+       "w": 0.9012,
+       "x": 0.0538,
+       "y": 0.0797
+      }
+     }
+    }
+   ],
+   "status": "partial",
+   "syncedAt": "2026-09-26T13:30:00Z"
+  },
+  "028": {
+   "title": "028 - The Journey - Accommodation · Lijiang",
+   "place": "The Journey · Luye Baisha Lijiang (src/stay-media.json · luyeBaisha)",
+   "slot": {
+    "route": "/journeys.html"
+   },
+   "role": "product-gallery",
+   "order": "title-ascending",
+   "items": [
+    {
+     "driveId": "1yK76sbPj8f5qbaFbhLzORKuu2R7GLOxL",
+     "title": "913070115.jpg",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 122655,
+     "modifiedTime": "2026-09-26T10:35:00.597Z",
+     "kind": "image",
+     "w": 1024,
+     "h": 683,
+     "aspect": 1.499,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "13yVbJxvf0DoDdRrk4mZhVm5udpAweG4q",
+     "title": "913089370.jpg",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 114589,
+     "modifiedTime": "2026-09-26T10:35:12.601Z",
+     "kind": "image",
+     "w": 1024,
+     "h": 683,
+     "aspect": 1.499,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1CZNNksTYxfk-gkzRKNqKq99F-tqYAp0O",
+     "title": "913089563.jpg",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 118143,
+     "modifiedTime": "2026-09-26T10:35:16.140Z",
+     "kind": "image",
+     "w": 1024,
+     "h": 683,
+     "aspect": 1.499,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1H0h0CEeEuXUk6zBihlw8LvhJ1Yqo67GL",
+     "title": "913089619.jpg",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 115600,
+     "modifiedTime": "2026-09-26T10:35:20.581Z",
+     "kind": "image",
+     "w": 1024,
+     "h": 683,
+     "aspect": 1.499,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1wIR36vDYQBPvft0I4ImRa6F7VRIsx5I1",
+     "title": "913099850.jpg",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 80631,
+     "modifiedTime": "2026-09-26T10:35:28.199Z",
+     "kind": "image",
+     "w": 1024,
+     "h": 682,
+     "aspect": 1.501,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1P4_bfZ4EfPFc0DcLSkMxoMLxFuw76VQl",
+     "title": "913100700.jpg",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 106243,
+     "modifiedTime": "2026-09-26T10:35:37.844Z",
+     "kind": "image",
+     "w": 1024,
+     "h": 683,
+     "aspect": 1.499,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1aJUMnex_ZFLA9nERPyPu5dbb-jZeEDYG",
+     "title": "913102089.jpg",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 137639,
+     "modifiedTime": "2026-09-26T10:35:46.266Z",
+     "kind": "image",
+     "w": 1024,
+     "h": 683,
+     "aspect": 1.499,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1RSXe17w8ukIQfTgjoros_72SonAJhcG2",
+     "title": "913102324.jpg",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 103563,
+     "modifiedTime": "2026-09-26T10:35:42.747Z",
+     "kind": "image",
+     "w": 1024,
+     "h": 683,
+     "aspect": 1.499,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "113TNVctl-upvv9tqj0M-Wt8QxSb5zchH",
+     "title": "913102934.jpg",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 65452,
+     "modifiedTime": "2026-09-26T10:35:49.618Z",
+     "kind": "image",
+     "w": 1024,
+     "h": 576,
+     "aspect": 1.778,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1JINa427kanK1DZ6Kx27q5jXRsmqZQWik",
+     "title": "913105551.jpg",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 64874,
+     "modifiedTime": "2026-09-26T10:36:01.775Z",
+     "kind": "image",
+     "w": 1024,
+     "h": 683,
+     "aspect": 1.499,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    }
+   ],
+   "status": "pending",
+   "syncedAt": "2026-09-26T13:30:00Z"
+  },
+  "029": {
+   "title": "029 - The Journey - Travel · Lijiang → Bangkok",
+   "place": "The Journey · MU5922 + MU741 Lijiang → Bangkok (assets/transport-data.js)",
+   "slot": {
+    "route": "/journeys.html"
+   },
+   "role": "product-gallery",
+   "order": "title-ascending",
+   "items": [
+    {
+     "driveId": "1ILzgfgofEE0NcNZRoXoGXHWblDNm3j3Q",
+     "title": "001 - MU5922 + MU741 · Lijiang → Bangkok - Economy Flexible",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 535926,
+     "modifiedTime": "2026-09-26T10:06:54.865Z",
+     "kind": "image",
+     "w": 1500,
+     "h": 1016,
+     "aspect": 1.476,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1qgwlndQre2doDnoMhPtcK1eodHJYY2J0",
+     "title": "002 - MU5922 + MU741 · Lijiang → Bangkok - Economy Flexible",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 379362,
+     "modifiedTime": "2026-09-26T10:07:03.068Z",
+     "kind": "image",
+     "w": 1500,
+     "h": 1125,
+     "aspect": 1.333,
+     "status": "synced",
+     "asset": "assets/images/transport/mu5924-economy-cabin-1.jpg",
+     "match": {
+      "bits": 50,
+      "confirmedByEye": true
+     },
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      },
+      {
+       "route": "/transport.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 1500,
+      "h": 1057
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.6223,
+       "w": 0.8608,
+       "x": 0.064,
+       "y": 0.0984
+      }
+     },
+     "alsoShownAs": "a small thumbnail in assets/bag.js, assets/pricing.js, your-journey.html (not a composition slot)"
+    },
+    {
+     "driveId": "1J-LplA768a3JaiyroFAa-0vPPGm-ndn1",
+     "title": "003 - MU5922 + MU741 · Lijiang → Bangkok - Economy Flexible",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 358003,
+     "modifiedTime": "2026-09-26T10:07:07.844Z",
+     "kind": "image",
+     "w": 1500,
+     "h": 1125,
+     "aspect": 1.333,
+     "status": "synced",
+     "asset": "assets/images/transport/mu5924-economy-cabin-2.jpg",
+     "match": {
+      "bits": 46,
+      "confirmedByEye": true
+     },
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      },
+      {
+       "route": "/transport.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 1500,
+      "h": 1057
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.6963,
+       "w": 0.7681,
+       "x": 0.1382,
+       "y": 0.0142
+      }
+     }
+    },
+    {
+     "driveId": "1PGxOH00yy9rs_lw0xi-8FAyvCmWnwHve",
+     "title": "004 - MU5922 + MU741 · Lijiang → Bangkok - Economy Flexible",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 356672,
+     "modifiedTime": "2026-09-26T10:07:14.335Z",
+     "kind": "image",
+     "w": 1500,
+     "h": 1125,
+     "aspect": 1.333,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1Bpfu2xgmdp1wVA9n4ubDwh5iaguu6cXn",
+     "title": "006 - MU5922 + MU741 · Lijiang → Bangkok - Economy Flexible",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 264046,
+     "modifiedTime": "2026-09-26T10:07:26.878Z",
+     "kind": "image",
+     "w": 1500,
+     "h": 1125,
+     "aspect": 1.333,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1kAZevuWZcIptbHdZ-iSmAbvYd6r6rZKh",
+     "title": "007 - MU5922 + MU741 · Lijiang → Bangkok - Economy Flexible",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 69666,
+     "modifiedTime": "2026-09-26T10:07:32.668Z",
+     "kind": "image",
+     "w": 1024,
+     "h": 512,
+     "aspect": 2,
+     "status": "synced",
+     "asset": "assets/images/transport/mu5924-economy-cabin-3.jpg",
+     "match": {
+      "bits": 1,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      },
+      {
+       "route": "/transport.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 1024,
+      "h": 512
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.8485,
+       "w": 0.847,
+       "x": 0.0851,
+       "y": 0.0734
+      }
+     },
+     "review": {
+      "/journeys.html product-gallery": {
+       "verdict": "kept",
+       "why": "the cabin aisle stays centred",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 50%"
+      },
+      "/transport.html room-gallery": {
+       "verdict": "kept",
+       "why": "the cabin aisle stays centred",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 50%"
+      }
+     }
+    }
+   ],
+   "status": "partial",
+   "syncedAt": "2026-09-26T13:30:00Z"
+  },
+  "030": {
+   "title": "030 - The Journey - Accommodation · Bangkok - After the Wedding",
+   "place": "The Journey · Siam Kempinski Bangkok, After the Wedding (src/stay-media.json · kempinski)",
+   "slot": {
+    "route": "/journeys.html"
+   },
+   "role": "product-gallery",
+   "order": "title-ascending",
+   "items": [
+    {
+     "driveId": "1Sum0RlFXopuuT9vpKbRJDbUOkLeLujXw",
+     "title": "001 - Siam Kempinski Bangkok",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 441817,
+     "modifiedTime": "2026-09-26T10:15:52.569Z",
+     "kind": "image",
+     "w": 2428,
+     "h": 1362,
+     "aspect": 1.783,
+     "status": "synced",
+     "asset": "assets/images/kempinski/room-bedroom-balcony.jpg",
+     "match": {
+      "bits": 0,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      },
+      {
+       "route": "/room.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 1600,
+      "h": 898
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.5542,
+       "w": 0.9041,
+       "x": 0.0251,
+       "y": 0.1611
+      }
+     },
+     "review": {
+      "/journeys.html product-gallery": {
+       "verdict": "kept",
+       "why": "the room stays whole to the window; the lost sides are wall",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 50%"
+      },
+      "/room.html room-gallery": {
+       "verdict": "kept",
+       "why": "the room stays whole to the window; the lost sides are wall",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 50%"
+      }
+     }
+    },
+    {
+     "driveId": "1KJ9dv5v_HC2XPatfmM9WozmWn8fbppD0",
+     "title": "002 - Siam Kempinski Bangkok",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 463157,
+     "modifiedTime": "2026-09-26T10:15:57.788Z",
+     "kind": "image",
+     "w": 2430,
+     "h": 1363,
+     "aspect": 1.783,
+     "status": "synced",
+     "asset": "assets/images/kempinski/room-balcony-view.jpg",
+     "match": {
+      "bits": 0,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/room.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 1600,
+      "h": 897
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.738,
+       "w": 0.937,
+       "x": 0,
+       "y": 0.0896
+      }
+     },
+     "review": {
+      "/room.html room-gallery": {
+       "verdict": "kept",
+       "why": "the room stays whole to the window; the lost sides are wall",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 50%"
+      }
+     }
+    },
+    {
+     "driveId": "1uaCa0vbp5WTiyExGfzabWYiQwHFnF-Qe",
+     "title": "003 - Siam Kempinski Bangkok",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 418136,
+     "modifiedTime": "2026-09-26T10:16:02.916Z",
+     "kind": "image",
+     "w": 2430,
+     "h": 1364,
+     "aspect": 1.782,
+     "status": "synced",
+     "asset": "assets/images/kempinski/room-sitting-corner.jpg",
+     "match": {
+      "bits": 1,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/room.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 1600,
+      "h": 898
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.8495,
+       "w": 0.7236,
+       "x": 0.1416,
+       "y": 0.0329
+      }
+     }
+    },
+    {
+     "driveId": "1DhrPwFSwruurpL3gqpLAXm6rgsvbMFjh",
+     "title": "004 - Siam Kempinski Bangkok",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 409414,
+     "modifiedTime": "2026-09-26T10:16:07.734Z",
+     "kind": "image",
+     "w": 2427,
+     "h": 1366,
+     "aspect": 1.777,
+     "status": "synced",
+     "asset": "assets/images/kempinski/room-bathroom.jpg",
+     "match": {
+      "bits": 0,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/room.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 1600,
+      "h": 901
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.7006,
+       "w": 0.8897,
+       "x": 0.0351,
+       "y": 0.1271
+      }
+     },
+     "review": {
+      "/room.html room-gallery": {
+       "verdict": "kept",
+       "why": "the room stays whole to the window; the lost sides are wall",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 50%"
+      }
+     }
+    },
+    {
+     "driveId": "1niquPrkpZUFu61CQBI9-8168TnKuB4sp",
+     "title": "005 - Siam Kempinski Bangkok",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 687412,
+     "modifiedTime": "2026-09-26T10:16:12.429Z",
+     "kind": "image",
+     "w": 3181,
+     "h": 2000,
+     "aspect": 1.591,
+     "status": "synced",
+     "asset": "assets/images/journey/kempinski-03.jpg",
+     "match": {
+      "bits": 0,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      },
+      {
+       "route": "/room.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 3181,
+      "h": 2000
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.7502,
+       "w": 0.9706,
+       "x": 0.0158,
+       "y": 0.136
+      }
+     },
+     "review": {
+      "/journeys.html product-gallery": {
+       "verdict": "kept",
+       "why": "the lobby fountain and colonnade stay centred",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 50%"
+      },
+      "/room.html room-gallery": {
+       "verdict": "kept",
+       "why": "the lobby fountain and colonnade stay centred",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 50%"
+      }
+     }
+    },
+    {
+     "driveId": "1PArW_UR_kmNKhFtmYmBVLc-bo_SOHDY5",
+     "title": "006 - Siam Kempinski Bangkok",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 743897,
+     "modifiedTime": "2026-09-26T10:16:17.390Z",
+     "kind": "image",
+     "w": 1440,
+     "h": 1778,
+     "aspect": 0.81,
+     "status": "synced",
+     "asset": "assets/images/kempinski/lobby-staircase.jpg",
+     "match": {
+      "bits": 0,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      },
+      {
+       "route": "/room.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 1296,
+      "h": 1600
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.8236,
+       "w": 0.768,
+       "x": 0.1119,
+       "y": 0.0963
+      }
+     },
+     "review": {
+      "/journeys.html product-gallery": {
+       "verdict": "kept",
+       "why": "the staircase stays whole; the piano and chairs below are the lost strip",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 50%"
+      },
+      "/room.html room-gallery": {
+       "verdict": "kept",
+       "why": "the staircase stays whole; the piano and chairs below are the lost strip",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 50%"
+      }
+     }
+    },
+    {
+     "driveId": "1RUdYwz2FeOgysxGDgjFlYgnZwfYsBQpq",
+     "title": "007 - Siam Kempinski Bangkok",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 328280,
+     "modifiedTime": "2026-09-26T10:16:22.153Z",
+     "kind": "image",
+     "w": 1600,
+     "h": 916,
+     "aspect": 1.747,
+     "status": "synced",
+     "asset": "assets/images/journey/kempinski-01.jpg",
+     "match": {
+      "bits": 0,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      },
+      {
+       "route": "/room.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 1600,
+      "h": 916
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.8643,
+       "w": 0.8878,
+       "x": 0.0673,
+       "y": 0.0444
+      }
+     },
+     "review": {
+      "/journeys.html product-gallery": {
+       "verdict": "kept",
+       "why": "the gardens and pools from above stay centred",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 50%"
+      },
+      "/room.html room-gallery": {
+       "verdict": "kept",
+       "why": "the gardens and pools from above stay centred",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 50%"
+      }
+     }
+    },
+    {
+     "driveId": "1pRHdeGdwjBt0wW7nYSnAAr_RqUMkK3IK",
+     "title": "008 - Siam Kempinski Bangkok",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 552747,
+     "modifiedTime": "2026-09-26T10:16:27.275Z",
+     "kind": "image",
+     "w": 1439,
+     "h": 1780,
+     "aspect": 0.808,
+     "status": "synced",
+     "asset": "assets/images/kempinski/lobby-palms.jpg",
+     "match": {
+      "bits": 0,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 90%",
+       "focalWhy": "the walking figure gives the lobby its scale; 50% 50% cut him off"
+      }
+     ],
+     "display": {
+      "w": 1293,
+      "h": 1600
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.8674,
+       "w": 0.8624,
+       "x": 0.0893,
+       "y": 0.0725
+      }
+     },
+     "review": {
+      "/journeys.html product-gallery": {
+       "verdict": "kept",
+       "why": "refocused to 50% 90%: the walking figure, the lounge chair and the palms stay inside; the upper window shutters are the lost strip",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 90%"
+      }
+     }
+    },
+    {
+     "driveId": "1pa5GPvj0Q652hz0m_uC6KHBLCou5TaqI",
+     "title": "009 - Siam Kempinski Bangkok",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 553619,
+     "modifiedTime": "2026-09-26T10:16:32.110Z",
+     "kind": "image",
+     "w": 1440,
+     "h": 1777,
+     "aspect": 0.81,
+     "status": "synced",
+     "asset": "assets/images/kempinski/facade-garden.jpg",
+     "match": {
+      "bits": 1,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/accommodation.html",
+       "role": "card",
+       "focal": "50% 50%"
+      },
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 1296,
+      "h": 1600
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.9293,
+       "w": 0.6238,
+       "x": 0.1511,
+       "y": 0.0707
+      }
+     },
+     "review": {
+      "/accommodation.html card": {
+       "verdict": "kept",
+       "why": "the facade and its great window stay whole; the terrace table below is the lost strip",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 50%"
+      },
+      "/journeys.html product-gallery": {
+       "verdict": "kept",
+       "why": "the facade and its great window stay whole; the terrace table below is the lost strip",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 50%"
+      }
+     }
+    },
+    {
+     "driveId": "1d8yIhZiOgprAXQtRt5Jal6P1u_uzRHvC",
+     "title": "010 - Siam Kempinski Bangkok",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 456105,
+     "modifiedTime": "2026-09-26T10:16:39.169Z",
+     "kind": "image",
+     "w": 1439,
+     "h": 1782,
+     "aspect": 0.808,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1qlvjTwWp7Mlb7xrFvd_jsZhCGiFbEfC3",
+     "title": "011 - Siam Kempinski Bangkok",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 422038,
+     "modifiedTime": "2026-09-26T10:16:43.562Z",
+     "kind": "image",
+     "w": 1439,
+     "h": 1779,
+     "aspect": 0.809,
+     "status": "pending",
+     "note": "the same photograph as assets/images/journey/kempinski-02.jpg (on disk, not yet placed) — a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1RaiOi49Gu3jsxtTKlHIBcc3y5uDVjusD",
+     "title": "012 - Siam Kempinski Bangkok",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 432246,
+     "modifiedTime": "2026-09-26T10:16:47.339Z",
+     "kind": "image",
+     "w": 1440,
+     "h": 1780,
+     "aspect": 0.809,
+     "status": "synced",
+     "asset": "assets/images/kempinski/lounge.jpg",
+     "match": {
+      "bits": 0,
+      "confirmedByEye": false
+     },
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      },
+      {
+       "route": "/room.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "display": {
+      "w": 1294,
+      "h": 1600
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.5242,
+       "w": 0.9148,
+       "x": 0.0852,
+       "y": 0.303
+      }
+     }
+    },
+    {
+     "driveId": "101W7OaX7AWE3T609_WIrWGNEyHGe_Qo9",
+     "title": "013 - Siam Kempinski Bangkok",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 223453,
+     "modifiedTime": "2026-09-26T10:16:51.987Z",
+     "kind": "image",
+     "w": 1440,
+     "h": 1778,
+     "aspect": 0.81,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    },
+    {
+     "driveId": "1P1oDBlFwQZshaiU-tvdPvUMx-7qEpU1A",
+     "title": "014 - Siam Kempinski Bangkok",
+     "path": "",
+     "mimeType": "image/jpeg",
+     "size": 293192,
+     "modifiedTime": "2026-09-26T10:16:56.822Z",
+     "kind": "image",
+     "w": 1440,
+     "h": 1777,
+     "aspect": 0.81,
+     "status": "pending",
+     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+    }
+   ],
+   "status": "partial",
+   "syncedAt": "2026-09-26T13:30:00Z"
+  }
+ },
+ "ownedDirs": [
+  "assets/images/hero",
+  "assets/images/city",
+  "assets/images/event",
+  "assets/images/usathorn",
+  "assets/images/guesthouse",
+  "assets/images/kempinski",
+  "assets/images/souphattra",
+  "assets/images/transport",
+  "assets/video"
+ ],
+ "playback": {
+  "show": "the Hero slideshow (assets/hero-show.js): a film starts muted; Play / Pause on every film; Sound on / Mute only when the file has a meaningful audio track (data-audio)",
+  "clip": "the editorial clip (assets/clip.js, .a-clip-ctl): muted by itself; Play / Pause; Sound on / Mute only with a meaningful audio track; only the guest's own gesture unmutes",
+  "ambient": "the card and chapter loop (assets/aman.js): always muted, no controls, aria-hidden, the photograph underneath; a source with sound keeps it in the file (never stripped) — OWNER QUESTION OPEN: should a chapter film with meaningful sound become a clip with Sound on / Mute?"
+ }
+}

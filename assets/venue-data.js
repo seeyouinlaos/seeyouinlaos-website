@@ -1,9 +1,10 @@
 /* ============================================================================
    THE VENUE — Souphattra Heritage Vientiane, as the real photographs show it.
    Content and data only; assets/venue.js draws it. Every image is a real Owner
-   photograph from the Drive venue library: `drive` is its Drive file id and
-   docs/venue/asset-manifest.json carries folder, filename, subject and reason
-   (provenance stays out of the guest-loaded file). Nothing here is generated,
+   photograph from the Drive venue library; its provenance (Drive file id,
+   folder, filename, subject, reason) lives in docs/venue/asset-manifest.json
+   and src/media/manifest.json — never in this guest-loaded file (Media QA
+   fails a served page that carries a Drive id). Nothing here is generated,
    redrawn or reconstructed.
 
    POSITIONS ON THE AERIAL (Owner rule, 003): a marker sits on the real area it
@@ -41,17 +42,16 @@
       full: pic('souphattra-aerial', [1000, 1600, 2560], 2560, 1440),
       tall: pic('souphattra-aerial-tall', [600, 800, 1152], 1152, 1440),
       /* the tall crop begins at 26 % of the full frame and is 45 % of it wide (the same height) */
-      tallCrop: { x: 26, w: 45 },
-      drive: '1VIz9oIZDOUlktJD7pase7e4UilhvsO9j'   /* Copy of Heritage_0631.jpg · 003 - Hotel - Pool & Garden — see docs/venue/asset-manifest.json */
+      tallCrop: { x: 26, w: 45 }
     },
     zones: [
       { id: 'lobby', n: '01', label: 'Lobby', title: 'The lobby', when: 'Arrival · 25 or 27 February',
         marks: [{ x: 12.5, y: 0, w: 21, h: 31, anchor: { x: 23, y: 15 }, tall: { x: 28.5, y: 15, align: 'left' } }],   /* the top left building */
         story: 'The heritage salon with its chandelier and its clock, and the lounge with its lamps and its books — where you check in.',
         photos: [
-          { pic: pic('lobby-lounge', [1000, 1600], 1600, 1067, 'The heritage lounge: sofas, lamps and books under tall windows'), drive: '1XVYr1DrvJ4CAafFrL1B-9BvPfsUYTltz' },
-          { pic: pic('lobby-clock', [800, 1200], 1200, 1200, 'The chandelier and the clock above the lobby bar'), drive: '1CMdx_ytO_Uy6oDJkYNdf-iMv0kQv00Ha' },
-          { pic: pic('lobby-gallery-wall', [1000, 1600], 1600, 1066, 'A wall of framed botanical prints under the chandelier'), drive: '1pTzQswtYwQv_nL6NTXtNRQyHlkKvmr-6' }
+          { pic: pic('lobby-lounge', [1000, 1600], 1600, 1067, 'The heritage lounge: sofas, lamps and books under tall windows') },
+          { pic: pic('lobby-clock', [800, 1200], 1200, 1200, 'The chandelier and the clock above the lobby bar') },
+          { pic: pic('lobby-gallery-wall', [1000, 1600], 1600, 1066, 'A wall of framed botanical prints under the chandelier') }
         ] },
       { id: 'rooms', n: '02', label: 'Rooms', title: 'The rooms', when: 'Up to four nights · 25 February – 1 March',
         marks: [   /* three houses: top right, lower right, lower centre */
@@ -62,7 +62,7 @@
         story: 'Twenty-six rooms in the heritage houses, from The Heritage to the Presidential. On the Wedding Stay, the first night is your cost and the second night is complimentary, hosted by Haruthai & Suthep.',
         href: 'journeys.html#j-wedstay', cta: 'Choose your room', swap: true,   /* private planning: signed out the link reads Open your invitation */
         photos: [
-          { single: one(H + 'heritage-balconies.jpg', 2000, 1334, 'The balconies of the heritage houses over the courtyard'), drive: '1TCozr65dNM7EIdesnPLMpJ4lPwevmzpf' },
+          { single: one(H + 'heritage-balconies.jpg', 2000, 1334, 'The balconies of the heritage houses over the courtyard') },
           { single: one(H + 'heritage-room.jpg', 2000, 1334, 'A room at Souphattra Heritage Vientiane') },
           { single: one(H + 'heritage-lao-reading.jpg', 2000, 1334, 'A book and a folded throw on the bed') }
         ] },
@@ -72,17 +72,17 @@
         photos: [
           { single: one(E + '051-coffee-and-cake-patisserie.jpg', 1334, 2000, 'Cakes and pastries on a tiered stand') },
           { single: one(E + '051-coffee-and-cake-salon.jpg', 2000, 1334, 'The salon where coffee and cake are served') },
-          { pic: pic('breakfast-01', [700, 1100], 1100, 1466, 'Breakfast at Souphattra Heritage: eggs, fruit and tea from above'), drive: '1Eaxqak_sWkVphdVeqGD7daO9Jzxzn2zb' },
-          { pic: pic('breakfast-02', [700, 1100], 1100, 1466, 'Eggs Benedict and a breakfast setting'), drive: '1Zrjx_EeCDOtdXRpb8AG46h1cgmKR8s7i' }
+          { pic: pic('breakfast-01', [700, 1100], 1100, 1466, 'Breakfast at Souphattra Heritage: eggs, fruit and tea from above') },
+          { pic: pic('breakfast-02', [700, 1100], 1100, 1466, 'Eggs Benedict and a breakfast setting') }
         ] },
       { id: 'ceremony', n: '04', label: 'Vow Ceremony', title: 'Vow Ceremony', when: 'Sunday, 28 February 2027 · 15:30',
         marks: [{ x: 12.5, y: 33, w: 21, h: 26, anchor: { x: 22, y: 56 }, tall: { x: 28.5, y: 40, align: 'left' } }],   /* the left centre event area */
         story: 'The vows, at the green door, in front of everyone who matters — the Bride and the Groom at the front centre, and every guest in the seat they chose.',
         href: 'voyage.html#vows', cta: 'The Vow Ceremony',
         photos: [
-          { single: one(E + '052-vow-ceremony-green-door-entrance.jpg', 480, 960, 'The green door of Souphattra Heritage, open, with its steps and lanterns'), drive: '1LHfLS0Ys4QV7Jds4PVmoMsvkCSlaAXXG' },
-          { single: one(E + '052-ceremony-green-gateway.jpg', 1334, 2000, 'The arched gateway to the green door'), drive: '19ViN_ey9MDoGI9tiDUG4bL3nUgqZjGbc' },
-          { single: one(E + '052-vow-ceremony-green-door.jpg', 1334, 2000, 'The carved medallion on the green door'), drive: '17a4zLdwEnyLa8MEbItyB_l1-9rptNyiK' }
+          { single: one(E + '052-vow-ceremony-green-door-entrance.jpg', 480, 960, 'The green door of Souphattra Heritage, open, with its steps and lanterns') },
+          { single: one(E + '052-ceremony-green-gateway.jpg', 1334, 2000, 'The arched gateway to the green door') },
+          { single: one(E + '052-vow-ceremony-green-door.jpg', 1334, 2000, 'The carved medallion on the green door') }
         ] },
       /* THE WEDDING DINNER on the map is an INDEX ENTRY (Owner, 21 Sep 2026 · the consolidation): the place, the time, the seating
          of the one long table, and the way to the one detail (#dinner) — no photographs here; the dinner's photographs live in the
@@ -95,15 +95,15 @@
       { id: 'pool', n: '06', label: 'Swimming pool', title: 'The swimming pool', when: 'Every day of the stay', marks: null,
         story: 'The pool at the centre of the courtyard, hedged on every side, loungers along the deck — and the dinner beside it on the wedding night.',
         photos: [
-          { single: one(H + 'heritage-courtyard-pool.jpg', 2000, 1334, 'The pool seen from the upper gallery, through the trees'), drive: '1S3-vJ5ZJPSITqsBfcduIDTEnbVvmP-02' },
-          { single: one(E + '053-wedding-dinner-courtyard-villa.jpg', 2000, 1334, 'The heritage villa across the pool'), drive: '15A7PQWvP29IVDzGT1eqOntbOOXZQV7Wn' },
-          { single: one(E + '053-wedding-dinner-courtyard-loungers.jpg', 2000, 1334, 'Loungers under the trees beside the pool'), drive: '17HNEtxDb9bs7z-iJOpUU7t7i8_Wds-SU' }
+          { single: one(H + 'heritage-courtyard-pool.jpg', 2000, 1334, 'The pool seen from the upper gallery, through the trees') },
+          { single: one(E + '053-wedding-dinner-courtyard-villa.jpg', 2000, 1334, 'The heritage villa across the pool') },
+          { single: one(E + '053-wedding-dinner-courtyard-loungers.jpg', 2000, 1334, 'Loungers under the trees beside the pool') }
         ] },
       { id: 'garden', n: '07', label: 'Courtyard garden', title: 'The courtyard garden', when: 'Between the houses', marks: null,
         story: 'A lawn, old trees and a small fountain between the heritage houses.',
         photos: [
-          { single: one(E + '053-wedding-dinner-garden-terrace.jpg', 1024, 683, 'Garden terrace seating among the greenery'), drive: '1I-08jxAU657329pqJcUpAalRY-UgiEbz' },
-          { single: one(E + '053-wedding-dinner-courtyard-gallery-view.jpg', 2000, 1334, 'The courtyard from the upper gallery, through the trees'), drive: '1S3-vJ5ZJPSITqsBfcduIDTEnbVvmP-02' }
+          { single: one(E + '053-wedding-dinner-garden-terrace.jpg', 1024, 683, 'Garden terrace seating among the greenery') },
+          { single: one(E + '053-wedding-dinner-courtyard-gallery-view.jpg', 2000, 1334, 'The courtyard from the upper gallery, through the trees') }
         ] }
     ]
   };

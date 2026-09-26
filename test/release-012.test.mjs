@@ -76,7 +76,7 @@ test('THE JOURNEY · every accommodation card is a stay gallery from the record 
   assert.match(j, /<div class="p" id="j-guesthouse">[^]*?<p class="pn">Guest House complimentary<\/p><p class="pm">27 February – 1 March 2027 · 2 nights · a one-bedroom guest house in downtown Vientiane, shared by four guests · you see who is already staying when you take your place<\/p><p class="pp" data-private>Complimentary<\/p><p class="pb" data-private data-gh-line>Both nights hosted by Haruthai &amp; Suthep<\/p><p class="pb" data-gh-bf hidden><\/p><div class="ghact" data-private data-gh><\/div><a class="vw" data-cta-swap href="room\.html\?stay=guesthouse&amp;room=guest-house">Details<\/a>/);
   assert.doesNotMatch(j, /Private Residence|j-residence|privateResidence|airbnb-2br|up to 4/, 'no "Private Residence", no "up to 4" on The Journey');
   /* one grammar: frames name their hotel in a multi-hotel window; arrows, keyboard, lazy frames, the empty frame */
-  assert.match(j, /out\.push\(\[im\.src,\(multi\?h\.name\+' · ':''\)\+im\.caption,h\.name,im\.kind\]\)/, 'a multi-hotel gallery names the hotel on every frame');
+  assert.match(j, /out\.push\(\[im\.src,\(multi\?h\.name\+' · ':''\)\+im\.caption,h\.name,im\.kind,im\.focal\]\)/, 'a multi-hotel gallery names the hotel on every frame');
   assert.match(j, /aria-roledescription="carousel"/); assert.match(j, /e\.key==='ArrowRight'/); assert.match(j, /e\.key==='ArrowLeft'/); assert.match(j, /e\.key==='Home'/); assert.match(j, /e\.key==='End'/);
   assert.match(j, /data-bg="'\+x\[0\]\+'"/, 'frames after the first two load when the guest moves');
   /* the empty frame: its aria-label names the hotel (TO-00532); its visible words are KEPT as "Photography to follow" (TO-00533 KEEP) */

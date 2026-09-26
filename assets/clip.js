@@ -2,9 +2,9 @@
    THE EDITORIAL CLIP WITH SOUND (Owner, 21 Sep 2026 · the Lijiang chapter).
    A `[data-clip]` frame holds one <video> (playsinline · loop · a poster · the
    source declared once) and two controls: Play / Pause and Sound on / Mute.
-   · Autoplay when a meaningful part of the frame is in view: with sound where the
-     browser permits it, muted where it does not (the SOUND ON control then says
-     so) — never a frozen frame because audible autoplay was refused.
+   · Autoplay when a meaningful part of the frame is in view — ALWAYS MUTED (Owner, 26 Sep 2026 · the media rules: an
+     audible film never starts by itself); SOUND ON is the guest's own tap. A film is fetched through the Worker's
+     byte-range route (/media/<name>.mp4, the same file) so Safari can play it.
    · Leaving the viewport pauses, returning resumes where it was — never from 0.
    · A manual PAUSE wins for the page session: the viewport never restarts it;
      only PLAY does. After PLAY the viewport logic runs as before.
@@ -24,12 +24,12 @@
     var v = frame.querySelector('video'); if (!v) return;
     var id = frame.getAttribute('data-clip') || (v.getAttribute('data-src') || '').split('/').pop() || 'clip';
     var play = frame.querySelector('button[data-clip-play]'), sound = frame.querySelector('button[data-clip-sound]');
-    var manual = remembered(id), inView = false, attached = false, wantSound = true;
+    var manual = remembered(id), inView = false, attached = false, wantSound = false;   /* sound only by the guest's tap */
     v.setAttribute('playsinline', ''); v.playsInline = true; v.loop = true; v.preload = 'metadata';
 
     function attach() {
       if (attached) return; attached = true;
-      var src = v.getAttribute('data-src'); if (src && !v.querySelector('source') && !v.src) v.src = src;
+      var src = (v.getAttribute('data-src') || '').replace(/^(?:\.\/)?assets\/video\/([a-z0-9-]+\.mp4)$/, 'media/$1'); if (src && !v.querySelector('source') && !v.src) v.src = src;
       v.preload = 'auto'; try { v.load(); } catch (e) {}
     }
     var lastT = -1, lastTick = 0;
@@ -48,7 +48,7 @@
     function start(userGesture) {
       attach();
       try { document.dispatchEvent(new CustomEvent('siyl:clip-start', { detail: { frame: frame } })); } catch (e) {}
-      v.muted = !wantSound;
+      v.muted = userGesture ? !wantSound : true;   /* by itself: muted, always */
       var p = v.play();
       if (p && p.catch) p.catch(function () {
         if (!v.muted) { v.muted = true; var q = v.play(); if (q && q.catch) q.catch(function () { paint(); }); }

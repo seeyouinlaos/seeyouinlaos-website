@@ -247,7 +247,9 @@
     "src": "assets/images/kempinski/lobby-palms.jpg",
     "kind": "lobby",
     "caption": "The lobby palms",
-    "source": "Owner Drive 025 - Hotel - Siam Kempinski Bangkok"
+    "source": "Owner Drive 025 - Hotel - Siam Kempinski Bangkok",
+    "focal": "50% 90%",
+    "focalWhy": "the walking figure gives the lobby its scale; the centred 5:4 / 3:2 crop cut him off (Media Asset Agent, 26 Sep 2026)"
    },
    {
     "src": "assets/images/kempinski/lobby-staircase.jpg",

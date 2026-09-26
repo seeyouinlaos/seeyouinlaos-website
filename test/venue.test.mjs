@@ -54,18 +54,21 @@ test('ASSETS · the base is the Owner\'s aerial as built (bytes pinned, 2560 × 
   assert.equal(sha(V + 'souphattra-aerial-2560.jpg'), '48b825ec0b26ced9fd8ca96448612c7781be8993ff71c46a9a18500d74d21e7b', 'the served base is the file built from Heritage_0631 — any substitute fails here');
   assert.equal(sha(V + 'souphattra-aerial-tall-1152.jpg'), '908371d25d1baf62ccde614cd3c327a1726d5fd52f369fc3d4645f6ab26526b3');
   assert.deepEqual(jpegSize(V + 'souphattra-aerial-2560.jpg'), { w: 2560, h: 1440 }); assert.deepEqual(jpegSize(V + 'souphattra-aerial-tall-1152.jpg'), { w: 1152, h: 1440 });
-  assert.equal(DATA.base.drive, '1VIz9oIZDOUlktJD7pase7e4UilhvsO9j');
-  const base = manifest.entries.find((e) => e.driveId === DATA.base.drive);
-  assert.ok(base && base.selected && /THE BASE/.test(base.visualRole), 'the base is in the manifest as the base');
+  /* provenance by the production file (the Media Asset Agent, 26 Sep 2026): the guest-loaded record carries no Drive id at all */
+  const entryOf = (p) => manifest.entries.find((e) => e.selected && (p.pic ? String(e.productionFilename).startsWith('assets/images/venue/' + p.pic.name + '-{') : e.productionFilename === p.single.src));
+  assert.equal(DATA.base.drive, undefined, 'no Drive id in the guest-loaded file');
+  const base = manifest.entries.find((e) => e.selected && String(e.productionFilename).startsWith('assets/images/venue/' + DATA.base.full.name + '-{'));
+  assert.ok(base && /^[\w-]{20,}$/.test(base.driveId) && /THE BASE/.test(base.visualRole), 'the base is in the manifest as the base, with its Drive id there');
   for (const q of [DATA.base.full, DATA.base.tall]) for (const w of q.widths) for (const ext of ['avif', 'webp', 'jpg']) assert.ok(exists(V + q.name + '-' + w + '.' + ext), q.name + '-' + w + '.' + ext);
   for (const w of DATA.base.full.widths) { const s = jpegSize(V + DATA.base.full.name + '-' + w + '.jpg'); assert.equal(s.w, w); assert.equal(Math.round(s.w / s.h * 100), Math.round(2560 / 1440 * 100)); }
   for (const z of DATA.zones) for (const p of z.photos) {
     if (p.pic) { for (const w of p.pic.widths) for (const ext of ['avif', 'webp', 'jpg']) assert.ok(exists(V + p.pic.name + '-' + w + '.' + ext), z.id + ' ' + p.pic.name + '-' + w + '.' + ext); const s = jpegSize(V + p.pic.name + '-' + p.pic.widths[p.pic.widths.length - 1] + '.jpg'); assert.equal(s.w, p.pic.w, z.id + ' ' + p.pic.name + ' intrinsic width'); assert.equal(s.h, p.pic.h); }
     else { assert.ok(exists(p.single.src), z.id + ' ' + p.single.src); const s = jpegSize(p.single.src); assert.equal(s.w, p.single.w, p.single.src + ' intrinsic width'); assert.equal(s.h, p.single.h, p.single.src + ' intrinsic height'); }
-    assert.ok(p.drive || (p.single && /^assets\/images\/(souphattra|event)\//.test(p.single.src)), z.id + ' photograph has a Drive id or is repository photography already mapped in assets/images/ASSET-MAP.md');
+    assert.equal(p.drive, undefined, z.id + ': no Drive id in the guest-loaded file');
+    assert.ok(entryOf(p) || (p.single && /^assets\/images\/(souphattra|event)\//.test(p.single.src)), z.id + ' photograph maps to the Drive manifest or is repository photography already mapped in assets/images/ASSET-MAP.md');
     const tb = (p.pic ? p.pic.name : p.single.src.split('/').pop().replace(/\.[a-z]+$/, ''));
     assert.ok(exists(V + 'thumbs/' + tb + '-320.jpg'), z.id + ' thumbnail ' + tb); assert.equal(jpegSize(V + 'thumbs/' + tb + '-320.jpg').w, 320);
-    if (p.drive) { const m = manifest.entries.find((e) => e.driveId === p.drive); assert.ok(m && m.selected, z.id + ' ' + p.drive + ' is a selected manifest entry'); }
+    if (p.pic) assert.ok(entryOf(p) && /^[\w-]{20,}$/.test(entryOf(p).driveId), z.id + ' ' + p.pic.name + ' is a selected manifest entry with its Drive id');
     assert.equal(p.source, undefined, 'no provenance strings in the guest-loaded file');
   }
   /* nothing generated: no AI / synthetic wording anywhere in the venue files, and the manifest says so */

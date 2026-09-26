@@ -1,5 +1,5 @@
 /* THE FIRST-PAGE HERO (Owner, 21 Sep 2026; the pace and the dots 22 Sep 2026; the Drive sync and the films 26 Sep 2026): the
-   Hero's slides are the Drive collection "000 - Hero Image", recorded by file id in src/hero-media.json and written into
+   Hero's slides are the Drive collection "000 - Hero Image", recorded by file id in src/media/manifest.json (collection 001) and written into
    index.html by src/build-hero.cjs — the first item is the frame itself (its poster or photograph on screen at once), the
    others layers of the same frame, in the record's canonical order (the Drive titles; since 26 Sep 2026 the main video last). A photograph holds 3 s; a film plays over its poster, always starting
    muted, and the show moves on when it ends; Play / Pause on a film, Sound on / Mute only on a film with an audio track. */
@@ -10,14 +10,16 @@ import { join } from 'node:path';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { ROOT, src } from './sandbox.mjs';
 
-const REC = JSON.parse(src('src/hero-media.json'));
+const REC = JSON.parse(src('src/media/manifest.json')).collections['001'];   /* the Hero is collection 001 of the site-wide media contract */
 
 test('HERO SYNC · the record is the Drive collection by file id, in its canonical order (the main video last); index.html is exactly its Hero; every asset exists; no Drive id or URL reaches the page; nothing obsolete remains', () => {
-  assert.equal(REC.collection, '000 - Hero Image'); assert.match(REC.folderId, /^[\w-]{20,}$/);
+  assert.match(REC.title, /Hero/); assert.equal(REC.role, 'hero-slide'); assert.equal(REC.folderId, undefined, 'the folder id stays in the local src/media-library.private.json');
   const ids = REC.items.map((x) => x.driveId); assert.equal(new Set(ids).size, ids.length, 'one file, one slide');
   /* THE CANONICAL ORDER (Owner, 26 Sep 2026 · Haruthai): the main video plays LAST; the others in Drive title order */
   assert.equal(REC.order, 'explicit'); assert.match(REC.orderNote, /main video .* LAST/);
-  assert.deepEqual(REC.items.map((x) => x.title), ['000_Hero', '001_Hero', '002_Hero', '003_Hero', '004_Hero', '000 - Hero_Main_Video']);
+  /* the Drive titles since the Owner's rename of 26 Sep 2026 (same bytes): a rename never reorders an explicit collection */
+  assert.deepEqual(REC.items.map((x) => x.title), ['000 - Hero_Main_Video 02', '001 - Hero', '002 - Hero', '003 - Hero', '004 - Hero', '000 - Hero_Main_Video 01']);
+  assert.deepEqual(REC.items.map((x) => x.formerTitle), ['000_Hero', '001_Hero', '002_Hero', '003_Hero', '004_Hero', '000 - Hero_Main_Video']);
   assert.equal(REC.items[5].driveId, '1TcVUGDzOHp7qdsO-5ekMXEYV38SCL1B6', 'the main video, by its Drive id, is the sixth and last slide');
   assert.deepEqual(REC.items.map((x) => x.kind), ['video', 'image', 'image', 'image', 'image', 'video']);
   assert.equal(spawnSync('node', [join(ROOT, 'src/build-hero.cjs'), '--check'], { encoding: 'utf8' }).status, 0, 'index.html is the record\'s Hero');

@@ -1,7 +1,7 @@
 /* ============================================================================
    THE HERO SLIDESHOW (Owner, 21 Sep 2026 · the first page; the controls 22 Sep 2026; films 26 Sep 2026).
    The existing hero frame stays exactly as it is. Its slides come from the Drive
-   collection "000 - Hero Image" (src/hero-media.json → src/build-hero.cjs): the
+   collection 001 of the Drive media library (src/media/manifest.json → src/build-hero.cjs): the
    first item is the frame itself (its photograph or its film's poster is the .am
    background, on screen at once, with no script); the others are [data-src]
    layers, in order, one calm 1000 ms crossfade between them, for ever. No

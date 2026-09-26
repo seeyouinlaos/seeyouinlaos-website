@@ -65,9 +65,9 @@ EOF
 
 ## Hero media sync (Owner, 26 Sep 2026)
 
-The first page's Hero is the Drive folder **`000 - Hero Image`**, and nothing else. The request "Synchronize Hero media." means the following:
+The first page's Hero is collection **`001`** of the Media Asset Agent's library (the Drive folder `001 - Main - Hero`, formerly `000 - Hero Image`), and nothing else. The site-wide workflow — every collection 001–030, the commands `Synchronize media.` · `Synchronize 001.` — is **docs/MEDIA-ASSET-AGENT.md**; the Hero-specific steps below are its collection 001. The request "Synchronize Hero media." (= `Synchronize 001.`) means the following:
 
-1. **List the folder.** Compare it with `src/hero-media.json` by **Drive file id**, using `modifiedTime` and `size` to detect changes.
+1. **List the folder.** Compare it with `src/media/manifest.json` (collection 001 · the Media Asset Agent, docs/MEDIA-ASSET-AGENT.md) by **Drive file id**, using `modifiedTime` and `size` to detect changes.
 2. **Download each new or changed file.** The Drive connector fails above ~7 MB, so a larger file comes from the Owner as an upload with the identical byte size.
 3. **Place the media.**
    - Kind comes from the actual file: `image/*` is an image, `video/*` is a video.

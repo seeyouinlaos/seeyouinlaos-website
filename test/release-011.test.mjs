@@ -93,7 +93,7 @@ test('CARD CLIP · poster first: the photograph stays the card; the clip is inse
   assert.equal(frame.children[0], v, 'under everything else in the frame (the veil paints above it)');
   assert.equal(v.attrs.muted, ''); assert.equal(v.attrs.playsinline, ''); assert.equal(v.attrs.loop, ''); assert.equal(v.attrs.autoplay, ''); assert.equal(v.attrs.preload, 'metadata'); assert.equal(v.attrs['aria-hidden'], 'true');
   assert.equal(v.attrs.poster, 'assets/images/city/001-bangkok-chao-phraya-skyline.jpg', 'the poster is the photograph the card already frames');
-  assert.equal(v.children[0].tag, 'source'); assert.equal(v.children[0].src, 'assets/video/bangkok-card.mp4'); assert.equal(v.children[0].type, 'video/mp4');
+  assert.equal(v.children[0].tag, 'source'); assert.equal(v.children[0].src, 'media/bangkok-card.mp4', 'through the Worker\'s byte-range route (Safari needs 206) — the Media Asset Agent, 26 Sep 2026'); assert.equal(v.children[0].type, 'video/mp4');
   assert.equal(frame.getAttribute('data-video-state'), 'loading'); assert.equal(frame.classes.has('am-playing'), false, 'nothing fades in before the clip plays');
   assert.equal(v.played, 0, 'no play before the card is on screen');
   observers[0].cb([{ isIntersecting: true }]); assert.equal(v.played, 1);
@@ -119,7 +119,10 @@ test('CARD CLIP · the photograph is the answer for reduced motion, Save-Data, a
   assert.match(css, /\.am\.am-playing \.am-clip \{ opacity: 1; \}/); assert.match(css, /@media \(prefers-reduced-motion: reduce\) \{ \.am \.am-clip \{ display: none; \} \}/);
   /* every clip a page declares is local, under assets/video, MP4 — and the release check proves the file facts (gate V1) */
   for (const f of readdirSync('.').filter((x) => x.endsWith('.html'))) for (const m of src(f).matchAll(/data-video="([^"]*)"/g)) { assert.match(m[1], /^assets\/video\/[a-z0-9-]+\.mp4$/, f + ' declares a local clip'); assert.ok(existsSync(m[1]), f + ': ' + m[1] + ' exists'); }
-  assert.match(src('src/release-check.cjs'), /gate\('V1', 'Card clips local, small, silent, H\.264, poster-first'/);
+  assert.match(src('src/release-check.cjs'), /gate\('V1', 'Card clips local, H\.264, faststart, always muted, poster-first'/);
+  /* the clip is muted by the module before it plays — the file keeps the Owner's source sound (never downgraded, 26 Sep 2026) */
+  d = frameDom(); d.sb.SIYL_AMAN.video.wire(d.root); v = d.frame.querySelector('video.am-clip');
+  assert.equal(v.muted, true, 'a card clip never speaks'); assert.equal(v.defaultMuted, true); assert.ok('muted' in v.attrs, 'muted as an attribute too (iOS autoplay)');
 });
 
 test('RETIRED GITHUB PAGES · no build config, no redirect stub, no CNAME, no .nojekyll, no Pages workflow; no guest surface names github.io or a mirror', () => {

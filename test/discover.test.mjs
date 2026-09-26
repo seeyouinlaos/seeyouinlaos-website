@@ -68,7 +68,7 @@ test('BARON VIENTIANE · the club of the wedding night: once, a CLUB in Bars & n
   /* the highlight rail: BARON closes it; the detail page: the films with sound through the shared clip module */
   const h = src('experiences.html'); assert.match(h, /data-highlight-id="vte-baron"/); assert.ok(h.indexOf('data-highlight-id="vte-baron"') > h.indexOf('data-highlight-id="bkk-cannubi"'), 'the closing card');
   const e = src('experience.html'); assert.match(e, /<script src="assets\/clip\.js/); assert.match(e, /data-clip-sound aria-label="Sound on"/); assert.match(e, /if \(window\.SIYL_CLIP\) SIYL_CLIP\.init\(\);/); assert.match(e, /\.x-film\.is-tall \{ aspect-ratio: 9 \/ 16; \}/);
-  assert.match(src('assets/clip.js'), /v\.muted = !wantSound;/, 'the film starts with sound where the browser allows, muted where it does not — the guest\'s tap on SOUND ON is the rule'); assert.doesNotMatch(src('assets/clip.js'), /muted = true;\s*$/m);
+  assert.match(src('assets/clip.js'), /v\.muted = userGesture \? !wantSound : true;/, 'SUPERSEDED (Owner, 26 Sep 2026 · the media rules): a film never starts audibly by itself — muted by the show, sound only by the guest — the guest\'s tap on SOUND ON is the rule'); assert.doesNotMatch(src('assets/clip.js'), /muted = true;\s*$/m);
 });
 
 test('PETITS PLATS BANGKOK · one restaurant, Bangkok, 08.03.2027 (the last dinner), five photographs of its own folder, never another house\'s; WAT ONG TEU · one experience, the temple of the Alms Giving Ceremony (Sunday 28.02.2027), its four photographs from the temple\'s own folder (195, Edit 6); the six overview venues the Discover had missed stand without a photograph', () => {

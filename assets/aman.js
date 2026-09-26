@@ -276,7 +276,7 @@
     v.setAttribute('aria-hidden', 'true'); v.setAttribute('tabindex', '-1'); v.disablePictureInPicture = true;
     var poster = (frame.style.backgroundImage || '').replace(/^url\(["']?|["']?\)$/g, '');
     if (poster) v.setAttribute('poster', poster);
-    var s = document.createElement('source'); s.src = src; s.type = 'video/mp4';
+    var s = document.createElement('source'); s.src = src.replace(/^(?:\.\/)?assets\/video\/([a-z0-9-]+\.mp4)$/, 'media/$1'); s.type = 'video/mp4';   /* the byte-range route: Safari plays it */
     v.appendChild(s);
     var fail = function () { unmountVideo(frame); frame.setAttribute('data-video-state', 'still'); };
     s.addEventListener('error', fail);

@@ -23,6 +23,9 @@
       s.setAttribute('aria-label', (img.getAttribute('alt') || 'Reference') + ' · ' + (i + 1) + ' of ' + imgs.length);
       var frame = document.createElement('div'); frame.className = 'am';
       img.removeAttribute('width'); img.removeAttribute('height'); img.removeAttribute('style');
+      /* THE SLOT'S FOCAL POINT (the Media Asset Agent, 26 Sep 2026): a photograph whose subject the 3:4 card's top-weighted
+         crop would cut carries its own object-position, decided by looking (src/media/manifest.json · slots[].focal) */
+      if (/^\d{1,3}% \d{1,3}%$/.test(img.getAttribute('data-focal') || '')) img.style.objectPosition = img.getAttribute('data-focal');
       frame.appendChild(img); s.appendChild(frame); trk.appendChild(s);
     });
     var row = document.createElement('div'); row.className = 'arow';

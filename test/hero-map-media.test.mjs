@@ -83,12 +83,16 @@ test('EDIT 7 · BANGKOK AND VIENTIANE: each destination gallery is its Drive fol
   assert.doesNotMatch(css, /object-fit: fill/);
 });
 
-test('THE VIENTIANE FILM · the Owner\'s "night of Vientiane" replaces the Buddha-statue clip everywhere, silent, local, small, with its own poster; no page still names the cloister', () => {
+test('THE VIENTIANE FILM · the Owner\'s "night of Vientiane" replaces the Buddha-statue clip everywhere, local, the source untouched, with its own poster; no page still names the cloister', () => {
   const v = join(ROOT, 'assets/video/vientiane-card.mp4');
-  assert.ok(existsSync(v)); assert.ok(statSync(v).size < 4.5 * 1024 * 1024, 'within the card-clip budget');
+  assert.ok(existsSync(v));
+  /* VIDEO QUALITY IS NEVER DOWNGRADED (Owner, 26 Sep 2026 · the Media Asset Agent): the Drive source bit for bit — its picture and
+     its sound; the ambient card module mutes it (assets/aman.js), so the card still never speaks */
   const probe = execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'stream=codec_type,codec_name,width,height,pix_fmt', '-of', 'csv=p=0', v], { encoding: 'utf8' }).trim().split('\n');
-  assert.equal(probe.length, 1, 'one stream only — the film is silent (a card clip never speaks)');
-  assert.match(probe[0], /^h264,video,720,1280,yuv420p$/, 'the source geometry, untouched');
+  assert.equal(probe.length, 2, 'the picture and the source sound, both kept');
+  assert.ok(probe.some((l) => /^h264,video,720,1280,yuv420p$/.test(l)), 'the source geometry, untouched');
+  assert.ok(probe.some((l) => /^aac,audio/.test(l)), 'the source sound, kept in the file');
+  assert.match(src('assets/aman.js'), /v\.muted = true; v\.defaultMuted = true;/, 'the card clip never speaks');
   for (const page of ['index.html', 'destination.html']) {
     const s = src(page);
     /* PRQ-07a-10: the index card is a link and no longer carries role="img" (announced as a link with its name); destination.html keeps it */

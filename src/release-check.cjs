@@ -627,10 +627,27 @@ gate('P7', 'Dress Code imagery real (23 — resort-01 retired by the owner), no 
     [a.status !== 0 && (a.stderr || a.stdout).trim(), b.status !== 0 && (b.stderr || b.stdout).trim(), !same && 'assets/experience-galleries.js was stale'].filter(Boolean).join(' · ') || ((a.stdout || '').trim() + ' · ' + (b.stdout || '').trim()));
 }
 
+/* GATE M2 — MEDIA QA (Owner, 26 Sep 2026 · the Media Asset Agent, docs/MEDIA-ASSET-AGENT.md): every collection of the site-wide
+ * media contract src/media/manifest.json — no "999 - Archive" anywhere, every mapped asset on disk and in use, every film at least
+ * its recorded source (duration, frames, frame rate, resolution, sound, bitrate), the playback its role promises (muted first;
+ * Play / Pause; Sound on / Mute only with sound), every crop finding resolved by a focal point or a recorded look, the recorded
+ * focal points what the site shows, no Drive id on a served file. Layout QA (L2) stays the authority on page geometry. */
+{
+  const { spawnSync } = require('child_process');
+  const r = spawnSync('node', [path.join(__dirname, 'media', 'media-qa.mjs')], { encoding: 'utf8' });
+  const last = (r.stdout || '').trim().split('\n').filter((l) => /^MEDIA QA/.test(l)).pop() || (r.stderr || '').trim().split('\n')[0] || 'no result';
+  const fails = (r.stdout || '').split('\n').filter((l) => /^FAIL /.test(l)).slice(0, 6).map((l) => l.slice(5));
+  gate('M2', 'Media QA: archive excluded, sources honoured, films never downgraded, crops looked at, no Drive id served', r.status === 0,
+    r.status === 0 ? last : fails.join(' · ') + ' · ' + last);
+}
+
 /* GATE V1 — card clips (Owner, 18 Sep 2026 · Bangkok destination card): every data-video a page declares is a
- * same-origin H.264 MP4 under assets/video/ — present, small (≤ 4.5 MB), no audio, yuv420p, moov first — never a
- * hotlink; the photograph the card frames stays its poster (the module falls back to it). ffprobe verifies the
- * codec facts when it is installed; the file facts are checked always. */
+ * same-origin H.264 MP4 under assets/video/ — present, yuv420p, moov first — never a hotlink; the photograph the card
+ * frames stays its poster (the module falls back to it), and the ambient module always plays it muted. ffprobe verifies
+ * the codec facts when it is installed; the file facts are checked always.
+ * VIDEO QUALITY IS NEVER DOWNGRADED (Owner, 26 Sep 2026 · the Media Asset Agent): the former size cap (≤ 4.5 MB) and the
+ * stripped audio track are gone — a card clip is the Owner's source, remuxed bit for bit (src/media/agent.mjs remux), its
+ * sound kept in the file and silenced by the module; gate M2 (Media QA) compares every film with its recorded source. */
 {
   const decl = [];
   for (const f of fs.readdirSync(ROOT).filter((x) => /\.html$/.test(x))) {
@@ -646,8 +663,6 @@ gate('P7', 'Dress Code imagery real (23 — resort-01 retired by the owner), no 
     if (!/^assets\/video\/[a-z0-9-]+\.mp4$/.test(d.src)) { problems.push(d.page + ': ' + d.src + ' is not a same-origin assets/video/*.mp4'); continue; }
     const file = path.join(ROOT, d.src);
     if (!fs.existsSync(file)) { problems.push(d.page + ': ' + d.src + ' missing'); continue; }
-    const size = fs.statSync(file).size;
-    if (size > 4.5 * 1024 * 1024) problems.push(d.src + ' is ' + (size / 1048576).toFixed(1) + ' MB (max 4.5)');
     const head = fs.readFileSync(file).subarray(0, 4096).toString('latin1');
     if (head.indexOf('moov') < 0) problems.push(d.src + ': moov atom not at the start (faststart)');
     if (ffprobe) {
@@ -655,10 +670,12 @@ gate('P7', 'Dress Code imagery real (23 — resort-01 retired by the owner), no 
       const r = spawnSync(ffprobe, ['-v', 'error', '-show_entries', 'stream=codec_type,codec_name,pix_fmt', '-of', 'json', file], { encoding: 'utf8' });
       let streams = []; try { streams = (JSON.parse(r.stdout || '{}').streams || []).map((x) => (x.codec_type || '') + ',' + (x.codec_name || '') + ',' + (x.pix_fmt || '')); } catch (e) { streams = []; }
       if (!streams.some((x) => /^video,h264,yuv420p$/.test(x))) problems.push(d.src + ': not H.264 yuv420p (' + streams.join(' · ') + ')');
-      if (streams.some((x) => /^audio/.test(x))) problems.push(d.src + ': carries an audio stream');
     }
   }
-  gate('V1', 'Card clips local, small, silent, H.264, poster-first', problems.length === 0,
+  /* the ambient module never lets a card clip speak: muted as a property and as an attribute, before play() */
+  const am = read('assets/aman.js');
+  if (!/v\.muted = true; v\.defaultMuted = true;/.test(am) || !/v\.setAttribute\('muted', ''\)/.test(am)) problems.push('assets/aman.js: the card clip is not muted before it plays');
+  gate('V1', 'Card clips local, H.264, faststart, always muted, poster-first', problems.length === 0,
     problems.join(' · ') || (decl.length ? decl.map((d) => d.src).join(', ') + ' verified' + (ffprobe ? ' (ffprobe)' : ' (file facts only)') : 'no card clip declared — every card is its photograph'));
 }
 
