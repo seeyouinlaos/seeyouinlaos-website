@@ -24,6 +24,15 @@ export async function signIn(browser, origin, code, ctxOpts) {
   await p.fill('.siyl-inv input', code);
   await p.evaluate(() => document.querySelector('.siyl-inv .igo').click());
   await p.waitForFunction(() => { try { return !!JSON.parse(localStorage.getItem('siyl.auth') || 'null').bearer; } catch (e) { return false; } }, null, { timeout: 20000 });
+  /* THE NOTE FROM THE GUEST RELATIONS MANAGER (26 Sep 2026): acknowledged once, as a guest does — the box ticked, the button pressed,
+     the draft saved — so the audited states are the journey behind it */
+  const note = await p.waitForSelector('[data-guest-note] [data-note-ack]', { state: 'attached', timeout: 12000 }).catch(() => null);
+  if (note) {
+    await p.evaluate(() => { const b = document.querySelector('[data-note-ack]'); b.checked = true; b.dispatchEvent(new Event('change')); document.querySelector('[data-note-go]').click(); });
+    await p.waitForFunction(() => !document.querySelector('[data-guest-note]'), null, { timeout: 8000 });
+    await p.waitForFunction(() => { const D = window.SIYL_DRAFT; const s = D && D.state && D.state(); return !s || s.phase !== 'saving'; }, null, { timeout: 15000 }).catch(() => {});
+    await p.waitForTimeout(1200);
+  }
   const storage = await ctx.storageState();
   await ctx.close();
   return storage;

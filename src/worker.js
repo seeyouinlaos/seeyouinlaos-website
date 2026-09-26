@@ -634,7 +634,9 @@ function draftContent(keys) {
   const out = {};
   for (const k of ['siyl.guest', 'siyl.bag', 'siyl.temple', 'siyl.docs', 'siyl.skip', 'siyl.skip.by']) {
     let v = null; try { v = JSON.parse(keys && keys[k] || 'null'); } catch (e) { v = keys && keys[k] || null; }
-    if (v && typeof v === 'object' && !Array.isArray(v)) { delete v.history; delete v.contactSyncedAt; if (v.guests) for (const g of Object.values(v.guests)) if (g && typeof g === 'object') delete g.history; }
+    /* the guest's acknowledgement of the note from the Guest Relations Manager (assets/guest-note.js, 26 Sep 2026) is kept in the draft for
+       Guest Relations but is not part of the trip: acknowledging never marks a sent trip as changed */
+    if (v && typeof v === 'object' && !Array.isArray(v)) { delete v.history; delete v.contactSyncedAt; if (k === 'siyl.guest') delete v.note; if (v.guests) for (const g of Object.values(v.guests)) if (g && typeof g === 'object') delete g.history; }
     out[k] = v;
   }
   return out;
@@ -987,9 +989,14 @@ async function handleGrJourneys(request, env) {
       status: sub.submissionStatus, submissionId: sub.submissionId, version: sub.version, submittedAt: sub.submittedAt, lastSentAt: sub.lastSentAt, hasUnsentChanges: sub.hasUnsentChanges,
       draftUpdatedAt: d ? d.updatedAt : null, contact: contact ? publicContact(contact) : (g.contact || null),
       bag: content['siyl.bag'] || null, wedding: content['siyl.temple'] || null, aboutYou: g.guests ? Object.values(g.guests).map((x) => ({ submitted: x.submitted, profile: x.profile })) : null, documents: content['siyl.docs'] || null,
-      rooms, seats, mail: rec ? (rec.mailSummary || null) : null, text: rec ? rec.text : null });
+      rooms, seats, mail: rec ? (rec.mailSummary || null) : null, text: rec ? rec.text : null, noteAck: noteAckOf(d) });
   }
   return json({ ok: true, at: new Date().toISOString(), journeys: out });
+}
+/* whether this guest acknowledged the note from the Guest Relations Manager — read from the guest's own draft record (never the trip content) */
+function noteAckOf(d) {
+  let g = null; try { g = JSON.parse((d && d.keys && d.keys['siyl.guest']) || 'null'); } catch (e) { g = null; }
+  const n = g && g.note; return n && n.acknowledged === true ? { acknowledged: true, at: n.at || null, textVersion: n.textVersion || null } : null;
 }
 /* the flat mail record the Owner asked for, beside the provider answers */
 function mailSummary(mail) {

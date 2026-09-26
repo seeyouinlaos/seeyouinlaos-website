@@ -172,7 +172,7 @@
   de.setAttribute('data-lang', lang);
   de.setAttribute('data-cur', cur);
   if (lang === 'th' && document.readyState === 'loading') {
-    document.write('<link rel="stylesheet" href="assets/i18n/th.css?v=39573186"><script src="assets/i18n/th.js?v=173f99fb"><\/script>');
+    document.write('<link rel="stylesheet" href="assets/i18n/th.css?v=39573186"><script src="assets/i18n/th.js?v=ab9c3a29"><\/script>');
   }
   var revealed = false;
   function reveal() { if (revealed) return; revealed = true; de.style.visibility = ''; }
