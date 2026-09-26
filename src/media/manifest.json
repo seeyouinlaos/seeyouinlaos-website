@@ -17,7 +17,9 @@
  "roles": {
   "hero-slide": {
    "routes": [
-    "/index.html"
+    "/index.html",
+    "/destination.html",
+    "/voyage.html"
    ],
    "component": ".a-hero .am [data-hero-show] — the first page's slideshow",
    "geometry": {
@@ -122,10 +124,10 @@
    "behaviour": "the editorial clip (assets/clip.js): muted by itself, Play / Pause always, Sound on / Mute only with an audio track; the guest's own tap alone may unmute",
    "playback": "clip",
    "geometry": {
-    "p": 0.8,
-    "tp": 1.601,
-    "tl": 1.777,
-    "d": 1.777
+    "p": 1.778,
+    "tp": 1.778,
+    "tl": 1.778,
+    "d": 1.778
    },
    "px": {
     "p": [
@@ -150,7 +152,9 @@
    "routes": [
     "/destination.html",
     "/voyage.html",
-    "/dress.html"
+    "/dress.html",
+    "/marsilea.html",
+    "/wedding-preparation.html"
    ],
    "component": ".refgal .aslide .am — a chapter's reference gallery",
    "geometry": {
@@ -1323,7 +1327,7 @@
      "modifiedTime": "2026-09-26T14:23:12.637Z",
      "kind": "video",
      "status": "pending",
-     "note": "larger than the Drive connector delivers (~6 MB): the Owner uploads it with the next sync request"
+     "note": "larger than the Drive connector delivers (~6 MB): the Owner uploads it with the next sync request — the live lijiang-impression.mp4 (1024 × 436, 5.6 MB) cannot be verified against this 8.4 MB source until then"
     },
     {
      "driveId": "1pfNmPGRUTdl758BZyf6-bH9MQmtKFoQZ",
@@ -1333,7 +1337,27 @@
      "size": 2669320,
      "modifiedTime": "2026-09-26T14:23:12.637Z",
      "kind": "video",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/video/lijiang-main-02.mp4",
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "destination-clip"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "note": "a copy of 015 in the Experiences library",
+     "duration": 11.4,
+     "width": 1280,
+     "height": 720,
+     "fps": 30,
+     "codec": "h264",
+     "bitrate": 1818845,
+     "audio": true,
+     "audioBitrate": 46458,
+     "videoFrames": 342,
+     "audioFrames": 248,
+     "poster": "assets/images/city/004-lijiang-main-02-poster.jpg"
     },
     {
      "driveId": "1sv6KlYO8KhK0AXN8BzzNxNEHiQZ4vGXd",
@@ -1343,7 +1367,27 @@
      "size": 1487123,
      "modifiedTime": "2026-09-26T14:23:12.637Z",
      "kind": "video",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/video/lijiang-main-03.mp4",
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "destination-clip"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "note": "a copy of 015 in the Experiences library",
+     "duration": 10.53,
+     "width": 1280,
+     "height": 720,
+     "fps": 30,
+     "codec": "h264",
+     "bitrate": 1081064,
+     "audio": true,
+     "audioBitrate": 40508,
+     "videoFrames": 316,
+     "audioFrames": 229,
+     "poster": "assets/images/city/004-lijiang-main-03-poster.jpg"
     },
     {
      "driveId": "1B5XtYhOWXKcZh-sLgWSn-gjjMCeQ9kMM",
@@ -1353,7 +1397,27 @@
      "size": 1097270,
      "modifiedTime": "2026-09-26T14:23:12.637Z",
      "kind": "video",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/video/lijiang-main-04.mp4",
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "destination-clip"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "note": "a copy of 015 in the Experiences library",
+     "duration": 10.24,
+     "width": 1280,
+     "height": 720,
+     "fps": 29.971,
+     "codec": "h264",
+     "bitrate": 785628,
+     "audio": true,
+     "audioBitrate": 63279,
+     "videoFrames": 307,
+     "audioFrames": 223,
+     "poster": "assets/images/city/004-lijiang-main-04-poster.jpg"
     },
     {
      "driveId": "1lUNSyMfN9MgRAKS4o5nGs-hHkWLSdrOV",
@@ -1363,7 +1427,27 @@
      "size": 3141749,
      "modifiedTime": "2026-09-26T14:23:12.637Z",
      "kind": "video",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/video/lijiang-main-05.mp4",
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "destination-clip"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "note": "a copy of 015 in the Experiences library",
+     "duration": 10,
+     "width": 1280,
+     "height": 720,
+     "fps": 30,
+     "codec": "h264",
+     "bitrate": 2461943,
+     "audio": true,
+     "audioBitrate": 43461,
+     "videoFrames": 300,
+     "audioFrames": 218,
+     "poster": "assets/images/city/004-lijiang-main-05-poster.jpg"
     },
     {
      "driveId": "1_OqqEetL0PbR1GVe5ZcImuEYx8lSZZd0",
@@ -1373,7 +1457,40 @@
      "size": 393947,
      "modifiedTime": "2026-09-26T14:23:12.637Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/city/004-lijiang-001.jpg",
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "destination-gallery-item",
+       "focal": "30% 50%",
+       "focalWhy": "the mountain edge beside the red stage — the centred 3:4 crop showed only the stage"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "note": "a copy of 015 in the Experiences library",
+     "vision": {
+      "faces": [],
+      "salient": {
+       "x": 0.0635,
+       "y": 0.0026,
+       "w": 0.9048,
+       "h": 0.9427
+      }
+     },
+     "display": {
+      "w": 1440,
+      "h": 810
+     },
+     "review": {
+      "/destination.html destination-gallery-item": {
+       "verdict": "kept",
+       "why": "the snow peak, or the mountain beside the stage, stays in the 3:4 card",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "30% 50%"
+      }
+     }
     },
     {
      "driveId": "1zokwGp7u1xT9p-xBYCRQQAFwOUK-jLEE",
@@ -1383,12 +1500,43 @@
      "size": 297787,
      "modifiedTime": "2026-09-26T14:23:12.637Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/city/004-lijiang-002.jpg",
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "destination-gallery-item"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "note": "a copy of 015 in the Experiences library",
+     "vision": {
+      "faces": [],
+      "salient": {
+       "x": 0.0906,
+       "y": 0.11,
+       "w": 0.7908,
+       "h": 0.7713
+      }
+     },
+     "display": {
+      "w": 1440,
+      "h": 810
+     },
+     "review": {
+      "/destination.html destination-gallery-item": {
+       "verdict": "kept",
+       "why": "the snow peak, or the mountain beside the stage, stays in the 3:4 card",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 12%"
+      }
+     }
     }
    ],
-   "question": "Lijiang: Impression Lijiang and the snow mountain — the open 015 question (which film and photographs lead the Lijiang chapter) decides their place.",
-   "status": "unresolved",
-   "syncedAt": "2026-09-26T20:00:00Z"
+   "status": "partial",
+   "syncedAt": "2026-09-26T20:00:00Z",
+   "sharedWith": "015"
   },
   "200": {
    "title": "200 - Wedding",
@@ -1405,7 +1553,63 @@
      "size": 1726014,
      "modifiedTime": "2024-08-08T02:40:04Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/wedding/hero-01.jpg",
+     "focal": {
+      "p": "37% 50%",
+      "tp": "40% 50%",
+      "tl": "50% 0%",
+      "d": "0% 50%"
+     },
+     "display": {
+      "w": 2048,
+      "h": 1365
+     },
+     "vision": {
+      "faces": [
+       {
+        "c": 0.7074519395828247,
+        "h": 0.1228555604815483,
+        "w": 0.07341297976672649,
+        "x": 0.3660124992951751,
+        "y": 0.2506141498684883
+       },
+       {
+        "c": 0.6348828077316284,
+        "h": 0.10900447703897953,
+        "w": 0.06513619720935822,
+        "x": 0.4793586865067482,
+        "y": 0.24820180796086788
+       }
+      ],
+      "salient": {
+       "h": 0.402587890625,
+       "w": 0.41552734375,
+       "x": 0.25,
+       "y": 0.109130859375
+      }
+     },
+     "slots": [
+      {
+       "route": "/voyage.html",
+       "role": "hero-slide"
+      }
+     ],
+     "alt": "Haruthai and Suthep kneeling at their offerings on the morning of the alms-giving",
+     "review": {
+      "/voyage.html hero-slide": {
+       "verdict": "kept",
+       "why": "the kneeling couple and the monks stay whole at every class",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": {
+        "p": "37% 50%",
+        "tp": "40% 50%",
+        "tl": "50% 0%",
+        "d": "0% 50%"
+       }
+      }
+     }
     },
     {
      "driveId": "1ABVkTQAgtbAwcnpc_5o5O5wzm3yvDGHS",
@@ -1415,7 +1619,55 @@
      "size": 1547846,
      "modifiedTime": "2024-08-08T02:40:08Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/wedding/hero-02.jpg",
+     "focal": {
+      "p": "93% 50%",
+      "tp": "80% 50%",
+      "tl": "100% 50%",
+      "d": "100% 50%"
+     },
+     "display": {
+      "w": 2048,
+      "h": 1363
+     },
+     "vision": {
+      "faces": [
+       {
+        "c": 0.6159501075744629,
+        "h": 0.07262836098670959,
+        "w": 0.043335868418216704,
+        "x": 0.6205989725887775,
+        "y": 0.3404228866100311
+       }
+      ],
+      "salient": {
+       "h": 0.6890869140625,
+       "w": 0.77276611328125,
+       "x": 0.05535888671875,
+       "y": 0.1463623046875
+      }
+     },
+     "slots": [
+      {
+       "route": "/voyage.html",
+       "role": "hero-slide"
+      }
+     ],
+     "review": {
+      "/voyage.html hero-slide": {
+       "verdict": "kept",
+       "why": "the kneeling couple and the monks stay whole at every class",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": {
+        "p": "93% 50%",
+        "tp": "80% 50%",
+        "tl": "100% 50%",
+        "d": "100% 50%"
+       }
+      }
+     }
     },
     {
      "driveId": "1d3I6z5HBlJJ7Ebq6e_etC7KcgcQ8q-AP",
@@ -1425,7 +1677,47 @@
      "size": 1760661,
      "modifiedTime": "2024-08-08T02:40:20Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/wedding/hero-03.jpg",
+     "focal": {
+      "p": "53% 50%",
+      "tp": "52% 50%",
+      "tl": "100% 50%",
+      "d": "70% 50%"
+     },
+     "display": {
+      "w": 2048,
+      "h": 1363
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.46380615234375,
+       "w": 0.7318115234375,
+       "x": 0.1446533203125,
+       "y": 0.12066650390625
+      }
+     },
+     "slots": [
+      {
+       "route": "/voyage.html",
+       "role": "hero-slide"
+      }
+     ],
+     "review": {
+      "/voyage.html hero-slide": {
+       "verdict": "kept",
+       "why": "the kneeling couple and the monks stay whole at every class",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": {
+        "p": "53% 50%",
+        "tp": "52% 50%",
+        "tl": "100% 50%",
+        "d": "70% 50%"
+       }
+      }
+     }
     },
     {
      "driveId": "1VoV6afbR2Zq8kFQKXhrbLZpJJPH78krR",
@@ -1435,7 +1727,16 @@
      "size": 2032569,
      "modifiedTime": "2024-08-08T02:39:40Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/temple/temple-ceremony-morning.jpg",
+     "slots": [
+      {
+       "route": "/voyage.html",
+       "role": "editorial-pair"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "note": "the Temple Ceremony photograph already shown (the same photograph, recropped)"
     },
     {
      "driveId": "1BWxv_8XcbvFstkkHSBKikUhlbiLoMo_L",
@@ -1445,7 +1746,41 @@
      "size": 1992837,
      "modifiedTime": "2026-09-04T21:25:58Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/temple/takbat-g01-couple-kneeling.jpg",
+     "slots": [
+      {
+       "route": "/voyage.html",
+       "role": "destination-gallery-item"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "vision": {
+      "faces": [
+       {
+        "x": 0.672,
+        "y": 0.2911,
+        "w": 0.1313,
+        "h": 0.0976
+       },
+       {
+        "x": 0.2258,
+        "y": 0.2788,
+        "w": 0.1365,
+        "h": 0.1015
+       }
+      ],
+      "salient": {
+       "x": 0.1084,
+       "y": 0.1372,
+       "w": 0.8618,
+       "h": 0.6265
+      }
+     },
+     "display": {
+      "w": 1365,
+      "h": 2048
+     }
     },
     {
      "driveId": "1dTl7bL3vlCR1-pNg-hl119xFZSkCFDdR",
@@ -1455,7 +1790,8 @@
      "size": 350572,
      "modifiedTime": "2026-09-04T21:25:58Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "excluded",
+     "note": "the Temple Ceremony photograph (002) — shown there, not repeated"
     },
     {
      "driveId": "19hHoRBmy4SXvS_wUsQVx4yjpp58OVa2t",
@@ -1465,7 +1801,39 @@
      "size": 2037404,
      "modifiedTime": "2026-09-04T21:25:58Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/experiences/vte-ongteu-01.jpg",
+     "slots": [
+      {
+       "route": "/voyage.html",
+       "role": "destination-gallery-item",
+       "focal": "59% 50%",
+       "focalWhy": "chosen by looking on a crop sheet of the 3:4 card (26 Sep 2026)"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "vision": {
+      "faces": [],
+      "salient": {
+       "x": 0.1216,
+       "y": 0.0037,
+       "w": 0.8393,
+       "h": 0.882
+      }
+     },
+     "display": {
+      "w": 1920,
+      "h": 1440
+     },
+     "review": {
+      "/voyage.html destination-gallery-item": {
+       "verdict": "kept",
+       "why": "the temple façade stays centred",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "59% 50%"
+      }
+     }
     },
     {
      "driveId": "1M5bzYvA6jr_zL8lzLcyV0H7wHfOdmd4M",
@@ -1475,15 +1843,47 @@
      "size": 2259114,
      "modifiedTime": "2026-09-04T21:25:58Z",
      "kind": "image",
-     "status": "unresolved",
-     "syncedAt": "2026-09-26T20:00:00Z",
+     "status": "synced",
+     "syncedAt": "2026-09-26T21:00:00Z",
      "how": "fingerprint",
      "match": {
       "bits": 0
      },
      "w": 1363,
      "h": 2048,
-     "localCopy": "assets/images/temple/takbat-monks-receiving.jpg"
+     "asset": "assets/images/temple/takbat-monks-receiving.jpg",
+     "slots": [
+      {
+       "route": "/voyage.html",
+       "role": "destination-gallery-item"
+      }
+     ],
+     "vision": {
+      "faces": [
+       {
+        "x": 0.5175,
+        "y": 0.3765,
+        "w": 0.1096,
+        "h": 0.0814
+       },
+       {
+        "x": 0.7506,
+        "y": 0.3585,
+        "w": 0.0922,
+        "h": 0.0685
+       }
+      ],
+      "salient": {
+       "x": 0.2086,
+       "y": 0.2003,
+       "w": 0.7294,
+       "h": 0.5751
+      }
+     },
+     "display": {
+      "w": 1363,
+      "h": 2048
+     }
     },
     {
      "driveId": "1vrXZyIlpQYAGXuGNZV4NhqZW3wYPNKbw",
@@ -1493,7 +1893,46 @@
      "size": 1732753,
      "modifiedTime": "2024-08-08T02:33:04Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/temple/takbat-g02-suthep-offerings.jpg",
+     "slots": [
+      {
+       "route": "/voyage.html",
+       "role": "destination-gallery-item",
+       "focal": "19% 50%",
+       "focalWhy": "chosen by looking on a crop sheet of the 3:4 card (26 Sep 2026)"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "vision": {
+      "faces": [
+       {
+        "x": 0.3006,
+        "y": 0.2441,
+        "w": 0.0901,
+        "h": 0.151
+       }
+      ],
+      "salient": {
+       "x": 0.1787,
+       "y": 0.1071,
+       "w": 0.6748,
+       "h": 0.8441
+      }
+     },
+     "display": {
+      "w": 2048,
+      "h": 1363
+     },
+     "review": {
+      "/voyage.html destination-gallery-item": {
+       "verdict": "kept",
+       "why": "Suthep and the offerings stay whole",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "19% 50%"
+      }
+     }
     },
     {
      "driveId": "1fFuG3d2Kg64hTXbs7zdZfvIL9_kj2DA5",
@@ -1503,7 +1942,8 @@
      "size": 1474162,
      "modifiedTime": "2024-08-08T02:33:10Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "excluded",
+     "note": "a near-duplicate of a frame already shown in the same section (26 Sep 2026)"
     },
     {
      "driveId": "1k7x7fR13B2kY2vftOsZAxKe_qKJUES_G",
@@ -1513,7 +1953,41 @@
      "size": 1322106,
      "modifiedTime": "2024-08-08T02:33:28Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/temple/takbat-g03-preparing.jpg",
+     "slots": [
+      {
+       "route": "/voyage.html",
+       "role": "destination-gallery-item"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "vision": {
+      "faces": [
+       {
+        "x": 0.4514,
+        "y": 0.4757,
+        "w": 0.093,
+        "h": 0.069
+       },
+       {
+        "x": 0.1825,
+        "y": 0.5042,
+        "w": 0.0813,
+        "h": 0.0603
+       }
+      ],
+      "salient": {
+       "x": 0.1039,
+       "y": 0.303,
+       "w": 0.6299,
+       "h": 0.5735
+      }
+     },
+     "display": {
+      "w": 1363,
+      "h": 2048
+     }
     },
     {
      "driveId": "18WZVQ3NOrQh8F60Pc_0WfG7TUOSejK0Z",
@@ -1523,7 +1997,35 @@
      "size": 1578891,
      "modifiedTime": "2024-08-08T02:33:36Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/temple/takbat-g04-haruthai-kneeling.jpg",
+     "slots": [
+      {
+       "route": "/voyage.html",
+       "role": "destination-gallery-item"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "vision": {
+      "faces": [
+       {
+        "x": 0.3132,
+        "y": 0.3658,
+        "w": 0.0791,
+        "h": 0.0588
+       }
+      ],
+      "salient": {
+       "x": 0.0801,
+       "y": 0.2006,
+       "w": 0.7212,
+       "h": 0.6725
+      }
+     },
+     "display": {
+      "w": 1365,
+      "h": 2048
+     }
     },
     {
      "driveId": "1pX0XbmAPkfF7Z013G-idj_4oSiqxx7T2",
@@ -1533,7 +2035,43 @@
      "size": 1534655,
      "modifiedTime": "2024-08-08T02:38:36Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/temple/takbat-g05-monk-receiving.jpg",
+     "slots": [
+      {
+       "route": "/voyage.html",
+       "role": "destination-gallery-item",
+       "focal": "46% 50%",
+       "focalWhy": "chosen by looking on a crop sheet of the 3:4 card (26 Sep 2026)"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "vision": {
+      "faces": [
+       {
+        "x": 0.5555,
+        "y": 0.4759,
+        "w": 0.0454,
+        "h": 0.0761
+       },
+       {
+        "x": 0.3604,
+        "y": 0.4647,
+        "w": 0.0366,
+        "h": 0.0614
+       }
+      ],
+      "salient": {
+       "x": 0.2454,
+       "y": 0.1136,
+       "w": 0.4368,
+       "h": 0.7301
+      }
+     },
+     "display": {
+      "w": 2048,
+      "h": 1363
+     }
     },
     {
      "driveId": "1jVftDT2yLzgObRv7U5qpRlHax1akqjtO",
@@ -1543,7 +2081,8 @@
      "size": 1453165,
      "modifiedTime": "2024-08-08T02:38:46Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "excluded",
+     "note": "a near-duplicate of a frame already shown in the same section (26 Sep 2026)"
     },
     {
      "driveId": "1tw_HPzMLZdyfYblaGUicsUU8lhJm6yi8",
@@ -1553,7 +2092,43 @@
      "size": 1534655,
      "modifiedTime": "2026-09-04T21:25:58Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/temple/takbat-g05-monk-receiving.jpg",
+     "slots": [
+      {
+       "route": "/voyage.html",
+       "role": "destination-gallery-item",
+       "focal": "46% 50%",
+       "focalWhy": "chosen by looking on a crop sheet of the 3:4 card (26 Sep 2026)"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "vision": {
+      "faces": [
+       {
+        "x": 0.5555,
+        "y": 0.4759,
+        "w": 0.0454,
+        "h": 0.0761
+       },
+       {
+        "x": 0.3604,
+        "y": 0.4647,
+        "w": 0.0366,
+        "h": 0.0614
+       }
+      ],
+      "salient": {
+       "x": 0.2454,
+       "y": 0.1136,
+       "w": 0.4368,
+       "h": 0.7301
+      }
+     },
+     "display": {
+      "w": 2048,
+      "h": 1363
+     }
     },
     {
      "driveId": "1E12xR-78Lai5dzLlQEqsNJlFGNFHJZnt",
@@ -1563,15 +2138,45 @@
      "size": 2642618,
      "modifiedTime": "2026-09-05T05:58:35Z",
      "kind": "image",
-     "status": "unresolved",
-     "syncedAt": "2026-09-26T20:00:00Z",
+     "status": "synced",
+     "syncedAt": "2026-09-26T21:00:00Z",
      "how": "fingerprint",
      "match": {
       "bits": 0
      },
      "w": 939,
      "h": 1675,
-     "localCopy": "assets/images/alms/ritual-offering-basket.jpg"
+     "asset": "assets/images/alms/ritual-offering-basket.jpg",
+     "slots": [
+      {
+       "route": "/voyage.html",
+       "role": "destination-gallery-item",
+       "focal": "50% 45%",
+       "focalWhy": "chosen by looking on a crop sheet of the 3:4 card (26 Sep 2026)"
+      }
+     ],
+     "vision": {
+      "faces": [],
+      "salient": {
+       "x": 0.0437,
+       "y": 0.0358,
+       "w": 0.9554,
+       "h": 0.9046
+      }
+     },
+     "display": {
+      "w": 672,
+      "h": 1200
+     },
+     "review": {
+      "/voyage.html destination-gallery-item": {
+       "verdict": "kept",
+       "why": "the baskets fill the card",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 45%"
+      }
+     }
     },
     {
      "driveId": "1xEH7V68kyqPhfO8kiqW8AoGNLf-qPH1N",
@@ -1583,14 +2188,43 @@
      "kind": "image",
      "status": "synced",
      "asset": "assets/images/event/051-coffee-and-cake-salon.jpg",
-     "slots": [],
-     "syncedAt": "2026-09-26T20:00:00Z",
+     "slots": [
+      {
+       "route": "/voyage.html",
+       "role": "destination-gallery-item",
+       "focal": "46% 50%",
+       "focalWhy": "chosen by looking on a crop sheet of the 3:4 card (26 Sep 2026)"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
      "how": "fingerprint",
      "match": {
       "bits": 0
      },
      "w": 768,
-     "h": 512
+     "h": 512,
+     "vision": {
+      "faces": [],
+      "salient": {
+       "x": 0.0572,
+       "y": 0.0676,
+       "w": 0.8437,
+       "h": 0.7547
+      }
+     },
+     "display": {
+      "w": 2000,
+      "h": 1334
+     },
+     "review": {
+      "/voyage.html destination-gallery-item": {
+       "verdict": "kept",
+       "why": "the salon and the bar stay whole",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "46% 50%"
+      }
+     }
     },
     {
      "driveId": "1LIaM4dyIQp_hN3N18LN0-Z7OnWPkEJHE",
@@ -1600,7 +2234,37 @@
      "size": 110167,
      "modifiedTime": "2026-09-05T13:26:27.409Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/event/051-coffee-and-cake-bar-stools.jpg",
+     "slots": [
+      {
+       "route": "/voyage.html",
+       "role": "destination-gallery-item"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "vision": {
+      "faces": [],
+      "salient": {
+       "x": 0.0409,
+       "y": 0.0577,
+       "w": 0.9278,
+       "h": 0.8178
+      }
+     },
+     "display": {
+      "w": 768,
+      "h": 1152
+     },
+     "review": {
+      "/voyage.html destination-gallery-item": {
+       "verdict": "kept",
+       "why": "the salon and the bar stay whole",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 12%"
+      }
+     }
     },
     {
      "driveId": "10ZoEQMW9MBkej2rsOK-ZrsE3pZDqeltS",
@@ -1610,7 +2274,8 @@
      "size": 78144,
      "modifiedTime": "2026-09-05T13:26:26.953Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "excluded",
+     "note": "a near-duplicate of a frame already shown in the same section (26 Sep 2026)"
     },
     {
      "driveId": "1uqp84Ve09h0Ns_ueQ6ab-bw6DzA-wShF",
@@ -1620,7 +2285,39 @@
      "size": 584750,
      "modifiedTime": "2026-09-05T13:26:29.893Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/event/051-coffee-and-cake-bar.jpg",
+     "slots": [
+      {
+       "route": "/voyage.html",
+       "role": "destination-gallery-item",
+       "focal": "50% 50%",
+       "focalWhy": "chosen by looking on a crop sheet of the 3:4 card (26 Sep 2026)"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "vision": {
+      "faces": [],
+      "salient": {
+       "x": 0.1236,
+       "y": 0.1445,
+       "w": 0.7524,
+       "h": 0.6211
+      }
+     },
+     "display": {
+      "w": 2400,
+      "h": 1600
+     },
+     "review": {
+      "/voyage.html destination-gallery-item": {
+       "verdict": "kept",
+       "why": "the salon and the bar stay whole",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 50%"
+      }
+     }
     },
     {
      "driveId": "17T6NKkHyLg846vZwm_p1lmzkcG-EEmsw",
@@ -1651,14 +2348,32 @@
      "kind": "image",
      "status": "synced",
      "asset": "assets/images/event/052-ceremony-green-gateway.jpg",
-     "slots": [],
-     "syncedAt": "2026-09-26T20:00:00Z",
+     "slots": [
+      {
+       "route": "/voyage.html",
+       "role": "destination-gallery-item"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
      "how": "fingerprint",
      "match": {
       "bits": 0
      },
      "w": 1707,
-     "h": 2560
+     "h": 2560,
+     "vision": {
+      "faces": [],
+      "salient": {
+       "x": 0.021,
+       "y": 0.2959,
+       "w": 0.9434,
+       "h": 0.522
+      }
+     },
+     "display": {
+      "w": 1334,
+      "h": 2000
+     }
     },
     {
      "driveId": "1DGlOwzJAEaUSEwf44I0g4Y0QwYn7GKhi",
@@ -1670,14 +2385,32 @@
      "kind": "image",
      "status": "synced",
      "asset": "assets/images/event/052-vow-ceremony-green-door.jpg",
-     "slots": [],
-     "syncedAt": "2026-09-26T20:00:00Z",
+     "slots": [
+      {
+       "route": "/voyage.html",
+       "role": "destination-gallery-item"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
      "how": "fingerprint",
      "match": {
       "bits": 1
      },
      "w": 1707,
-     "h": 2560
+     "h": 2560,
+     "vision": {
+      "faces": [],
+      "salient": {
+       "x": 0.1089,
+       "y": 0.074,
+       "w": 0.8105,
+       "h": 0.7678
+      }
+     },
+     "display": {
+      "w": 1334,
+      "h": 2000
+     }
     },
     {
      "driveId": "1ugI4lvp2zrvguf9jo-a4mPI1yS5E2Nfo",
@@ -1687,7 +2420,39 @@
      "size": 223678,
      "modifiedTime": "2026-09-05T13:27:55.616Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/event/052-vow-ceremony-heritage-entrance.jpg",
+     "slots": [
+      {
+       "route": "/voyage.html",
+       "role": "destination-gallery-item",
+       "focal": "52% 50%",
+       "focalWhy": "chosen by looking on a crop sheet of the 3:4 card (26 Sep 2026)"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "vision": {
+      "faces": [],
+      "salient": {
+       "x": 0.1393,
+       "y": 0.1592,
+       "w": 0.746,
+       "h": 0.5488
+      }
+     },
+     "display": {
+      "w": 2400,
+      "h": 1600
+     },
+     "review": {
+      "/voyage.html destination-gallery-item": {
+       "verdict": "kept",
+       "why": "the entrance and its name stay whole",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "52% 50%"
+      }
+     }
     },
     {
      "driveId": "1LHfLS0Ys4QV7Jds4PVmoMsvkCSlaAXXG",
@@ -1697,7 +2462,14 @@
      "size": 119679,
      "modifiedTime": "2026-09-13T14:51:59.562Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/event/052-vow-ceremony-green-door-entrance.jpg",
+     "slots": [
+      {
+       "route": "/voyage.html",
+       "role": "editorial-pair"
+      }
+     ]
     },
     {
      "driveId": "1nzmrkntg_sBwLTBTiOBI8bEbi8xyVv0_",
@@ -1707,7 +2479,8 @@
      "size": 146310,
      "modifiedTime": "2026-09-06T17:22:51.265Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "excluded",
+     "note": "duplicates the Wedding Dinner gallery consolidated on 21 Sep 2026 (053 = 056)"
     },
     {
      "driveId": "17HNEtxDb9bs7z-iJOpUU7t7i8_Wds-SU",
@@ -1717,7 +2490,8 @@
      "size": 827030,
      "modifiedTime": "2026-09-06T17:22:51.265Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "excluded",
+     "note": "duplicates the Wedding Dinner gallery consolidated on 21 Sep 2026 (053 = 056)"
     },
     {
      "driveId": "1S3-vJ5ZJPSITqsBfcduIDTEnbVvmP-02",
@@ -1727,7 +2501,8 @@
      "size": 844846,
      "modifiedTime": "2026-09-06T17:22:51.265Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "excluded",
+     "note": "duplicates the Wedding Dinner gallery consolidated on 21 Sep 2026 (053 = 056)"
     },
     {
      "driveId": "1MXaDcTiTX7lPy0WMn1ps9RfHy-2XgDbM",
@@ -1737,15 +2512,34 @@
      "size": 289387,
      "modifiedTime": "2026-09-26T14:35:16.167Z",
      "kind": "image",
-     "status": "unresolved",
-     "syncedAt": "2026-09-26T20:00:00Z",
+     "status": "synced",
+     "syncedAt": "2026-09-26T21:00:00Z",
      "how": "fingerprint",
      "match": {
       "bits": 0
      },
      "w": 1440,
      "h": 1920,
-     "localCopy": "assets/images/event/053-wedding-dinner-long-table-settings.jpg"
+     "asset": "assets/images/event/053-wedding-dinner-long-table-settings.jpg",
+     "slots": [
+      {
+       "route": "/voyage.html",
+       "role": "destination-gallery-item"
+      }
+     ],
+     "vision": {
+      "faces": [],
+      "salient": {
+       "x": 0.1188,
+       "y": 0.0378,
+       "w": 0.7991,
+       "h": 0.7908
+      }
+     },
+     "display": {
+      "w": 1440,
+      "h": 1920
+     }
     },
     {
      "driveId": "1E5P0KkDvcP4U6AVik7kYPn2gy9qaDM9M",
@@ -1755,7 +2549,28 @@
      "size": 805287,
      "modifiedTime": "2026-09-25T13:58:05.426Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/event/200-wedding-dinner-pool-from-above.jpg",
+     "slots": [
+      {
+       "route": "/voyage.html",
+       "role": "destination-gallery-item"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "vision": {
+      "faces": [],
+      "salient": {
+       "x": 0.1554,
+       "y": 0.0664,
+       "w": 0.7518,
+       "h": 0.8066
+      }
+     },
+     "display": {
+      "w": 1200,
+      "h": 2133
+     }
     },
     {
      "driveId": "1bguQl21yc1Y3YJjEG0qE1K9LypOZvLXi",
@@ -1872,9 +2687,10 @@
      "h": 1666
     }
    ],
-   "question": "The Wedding folder holds the alms-giving (Tak Bat) series, the bar and the pool of Souphattra: which of these join the Wedding page (the alms-giving pair, the dinner gallery) — or a new Wedding gallery?",
-   "status": "unresolved",
-   "syncedAt": "2026-09-26T20:00:00Z"
+   "status": "synced",
+   "syncedAt": "2026-09-26T20:00:00Z",
+   "heroPage": "voyage.html",
+   "heroPath": "001 - Wedding - Hero"
   },
   "300": {
    "title": "300 - Your invitation",
@@ -1901,7 +2717,39 @@
      "size": 2563255,
      "modifiedTime": "2026-09-05T10:10:24Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/dress/blacktie-01.jpg",
+     "slots": [
+      {
+       "route": "/dress.html",
+       "role": "destination-gallery-item"
+      },
+      {
+       "route": "/wedding-preparation.html",
+       "role": "destination-gallery-item"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "vision": {
+      "faces": [
+       {
+        "x": 0.5103,
+        "y": 0.4913,
+        "w": 0.0817,
+        "h": 0.0731
+       }
+      ],
+      "salient": {
+       "x": 0.0299,
+       "y": 0.3103,
+       "w": 0.9056,
+       "h": 0.6873
+      }
+     },
+     "display": {
+      "w": 882,
+      "h": 1100
+     }
     },
     {
      "driveId": "1fZMQqnpLH2X0iC9UiDLcKF0zkmR3JILA",
@@ -1911,7 +2759,45 @@
      "size": 761530,
      "modifiedTime": "2026-08-27T02:55:12Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/dress/blacktie-02.jpg",
+     "slots": [
+      {
+       "route": "/dress.html",
+       "role": "destination-gallery-item"
+      },
+      {
+       "route": "/wedding-preparation.html",
+       "role": "destination-gallery-item"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "vision": {
+      "faces": [
+       {
+        "x": 0.202,
+        "y": 0.4915,
+        "w": 0.0777,
+        "h": 0.0577
+       },
+       {
+        "x": 0.0641,
+        "y": 0.4727,
+        "w": 0.0858,
+        "h": 0.0638
+       }
+      ],
+      "salient": {
+       "x": 0.047,
+       "y": 0.0659,
+       "w": 0.911,
+       "h": 0.813
+      }
+     },
+     "display": {
+      "w": 733,
+      "h": 1100
+     }
     },
     {
      "driveId": "1cdX1V3A98ayxMmHHdSPdVh9Av9nR4_de",
@@ -1921,7 +2807,39 @@
      "size": 93548,
      "modifiedTime": "2026-09-26T13:52:17.132Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/dress/blacktie-03.jpg",
+     "slots": [
+      {
+       "route": "/dress.html",
+       "role": "destination-gallery-item"
+      },
+      {
+       "route": "/wedding-preparation.html",
+       "role": "destination-gallery-item"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "vision": {
+      "faces": [
+       {
+        "x": 0.4579,
+        "y": 0.1428,
+        "w": 0.1071,
+        "h": 0.1064
+       }
+      ],
+      "salient": {
+       "x": 0.3062,
+       "y": 0.0211,
+       "w": 0.4326,
+       "h": 0.8695
+      }
+     },
+     "display": {
+      "w": 980,
+      "h": 1100
+     }
     },
     {
      "driveId": "17hwdh4qzCQxNIUaAzrkuZ6lEnqGlJuaC",
@@ -1931,7 +2849,39 @@
      "size": 170767,
      "modifiedTime": "2026-09-26T13:52:23.274Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/dress/blacktie-04.jpg",
+     "slots": [
+      {
+       "route": "/dress.html",
+       "role": "destination-gallery-item"
+      },
+      {
+       "route": "/wedding-preparation.html",
+       "role": "destination-gallery-item"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "vision": {
+      "faces": [
+       {
+        "x": 0.2046,
+        "y": 0.0665,
+        "w": 0.1586,
+        "h": 0.1327
+       }
+      ],
+      "salient": {
+       "x": 0.0632,
+       "y": 0,
+       "w": 0.6365,
+       "h": 0.7759
+      }
+     },
+     "display": {
+      "w": 825,
+      "h": 1100
+     }
     },
     {
      "driveId": "1sAQkDYWvY1QFozbKxq-ih-BLAb80GSj9",
@@ -1941,7 +2891,39 @@
      "size": 294781,
      "modifiedTime": "2026-09-26T13:52:32.999Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/dress/blacktie-05.jpg",
+     "slots": [
+      {
+       "route": "/dress.html",
+       "role": "destination-gallery-item"
+      },
+      {
+       "route": "/wedding-preparation.html",
+       "role": "destination-gallery-item"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "vision": {
+      "faces": [
+       {
+        "x": 0.4762,
+        "y": 0.0579,
+        "w": 0.1414,
+        "h": 0.1262
+       }
+      ],
+      "salient": {
+       "x": 0.3179,
+       "y": 0,
+       "w": 0.4238,
+       "h": 0.9243
+      }
+     },
+     "display": {
+      "w": 880,
+      "h": 1100
+     }
     },
     {
      "driveId": "1lxRgoO9gFG-WKD0B5N0JMmTF1jY31Bpd",
@@ -1951,7 +2933,39 @@
      "size": 576393,
      "modifiedTime": "2026-09-26T13:52:46.959Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/dress/blacktie-06.jpg",
+     "slots": [
+      {
+       "route": "/dress.html",
+       "role": "destination-gallery-item"
+      },
+      {
+       "route": "/wedding-preparation.html",
+       "role": "destination-gallery-item"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "vision": {
+      "faces": [
+       {
+        "x": 0.5003,
+        "y": 0.1272,
+        "w": 0.1282,
+        "h": 0.1144
+       }
+      ],
+      "salient": {
+       "x": 0.3735,
+       "y": 0.002,
+       "w": 0.377,
+       "h": 0.8154
+      }
+     },
+     "display": {
+      "w": 880,
+      "h": 1100
+     }
     },
     {
      "driveId": "1K8zKYN4cXKm4wPeV-qRsmzDRZPg858aM",
@@ -1961,7 +2975,39 @@
      "size": 208621,
      "modifiedTime": "2026-09-26T13:52:29.708Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/dress/blacktie-07.jpg",
+     "slots": [
+      {
+       "route": "/dress.html",
+       "role": "destination-gallery-item"
+      },
+      {
+       "route": "/wedding-preparation.html",
+       "role": "destination-gallery-item"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "vision": {
+      "faces": [
+       {
+        "x": 0.7243,
+        "y": 0.0967,
+        "w": 0.1673,
+        "h": 0.14
+       }
+      ],
+      "salient": {
+       "x": 0.2595,
+       "y": 0.0012,
+       "w": 0.7185,
+       "h": 0.8816
+      }
+     },
+     "display": {
+      "w": 825,
+      "h": 1100
+     }
     },
     {
      "driveId": "1kH6ER_3v1vW0zv9_m7DXZ-UVcUD5ZeJr",
@@ -1971,7 +3017,45 @@
      "size": 411048,
      "modifiedTime": "2026-09-26T13:52:42.213Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/dress/blacktie-08.jpg",
+     "slots": [
+      {
+       "route": "/dress.html",
+       "role": "destination-gallery-item"
+      },
+      {
+       "route": "/wedding-preparation.html",
+       "role": "destination-gallery-item"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "vision": {
+      "faces": [
+       {
+        "x": 0.27,
+        "y": 0.2469,
+        "w": 0.2069,
+        "h": 0.1847
+       },
+       {
+        "x": 0.11,
+        "y": 0.0488,
+        "w": 0.1345,
+        "h": 0.1201
+       }
+      ],
+      "salient": {
+       "x": 0,
+       "y": 0,
+       "w": 1,
+       "h": 0.8638
+      }
+     },
+     "display": {
+      "w": 880,
+      "h": 1100
+     }
     },
     {
      "driveId": "1715Pm4pUqY6IK-TwQaofytnX5oC8DLm2",
@@ -1981,7 +3065,39 @@
      "size": 307413,
      "modifiedTime": "2026-09-26T13:52:36.883Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/dress/blacktie-09.jpg",
+     "slots": [
+      {
+       "route": "/dress.html",
+       "role": "destination-gallery-item"
+      },
+      {
+       "route": "/wedding-preparation.html",
+       "role": "destination-gallery-item"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "vision": {
+      "faces": [
+       {
+        "x": 0.3094,
+        "y": 0.0085,
+        "w": 0.1512,
+        "h": 0.1349
+       }
+      ],
+      "salient": {
+       "x": 0.161,
+       "y": 0.0003,
+       "w": 0.8053,
+       "h": 0.8488
+      }
+     },
+     "display": {
+      "w": 880,
+      "h": 1100
+     }
     },
     {
      "driveId": "1LhwEPfMb11eTnyrhJsv1LnDDxaa6sANK",
@@ -1991,7 +3107,39 @@
      "size": 103053,
      "modifiedTime": "2026-09-26T13:52:20Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/dress/blacktie-10.jpg",
+     "slots": [
+      {
+       "route": "/dress.html",
+       "role": "destination-gallery-item"
+      },
+      {
+       "route": "/wedding-preparation.html",
+       "role": "destination-gallery-item"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "vision": {
+      "faces": [
+       {
+        "x": 0.4816,
+        "y": 0.283,
+        "w": 0.0891,
+        "h": 0.0812
+       }
+      ],
+      "salient": {
+       "x": 0.3142,
+       "y": 0.1116,
+       "w": 0.4133,
+       "h": 0.4919
+      }
+     },
+     "display": {
+      "w": 898,
+      "h": 1100
+     }
     },
     {
      "driveId": "1yevGi_Q2e6R6og11PdagyS0SFt3UZ7OF",
@@ -2001,7 +3149,45 @@
      "size": 187237,
      "modifiedTime": "2026-09-26T13:52:26.497Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/dress/blacktie-11.jpg",
+     "slots": [
+      {
+       "route": "/dress.html",
+       "role": "destination-gallery-item"
+      },
+      {
+       "route": "/wedding-preparation.html",
+       "role": "destination-gallery-item"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "vision": {
+      "faces": [
+       {
+        "x": 0.7136,
+        "y": 0.0262,
+        "w": 0.2197,
+        "h": 0.1872
+       },
+       {
+        "x": 0.4117,
+        "y": 0.0806,
+        "w": 0.1943,
+        "h": 0.1655
+       }
+      ],
+      "salient": {
+       "x": 0.208,
+       "y": 0,
+       "w": 0.769,
+       "h": 0.4783
+      }
+     },
+     "display": {
+      "w": 840,
+      "h": 1100
+     }
     },
     {
      "driveId": "1U_-Y9cKMtOkfgLiMY9RHeIy7AhBrXgFd",
@@ -2068,15 +3254,51 @@
      "size": 726652,
      "modifiedTime": "2026-08-27T02:43:35.655Z",
      "kind": "image",
-     "status": "unresolved",
-     "syncedAt": "2026-09-26T20:00:00Z",
+     "status": "synced",
+     "syncedAt": "2026-09-26T21:00:00Z",
      "how": "fingerprint",
      "match": {
       "bits": 4
      },
      "w": 2048,
      "h": 3029,
-     "localCopy": "assets/images/dress/dinner-04.jpg"
+     "asset": "assets/images/dress/dinner-04.jpg",
+     "slots": [
+      {
+       "route": "/dress.html",
+       "role": "destination-gallery-item"
+      },
+      {
+       "route": "/wedding-preparation.html",
+       "role": "destination-gallery-item"
+      }
+     ],
+     "vision": {
+      "faces": [
+       {
+        "x": 0.5804,
+        "y": 0.1972,
+        "w": 0.1229,
+        "h": 0.0926
+       },
+       {
+        "x": 0.3672,
+        "y": 0.1792,
+        "w": 0.1169,
+        "h": 0.088
+       }
+      ],
+      "salient": {
+       "x": 0.2404,
+       "y": 0.0586,
+       "w": 0.641,
+       "h": 0.5806
+      }
+     },
+     "display": {
+      "w": 743,
+      "h": 1100
+     }
     },
     {
      "driveId": "19dJFYzphhY39PY2oMb4PRwDaK4cV8-f5",
@@ -2086,15 +3308,51 @@
      "size": 642388,
      "modifiedTime": "2026-08-27T02:43:40.662Z",
      "kind": "image",
-     "status": "unresolved",
-     "syncedAt": "2026-09-26T20:00:00Z",
+     "status": "synced",
+     "syncedAt": "2026-09-26T21:00:00Z",
      "how": "fingerprint",
      "match": {
       "bits": 0
      },
      "w": 2048,
      "h": 3072,
-     "localCopy": "assets/images/dress/dinner-05.jpg"
+     "asset": "assets/images/dress/dinner-05.jpg",
+     "slots": [
+      {
+       "route": "/dress.html",
+       "role": "destination-gallery-item"
+      },
+      {
+       "route": "/wedding-preparation.html",
+       "role": "destination-gallery-item"
+      }
+     ],
+     "vision": {
+      "faces": [
+       {
+        "x": 0.4822,
+        "y": 0.4767,
+        "w": 0.0738,
+        "h": 0.0549
+       },
+       {
+        "x": 0.6719,
+        "y": 0.4436,
+        "w": 0.0779,
+        "h": 0.0579
+       }
+      ],
+      "salient": {
+       "x": 0.1406,
+       "y": 0.2117,
+       "w": 0.7905,
+       "h": 0.4431
+      }
+     },
+     "display": {
+      "w": 733,
+      "h": 1100
+     }
     },
     {
      "driveId": "1hwhvumGGVeQ2QX8Oc7oUsS14egdjghQk",
@@ -2104,15 +3362,45 @@
      "size": 503854,
      "modifiedTime": "2026-08-27T02:43:44.660Z",
      "kind": "image",
-     "status": "unresolved",
-     "syncedAt": "2026-09-26T20:00:00Z",
+     "status": "synced",
+     "syncedAt": "2026-09-26T21:00:00Z",
      "how": "fingerprint",
      "match": {
       "bits": 1
      },
      "w": 2048,
      "h": 3072,
-     "localCopy": "assets/images/dress/dinner-06.jpg"
+     "asset": "assets/images/dress/dinner-06.jpg",
+     "slots": [
+      {
+       "route": "/dress.html",
+       "role": "destination-gallery-item"
+      },
+      {
+       "route": "/wedding-preparation.html",
+       "role": "destination-gallery-item"
+      }
+     ],
+     "vision": {
+      "faces": [
+       {
+        "x": 0.1649,
+        "y": 0.4286,
+        "w": 0.0934,
+        "h": 0.0694
+       }
+      ],
+      "salient": {
+       "x": 0.0781,
+       "y": 0.2156,
+       "w": 0.8882,
+       "h": 0.4368
+      }
+     },
+     "display": {
+      "w": 733,
+      "h": 1100
+     }
     },
     {
      "driveId": "1mbwijy3aRumTxhLeoQwAhc6Ziyi6ze35",
@@ -2160,15 +3448,45 @@
      "size": 61005,
      "modifiedTime": "2026-07-08T13:01:29Z",
      "kind": "image",
-     "status": "unresolved",
-     "syncedAt": "2026-09-26T20:00:00Z",
+     "status": "synced",
+     "syncedAt": "2026-09-26T21:00:00Z",
      "how": "fingerprint",
      "match": {
       "bits": 0
      },
      "w": 561,
      "h": 830,
-     "localCopy": "assets/images/dress/vow-04.jpg"
+     "asset": "assets/images/dress/vow-04.jpg",
+     "slots": [
+      {
+       "route": "/dress.html",
+       "role": "destination-gallery-item"
+      },
+      {
+       "route": "/wedding-preparation.html",
+       "role": "destination-gallery-item"
+      }
+     ],
+     "vision": {
+      "faces": [
+       {
+        "x": 0.3854,
+        "y": 0.0688,
+        "w": 0.2425,
+        "h": 0.1828
+       }
+      ],
+      "salient": {
+       "x": 0.1938,
+       "y": 0,
+       "w": 0.5459,
+       "h": 0.7119
+      }
+     },
+     "display": {
+      "w": 561,
+      "h": 830
+     }
     },
     {
      "driveId": "1hR0xOWPHsIbbFDQq5Cz8A4CJ5GMRpslU",
@@ -2178,7 +3496,7 @@
      "size": 11887,
      "modifiedTime": "2026-07-08T12:33:34Z",
      "kind": "image",
-     "status": "unresolved",
+     "status": "excluded",
      "syncedAt": "2026-09-26T20:00:00Z",
      "how": "fingerprint",
      "match": {
@@ -2186,7 +3504,8 @@
      },
      "w": 387,
      "h": 516,
-     "localCopy": "assets/images/dress/vow-05.jpg"
+     "localCopy": "assets/images/dress/vow-05.jpg",
+     "note": "the source is 387 × 516 — below the quality floor of a dress reference (the live vow-05.jpg was upscaled from it and is not shown)"
     },
     {
      "driveId": "1752BZPUvnahcr5jjY35zwJw-QY8WevSi",
@@ -2196,15 +3515,45 @@
      "size": 206202,
      "modifiedTime": "2026-07-08T12:36:37Z",
      "kind": "image",
-     "status": "unresolved",
-     "syncedAt": "2026-09-26T20:00:00Z",
+     "status": "synced",
+     "syncedAt": "2026-09-26T21:00:00Z",
      "how": "fingerprint",
      "match": {
       "bits": 2
      },
      "w": 736,
      "h": 1156,
-     "localCopy": "assets/images/dress/vow-06.jpg"
+     "asset": "assets/images/dress/vow-06.jpg",
+     "slots": [
+      {
+       "route": "/dress.html",
+       "role": "destination-gallery-item"
+      },
+      {
+       "route": "/wedding-preparation.html",
+       "role": "destination-gallery-item"
+      }
+     ],
+     "vision": {
+      "faces": [
+       {
+        "x": 0.3563,
+        "y": 0.0775,
+        "w": 0.1703,
+        "h": 0.1209
+       }
+      ],
+      "salient": {
+       "x": 0.2561,
+       "y": 0.0003,
+       "w": 0.4861,
+       "h": 0.9362
+      }
+     },
+     "display": {
+      "w": 700,
+      "h": 1100
+     }
     },
     {
      "driveId": "1FhMHNVIg2P2AJK6YdR7S5rOd7zc-HUQR",
@@ -2214,7 +3563,39 @@
      "size": 125099,
      "modifiedTime": "2026-09-26T13:54:43.375Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/dress/resort-07.jpg",
+     "slots": [
+      {
+       "route": "/dress.html",
+       "role": "destination-gallery-item"
+      },
+      {
+       "route": "/wedding-preparation.html",
+       "role": "destination-gallery-item"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "vision": {
+      "faces": [
+       {
+        "x": 0.3198,
+        "y": 0.1321,
+        "w": 0.1691,
+        "h": 0.1478
+       }
+      ],
+      "salient": {
+       "x": 0.1982,
+       "y": 0.0185,
+       "w": 0.52,
+       "h": 0.86
+      }
+     },
+     "display": {
+      "w": 862,
+      "h": 1100
+     }
     },
     {
      "driveId": "1Tvmvjb3C2L2whPIap9e6TcCE__WhvCZ-",
@@ -2224,7 +3605,39 @@
      "size": 64389,
      "modifiedTime": "2026-09-26T13:54:29.177Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/dress/resort-08.jpg",
+     "slots": [
+      {
+       "route": "/dress.html",
+       "role": "destination-gallery-item"
+      },
+      {
+       "route": "/wedding-preparation.html",
+       "role": "destination-gallery-item"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "vision": {
+      "faces": [
+       {
+        "x": 0.499,
+        "y": 0.2637,
+        "w": 0.0929,
+        "h": 0.083
+       }
+      ],
+      "salient": {
+       "x": 0.2126,
+       "y": 0.1239,
+       "w": 0.5237,
+       "h": 0.8751
+      }
+     },
+     "display": {
+      "w": 474,
+      "h": 592
+     }
     },
     {
      "driveId": "1JmRGZlHmF1Cufg6jo_xWgPdp_YNjpxL3",
@@ -2234,7 +3647,39 @@
      "size": 161050,
      "modifiedTime": "2026-09-26T13:55:31.960Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/dress/resort-09.jpg",
+     "slots": [
+      {
+       "route": "/dress.html",
+       "role": "destination-gallery-item"
+      },
+      {
+       "route": "/wedding-preparation.html",
+       "role": "destination-gallery-item"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "vision": {
+      "faces": [
+       {
+        "x": 0.5481,
+        "y": 0.0261,
+        "w": 0.1357,
+        "h": 0.1051
+       }
+      ],
+      "salient": {
+       "x": 0.2886,
+       "y": 0,
+       "w": 0.5752,
+       "h": 1
+      }
+     },
+     "display": {
+      "w": 764,
+      "h": 1100
+     }
     },
     {
      "driveId": "1ZzLk_5iDTRfnE9kp6jMyuIRSm1BqOtUb",
@@ -2244,7 +3689,39 @@
      "size": 104452,
      "modifiedTime": "2026-09-26T13:55:25.710Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/dress/resort-10.jpg",
+     "slots": [
+      {
+       "route": "/dress.html",
+       "role": "destination-gallery-item"
+      },
+      {
+       "route": "/wedding-preparation.html",
+       "role": "destination-gallery-item"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "vision": {
+      "faces": [
+       {
+        "x": 0.4574,
+        "y": 0.1026,
+        "w": 0.1462,
+        "h": 0.1086
+       }
+      ],
+      "salient": {
+       "x": 0.2825,
+       "y": 0.0003,
+       "w": 0.4568,
+       "h": 0.6403
+      }
+     },
+     "display": {
+      "w": 733,
+      "h": 1100
+     }
     },
     {
      "driveId": "1kfzoTWigpVmXL98mBAPyPHIZkU1mau2C",
@@ -2254,7 +3731,39 @@
      "size": 224940,
      "modifiedTime": "2026-09-26T13:55:54.776Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/dress/resort-11.jpg",
+     "slots": [
+      {
+       "route": "/dress.html",
+       "role": "destination-gallery-item"
+      },
+      {
+       "route": "/wedding-preparation.html",
+       "role": "destination-gallery-item"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "vision": {
+      "faces": [
+       {
+        "x": 0.3969,
+        "y": 0.0464,
+        "w": 0.2184,
+        "h": 0.1836
+       }
+      ],
+      "salient": {
+       "x": 0.2671,
+       "y": 0,
+       "w": 0.5073,
+       "h": 0.7134
+      }
+     },
+     "display": {
+      "w": 829,
+      "h": 1100
+     }
     },
     {
      "driveId": "1u6XH3DpsmeoYFaqcdOO4c4M0ZK1N35d9",
@@ -2264,7 +3773,8 @@
      "size": 27552,
      "modifiedTime": "2026-09-26T13:55:00.495Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "excluded",
+     "note": "the source is 335 × 597 — below the quality floor of a dress reference"
     },
     {
      "driveId": "1ok1eYC22D5WNua6Kh7qtSZNg9-BTFg-6",
@@ -2274,7 +3784,39 @@
      "size": 17132,
      "modifiedTime": "2026-09-26T13:54:04.150Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/dress/resort-12.jpg",
+     "slots": [
+      {
+       "route": "/dress.html",
+       "role": "destination-gallery-item"
+      },
+      {
+       "route": "/wedding-preparation.html",
+       "role": "destination-gallery-item"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "vision": {
+      "faces": [
+       {
+        "x": 0.3063,
+        "y": 0.1004,
+        "w": 0.3353,
+        "h": 0.2493
+       }
+      ],
+      "salient": {
+       "x": 0.2443,
+       "y": 0.0306,
+       "w": 0.4935,
+       "h": 0.673
+      }
+     },
+     "display": {
+      "w": 640,
+      "h": 960
+     }
     },
     {
      "driveId": "1TWpfysqqNh3kD1hZzp8jSc-FF7t8tE7Q",
@@ -2486,13 +4028,12 @@
      "h": 1800
     }
    ],
-   "question": "Eighteen new dress references: which dress-code group does each join (the four groups of dress.html), or do they form a new group?",
-   "status": "unresolved",
+   "status": "synced",
    "syncedAt": "2026-09-26T20:00:00Z"
   },
   "500": {
    "title": "500 - Special - Highlight - Marsilea Spa",
-   "place": "",
+   "place": "Marsilea Spa · its gallery (the site's one carousel)",
    "slot": {},
    "role": null,
    "order": "title-ascending",
@@ -2505,7 +4046,39 @@
      "size": 108684,
      "modifiedTime": "2026-09-26T13:12:42.002Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/marsilea/marsilea-g01-silhouette.jpg",
+     "slots": [
+      {
+       "route": "/marsilea.html",
+       "role": "destination-gallery-item",
+       "focal": "90% 50%",
+       "focalWhy": "chosen by looking on a crop sheet of the 3:4 card (26 Sep 2026)"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "vision": {
+      "faces": [],
+      "salient": {
+       "x": 0.2198,
+       "y": 0.071,
+       "w": 0.7469,
+       "h": 0.6018
+      }
+     },
+     "display": {
+      "w": 2000,
+      "h": 1000
+     },
+     "review": {
+      "/marsilea.html destination-gallery-item": {
+       "verdict": "kept",
+       "why": "the chosen focal keeps the figure, the room, the tray or the treatment",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "90% 50%"
+      }
+     }
     },
     {
      "driveId": "1HxhhPq3OR9zcnU4VXdg4PjP6_vYwc1q-",
@@ -2515,7 +4088,37 @@
      "size": 206042,
      "modifiedTime": "2026-09-26T13:12:54.854Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/marsilea/marsilea-g02-arrival.jpg",
+     "slots": [
+      {
+       "route": "/marsilea.html",
+       "role": "destination-gallery-item"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "vision": {
+      "faces": [],
+      "salient": {
+       "x": 0.0452,
+       "y": 0.0553,
+       "w": 0.886,
+       "h": 0.6595
+      }
+     },
+     "display": {
+      "w": 2000,
+      "h": 1333
+     },
+     "review": {
+      "/marsilea.html destination-gallery-item": {
+       "verdict": "kept",
+       "why": "the chosen focal keeps the figure, the room, the tray or the treatment",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 12%"
+      }
+     }
     },
     {
      "driveId": "1qj_skMPJ4xJ9MtdAtOQm2LsbCXdzdF7U",
@@ -2525,7 +4128,39 @@
      "size": 151095,
      "modifiedTime": "2026-09-26T13:13:03.246Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/marsilea/marsilea-g03-lounge.jpg",
+     "slots": [
+      {
+       "route": "/marsilea.html",
+       "role": "destination-gallery-item",
+       "focal": "60% 50%",
+       "focalWhy": "chosen by looking on a crop sheet of the 3:4 card (26 Sep 2026)"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "vision": {
+      "faces": [],
+      "salient": {
+       "x": 0.2236,
+       "y": 0.3887,
+       "w": 0.6484,
+       "h": 0.4448
+      }
+     },
+     "display": {
+      "w": 2000,
+      "h": 1333
+     },
+     "review": {
+      "/marsilea.html destination-gallery-item": {
+       "verdict": "kept",
+       "why": "the chosen focal keeps the figure, the room, the tray or the treatment",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "60% 50%"
+      }
+     }
     },
     {
      "driveId": "1cCvfR0TAXS1S-OAwZwgEr9EG02xQw2EM",
@@ -2535,7 +4170,39 @@
      "size": 114061,
      "modifiedTime": "2026-09-26T13:13:08.460Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/marsilea/marsilea-g04-welcome-tea.jpg",
+     "slots": [
+      {
+       "route": "/marsilea.html",
+       "role": "destination-gallery-item",
+       "focal": "54% 50%",
+       "focalWhy": "chosen by looking on a crop sheet of the 3:4 card (26 Sep 2026)"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "vision": {
+      "faces": [],
+      "salient": {
+       "x": 0.224,
+       "y": 0.2747,
+       "w": 0.587,
+       "h": 0.488
+      }
+     },
+     "display": {
+      "w": 2000,
+      "h": 1333
+     },
+     "review": {
+      "/marsilea.html destination-gallery-item": {
+       "verdict": "kept",
+       "why": "the chosen focal keeps the figure, the room, the tray or the treatment",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "54% 50%"
+      }
+     }
     },
     {
      "driveId": "1mQ5UW-1xT0rEJ4Xdp5npJGHxhgJu_Oln",
@@ -2545,7 +4212,39 @@
      "size": 116565,
      "modifiedTime": "2026-09-26T13:13:13.420Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/marsilea/marsilea-g05-oils.jpg",
+     "slots": [
+      {
+       "route": "/marsilea.html",
+       "role": "destination-gallery-item",
+       "focal": "45% 50%",
+       "focalWhy": "chosen by looking on a crop sheet of the 3:4 card (26 Sep 2026)"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "vision": {
+      "faces": [],
+      "salient": {
+       "x": 0.0745,
+       "y": 0.1563,
+       "w": 0.783,
+       "h": 0.585
+      }
+     },
+     "display": {
+      "w": 2000,
+      "h": 1333
+     },
+     "review": {
+      "/marsilea.html destination-gallery-item": {
+       "verdict": "kept",
+       "why": "the chosen focal keeps the figure, the room, the tray or the treatment",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "45% 50%"
+      }
+     }
     },
     {
      "driveId": "1_9Imj1rV8HkkVMw6aoQTYAaOxxjv0iC-",
@@ -2555,11 +4254,49 @@
      "size": 100419,
      "modifiedTime": "2026-09-26T13:13:18.804Z",
      "kind": "image",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/marsilea/marsilea-g06-treatment.jpg",
+     "slots": [
+      {
+       "route": "/marsilea.html",
+       "role": "destination-gallery-item",
+       "focal": "88% 50%",
+       "focalWhy": "chosen by looking on a crop sheet of the 3:4 card (26 Sep 2026)"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "vision": {
+      "faces": [
+       {
+        "x": 0.5747,
+        "y": 0.4126,
+        "w": 0.2264,
+        "h": 0.3789
+       }
+      ],
+      "salient": {
+       "x": 0.1371,
+       "y": 0.0501,
+       "w": 0.7355,
+       "h": 0.8347
+      }
+     },
+     "display": {
+      "w": 2000,
+      "h": 1333
+     },
+     "review": {
+      "/marsilea.html destination-gallery-item": {
+       "verdict": "kept",
+       "why": "the chosen focal keeps the figure, the room, the tray or the treatment",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "88% 50%"
+      }
+     }
     }
    ],
-   "question": "Marsilea Spa has no gallery on its page: does the page gain one from these six photographs?",
-   "status": "unresolved",
+   "status": "synced",
    "syncedAt": "2026-09-26T20:00:00Z"
   },
   "501": {
@@ -3610,7 +5347,26 @@
      "size": 8189146,
      "modifiedTime": "2026-09-26T07:08:15.350Z",
      "kind": "video",
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/video/hero-000-main.mp4",
+     "slots": [
+      {
+       "route": "/index.html",
+       "role": "card"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "note": "byte-identical to the first page's main film (collection 001): the Bangkok card plays that file",
+     "duration": 31.97,
+     "width": 1276,
+     "height": 718,
+     "fps": 30,
+     "codec": "h264",
+     "bitrate": 1984031,
+     "audio": true,
+     "audioBitrate": 58487,
+     "videoFrames": 959,
+     "audioFrames": 691
     },
     {
      "driveId": "1M28a7NbWmexKdbMpQKNc-FJnhHfb0PH3",
@@ -3620,7 +5376,8 @@
      "size": 18901028,
      "modifiedTime": "2026-09-26T07:17:48.349Z",
      "kind": "video",
-     "status": "unresolved"
+     "status": "pending",
+     "note": "larger than the Drive connector delivers (~6 MB): the Owner uploads it with the next sync request (18.9 MB); the Vientiane card keeps its current film until then"
     },
     {
      "driveId": "1sSlqH2TK-30XiVMAVDadqh_suJw0CxUA",
@@ -3643,8 +5400,16 @@
      "audio": true,
      "audioFrames": 381,
      "audioBitrate": 39197,
-     "status": "unresolved",
-     "note": "the same photograph or film as assets/video/kunming-card.mp4 (on the website elsewhere)"
+     "status": "synced",
+     "asset": "assets/video/kunming-card.mp4",
+     "slots": [
+      {
+       "route": "/index.html",
+       "role": "card"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "note": "the China card opens the Kunming chapter (#china); the same file as 014's film"
     },
     {
      "driveId": "1-dGMxgs9D98bywatVxXyEB5DdQbDKdPC",
@@ -3654,11 +5419,11 @@
      "size": 8364170,
      "modifiedTime": "2026-09-26T07:22:59.684Z",
      "kind": "video",
-     "status": "unresolved"
+     "status": "excluded",
+     "note": "the rail has no Lijiang card (Bangkok · Vientiane · China, the China card opens Kunming); this file is Lijiang's Main 01 (015), placed there"
     }
    ],
-   "question": "Four city films (Bangkok = the Hero's main film · Vientiane · Kunming · Lijiang) for a rail of three cards (Bangkok · Vientiane · China): does the rail become four cards, and does China show the Lijiang film?",
-   "status": "unresolved",
+   "status": "partial",
    "syncedAt": "2026-09-26T13:30:00Z"
   },
   "003": {
@@ -3743,8 +5508,8 @@
      "size": 10339106,
      "modifiedTime": "2026-09-26T08:26:19.206Z",
      "kind": "video",
-     "status": "unresolved",
-     "note": "a chapter film for a card gallery that shows photographs only today"
+     "status": "pending",
+     "note": "larger than the Drive connector delivers (~6 MB): the Owner uploads it with the next sync request (10.3 MB, QuickTime); the Before the Wedding card stays photographs until then"
     },
     {
      "driveId": "1ON8S6EqEtEwxYUjvPu4zVoZ_JK4FuyC1",
@@ -4025,8 +5790,16 @@
      "audio": true,
      "audioFrames": 320,
      "audioBitrate": 61101,
-     "status": "unresolved",
-     "note": "a chapter film for a card gallery that shows photographs only today"
+     "status": "synced",
+     "asset": "assets/video/chapter-wedding.mp4",
+     "slots": [
+      {
+       "route": "/index.html",
+       "role": "card"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "poster": "assets/images/city/chapter-wedding-poster.jpg"
     },
     {
      "driveId": "1nWkEWPqueIHpTBKzJJ0NX_IS25kJfvGO",
@@ -4039,8 +5812,28 @@
      "w": 2400,
      "h": 1792,
      "aspect": 1.339,
-     "status": "pending",
-     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+     "status": "synced",
+     "asset": "assets/images/event/005-wedding-001-long-table-above.jpg",
+     "slots": [
+      {
+       "route": "/index.html",
+       "role": "journey-card-gallery"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "vision": {
+      "faces": [],
+      "salient": {
+       "x": 0.1256,
+       "y": 0.0323,
+       "w": 0.7006,
+       "h": 0.8891
+      }
+     },
+     "display": {
+      "w": 2000,
+      "h": 1493
+     }
     },
     {
      "driveId": "1_Ud2ypf6ckOcd25CeHWilrfNgcCQ3hd8",
@@ -4053,8 +5846,29 @@
      "w": 1334,
      "h": 2000,
      "aspect": 0.667,
-     "status": "pending",
-     "note": "the same photograph as assets/images/hero/hero-arrival.jpg (on disk, not yet placed) — a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+     "status": "synced",
+     "asset": "assets/images/event/052-ceremony-green-gateway.jpg",
+     "slots": [
+      {
+       "route": "/index.html",
+       "role": "journey-card-gallery"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "note": "the green gateway already in the Wedding card",
+     "vision": {
+      "faces": [],
+      "salient": {
+       "x": 0.021,
+       "y": 0.2959,
+       "w": 0.9434,
+       "h": 0.522
+      }
+     },
+     "display": {
+      "w": 1334,
+      "h": 2000
+     }
     },
     {
      "driveId": "1QM0P-e-nGzrZrEYZdW95j0vXUsBvmWio",
@@ -4191,8 +6005,16 @@
      "audio": true,
      "audioFrames": 298,
      "audioBitrate": 70357,
-     "status": "unresolved",
-     "note": "a chapter film for a card gallery that shows photographs only today"
+     "status": "synced",
+     "asset": "assets/video/chapter-after.mp4",
+     "slots": [
+      {
+       "route": "/index.html",
+       "role": "card"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "poster": "assets/images/city/chapter-after-poster.jpg"
     },
     {
      "driveId": "1sEuYPoMF2ioO8z_ng2zMXlgJ3jSAwWaH",
@@ -4408,8 +6230,7 @@
      }
     }
    ],
-   "question": "Each chapter folder carries a film (\"… Main_Video\"): does the chapter card show its film first (muted, like the Hero), or stay photographs only? The photographs themselves follow the folders at the next synchronisation.",
-   "status": "unresolved",
+   "status": "partial",
    "syncedAt": "2026-09-26T13:30:00Z"
   },
   "010": {
@@ -4442,7 +6263,22 @@
      "audio": true,
      "audioFrames": 665,
      "audioBitrate": 61295,
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/video/destinations-hero.mp4",
+     "focal": {
+      "p": "56% 50%",
+      "tp": "55% 50%",
+      "tl": "66% 50%",
+      "d": "62% 50%"
+     },
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "hero-slide"
+      }
+     ],
+     "poster": "assets/images/hero/destinations-000-poster.jpg",
+     "alt": "Jade Dragon Snow Mountain above the clouds at sunrise"
     },
     {
      "driveId": "10-kzkc5mehLViKvcqfbNd3rpZnyfpW8g",
@@ -4455,7 +6291,47 @@
      "w": 1122,
      "h": 1402,
      "aspect": 0.8,
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/hero/destinations-001.jpg",
+     "focal": {
+      "p": "50% 72%",
+      "tp": "100% 50%",
+      "tl": "50% 59%",
+      "d": "50% 60%"
+     },
+     "display": {
+      "w": 1122,
+      "h": 1402
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.91064453125,
+       "w": 0.91546630859375,
+       "x": 0.06109619140625,
+       "y": 0.087890625
+      }
+     },
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "hero-slide"
+      }
+     ],
+     "review": {
+      "/destination.html hero-slide": {
+       "verdict": "kept",
+       "why": "the old towns, the pavilion and the snow mountain stay whole at every class (looked at, crop sheet)",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": {
+        "p": "50% 72%",
+        "tp": "100% 50%",
+        "tl": "50% 59%",
+        "d": "50% 60%"
+       }
+      }
+     }
     },
     {
      "driveId": "1WbLwTNU5LEjof9HjZYS8ZtSmL1XV3uvI",
@@ -4468,7 +6344,47 @@
      "w": 1122,
      "h": 1402,
      "aspect": 0.8,
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/hero/destinations-002.jpg",
+     "focal": {
+      "p": "50% 57%",
+      "tp": "100% 50%",
+      "tl": "50% 53%",
+      "d": "50% 53%"
+     },
+     "display": {
+      "w": 1122,
+      "h": 1402
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.86236572265625,
+       "w": 0.87042236328125,
+       "x": 0.06658935546875,
+       "y": 0.08245849609375
+      }
+     },
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "hero-slide"
+      }
+     ],
+     "review": {
+      "/destination.html hero-slide": {
+       "verdict": "kept",
+       "why": "the old towns, the pavilion and the snow mountain stay whole at every class (looked at, crop sheet)",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": {
+        "p": "50% 57%",
+        "tp": "100% 50%",
+        "tl": "50% 53%",
+        "d": "50% 53%"
+       }
+      }
+     }
     },
     {
      "driveId": "1vsYL-NONgH5L5pmPCM3xa3XwI8JQpetn",
@@ -4481,7 +6397,47 @@
      "w": 1122,
      "h": 1402,
      "aspect": 0.8,
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/hero/destinations-003.jpg",
+     "focal": {
+      "p": "50% 0%",
+      "tp": "100% 50%",
+      "tl": "50% 18%",
+      "d": "50% 16%"
+     },
+     "display": {
+      "w": 1122,
+      "h": 1402
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.705078125,
+       "w": 0.87530517578125,
+       "x": 0.07879638671875,
+       "y": 0
+      }
+     },
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "hero-slide"
+      }
+     ],
+     "review": {
+      "/destination.html hero-slide": {
+       "verdict": "kept",
+       "why": "the old towns, the pavilion and the snow mountain stay whole at every class (looked at, crop sheet)",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": {
+        "p": "50% 0%",
+        "tp": "100% 50%",
+        "tl": "50% 18%",
+        "d": "50% 16%"
+       }
+      }
+     }
     },
     {
      "driveId": "1Liiyqu3DeJc_269zRg73VY_2ubgyNAnL",
@@ -4494,7 +6450,47 @@
      "w": 1122,
      "h": 1402,
      "aspect": 0.8,
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/hero/destinations-004.jpg",
+     "focal": {
+      "p": "50% 50%",
+      "tp": "100% 50%",
+      "tl": "50% 50%",
+      "d": "50% 50%"
+     },
+     "display": {
+      "w": 1122,
+      "h": 1402
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 1,
+       "w": 0.88232421875,
+       "x": 0.0791015625,
+       "y": 0
+      }
+     },
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "hero-slide"
+      }
+     ],
+     "review": {
+      "/destination.html hero-slide": {
+       "verdict": "kept",
+       "why": "the old towns, the pavilion and the snow mountain stay whole at every class (looked at, crop sheet)",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": {
+        "p": "50% 50%",
+        "tp": "100% 50%",
+        "tl": "50% 50%",
+        "d": "50% 50%"
+       }
+      }
+     }
     },
     {
      "driveId": "1r0X2kHeWmuSJyRbdpu_QsLgLzrc4WEd5",
@@ -4507,7 +6503,47 @@
      "w": 1122,
      "h": 1402,
      "aspect": 0.8,
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/hero/destinations-005.jpg",
+     "focal": {
+      "p": "50% 68%",
+      "tp": "0% 50%",
+      "tl": "50% 58%",
+      "d": "50% 58%"
+     },
+     "display": {
+      "w": 1122,
+      "h": 1402
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.929443359375,
+       "w": 0.7105712890625,
+       "x": 0.0955810546875,
+       "y": 0.070556640625
+      }
+     },
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "hero-slide"
+      }
+     ],
+     "review": {
+      "/destination.html hero-slide": {
+       "verdict": "kept",
+       "why": "the old towns, the pavilion and the snow mountain stay whole at every class (looked at, crop sheet)",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": {
+        "p": "50% 68%",
+        "tp": "0% 50%",
+        "tl": "50% 58%",
+        "d": "50% 58%"
+       }
+      }
+     }
     },
     {
      "driveId": "1cdo6GwnZcxIUphSIICZIE7nrLDAz_Izz",
@@ -4520,7 +6556,47 @@
      "w": 1122,
      "h": 1402,
      "aspect": 0.8,
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/hero/destinations-006.jpg",
+     "focal": {
+      "p": "50% 48%",
+      "tp": "0% 50%",
+      "tl": "50% 49%",
+      "d": "50% 49%"
+     },
+     "display": {
+      "w": 1122,
+      "h": 1402
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.6732177734375,
+       "w": 0.6883544921875,
+       "x": 0.1387939453125,
+       "y": 0.1597900390625
+      }
+     },
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "hero-slide"
+      }
+     ],
+     "review": {
+      "/destination.html hero-slide": {
+       "verdict": "kept",
+       "why": "the old towns, the pavilion and the snow mountain stay whole at every class (looked at, crop sheet)",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": {
+        "p": "50% 48%",
+        "tp": "0% 50%",
+        "tl": "50% 49%",
+        "d": "50% 49%"
+       }
+      }
+     }
     },
     {
      "driveId": "1YpTeuf4zJwgi8oSTiFXsyGDuwQAdfRgk",
@@ -4533,12 +6609,52 @@
      "w": 1122,
      "h": 1402,
      "aspect": 0.8,
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/hero/destinations-007.jpg",
+     "focal": {
+      "p": "50% 67%",
+      "tp": "0% 50%",
+      "tl": "50% 57%",
+      "d": "50% 58%"
+     },
+     "display": {
+      "w": 1122,
+      "h": 1402
+     },
+     "vision": {
+      "faces": [],
+      "salient": {
+       "h": 0.92828369140625,
+       "w": 0.886260986328125,
+       "x": 0.046356201171875,
+       "y": 0.07025146484375
+      }
+     },
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "hero-slide"
+      }
+     ],
+     "review": {
+      "/destination.html hero-slide": {
+       "verdict": "kept",
+       "why": "the old towns, the pavilion and the snow mountain stay whole at every class (looked at, crop sheet)",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": {
+        "p": "50% 67%",
+        "tp": "0% 50%",
+        "tl": "50% 57%",
+        "d": "50% 58%"
+       }
+      }
+     }
     }
    ],
-   "question": "Seven portrait photographs and a film for a page opening that is one still picture today: one chosen photograph, or the Hero's slideshow (as the first page)?",
-   "status": "unresolved",
-   "syncedAt": "2026-09-26T13:30:00Z"
+   "status": "synced",
+   "syncedAt": "2026-09-26T13:30:00Z",
+   "heroPage": "destination.html"
   },
   "011": {
    "title": "011 - Destination - Bangkok",
@@ -4570,8 +6686,15 @@
      "audio": true,
      "audioFrames": 327,
      "audioBitrate": 70746,
-     "status": "pending",
-     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+     "status": "synced",
+     "asset": "assets/video/bangkok-main.mp4",
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "destination-film"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z"
     },
     {
      "driveId": "12dVkb61eVrHxEwj_dzP6om5of5RAK7ys",
@@ -4832,7 +6955,7 @@
      }
     }
    ],
-   "status": "partial",
+   "status": "synced",
    "syncedAt": "2026-09-26T13:30:00Z"
   },
   "012": {
@@ -4855,8 +6978,8 @@
      "w": 1440,
      "h": 1200,
      "aspect": 1.2,
-     "status": "unresolved",
-     "note": "the same photograph or film as assets/images/hero/hero-journey.jpg (unused on the website today)"
+     "status": "excluded",
+     "note": "no Nong Khai section exists on the website — a folder without a corresponding section is not placed (Owner rule, 26 Sep 2026)"
     },
     {
      "driveId": "1Z-SHeli4btdps-E6jofjgiEMwYU-dZ3Y",
@@ -4869,7 +6992,8 @@
      "w": 1848,
      "h": 968,
      "aspect": 1.909,
-     "status": "unresolved"
+     "status": "excluded",
+     "note": "no Nong Khai section exists on the website — a folder without a corresponding section is not placed (Owner rule, 26 Sep 2026)"
     },
     {
      "driveId": "14Gor0cX30rLbg-a7xoiJQsDXYpOOjjLH",
@@ -4882,11 +7006,11 @@
      "w": 1280,
      "h": 720,
      "aspect": 1.778,
-     "status": "unresolved"
+     "status": "excluded",
+     "note": "no Nong Khai section exists on the website — a folder without a corresponding section is not placed (Owner rule, 26 Sep 2026)"
     }
    ],
-   "question": "Nong Khai has no chapter on Destinations: a new chapter, or a place inside Vientiane / The Journey?",
-   "status": "unresolved",
+   "status": "synced",
    "syncedAt": "2026-09-26T13:30:00Z"
   },
   "013": {
@@ -5554,7 +7678,8 @@
      "size": 8364170,
      "modifiedTime": "2026-09-26T09:00:43.914Z",
      "kind": "video",
-     "status": "unresolved"
+     "status": "pending",
+     "note": "larger than the Drive connector delivers (~6 MB): the Owner uploads it with the next sync request — the live lijiang-impression.mp4 (1024 × 436, 5.6 MB) cannot be verified against this 8.4 MB source until then"
     },
     {
      "driveId": "1o-Hv4guYSN94Fo4WsR7xxZuY7OgJrB2j",
@@ -5577,7 +7702,16 @@
      "audio": true,
      "audioFrames": 248,
      "audioBitrate": 46458,
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/video/lijiang-main-02.mp4",
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "destination-clip"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "poster": "assets/images/city/004-lijiang-main-02-poster.jpg"
     },
     {
      "driveId": "1I2lVnMPv3wn5qE-sMhu-fkD_MZa8dtYP",
@@ -5600,7 +7734,16 @@
      "audio": true,
      "audioFrames": 229,
      "audioBitrate": 40508,
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/video/lijiang-main-03.mp4",
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "destination-clip"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "poster": "assets/images/city/004-lijiang-main-03-poster.jpg"
     },
     {
      "driveId": "1yJmPKKeoa6Tm6nPTMKa9o2nHa-ejqJam",
@@ -5623,7 +7766,16 @@
      "audio": true,
      "audioFrames": 223,
      "audioBitrate": 63279,
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/video/lijiang-main-04.mp4",
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "destination-clip"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "poster": "assets/images/city/004-lijiang-main-04-poster.jpg"
     },
     {
      "driveId": "1-4K-9tKcrMxVtRP_KblfF9GvCPzzfjN1",
@@ -5646,7 +7798,16 @@
      "audio": true,
      "audioFrames": 218,
      "audioBitrate": 43461,
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/video/lijiang-main-05.mp4",
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "destination-clip"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "poster": "assets/images/city/004-lijiang-main-05-poster.jpg"
     },
     {
      "driveId": "1d2qkEv7rNsctHjzhPlSo7INVIYDFUcyp",
@@ -5659,7 +7820,39 @@
      "w": 1440,
      "h": 810,
      "aspect": 1.778,
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/city/004-lijiang-001.jpg",
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "destination-gallery-item",
+       "focal": "30% 50%",
+       "focalWhy": "the mountain edge beside the red stage — the centred 3:4 crop showed only the stage"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "vision": {
+      "faces": [],
+      "salient": {
+       "x": 0.0635,
+       "y": 0.0026,
+       "w": 0.9048,
+       "h": 0.9427
+      }
+     },
+     "display": {
+      "w": 1440,
+      "h": 810
+     },
+     "review": {
+      "/destination.html destination-gallery-item": {
+       "verdict": "kept",
+       "why": "the snow peak, or the mountain beside the stage, stays in the 3:4 card",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "30% 50%"
+      }
+     }
     },
     {
      "driveId": "1ReQad9Yz7cPTh-Ir38mFwAbNIc23whN7",
@@ -5672,11 +7865,40 @@
      "w": 1440,
      "h": 810,
      "aspect": 1.778,
-     "status": "unresolved"
+     "status": "synced",
+     "asset": "assets/images/city/004-lijiang-002.jpg",
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "destination-gallery-item"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "vision": {
+      "faces": [],
+      "salient": {
+       "x": 0.0906,
+       "y": 0.11,
+       "w": 0.7908,
+       "h": 0.7713
+      }
+     },
+     "display": {
+      "w": 1440,
+      "h": 810
+     },
+     "review": {
+      "/destination.html destination-gallery-item": {
+       "verdict": "kept",
+       "why": "the snow peak, or the mountain beside the stage, stays in the 3:4 card",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 12%"
+      }
+     }
     }
    ],
-   "question": "Five films and two photographs for the Lijiang chapter, which today carries the Impression Lijiang film and a gallery: which film leads, and do the others form a film gallery?",
-   "status": "unresolved",
+   "status": "partial",
    "syncedAt": "2026-09-26T13:30:00Z"
   },
   "020": {
@@ -8455,10 +10677,32 @@
      "w": 1024,
      "h": 683,
      "aspect": 1.499,
-     "status": "unresolved",
-     "note": "published by \"Synchronize media.\" on 26 Sep 2026 (the same photograph in the new library)",
+     "status": "synced",
      "match": {
       "bits": 0
+     },
+     "asset": "assets/images/lijiang/luye-restaurant.jpg",
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "note": "the same house photograph as 045 (fingerprint 0 bits)",
+     "vision": {
+      "faces": [],
+      "salient": {
+       "x": 0.0248,
+       "y": 0.2905,
+       "w": 0.8966,
+       "h": 0.5513
+      }
+     },
+     "display": {
+      "w": 1024,
+      "h": 683
      }
     },
     {
@@ -8472,10 +10716,32 @@
      "w": 1024,
      "h": 683,
      "aspect": 1.499,
-     "status": "unresolved",
-     "note": "published by \"Synchronize media.\" on 26 Sep 2026 (the same photograph in the new library)",
+     "status": "synced",
      "match": {
       "bits": 0
+     },
+     "asset": "assets/images/lijiang/luye-lounge-fire.jpg",
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "note": "the same house photograph as 045 (fingerprint 0 bits)",
+     "vision": {
+      "faces": [],
+      "salient": {
+       "x": 0.0491,
+       "y": 0.2224,
+       "w": 0.9138,
+       "h": 0.5374
+      }
+     },
+     "display": {
+      "w": 1024,
+      "h": 683
      }
     },
     {
@@ -8489,11 +10755,12 @@
      "w": 1024,
      "h": 683,
      "aspect": 1.499,
-     "status": "unresolved",
-     "note": "published by \"Synchronize media.\" on 26 Sep 2026 (the same photograph in the new library)",
+     "status": "excluded",
      "match": {
       "bits": 0
-     }
+     },
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "note": "the mountain terrace does not represent the accommodation (Owner decision, 26 Sep 2026)"
     },
     {
      "driveId": "1H0h0CEeEuXUk6zBihlw8LvhJ1Yqo67GL",
@@ -8506,10 +10773,32 @@
      "w": 1024,
      "h": 683,
      "aspect": 1.499,
-     "status": "unresolved",
-     "note": "published by \"Synchronize media.\" on 26 Sep 2026 (the same photograph in the new library)",
+     "status": "synced",
      "match": {
       "bits": 0
+     },
+     "asset": "assets/images/lijiang/luye-fireside-painting.jpg",
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "note": "the same house photograph as 045 (fingerprint 0 bits)",
+     "vision": {
+      "faces": [],
+      "salient": {
+       "x": 0,
+       "y": 0.0825,
+       "w": 0.9175,
+       "h": 0.8032
+      }
+     },
+     "display": {
+      "w": 1024,
+      "h": 683
      }
     },
     {
@@ -8523,10 +10812,32 @@
      "w": 1024,
      "h": 682,
      "aspect": 1.501,
-     "status": "unresolved",
-     "note": "published by \"Synchronize media.\" on 26 Sep 2026 (the same photograph in the new library)",
+     "status": "synced",
      "match": {
       "bits": 0
+     },
+     "asset": "assets/images/lijiang/luye-fireside-lounge.jpg",
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "note": "the same house photograph as 045 (fingerprint 0 bits)",
+     "vision": {
+      "faces": [],
+      "salient": {
+       "x": 0.1654,
+       "y": 0.2491,
+       "w": 0.6119,
+       "h": 0.6219
+      }
+     },
+     "display": {
+      "w": 1024,
+      "h": 682
      }
     },
     {
@@ -8540,10 +10851,32 @@
      "w": 1024,
      "h": 683,
      "aspect": 1.499,
-     "status": "unresolved",
-     "note": "published by \"Synchronize media.\" on 26 Sep 2026 (the same photograph in the new library)",
+     "status": "synced",
      "match": {
       "bits": 0
+     },
+     "asset": "assets/images/lijiang/luye-fireside-mountain.jpg",
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "note": "the same house photograph as 045 (fingerprint 0 bits)",
+     "vision": {
+      "faces": [],
+      "salient": {
+       "x": 0.0545,
+       "y": 0.1504,
+       "w": 0.8888,
+       "h": 0.5654
+      }
+     },
+     "display": {
+      "w": 1024,
+      "h": 683
      }
     },
     {
@@ -8557,10 +10890,32 @@
      "w": 1024,
      "h": 683,
      "aspect": 1.499,
-     "status": "unresolved",
-     "note": "published by \"Synchronize media.\" on 26 Sep 2026 (the same photograph in the new library)",
+     "status": "synced",
      "match": {
       "bits": 0
+     },
+     "asset": "assets/images/lijiang/luye-lounge-lantern.jpg",
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "note": "the same house photograph as 045 (fingerprint 0 bits)",
+     "vision": {
+      "faces": [],
+      "salient": {
+       "x": 0.0503,
+       "y": 0.145,
+       "w": 0.9136,
+       "h": 0.7065
+      }
+     },
+     "display": {
+      "w": 1024,
+      "h": 683
      }
     },
     {
@@ -8574,10 +10929,32 @@
      "w": 1024,
      "h": 683,
      "aspect": 1.499,
-     "status": "unresolved",
-     "note": "published by \"Synchronize media.\" on 26 Sep 2026 (the same photograph in the new library)",
+     "status": "synced",
      "match": {
       "bits": 0
+     },
+     "asset": "assets/images/lijiang/luye-lobby.jpg",
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "note": "the same house photograph as 045 (fingerprint 0 bits)",
+     "vision": {
+      "faces": [],
+      "salient": {
+       "x": 0.1292,
+       "y": 0.1881,
+       "w": 0.8313,
+       "h": 0.5668
+      }
+     },
+     "display": {
+      "w": 1024,
+      "h": 683
      }
     },
     {
@@ -8591,10 +10968,41 @@
      "w": 1024,
      "h": 576,
      "aspect": 1.778,
-     "status": "unresolved",
-     "note": "published by \"Synchronize media.\" on 26 Sep 2026 (the same photograph in the new library)",
+     "status": "synced",
      "match": {
       "bits": 0
+     },
+     "asset": "assets/images/lijiang/luye-hotel-at-night.jpg",
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "syncedAt": "2026-09-26T21:00:00Z",
+     "note": "the same house photograph as 045 (fingerprint 0 bits)",
+     "vision": {
+      "faces": [],
+      "salient": {
+       "x": 0.0462,
+       "y": 0.2532,
+       "w": 0.9084,
+       "h": 0.4993
+      }
+     },
+     "display": {
+      "w": 1024,
+      "h": 576
+     },
+     "review": {
+      "/journeys.html product-gallery": {
+       "verdict": "kept",
+       "why": "the lit façade stays whole in the 5:4 and 3:2 frames",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 50%"
+      }
      }
     },
     {
@@ -8609,8 +11017,8 @@
      "h": 683,
      "aspect": 1.499,
      "status": "synced",
-     "note": "published by \"Synchronize media.\" on 26 Sep 2026 (the same photograph in the new library)",
-     "asset": "assets/images/lijiang/luye-a-room-with-its-own-fireplace.jpg",
+     "note": "the same house photograph as 045 (fingerprint 0 bits)",
+     "asset": "assets/images/lijiang/luye-room-fireplace.jpg",
      "match": {
       "bits": 0
      },
@@ -8636,9 +11044,8 @@
      }
     }
    ],
-   "status": "unresolved",
-   "syncedAt": "2026-09-26T20:00:00Z",
-   "question": "Luye Baisha is shown by its own rooms only (Owner, 21 Sep 2026 — never the mountain or the village; there was no house photography then). The library now holds the hotel at night, its lobby, restaurant and fireside lounges: may the gallery lead with the house? (The mountain-terrace frame stays out either way.) (028 holds the same photographs for The Journey.)"
+   "status": "synced",
+   "syncedAt": "2026-09-26T20:00:00Z"
   },
   "029": {
    "title": "029 - The Journey - Travel · Lijiang → Bangkok",
@@ -10734,11 +13141,41 @@
      "size": 65452,
      "modifiedTime": "2026-09-26T12:17:23.881Z",
      "kind": "image",
-     "status": "unresolved",
-     "syncedAt": "2026-09-26T20:00:00Z",
+     "status": "synced",
+     "syncedAt": "2026-09-26T21:00:00Z",
      "how": "published",
      "w": 1024,
-     "h": 576
+     "h": 576,
+     "asset": "assets/images/lijiang/luye-hotel-at-night.jpg",
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "vision": {
+      "faces": [],
+      "salient": {
+       "x": 0.0462,
+       "y": 0.2532,
+       "w": 0.9084,
+       "h": 0.4993
+      }
+     },
+     "display": {
+      "w": 1024,
+      "h": 576
+     },
+     "review": {
+      "/journeys.html product-gallery": {
+       "verdict": "kept",
+       "why": "the lit façade stays whole in the 5:4 and 3:2 frames",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 50%"
+      }
+     }
     },
     {
      "driveId": "10W7cAWCgxs6FNMcxcpVxa_Jm1vzWscRk",
@@ -10748,11 +13185,32 @@
      "size": 103563,
      "modifiedTime": "2026-09-26T12:17:28.642Z",
      "kind": "image",
-     "status": "unresolved",
-     "syncedAt": "2026-09-26T20:00:00Z",
+     "status": "synced",
+     "syncedAt": "2026-09-26T21:00:00Z",
      "how": "published",
      "w": 1024,
-     "h": 683
+     "h": 683,
+     "asset": "assets/images/lijiang/luye-lobby.jpg",
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "vision": {
+      "faces": [],
+      "salient": {
+       "x": 0.1292,
+       "y": 0.1881,
+       "w": 0.8313,
+       "h": 0.5668
+      }
+     },
+     "display": {
+      "w": 1024,
+      "h": 683
+     }
     },
     {
      "driveId": "1864bUN8YvoqwfPxYJDbnpjcTLugDxQaz",
@@ -10762,11 +13220,32 @@
      "size": 137639,
      "modifiedTime": "2026-09-26T12:17:33.489Z",
      "kind": "image",
-     "status": "unresolved",
-     "syncedAt": "2026-09-26T20:00:00Z",
+     "status": "synced",
+     "syncedAt": "2026-09-26T21:00:00Z",
      "how": "published",
      "w": 1024,
-     "h": 683
+     "h": 683,
+     "asset": "assets/images/lijiang/luye-lounge-lantern.jpg",
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "vision": {
+      "faces": [],
+      "salient": {
+       "x": 0.0503,
+       "y": 0.145,
+       "w": 0.9136,
+       "h": 0.7065
+      }
+     },
+     "display": {
+      "w": 1024,
+      "h": 683
+     }
     },
     {
      "driveId": "1aqjgx2VLlQIJjiSM6fbR3gV53uUpVU4t",
@@ -10776,11 +13255,32 @@
      "size": 115600,
      "modifiedTime": "2026-09-26T11:26:56.119Z",
      "kind": "image",
-     "status": "unresolved",
-     "syncedAt": "2026-09-26T20:00:00Z",
+     "status": "synced",
+     "syncedAt": "2026-09-26T21:00:00Z",
      "how": "published",
      "w": 1024,
-     "h": 683
+     "h": 683,
+     "asset": "assets/images/lijiang/luye-fireside-painting.jpg",
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "vision": {
+      "faces": [],
+      "salient": {
+       "x": 0,
+       "y": 0.0825,
+       "w": 0.9175,
+       "h": 0.8032
+      }
+     },
+     "display": {
+      "w": 1024,
+      "h": 683
+     }
     },
     {
      "driveId": "1hVimu8tdd9cu7BawPb-5Es4zddwwpCDc",
@@ -10790,11 +13290,32 @@
      "size": 80631,
      "modifiedTime": "2026-09-26T11:27:03.675Z",
      "kind": "image",
-     "status": "unresolved",
-     "syncedAt": "2026-09-26T20:00:00Z",
+     "status": "synced",
+     "syncedAt": "2026-09-26T21:00:00Z",
      "how": "published",
      "w": 1024,
-     "h": 682
+     "h": 682,
+     "asset": "assets/images/lijiang/luye-fireside-lounge.jpg",
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "vision": {
+      "faces": [],
+      "salient": {
+       "x": 0.1654,
+       "y": 0.2491,
+       "w": 0.6119,
+       "h": 0.6219
+      }
+     },
+     "display": {
+      "w": 1024,
+      "h": 682
+     }
     },
     {
      "driveId": "1KjjOUNBnEbfy3717SEKowU65-MXXgjjy",
@@ -10804,11 +13325,32 @@
      "size": 106243,
      "modifiedTime": "2026-09-26T12:16:47.701Z",
      "kind": "image",
-     "status": "unresolved",
-     "syncedAt": "2026-09-26T20:00:00Z",
+     "status": "synced",
+     "syncedAt": "2026-09-26T21:00:00Z",
      "how": "published",
      "w": 1024,
-     "h": 683
+     "h": 683,
+     "asset": "assets/images/lijiang/luye-fireside-mountain.jpg",
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "vision": {
+      "faces": [],
+      "salient": {
+       "x": 0.0545,
+       "y": 0.1504,
+       "w": 0.8888,
+       "h": 0.5654
+      }
+     },
+     "display": {
+      "w": 1024,
+      "h": 683
+     }
     },
     {
      "driveId": "1DWiUxr5ss9k13iACOtKsAW9MCvm6x6Lw",
@@ -10818,11 +13360,32 @@
      "size": 114589,
      "modifiedTime": "2026-09-26T12:17:04.557Z",
      "kind": "image",
-     "status": "unresolved",
-     "syncedAt": "2026-09-26T20:00:00Z",
+     "status": "synced",
+     "syncedAt": "2026-09-26T21:00:00Z",
      "how": "published",
      "w": 1024,
-     "h": 683
+     "h": 683,
+     "asset": "assets/images/lijiang/luye-lounge-fire.jpg",
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "vision": {
+      "faces": [],
+      "salient": {
+       "x": 0.0491,
+       "y": 0.2224,
+       "w": 0.9138,
+       "h": 0.5374
+      }
+     },
+     "display": {
+      "w": 1024,
+      "h": 683
+     }
     },
     {
      "driveId": "1YJF6tPuy_5ixAtJ8kEecNqAaByN3NlFg",
@@ -10833,7 +13396,7 @@
      "modifiedTime": "2026-09-26T12:19:03.965Z",
      "kind": "image",
      "status": "synced",
-     "asset": "assets/images/lijiang/luye-a-room-with-its-own-fireplace.jpg",
+     "asset": "assets/images/lijiang/luye-room-fireplace.jpg",
      "slots": [
       {
        "route": "/journeys.html",
@@ -10841,7 +13404,7 @@
        "focal": "50% 50%"
       }
      ],
-     "syncedAt": "2026-09-26T20:00:00Z",
+     "syncedAt": "2026-09-26T21:00:00Z",
      "how": "published",
      "w": 1024,
      "h": 683,
@@ -10867,11 +13430,32 @@
      "size": 122655,
      "modifiedTime": "2026-09-26T12:17:50.904Z",
      "kind": "image",
-     "status": "unresolved",
-     "syncedAt": "2026-09-26T20:00:00Z",
+     "status": "synced",
+     "syncedAt": "2026-09-26T21:00:00Z",
      "how": "published",
      "w": 1024,
-     "h": 683
+     "h": 683,
+     "asset": "assets/images/lijiang/luye-restaurant.jpg",
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "vision": {
+      "faces": [],
+      "salient": {
+       "x": 0.0248,
+       "y": 0.2905,
+       "w": 0.8966,
+       "h": 0.5513
+      }
+     },
+     "display": {
+      "w": 1024,
+      "h": 683
+     }
     },
     {
      "driveId": "1BUfKybR_--IiaawMjeKse6tZkcFUyE70",
@@ -10881,16 +13465,16 @@
      "size": 118143,
      "modifiedTime": "2026-09-26T12:19:11.356Z",
      "kind": "image",
-     "status": "unresolved",
+     "status": "excluded",
      "syncedAt": "2026-09-26T20:00:00Z",
      "how": "published",
      "w": 1024,
-     "h": 683
+     "h": 683,
+     "note": "the mountain terrace does not represent the accommodation (Owner decision, 26 Sep 2026)"
     }
    ],
-   "status": "unresolved",
-   "syncedAt": "2026-09-26T20:00:00Z",
-   "question": "Luye Baisha is shown by its own rooms only (Owner, 21 Sep 2026 — never the mountain or the village; there was no house photography then). The library now holds the hotel at night, its lobby, restaurant and fireside lounges: may the gallery lead with the house? (The mountain-terrace frame stays out either way.)"
+   "status": "synced",
+   "syncedAt": "2026-09-26T20:00:00Z"
   },
   "046": {
    "title": "046 - Stays - The Houses - Siam Kempinski",
@@ -19920,7 +22504,29 @@
       }
      ],
      "syncedAt": "2026-09-26T20:00:00Z",
-     "how": "by-id"
+     "how": "by-id",
+     "vision": {
+      "faces": [],
+      "salient": {
+       "x": 0.1216,
+       "y": 0.0037,
+       "w": 0.8393,
+       "h": 0.882
+      }
+     },
+     "display": {
+      "w": 1920,
+      "h": 1440
+     },
+     "review": {
+      "/experience.html?id=vte-ongteu experience-gallery": {
+       "verdict": "kept",
+       "why": "the temple façade stays centred",
+       "by": "eye · crop sheet of every class",
+       "at": "2026-09-26",
+       "focal": "50% 50%"
+      }
+     }
     }
    ],
    "status": "synced",

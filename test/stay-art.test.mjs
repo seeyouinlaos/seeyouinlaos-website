@@ -40,9 +40,10 @@ test('no destination, city, mountain, Highlights, other-hotel, keyword or filena
   assert.match(A.NEVER.source, /city|experiences|hero|venue|temple/, 'the never-list names the destination and Highlights folders');
 });
 
-test('LUYE BAISHA · LIJIANG: the recommendation shows the hotel\'s own rooms — never Jade Dragon Snow Mountain or the Baisha village', () => {
-  const lb = JSON.parse(readFileSync(join(ROOT, 'src/stay-media.json'), 'utf8')).luyeBaisha; assert.equal(lb.lead, 'room'); assert.match(lb.leadWhy, /never stands for the hotel/); assert.ok(lb.images.length >= 3); assert.deepEqual(plain(M.luyeBaisha.images.map((i) => i.src)), lb.images.map((i) => i.src));
-  for (const im of lb.images) { assert.ok(['room', 'suite'].includes(im.kind), im.src + ' is a room of the hotel'); assert.doesNotMatch(im.src, /snow-mountain-viewing-1|city\//); assert.doesNotMatch(im.caption, /over the Baisha rooftops|village/i); }
+test('LUYE BAISHA · LIJIANG: the property itself (Owner decision, 26 Sep 2026: house photography now exists) — never a mountain-terrace, view or village frame', () => {
+  const lb = JSON.parse(readFileSync(join(ROOT, 'src/stay-media.json'), 'utf8')).luyeBaisha; assert.equal(lb.lead, undefined, 'no rooms-only lead any more'); assert.match(lb.leadNote, /presents the property itself/); assert.ok(lb.images.length >= 3);
+  assert.equal(lb.images[0].src, 'assets/images/lijiang/luye-hotel-at-night.jpg', 'the Owner\'s 045 · 001 leads: the hotel at night'); assert.deepEqual(plain(M.luyeBaisha.images.map((i) => i.src)), lb.images.map((i) => i.src));
+  for (const im of lb.images) { assert.ok(['exterior', 'lobby', 'facilities', 'room', 'suite'].includes(im.kind), im.src + ' is the hotel itself'); assert.doesNotMatch(im.caption, /terrace facing|Jade Dragon/i, 'the mountain terrace stays out'); assert.doesNotMatch(im.src, /snow-mountain-viewing-1|city\//); assert.doesNotMatch(im.caption, /over the Baisha rooftops|village/i); }
   assert.equal(A.house('lijiang'), 'assets/images/lijiang/view270-1.jpg'); assert.equal(R.lijiang.windows[0].bagImg, 'assets/images/lijiang/view270-1.jpg');
   assert.equal(P.items('ljg', 'snow-mountain-viewing')[0].img, 'assets/images/journey/lijiang-01.jpg', 'the Snow Mountain Viewing Room line carries its bedroom');
   assert.equal(existsSync(join(ROOT, 'assets/images/lijiang/snow-mountain-viewing-1.jpg')), false, 'the mountain frame is retired from the hotel folder');

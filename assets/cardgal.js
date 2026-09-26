@@ -52,6 +52,7 @@
         var a = slides[k].querySelector('a'); if (a) a.setAttribute('tabindex', on ? '0' : '-1');
         var im = slides[k].querySelector('img');
         if (on && im && im.getAttribute('data-src')) { im.src = im.getAttribute('data-src'); im.removeAttribute('data-src'); }
+        film(slides[k].querySelector('video'), on);
       }
       count.textContent = (i + 1) + ' / ' + n;
       for (var q = 0; q < dots.children.length; q++) dots.children[q].classList.toggle('on', q === i);
@@ -59,6 +60,17 @@
       /* the neighbour is fetched quietly, so the next turn is instant */
       var nx = slides[(i + 1) % n].querySelector('img');
       if (nx && nx.getAttribute('data-src')) { nx.src = nx.getAttribute('data-src'); nx.removeAttribute('data-src'); }
+    }
+    /* A CHAPTER'S FILM (Owner, 26 Sep 2026 · "Main 01 = lead"): a frame may hold the chapter's film — ambient like every card
+       film of the site: always muted, no sound control, fetched only when it is the frame on show, paused when it is not;
+       reduced motion or Save-Data keep its poster (the film's own first frame) */
+    function calm() { var mq = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)'); return !!(mq && mq.matches) || !!(navigator.connection && navigator.connection.saveData); }
+    function film(v, on) {
+      if (!v) return;
+      if (!on || calm()) { try { v.pause(); } catch (e) { /* nothing to pause */ } return; }
+      v.muted = true; v.defaultMuted = true; v.setAttribute('muted', '');
+      if (!v.getAttribute('src') && v.getAttribute('data-src')) { v.src = v.getAttribute('data-src'); v.removeAttribute('data-src'); }
+      try { var p = v.play(); if (p && p.catch) p.catch(function () { /* autoplay refused: the poster stays */ }); } catch (e) { /* the poster stays */ }
     }
     function go(k) { i = (k + n) % n; paint(); }
 

@@ -705,8 +705,10 @@ test('the dress code carries three codes and 18 owner references, acknowledged b
   assert.match(page, /<h2>Black Tie<\/h2>/);
   assert.match(page, /<h2>Resort Wear<\/h2>/);
   const imgs = [...page.matchAll(/assets\/images\/dress\/([a-z0-9-]+)\.jpg/g)].map((m) => m[1]);
-  assert.equal(imgs.length, 17, 'the crossed-out beach photograph is gone');
-  assert.equal(new Set(imgs).size, 17, 'no reference is used twice');
+  /* 26 Sep 2026 · Drive 400 by its subfolders: Black Tie 22 (dresscode_005 below the quality floor), Resort Wear 11, Lao Traditional Dress 6 */
+  assert.equal(imgs.length, 39, 'the Owner\'s dress-code folders, the crossed-out beach photograph still gone');
+  assert.equal(new Set(imgs).size, 39, 'no reference is used twice');
+  assert.ok(!imgs.includes('resort-01') && !imgs.includes('vow-05'), 'the beach photograph and the sub-standard vow-05 stay out');
   assert.ok(!imgs.includes('resort-01'), 'the retired photograph is never reused');
   imgs.forEach((f) => assert.ok(existsSync(join(ROOT, 'assets/images/dress/' + f + '.jpg')), f + ' missing on disk'));
   /* the public guide carries no acknowledgement of its own: that lives in step 04, once per guest */
@@ -806,7 +808,9 @@ test('Snow Mountain Viewing Room carries its own three room photographs (the Own
   assert.ok(!Object.values(R).flatMap((s) => s.rooms).some((r) => r.gallery.some((g) => /snow-mountain-viewing-1/.test(g[0]))), 'the view stands for no room');
   /* THE ACCOMMODATION MEDIA RULE (Owner, 21 Sep 2026): the house is shown by its own rooms — the peak over the Baisha rooftops is destination photography and stands for no hotel (test/stay-art.test.mjs) */
   const media = {}; new Function('window', readFileSync(join(ROOT, 'assets/stay-media.js'), 'utf8'))(media);
-  assert.equal(media.SIYL_STAY_MEDIA.luyeBaisha.images[0].src, 'assets/images/lijiang/view270-1.jpg', 'the house on The Journey: its own room at dusk');
+  /* Owner decision, 26 Sep 2026: the house is now photographed — the gallery leads with the hotel itself (045 · 001) */
+  assert.equal(media.SIYL_STAY_MEDIA.luyeBaisha.images[0].src, 'assets/images/lijiang/luye-hotel-at-night.jpg', 'the house on The Journey: the hotel at night');
+  assert.ok(media.SIYL_STAY_MEDIA.luyeBaisha.images.some((im) => im.src === 'assets/images/lijiang/view270-1.jpg'), 'its own room at dusk stays in the gallery');
   assert.equal(R.lijiang.windows[0].bagImg, 'assets/images/lijiang/view270-1.jpg');
   assert.match(readFileSync(join(ROOT, 'accommodation.html'), 'utf8'), /href="journeys\.html#j-ljg" style="background-image:url\(assets\/images\/lijiang\/view270-1\.jpg\)"/);
   assert.equal(P.items('ljg', 'snow-mountain-viewing')[0].img, room.gallery[0][0], 'the bag line carries the room');

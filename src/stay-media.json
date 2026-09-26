@@ -324,9 +324,61 @@
  "luyeBaisha": {
   "name": "Luye Baisha · Lijiang",
   "city": "Lijiang",
-  "lead": "room",
-  "leadWhy": "the Owner's photography of the house is its rooms — no exterior, lobby or grounds frame of the hotel itself exists; a mountain or village view is destination photography and never stands for the hotel (Owner, 21 Sep 2026 · the accommodation media rule)",
   "images": [
+   {
+    "src": "assets/images/lijiang/luye-hotel-at-night.jpg",
+    "kind": "exterior",
+    "caption": "The hotel at night, its rooms lit",
+    "source": "Owner Drive 045 · 001 - Luye Baisha · Lijiang (Owner decision, 26 Sep 2026)"
+   },
+   {
+    "src": "assets/images/lijiang/luye-lobby.jpg",
+    "kind": "lobby",
+    "caption": "The lobby and its windows to the mountain",
+    "source": "Owner Drive 045 · 002 - Luye Baisha · Lijiang (Owner decision, 26 Sep 2026)"
+   },
+   {
+    "src": "assets/images/lijiang/luye-lounge-lantern.jpg",
+    "kind": "lobby",
+    "caption": "The lounge beneath the lantern",
+    "source": "Owner Drive 045 · 003 - Luye Baisha · Lijiang (Owner decision, 26 Sep 2026)"
+   },
+   {
+    "src": "assets/images/lijiang/luye-fireside-painting.jpg",
+    "kind": "facilities",
+    "caption": "A fireside lounge with a painted wall",
+    "source": "Owner Drive 045 · 004 - Luye Baisha · Lijiang (Owner decision, 26 Sep 2026)"
+   },
+   {
+    "src": "assets/images/lijiang/luye-fireside-lounge.jpg",
+    "kind": "facilities",
+    "caption": "The fireside lounge",
+    "source": "Owner Drive 045 · 005 - Luye Baisha · Lijiang (Owner decision, 26 Sep 2026)"
+   },
+   {
+    "src": "assets/images/lijiang/luye-fireside-mountain.jpg",
+    "kind": "facilities",
+    "caption": "A fireside lounge before the mountain",
+    "source": "Owner Drive 045 · 006 - Luye Baisha · Lijiang (Owner decision, 26 Sep 2026)"
+   },
+   {
+    "src": "assets/images/lijiang/luye-lounge-fire.jpg",
+    "kind": "lobby",
+    "caption": "The lounge by the fire",
+    "source": "Owner Drive 045 · 007 - Luye Baisha · Lijiang (Owner decision, 26 Sep 2026)"
+   },
+   {
+    "src": "assets/images/lijiang/luye-room-fireplace.jpg",
+    "kind": "room",
+    "caption": "A room with its own fireplace",
+    "source": "Owner Drive 045 · 008 - Luye Baisha · Lijiang (Owner decision, 26 Sep 2026)"
+   },
+   {
+    "src": "assets/images/lijiang/luye-restaurant.jpg",
+    "kind": "facilities",
+    "caption": "The restaurant",
+    "source": "Owner Drive 045 · 009 - Luye Baisha · Lijiang (Owner decision, 26 Sep 2026)"
+   },
    {
     "src": "assets/images/lijiang/view270-1.jpg",
     "kind": "room",
@@ -362,14 +414,9 @@
     "kind": "room",
     "caption": "The sitting room and the fireplace",
     "source": "Owner Drive 024 - Hotel - Luye Baisha Lijiang"
-   },
-   {
-    "src": "assets/images/lijiang/luye-a-room-with-its-own-fireplace.jpg",
-    "kind": "room",
-    "caption": "A room with its own fireplace",
-    "source": "Owner Drive 045 (Media Asset Agent, 26 Sep 2026)"
    }
-  ]
+  ],
+  "leadNote": "Owner decision, 26 Sep 2026: the gallery presents the property itself in the Owner's numbered order (045 · 001–009); the mountain-terrace frame (010) stays out"
  },
  "kempinski": {
   "name": "Siam Kempinski Bangkok",

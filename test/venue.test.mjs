@@ -122,7 +122,7 @@ test('MARKUP · every label and legend item is a button with a name and a presse
   for (const z of DATA.zones) {
     const d = H.detail(z, 0);
     assert.match(d, /<h3 id="venue-detail-h" class="venue-title">/); assert.match(d, /<p class="venue-story">/);
-    if (z.index) { assert.doesNotMatch(d, /venue-photo|venue-thumb/, z.id + ': an index entry carries no photograph'); assert.match(d, /class="venue-detail-in venue-index"/); assert.match(d, /href="#dinner">The Wedding Dinner<\/a>/); continue; }
+    if (z.index) { assert.doesNotMatch(d, /venue-photo|venue-thumb/, z.id + ': an index entry carries no photograph'); assert.match(d, /class="venue-detail-in venue-index"/); assert.match(d, /href="(?:voyage\.html)?#dinner">The Wedding Dinner<\/a>/); continue; }
     assert.match(d, /loading="lazy" decoding="async"/); assert.match(d, /width="\d+" height="\d+"/, 'intrinsic size: no layout shift');
     if (z.photos.length > 1) { assert.match(d, /role="group" aria-label="Photographs of /); assert.match(d, /<button type="button" class="venue-thumb" data-photo="0" aria-pressed="true" aria-label="/); }
   }

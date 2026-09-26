@@ -158,7 +158,7 @@ test('the dress code is understood once, in step 04, and acknowledged per guest 
   const wp = read('wedding-preparation.html');
   assert.match(wp, /setDressAck\(c\.checked\)/);
   assert.doesNotMatch(wp, /p\.guests\.forEach/, 'one guest, one acknowledgement');
-  assert.equal((wp.match(/assets\/images\/dress\//g) || []).length, 17);
+  assert.equal((wp.match(/assets\/images\/dress\//g) || []).length, 39, 'the Owner\'s dress-code folders (26 Sep 2026)');
   assert.doesNotMatch(wp, /resort-01\.jpg/, 'the crossed-out beach photograph is gone');
   for (const f of ['invitation.html', 'your-journey.html', 'wedding.html', 'about-you.html', 'review.html']) {
     const page = read(f);

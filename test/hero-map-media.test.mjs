@@ -110,8 +110,8 @@ test('AFTER THE WEDDING · the whole Lijiang 02 folder in one card gallery: nine
   const frames = [...card.matchAll(/(?:src|data-src)="assets\/images\/city\/(004-lijiang-aw-\d\d\.jpg)"/g)].map((m) => m[1]);
   assert.deepEqual(frames, Array.from({ length: 9 }, (_, i) => '004-lijiang-aw-' + String(i + 1).padStart(2, '0') + '.jpg'), 'nine, in a deterministic order');
   for (const f of frames) { const p = join(ROOT, 'assets/images/city/' + f); assert.ok(existsSync(p), f); assert.ok(statSync(p).size < 520000, f + ' is web-sized'); }
-  assert.equal((card.match(/href="journeys\.html#j-mu9646"/g) || []).length, 9, 'every frame is the same journey link the card always was');
-  assert.equal((card.match(/loading="lazy"/g) || []).length, 8, 'only the first photograph is asked for at once');
+  assert.equal((card.match(/href="journeys\.html#j-mu9646"/g) || []).length, 10, 'every frame — the film and the nine photographs — is the same journey link the card always was');
+  assert.equal((card.match(/loading="lazy"/g) || []).length, 9, 'the photographs are asked for as they are turned to; the film leads (26 Sep 2026)');
   assert.match(h, /<h3>After the Wedding<\/h3>/); assert.match(h, /<p class="an">1 – 8 March 2027<\/p>/);
   assert.match(h, /Kunming, the train through the gorges to Lijiang, and two closing nights back in Bangkok\./);
   assert.match(h, /<a class="a-more" href="journeys\.html#j-mu9646">Discover more<\/a>/, 'Discover more is untouched');
@@ -138,14 +138,16 @@ test('ITEM 12 (24 Sep 2026) · BEFORE THE WEDDING and THE WEDDING are the same c
   const frames = (card) => [...card.matchAll(/<div class="cg-frame(?: is-on)?"><a href="([^"]+)" tabindex="(?:0|-1)"><img (?:src|data-src)="(assets\/images\/[^"]+)"/g)].map((m) => [m[1], m[2]]);
   const before = frames(gal('Before the Wedding')), wed = frames(gal('The Wedding'));
   assert.deepEqual(before.map((f) => f[1]), ['city/001-bangkok-skytrain-king-power-mahanakhon.jpg', ...BKK.map((f) => 'city/' + f), 'transport/train-no25-krung-thep-aphiwat.jpg', 'transport/train-no25-terminal-aerial.jpg', 'transport/train-no25-first-class-passenger-room.jpg', 'transport/train-no25-srt-train.jpg'].map((f) => 'assets/images/' + f));
-  assert.deepEqual(wed.map((f) => f[1]), ['event/052-vow-ceremony-green-door.jpg', 'event/052-ceremony-green-gateway.jpg', 'experiences/vte-ongteu-01.jpg', 'experiences/vte-ongteu-03.jpg', 'temple/takbat-couple-giving-novice.jpg', 'temple/takbat-novices-with-bowls.jpg', 'temple/takbat-couple-offering-bowl.jpg', 'temple/sangkhathan-prepared-offerings.jpg', 'event/051-coffee-and-cake-patisserie.jpg', 'event/052-vow-ceremony-green-door-entrance.jpg', 'souphattra/heritage-arches-dusk.jpg', 'souphattra/heritage-room.jpg'].map((f) => 'assets/images/' + f));
+  assert.deepEqual(wed.map((f) => f[1]), ['event/005-wedding-001-long-table-above.jpg', 'event/052-vow-ceremony-green-door.jpg', 'event/052-ceremony-green-gateway.jpg', 'experiences/vte-ongteu-01.jpg', 'experiences/vte-ongteu-03.jpg', 'temple/takbat-couple-giving-novice.jpg', 'temple/takbat-novices-with-bowls.jpg', 'temple/takbat-couple-offering-bowl.jpg', 'temple/sangkhathan-prepared-offerings.jpg', 'event/051-coffee-and-cake-patisserie.jpg', 'event/052-vow-ceremony-green-door-entrance.jpg', 'souphattra/heritage-arches-dusk.jpg', 'souphattra/heritage-room.jpg'].map((f) => 'assets/images/' + f));
   for (const [, f] of [...before, ...wed]) assert.ok(existsSync(join(ROOT, f)), f);
   for (const [href, f] of before) assert.equal(href, /\/transport\//.test(f) ? 'journeys.html#j-train' : 'journeys.html#j-bkk-stay', f);
   for (const [href] of wed) assert.equal(href, 'voyage.html');
   for (const card of [gal('Before the Wedding'), gal('The Wedding')]) {
     assert.equal((card.match(/<div class="cg-frame is-on">/g) || []).length, 1, 'one frame on at first');
-    assert.equal((card.match(/ src="/g) || []).length, 1, 'only the first photograph is asked for at once');
-    assert.equal((card.match(/loading="lazy"/g) || []).length, (card.match(/data-src="/g) || []).length);
+    /* a chapter's film (Main 01, 26 Sep 2026) leads without a src — fetched only while it is the frame on show */
+    const films = (card.match(/<video class="cg-film"/g) || []).length;
+    assert.equal((card.match(/ src="/g) || []).length, films ? 0 : 1, 'only the first frame is asked for at once');
+    assert.equal((card.match(/loading="lazy"/g) || []).length, (card.match(/data-src="/g) || []).length - films);
     assert.doesNotMatch(card, /penthouse|shama|riverside|usathorn|u-sathorn/i, 'no withdrawn product and no hotel the card does not name');
   }
   assert.match(h, /<h3>Before the Wedding<\/h3>/); assert.match(h, /<h3>The Wedding<\/h3>/);

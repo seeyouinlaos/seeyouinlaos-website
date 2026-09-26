@@ -17,7 +17,7 @@ test('THE RECORD · the facts once (Sunday 28 Feb 2027 · 19:30 · Poolside · S
   assert.match(WD.copy, /Chinese sharing menu/); assert.equal(WD.seating, 'The long table beside the water — side A along the pool, side B facing it.', 'TO-02011'); assert.doesNotMatch(WD.copy + WD.seating, /cocktail|second dinner|two dinners/i);
   assert.equal(WD.href, 'voyage.html#dinner'); assert.equal(WD.dressHref, 'wedding-preparation.html#dress-code');
   const srcs = WD.media.map((m) => m.src);
-  assert.equal(srcs.length, 13); assert.equal(new Set(srcs).size, 13, 'no photograph twice');
+  assert.equal(srcs.length, 15, 'the 13 frames + the long table from above and its place settings (Drive 200 · 007, 26 Sep 2026)'); assert.equal(new Set(srcs).size, 15, 'no photograph twice');
   for (const m of WD.media) { assert.ok(existsSync(join(ROOT, m.src)), m.src + ' is on disk'); assert.ok(m.alt && m.source, m.src + ' carries its words and its Drive source'); }
   const set056 = srcs.filter((s) => /056-wedding-dinner-/.test(s)); assert.equal(set056.length, 11, 'every frame of Drive 056');
   assert.ok(srcs.includes('assets/images/event/056-wedding-dinner-08-long-table-candlelight.jpg'), 'the dark candlelit table');
@@ -25,7 +25,7 @@ test('THE RECORD · the facts once (Sunday 28 Feb 2027 · 19:30 · Poolside · S
   assert.ok(srcs.includes('assets/images/venue/pool-terrace-oblique-1600.jpg'), 'the pool terrace from the upper floor (the venue map\'s unique frame)');
   assert.ok(srcs.includes('assets/images/event/056-wedding-dinner-07-pool-aerial.jpg') && srcs.includes('assets/images/event/056-wedding-dinner-03-poolside-loungers.jpg'), 'the pool from above and the pool with the houses — the same photographs the venue map once listed under 053');
   assert.equal(WD.lead, 'assets/images/event/056-wedding-dinner-01-poolside-from-above.jpg');
-  assert.equal((WD.galleryHtml().match(/<img /g) || []).length, 13); assert.doesNotMatch(WD.galleryHtml(), /<h2|<h3|caption/, 'frames only — no second title');
+  assert.equal((WD.galleryHtml().match(/<img /g) || []).length, 15); assert.doesNotMatch(WD.galleryHtml(), /<h2|<h3|caption/, 'frames only — no second title');
 });
 
 test('ONE DETAIL under The Wedding: #dinner with the eyebrow, the title, the copy, the dress and the one gallery drawn from the record; the second static block is gone; the venue map\'s dinner is an index entry pointing to #dinner; no duplicate anchor', () => {
@@ -61,7 +61,7 @@ test('EVERY OTHER SURFACE is a teaser or a link — never a second presentation;
 
 test('THE WAY FROM THE VENUE (Owner\'s iPad, 21 Sep 2026): the index entry\'s call is a native same-page link to the one #dinner — no preventDefault, no second route; the page carries a scroll padding for the sticky header so the anchor lands below it, never beneath; the target is revealed at once on the tap; the guard only ever brings the same target into view; one #dinner id on the page', () => {
   const v = src('assets/venue.js'), css = src('assets/aman.css'), html = src('voyage.html');
-  assert.match(v, /<a class="a-link"' \+ \(z\.swap \? ' data-cta-swap' : ''\) \+ ' href="' \+ esc\(z\.href\) \+ '">/, 'a real anchor with the real href');
+  assert.match(v, /<a class="a-link"' \+ \(z\.swap \? ' data-cta-swap' : ''\) \+ ' href="' \+ esc\(hrefOf\(z\.href\)\) \+ '">/, 'a real anchor with the real href');
   const guard = v.slice(v.indexOf("frag.querySelectorAll('a.a-link[href^=\"#\"]')"), v.indexOf('if (announce && changed)'));
   assert.ok(guard.length > 100, 'the guard stands beside the link'); assert.doesNotMatch(guard, /preventDefault|location\.assign|location\.replace|reload|open\(/, 'native navigation is never replaced');
   assert.match(guard, /t\.classList\.add\('is-in'\)/, 'the target is revealed at once'); assert.match(guard, /scrollIntoView\(\{ block: 'start' \}\)/, 'the fallback brings the same target into view'); assert.match(guard, /root\.location\.hash = '#' \+ id/, 'the fallback sets the same fragment');

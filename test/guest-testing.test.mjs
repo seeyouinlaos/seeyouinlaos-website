@@ -184,12 +184,15 @@ test('WORDING: no 1 + 1 seating, no blue dress, dinner poolside, China card is t
   for (const f of ['assets/journey.js', 'assets/temple.js', 'voyage.html', 'index.html', 'review.html', 'wedding.html']) assert.doesNotMatch(src(f), /courtyard garden/i, f);
   assert.match(src('assets/journey.js'), /Souphattra Heritage Vientiane · poolside/); assert.match(src('voyage.html'), /<p class="a-eyebrow">19:30 · Souphattra Heritage · poolside<\/p>/); assert.match(src('voyage.html'), /An evening poolside/);
   /* 21 Sep 2026: the Owner's clip of Impression Lijiang on the China card, its own poster frame beneath (gate V1) */
-  assert.match(src('index.html'), /destination\.html#china" data-video="assets\/video\/china-card\.mp4" style="background-image:url\(assets\/images\/city\/004-lijiang-card-poster\.jpg\)/);
+  /* 26 Sep 2026 · the Owner's folder 002: "03 - China - Kunming" is the China card's film (the card opens the Kunming chapter, #china) */
+  assert.match(src('index.html'), /destination\.html#china" data-video="assets\/video\/kunming-card\.mp4" style="background-image:url\(assets\/images\/city\/003-kunming-card-poster\.jpg\)/);
   assert.match(src('assets/images/ASSET-MAP.md'), /1XBVp6qIwUSWfHpw4w3S0CH-apvsej154/, 'the Drive source is traceable');
   /* the "After the Wedding" card is the Owner's whole Lijiang 02 folder, one card gallery of nine (22 Sep 2026) */
   assert.match(src('index.html'), /<div class="cg am" data-cardgal /);
   assert.equal((src('index.html').match(/assets\/images\/city\/004-lijiang-aw-\d\d\.jpg/g) || []).length, 9, 'nine frames in the card');
-  assert.match(src('index.html'), /journeys\.html#j-mu9646" tabindex="0"><img src="assets\/images\/city\/004-lijiang-aw-01\.jpg"/, 'each frame keeps the journey link; the first is fetched at once');
+  /* 26 Sep 2026 · the folder's "Main_Video 01" leads the card (Owner rule: Main 01 = lead); the photographs follow, fetched on turn */
+  assert.match(src('index.html'), /journeys\.html#j-mu9646" tabindex="0"><video class="cg-film" playsinline loop muted preload="none" poster="assets\/images\/city\/chapter-after-poster\.jpg" data-src="media\/chapter-after\.mp4"/, 'the chapter film leads, muted');
+  assert.match(src('index.html'), /journeys\.html#j-mu9646" tabindex="-1"><img data-src="assets\/images\/city\/004-lijiang-aw-01\.jpg"/, 'each frame keeps the journey link');
   assert.match(src('assets/images/ASSET-MAP.md'), /1k9cliGiXWyHIp8tHsppcCb-bFw523LD6/, 'the Drive folder is traceable');
   /* the first three tradition references, in the Owner's order */
   for (const f of ['wedding-preparation.html', 'dress.html']) {

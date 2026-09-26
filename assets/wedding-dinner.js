@@ -37,7 +37,10 @@
       { src: E + '056-wedding-dinner-09-lilies.jpg', alt: 'White lilies on the table', source: 'Drive 056' },
       { src: E + '056-wedding-dinner-10-lilies-at-night.jpg', alt: 'Lilies against the night', source: 'Drive 056' },
       { src: E + '056-wedding-dinner-11-sharing-menu.jpg', alt: 'The Chinese sharing menu', source: 'Drive 056' },
-      { src: E + '053-wedding-dinner-sharing-menu.jpg', alt: 'Bamboo steamers of dim sum — the Chinese sharing menu', source: 'Drive 1fkK2P-Hi4Lhw5CygcQS6rlxA3XkF2K5n (053)' }
+      { src: E + '053-wedding-dinner-sharing-menu.jpg', alt: 'Bamboo steamers of dim sum — the Chinese sharing menu', source: 'Drive 053' },
+      /* Drive 200 · 007 - Wedding - Dinner (Owner, 26 Sep 2026) */
+      { src: E + '053-wedding-dinner-long-table-settings.jpg', alt: 'Place settings along the long table, in black and white', source: 'Drive 200 · 007' },
+      { src: E + '200-wedding-dinner-pool-from-above.jpg', alt: 'The long table beside the pool, from above', source: 'Drive 200 · 007' }
     ]
   };
   WD.lead = WD.media[0].src;

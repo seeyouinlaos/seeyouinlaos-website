@@ -239,9 +239,10 @@ test('QUESTION 5 REMOVED · "Anything you would rather avoid?" is on no surface:
 
 test('THE BANGKOK CLIP · the destination card declares the local H.264 derivative of the Owner\'s file (no hotlink), the module keeps the photograph as the poster and falls back to it, gate V1 verifies the streams by name', () => {
   const idx = src('index.html');
-  assert.match(idx, /<a class="am" href="destination\.html#bangkok" data-video="assets\/video\/bangkok-card\.mp4" style="background-image:url\(assets\/images\/city\/001-bangkok-chao-phraya-skyline\.jpg\)"/, 'the card: the photograph stays the poster');
-  assert.ok(existsSync('assets/video/bangkok-card.mp4')); const size = statSync('assets/video/bangkok-card.mp4').size; assert.ok(size > 500000 && size <= 4.5 * 1024 * 1024, 'small: ' + size);
-  const head = readFileSync('assets/video/bangkok-card.mp4').subarray(0, 4096).toString('latin1'); assert.ok(head.indexOf('ftyp') >= 0 && head.indexOf('moov') >= 0, 'faststart');
+  /* the Owner's folder 002 (26 Sep 2026): "01 - Thailand - Bangkok" is the first page's main film, byte for byte — the card plays it */
+  assert.match(idx, /<a class="am" href="destination\.html#bangkok" data-video="assets\/video\/hero-000-main\.mp4" style="background-image:url\(assets\/images\/city\/001-bangkok-chao-phraya-skyline\.jpg\)"/, 'the card: the photograph stays the poster');
+  assert.ok(existsSync('assets/video/hero-000-main.mp4')); assert.ok(!existsSync('assets/video/bangkok-card.mp4'), 'the old derivative is retired');
+  const head = readFileSync('assets/video/hero-000-main.mp4').subarray(0, 4096).toString('latin1'); assert.ok(head.indexOf('ftyp') >= 0 && head.indexOf('moov') >= 0, 'faststart');
   assert.doesNotMatch(idx, /drive\.google\.com|googleusercontent/, 'never a Drive hotlink');
   const am = src('assets/aman.js');
   for (const re of [/v\.muted = true; v\.defaultMuted = true; v\.loop = true; v\.autoplay = true;/, /setAttribute\('playsinline', ''\)/, /if \(calmMotion\(\)\) \{ frame\.setAttribute\('data-video-state', 'still'\); return null; \}/, /s\.addEventListener\('error', fail\);/, /p\.then\(null, function \(\) \{ if \(v\.isConnected\) fail\(\); \}\)/, /v\.addEventListener\('playing', function \(\) \{ frame\.classList\.add\('am-playing'\)/]) assert.match(am, re);

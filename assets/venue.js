@@ -102,6 +102,9 @@
     return out.join('');
   }
 
+  /* A ZONE'S WAY ON (Owner, 26 Sep 2026): the stage stands on the first page and on The Wedding; a zone's '#section' is a
+     section of The Wedding page — on a page that does not carry it (the first page has no #dinner), the link goes there */
+  function hrefOf(h) { return h.charAt(0) === '#' && doc && doc.getElementById && !doc.getElementById(h.slice(1)) ? 'voyage.html' + h : h; }
   function detailHtml(z, i) {
     var photo = z.photos[i || 0];
     return '<div class="venue-detail-in' + (z.index ? ' venue-index' : '') + '" data-motion="reveal">' +
@@ -114,7 +117,7 @@
         return '<button type="button" class="venue-thumb" data-photo="' + k + '" aria-pressed="' + (k === (i || 0) ? 'true' : 'false') + '" aria-label="' + esc(q.alt) + '"><img src="' + q.src + '" alt="" loading="lazy" decoding="async" width="96" height="72"></button>';
       }).join('') + '</div>' : '') +
       '<p class="venue-story">' + esc(z.story) + '</p>' +
-      (z.href ? '<a class="a-link"' + (z.swap ? ' data-cta-swap' : '') + ' href="' + esc(z.href) + '">' + esc(z.cta) + '</a>' : '') +
+      (z.href ? '<a class="a-link"' + (z.swap ? ' data-cta-swap' : '') + ' href="' + esc(hrefOf(z.href)) + '">' + esc(z.cta) + '</a>' : '') +
       '</div>';
   }
 

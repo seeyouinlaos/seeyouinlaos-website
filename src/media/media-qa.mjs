@@ -76,8 +76,9 @@ for (const [no, c] of Object.entries(M.collections)) {
 const heroHtml = text['index.html'] || '';
 for (const f of films) {
   const name = path.basename(f.asset);
-  if ((f.role || '') === 'hero-slide') {
-    const m = new RegExp('data-hero-video="media/' + name.replace('.', '\\.') + '" data-audio="([01])"').exec(heroHtml);
+  if ((f.role || '') === 'hero-slide' || (f.it.slots || []).some((s) => s.role === 'hero-slide')) {
+    const pages = [...new Set((f.it.slots || []).filter((s) => s.role === 'hero-slide').map((s) => s.route.replace(/^\//, '')).concat(f.role === 'hero-slide' ? ['index.html'] : []))];
+    const m = pages.map((pg) => new RegExp('data-hero-video="media/' + name.replace('.', '\\.') + '" data-audio="([01])"').exec(text[pg] || '')).find(Boolean);
     if (!m) fail(f.no, f.it.title, 'the Hero film is not delivered through the byte-range route (media/' + name + ')');
     else if ((m[1] === '1') !== !!f.it.audio) fail(f.no, f.it.title, 'the sound control would ' + (f.it.audio ? 'be missing on a film with audio' : 'appear on a silent film'));
   }
@@ -85,7 +86,8 @@ for (const f of films) {
      (always muted, no controls); clip = a [data-clip] frame whose sound button exists only with a meaningful audio track */
   for (const s of f.it.slots || []) {
     const pb = (M.roles[s.role] || {}).playback, page = text[s.route.replace(/^\//, '')] || '';
-    if (pb === 'ambient' && !page.includes('data-video="assets/video/' + name + '"')) fail(f.no, f.it.title + ' @ ' + s.route, 'the ambient film is not declared there (data-video)');
+    /* ambient: a card or chapter loop (data-video) — or a chapter card's film frame (assets/cardgal.js, data-src="media/…") */
+    if (pb === 'ambient' && !page.includes('data-video="assets/video/' + name + '"') && !page.includes('data-src="media/' + name + '"')) fail(f.no, f.it.title + ' @ ' + s.route, 'the ambient film is not declared there (data-video)');
     if (pb === 'clip') {
       const at = page.indexOf('data-src="assets/video/' + name + '"'); if (at < 0) { fail(f.no, f.it.title + ' @ ' + s.route, 'the clip is not declared there'); continue; }
       const frame = page.slice(page.lastIndexOf('data-clip', at), page.indexOf('</figure>', at) > 0 ? page.indexOf('</figure>', at) : at + 2000);
