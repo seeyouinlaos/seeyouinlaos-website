@@ -71,7 +71,7 @@ The first page's Hero is the Drive folder **`000 - Hero Image`**, and nothing el
 2. **Download each new or changed file.** The Drive connector fails above ~7 MB, so a larger file comes from the Owner as an upload with the identical byte size.
 3. **Place the media.**
    - Kind comes from the actual file: `image/*` is an image, `video/*` is a video.
-   - Order is the Drive titles, ascending.
+   - Order is the Drive titles, ascending, unless the record carries an explicit Owner order (`"order": "explicit"` with its `orderNote`; since 26 Sep 2026 the main video plays last, at Haruthai's request). Keep an explicit order when syncing: a new file is added where the Owner says.
    - The local asset is named after its position (`hero-NNN…`).
 4. **Prepare the assets.**
    - **Images:** re-encode at their own size with no metadata (`magick -auto-orient -strip -interlace Plane -quality 84`).

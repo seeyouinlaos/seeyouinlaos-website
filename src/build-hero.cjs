@@ -45,7 +45,9 @@ function problems() {
     if (!x.focal || !['p', 'tp', 'tl', 'd'].every((k) => /^\d+% \d+%$/.test(x.focal[k] || ''))) p.push(x.title + ': four focal points');
   });
   const titles = REC.items.map((x) => x.title);
-  if (titles.join('\n') !== titles.slice().sort().join('\n')) p.push('the items are not in Drive title order');
+  /* the order is the Drive titles unless the record states an explicit, Owner-set order (orderNote says whose and why) */
+  if (REC.order === 'title-ascending' && titles.join('\n') !== titles.slice().sort().join('\n')) p.push('the items are not in Drive title order');
+  if (REC.order === 'explicit' && !REC.orderNote) p.push('an explicit order names its reason (orderNote)');
   if (!REC.items[0] || !REC.items[0].alt) p.push('the first item needs its alt text');
   return p;
 }
