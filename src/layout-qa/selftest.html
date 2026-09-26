@@ -22,6 +22,10 @@ main > * { max-width: var(--a-frame); margin-left: auto; margin-right: auto; pad
   <section><div class="bad" data-expect="TEXT_CLIPPED" style="overflow:hidden;width:120px;white-space:nowrap">A line far longer than its box, cut off</div></section>
   <section><img class="bad" data-expect="MEDIA_DISTORTED" alt="" style="width:200px;height:200px;display:block" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='100'><rect width='200' height='100' fill='%23999'/></svg>"></section>
   <section><img class="bad" data-expect="MEDIA_BROKEN" alt="" style="width:100px;height:60px;display:block" src="data:image/png;base64,AAAA"></section>
+  <!-- grouped media (26 Sep 2026): a correct duo, a duo stacked into two full-wall blocks, a duo whose members differ in weight -->
+  <section class="a-duo" style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div class="am good" style="aspect-ratio:1;background:#ccc"></div><div class="am good" style="aspect-ratio:1;background:#bbb"></div></section>
+  <section class="a-duo"><div class="am" style="height:120px;background:#ccc"></div><div class="am bad" data-expect="GROUP_STACKED" style="height:120px;background:#bbb"></div></section>
+  <section class="a-duo" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start"><div class="am" style="height:60px;background:#ccc"></div><div class="am bad" data-expect="GROUP_WEIGHT" style="height:120px;background:#bbb"></div></section>
   <section><div class="bad" data-expect="OUTSIDE_WALL" style="width:calc(100% + 60px);height:20px;background:#333"></div></section>
   <section class="bad" data-expect="SECTION_OVERLAP" style="margin-top:-60px;height:40px"><p>Sits on the section above.</p></section>
 </main>

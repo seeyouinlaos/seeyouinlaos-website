@@ -790,20 +790,15 @@ html[data-session="in"] [data-private-cta] { display: none !important; }
 /* ---- THE MAP OF LAOS ------------------------------------------------------
    The map carries its own proportions (838 × 980), so the drawing meets both
    edges of the frame it is given instead of floating in an empty block; the
-   photograph beside it takes the same height. On a tablet held upright the duo
-   stacks and the map has the whole column, capped so it stays a page and not a
-   poster. Nothing is cropped, stretched or distorted at any width. */
+   photograph beside it takes the same height. Nothing is cropped, stretched or
+   distorted at any width.
+   THE DUO IS ONE COMPOSITION AT EVERY WIDTH (Owner, 26 Sep 2026 · composition QA): its two photographs stand side by side
+   on the frame's two columns from the phone to the desktop — never two full-wall blocks stacked. A tablet held upright
+   (768–1199 px, portrait) used to stack them, which made the map a 633 × 740 poster above a 746 × 497 photograph while
+   the phone, the small tablet and the landscape tablet all kept the pair; the stack is gone, and the layout QA's GROUP
+   rule (src/layout-contract.cjs · groups) fails any duo whose members leave their shared row. */
 .a-duo .am.a-map { aspect-ratio: 838 / 980; background-size: contain; background-color: #E7E3DB; }
 .a-duo .am.a-map + .am { aspect-ratio: auto; height: 100%; min-height: 160px; }
-/* THE TABLET FRAME (Owner, 24 Sep 2026 · item 13): the duo is on the same frame as the closing invitation below it —
-   no narrower 760 px column re-centred inside the frame (that put the photograph and its caption 4–37 px inside the rule,
-   the eyebrow, the heading and the call to action on every iPad held upright). Stacked, the map keeps its readable cap
-   and is centred on the frame's axis; the photograph, the caption, the rule and the words share the frame's edges. */
-@media (min-width: 768px) and (max-width: 1199px) and (orientation: portrait) {
-  .a-duo { grid-template-columns: minmax(0, 1fr); row-gap: 18px; }
-  .a-duo .am.a-map { justify-self: center; width: min(100%, calc(62vh * 838 / 980)); }
-  .a-duo .am.a-map + .am { aspect-ratio: 3 / 2; height: auto; }
-}
 @media (min-width: 768px) and (orientation: landscape) {
   .a-duo .am.a-map { justify-self: center; width: min(100%, calc(76vh * 838 / 980)); }
 }

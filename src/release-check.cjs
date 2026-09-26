@@ -712,6 +712,17 @@ gate('P7', 'Dress Code imagery real (23 — resort-01 retired by the owner), no 
       if (rec.widths !== core.fullWidths().length) problems.push('the FULL layout audit covered ' + rec.widths + ' widths, the matrix has ' + core.fullWidths().length);
     }
   }
+  /* THE COMPOSITION AUDIT (26 Sep 2026): grouped media rendered densely in both orientations, both engines, both languages */
+  {
+    const f = path.join(ROOT, 'docs', 'acceptance', 'layout', 'LAST-COMPOSITION-AUDIT.json');
+    if (!fs.existsSync(f)) problems.push('no recorded composition audit (node src/layout-qa/composition.mjs --record)');
+    else {
+      const rec = JSON.parse(fs.readFileSync(f, 'utf8'));
+      if (rec.fingerprint !== fp) problems.push('the composition audit (' + rec.fingerprint + ') was run on another layout than this one (' + fp + ') — run it again');
+      if (rec.violations !== 0) problems.push('the composition audit has ' + rec.violations + ' violation(s)');
+      if (!['chromium', 'webkit'].every((e) => (rec.engines || []).includes(e)) || !['en', 'th'].every((l) => (rec.langs || []).includes(l))) problems.push('the composition audit did not cover Chromium + WebKit, English + Thai');
+    }
+  }
   gate('L2', 'Layout contract: every page audited, every exception a named primitive, fast gate and full audit on this exact layout with zero unexplained violations', problems.length === 0,
     problems.length ? problems.join(' · ') : 'fingerprint ' + fp + ' · ' + R.ROUTES.length + ' routes · ' + R.STATES.length + ' states · ' + core.fullWidths().length + ' widths · 0 unexplained');
 }

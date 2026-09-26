@@ -51,6 +51,24 @@ module.exports = {
     { sel: '.prep-head .p-media', minWidth: 900, why: 'the private journey reads on ONE 860 px column on the wall\'s left axis (prep.css · one column); the step\'s photograph belongs to it' }
   ],
 
+  /* GROUPED MEDIA (Owner, 26 Sep 2026 · composition QA): photographs that form ONE editorial composition. Two valid photographs
+     can still be an invalid composition — the auditor measures the group, not only its members:
+       row           the members share one row (vertical overlap ≥ 60 % of the shorter) — never a stack of independent blocks
+       weight        the taller member ≤ weight × the shorter (one row, one visual weight); area ≤ weight² (the aspect of each
+                     member may differ — a map keeps its drawing ratio — but neither may dominate)
+       memberShare   no member wider than this share of the content wall (a member is never a full-wall block)
+       heightRatio   the group's media height ≤ this × the group's width (no poster-sized pair)
+       continuity    between two adjacent sampled widths of one orientation, the group's height ÷ width changes by at most
+                     this factor (src/layout-qa/composition.mjs: a breakpoint gap cannot hide between the named widths) —
+                     1.8: the phone's 4 : 5 pair becoming the tablet's 4 : 3 pair at 600 px is ×1.7 (art-directed); a stack is ×2.9 or more
+     routes: where the group stands (the composition audit renders exactly these). */
+  groups: [
+    { sel: '.a-duo', members: ':scope > .am', count: 2, weight: 1.25, memberShare: 0.62, heightRatio: 0.9, continuity: 1.8,
+      routes: ['/index.html', '/voyage.html'], why: 'the duo: two supporting photographs (the map of Laos beside the reclining Buddha; the alms-giving pair) side by side on the frame\'s two columns at every width' },
+    { sel: '.duo', members: ':scope > .ph', count: 2, weight: 1.25, memberShare: 0.62, heightRatio: 0.9, continuity: 1.8,
+      routes: ['/1872.html'], why: 'the venue page\'s secondary pair: two photographs side by side' }
+  ],
+
   /* components whose inner text is positioned by the component itself (labels on a map, counters on a picture) */
   axisFree: [
     { sel: '.venue-labels, .venue-stage', why: 'the venue map: labels sit on the drawing at the venue\'s coordinates' },

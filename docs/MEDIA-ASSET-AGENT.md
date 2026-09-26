@@ -150,6 +150,13 @@ The Owner's private working area is permanently outside the agent's authority.
 - The need is the role's largest box (`roles.*.px`) at device density 2.
 - A source below it is **reported**, never upscaled. The report says when the Drive source has more pixels than the site shows, so a sync can deliver them.
 
+## Grouped media (26 Sep 2026)
+
+Some photographs are one half of a composition: the duo (`editorial-duo`, group `.a-duo`).
+- Media QA fails if a role declares a group that the layout contract (`src/layout-contract.cjs` · `groups`) does not audit.
+- `--rendered` runs the composition audit (`src/layout-qa/composition.mjs`: row, weight, member share, height and breakpoint continuity, in both orientations).
+- Two valid photographs can still be an invalid composition. A member's focal point is decided for every aspect the group gives it; the alms pair, for example, is 4:5 on the phone and 4:3 from 600 px.
+
 ## Media QA (gate M2)
 
 **It fails on:**

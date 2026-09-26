@@ -497,6 +497,40 @@
      360
     ]
    }
+  },
+  "editorial-duo": {
+   "routes": [
+    "/index.html",
+    "/voyage.html"
+   ],
+   "component": ".a-duo .am — two supporting photographs as ONE composition (the map of Laos beside the reclining Buddha; the alms-giving pair)",
+   "behaviour": "side by side on the frame's two columns at every width; the map keeps its drawing ratio (never cropped), the photograph beside it takes the same height; the other pair 4 : 3 from 600 px",
+   "group": ".a-duo",
+   "geometry": {
+    "p": 0.855,
+    "tp": 0.855,
+    "tl": 0.855,
+    "d": 0.855
+   },
+   "px": {
+    "p": [
+     165,
+     193
+    ],
+    "tp": [
+     351,
+     410
+    ],
+    "tl": [
+     494,
+     578
+    ],
+    "d": [
+     494,
+     578
+    ]
+   },
+   "geometryNote": "the map pair (index.html): both members at the map's 838 × 980 height; the alms pair (voyage.html) is 4 : 5 below 600 px and 4 : 3 from 600 px — members differ in aspect, never in row or weight"
   }
  },
  "collections": {

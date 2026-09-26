@@ -147,6 +147,17 @@ if (M.library.folderId || Object.values(M.collections).some((c) => c.folderId)) 
 for (const f of served) for (const id of ids) if (text[f].includes(id)) { fail('', f, 'carries a Drive id'); break; }
 for (const r of M.retired || []) { const u = usedBy(r.asset).filter((f) => !/^assets\/(experience-galleries|stay-media)\.js$/.test(f) || true); if (u.length) fail('', r.asset, 'retired (' + r.why + ') but still referenced by ' + u.join(', ')); }
 
+/* 5b · GROUPED MEDIA: a role that is one half of a composition names its group, and the layout contract audits that group
+   (src/layout-contract.cjs · groups — row, weight, member share, height, continuity); two valid photographs can still be an
+   invalid composition */
+{
+  const { createRequire } = await import('module');
+  const LC = createRequire(import.meta.url)('../layout-contract.cjs');
+  const groups = new Set((LC.groups || []).map((g) => g.sel));
+  for (const [k, r] of Object.entries(M.roles)) if (r.group && !groups.has(r.group)) fail('', 'role ' + k, 'grouped media (' + r.group + ') that the layout contract does not audit as a group');
+  if (!Object.values(M.roles).some((r) => r.group)) fail('', 'roles', 'no grouped-media role in the contract');
+}
+
 /* 6 · ORPHANS (reported) */
 for (const d of M.ownedDirs || []) {
   const dir = path.join(ROOT, d); if (!fs.existsSync(dir)) continue;
@@ -169,6 +180,9 @@ async function rendered(origin) {
     }
     await b.close();
   }
+  /* the grouped media, rendered densely (both orientations, both engines, both languages): src/layout-qa/composition.mjs */
+  const comp = await (await import('../layout-qa/composition.mjs')).audit({ origin });
+  for (const v of comp.violations.slice(0, 20)) out.push('composition ' + v.type + ' · ' + v.route + ' ' + v.width + ' ' + v.orientation + ' ' + v.engine + '/' + v.lang + ': ' + v.actual);
   for (const f of films) {
     const r = await fetch(origin + '/media/' + path.basename(f.asset), { headers: { Range: 'bytes=0-99' } });
     if (r.status !== 206) out.push('media/' + path.basename(f.asset) + ' answers ' + r.status + ' to a byte range (Safari needs 206)');

@@ -7,7 +7,8 @@
  * box sits inside it, or is a declared full-bleed band whose own content returns to it. Every block of text or media
  * starts on an AXIS: the wall, or the content edge of the component that holds it (a card, a column of a multi-column
  * grid or row, a positioned overlay, a scroll rail). A page-level photograph spans the wall exactly. Nothing scrolls
- * sideways, no text is cut, no photograph is distorted, no section overlaps the next, no blank void opens between them. */
+ * sideways, no text is cut, no photograph is distorted, no section overlaps the next, no blank void opens between them,
+ * and grouped photographs (C.groups) stay ONE composition: one row, one weight, never full-wall blocks, never a poster. */
 (function () {
   'use strict';
   var R = Math.round;
@@ -260,7 +261,36 @@
         else if (gap > voidMax) add('SECTION_VOID', kids[j], 'gap ≤ ' + R(voidMax), 'gap ' + R(gap));
       }
     }
-    return { geometry: { vw: vw, vh: vh, wl: wl, wr: wr, gut: gut, frame: frame, scrollWidth: doc.scrollWidth, height: doc.scrollHeight, panel: !!scope }, violations: V, exceptions: used };
+    /* 9 · GROUPED MEDIA — two individually valid photographs can still form an invalid composition (C.groups): the
+       members share one row, carry one visual weight, never become full-wall blocks, and the pair never grows into a poster */
+    var groups = [], gl = C.groups || [];
+    for (var gi = 0; gi < gl.length; gi++) {
+      var gels = top.querySelectorAll(gl[gi].sel);
+      for (var gk = 0; gk < gels.length; gk++) {
+        var G = gl[gi], gel = gels[gk]; if (state(gel)) continue;
+        var mem = [].filter.call(gel.querySelectorAll(G.members), function (m) { var mr = m.getBoundingClientRect(); return mr.width > 0 && mr.height > 0 && cs(m).display !== 'none'; });
+        if (!mem.length) continue;
+        var boxes = mem.map(function (m) { return m.getBoundingClientRect(); });
+        var gx0 = Math.min.apply(null, boxes.map(function (b) { return b.left; })), gx1 = Math.max.apply(null, boxes.map(function (b) { return b.right; }));
+        var gy0 = Math.min.apply(null, boxes.map(function (b) { return b.top; })), gy1 = Math.max.apply(null, boxes.map(function (b) { return b.bottom; }));
+        var rec = { sel: G.sel, w: R(gx1 - gx0), h: R(gy1 - gy0), members: boxes.map(function (b) { return { w: R(b.width), h: R(b.height), x: R(b.left), y: R(b.top + sy) }; }) };
+        groups.push(rec);
+        if (G.count && mem.length !== G.count) add('GROUP_MEMBERS', gel, G.count + ' visible members', mem.length + '');
+        var wallW = wr - wl;
+        for (var mi = 0; mi < boxes.length; mi++) {
+          if (boxes[mi].width > G.memberShare * wallW + tol) add('GROUP_MEMBER_OVERSIZED', mem[mi], '≤ ' + R(G.memberShare * 100) + ' % of the wall (' + R(G.memberShare * wallW) + ')', R(boxes[mi].width) + ' of ' + R(wallW), { cause: path(gel) });
+          for (var mj = mi + 1; mj < boxes.length; mj++) {
+            var a1 = boxes[mi], b1 = boxes[mj];
+            var ov = Math.min(a1.bottom, b1.bottom) - Math.max(a1.top, b1.top), shorter = Math.min(a1.height, b1.height);
+            if (ov < 0.6 * shorter) add('GROUP_STACKED', mem[mj], 'one row with its partner (vertical overlap ≥ 60 %)', 'overlap ' + R(Math.max(0, ov)) + ' of ' + R(shorter) + ' — ' + R(a1.width) + '×' + R(a1.height) + ' above ' + R(b1.width) + '×' + R(b1.height), { cause: path(gel) });
+            var hr = Math.max(a1.height, b1.height) / Math.min(a1.height, b1.height), ar = Math.max(a1.width * a1.height, b1.width * b1.height) / Math.min(a1.width * a1.height, b1.width * b1.height);
+            if (hr > G.weight + 0.01 || ar > G.weight * G.weight + 0.01) add('GROUP_WEIGHT', mem[mj], 'height ratio ≤ ' + G.weight + ', area ratio ≤ ' + (G.weight * G.weight).toFixed(2), 'height ×' + hr.toFixed(2) + ', area ×' + ar.toFixed(2), { cause: path(gel) });
+          }
+        }
+        if (gx1 - gx0 > 0 && (gy1 - gy0) / (gx1 - gx0) > G.heightRatio + 0.01) add('GROUP_TOO_TALL', gel, 'media height ≤ ' + G.heightRatio + ' × width', R(gy1 - gy0) + ' × ' + R(gx1 - gx0) + ' (' + ((gy1 - gy0) / (gx1 - gx0)).toFixed(2) + ')');
+      }
+    }
+    return { geometry: { vw: vw, vh: vh, wl: wl, wr: wr, gut: gut, frame: frame, scrollWidth: doc.scrollWidth, height: doc.scrollHeight, panel: !!scope, groups: groups }, violations: V, exceptions: used };
   }
 
   /* the diagnostic overlay: the wall, and every offending box outlined and numbered — QA artifacts only, never shipped */

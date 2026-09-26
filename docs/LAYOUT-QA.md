@@ -110,3 +110,34 @@ When the Owner changes a rule:
 - run the audits again.
 
 A violation is never fixed by a negative margin, a per-route override, or a coordinate taken from a screenshot.
+
+## Grouped media — the composition rule (26 Sep 2026)
+
+Two individually valid photographs can still form an invalid composition. On a tablet held upright (768–1199 px, portrait), a rule in `assets/aman.css` turned the duo (`.a-duo`: the map of Laos beside the reclining Buddha on the first page, and the alms-giving pair on the Wedding page) into one column. The result was two full-wall blocks stacked on top of each other. Every audit still passed, because the contract had no rule for a **group**.
+
+That rule is gone. The duo now stands side by side on the frame's two columns at every width.
+
+**The contract:** `groups` in `src/layout-contract.cjs` declares grouped media, with their members, routes and reason. `core.contractProblems` fails a page that carries a grouped primitive but is not in that group's routes.
+
+**The rules:** `rules.js`, section 9, runs in every fast and full audit and in the self-test, which seeds a stacked duo and an unequal-weight duo. It checks:
+- `GROUP_STACKED`: the members share one row, with a vertical overlap of at least 60 %.
+- `GROUP_WEIGHT`: height ratio ≤ `weight` and area ratio ≤ `weight`². The members may differ in aspect, since the map keeps its drawing ratio, but not in weight.
+- `GROUP_MEMBER_OVERSIZED`: no member is wider than `memberShare` of the content wall.
+- `GROUP_TOO_TALL`: the group's media height ≤ `heightRatio` × its width.
+- `GROUP_MEMBERS`: the expected number of members is visible.
+
+**The composition audit:** `node src/layout-qa/composition.mjs [--origin URL] [--record]` renders only the grouped routes, but densely:
+- every real breakpoint ±1, the named widths, and every 32 px from 560 to 1400;
+- both orientations from 600 to 1366 px;
+- Chromium and WebKit, English and Thai.
+
+It adds `GROUP_DISCONTINUITY`: between two adjacent samples of one orientation, a group's height ÷ width may change by at most `continuity` (×1.8). The art-directed switch from the phone's 4:5 pair to the tablet's 4:3 pair at 600 px is ×1.7; a stack is ×2.9 or more. It is read-only against any origin.
+
+**Release gate L2** requires `docs/acceptance/layout/LAST-COMPOSITION-AUDIT.json`, recorded on the current layout fingerprint with zero violations. Media QA `--rendered` runs the same audit.
+
+**The proof:**
+
+| Run | Result |
+|---|---|
+| Production before the fix | FAIL: 920 violations in 9 root causes, exactly 768–1199 px portrait, both duos, both engines, both languages |
+| The corrected stage | PASS |

@@ -84,6 +84,13 @@ function group(violations) {
 function contractProblems() {
   const p = [];
   for (const k of ['fullBleed', 'narrowMedia', 'axisFree', 'centered']) for (const e of C[k]) { if (!e.sel) p.push(k + ': an entry without a selector'); if (!e.why) p.push(k + ' ' + e.sel + ': no reason'); }
+  /* grouped media: every group names its reason and its routes, and every page that carries the group's class is one of them
+     (a new instance of a grouped primitive is audited the day it is written) */
+  for (const g of C.groups || []) {
+    if (!g.sel || !g.why || !g.members || !(g.routes || []).length) p.push('groups ' + g.sel + ': selector, members, routes and reason are required');
+    const cls = String(g.sel).replace(/^\./, '');
+    for (const pg of fs.readdirSync(ROOT).filter((f) => /\.html$/.test(f))) if (new RegExp('class="(?:[^"]* )?' + cls + '(?: [^"]*)?"').test(read(pg)) && !g.routes.includes('/' + pg)) p.push('groups ' + g.sel + ': ' + pg + ' carries it but is not in its routes');
+  }
   for (const w of [320, 360, 375, 390, 430, 600, 744, 768, 820, 834, 1024, 1133, 1180, 1194, 1280, 1366, 1440, 1680, 1920, 2560]) if (!C.widths.named.includes(w)) p.push('the named width ' + w + ' is missing');
   return p;
 }

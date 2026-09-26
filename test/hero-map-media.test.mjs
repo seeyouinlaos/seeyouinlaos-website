@@ -33,19 +33,18 @@ const GONE = ['002-vientiane-01-cathedral-nave.jpg', '002-vientiane-02-sacred-he
   '002-vientiane-07-pha-that-luang-dusk.jpg', '002-vientiane-08-pha-that-luang-gate.jpg', '002-vientiane-09-storm-sky.jpg',
   '002-vientiane-10-aerial-dusk.jpg', '002-vientiane-11-patuxai-from-above.jpg'];
 
-test('THE MAP OF LAOS · read, not decorated: the frame carries the map\'s own 838 × 980, contained, never cropped or stretched; a tablet held upright gives it the whole column; the photograph beside it takes the same height; no width overflows', () => {
+test('THE MAP OF LAOS · read, not decorated: the frame carries the map\'s own 838 × 980, contained, never cropped or stretched; beside the photograph at every width (the duo is one composition, 26 Sep 2026); the photograph beside it takes the same height; no width overflows', () => {
   const css = src('assets/aman.css'), h = src('index.html');
   assert.match(h, /<div class="am a-map" style="background-image:url\(assets\/images\/city\/laos-map\.jpg\)" role="img" aria-label="The map of Laos — Vientiane on the Mekong"><\/div>/, 'the map is named and carries no inline sizing of its own');
   assert.match(css, /\.a-duo \.am\.a-map \{ aspect-ratio: 838 \/ 980; background-size: contain; background-color: #E7E3DB; \}/);
   assert.match(css, /\.a-duo \.am\.a-map \+ \.am \{ aspect-ratio: auto; height: 100%;/, 'the photograph beside the map matches its height');
-  const tp = css.slice(css.indexOf('@media (min-width: 768px) and (max-width: 1199px) and (orientation: portrait) {'));
-  assert.ok(tp.length > 0, 'the tablet-upright rule exists');
-  assert.match(tp.slice(0, 500), /\.a-duo \{ grid-template-columns: minmax\(0, 1fr\);/, 'upright: one column, the map at full width');
-  assert.match(tp.slice(0, 500), /width: min\(100%, calc\(62vh \* 838 \/ 980\)\)/, 'and capped by the height of the screen, never by a device name');
+  /* THE DUO IS ONE COMPOSITION (Owner, 26 Sep 2026 · composition QA): a tablet held upright no longer stacks the map above the
+     photograph as two full-wall blocks — side by side from the phone to the desktop (gate L2 · the composition audit) */
+  assert.ok(!css.includes('@media (min-width: 768px) and (max-width: 1199px) and (orientation: portrait) {\n  .a-duo'), 'no tablet-upright stack');
+  assert.doesNotMatch(css, /\.a-duo \{ grid-template-columns: minmax\(0, 1fr\);/, 'never one column');
   assert.match(css, /@media \(min-width: 768px\) and \(orientation: landscape\) \{\s*\.a-duo \.am\.a-map \{ justify-self: center; width: min\(100%, calc\(76vh \* 838 \/ 980\)\); \}/);
   /* ITEM 13 (24 Sep 2026): on a tablet the duo is on the same frame as the closing invitation — no narrower column
      re-centred inside it — and a tablet on its side never lets the height cap pull the map off its column's edges */
-  assert.doesNotMatch(tp.slice(0, 500), /max-width: 760px/, 'upright: the duo is not re-centred in a narrower column');
   assert.match(css, /@media \(min-width: 768px\) and \(max-width: 1199px\) and \(orientation: landscape\) \{\s*\.a-duo \.am\.a-map \{ justify-self: stretch; width: 100%; \}/);
   assert.doesNotMatch(css.slice(css.indexOf('.a-duo .am.a-map'), css.indexOf('THE CARD GALLERY')), /background-size: cover|object-fit: fill|transform: scale/, 'never cropped, never stretched');
   /* the file the rules are built on */
