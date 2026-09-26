@@ -772,6 +772,20 @@ html[data-session="in"] [data-private-cta] { display: none !important; }
 .a-hero-dot:focus-visible i { box-shadow: 0 0 0 2px rgba(255,255,255,.9), 0 0 0 4px rgba(0,0,0,.35); }
 @media (prefers-reduced-motion: reduce) { .a-hero-dot i { transition: none; } }
 @media (min-width: 768px) { .a-hero-dots { bottom: 14px; gap: 4px; } }
+/* THE HERO FILMS (Owner, 26 Sep 2026 · the Drive collection "000 - Hero Image"): a film covers its slide exactly as a
+   photograph does — the same frame, the same focal point per viewport class, over its own poster (never a black plane);
+   the site's clip controls sit at the picture's top-left corner, clear of the dots, shown only on a film (the sound
+   control only when the film has sound). assets/hero-show.js */
+.a-hero-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: var(--fp-p, center); display: block; pointer-events: none; }
+@media (min-width: 768px) and (orientation: portrait) { .a-hero-video { object-position: var(--fp-tp, var(--fp-p, center)); } }
+@media (min-width: 768px) and (orientation: landscape) { .a-hero-video { object-position: var(--fp-tl, var(--fp-p, center)); } }
+@media (min-width: 1200px) { .a-hero-video { object-position: var(--fp-d, var(--fp-p, center)); } }
+.a-hero-ctl { position: absolute; left: 12px; top: 12px; z-index: 3; display: flex; gap: 8px; align-items: center; }
+.a-hero-ctl[hidden], .a-hero-ctl [hidden] { display: none; }
+.a-hero-ctl[data-state="playing"] .ic-play { display: none; }
+.a-hero-ctl[data-state="playing"] .ic-pause { display: block; }
+.a-hero-ctl[data-audio="on"] .ic-sound { clip-path: polygon(0 35%, 30% 35%, 60% 8%, 60% 92%, 30% 65%, 0 65%, 0 35%, 70% 35%, 100% 35%, 100% 65%, 70% 65%, 70% 35%); }
+@media (min-width: 900px) { .a-hero-ctl { left: 20px; top: 20px; } .a-hero-ctl .a-clip-btn { height: 38px; } }
 
 /* ---- THE MAP OF LAOS ------------------------------------------------------
    The map carries its own proportions (838 × 980), so the drawing meets both

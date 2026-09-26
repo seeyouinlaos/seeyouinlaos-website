@@ -62,3 +62,28 @@ print('missing:', sorted(refs - files) or 'none')
 print('orphans:', sorted(files - refs) or 'none')
 EOF
 ```
+
+## Hero media sync (Owner, 26 Sep 2026)
+
+The first page's Hero is the Drive folder **`000 - Hero Image`**, and nothing else. The request "Synchronize Hero media." means the following:
+
+1. **List the folder.** Compare it with `src/hero-media.json` by **Drive file id**, using `modifiedTime` and `size` to detect changes.
+2. **Download each new or changed file.** The Drive connector fails above ~7 MB, so a larger file comes from the Owner as an upload with the identical byte size.
+3. **Place the media.**
+   - Kind comes from the actual file: `image/*` is an image, `video/*` is a video.
+   - Order is the Drive titles, ascending.
+   - The local asset is named after its position (`hero-NNN…`).
+4. **Prepare the assets.**
+   - **Images:** re-encode at their own size with no metadata (`magick -auto-orient -strip -interlace Plane -quality 84`).
+   - **Videos:** remux losslessly with the index first (`ffmpeg -c copy -movflags +faststart`). Keep the audio track if the source has one. Take a poster from the film's first frame.
+   - **Audio flag:** record `audio` from `ffprobe`.
+5. **Update the record.** Record each item's focal points (`p` phone · `tp` tablet portrait · `tl` tablet landscape · `d` desktop) and set `syncedAt`.
+6. **Rebuild and retire.**
+   - Run `node src/build-hero.cjs` to rewrite the Hero block of `index.html`.
+   - Delete the assets of files that left the folder.
+   - `test/hero-show.test.mjs` pins the record, the markup, the audio tracks and the retired files.
+
+**Rules:**
+- Drive files are never renamed, moved or changed.
+- No Drive id or URL ever reaches a page: `src/` is not served.
+- The Hero's behaviour lives in `assets/hero-show.js`: a film always starts muted, Play/Pause appears on every film, and Sound on/Mute only on a film with an audio track.

@@ -271,6 +271,13 @@ export default {
       if (!keep) return Response.redirect(url.origin + '/invitation.html', 302);
     }
 
+    /* THE HERO FILMS WITH BYTE RANGES (Owner, 26 Sep 2026): Safari plays a video only from a server that answers Range
+       requests, and the static asset layer answers every request with the whole file. /media/<name>.mp4 is not a file, so it
+       reaches the Worker, which reads the same file from assets/video/ through the existing ASSETS binding and answers
+       206 slices — application code only: no binding, route or asset configuration changes. */
+    const media = /^\/media\/([a-z0-9-]+\.mp4)$/.exec(url.pathname);
+    if (media && (request.method === 'GET' || request.method === 'HEAD')) return mediaRange(request, env, url, media[1]);
+
     const res = await env.ASSETS.fetch(request);
     /* THE PAGE FOR AN UNKNOWN ADDRESS (OQ-39 · PRQ-00-06 / PRQ-07B-03): when the assets answer 404 for a page address, the site's
        own 404.html is served with status 404 — no configuration change (not_found_handling stays untouched); an asset that is
@@ -291,6 +298,41 @@ export default {
     return run;
   },
 };
+
+/* one film from assets/video/, whole (200) or the byte range asked for (206 · 416 when it cannot be satisfied). The range is
+   streamed out of the asset's own body — the file is never held in memory, and the read stops once the range is sent. */
+function sliceBody(body, start, end) {
+  let pos = 0;
+  return body.pipeThrough(new TransformStream({
+    transform(chunk, ctl) {
+      const from = pos, to = pos + chunk.byteLength; pos = to;
+      if (to <= start) return;
+      if (from > end) { ctl.terminate(); return; }
+      ctl.enqueue(chunk.subarray(Math.max(0, start - from), Math.min(chunk.byteLength, end + 1 - from)));
+      if (to > end) ctl.terminate();
+    }
+  }));
+}
+async function mediaRange(request, env, url, name) {
+  const src = await env.ASSETS.fetch(new Request(url.origin + '/assets/video/' + name, { method: 'GET' }));
+  if (!src.ok || !src.body) return new Response('Not found', { status: 404 });
+  const head = { 'content-type': 'video/mp4', 'accept-ranges': 'bytes', 'cache-control': 'public, max-age=86400' };
+  let size = Number(src.headers.get('content-length'));
+  let body = src.body;
+  if (!size) { const buf = await src.arrayBuffer(); size = buf.byteLength; body = new Response(buf).body; }
+  const m = /^bytes=(\d*)-(\d*)$/.exec((request.headers.get('range') || '').trim());
+  if (!m || (m[1] === '' && m[2] === '')) {
+    if (request.method === 'HEAD') { try { await body.cancel(); } catch (e) { /* nothing to cancel */ } return new Response(null, { status: 200, headers: { ...head, 'content-length': String(size) } }); }
+    return new Response(body, { status: 200, headers: { ...head, 'content-length': String(size) } });
+  }
+  let start, end;
+  if (m[1] === '') { start = Math.max(0, size - Number(m[2])); end = size - 1; }
+  else { start = Number(m[1]); end = m[2] === '' ? size - 1 : Math.min(Number(m[2]), size - 1); }
+  if (!(start <= end) || start >= size) { try { await body.cancel(); } catch (e) { /* nothing to cancel */ } return new Response(null, { status: 416, headers: { ...head, 'content-range': 'bytes */' + size } }); }
+  const range = { ...head, 'content-range': 'bytes ' + start + '-' + end + '/' + size, 'content-length': String(end - start + 1) };
+  if (request.method === 'HEAD') { try { await body.cancel(); } catch (e) { /* nothing to cancel */ } return new Response(null, { status: 206, headers: range }); }
+  return new Response(sliceBody(body, start, end), { status: 206, headers: range });
+}
 
 /* THE HOLDER'S FIRST NAME (PRQ-GAP-02): the engines name a room or seat holder only from the verified identity, never from a
    request body — the Worker adds `firstName`: the couple by the register's role (Bride → Haruthai, Groom → Suthep), otherwise the

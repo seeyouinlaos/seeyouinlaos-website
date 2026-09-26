@@ -1,8 +1,8 @@
 {
  "mode": "fast",
- "fingerprint": "a38d148acfe23ba1",
+ "fingerprint": "dd56c6cd7bb28ee2",
  "origin": "local stage",
- "finished": "2026-09-26T05:33:11.597Z",
+ "finished": "2026-09-26T07:05:14.678Z",
  "engines": [
   "chromium",
   "webkit"
@@ -26,11 +26,11 @@
  "unexplained": 0,
  "rootCauses": [],
  "exceptions": {
+  "button, .p-act, .a-cta, .cta, .x-cta, .dcta": 1468,
   ".acar .atrk, .refgal .atrk, .others .oc": 260,
   ".a-duo .a-map": 14,
   "footer.sfoot": 770,
   ".a-band": 30,
-  "button, .p-act, .a-cta, .cta, .x-cta, .dcta": 1440,
   ".prep-head .p-media": 418,
   ".intro, .lede, .plane h2, .ed .body, .ok, main > h2, main > p": 228,
   "main > .media": 10,
