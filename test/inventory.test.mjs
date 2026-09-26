@@ -264,7 +264,7 @@ test('F · the Guest House complimentary: Complimentary is the value, four share
   w.SIYL_GUEST.setScope({ vientiane: true });
   const wed = J.SEGMENTS.find((s) => s.key === 'wedstay');
   const [line] = P.items('guesthouse', 'guest-house');
-  assert.deepEqual(plain(line), { id: 'guesthouse', name: 'Guest House complimentary · Vientiane', meta: '27 February – 1 March 2027 · One of four places in a shared house', /* TO-00819 · TO-01478 */ interest: false, complimentary: true, price: 0, stay: 'guesthouse', room: 'guest-house', img: 'assets/images/guesthouse/guesthouse-01.jpg' });
+  assert.deepEqual(plain(line), { id: 'guesthouse', name: 'Guest House complimentary · Vientiane', meta: '27 February – 1 March 2027 · One of four places in a shared house', /* TO-00819 · TO-01478 */ interest: false, complimentary: true, price: 0, breakfast: 'Breakfast not included · your own cost', stay: 'guesthouse', room: 'guest-house', img: 'assets/images/guesthouse/guesthouse-01.jpg' });
   assert.equal(P.lineBasis(line), '', 'a complimentary line never reads "Amount on request"');
   assert.equal(J.meta(line).cat, 'Accommodation');
   /* PRQ-03-09 / TO-01208: one counting grammar */

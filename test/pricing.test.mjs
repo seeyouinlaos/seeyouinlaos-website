@@ -1159,3 +1159,15 @@ test('MY BAG BASIS · “USD 290 per person · 2 nights: 25 → 26 and 26 → 27
   assert.match(P.lineBasis(line('kmg', 'left-bank')), /^USD 261 per person · 3 nights: .+ · USD 87 per person per night$/);
   for (const [w, s] of [['prewed', 'heritage'], ['kmg', 'left-bank'], ['ljg', 'starry-sky']]) assert.doesNotMatch(P.lineBasis(line(w, s)), /total per person|\/ night|×/);
 });
+
+test('EDIT 8 (Aui, 25 Sep 2026) · the Guest House complimentary includes no breakfast (the guest’s own cost), said on the stay itself and in its list — EN and TH; no line promises a shared breakfast', () => {
+  const gh = R.guesthouse;
+  assert.equal(gh.breakfast, 'Breakfast not included · your own cost', 'the booking panel, The Journey, My Bag and Review read this field');
+  assert.ok(gh.includes.includes('Breakfast is not included and is at your own cost.'));
+  assert.doesNotMatch(JSON.stringify(gh), /with everyone at the Souphattra|breakfast included/i);
+  assert.equal(P.items('guesthouse', 'guest-house')[0].breakfast, 'Breakfast not included · your own cost', 'the shared pricing quote carries it to every summary');
+  const th = JSON.parse(readFileSync(join(ROOT, 'src/i18n-th.json'), 'utf8')).exact;
+  assert.equal(th['Breakfast not included · your own cost'], 'ไม่รวมอาหารเช้า · ค่าใช้จ่ายในส่วนของคุณ');
+  assert.equal(th['Breakfast is not included and is at your own cost.'], 'ไม่รวมอาหารเช้า อาหารเช้าเป็นค่าใช้จ่ายในส่วนของคุณ');
+  assert.equal(th['Breakfast on 28 February is with everyone at the Souphattra Heritage.'], undefined, 'the retired sentence is gone');
+});

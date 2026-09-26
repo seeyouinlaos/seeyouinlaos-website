@@ -248,6 +248,7 @@
         return [{ id: at.win.id, name: bagName, meta: at.win.dates + ' · ' + (room.status || room.name),
                   interest: !complimentary, complimentary: complimentary,
                   price: complimentary ? 0 : undefined,
+                  breakfast: q.breakfast || undefined,   /* EDIT 8: the Guest House says its breakfast is not included (the guest's own cost) on every summary */
                   stay: at.key, room: room.slug, img: img }];
       }
       return [{
@@ -467,6 +468,13 @@
     if (!B || !window.SIYL_ROOMS) return;
     var bag = B.get(), changed = false;
     var next = bag.map(function (x) {
+      /* EDIT 8 (Aui, 25 Sep 2026): a saved Guest House line takes the stay's CURRENT breakfast fact (not included, the guest's own cost)
+         from the one source — nothing else on the line is re-derived, the place itself belongs to the room engine */
+      if (x && x.complimentary && x.id === 'guesthouse') {
+        var gh = window.SIYL_PRICE.items(x.id, x.room)[0];
+        if (gh && gh.breakfast && x.breakfast !== gh.breakfast) { changed = true; var y = {}; for (var k in x) y[k] = x[k]; y.breakfast = gh.breakfast; return y; }
+        return x;
+      }
       if (!x.stay || !x.room || x.interest || x.complimentary) return x;
       /* a line of a room the website no longer offers (the Sathorn Penthouse, deleted — Owner, 24 Sep 2026 · Edit 6) is
          never re-quoted into another room: it leaves the Bag, and the stage asks for a choice again */

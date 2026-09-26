@@ -209,13 +209,15 @@
     guesthouse: {
       name: 'Guest House complimentary',
       place: 'Vientiane, Laos',
+      breakfast: 'Breakfast not included · your own cost',
       windows: [{ id: 'guesthouse', label: 'Wedding Stay', dates: '27 February – 1 March 2027', nights: '2 nights', n: 2,
         bagName: 'Guest House complimentary · Vientiane', bagImg: 'assets/images/guesthouse/guesthouse-01.jpg' }],
       includes: [
         'Two nights, 27 → 28 February and 28 February → 1 March — the two wedding nights.',
         'Complimentary — nothing to pay. The house is shared by four guests; your place is held for you as soon as you take it.',
         'Guest Relations looks after the keys, your arrival and everything around it.',
-        'Breakfast on 28 February is with everyone at the Souphattra Heritage.'
+        /* EDIT 8 (Aui, 25 Sep 2026): a guest of the Guest House complimentary has no breakfast in the stay — it is the guest's own cost */
+        'Breakfast is not included and is at your own cost.'
       ],
       rooms: [
         { slug: 'guest-house', name: 'Guest House complimentary', cat: 'Shared guest house',

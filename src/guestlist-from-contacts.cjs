@@ -50,7 +50,10 @@ const ALIAS_BY_PERSON = { 'ozhan arslan': 'G004', 'paddy kongkeow': 'G007', 'ari
 const NO_NAME = (v) => /^no( name)?$/i.test(String(v || '').trim());
 /* the profile the sheet knows (prefilled for the guest to review and correct — the guest's own record, per person) */
 const isoDate = (v) => { const m = String(v || '').trim().match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/); if (m) return m[3] + '-' + m[2].padStart(2, '0') + '-' + m[1].padStart(2, '0'); const iso = String(v || '').trim().match(/^(\d{4})-(\d{2})-(\d{2})$/); return iso ? iso[0] : ''; };
-const profileOf = (r) => { const p = {}; const bd = isoDate(r.Birthdate); if (bd) p.birthdate = bd; if (r.Nationality) p.nationality = String(r.Nationality).replace(/\s*[\/,]\s*/g, ', ').trim(); if (r.Phone) p.phone = String(r.Phone).trim(); if (r.Email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(r.Email).trim())) p.email = String(r.Email).trim(); if (r.Address) p.address = { line1: String(r.Address).replace(/\s+/g, ' ').trim() }; return p; };
+/* the sheet's placeholders for "nothing here" ("-", "\\-", "x", ".") are never a guest's data: never prefilled (26 Sep 2026 — a
+   one-character phone also matched every ciphertext and stopped the builder's leak guard) */
+const real = (v) => { const t = String(v || '').trim(); return t && !/^[\s\\\-–—x.]*$/i.test(t) ? t : ''; };
+const profileOf = (r) => { const p = {}; const bd = isoDate(r.Birthdate); if (bd) p.birthdate = bd; if (real(r.Nationality)) p.nationality = real(r.Nationality).replace(/\s*[\/,]\s*/g, ', ').trim(); if (real(r.Phone)) p.phone = real(r.Phone); if (r.Email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(r.Email).trim())) p.email = String(r.Email).trim(); if (real(r.Address)) p.address = { line1: real(r.Address).replace(/\s+/g, ' ').trim() }; return p; };
 const firstWord = (s) => norm(String(s || '').replace(/\(.*?\)/g, '')).split(' ')[0] || '';
 
 function readTsv(file) {

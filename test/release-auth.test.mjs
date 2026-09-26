@@ -18,8 +18,10 @@ const index = JSON.parse(src('register/auth-index.json')), records = JSON.parse(
 const PRIVATE = path.join(ROOT, 'src/invitation-tokens.private.csv');
 
 /* GUEST LIST 007 (Owner, 20 Sep 2026 · the go-live read of the sheet): 104 active guests in 81 parties (CON001 – CON107 populated, two
-   duplicate rows and one unnamed partner reported, not invited), 6 cancelled ids kept, never reused */
-const ACTIVE = 104, CANCELLED = 6;
+   duplicate rows and one unnamed partner reported, not invited), 6 cancelled ids kept, never reused.
+   26 Sep 2026 (the Operations Master's 006_Guestlist): three new guests added by Aui — one single party and one party of two —
+   each with a new code from the same builder; every existing code kept: 107 active guests in 83 parties. */
+const ACTIVE = 107, CANCELLED = 6;
 test('REGISTER · the shipped index and bundle: one entry per active guest, every invitation INV-<guestId>, no guest twice, no id of a cancelled guest', () => {
   const entries = Object.values(index.entries);
   assert.equal(index.v, 2); assert.equal(entries.length, ACTIVE); assert.equal(records.length, ACTIVE);
