@@ -216,7 +216,8 @@
         [T + 'c642-business-cabin-2.jpg', 'Business Class cabin'],
         [T + 'c642-business-seat.jpg', 'Business Class seat · reclined'],
         [T + 'c642-train-forest.jpg', 'The Kunming – Lijiang line'],
-        [T + 'c642-gorge-bridge.jpg', 'The line across the gorge']
+        [T + 'c642-gorge-bridge.jpg', 'The line across the gorge'],
+        [T + 'c642-leaving-kunming-dusk.jpg', 'Leaving Kunming at dusk', '50% 80%']   /* the train is the subject: aimed low (Media Asset Agent, 26 Sep 2026) */
       ]
     },
 

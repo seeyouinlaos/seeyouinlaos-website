@@ -14,7 +14,7 @@
    "1oQAeRiFztpIdGM5ln0i5rhnYAmps4jnR"
   ],
   "sourceImages": 11,
-  "used": 6,
+  "used": 7,
   "primary": "assets/images/experiences/bkk-curvy-01.jpg",
   "gallery": [
    "assets/images/experiences/bkk-curvy-01.jpg",
@@ -22,7 +22,8 @@
    "assets/images/experiences/bkk-curvy-03.jpg",
    "assets/images/experiences/bkk-curvy-04.jpg",
    "assets/images/experiences/bkk-curvy-05.jpg",
-   "assets/images/experiences/bkk-curvy-06.jpg"
+   "assets/images/experiences/bkk-curvy-06.jpg",
+   "assets/images/experiences/bkk-curvy-07.jpg"
   ],
   "note": "IMG_3513 is a 447 px thumbnail, excluded",
   "price": null,
@@ -46,13 +47,15 @@
    "12BzWDhI4pN5reUWdsgbgMiD4tCWp5I4N"
   ],
   "sourceImages": 13,
-  "used": 4,
+  "used": 6,
   "primary": "assets/images/experiences/bkk-suhring-01.jpg",
   "gallery": [
    "assets/images/experiences/bkk-suhring-01.jpg",
    "assets/images/experiences/bkk-suhring-04.jpg",
    "assets/images/experiences/bkk-suhring-09.jpg",
-   "assets/images/experiences/bkk-suhring-03.jpg"
+   "assets/images/experiences/bkk-suhring-03.jpg",
+   "assets/images/experiences/bkk-suhring-10.jpg",
+   "assets/images/experiences/bkk-suhring-11.jpg"
   ],
   "note": "THE HIGHLIGHT (Owner, 20 Sep 2026): the house's menu card — the Erlebnis THB 9,800 (USD 294) or the shorter sequence THB 7,800 (USD 234), per person, beverages not included; the earlier source cell $180 is superseded · dated by the current Operations Master: Day 01 · 21.02.2027 · dinner",
   "price": "USD 294 · USD 234 per person",
@@ -81,12 +84,14 @@
    "1T8LtqEK358_5mdEC-y_Uu5HnZ8Jnyv4h"
   ],
   "sourceImages": 20,
-  "used": 3,
+  "used": 5,
   "primary": "assets/images/experiences/bkk-dior-02.jpg",
   "gallery": [
    "assets/images/experiences/bkk-dior-02.jpg",
    "assets/images/experiences/bkk-dior-03.jpg",
-   "assets/images/experiences/bkk-dior-04.jpg"
+   "assets/images/experiences/bkk-dior-04.jpg",
+   "assets/images/experiences/bkk-dior-05.jpg",
+   "assets/images/experiences/bkk-dior-06.jpg"
   ],
   "note": "its own location since 22 Sep 2026 (the combined \"Dior · Café LV\" card is retired): Café Dior at the maison — the three Dior frames of the earlier shared set",
   "price": null,
@@ -110,13 +115,15 @@
    "1oBn04Bq8QBQglAzOrtKFtxRtD_AYzweS"
   ],
   "sourceImages": 9,
-  "used": 4,
+  "used": 6,
   "primary": "assets/images/experiences/bkk-lvcafe-02.jpg",
   "gallery": [
    "assets/images/experiences/bkk-lvcafe-02.jpg",
    "assets/images/experiences/bkk-lvcafe-01.jpg",
    "assets/images/experiences/bkk-lvcafe-03.jpg",
-   "assets/images/experiences/bkk-lvcafe-04.jpg"
+   "assets/images/experiences/bkk-lvcafe-04.jpg",
+   "assets/images/experiences/bkk-lvcafe-05.jpg",
+   "assets/images/experiences/bkk-lvcafe-06.jpg"
   ],
   "note": "its own location since 22 Sep 2026: Le Café Louis Vuitton at Gaysorn Amarin — the four Louis Vuitton frames of the earlier shared set, renamed to its own slug",
   "price": null,
@@ -140,7 +147,7 @@
    "1QKzxVzIPllXkUivIL6yWin-fDKehwEbd"
   ],
   "sourceImages": 16,
-  "used": 8,
+  "used": 11,
   "primary": "assets/images/experiences/bkk-lvvisionary-01.jpg",
   "gallery": [
    "assets/images/experiences/bkk-lvvisionary-01.jpg",
@@ -150,7 +157,10 @@
    "assets/images/experiences/bkk-lvvisionary-05.jpg",
    "assets/images/experiences/bkk-lvvisionary-06.jpg",
    "assets/images/experiences/bkk-lvvisionary-07.jpg",
-   "assets/images/experiences/bkk-lvvisionary-08.jpg"
+   "assets/images/experiences/bkk-lvvisionary-08.jpg",
+   "assets/images/experiences/bkk-lvvisionary-09.jpg",
+   "assets/images/experiences/bkk-lvvisionary-10.jpg",
+   "assets/images/experiences/bkk-lvvisionary-11.jpg"
   ],
   "note": "",
   "price": null,
@@ -174,7 +184,7 @@
    "1IVKu15aTmQov07tjSuQwW1ay4JTeTvFJ"
   ],
   "sourceImages": 7,
-  "used": 6,
+  "used": 7,
   "primary": "assets/images/experiences/bkk-iconsiam-01.jpg",
   "gallery": [
    "assets/images/experiences/bkk-iconsiam-01.jpg",
@@ -182,7 +192,8 @@
    "assets/images/experiences/bkk-iconsiam-03.jpg",
    "assets/images/experiences/bkk-iconsiam-04.jpg",
    "assets/images/experiences/bkk-iconsiam-05.jpg",
-   "assets/images/experiences/bkk-iconsiam-06.jpg"
+   "assets/images/experiences/bkk-iconsiam-06.jpg",
+   "assets/images/experiences/bkk-iconsiam-07.jpg"
   ],
   "note": "IMG_3496 (dusk aerial) not used — the night aerial was rejected on 05 Sep; one Google Doc \"ICONSIAM\" not used",
   "price": null,
@@ -207,7 +218,7 @@
    "1KR9jSayFoSFpF2MU5UFWmL1JMzQBLbcM"
   ],
   "sourceImages": 16,
-  "used": 6,
+  "used": 8,
   "primary": "assets/images/experiences/bkk-phranakorn-01.jpg",
   "gallery": [
    "assets/images/experiences/bkk-phranakorn-01.jpg",
@@ -215,7 +226,9 @@
    "assets/images/experiences/bkk-phranakorn-03.jpg",
    "assets/images/experiences/bkk-phranakorn-04.jpg",
    "assets/images/experiences/bkk-phranakorn-07.jpg",
-   "assets/images/experiences/bkk-phranakorn-08.jpg"
+   "assets/images/experiences/bkk-phranakorn-08.jpg",
+   "assets/images/experiences/bkk-phranakorn-09.jpg",
+   "assets/images/experiences/bkk-phranakorn-10.jpg"
   ],
   "note": "two folders for one place; IMG_3549 carries a Michelin badge overlay, excluded; one Google Doc \"Phra Nakhon\" in 081 not used",
   "price": null,
@@ -268,7 +281,7 @@
    "1CWga0shs9DwbiV6_CdaRglsJr1qoDsVk"
   ],
   "sourceImages": 13,
-  "used": 6,
+  "used": 7,
   "primary": "assets/images/experiences/bkk-timespace-03.jpg",
   "gallery": [
    "assets/images/experiences/bkk-timespace-03.jpg",
@@ -276,7 +289,8 @@
    "assets/images/experiences/bkk-timespace-02.jpg",
    "assets/images/experiences/bkk-timespace-04.jpg",
    "assets/images/experiences/bkk-timespace-06.jpg",
-   "assets/images/experiences/bkk-timespace-07.jpg"
+   "assets/images/experiences/bkk-timespace-07.jpg",
+   "assets/images/experiences/bkk-timespace-08.jpg"
   ],
   "note": "three 7–8 MB files could not be fetched through the Drive connector (session expired twice) — not opened",
   "price": null,
@@ -394,7 +408,7 @@
    "1vPtErvPheEGF6_f3y8nNVXV0EsBXleAG"
   ],
   "sourceImages": 7,
-  "used": 6,
+  "used": 7,
   "primary": "assets/images/experiences/bkk-emquartier-01.jpg",
   "gallery": [
    "assets/images/experiences/bkk-emquartier-01.jpg",
@@ -402,7 +416,8 @@
    "assets/images/experiences/bkk-emquartier-03.jpg",
    "assets/images/experiences/bkk-emquartier-04.jpg",
    "assets/images/experiences/bkk-emquartier-05.jpg",
-   "assets/images/experiences/bkk-emquartier-06.jpg"
+   "assets/images/experiences/bkk-emquartier-06.jpg",
+   "assets/images/experiences/bkk-emquartier-07.jpg"
   ],
   "note": "",
   "price": null,
@@ -426,14 +441,18 @@
    "1WI7kH1JtPP_OdP_iWx2osgz7qqiUd1mD"
   ],
   "sourceImages": 10,
-  "used": 5,
+  "used": 9,
   "primary": "assets/images/experiences/bkk-commons-01.jpg",
   "gallery": [
    "assets/images/experiences/bkk-commons-01.jpg",
    "assets/images/experiences/bkk-commons-02.jpg",
    "assets/images/experiences/bkk-commons-03.jpg",
    "assets/images/experiences/bkk-commons-04.jpg",
-   "assets/images/experiences/bkk-commons-05.jpg"
+   "assets/images/experiences/bkk-commons-05.jpg",
+   "assets/images/experiences/bkk-commons-06.jpg",
+   "assets/images/experiences/bkk-commons-07.jpg",
+   "assets/images/experiences/bkk-commons-08.jpg",
+   "assets/images/experiences/bkk-commons-09.jpg"
   ],
   "note": "nine of ten files are 630 px WebP · the 23.02 dinner is Baan Phraya (19 Sep 2026); The Commons stays the mall of the day",
   "price": null,
@@ -457,13 +476,14 @@
    "1m1mvGNZW4gsMPbSGJy-mgFbKiN5Wdxjd"
   ],
   "sourceImages": 8,
-  "used": 4,
+  "used": 5,
   "primary": "assets/images/experiences/bkk-baanphraya-01.jpg",
   "gallery": [
    "assets/images/experiences/bkk-baanphraya-01.jpg",
    "assets/images/experiences/bkk-baanphraya-02.jpg",
    "assets/images/experiences/bkk-baanphraya-03.jpg",
-   "assets/images/experiences/bkk-baanphraya-04.jpg"
+   "assets/images/experiences/bkk-baanphraya-04.jpg",
+   "assets/images/experiences/bkk-baanphraya-05.jpg"
   ],
   "note": "the 23.02 dinner (replaces The Commons); 8 source files: 4 used (courtyard, bar room, lamplit table, staircase), 2 dish photographs and a 600 px file excluded, the Authors' Lounge frame excluded as another house · THE HIGHLIGHT (Owner, 20 Sep 2026): the eight-course Thai set menu THB 3,800 = USD 114 per person, bookable as a request; pairings not products; the house adds 10% service charge and government tax",
   "price": "USD 114 per person",
@@ -546,13 +566,15 @@
    "1TQ86m75xxXNF8mF4XxGU86LuVyCYRK3K"
   ],
   "sourceImages": 12,
-  "used": 4,
+  "used": 6,
   "primary": "assets/images/experiences/bkk-thongsmith-03.jpg",
   "gallery": [
    "assets/images/experiences/bkk-thongsmith-03.jpg",
    "assets/images/experiences/bkk-thongsmith-06.jpg",
    "assets/images/experiences/bkk-thongsmith-04.jpg",
-   "assets/images/experiences/bkk-thongsmith-07.jpg"
+   "assets/images/experiences/bkk-thongsmith-07.jpg",
+   "assets/images/experiences/bkk-thongsmith-08.jpg",
+   "assets/images/experiences/bkk-thongsmith-09.jpg"
   ],
   "note": "4 AI renders in 083 (3 \"Codex Image\", 1 uuid png) excluded by the image rule; takeaway-bag WebP is the MASTER jpg twice · the 24.02 lunch cell reads the Aman afternoon tea (19 Sep 2026): kept as an undated Bangkok-days address",
   "price": null,
@@ -576,14 +598,15 @@
    "1PFuNbcw1kN9mVhBnZf4gOU8fcKl3IICI"
   ],
   "sourceImages": 6,
-  "used": 5,
+  "used": 6,
   "primary": "assets/images/experiences/bkk-letsrelax-01.jpg",
   "gallery": [
    "assets/images/experiences/bkk-letsrelax-01.jpg",
    "assets/images/experiences/bkk-letsrelax-02.jpg",
    "assets/images/experiences/bkk-letsrelax-03.jpg",
    "assets/images/experiences/bkk-letsrelax-04.jpg",
-   "assets/images/experiences/bkk-letsrelax-05.jpg"
+   "assets/images/experiences/bkk-letsrelax-05.jpg",
+   "assets/images/experiences/bkk-letsrelax-06.jpg"
   ],
   "note": "",
   "price": null,
@@ -607,13 +630,15 @@
    "1EuP1FzarJEWgqq1EQwsFmDX8RFuj4Yyl"
   ],
   "sourceImages": 6,
-  "used": 4,
+  "used": 6,
   "primary": "assets/images/experiences/bkk-dusit-01.jpg",
   "gallery": [
    "assets/images/experiences/bkk-dusit-01.jpg",
    "assets/images/experiences/bkk-dusit-02.jpg",
    "assets/images/experiences/bkk-dusit-03.jpg",
-   "assets/images/experiences/bkk-dusit-04.jpg"
+   "assets/images/experiences/bkk-dusit-04.jpg",
+   "assets/images/experiences/bkk-dusit-05.jpg",
+   "assets/images/experiences/bkk-dusit-06.jpg"
   ],
   "note": "IMG_3625 (600×800 png) excluded",
   "price": null,
@@ -815,11 +840,12 @@
    "1nCcRkh44-OQMUMp0F0A8ZFXYRxC5joLq"
   ],
   "sourceImages": 6,
-  "used": 2,
+  "used": 3,
   "primary": "assets/images/experiences/bkk-cafecraft-01.jpg",
   "gallery": [
    "assets/images/experiences/bkk-cafecraft-01.jpg",
-   "assets/images/experiences/bkk-cafecraft-02.jpg"
+   "assets/images/experiences/bkk-cafecraft-02.jpg",
+   "assets/images/experiences/bkk-cafecraft-03.jpg"
   ],
   "note": "the Owner's own folder (22 Sep 2026): two rooms of the café; the four plated dishes of the folder are never a place (the media taxonomy)",
   "price": null,
@@ -843,13 +869,14 @@
    "1QxgoS2aWXC2DWKh_c6Y0fTYOz06JhW8r"
   ],
   "sourceImages": 5,
-  "used": 4,
+  "used": 5,
   "primary": "assets/images/experiences/bkk-siamparagon-01.jpg",
   "gallery": [
    "assets/images/experiences/bkk-siamparagon-01.jpg",
    "assets/images/experiences/bkk-siamparagon-02.jpg",
    "assets/images/experiences/bkk-siamparagon-03.jpg",
-   "assets/images/experiences/bkk-siamparagon-04.jpg"
+   "assets/images/experiences/bkk-siamparagon-04.jpg",
+   "assets/images/experiences/bkk-siamparagon-05.jpg"
   ],
   "note": "the Owner's own folder (22 Sep 2026): the façade and three halls of the mall",
   "price": null,
@@ -970,113 +997,6 @@
   "category": "place"
  },
  {
-  "id": "vte-haphrakeo",
-  "name": "Ha Phrakeo Museum",
-  "city": "Vientiane",
-  "roles": [
-   "experience"
-  ],
-  "overview": "city",
-  "sheet": "NONE",
-  "selectable": false,
-  "drive": "002 - City - Vientiane (city portrait)",
-  "driveIds": [],
-  "sourceImages": 1,
-  "used": 1,
-  "primary": "assets/images/experiences/vte-haphrakeo-01.jpg",
-  "gallery": [
-   "assets/images/experiences/vte-haphrakeo-01.jpg"
-  ],
-  "note": "",
-  "price": null,
-  "hours": null,
-  "maps": null,
-  "link": null,
-  "category": "experience"
- },
- {
-  "id": "vte-palace",
-  "name": "Presidential Palace",
-  "city": "Vientiane",
-  "roles": [
-   "experience"
-  ],
-  "overview": "city",
-  "sheet": "NONE",
-  "selectable": false,
-  "drive": "002 - City - Vientiane (city portrait)",
-  "driveIds": [],
-  "sourceImages": 1,
-  "used": 1,
-  "primary": "assets/images/experiences/vte-palace-01.jpg",
-  "gallery": [
-   "assets/images/experiences/vte-palace-01.jpg"
-  ],
-  "note": "",
-  "price": null,
-  "hours": null,
-  "maps": null,
-  "link": null,
-  "category": "experience"
- },
- {
-  "id": "vte-buddhapark",
-  "name": "Buddha Park",
-  "city": "Xieng Khuan · Vientiane",
-  "roles": [
-   "experience"
-  ],
-  "overview": "city",
-  "sheet": "NONE",
-  "selectable": false,
-  "drive": "002 - City - Vientiane (city portrait)",
-  "driveIds": [],
-  "sourceImages": 1,
-  "used": 1,
-  "primary": "assets/images/experiences/vte-buddhapark-01.jpg",
-  "gallery": [
-   "assets/images/experiences/vte-buddhapark-01.jpg"
-  ],
-  "note": "",
-  "price": null,
-  "hours": null,
-  "maps": null,
-  "link": null,
-  "category": "experience"
- },
- {
-  "id": "vte-laonationalmuseum",
-  "name": "Lao National Museum",
-  "city": "Vientiane",
-  "roles": [
-   "experience"
-  ],
-  "overview": "city",
-  "sheet": "DETAIL",
-  "selectable": false,
-  "drive": "Lao National Museum (Owner Drive folder, Edit 5)",
-  "driveIds": [
-   "16gX3TfbIBdsmiXpUwSULwF7VvSHfuVW7"
-  ],
-  "sourceImages": 6,
-  "used": 6,
-  "primary": "assets/images/experiences/vte-laonationalmuseum-01.jpg",
-  "gallery": [
-   "assets/images/experiences/vte-laonationalmuseum-01.jpg",
-   "assets/images/experiences/vte-laonationalmuseum-02.jpg",
-   "assets/images/experiences/vte-laonationalmuseum-03.jpg",
-   "assets/images/experiences/vte-laonationalmuseum-04.jpg",
-   "assets/images/experiences/vte-laonationalmuseum-05.jpg",
-   "assets/images/experiences/vte-laonationalmuseum-06.jpg"
-  ],
-  "note": "Edit 5 (18 Sep 2026): description, admission and hours from H&S_Wedding_Operations_Master",
-  "price": "30,000 KIP per person (foreign visitors)",
-  "hours": "Monday – Friday 8:00 – 12:00 and 13:00 – 16:00",
-  "maps": null,
-  "link": null,
-  "category": "experience"
- },
- {
   "id": "vte-silkresidence",
   "name": "Traditional Lao Silk Residence",
   "city": "Vientiane",
@@ -1154,7 +1074,7 @@
    "1sE849cD0WWWdCS3hfM8JUl8YdZHT8602"
   ],
   "sourceImages": 11,
-  "used": 6,
+  "used": 8,
   "primary": "assets/images/experiences/vte-rivermoon-01.jpg",
   "gallery": [
    "assets/images/experiences/vte-rivermoon-01.jpg",
@@ -1162,7 +1082,9 @@
    "assets/images/experiences/vte-rivermoon-03.jpg",
    "assets/images/experiences/vte-rivermoon-04.jpg",
    "assets/images/experiences/vte-rivermoon-05.jpg",
-   "assets/images/experiences/vte-rivermoon-06.jpg"
+   "assets/images/experiences/vte-rivermoon-06.jpg",
+   "assets/images/experiences/vte-rivermoon-07.jpg",
+   "assets/images/experiences/vte-rivermoon-08.jpg"
   ],
   "note": "venue watermark \"River Moon\" on every frame",
   "price": null,
@@ -1214,12 +1136,13 @@
    "1F0QdQQ76CbxD2SJwp0MCr2FsoG3_uwnp"
   ],
   "sourceImages": 6,
-  "used": 3,
+  "used": 4,
   "primary": "assets/images/experiences/vte-sona-01.jpg",
   "gallery": [
    "assets/images/experiences/vte-sona-01.jpg",
    "assets/images/experiences/vte-sona-03.jpg",
-   "assets/images/experiences/vte-sona-02.jpg"
+   "assets/images/experiences/vte-sona-02.jpg",
+   "assets/images/experiences/vte-sona-04.jpg"
   ],
   "note": "",
   "price": null,
@@ -1304,14 +1227,18 @@
    "1MBKutAoO_mEKrfQmoGWUrRtO7wqlM4XK"
   ],
   "sourceImages": 13,
-  "used": 5,
+  "used": 9,
   "primary": "assets/images/experiences/vte-kokkok-01.jpg",
   "gallery": [
    "assets/images/experiences/vte-kokkok-01.jpg",
    "assets/images/experiences/vte-kokkok-02.jpg",
    "assets/images/experiences/vte-kokkok-03.jpg",
    "assets/images/experiences/vte-kokkok-04.jpg",
-   "assets/images/experiences/vte-kokkok-05.jpg"
+   "assets/images/experiences/vte-kokkok-05.jpg",
+   "assets/images/experiences/vte-kokkok-06.jpg",
+   "assets/images/experiences/vte-kokkok-07.jpg",
+   "assets/images/experiences/vte-kokkok-08.jpg",
+   "assets/images/experiences/vte-kokkok-09.jpg"
   ],
   "note": "phone originals 2.7–5.9 MB",
   "price": null,
@@ -1366,11 +1293,13 @@
    "1PkPZxgrH9-RVegM0LNkOw8TVozD0ejZ7"
   ],
   "sourceImages": 9,
-  "used": 2,
+  "used": 4,
   "primary": "assets/images/experiences/vte-camon-01.jpg",
   "gallery": [
    "assets/images/experiences/vte-camon-01.jpg",
-   "assets/images/experiences/vte-camon-02.jpg"
+   "assets/images/experiences/vte-camon-02.jpg",
+   "assets/images/experiences/vte-camon-03.jpg",
+   "assets/images/experiences/vte-camon-04.jpg"
   ],
   "note": "the Owner's own folder (22 Sep 2026): the shopfront and the dining room; the folder's dishes are never a place",
   "price": null,

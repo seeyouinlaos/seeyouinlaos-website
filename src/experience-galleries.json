@@ -80,6 +80,24 @@
     "drive": "1Zc4T6gfRAX5mdSdc3OAK0wzFZ6-J2qL0",
     "file": "IMG_3910.jpeg",
     "kind": "atmosphere"
+   },
+   {
+    "src": "assets/images/experiences/bkk-suhring-10.jpg",
+    "w": 960,
+    "h": 539,
+    "alt": "A table laid under the glass roof, the garden trees outside",
+    "drive": "16Dw3YypWyaQ0Np_n3_xmr-OEhj1Mf_HS",
+    "file": "Copy of 004 - Sühring",
+    "kind": "dining-room"
+   },
+   {
+    "src": "assets/images/experiences/bkk-suhring-11.jpg",
+    "w": 1252,
+    "h": 856,
+    "alt": "The glasshouse dining room among ferns and palms",
+    "drive": "1oVFlzTJsbklMiPFNwW1OiU2oeBnkzyco",
+    "file": "002 - Sühring",
+    "kind": "dining-room"
    }
   ]
  },
@@ -160,6 +178,33 @@
     "alt": "A Kusama pumpkin beside the metallic bag wall",
     "drive": "1V-BpbLlUFw8_Iu0jabHBntoHK_knEULq",
     "file": "IMG_3548.jpeg",
+    "kind": "venue"
+   },
+   {
+    "src": "assets/images/experiences/bkk-lvvisionary-09.jpg",
+    "w": 2000,
+    "h": 1125,
+    "alt": "A mirrored tunnel of light in Visionary Journeys",
+    "drive": "1OoeuxQ2SHlWfIgy6dRCZHUNvLnDTapzW",
+    "file": "Copy of IMG_3533.jpeg",
+    "kind": "venue"
+   },
+   {
+    "src": "assets/images/experiences/bkk-lvvisionary-10.jpg",
+    "w": 640,
+    "h": 853,
+    "alt": "Transparent spheres holding Louis Vuitton pieces in a white gallery",
+    "drive": "1YCiDjpW3gjwdMen9fX0UxE7wFt5NO-6z",
+    "file": "Copy of IMG_3535.webp",
+    "kind": "venue"
+   },
+   {
+    "src": "assets/images/experiences/bkk-lvvisionary-11.jpg",
+    "w": 640,
+    "h": 853,
+    "alt": "Suspended glass rings and trunks in the exhibition",
+    "drive": "1h6blOsAkciOx6BbSvlf7qGpUOYZt-f-B",
+    "file": "Copy of IMG_3534.webp",
     "kind": "venue"
    }
   ]
@@ -303,6 +348,24 @@
     "drive": "1VTOkfZMFx6-sknKgWpaBk6H7QO1UAELc",
     "file": "IMG_3553.jpeg",
     "kind": "exterior"
+   },
+   {
+    "src": "assets/images/experiences/bkk-phranakorn-09.jpg",
+    "w": 1350,
+    "h": 1688,
+    "alt": "The dining room of Phra Nakhon beside the river windows",
+    "drive": "1EtppULKPHGfJ-EyDx_oRU88vfiswfLDm",
+    "file": "Copy of SnapInsta.to_734009568_18167002693453187_82280202348153039_n.jpg",
+    "kind": "interior"
+   },
+   {
+    "src": "assets/images/experiences/bkk-phranakorn-10.jpg",
+    "w": 1005,
+    "h": 670,
+    "alt": "The riverside house of Phra Nakhon under its tall trees",
+    "drive": "1jurecQKRwhmiaAp9drUwWnO7jurnA0ug",
+    "file": "Copy of IMG_3550.jpeg",
+    "kind": "exterior"
    }
   ]
  },
@@ -356,6 +419,42 @@
     "drive": "1MKIzIqF7xZfS-5oyy9ggn1dVG6O4_eOV",
     "file": "IMG_3594.webp",
     "kind": "venue"
+   },
+   {
+    "src": "assets/images/experiences/bkk-commons-06.jpg",
+    "w": 630,
+    "h": 420,
+    "alt": "The open terraces of The Commons, planted and shaded",
+    "drive": "19_GvQmvcuYiN1ul7gi0h-giRGGvHgCCR",
+    "file": "IMG_3595.webp",
+    "kind": "venue"
+   },
+   {
+    "src": "assets/images/experiences/bkk-commons-07.jpg",
+    "w": 630,
+    "h": 420,
+    "alt": "A walkway along The Commons above Thonglor",
+    "drive": "1K3yXw_F_iV5a3WgCet6df0v7_rGqD0OS",
+    "file": "IMG_3591.webp",
+    "kind": "venue"
+   },
+   {
+    "src": "assets/images/experiences/bkk-commons-08.jpg",
+    "w": 630,
+    "h": 773,
+    "alt": "Stairs and planted balconies inside The Commons",
+    "drive": "1bEuw98AwlgdrOet-l3LGIPsPkVyVslbt",
+    "file": "IMG_3599.webp",
+    "kind": "venue"
+   },
+   {
+    "src": "assets/images/experiences/bkk-commons-09.jpg",
+    "w": 630,
+    "h": 574,
+    "alt": "The Commons from the street, its terraces stacked above the entrance",
+    "drive": "1euOPCzn9RU7K9v9PT3hQVfbmwbzaCrzE",
+    "file": "IMG_3598.webp",
+    "kind": "venue"
    }
   ]
  },
@@ -399,6 +498,24 @@
     "alt": "The neon Thong Smith sign above the shopfront",
     "drive": "1HedK7udar3zj7aHtEPs6geUm67SuGLo3",
     "file": "SnapInsta_785836760.jpg",
+    "kind": "exterior"
+   },
+   {
+    "src": "assets/images/experiences/bkk-thongsmith-08.jpg",
+    "w": 1440,
+    "h": 1800,
+    "alt": "Inside Thong Smith, wooden tables beneath a lantern",
+    "drive": "1HaWooHPkN2ttl-9AL0zjjwxP5Sa6qlo2",
+    "file": "Copy of 541515015_18280334056276968_4088206837475411751_n.jpg",
+    "kind": "interior"
+   },
+   {
+    "src": "assets/images/experiences/bkk-thongsmith-09.jpg",
+    "w": 1536,
+    "h": 1024,
+    "alt": "The Thong Smith house at dusk, lit from within",
+    "drive": "1N36v_Fk8c6NYj5d2zjrDJvJjt1DIIg0n",
+    "file": "1",
     "kind": "exterior"
    }
   ]
@@ -559,6 +676,16 @@
     "drive": "1d3dk_Z_v51IVUxsUs2a6GvxH85V-HuTa",
     "file": "IMG_3516.jpeg",
     "kind": "exterior"
+   },
+   {
+    "src": "assets/images/experiences/bkk-curvy-07.jpg",
+    "w": 750,
+    "h": 478,
+    "alt": "The white curved pavilions of Curvy.Dining from above, on their lawn",
+    "drive": "1Qai7t3g9D4pGyVuIg9N1m07Q90gMM1Vf",
+    "file": "Copy of IMG_3512.jpeg",
+    "kind": "architecture",
+    "pos": "22% 50%"
    }
   ]
  },
@@ -709,6 +836,15 @@
     "drive": "1Mie6N2eiwsg1d0TI-ZKiyLhb8wRcozdm",
     "file": "SnapInsta_701184667.jpg",
     "kind": "atmosphere"
+   },
+   {
+    "src": "assets/images/experiences/bkk-timespace-08.jpg",
+    "w": 1440,
+    "h": 1920,
+    "alt": "The café seen through a round window",
+    "drive": "1RVB2K2Z2gapzI51zMXY2VuL9KjrHe0Tg",
+    "file": "Copy of SnapInsta.to_709735801_18107162186286257_844051923915684691_n.jpg",
+    "kind": "interior"
    }
   ]
  },
@@ -868,6 +1004,24 @@
     "drive": "1mgUx3Tqqs1sSFup9B9y4m8RsCA4wSqST",
     "file": "IMG_3654.jpeg",
     "kind": "exterior"
+   },
+   {
+    "src": "assets/images/experiences/vte-rivermoon-07.jpg",
+    "w": 2000,
+    "h": 2000,
+    "alt": "The River Moon house among its garden trees",
+    "drive": "170gZ4tjq4GtHFVuxiPq0YZy7AutckOow",
+    "file": "IMG_3647.jpeg",
+    "kind": "exterior"
+   },
+   {
+    "src": "assets/images/experiences/vte-rivermoon-08.jpg",
+    "w": 2000,
+    "h": 1334,
+    "alt": "Guests walking the garden paths of River Moon",
+    "drive": "1HqOWIOZlLVAoyUH0cOA_Nc6MUIhC81N_",
+    "file": "IMG_3651.jpeg",
+    "kind": "atmosphere"
    }
   ]
  },
@@ -1026,6 +1180,15 @@
     "drive": "1uqE4mFOeAOOORdsG54As1NBV00jgjr8K",
     "file": "SaveDouyin_2.jpeg",
     "kind": "exterior"
+   },
+   {
+    "src": "assets/images/experiences/vte-sona-04.jpg",
+    "w": 1333,
+    "h": 2000,
+    "alt": "The bar counter of Sona beneath its tiled arch",
+    "drive": "1gOzOXSbr4a7IqBt4oNlcAbcSdsnqmr7T",
+    "file": "SaveDouyin.App_7415480022351334664_3.jpeg",
+    "kind": "counter"
    }
   ]
  },
@@ -1078,6 +1241,42 @@
     "alt": "Food stalls seen from above",
     "drive": "1akpjEyx7-Q8WNxkQP7scsL7D6DsshWgP",
     "file": "IMG_3184.jpeg",
+    "kind": "venue"
+   },
+   {
+    "src": "assets/images/experiences/vte-kokkok-06.jpg",
+    "w": 2000,
+    "h": 1500,
+    "alt": "A restaurant front inside KokKok Mega Mall",
+    "drive": "10y1XqY4zLdh0XYI0uDq0_Hs75wIdp1DT",
+    "file": "IMG_3175.jpeg",
+    "kind": "venue"
+   },
+   {
+    "src": "assets/images/experiences/vte-kokkok-07.jpg",
+    "w": 2000,
+    "h": 1500,
+    "alt": "The entrance hall of KokKok Mega Mall",
+    "drive": "1i_zBIXSb23Zj1pXSh-eYTClHGna9oF73",
+    "file": "IMG_3188.jpeg",
+    "kind": "venue"
+   },
+   {
+    "src": "assets/images/experiences/vte-kokkok-08.jpg",
+    "w": 2000,
+    "h": 1500,
+    "alt": "Cafés along a KokKok Mega Mall gallery",
+    "drive": "1jywJr0Q4ish4Kwop0GmaOBOqHi0bxODT",
+    "file": "IMG_3176.jpeg",
+    "kind": "venue"
+   },
+   {
+    "src": "assets/images/experiences/vte-kokkok-09.jpg",
+    "w": 2000,
+    "h": 1500,
+    "alt": "A ramen house inside KokKok Mega Mall",
+    "drive": "1zI0f-7hcGviuMpow9VlJAH0Y-6WD-rGS",
+    "file": "IMG_3177.jpeg",
     "kind": "venue"
    }
   ]
@@ -1167,6 +1366,15 @@
     "drive": "1I1B5KSlsRNx0h5AyBte13PC1Kqgcb_wW",
     "file": "IMG_4080.jpeg",
     "kind": "venue"
+   },
+   {
+    "src": "assets/images/experiences/bkk-letsrelax-06.jpg",
+    "w": 1920,
+    "h": 1920,
+    "alt": "The reception of Let’s Relax, marble and warm wood",
+    "drive": "1z0qAS0vSZRaWiVWxE7YUxXkQSTIss00h",
+    "file": "Copy of SnapInsta.to_576848831_1248308664008455_1148363071133460575_n.jpg",
+    "kind": "venue"
    }
   ]
  },
@@ -1210,6 +1418,24 @@
     "alt": "The atrium of the mall",
     "drive": "1gu0R_GBmvAqDxcrPIjFUM5hB2xe1-rjJ",
     "file": "IMG_3711.jpeg",
+    "kind": "venue"
+   },
+   {
+    "src": "assets/images/experiences/bkk-dusit-05.jpg",
+    "w": 600,
+    "h": 800,
+    "alt": "The skywalk through the park beside Dusit Central Park",
+    "drive": "1PWHEPhMx07mAjzia2RQT89dAriMGOZbg",
+    "file": "IMG_3625.png",
+    "kind": "venue"
+   },
+   {
+    "src": "assets/images/experiences/bkk-dusit-06.jpg",
+    "w": 2000,
+    "h": 1334,
+    "alt": "Dusit Central Park and its roof garden above Lumphini",
+    "drive": "1nHJvEBQXUQ1okq_jluN7WKl9GvzbgIQf",
+    "file": "IMG_3624.jpeg",
     "kind": "venue"
    }
   ]
@@ -1273,6 +1499,15 @@
     "drive": "1GhIJoK7uYiEJj5FaAo611ZR-qnXHUTod",
     "file": "IMG_3584.jpeg",
     "kind": "venue"
+   },
+   {
+    "src": "assets/images/experiences/bkk-emquartier-07.jpg",
+    "w": 1024,
+    "h": 683,
+    "alt": "A shopfront in EmQuartier",
+    "drive": "1YIy68gBHroocN_fln1vGdNz1BHy93QPl",
+    "file": "IMG_3583.jpeg",
+    "kind": "venue"
    }
   ]
  },
@@ -1334,6 +1569,15 @@
     "alt": "The façade at dusk",
     "drive": "1MOFh6BjC_6FEzcOIFmQYlgPGp-HTb4Zk",
     "file": "iconsiam01.jpg",
+    "kind": "venue"
+   },
+   {
+    "src": "assets/images/experiences/bkk-iconsiam-07.jpg",
+    "w": 1333,
+    "h": 2000,
+    "alt": "ICONSIAM on the Chao Phraya at dusk",
+    "drive": "186bJ1qKNqDycCtEbeXjz6CF6D6QZpwrF",
+    "file": "IMG_3496.jpeg",
     "kind": "venue"
    }
   ]
@@ -1495,68 +1739,6 @@
    }
   ]
  },
- "vte-laonationalmuseum": {
-  "slug": "vte-laonationalmuseum",
-  "folder": "174 - Experience - Lao National Museum",
-  "folderId": "16gX3TfbIBdsmiXpUwSULwF7VvSHfuVW7",
-  "frame": "4/5",
-  "images": [
-   {
-    "src": "assets/images/experiences/vte-laonationalmuseum-01.jpg",
-    "w": 1591,
-    "h": 2000,
-    "alt": "The façade of the Lao National Museum",
-    "drive": "1MHx4vyiOhddmVE4lb8uydp1UgFxEBrwQ",
-    "file": "IMG_4100.jpeg",
-    "kind": "venue"
-   },
-   {
-    "src": "assets/images/experiences/vte-laonationalmuseum-02.jpg",
-    "w": 1920,
-    "h": 1080,
-    "alt": "The museum building from the avenue",
-    "drive": "1O1qjH6P0fK1D3fxo_7obE1C-YmN_o-TX",
-    "file": "IMG_4102.webp",
-    "kind": "venue"
-   },
-   {
-    "src": "assets/images/experiences/vte-laonationalmuseum-03.jpg",
-    "w": 1597,
-    "h": 2000,
-    "alt": "Display cases in the gallery",
-    "drive": "1bk7PFSwlfeAggENCysIrrz_6toJPF3yW",
-    "file": "IMG_4101.jpeg",
-    "kind": "venue"
-   },
-   {
-    "src": "assets/images/experiences/vte-laonationalmuseum-04.jpg",
-    "w": 1600,
-    "h": 1200,
-    "alt": "Artefacts in the collection",
-    "drive": "1iRRzyB4M3ZHvOuHd5CwlgEM1NlY7sODe",
-    "file": "IMG_4099.jpeg",
-    "kind": "venue"
-   },
-   {
-    "src": "assets/images/experiences/vte-laonationalmuseum-05.jpg",
-    "w": 1600,
-    "h": 1200,
-    "alt": "An artefact of the collection",
-    "drive": "1l8gedPf62fKBgs-rTE-RiF0g4jFw912-",
-    "file": "IMG_4098.jpeg",
-    "kind": "venue"
-   },
-   {
-    "src": "assets/images/experiences/vte-laonationalmuseum-06.jpg",
-    "w": 2000,
-    "h": 1500,
-    "alt": "A model stupa in the hall",
-    "drive": "1lvVakbdaHuKyt7GNUo8uutSod_gD4i5e",
-    "file": "IMG_4103.jpeg",
-    "kind": "venue"
-   }
-  ]
- },
  "vte-silkresidence": {
   "slug": "vte-silkresidence",
   "folder": "175 - Experience - Traditional Lao Silk Residence",
@@ -1713,6 +1895,15 @@
     "drive": "1onQlQa0L_psK4YbT7TmYOcMHN5hzNelF",
     "file": "SnapInsta.to_483201232_18488882269028090_1999400562091392011_n.jpg",
     "kind": "architecture"
+   },
+   {
+    "src": "assets/images/experiences/bkk-baanphraya-05.jpg",
+    "w": 600,
+    "h": 600,
+    "alt": "The dining room of Baan Phraya, arched colonnades and soft lamplight",
+    "drive": "1XkbYQiVVmGIVIBRjuPG6wNfGCDmP3sLW",
+    "file": "002 - Baan Phraya",
+    "kind": "dining-room"
    }
   ]
  },
@@ -1925,6 +2116,24 @@
     "drive": "1ttercJQGJgexU6tkkjiz7uVjaIWCmhE2",
     "file": "IMG_3526.webp",
     "kind": "exterior"
+   },
+   {
+    "src": "assets/images/experiences/bkk-dior-05.jpg",
+    "w": 1900,
+    "h": 675,
+    "alt": "The Dior Café room, rattan chairs beneath carved gilded walls",
+    "drive": "1FK1P376CA9Sty7FvN_CEZMCarszB21Kw",
+    "file": "Copy of IMG_3523.webp",
+    "kind": "interior"
+   },
+   {
+    "src": "assets/images/experiences/bkk-dior-06.jpg",
+    "w": 1365,
+    "h": 1706,
+    "alt": "A wall of woven Dior bags in the café",
+    "drive": "1Ldo8alnIumD-TqlX9qdAoNQDiqFWN1dT",
+    "file": "Copy of SnapInsta.to_470902878_18477441229015408_3625171686372090801_n.jpg",
+    "kind": "interior"
    }
   ]
  },
@@ -1969,6 +2178,24 @@
     "drive": "1aEpxJolsDia19q9OdjhM7clUjt7hoWM5",
     "file": "IMG_3494.jpeg",
     "kind": "interior"
+   },
+   {
+    "src": "assets/images/experiences/bkk-lvcafe-05.jpg",
+    "w": 2000,
+    "h": 1125,
+    "alt": "The Le Café Louis Vuitton counter, lit beneath leaf reliefs",
+    "drive": "16Auvq-5sxO2MJQCeiRYZuwelVCIL8abW",
+    "file": "Copy of IMG_3483.jpeg",
+    "kind": "counter"
+   },
+   {
+    "src": "assets/images/experiences/bkk-lvcafe-06.jpg",
+    "w": 1500,
+    "h": 2000,
+    "alt": "Shelves of Louis Vuitton objects and books in the café",
+    "drive": "1Lds-4x9589A1TCZzHnx1i58pVqxd0T6u",
+    "file": "Copy of IMG_3493.jpeg",
+    "kind": "interior"
    }
   ]
  },
@@ -1995,6 +2222,15 @@
     "drive": "1skWJihrPyS5_UWbxMhsuCrVH9VvIHM5n",
     "file": "IMG_4302.webp",
     "kind": "interior"
+   },
+   {
+    "src": "assets/images/experiences/bkk-cafecraft-03.jpg",
+    "w": 1500,
+    "h": 1000,
+    "alt": "The entrance of Café Craft, a honey-coloured tiled wall",
+    "drive": "1obf2LtAdXDa4f-9Z7Ma3crtTbroV9WSC",
+    "file": "Copy of IMG_4299.webp",
+    "kind": "exterior"
    }
   ]
  },
@@ -2083,6 +2319,15 @@
     "drive": "1MMdfMqeBaaSW1hDrzP67Ved6VM_UiecU",
     "file": "IMG_4314.jpeg",
     "kind": "venue"
+   },
+   {
+    "src": "assets/images/experiences/bkk-siamparagon-05.jpg",
+    "w": 640,
+    "h": 853,
+    "alt": "The planted atrium of Siam Paragon",
+    "drive": "1HxzZQiiMFGquFqDDTi92TgPxH6XGsZVI",
+    "file": "IMG_4313.webp",
+    "kind": "venue"
    }
   ]
  },
@@ -2109,6 +2354,25 @@
     "drive": "1EIJSrccnNVpB8voFR4Lk7BMcVaVv4Nz3",
     "file": "IMG_4255.jpeg",
     "kind": "dining-room"
+   },
+   {
+    "src": "assets/images/experiences/vte-camon-03.jpg",
+    "w": 1241,
+    "h": 1241,
+    "alt": "The mural wall and neon of Cam On",
+    "drive": "1b6152aJ1zkK67MQeKl-qmMu1qCAkQnJE",
+    "file": "IMG_4254.jpeg",
+    "kind": "interior",
+    "pos": "25% 50%"
+   },
+   {
+    "src": "assets/images/experiences/vte-camon-04.jpg",
+    "w": 1241,
+    "h": 1241,
+    "alt": "The red front of Cam On, its neon sign open",
+    "drive": "1oN8oOBzR0TKspGcyhRDX9XT79Fy0hqcX",
+    "file": "IMG_4253.jpeg",
+    "kind": "exterior"
    }
   ]
  },

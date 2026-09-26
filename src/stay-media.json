@@ -58,6 +58,42 @@
     "kind": "room",
     "caption": "The Superior Room and its garden terrace",
     "source": "Owner Drive 026 - Hotel - U Sathorn Bangkok (16 Sep 2026)"
+   },
+   {
+    "src": "assets/images/usathorn/the-pool-before-the-house.jpg",
+    "kind": "pool",
+    "caption": "The pool before the house",
+    "source": "Owner Drive 041 (Media Asset Agent, 26 Sep 2026)"
+   },
+   {
+    "src": "assets/images/usathorn/the-lawn-and-garden-between-the-wings.jpg",
+    "kind": "grounds",
+    "caption": "The lawn and garden between the wings",
+    "source": "Owner Drive 041 (Media Asset Agent, 26 Sep 2026)"
+   },
+   {
+    "src": "assets/images/usathorn/the-tropical-garden-and-its-parasols.jpg",
+    "kind": "grounds",
+    "caption": "The tropical garden and its parasols",
+    "source": "Owner Drive 041 (Media Asset Agent, 26 Sep 2026)"
+   },
+   {
+    "src": "assets/images/usathorn/loungers-beside-the-pool-under-the-trees.jpg",
+    "kind": "pool",
+    "caption": "Loungers beside the pool under the trees",
+    "source": "Owner Drive 041 (Media Asset Agent, 26 Sep 2026)"
+   },
+   {
+    "src": "assets/images/usathorn/the-long-pool-towards-the-garden.jpg",
+    "kind": "pool",
+    "caption": "The long pool towards the garden",
+    "source": "Owner Drive 041 (Media Asset Agent, 26 Sep 2026)"
+   },
+   {
+    "src": "assets/images/usathorn/the-pool-terrace-and-its-palms.jpg",
+    "kind": "pool",
+    "caption": "The pool terrace and its palms",
+    "source": "Owner Drive 041 (Media Asset Agent, 26 Sep 2026)"
    }
   ]
  },
@@ -112,6 +148,36 @@
     "kind": "room",
     "caption": "A Heritage room",
     "source": "Owner Drive 021 - Hotel - Souphattra Heritage Vientiane"
+   },
+   {
+    "src": "assets/images/souphattra/a-veranda-seat-with-cushions-over-the-ga.jpg",
+    "kind": "room",
+    "caption": "A veranda seat with cushions over the garden",
+    "source": "Owner Drive 042 (Media Asset Agent, 26 Sep 2026)"
+   },
+   {
+    "src": "assets/images/souphattra/an-arched-corridor-in-afternoon-light.jpg",
+    "kind": "architecture",
+    "caption": "An arched corridor in afternoon light",
+    "source": "Owner Drive 042 (Media Asset Agent, 26 Sep 2026)"
+   },
+   {
+    "src": "assets/images/souphattra/the-fountain-in-the-courtyard.jpg",
+    "kind": "grounds",
+    "caption": "The fountain in the courtyard",
+    "source": "Owner Drive 042 (Media Asset Agent, 26 Sep 2026)"
+   },
+   {
+    "src": "assets/images/souphattra/the-wooden-balconies-of-the-heritage-hou.jpg",
+    "kind": "architecture",
+    "caption": "The wooden balconies of the heritage houses",
+    "source": "Owner Drive 042 (Media Asset Agent, 26 Sep 2026)"
+   },
+   {
+    "src": "assets/images/souphattra/the-lounge-with-its-blue-and-white-lamps.jpg",
+    "kind": "lobby",
+    "caption": "The lounge with its blue-and-white lamps",
+    "source": "Owner Drive 042 (Media Asset Agent, 26 Sep 2026)"
    }
   ]
  },
@@ -142,6 +208,66 @@
     "kind": "grounds",
     "caption": "Towards the temple roofs",
     "source": "Owner Drive 022 - Hotel - Airbnb Guest House Vientiane"
+   },
+   {
+    "src": "assets/images/guesthouse/guesthouse-07.jpg",
+    "kind": "room",
+    "caption": "The bedroom and sitting area",
+    "source": "Owner Drive 043 (Media Asset Agent, 26 Sep 2026)"
+   },
+   {
+    "src": "assets/images/guesthouse/guesthouse-08.jpg",
+    "kind": "room",
+    "caption": "Green through the window",
+    "source": "Owner Drive 043 (Media Asset Agent, 26 Sep 2026)"
+   },
+   {
+    "src": "assets/images/guesthouse/guesthouse-09.jpg",
+    "kind": "room",
+    "caption": "The kitchen corner and sofa",
+    "source": "Owner Drive 043 (Media Asset Agent, 26 Sep 2026)"
+   },
+   {
+    "src": "assets/images/guesthouse/guesthouse-10.jpg",
+    "kind": "architecture",
+    "caption": "The wooden entrance doors",
+    "source": "Owner Drive 043 (Media Asset Agent, 26 Sep 2026)"
+   },
+   {
+    "src": "assets/images/guesthouse/guesthouse-11.jpg",
+    "kind": "room",
+    "caption": "A dining nook by the window",
+    "source": "Owner Drive 043 (Media Asset Agent, 26 Sep 2026)"
+   },
+   {
+    "src": "assets/images/guesthouse/guesthouse-12.jpg",
+    "kind": "facilities",
+    "caption": "The kitchen",
+    "source": "Owner Drive 043 (Media Asset Agent, 26 Sep 2026)"
+   },
+   {
+    "src": "assets/images/guesthouse/guesthouse-13.jpg",
+    "kind": "facilities",
+    "caption": "The bathroom",
+    "source": "Owner Drive 043 (Media Asset Agent, 26 Sep 2026)"
+   },
+   {
+    "src": "assets/images/guesthouse/guesthouse-14.jpg",
+    "kind": "room",
+    "caption": "The bedroom",
+    "source": "Owner Drive 043 (Media Asset Agent, 26 Sep 2026)"
+   },
+   {
+    "src": "assets/images/guesthouse/guesthouse-15.jpg",
+    "kind": "grounds",
+    "caption": "The terrace over the trees",
+    "source": "Owner Drive 043 (Media Asset Agent, 26 Sep 2026)"
+   },
+   {
+    "src": "assets/images/guesthouse/guesthouse-16.jpg",
+    "kind": "room",
+    "caption": "The table and sofa in the light",
+    "source": "Owner Drive 043 (Media Asset Agent, 26 Sep 2026)"
    }
   ],
   "lead": "room",
@@ -174,6 +300,24 @@
     "kind": "suite",
     "caption": "The bath and the city",
     "source": "Owner Drive 023 - Hotel - Wanxiang Yueju Kunming"
+   },
+   {
+    "src": "assets/images/kunming/wanxiang-a-bedroom-with-a-city-view.jpg",
+    "kind": "room",
+    "caption": "A bedroom with a city view",
+    "source": "Owner Drive 044 (Media Asset Agent, 26 Sep 2026)"
+   },
+   {
+    "src": "assets/images/kunming/wanxiang-a-bathtub-by-the-window.jpg",
+    "kind": "suite",
+    "caption": "A bathtub by the window",
+    "source": "Owner Drive 044 (Media Asset Agent, 26 Sep 2026)"
+   },
+   {
+    "src": "assets/images/kunming/wanxiang-the-entrance-of-the-hotel.jpg",
+    "kind": "exterior",
+    "caption": "The entrance of the hotel",
+    "source": "Owner Drive 044 (Media Asset Agent, 26 Sep 2026)"
    }
   ]
  },
@@ -218,6 +362,12 @@
     "kind": "room",
     "caption": "The sitting room and the fireplace",
     "source": "Owner Drive 024 - Hotel - Luye Baisha Lijiang"
+   },
+   {
+    "src": "assets/images/lijiang/luye-a-room-with-its-own-fireplace.jpg",
+    "kind": "room",
+    "caption": "A room with its own fireplace",
+    "source": "Owner Drive 045 (Media Asset Agent, 26 Sep 2026)"
    }
   ]
  },

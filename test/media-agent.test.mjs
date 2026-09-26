@@ -66,7 +66,8 @@ test('MIXED ASPECT · the frame is the component\'s, never the source\'s: what c
   /* every role carries its measured frame at all four classes, and no role takes its aspect from a source */
   for (const [k, r] of Object.entries(M.roles)) {
     if (r.playback) continue;
-    for (const c of core.CLASSES) assert.ok(r.geometry && r.geometry[c] > 0, k + ' ' + c);
+    /* a component that shows the whole photograph from 768 px (the experience gallery) is framed on the phone only */
+    for (const c of r.containFrom ? ['p'] : core.CLASSES) assert.ok(r.geometry && r.geometry[c] > 0, k + ' ' + c);
   }
 });
 
@@ -93,7 +94,10 @@ test('FOCAL POINTS ON THE SITE · the decisions recorded in the contract are the
   /* portrait source, landscape gallery: the Kempinski lobby keeps the walking figure */
   assert.equal(slot('assets/images/kempinski/lobby-palms.jpg', 'product-gallery').focal, '50% 90%');
   assert.match(src('assets/stay-media.js'), /lobby-palms\.jpg","kind":"lobby","caption":"[^"]+","focal":"50% 90%"/);
-  assert.match(src('journeys.html'), /background-position:'\+x\[4\]/);
+  assert.match(src('journeys.html'), /var f4=x\[4\]\|\|x\[2\],fp=f4&&/);
+  /* a transport frame carries its own focal point as the tuple's third value (the C86 departure, aimed at the train) */
+  assert.match(src('assets/transport-data.js'), /c642-leaving-kunming-dusk\.jpg', 'Leaving Kunming at dusk', '50% 80%'/);
+  assert.match(src('transport.html'), /';background-position:' \+ g\[2\]/);
   /* landscape source, the widest band: the arcades keep their arches */
   assert.match(src('voyage.html'), /heritage-arches-dusk\.jpg\);background-position:50% 30%"/);
   /* landscape source, portrait card: the alley train stays aimed (EDIT 7) */
@@ -129,15 +133,16 @@ test('RESOLUTION · downscaling for delivery is expected, upscaling never: a sou
 
 test('THE CONTRACT · 001–030 mapped from the Drive library, every synced asset on disk with its slots, every question named, no Drive id on a served file', () => {
   const nos = Object.keys(M.collections);
-  assert.ok(nos.length >= 22 && nos.every((n) => /^0(0\d|1\d|2\d|30)$/.test(n)), nos.join());
+  assert.ok(nos.length >= 22 && nos.every((n) => /^\d{3}$/.test(n) && !/^999/.test(n)), nos.join());
   assert.equal(M.collections['001'].order, 'explicit'); assert.match(M.collections['001'].orderNote, /LAST/);
   let synced = 0;
   for (const { no, c, it } of items()) {
     assert.ok(it.driveId && /^(image|video)$/.test(it.kind), no + ' ' + it.title);
-    assert.ok(['synced', 'pending', 'unresolved'].includes(it.status), no + ' ' + it.title + ' ' + it.status);
+    assert.ok(['synced', 'pending', 'unresolved', 'excluded'].includes(it.status), no + ' ' + it.title + ' ' + it.status);
+    if (it.status === 'excluded') assert.ok(it.note, no + ' ' + it.title + ': an excluded source names its reason');
     if (it.status === 'synced') {
       synced++; assert.ok(existsSync(join(ROOT, it.asset)), it.asset);
-      for (const s of it.slots || []) assert.ok(M.roles[s.role] && M.roles[s.role].routes.includes(s.route), no + ' ' + it.asset + ' ' + s.route + ' ' + s.role);
+      for (const s of it.slots || []) assert.ok(M.roles[s.role] && M.roles[s.role].routes.includes(s.route.split('?')[0]), no + ' ' + it.asset + ' ' + s.route + ' ' + s.role);
     }
     if (it.status === 'unresolved') assert.ok(c.question, no + ': an unresolved source needs the Owner question');
   }

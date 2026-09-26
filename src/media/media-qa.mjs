@@ -50,6 +50,7 @@ for (const [no, c] of Object.entries(M.collections)) {
     else if (seen.has(it.driveId) && !it.sharedWith) fail(no, where, 'the same source already stands in ' + seen.get(it.driveId) + ' (declare sharedWith if intended)');
     seen.set(it.driveId, no);
     if (!/^(image|video)$/.test(it.kind || '')) fail(no, where, 'kind must be image or video');
+    if (it.status === 'excluded' && !it.note) fail(no, where, 'excluded without its reason');
     const mapped = c.status === 'synced' || it.status === 'mapped' || it.status === 'synced';
     if (!mapped) continue;
     const assets = [it.asset, ...(it.assets || [])].filter(Boolean);
@@ -122,13 +123,17 @@ for (const [no, c] of Object.entries(M.collections)) {
         const inCss = css.includes('[src$="' + b + '"] { object-position: ' + focal + ';');
         const inPage = Object.entries(text).some(([f, t]) => /\.html$/.test(f) && (t.includes(b + '" data-focal="' + focal + '"') || t.includes(b + ');background-position:' + focal + '"')));
         const inStay = new RegExp(b.replace(/[.]/g, '\\.') + '"[^}]*"focal":"' + focal + '"').test(text['assets/stay-media.js'] || '');
-        if (!inCss && !inPage && !inStay) fail(no, it.title + ' @ ' + key, 'the recorded focal point ' + focal + ' is not what the site shows');
+        const inExp = new RegExp(b.replace(/[.]/g, '\\.') + '"[^}]*"pos":"' + focal + '"').test(text['assets/experience-galleries.js'] || '');
+        const inTransport = (text['assets/transport-data.js'] || '').includes(b + "', '") && new RegExp(b.replace(/[.]/g, '\\.') + "', '[^']*', '" + focal + "'").test(text['assets/transport-data.js'] || '');
+        if (!inCss && !inPage && !inStay && !inExp && !inTransport) fail(no, it.title + ' @ ' + key, 'the recorded focal point ' + focal + ' is not what the site shows');
         if (!s.focalWhy && !inCss) fail(no, it.title + ' @ ' + key, 'a focal point without its reason (focalWhy)');
       }
       if (role.crop === 'none' || !it.vision) continue;
       const shown = Object.assign({}, it, it.display || {}, { focal: perClass || { p: focal, tp: focal, tl: focal, d: focal } });
       if (!shown.w) continue;
-      const found = core.cropSafety(shown, role.geometry);
+      /* a slot may carry its own frame (an experience gallery's `frame`: 4:5 · 3:2 · 1:1 on the phone) */
+      const geo = s.aspect ? Object.fromEntries(Object.keys(role.geometry).map((k) => [k, s.aspect])) : role.geometry;
+      const found = core.cropSafety(shown, geo);
       const rv = it.review && it.review[key];
       /* a review holds for the focal point it was judged at: moving the picture needs a new look */
       if (found.length && !(rv && rv.verdict === 'kept' && rv.why && JSON.stringify(rv.focal) === JSON.stringify(perClass || focal))) for (const x of found) fail(no, it.title + ' @ ' + key, x.type + ' · ' + x.detail + (rv && rv.focal !== focal ? ' — reviewed at ' + rv.focal + ', shown at ' + focal : '') + ' — refocus or record the visual review');

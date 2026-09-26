@@ -42,7 +42,9 @@ test('EDIT 5 · IGNIV is gone everywhere; Le Du Kaan, the Lao National Museum, t
   const leads = new Set([...exp.matchAll(/img: 'assets\/images\/experiences\/([^']+)'/g)].map((m) => m[1]));
   for (const f of files) assert.ok(frames.has(f) || leads.has(f) || f === 'vte-oathhouse.jpg', f + ' is a frame of the record or a lead photograph (no orphan photograph; vte-oathhouse.jpg is a historical asset, pre-Edit 5)');
   for (const f of frames) assert.ok(existsSync('assets/images/experiences/' + f), f + ' on disk');
-  const want = { 'bkk-ledukaan': ['Le Du Kaan', 4], 'vte-laonationalmuseum': ['Lao National Museum', 6], 'vte-silkresidence': ['Traditional Lao Silk Residence', 5], 'vte-laoartmuseum': ['Lao Art Museum', 6] };   /* Le Du Kaan: the four dish and chef-collage frames left in the release 012 media audit */
+  const want = { 'bkk-ledukaan': ['Le Du Kaan', 4], 'vte-silkresidence': ['Traditional Lao Silk Residence', 5], 'vte-laoartmuseum': ['Lao Art Museum', 6] };   /* Le Du Kaan: the four dish and chef-collage frames left in the release 012 media audit */
+  /* EDIT 9 (Owner, 26 Sep 2026): the Lao National Museum is deleted — no record, no gallery, no photograph */
+  assert.doesNotMatch(exp, /id: 'vte-(laonationalmuseum|haphrakeo|palace|buddhapark)'/); assert.equal(record['vte-laonationalmuseum'], undefined);
   for (const [id, [name, n]] of Object.entries(want)) {
     assert.match(exp, new RegExp("id: '" + id + "'[^\\n]*name: '" + name + "'"), name + ' on the website');
     assert.equal(record[id].images.length, n, name + ' gallery size'); assert.equal(record[id].images[0].src, 'assets/images/experiences/' + id + '-01.jpg');
@@ -51,7 +53,7 @@ test('EDIT 5 · IGNIV is gone everywhere; Le Du Kaan, the Lao National Museum, t
   }
   /* the replaced frames (the watermarked ones) now come from the Owner's originals: every frame of these places names its Drive file */
   for (const id of ['bkk-mooyoo', 'bkk-lvvisionary', 'bkk-letsrelax', 'vte-rivermoon', 'vte-laoderm', 'bkk-dusit', 'vte-kaogee', 'bkk-barus']) for (const im of record[id].images) assert.ok(/^[A-Za-z0-9_-]{20,}$/.test(im.drive), id + ' · ' + im.src + ' names its Drive original');
-  assert.equal(record['bkk-dusit'].images.length, 4); assert.equal(record['vte-kaogee'].images.length, 4); assert.equal(record['bkk-barus'].images.length, 2, 'Bar Us: the bar room and the counter — no cocktail (release 012)');
+  assert.equal(record['bkk-dusit'].images.length, 6, 'the park skywalk and the roof garden joined from the Owner\'s library (Synchronize media., 26 Sep 2026)'); assert.equal(record['vte-kaogee'].images.length, 4); assert.equal(record['bkk-barus'].images.length, 2, 'Bar Us: the bar room and the counter — no cocktail (release 012)');
 });
 
 /* a small DOM for the card clip: one frame, the elements the module creates, a fake observer */

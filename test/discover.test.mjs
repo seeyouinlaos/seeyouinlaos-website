@@ -99,8 +99,8 @@ test('PETITS PLATS BANGKOK · one restaurant, Bangkok, 08.03.2027 (the last dinn
   for (const f of onDisk) assert.ok(known.has(f) || f === 'vte-oathhouse.jpg', f + ' is a frame of a record'); for (const f of known) assert.ok(onDisk.includes(f), f + ' on disk');
 });
 
-test('THE JOURNEY IN NUMBERS · counted from unique places: 14 restaurants · 11 cafés · 6 bars & nightlife · 4 museums · 2 temples & stupas — no house counted twice, nothing gone still counted', () => {
-  assert.deepEqual(D.counts(), { restaurants: 14, cafes: 11, nightlife: 6, museums: 4, temples: 2 }, 'recomputed from the canonical records — eleven cafés since Dior and LV became two places');
+test('THE JOURNEY IN NUMBERS · counted from unique places: 14 restaurants · 11 cafés · 6 bars & nightlife · 2 museums (Edit 9) · 2 temples & stupas — no house counted twice, nothing gone still counted', () => {
+  assert.deepEqual(D.counts(), { restaurants: 14, cafes: 11, nightlife: 6, museums: 2, temples: 2 }, 'recomputed from the canonical records — eleven cafés since Dior and LV became two places');
   const names = (c) => X.filter((x) => x.category === c).map((x) => x.name).sort();
   assert.deepEqual(names('restaurant'), ['3 Merchants Restaurant', 'ALATi', 'Baan Phraya', 'Cam On Restaurant', 'Cannubi by Umberto Bombana', 'Curvy.Dining', 'Lao Derm', 'Le Du Kaan', 'Petits Plats Bangkok', 'Phra Nakhon', 'River Moon', 'Sühring', 'Tang Jai Yang', 'Thong Smith']);
   assert.deepEqual(names('cafe'), ['Cafe Madeleine', 'Café Craft by CHANINTR', 'Dior Café', 'Harudot', 'Kaogee Le Triomphe', 'LV Café', 'Lacuna VTE', 'Le Café at Souphattra Heritage', 'Moo Yoo Rose House', 'Time Space Cafe', 'Whispering Cafe']);

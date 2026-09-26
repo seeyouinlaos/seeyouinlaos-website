@@ -47,7 +47,7 @@ test('STAY MEDIA · the record is the module; every frame is a hotel kind of the
   /* D2 · Guest House complimentary (Owner, 19 Sep 2026): the record key is guestHouse; no "Private Residence" key, name or caption remains */
   assert.equal(STAY.privateResidence, undefined); assert.equal(W.SIYL_STAY_MEDIA.privateResidence, undefined);
   assert.equal(STAY.guestHouse.name, 'Guest House complimentary · Vientiane'); assert.ok(STAY.guestHouse.images.length > 0, 'the guest house shows its frames');
-  for (const im of STAY.guestHouse.images) assert.match(im.src, /^assets\/images\/guesthouse\/guesthouse-0[1-6]\.jpg$/, 'the guest house frames live in their own folder');
+  for (const im of STAY.guestHouse.images) assert.match(im.src, /^assets\/images\/guesthouse\/guesthouse-\d{2}\.jpg$/, 'the guest house frames live in their own folder');
   assert.doesNotMatch(src('src/stay-media.json') + src('assets/stay-media.js'), /Private Residence|privateResidence|up to 4/, 'the invented label is gone from the record and the module');
   /* every hotel's frames are its own: the folder in `source` names the hotel */
   /* SATHORN PENTHOUSE BANGKOK IS DELETED (Owner, 24 Sep 2026 · Edit 6): not a hotel of the record, not in the module */
@@ -55,7 +55,7 @@ test('STAY MEDIA · the record is the module; every frame is a hotel kind of the
   /* SHAMA YEN-AKAT BANGKOK IS DELETED (Owner, 24 Sep 2026): not a hotel of the record, not in the module, nothing replaces it */
   assert.equal(STAY.shamaYenAkat, undefined, 'the deleted Shama is still in the media record'); assert.equal(W.SIYL_STAY_MEDIA.shamaYenAkat, undefined);
   assert.doesNotMatch(src('src/stay-media.json') + src('assets/stay-media.js'), /Shama|images\/shama\//, 'no Shama frame, name or caption remains in the record or the module');
-  const own = { uSathorn: /026/, souphattra: /021/, guestHouse: /022/, wanxiang: /023/, luyeBaisha: /024/, kempinski: /025/ };
+  const own = { uSathorn: /026|041/, souphattra: /021|042/, guestHouse: /022|043/, wanxiang: /023|044/, luyeBaisha: /024|045/, kempinski: /025|046/ };   /* the old library number, or the house's folder in the numbered media library (041–046, 26 Sep 2026) */
   for (const [k, rx] of Object.entries(own)) for (const im of STAY[k].images) assert.match(im.source, rx, k + ' · ' + im.src + ' comes from its own folder');
 });
 
@@ -110,7 +110,7 @@ test('RESTAURANT MEDIA AUDIT · Thong Smith, Tang Jai Yang and Le Du Kaan show t
     for (const im of REC[id].images) assert.ok(!/food|drink/.test(im.kind) && !/dish|bowl|noodle|plate|dessert|cake|cocktail|martini|brunch plates/i.test(im.alt), id + ' · ' + im.alt);
     assert.equal(W.SIYL_EXP.find((x) => x.id === id).img, REC[id].images[0].src, id + ' lead = first frame');
   }
-  assert.deepEqual(REC['bkk-thongsmith'].images.map((im) => im.kind), ['interior', 'interior', 'exterior', 'exterior']);
+  assert.deepEqual(REC['bkk-thongsmith'].images.map((im) => im.kind), ['interior', 'interior', 'exterior', 'exterior', 'interior', 'exterior']);   /* + the lantern room and the house at dusk (Synchronize media., 26 Sep 2026) */
   assert.deepEqual(REC['bkk-tangjaiyang'].images.map((im) => im.kind), ['interior'], 'the Owner\'s folder holds one photograph of the room (the other four are dishes)');
   assert.deepEqual(REC['bkk-ledukaan'].images.map((im) => im.kind), ['interior', 'architecture', 'dining-room', 'atmosphere']);
   /* Bar Us: the tray martini (Drive 15HTZthAvxk6mjhd1Jtsucf0hy9Z-qRfb) and every cocktail frame are gone — not moved */
