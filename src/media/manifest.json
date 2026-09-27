@@ -5011,7 +5011,7 @@
   },
   "800": {
    "title": "800 - Hotel - Wanxiang Yueju Kunming",
-   "place": "The Journey · Package F · the Yifangju Designer Courtyard, Kunming — its three rooms (assets/rooms-data.js · kunming) and its house gallery (src/stay-media.json · yifangju)",
+   "place": "The Journey · Package F · the Yifangju rooms — each room's own gallery (assets/rooms-data.js · kunming.rooms[].gallery)",
    "slot": {
     "route": "/room.html"
    },
@@ -5033,11 +5033,6 @@
        "route": "/room.html",
        "role": "room-gallery",
        "focal": "50% 50%"
-      },
-      {
-       "route": "/journeys.html",
-       "role": "product-gallery",
-       "focal": "50% 50%"
       }
      ],
      "syncedAt": "2026-09-27T21:00:00Z",
@@ -5049,7 +5044,9 @@
       "h": 853
      },
      "order": 1,
-     "lead": true
+     "lead": true,
+     "level": "room",
+     "room": "elegant-residence"
     },
     {
      "driveId": "1VWrFom-O_OcDGy2MKtnJZh_kS90rEP_-",
@@ -5077,7 +5074,9 @@
       "h": 853
      },
      "order": 2,
-     "lead": false
+     "lead": false,
+     "level": "room",
+     "room": "elegant-residence"
     },
     {
      "driveId": "1RudbmCn-0BmGRiu4P9JqVXG_Dp4iSbav",
@@ -5105,7 +5104,9 @@
       "h": 853
      },
      "order": 3,
-     "lead": false
+     "lead": false,
+     "level": "room",
+     "room": "elegant-residence"
     },
     {
      "driveId": "13h6O8bxVdfae-oBvyzeD4uHgBP15EXN1",
@@ -5133,7 +5134,9 @@
       "h": 853
      },
      "order": 4,
-     "lead": false
+     "lead": false,
+     "level": "room",
+     "room": "elegant-residence"
     },
     {
      "driveId": "1oPTN7gpdirKsenPEoJM_9ZjAsIPZBmP0",
@@ -5161,7 +5164,9 @@
       "h": 853
      },
      "order": 5,
-     "lead": false
+     "lead": false,
+     "level": "room",
+     "room": "elegant-residence"
     },
     {
      "driveId": "1kdl9MOZ7_n_pGqLy5KDa3dRjplqHEv8f",
@@ -5189,7 +5194,9 @@
       "h": 853
      },
      "order": 6,
-     "lead": false
+     "lead": false,
+     "level": "room",
+     "room": "elegant-residence"
     },
     {
      "driveId": "1SbTh_KgJPndJpEG_yIY_W2MMoU1S-_Mr",
@@ -5217,7 +5224,9 @@
       "h": 853
      },
      "order": 7,
-     "lead": false
+     "lead": false,
+     "level": "room",
+     "room": "elegant-residence"
     },
     {
      "driveId": "1rdFs7x3I5vwNdLLzdNvD1nCkA_gzTweQ",
@@ -5234,11 +5243,6 @@
        "route": "/room.html",
        "role": "room-gallery",
        "focal": "50% 50%"
-      },
-      {
-       "route": "/journeys.html",
-       "role": "product-gallery",
-       "focal": "50% 50%"
       }
      ],
      "syncedAt": "2026-09-27T21:00:00Z",
@@ -5250,7 +5254,9 @@
       "h": 853
      },
      "order": 1,
-     "lead": true
+     "lead": true,
+     "level": "room",
+     "room": "jinri-terrace-double"
     },
     {
      "driveId": "1cn8L5qTyMm4F7VwzjmOKTQnXWBXa3Lz_",
@@ -5267,11 +5273,6 @@
        "route": "/room.html",
        "role": "room-gallery",
        "focal": "50% 50%"
-      },
-      {
-       "route": "/journeys.html",
-       "role": "product-gallery",
-       "focal": "50% 50%"
       }
      ],
      "syncedAt": "2026-09-27T21:00:00Z",
@@ -5283,7 +5284,9 @@
       "h": 853
      },
      "order": 2,
-     "lead": false
+     "lead": false,
+     "level": "room",
+     "room": "jinri-terrace-double"
     },
     {
      "driveId": "1d-jWB9fzjOmq7gO3daAByM_OlvLnqWMp",
@@ -5311,7 +5314,9 @@
       "h": 853
      },
      "order": 3,
-     "lead": false
+     "lead": false,
+     "level": "room",
+     "room": "jinri-terrace-double"
     },
     {
      "driveId": "1x87j6qx7kn-cUwvr0W7dImW_S8BjqyW9",
@@ -5339,7 +5344,9 @@
       "h": 853
      },
      "order": 4,
-     "lead": false
+     "lead": false,
+     "level": "room",
+     "room": "jinri-terrace-double"
     },
     {
      "driveId": "1QHABp-zf8pkCcne7VVfDvNw90em6wXhK",
@@ -5367,7 +5374,9 @@
       "h": 853
      },
      "order": 5,
-     "lead": false
+     "lead": false,
+     "level": "room",
+     "room": "jinri-terrace-double"
     },
     {
      "driveId": "1GFzklBTmDszcgxqOPpyGmYu5BBFQj97m",
@@ -5395,7 +5404,9 @@
       "h": 853
      },
      "order": 6,
-     "lead": false
+     "lead": false,
+     "level": "room",
+     "room": "jinri-terrace-double"
     },
     {
      "driveId": "1yLoJv9wacIYy7itfhUw4_J9paNRPZJz5",
@@ -5423,7 +5434,9 @@
       "h": 853
      },
      "order": 7,
-     "lead": false
+     "lead": false,
+     "level": "room",
+     "room": "jinri-terrace-double"
     },
     {
      "driveId": "13jwnxnDgkSBo5NN2uoYL4hr46E6AQD4x",
@@ -5440,11 +5453,6 @@
        "route": "/room.html",
        "role": "room-gallery",
        "focal": "50% 50%"
-      },
-      {
-       "route": "/journeys.html",
-       "role": "product-gallery",
-       "focal": "50% 50%"
       }
      ],
      "syncedAt": "2026-09-27T21:00:00Z",
@@ -5456,7 +5464,9 @@
       "h": 853
      },
      "order": 1,
-     "lead": true
+     "lead": true,
+     "level": "room",
+     "room": "jinri-family-suite"
     },
     {
      "driveId": "1RE76ht8_69Y-L-gUK_xtx5Eh93uKybKp",
@@ -5473,11 +5483,6 @@
        "route": "/room.html",
        "role": "room-gallery",
        "focal": "50% 50%"
-      },
-      {
-       "route": "/journeys.html",
-       "role": "product-gallery",
-       "focal": "50% 50%"
       }
      ],
      "syncedAt": "2026-09-27T21:00:00Z",
@@ -5489,7 +5494,9 @@
       "h": 853
      },
      "order": 2,
-     "lead": false
+     "lead": false,
+     "level": "room",
+     "room": "jinri-family-suite"
     },
     {
      "driveId": "12411rr0cU_ua42M3qvF1EGVgLenHlkR7",
@@ -5517,7 +5524,9 @@
       "h": 853
      },
      "order": 3,
-     "lead": false
+     "lead": false,
+     "level": "room",
+     "room": "jinri-family-suite"
     },
     {
      "driveId": "1DwDF3DwIRJX0-EO5E16hDRB87a21lL_T",
@@ -5545,7 +5554,9 @@
       "h": 853
      },
      "order": 4,
-     "lead": false
+     "lead": false,
+     "level": "room",
+     "room": "jinri-family-suite"
     },
     {
      "driveId": "1UOH6rQDezdJhsknRjk_R7nfL_YbQqO6I",
@@ -5573,7 +5584,9 @@
       "h": 853
      },
      "order": 5,
-     "lead": false
+     "lead": false,
+     "level": "room",
+     "room": "jinri-family-suite"
     },
     {
      "driveId": "1vF7lgadtfRhFZCZ7DT-5nDI1MVe5nujF",
@@ -5590,11 +5603,6 @@
        "route": "/room.html",
        "role": "room-gallery",
        "focal": "50% 50%"
-      },
-      {
-       "route": "/journeys.html",
-       "role": "product-gallery",
-       "focal": "50% 50%"
       }
      ],
      "syncedAt": "2026-09-27T21:00:00Z",
@@ -5606,7 +5614,9 @@
       "h": 853
      },
      "order": 6,
-     "lead": false
+     "lead": false,
+     "level": "room",
+     "room": "jinri-family-suite"
     },
     {
      "driveId": "1V3yUil-gD9LK16ePsMw7PJOVsQDpnQYS",
@@ -5634,11 +5644,15 @@
       "h": 853
      },
      "order": 7,
-     "lead": false
+     "lead": false,
+     "level": "room",
+     "room": "jinri-family-suite"
     }
    ],
    "status": "synced",
-   "syncedAt": "2026-09-27T21:00:00Z"
+   "syncedAt": "2026-09-27T21:00:00Z",
+   "level": "room",
+   "rule": "ROOM MEDIA ONLY (Owner, 28 Sep 2026): each folder belongs to its one room — 001 elegant-residence · 002 jinri-terrace-double · 003 jinri-family-suite — never another room, never a hotel-level surface; the property is collection 026."
   },
   "001": {
    "title": "001 - Main -  Hero ",
@@ -10653,7 +10667,7 @@
   },
   "026": {
    "title": "026 - The Journey - Accommodation · Kunming",
-   "place": "The Journey · Wanxiang Yueju Kunming (src/stay-media.json · wanxiang)",
+   "place": "The Journey and Stays · the Yifangju Designer Courtyard, Kunming — the PROPERTY: the house gallery (src/stay-media.json · yifangju), the Stays card, the Bag frame of the stay (assets/rooms-data.js · kunming.windows.bagImg)",
    "slot": {
     "route": "/journeys.html"
    },
@@ -11000,11 +11014,193 @@
      "aspect": 2.415,
      "status": "excluded",
      "note": "the Kunming house was replaced (Owner, 27 Sep 2026): the former hotel is no longer bookable; the Yifangju Designer Courtyard stands in collection 800"
+    },
+    {
+     "driveId": "1pMz41au7z3VoYjuzRBI55fxQA5SX_1ik",
+     "title": "1mc1212000rlxus1r01D2_W_600_0_R5.jpg_.webp",
+     "path": "026 - The Journey - Accommodation · Kunming",
+     "mimeType": "image/webp",
+     "size": 35648,
+     "modifiedTime": "2026-09-27T18:41:36.623Z",
+     "kind": "image",
+     "status": "synced",
+     "asset": "assets/images/yifangju/house-1.webp",
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      },
+      {
+       "route": "/accommodation.html",
+       "role": "card",
+       "focal": "50% 50%"
+      }
+     ],
+     "syncedAt": "2026-09-28T06:00:00Z",
+     "how": "copied bit for bit (the Owner's WebP, no re-encode)",
+     "w": 600,
+     "h": 337,
+     "display": {
+      "w": 600,
+      "h": 337
+     },
+     "order": 1,
+     "lead": true,
+     "level": "property"
+    },
+    {
+     "driveId": "1Bu4AZUZL-4kuzDtX9Zjvi4wpyfF7zHd9",
+     "title": "1mc3r12000rlxus221193_W_600_0_R5.jpg_.webp",
+     "path": "026 - The Journey - Accommodation · Kunming",
+     "mimeType": "image/webp",
+     "size": 49084,
+     "modifiedTime": "2026-09-27T18:41:38.229Z",
+     "kind": "image",
+     "status": "synced",
+     "asset": "assets/images/yifangju/house-2.webp",
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "syncedAt": "2026-09-28T06:00:00Z",
+     "how": "copied bit for bit (the Owner's WebP, no re-encode)",
+     "w": 600,
+     "h": 337,
+     "display": {
+      "w": 600,
+      "h": 337
+     },
+     "order": 2,
+     "lead": false,
+     "level": "property"
+    },
+    {
+     "driveId": "1j81miFExesY2ISlCtgs6Q2GspAwvHnCW",
+     "title": "1mc5912000rlxuh9f1E3D_W_600_0_R5.jpg_.webp",
+     "path": "026 - The Journey - Accommodation · Kunming",
+     "mimeType": "image/webp",
+     "size": 41470,
+     "modifiedTime": "2026-09-27T18:41:41.199Z",
+     "kind": "image",
+     "status": "synced",
+     "asset": "assets/images/yifangju/house-3.webp",
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "syncedAt": "2026-09-28T06:00:00Z",
+     "how": "copied bit for bit (the Owner's WebP, no re-encode)",
+     "w": 600,
+     "h": 399,
+     "display": {
+      "w": 600,
+      "h": 399
+     },
+     "order": 3,
+     "lead": false,
+     "level": "property"
+    },
+    {
+     "driveId": "1f9qCUGd1BLWbaRN-hb4YC8AzyvXy8RN8",
+     "title": "1mc3712000rlxw1laAFBD_W_600_0_R5.jpg_.webp",
+     "path": "026 - The Journey - Accommodation · Kunming",
+     "mimeType": "image/webp",
+     "size": 35368,
+     "modifiedTime": "2026-09-27T18:41:44.026Z",
+     "kind": "image",
+     "status": "synced",
+     "asset": "assets/images/yifangju/house-4.webp",
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "syncedAt": "2026-09-28T06:00:00Z",
+     "how": "copied bit for bit (the Owner's WebP, no re-encode)",
+     "w": 600,
+     "h": 400,
+     "display": {
+      "w": 600,
+      "h": 400
+     },
+     "order": 4,
+     "lead": false,
+     "level": "property"
+    },
+    {
+     "driveId": "1htqKApuPBsMsThKusYU6wMVcEwZkjk4D",
+     "title": "1mc5l12000rlxuii43EDC_W_600_0_R5.jpg_.webp",
+     "path": "026 - The Journey - Accommodation · Kunming",
+     "mimeType": "image/webp",
+     "size": 55934,
+     "modifiedTime": "2026-09-27T18:41:52.177Z",
+     "kind": "image",
+     "status": "synced",
+     "asset": "assets/images/yifangju/house-5.webp",
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "syncedAt": "2026-09-28T06:00:00Z",
+     "how": "copied bit for bit (the Owner's WebP, no re-encode)",
+     "w": 600,
+     "h": 337,
+     "display": {
+      "w": 600,
+      "h": 337
+     },
+     "order": 5,
+     "lead": false,
+     "level": "property"
+    },
+    {
+     "driveId": "1UnEZ2Y92Rawa9s-zZUrH_aJLpPSQlR9R",
+     "title": "1mc2w12000rmss02nC0D1_W_600_0_R5.jpg_.webp",
+     "path": "026 - The Journey - Accommodation · Kunming",
+     "mimeType": "image/webp",
+     "size": 69280,
+     "modifiedTime": "2026-09-27T18:41:53.807Z",
+     "kind": "image",
+     "status": "synced",
+     "asset": "assets/images/yifangju/house-6.webp",
+     "slots": [
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "syncedAt": "2026-09-28T06:00:00Z",
+     "how": "copied bit for bit (the Owner's WebP, no re-encode)",
+     "w": 600,
+     "h": 803,
+     "display": {
+      "w": 600,
+      "h": 803
+     },
+     "order": 6,
+     "lead": false,
+     "level": "property"
     }
    ],
-   "status": "retired",
-   "syncedAt": "2026-09-26T13:30:00Z",
-   "note": "the Kunming house was replaced (Owner, 27 Sep 2026): the former hotel is no longer bookable; the Yifangju Designer Courtyard stands in collection 800"
+   "status": "partial",
+   "syncedAt": "2026-09-28T06:00:00Z",
+   "note": "the folder now holds the Yifangju property photographs (28 Sep 2026); the former hotel's sources stay excluded",
+   "level": "property",
+   "property": "yifangju",
+   "rule": "PROPERTY MEDIA ONLY (Owner, 28 Sep 2026): these six frames stand for the house on hotel-level surfaces and never inside a room gallery; the rooms are collection 800, one folder per room."
   },
   "027": {
    "title": "027 - The Journey - Travel · Kunming → Lijiang",

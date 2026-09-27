@@ -278,40 +278,40 @@
   "city": "Kunming",
   "images": [
    {
-    "src": "assets/images/yifangju/jinri-terrace-double-1.webp",
+    "src": "assets/images/yifangju/house-1.webp",
     "kind": "exterior",
-    "caption": "A private terrace at dusk, above the lit old street",
-    "source": "Owner Drive 800 · the Yifangju Designer Courtyard room folders (27 Sep 2026) · 002"
+    "caption": "The Yifangju Designer Courtyard at dusk",
+    "source": "Owner Drive 026 - The Journey - Accommodation · Kunming (the property folder, 28 Sep 2026)"
    },
    {
-    "src": "assets/images/yifangju/jinri-family-suite-2.webp",
+    "src": "assets/images/yifangju/house-2.webp",
+    "kind": "architecture",
+    "caption": "The courtyard houses from above, at night",
+    "source": "Owner Drive 026 - The Journey - Accommodation · Kunming (the property folder, 28 Sep 2026)"
+   },
+   {
+    "src": "assets/images/yifangju/house-3.webp",
+    "kind": "exterior",
+    "caption": "The entrance of the house",
+    "source": "Owner Drive 026 - The Journey - Accommodation · Kunming (the property folder, 28 Sep 2026)"
+   },
+   {
+    "src": "assets/images/yifangju/house-4.webp",
+    "kind": "architecture",
+    "caption": "The galleries around the inner courtyard",
+    "source": "Owner Drive 026 - The Journey - Accommodation · Kunming (the property folder, 28 Sep 2026)"
+   },
+   {
+    "src": "assets/images/yifangju/house-5.webp",
+    "kind": "architecture",
+    "caption": "A courtyard terrace among the tiled roofs",
+    "source": "Owner Drive 026 - The Journey - Accommodation · Kunming (the property folder, 28 Sep 2026)"
+   },
+   {
+    "src": "assets/images/yifangju/house-6.webp",
     "kind": "grounds",
-    "caption": "A terrace towards the Jinri Building",
-    "source": "Owner Drive 800 · the Yifangju Designer Courtyard room folders (27 Sep 2026) · 003"
-   },
-   {
-    "src": "assets/images/yifangju/jinri-family-suite-1.webp",
-    "kind": "suite",
-    "caption": "The Jinri Terrace Tub Family Suite",
-    "source": "Owner Drive 800 · the Yifangju Designer Courtyard room folders (27 Sep 2026) · 003"
-   },
-   {
-    "src": "assets/images/yifangju/jinri-terrace-double-2.webp",
-    "kind": "suite",
-    "caption": "The Jinri Building Scenic Terrace Tub Double",
-    "source": "Owner Drive 800 · the Yifangju Designer Courtyard room folders (27 Sep 2026) · 002"
-   },
-   {
-    "src": "assets/images/yifangju/jinri-family-suite-6.webp",
-    "kind": "suite",
-    "caption": "A bathroom with a freestanding tub",
-    "source": "Owner Drive 800 · the Yifangju Designer Courtyard room folders (27 Sep 2026) · 003"
-   },
-   {
-    "src": "assets/images/yifangju/elegant-residence-1.webp",
-    "kind": "room",
-    "caption": "The Elegant Residence Double Bed Room",
-    "source": "Owner Drive 800 · the Yifangju Designer Courtyard room folders (27 Sep 2026) · 001"
+    "caption": "Kunming Old Street at night, below the city wall",
+    "source": "Owner Drive 026 - The Journey - Accommodation · Kunming (the property folder, 28 Sep 2026)"
    }
   ]
  },

@@ -280,7 +280,7 @@
       place: 'Jinma Biji Archway · Kunming Old Street',
       breakfast: 'Breakfast included',
       windows: [{ id: 'kmg', label: 'After the Wedding', dates: '1 – 4 March 2027', nights: '3 nights', n: 3,
-        bagName: 'Yifangju Designer Courtyard · Kunming', bagImg: YFJ + 'jinri-terrace-double-1.webp' }],
+        bagName: 'Yifangju Designer Courtyard · Kunming', bagImg: YFJ + 'house-1.webp' }],   /* the HOUSE frame (Owner Drive 026, the property folder) — never a room's */
       includes: [
         'Three nights, 1 → 2, 2 → 3 and 3 → 4 March.',
         'Free Wi-Fi, air conditioning, a smart toilet and daily housekeeping in every room.',
@@ -521,7 +521,7 @@
     sathorn:    ['assets/images/usathorn/'],
     souphattra: ['assets/images/souphattra/', 'assets/images/rooms/'],   /* assets/images/rooms/ = the Souphattra's own room categories (its Drive folder) */
     guesthouse: ['assets/images/guesthouse/'],
-    kunming:    ['assets/images/yifangju/'],   /* the Yifangju Designer Courtyard alone (Owner, 27 Sep 2026) */
+    kunming:    ['assets/images/yifangju/'],   /* the Yifangju Designer Courtyard alone (Owner, 27 Sep 2026): house-N = the property (Drive 026), <room>-N = that room only (Drive 800) */
     lijiang:    ['assets/images/lijiang/', 'assets/images/journey/lijiang-'],
     kempinski:  ['assets/images/kempinski/', 'assets/images/journey/kempinski-']
   };

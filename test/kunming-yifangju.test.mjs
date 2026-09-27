@@ -57,7 +57,7 @@ test('THE PHOTOGRAPHS · seven per room, each room only its own folder, the Owne
   const M = JSON.parse(src('src/media/manifest.json')), c = M.collections['800'];
   assert.equal(c.items.length, 21); assert.ok(c.items.every((it) => it.mimeType === 'image/webp' && fs.statSync(path.join(ROOT, it.asset)).size === it.size), 'the Owner\'s bytes, unchanged');
   for (const r of ROOMS) assert.equal(c.items.filter((it) => it.asset.includes('/' + r.slug + '-')).length, 7);
-  assert.equal(M.collections['026'].status, 'retired'); assert.equal(M.collections['044'].status, 'retired');
+  assert.equal(M.collections['026'].level, 'property', 'the Drive folder 026 now holds the Yifangju property'); assert.equal(M.collections['044'].status, 'retired');
   assert.ok(!fs.existsSync(path.join(ROOT, 'assets/images/kunming')) || fs.readdirSync(path.join(ROOT, 'assets/images/kunming')).length === 0, 'the former hotel\'s photographs are gone');
   assert.deepEqual(plain(ART.FOLDERS.kunming), ['assets/images/yifangju/']);
 });
@@ -117,4 +117,29 @@ test('THE BOOKING (the shipped client on the shipped engine) · the Yifangju roo
   assert.equal(line.room, 'jinri-terrace-double'); assert.equal(line.price, 109); assert.equal(line.name, 'Yifangju Designer Courtyard · Kunming');
   assert.match(line.meta, /1 – 4 March 2027 · 002 · Jinri Building Scenic Terrace Tub Double/);
   assert.equal(B.total(), 109);
+});
+
+/* PROPERTY MEDIA ≠ ROOM MEDIA (Owner, 28 Sep 2026): the six property photographs (Owner Drive 026) stand for the HOUSE — the house
+   gallery on The Journey, the Stays card, the stay's Bag frame — and never inside a room; each room shows its own seven (Drive 800,
+   one folder per room) and nothing of the house or of another room. The media contract says which is which. */
+test('PROPERTY ≠ ROOM · the house surfaces show only the six property frames; every room only its own seven; the contract records the level of every source', () => {
+  const w = page({ auth: PEGGY }); const K = w.SIYL_ROOMS.kunming, SM = JSON.parse(src('src/stay-media.json')).yifangju, ART = w.SIYL_STAY_ART;
+  const HOUSE = [1, 2, 3, 4, 5, 6].map((n) => 'assets/images/yifangju/house-' + n + '.webp');
+  assert.deepEqual(plain(SM.images.map((i) => i.src)), HOUSE, 'the house gallery: the six property frames, the façade first');
+  assert.equal(SM.images[0].kind, 'exterior');
+  assert.equal(K.windows[0].bagImg, HOUSE[0]); assert.equal(ART.house('kunming', 'kmg'), HOUSE[0], 'the stay\'s own frame is the house');
+  assert.match(src('accommodation.html'), /background-image:url\(assets\/images\/yifangju\/house-1\.webp\)/);
+  assert.doesNotMatch(src('accommodation.html') + JSON.stringify(plain(SM)) + K.windows[0].bagImg, /elegant-residence|jinri-/, 'no room frame on a house surface');
+  for (const r of K.rooms) {
+    const g = r.gallery.map((x) => x[0]);
+    assert.equal(g.length, 7); assert.ok(g.every((f) => f.startsWith('assets/images/yifangju/' + r.slug + '-')), r.slug + ': its own seven only');
+    assert.ok(!g.some((f) => /house-/.test(f)), r.slug + ': no property frame in a room');
+  }
+  for (const f of HOUSE) assert.ok(fs.existsSync(path.join(ROOT, f)));
+  const M = JSON.parse(src('src/media/manifest.json'));
+  const p = M.collections['026'], r = M.collections['800'];
+  assert.equal(p.level, 'property'); assert.equal(r.level, 'room');
+  const pm = p.items.filter((i) => i.status === 'synced');
+  assert.equal(pm.length, 6); assert.ok(pm.every((i) => i.level === 'property' && /\/house-[1-6]\.webp$/.test(i.asset) && i.slots.every((s) => s.role !== 'room-gallery') && fs.statSync(path.join(ROOT, i.asset)).size === i.size));
+  assert.equal(r.items.length, 21); assert.ok(r.items.every((i) => i.level === 'room' && i.asset.includes('/' + i.room + '-') && i.slots.every((s) => s.role === 'room-gallery')));
 });
