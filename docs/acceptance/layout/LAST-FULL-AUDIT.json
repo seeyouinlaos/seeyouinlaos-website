@@ -1,8 +1,8 @@
 {
  "mode": "full",
- "fingerprint": "90e0b485cd68405f",
+ "fingerprint": "5be44ff1b0dba92c",
  "origin": "local stage",
- "finished": "2026-09-26T23:14:53.427Z",
+ "finished": "2026-09-27T07:18:28.516Z",
  "engines": [
   "chromium",
   "webkit"
@@ -23,20 +23,20 @@
   "steps-open"
  ],
  "skippedStates": [],
- "routes": 23,
- "measurements": 23740,
- "loads": 9800,
+ "routes": 24,
+ "measurements": 24716,
+ "loads": 10120,
  "widths": 61,
  "unexplained": 0,
  "rootCauses": [],
  "exceptions": {
-  "button, .p-act, .a-cta, .cta, .x-cta, .dcta": 53054,
+  "button, .p-act, .a-cta, .cta, .x-cta, .dcta": 53038,
   ".acar .atrk, .refgal .atrk, .others .oc": 6388,
   ".a-duo .a-map": 244,
-  "footer.sfoot": 21788,
+  "footer.sfoot": 22764,
   ".a-band": 504,
   ".x-clip .am": 40,
-  ".prep-head .p-media": 8230,
+  ".prep-head .p-media": 8598,
   ".intro, .lede, .plane h2, .ed .body, .ok, main > h2, main > p": 7426,
   "main > .media": 168,
   ".jbar": 11804,

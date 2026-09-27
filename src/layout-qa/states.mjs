@@ -29,7 +29,20 @@ export async function signIn(browser, origin, code, ctxOpts) {
   const note = await p.waitForSelector('[data-guest-note] [data-note-ack]', { state: 'attached', timeout: 12000 }).catch(() => null);
   if (note) {
     await p.evaluate(() => { const b = document.querySelector('[data-note-ack]'); b.checked = true; b.dispatchEvent(new Event('change')); document.querySelector('[data-note-go]').click(); });
-    await p.waitForFunction(() => !document.querySelector('[data-guest-note]'), null, { timeout: 8000 });
+    /* the page may already be on its way to the Unwritten Rules (the next step) — a navigation here is expected */
+    await p.waitForFunction(() => !document.querySelector('[data-guest-note]'), null, { timeout: 8000 }).catch(() => {});
+    await p.waitForFunction(() => { const D = window.SIYL_DRAFT; const s = D && D.state && D.state(); return !s || s.phase !== 'saving'; }, null, { timeout: 15000 }).catch(() => {});
+    await p.waitForTimeout(1200);
+  }
+  /* THE UNWRITTEN RULES (27 Sep 2026): the guide opened, read to its end and acknowledged once, as a guest does — the box ticked, the
+     button pressed, the draft saved — so the audited states are the journey behind it */
+  const onRules = async () => /unwritten-rules/.test(new URL(p.url()).pathname);
+  await p.waitForFunction(() => /unwritten-rules/.test(location.pathname) || !!(window.SIYL_DRAFT && window.SIYL_DRAFT.state().ready && window.SIYL_RULES &&
+    window.SIYL_RULES.acknowledged(JSON.parse(localStorage.getItem('siyl.guest') || '{}'))), null, { timeout: 15000 }).catch(() => {});
+  if (await onRules()) {
+    await p.waitForSelector('[data-ur-check]', { state: 'attached', timeout: 12000 });
+    await p.evaluate(() => { const b = document.querySelector('[data-ur-check]'); b.checked = true; b.dispatchEvent(new Event('change')); document.querySelector('[data-ur-go]').click(); });
+    await p.waitForURL((u) => !/unwritten-rules/.test(u.pathname), { timeout: 15000 }).catch(() => {});
     await p.waitForFunction(() => { const D = window.SIYL_DRAFT; const s = D && D.state && D.state(); return !s || s.phase !== 'saving'; }, null, { timeout: 15000 }).catch(() => {});
     await p.waitForTimeout(1200);
   }

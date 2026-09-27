@@ -634,9 +634,10 @@ function draftContent(keys) {
   const out = {};
   for (const k of ['siyl.guest', 'siyl.bag', 'siyl.temple', 'siyl.docs', 'siyl.skip', 'siyl.skip.by']) {
     let v = null; try { v = JSON.parse(keys && keys[k] || 'null'); } catch (e) { v = keys && keys[k] || null; }
-    /* the guest's acknowledgement of the note from the Guest Relations Manager (assets/guest-note.js, 26 Sep 2026) is kept in the draft for
-       Guest Relations but is not part of the trip: acknowledging never marks a sent trip as changed */
-    if (v && typeof v === 'object' && !Array.isArray(v)) { delete v.history; delete v.contactSyncedAt; if (k === 'siyl.guest') delete v.note; if (v.guests) for (const g of Object.values(v.guests)) if (g && typeof g === 'object') delete g.history; }
+    /* the guest's acknowledgements — the note from the Guest Relations Manager (assets/guest-note.js, 26 Sep 2026) and the Unwritten
+       Rules (assets/rules-gate.js, 27 Sep 2026) — are kept in the draft for Guest Relations but are not part of the trip:
+       acknowledging never marks a sent trip as changed */
+    if (v && typeof v === 'object' && !Array.isArray(v)) { delete v.history; delete v.contactSyncedAt; if (k === 'siyl.guest') { delete v.note; delete v.rules; } if (v.guests) for (const g of Object.values(v.guests)) if (g && typeof g === 'object') delete g.history; }
     out[k] = v;
   }
   return out;
@@ -989,14 +990,32 @@ async function handleGrJourneys(request, env) {
       status: sub.submissionStatus, submissionId: sub.submissionId, version: sub.version, submittedAt: sub.submittedAt, lastSentAt: sub.lastSentAt, hasUnsentChanges: sub.hasUnsentChanges,
       draftUpdatedAt: d ? d.updatedAt : null, contact: contact ? publicContact(contact) : (g.contact || null),
       bag: content['siyl.bag'] || null, wedding: content['siyl.temple'] || null, aboutYou: g.guests ? Object.values(g.guests).map((x) => ({ submitted: x.submitted, profile: x.profile })) : null, documents: content['siyl.docs'] || null,
-      rooms, seats, mail: rec ? (rec.mailSummary || null) : null, text: rec ? rec.text : null, noteAck: noteAckOf(d) });
+      rooms, seats, mail: rec ? (rec.mailSummary || null) : null, text: rec ? rec.text : null, noteAck: noteAckOf(d), rulesAck: rulesAckOf(d) });
   }
-  return json({ ok: true, at: new Date().toISOString(), journeys: out });
+  return json({ ok: true, at: new Date().toISOString(), acknowledgements: acknowledgementSummary(entries, out), journeys: out });
 }
-/* whether this guest acknowledged the note from the Guest Relations Manager — read from the guest's own draft record (never the trip content) */
-function noteAckOf(d) {
+/* the guest's two acknowledgements, each on its own — read from the guest's own draft record (never the trip content) */
+function ackOf(d, field) {
   let g = null; try { g = JSON.parse((d && d.keys && d.keys['siyl.guest']) || 'null'); } catch (e) { g = null; }
-  const n = g && g.note; return n && n.acknowledged === true ? { acknowledged: true, at: n.at || null, textVersion: n.textVersion || null } : null;
+  const n = g && g[field]; return n && n.acknowledged === true ? { acknowledged: true, at: n.at || null, textVersion: n.textVersion || null } : null;
+}
+/* whether this guest acknowledged the note from the Guest Relations Manager */
+function noteAckOf(d) { return ackOf(d, 'note'); }
+/* whether this guest read and acknowledged the Unwritten Rules (Owner, 27 Sep 2026) */
+function rulesAckOf(d) { return ackOf(d, 'rules'); }
+/* WHO HAS NOT YET ACKNOWLEDGED (Owner, 27 Sep 2026): for each acknowledgement, every invited guest of the register (never the hosts)
+   who has not given it — a guest who has never signed in has not given either. Ids only, the name where the guest's own record has one. */
+function acknowledgementSummary(entries, journeys) {
+  const byInv = {}; for (const j of journeys) byInv[j.invitationId] = j;
+  const guests = []; const seen = new Set();
+  for (const e of Object.values(entries || {})) { if (!e || !e.i || e.h === 1 || seen.has(e.i)) continue; seen.add(e.i); guests.push({ invitationId: e.i, guestId: e.g }); }
+  guests.sort((a, b) => a.invitationId < b.invitationId ? -1 : a.invitationId > b.invitationId ? 1 : 0);
+  const one = (field) => {
+    const pending = [], done = [];
+    for (const g of guests) { const j = byInv[g.invitationId], ack = j ? j[field] : null; (ack ? done : pending).push({ guestId: g.guestId, invitationId: g.invitationId, name: j ? j.name : null, signedIn: !!(j && j.draftUpdatedAt), at: ack ? ack.at : null }); }
+    return { guests: guests.length, acknowledged: done.length, pending: pending.length, pendingGuests: pending };
+  };
+  return { guestRelationsNote: one('noteAck'), unwrittenRules: one('rulesAck') };
 }
 /* the flat mail record the Owner asked for, beside the provider answers */
 function mailSummary(mail) {

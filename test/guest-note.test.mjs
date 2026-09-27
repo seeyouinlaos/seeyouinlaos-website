@@ -78,7 +78,7 @@ test('THE STEP · a signed-in guest (never the hosts), once the server draft is 
 
 test('THE WORKER · the acknowledgement is read by Guest Relations and is never part of the trip\'s content', () => {
   const w = src('src/worker.js');
-  assert.match(w, /if \(k === 'siyl\.guest'\) delete v\.note;/, 'acknowledging never marks a sent trip as changed');
+  assert.match(w, /if \(k === 'siyl\.guest'\) \{ delete v\.note; delete v\.rules; \}/, 'acknowledging (the note, and the Unwritten Rules after it) never marks a sent trip as changed');
   assert.match(w, /noteAck: noteAckOf\(d\)/); assert.match(w, /function noteAckOf\(d\)/);
   assert.match(src('src/layout-qa/states.mjs'), /\[data-guest-note\] \[data-note-ack\]/, 'the layout audit acknowledges as a guest does');
 });

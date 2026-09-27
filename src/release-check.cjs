@@ -689,6 +689,29 @@ gate('P7', 'Dress Code imagery real (23 — resort-01 retired by the owner), no 
   gate('I1', 'Infrastructure freeze: one Worker, one public origin, frozen bindings, auth and email, GitHub Pages disabled', r.status === 0, lines[lines.length - 1].replace(/^INFRASTRUCTURE FREEZE: /, '') + (r.status === 0 ? '' : ' · ' + lines.filter((l) => /^FAIL/.test(l)).join(' · ')));
 }
 
+/* GATE U1 — THE UNWRITTEN RULES (Owner, 27 Sep 2026): src/unwritten-rules.js is the one source of the guide; the page block and the
+ * mini-magazine are built from it and must be current; every source URL is written out and is itself a link on the page and a real
+ * PDF URI annotation with a generous tap area; every page of the private journey carries the step after the note; the Worker keeps
+ * the acknowledgement out of the trip and gives it to Guest Relations; every sentence of the guide has its authored Thai. */
+{
+  const B = require('./build-unwritten-rules.cjs');
+  const U = require('./unwritten-rules.js');
+  const problems = [...B.check()];
+  const page = read('unwritten-rules.html');
+  const shown = [...page.matchAll(/<a href="(https:[^"]+)"[^>]*><span class="ur-src-t">[^<]*<\/span><span class="ur-src-u">([^<]+)<\/span><\/a>/g)];
+  if (shown.length !== B.sources(U).length || shown.some((m) => m[1] !== m[2])) problems.push('the page does not write out every source URL as its own link (' + shown.length + ' of ' + B.sources(U).length + ')');
+  for (const f of fs.readdirSync(ROOT).filter((n) => /\.html$/.test(n))) { const h = read(f); if (/assets\/guest-note\.js/.test(h) && !/assets\/guest-note\.js[^"]*"><\/script>\n<script src="assets\/rules-gate\.js/.test(h)) problems.push(f + ' does not carry the rules step right after the note'); }
+  const w = read('src/worker.js');
+  if (!/if \(k === 'siyl\.guest'\) \{ delete v\.note; delete v\.rules; \}/.test(w)) problems.push('the Worker counts the acknowledgement as trip content');
+  if (!/rulesAck: rulesAckOf\(d\)/.test(w) || !/acknowledgements: acknowledgementSummary\(entries, out\)/.test(w)) problems.push('Guest Relations cannot read the acknowledgement');
+  const CORE = require('./i18n-core.js'), TH = CORE.translator(JSON.parse(fs.readFileSync(path.join(__dirname, 'i18n-th.json'), 'utf8')));
+  const units = [U.title, U.subtitle, U.kicker, ...U.intro.blocks.map((b) => b[1]), ...U.rules.flatMap((r) => [r.title, ...r.blocks.flatMap((b) => (b[0] === 'l' ? b[1] : [b[1]]))]), U.closing.title, ...U.closing.blocks.flatMap((b) => (b[0] === 'l' ? b[1] : [b[1]]))].map(B.plain);
+  const missing = units.filter((t) => TH.lookup(t) == null);
+  if (missing.length) problems.push(missing.length + ' sentence(s) of the guide without Thai, e.g. ' + missing[0].slice(0, 60));
+  gate('U1', 'The Unwritten Rules: one source, the page and the PDF current, every source written out and linked, the step on every journey page, Thai complete', problems.length === 0,
+    problems.length ? problems.join(' · ') : U.rules.length + ' rules · ' + B.sources(U).length + ' sources written out and linked (page + PDF) · ' + units.length + ' sentences in Thai · the step after the note on every journey page');
+}
+
 /* GATE L2 — THE SITE-WIDE LAYOUT CONTRACT (Owner, 25 Sep 2026 · the layout QA agent; docs/LAYOUT-QA.md): every served page
  * is in the layout route manifest or excluded with a reason (the new-route guard); every exception of the contract is a
  * named primitive with its reason; and the rendered audits were run on exactly the layout that ships — the recorded FAST

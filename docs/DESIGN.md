@@ -51,6 +51,14 @@ the same colour.
 | **E** | **FOCUS** — where the keyboard is | one branded 2 px ring, site-wide |
 | **F** | **LOCATION** — the point that is theirs | a current map or destination point, where one exists |
 
+### The one named exception — THE UNWRITTEN RULES (Owner, 27 Sep 2026)
+
+The menu carries no Cherry point, with one exception the Owner named: the **Unwritten Rules** row, the guide every guest reads
+and acknowledges, is written in Cherry (`.a-mrow-rules > a`, shown only to a signed-in guest) so it is recognisable at once.
+It is a word, never a point or a badge; on its own page it becomes the quieter current word like every other row. On the guide
+itself (`unwritten-rules.html`) and in its PDF, Cherry stays punctuation: the full stop after each rule number (as in the
+wordmark), the fine rule beside a statement set apart, and in the PDF the printed source links. No other menu row paints Cherry.
+
 ### Cherry is never used for
 
 Decoration · headlines · paragraphs · every divider · every icon · whole cards · large backgrounds ·

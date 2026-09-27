@@ -279,7 +279,7 @@ function build() {
 /* the private surfaces: the personal planner and its steps, the bag, the tickets, the room and transport
    planning pages (rates, live inventory, fares, adds). The Journey (journeys.html) is public editorial —
    its private fragments are marked data-private and stay out of a signed-out page (assets/invite-early.js). */
-const PRIVATE = /^(?:\.\/)?(your-journey|cart|tickets|room|transport|wedding|wedding-preparation|about-you|profile|review)(?:\.html)?(?=$|[?#])/;
+const PRIVATE = /^(?:\.\/)?(your-journey|cart|tickets|room|transport|wedding|wedding-preparation|about-you|profile|review|unwritten-rules)(?:\.html)?(?=$|[?#])/;
 const LOC = typeof location !== 'undefined' ? location : { pathname: '/', search: '', hash: '', replace() {} };
 const cleanUrls = !/\.html$/i.test(LOC.pathname) && LOC.pathname.split('/').pop() !== '';
 const hrefOf = (file) => (cleanUrls ? file.replace(/\.html(?=[?#]|$)/, '') : file);

@@ -124,6 +124,11 @@ body.a-open .a-scrim { opacity: 1; pointer-events: auto; }
   letter-spacing: .3px; color: var(--a-ink); text-decoration: none;
 }
 .a-mrow > a[aria-current] { color: var(--a-mute); }
+/* THE UNWRITTEN RULES (Owner, 27 Sep 2026): a first-class row for a signed-in guest, and the one Cherry word of the menu — the
+   Owner's own exception to the menu without Cherry (25 Sep 2026). On its own page it is the quieter word like every current page. */
+.a-mrow[hidden] { display: none; }
+.a-mrow-rules > a { color: var(--cherry); }
+.a-mrow-rules > a[aria-current] { color: var(--a-mute); }
 .a-ch { background: none; border: 0; cursor: pointer; width: 44px; min-height: 44px; color: var(--a-mute); font-size: 16px; line-height: 1; display: flex; align-items: center; justify-content: flex-end; transition: transform .35s, color .3s; }
 .a-ch[aria-expanded="true"] { transform: rotate(90deg); color: var(--a-ink); }
 .a-msub { display: none; padding: 2px 0 20px 2px; }

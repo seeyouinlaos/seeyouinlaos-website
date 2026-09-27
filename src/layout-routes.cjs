@@ -32,6 +32,7 @@ const ROUTES = [
   { path: '/review.html', family: 'review-send' },
   { path: '/tickets.html', family: 'confirmation' },
   { path: '/profile.html', family: 'profile' },
+  { path: '/unwritten-rules.html', family: 'editorial' },
   { path: '/404.html', family: 'editorial' }
 ];
 
@@ -44,7 +45,7 @@ const EXCLUDED = [
 /* THE STATES. auth: which synthetic stage guest is signed in (null = signed out). setup: the stage recipe that brings the
  * guest into the state (src/layout-qa/states.mjs, local stage only). panel: an open layer audited on its own wall.
  * routes: '*' or the pages the state changes materially. */
-const GUEST_PAGES = ['/your-journey.html', '/journeys.html', '/wedding.html', '/wedding-preparation.html', '/about-you.html', '/cart.html', '/review.html', '/tickets.html', '/profile.html', '/invitation.html', '/room.html', '/transport.html', '/experience.html'];
+const GUEST_PAGES = ['/your-journey.html', '/journeys.html', '/wedding.html', '/wedding-preparation.html', '/about-you.html', '/cart.html', '/review.html', '/tickets.html', '/profile.html', '/invitation.html', '/room.html', '/transport.html', '/experience.html', '/unwritten-rules.html'];
 const STATES = [
   { id: 'signed-out', auth: null, routes: '*', why: 'the public pages, and every private page\'s signed-out face' },
   { id: 'fresh', auth: 'T001', setup: 'reset', routes: GUEST_PAGES, why: 'a guest who has just opened the invitation: empty Bag, nothing chosen' },

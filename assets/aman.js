@@ -12,6 +12,9 @@
      The navigation truth of the public website — the internal engine
      (register/) is deliberately absent from every guest surface. */
   var NAV = [
+    /* THE UNWRITTEN RULES (Owner, 27 Sep 2026): the guide every guest reads — a first-class row of its own, the one Cherry word of
+       the menu, for a signed-in guest only (the fourth field: shown while signed in) */
+    ['Unwritten Rules', 'unwritten-rules.html', null, 'in'],
     ['Destinations', 'destination.html', [
       ['Bangkok', 'destination.html#bangkok'],
       ['Vientiane', 'destination.html#vientiane'],
@@ -82,7 +85,7 @@
 
     var rows = NAV.map(function (n, i) {
       var cur = (n[1].split('#')[0] === here) ? ' aria-current="page"' : '';
-      var row = '<div class="a-mrow"><a href="' + n[1] + '"' + cur + '>' + n[0] + '</a>' +
+      var row = '<div class="a-mrow' + (n[3] === 'in' ? ' a-mrow-rules" data-signed-in hidden' : '"') + '><a href="' + n[1] + '"' + cur + '>' + n[0] + '</a>' +
         (n[2] ? '<button type="button" class="a-ch" aria-expanded="false" aria-controls="a-sub-' + i +
           '" aria-label="Show ' + n[0].replace(/&amp;/g, 'and') + ' sections">&rsaquo;</button>' : '') +
         '</div>';
@@ -107,6 +110,9 @@
     /* the foot follows the session: the six steps only for a guest who can open them (PRQ-07B-06) */
     var repaintFoot = function () { var f = menu.querySelector('[data-mfoot]'); if (f) { var h = footHtml(); if (f.innerHTML !== h) f.innerHTML = h; } };
     document.addEventListener('siyl:auth', repaintFoot); document.addEventListener('siyl:signout', repaintFoot);
+    /* the rows for a signed-in guest (the Unwritten Rules) follow the session the same way */
+    var repaintRows = function () { var inn = signedIn(); menu.querySelectorAll('[data-signed-in]').forEach(function (r) { r.hidden = !inn; }); };
+    repaintRows(); document.addEventListener('siyl:auth', repaintRows); document.addEventListener('siyl:signout', repaintRows);
     /* the account block is the invitation module's to fill (assets/invite.mjs) — tell it the drawer exists */
     try { document.dispatchEvent(new CustomEvent('siyl:menu')); } catch (e) { /* an old browser: the module fills it on load */ }
 

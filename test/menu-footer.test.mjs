@@ -25,6 +25,10 @@ test('NO CHERRY POINT IN THE MENU · neither the ::before beside the current pag
   assert.doesNotMatch(css, /\.a-menu a\[aria-current\]::before/);
   assert.doesNotMatch(css, /\.a-mrow > a\[aria-current\]::after/);
   assert.doesNotMatch(css, /\.a-menu[^{]*\{[^}]*var\(--cherry\)[^}]*\}/, 'no menu rule paints Cherry');
+  /* THE ONE NAMED EXCEPTION (Owner, 27 Sep 2026): the Unwritten Rules row is the Cherry word of the menu — and no other row */
+  const rowsInCherry = [...css.replace(/\/\*[\s\S]*?\*\//g, '').matchAll(/([^{}]*\.a-mrow[^{}]*)\{[^}]*var\(--cherry\)[^}]*\}/g)].map((m) => m[1].trim());
+  assert.deepEqual(rowsInCherry, ['.a-mrow-rules > a'], 'only the Unwritten Rules row paints Cherry');
+  assert.match(css, /\.a-mrow-rules > a\[aria-current\] \{ color: var\(--a-mute\); \}/, 'on its own page it is the quieter word like every current page');
   assert.match(css, /\.a-mrow > a\[aria-current\] \{ color: var\(--a-mute\); \}/);
   assert.doesNotMatch(css, /\.a-mrow > a\[aria-current\] \{ color: var\(--a-ink\)/, 'the old override is gone');
 });
