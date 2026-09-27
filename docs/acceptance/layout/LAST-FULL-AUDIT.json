@@ -1,8 +1,8 @@
 {
  "mode": "full",
- "fingerprint": "5be44ff1b0dba92c",
+ "fingerprint": "e4e047b7a46d82cf",
  "origin": "local stage",
- "finished": "2026-09-27T07:18:28.516Z",
+ "finished": "2026-09-27T10:49:47.130Z",
  "engines": [
   "chromium",
   "webkit"
@@ -24,16 +24,16 @@
  ],
  "skippedStates": [],
  "routes": 24,
- "measurements": 24716,
- "loads": 10120,
+ "measurements": 25448,
+ "loads": 10360,
  "widths": 61,
  "unexplained": 0,
  "rootCauses": [],
  "exceptions": {
-  "button, .p-act, .a-cta, .cta, .x-cta, .dcta": 53038,
-  ".acar .atrk, .refgal .atrk, .others .oc": 6388,
-  ".a-duo .a-map": 244,
-  "footer.sfoot": 22764,
+  "button, .p-act, .a-cta, .cta, .x-cta, .dcta": 53770,
+  ".acar .atrk, .refgal .atrk, .others .oc": 7396,
+  ".a-duo .a-map": 976,
+  "footer.sfoot": 23496,
   ".a-band": 504,
   ".x-clip .am": 40,
   ".prep-head .p-media": 8598,

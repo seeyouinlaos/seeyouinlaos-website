@@ -1,8 +1,8 @@
 {
  "mode": "fast",
- "fingerprint": "5be44ff1b0dba92c",
+ "fingerprint": "e4e047b7a46d82cf",
  "origin": "local stage",
- "finished": "2026-09-27T05:46:39.633Z",
+ "finished": "2026-09-27T09:15:26.410Z",
  "engines": [
   "chromium",
   "webkit"
@@ -20,16 +20,16 @@
  ],
  "skippedStates": [],
  "routes": 24,
- "measurements": 896,
- "loads": 896,
+ "measurements": 924,
+ "loads": 924,
  "widths": 8,
  "unexplained": 0,
  "rootCauses": [],
  "exceptions": {
-  "button, .p-act, .a-cta, .cta, .x-cta, .dcta": 1594,
-  ".acar .atrk, .refgal .atrk, .others .oc": 260,
-  ".a-duo .a-map": 14,
-  "footer.sfoot": 812,
+  "button, .p-act, .a-cta, .cta, .x-cta, .dcta": 1622,
+  ".acar .atrk, .refgal .atrk, .others .oc": 300,
+  ".a-duo .a-map": 42,
+  "footer.sfoot": 840,
   ".a-band": 30,
   ".prep-head .p-media": 440,
   ".intro, .lede, .plane h2, .ed .body, .ok, main > h2, main > p": 228,

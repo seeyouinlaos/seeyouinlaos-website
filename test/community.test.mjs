@@ -16,6 +16,9 @@ async function harness() {
   const entries = {}; entries[await authIdOf(peggy)] = { i: 'INV-G001', g: 'G001', p: 'INV-002', c: 'CON003', k: 'COUPL002' }; entries[await authIdOf(steffie)] = { i: 'INV-G002', g: 'G002', p: 'INV-002', c: 'CON004', k: 'COUPL002' };
   /* the couple, by the register's role — never by a name */
   entries['a'.repeat(64)] = { i: 'INV-G049', g: 'G049', p: 'INV-001', h: 1, r: 'G', c: 'CON001', k: 'COUPL001' }; entries['b'.repeat(64)] = { i: 'INV-G048', g: 'G048', p: 'INV-001', h: 1, r: 'B', c: 'CON002', k: 'COUPL001' };
+  /* every other active invitation of the register (the joining guests below and the one who declined) — a guest outside the
+     register (a cancelled invitation, INV-G014 below) is never joining (Owner, 27 Sep 2026) */
+  ['G010', 'G011', 'G012', 'G013'].forEach((g, i) => { entries[String(i + 1).repeat(64)] = { i: 'INV-' + g, g, p: 'INV-0' + (10 + i) }; });
   const store = kv(); const env = { ASSETS: await assetsFor(entries), REG_KV: store, GR_TOKEN: 'gr-secret' };
   return { w, env, store, peggy, steffie };
 }
@@ -34,13 +37,18 @@ test('WHO\'S JOINING US · the Worker: an authenticated read only; the Bride and
   m.set('reg:INV-G012', { v: reg('INV-G012', 'G012', { name: 'Sam', at: '2026-09-19T08:00:00.000Z' }) });
   m.set('contact:INV-G012', { v: JSON.stringify({ email: 's@example.org', phone: '+66', firstName: 'Samuel', lastName: 'Acker', birthdate: '1990-05-17' }) });
   m.set('reg:INV-G013', { v: reg('INV-G013', 'G013', { name: 'Nora', scope: { none: true } }) });                /* responded: not joining */
+  m.set('reg:INV-G014', { v: reg('INV-G014', 'G014', { name: 'Cato', at: '2026-09-18T11:00:00.000Z' }) });   /* a sent trip of an invitation since cancelled: not joining */
   m.set('reg:INV-G048', { v: reg('INV-G048', 'G048', { name: 'Haruthai', hosts: true, at: '2026-09-15T09:00:00.000Z' }) });   /* the Bride's own record: she keeps her place, gains her day, is never a guest */
   m.set('contact:INV-G049', { v: JSON.stringify({ email: 'g@example.org', phone: '+66', firstName: 'Thep', lastName: 'T' }) });   /* the Groom as he spells himself */
   m.set('avatar:INV-G049', { v: new Uint8Array([9]).buffer, meta: { type: 'image/jpeg', at: 'x' } });
   m.set('avatar:INV-G012', { v: new Uint8Array([1, 2, 3]).buffer, meta: { type: 'image/jpeg', at: 'x' } });
   m.set('draft:INV-G099', { v: JSON.stringify({ keys: {} }) });                                                    /* a draft alone is no answer */
   m.set('reg:INV-G010:prev:2026-09-17T10:00:00.000Z', { v: reg('INV-G010', 'G010', { name: 'Peggy', at: '2026-09-17T10:00:00.000Z' }) });   /* an earlier version of a sent trip — never a second guest */
-  r = await get(h, h.peggy); assert.equal(r.status, 200); assert.equal(r.d.count, 5, 'the count is the visible population: the couple and three guests'); assert.equal(r.d.couple, 2);
+  /* THE KV BUDGET (27 Sep 2026): within two minutes an isolate answers from the cohort it already read; then it reads the store again */
+  assert.equal((await get(h, h.peggy)).d.count, 2, 'the records written straight into the store are read at the next window');
+  const clock = Date.now; Date.now = () => clock() + 2 * 60 * 1000 + 1;
+  try { r = await get(h, h.peggy); } finally { Date.now = clock; }
+  assert.equal(r.status, 200); assert.equal(r.d.count, 5, 'the count is the visible population: the couple and three guests'); assert.equal(r.d.couple, 2);
   assert.deepEqual(r.d.guests.slice(0, 2), [{ guestId: 'G048', name: 'Haruthai', photo: false, joinedAt: '2026-09-15', role: 'Bride' }, { guestId: 'G049', name: 'Thep', photo: true, joinedAt: null, role: 'Groom' }], 'Bride then Groom (PRQ-01-10); his portrait and his own spelling; her genuine day');
   assert.deepEqual(r.d.guests.slice(2), [{ guestId: 'G011', name: 'Linnea', photo: false, joinedAt: '2026-09-20' }, { guestId: 'G012', name: 'Samuel', photo: true, joinedAt: '2026-09-19' }, { guestId: 'G010', name: 'Peggy', photo: false, joinedAt: '2026-09-18' }], 'the contact\'s first name wins, then the submitted one, then the invitation\'s; newest first');
   const text = JSON.stringify(r.d); for (const bad of ['@example.org', '+66', 'birthdate', 'Acker', 'wedstay', 'heritage', 'INV-', 'selections', 'email']) assert.ok(!text.includes(bad), 'never ' + bad);
@@ -107,7 +115,8 @@ test('WHO\'S JOINING US · the page: the count, the names, initials where no pho
   assert.ok(c.indexOf('data-person="G049"') < c.indexOf('data-person="G048"') && c.indexOf('data-person="G048"') < c.indexOf('data-person="G011"'), 'the couple first');
   assert.match(c, /Recently joined<\/p><p class="t-b1">Linnea · Peggy<\/p>/, 'RECENTLY JOINED lists genuine days only, newest first — the couple without a day is not in it'); assert.match(c, /You are among them/);
   assert.match(src('profile.html'), /\.pf-person-r\{[^}]*text-transform:uppercase/);
-  assert.match(src('profile.html'), /CM\.countdownHtml\(\)\+CM\.communityHtml\(CM\.data\(\),me\)\+CM\.numbersHtml\(\)/, 'the three stand between the account and the arrangements'); assert.match(src('profile.html'), /<script src="assets\/community\.js/);
+  assert.match(src('profile.html'), /\(CM\?CM\.countdownHtml\(\):''\)\+circle\(me,p\)\+\(CM\?CM\.numbersHtml\(\):''\)/, 'the three stand between the account and the arrangements — who is joining now lives in YOUR WEDDING CIRCLE (Owner, 27 Sep 2026)');
+  assert.match(src('profile.html'), /function circle\(me,p\)\{var PL=window\.SIYL_PULSE,CM=window\.SIYL_COMMUNITY;return PL\?PL\.circleHtml\(me,isHost\(me,p\)\):\(CM\?CM\.communityHtml\(CM\.data\(\),me\):''\)\}/, 'the community block remains the fallback'); assert.match(src('profile.html'), /<script src="assets\/community\.js/);
   assert.match(src('assets/community.js'), /AV\.of\(gid\)/, 'portraits through SIYL_AVATAR.of — the existing authenticated read'); assert.doesNotMatch(src('assets/community.js'), /photo\?of=|api\/profile\/photo/, 'no photo URL of its own');
   assert.match(src('assets/community.js'), /prefers-reduced-motion: reduce/); assert.match(src('profile.html'), /@media\(prefers-reduced-motion:reduce\)\{\.pf-person\{opacity:1;transform:none;transition:none\}\}/);
 });

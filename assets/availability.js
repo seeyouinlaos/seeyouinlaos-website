@@ -43,13 +43,31 @@
   /* ---- the facts ---------------------------------------------------------
      the count is the engine's (never a number written into a page); the days,
      both ends of the window and the share already run are the one plan's. */
+  /* THE WEDDING STAY FIRST (Owner, 27 Sep 2026): the rooms of the Wedding Stay at the Souphattra Heritage still free — a ROOM count
+     (a room nobody holds a place in, the engine's own emptyRooms), never guest places, never the participants; of the physical rooms
+     the engine knows (its source inventory, sourceRooms). The engine's view is the booking system's own: nothing is typed here. */
+  function stayRooms() {
+    var U = window.SIYL_UNITS, v = U && U.view ? U.view() : null;
+    if (!v || !v.summary) return null;
+    var keys = Object.keys(v.summary).filter(function (k) { return /^wedstay\//.test(k); });
+    if (!keys.length) return null;
+    var free = 0, total = 0;
+    for (var i = 0; i < keys.length; i++) {
+      var s = v.summary[keys[i]];
+      if (!s || typeof s.sourceRooms !== 'number') return null;          /* a category the engine did not describe: unknown, never 0 */
+      total += s.sourceRooms; free += typeof s.emptyRooms === 'number' ? s.emptyRooms : (s.remainingRooms || 0);
+    }
+    return { available: free, total: total };
+  }
   function facts() {
     var P = plan(), U = window.SIYL_UNITS;
     if (!P) return null;
-    var c = U && U.complimentary ? U.complimentary() : null;
-    if (!c || !c.max) return null;
+    var c = U && U.complimentary ? U.complimentary() : null, stay = stayRooms();
+    if ((!c || !c.max) && !stay) return null;
+    if (!c || !c.max) c = null;
     var w = P.planningWindow(new Date());
-    return {
+    if (!c) return { stay: stay, gh: false, elapsed: w.progress, startWords: w.startWords, endWords: w.endWords, phase: w.phase, days: w.days, deadlineWords: P.COMPLIMENTARY.deadlineWords, railWords: P.railWords ? P.railWords(new Date()) : w.words, closed: !w.open, full: false, mine: false, max: 0, remaining: 0, taken: 0 };
+    return { stay: stay, gh: true,
       max: c.max, remaining: c.remaining, taken: Math.max(0, c.max - c.remaining),
       /* THE LINE IS CALENDAR TIME, never the allocation — the ring already says what is left */
       elapsed: w.progress,
@@ -88,25 +106,31 @@
   /* the far end of the calendar line, short enough to sit beside it: "30 November 2026" → "30 Nov" */
   function endLabel(words) { var m = /^(\d{1,2})\s+([A-Za-z]{3})/.exec(String(words || '')); return m ? m[1] + ' ' + m[2] : String(words || ''); }
 
+  /* the Guest House line, beneath the Wedding Stay and never above it: its own places, its own words (Owner, 27 Sep 2026) */
+  function ghState(f) { if (f.mine) return 'One of the places is yours'; if (f.full || f.remaining <= 0) return 'Fully allocated'; return 'Complimentary alternative'; }
   function html(f) {
-    var a = action(), arc = f.max ? f.remaining / f.max : 0, p = Math.min(1, Math.max(0, f.elapsed));
+    var a = action(), p = Math.min(1, Math.max(0, f.elapsed)), st = f.stay;
+    var rooms = st ? '<div class="av-stay" data-av-rooms="' + st.available + '" data-av-rooms-total="' + st.total + '">' +
+        '<p class="av-rooms" role="img" aria-label="' + esc(st.available + ' / ' + st.total) + '"><b>' + st.available + '</b>' + (st.total ? '<span class="av-of">/ ' + st.total + '</span>' : '') + '</p>' +
+        '<p class="av-cap">' + (st.available > 0 ? 'Rooms available' : 'Sold out') + '</p>' +
+      '</div><p class="t-b2 av-where">Souphattra Heritage · 27 February – 1 March</p>' : '';
+    var arc = f.max ? f.remaining / f.max : 0;
+    var gh = f.gh ? '<div class="av-gh" data-av-gh="' + f.remaining + '/' + f.max + '">' +
+        '<div class="av-ring" role="img" aria-label="' + esc(f.remaining + ' of ' + f.max + ' places left at the Guest House') + '">' +
+          '<svg viewBox="0 0 60 60" aria-hidden="true" focusable="false">' +
+            '<circle class="av-track" cx="30" cy="30" r="' + R + '"></circle>' +
+            '<circle class="av-arc" cx="30" cy="30" r="' + R + '" stroke-dasharray="' + C.toFixed(2) + '" stroke-dashoffset="' + (C * (1 - arc)).toFixed(2) + '" style="--av-c:' + C.toFixed(2) + ';--av-o:' + (C * (1 - arc)).toFixed(2) + '"></circle>' +
+          '</svg></div>' +
+        '<div class="av-gh-words"><p class="t-l1 av-gh-h">Guest House complimentary</p>' +
+          '<p class="av-gh-count"><b>' + f.remaining + '</b><s>/</s><b>' + f.max + '</b> <span>places left</span></p>' +
+          '<p class="t-b2 av-gh-sub">' + esc(ghState(f)) + '</p></div>' +
+      '</div>' : '';
     return '' +
       '<div class="av-in">' +
-        '<p class="t-l1 av-eyebrow">Both wedding nights · 27 February – 1 March</p>' +
-        '<div class="av-row">' +
-          '<div class="av-ring" role="img" aria-label="' + esc(f.remaining + ' of ' + f.max + ' places left at the Guest House') + '">' +
-            '<svg viewBox="0 0 60 60" aria-hidden="true" focusable="false">' +
-              '<circle class="av-track" cx="30" cy="30" r="' + R + '"></circle>' +
-              '<circle class="av-arc" cx="30" cy="30" r="' + R + '" stroke-dasharray="' + C.toFixed(2) + '" stroke-dashoffset="' + (C * (1 - arc)).toFixed(2) + '" style="--av-c:' + C.toFixed(2) + ';--av-o:' + (C * (1 - arc)).toFixed(2) + '"></circle>' +
-            '</svg>' +
-            /* 3 / 4 on ONE line, the slash given room; LEFT small beneath it */
-            '<span class="av-count"><span class="av-num"><b>' + f.remaining + '</b><s>/</s><b>' + f.max + '</b></span><i>Left</i></span>' +
-          '</div>' +
-          '<div class="av-words">' +
-            '<p class="av-head">' + esc(headline(f)) + '</p>' +
-            '<p class="t-b2 av-sub">Hosted by Haruthai &amp; Suthep,<br>while places remain.</p>' +
-          '</div>' +
-        '</div>' +
+        '<p class="t-l1 av-eyebrow">Wedding Stay · Vientiane</p>' +
+        rooms +
+        (st ? '<p class="t-b2 av-say">Your invitation shows the rooms currently open to you.</p>' : '') +
+        gh +
         '<div class="av-line">' +
           '<span class="t-l1 av-end">Now</span>' +
           '<span class="av-rail" role="img" aria-label="' + esc(f.railWords) + '">' +
@@ -114,12 +138,11 @@
             '<i class="av-dot" style="--av-p:' + p.toFixed(4) + '"><b></b></i></span>' +
           '<span class="t-l1 av-end">' + esc(endLabel(f.endWords)) + '</span>' +
         '</div>' +
-        '<p class="t-b2 av-say">Your invitation shows what is still open to you.</p>' +
         '<p class="av-act">' +
           '<a class="av-cta" href="' + esc(a.href) + '" data-av-cta>' + esc(a.words) + ' <span aria-hidden="true">&rarr;</span></a>' +
-          '<a class="av-explore" href="accommodation.html#residence" data-av-explore>See the Guest House <span aria-hidden="true">&rarr;</span></a>' +
+          (f.gh ? '<a class="av-explore" href="accommodation.html#residence" data-av-explore>See the Guest House <span aria-hidden="true">&rarr;</span></a>' : '') +
         '</p>' +
-        '<p class="t-b2 av-foot">' + esc(footnote(f)) + '</p>' +
+        (f.gh ? '<p class="t-b2 av-foot">' + esc(footnote(f)) + '</p>' : '') +
       '</div>';
   }
 
@@ -145,8 +168,9 @@
     /* until the engine has answered, the object shows nothing rather than a number it has invented */
     if (!f) { host.innerHTML = ''; host.setAttribute('data-av-state', 'waiting'); return; }
     var played = host.getAttribute('data-av-played') === '1';
-    host.setAttribute('data-av-remaining', String(f.remaining));
-    host.setAttribute('data-av-max', String(f.max));
+    host.setAttribute('data-av-remaining', f.gh ? String(f.remaining) : '');
+    host.setAttribute('data-av-max', f.gh ? String(f.max) : '');
+    host.setAttribute('data-av-rooms', f.stay ? String(f.stay.available) : '');
     host.setAttribute('data-av-phase', f.phase);
     host.setAttribute('data-av-elapsed', f.elapsed.toFixed(4));
     host.innerHTML = html(f);
@@ -154,16 +178,17 @@
     else { host.setAttribute('data-av-state', 'ready'); watch(host); }
   }
 
+  /* every host of the object on the page: the section of the first page, and the Wedding Pulse's own place for a guest */
+  function all() { [].slice.call(document.querySelectorAll('[data-availability]')).forEach(function (h) { render(h); }); }
   function wire() {
-    var host = document.querySelector('[data-availability]');
-    if (!host) return;
-    render(host);
+    if (!document.querySelector('[data-availability]')) return;
+    all();
     /* the engine's answer, a sign-in, a place taken elsewhere: the object follows, and never replays its entrance */
-    document.addEventListener('siyl:units', function () { render(host); });
-    document.addEventListener('siyl:auth', function () { render(host); });
+    document.addEventListener('siyl:units', all);
+    document.addEventListener('siyl:auth', all);
     var today = new Date().getDate();
-    setInterval(function () { var d = new Date().getDate(); if (d !== today) { today = d; render(host); } }, 60000);
+    setInterval(function () { var d = new Date().getDate(); if (d !== today) { today = d; all(); } }, 60000);
   }
-  window.SIYL_AVAILABILITY = { render: render, wire: wire, facts: facts, headline: headline, footnote: footnote, action: action };
+  window.SIYL_AVAILABILITY = { render: render, wire: wire, facts: facts, stayRooms: stayRooms, ghState: ghState, headline: headline, footnote: footnote, action: action };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire); else wire();
 })();

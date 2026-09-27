@@ -72,7 +72,8 @@ module.exports = {
   /* components whose inner text is positioned by the component itself (labels on a map, counters on a picture) */
   axisFree: [
     { sel: '.venue-labels, .venue-stage', why: 'the venue map: labels sit on the drawing at the venue\'s coordinates' },
-    { sel: '.av-ring, .av-count', why: 'the availability ring: the count is centred in its circle' }
+    { sel: '.av-ring, .av-count', why: 'the availability ring: the count is centred in its circle' },
+    { sel: '.pl-cmap, .pl-dmap', why: 'Your Wedding Circle (Owner, 27 Sep 2026): the read-only seat plans are drawings — the Bride · Groom mark stands at the front centre of the ceremony, over the aisle, where the couple stand' }
   ],
 
   /* components that centre a line of text by design (maxWidth: only up to that width) */

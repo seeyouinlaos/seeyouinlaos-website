@@ -66,5 +66,5 @@ test('THE PAGE · the wedding block first and primary, the journey second and se
   /* reduced motion in the sandbox: the numerals are final in the markup itself */
   const calm = page({ auth: PEGGY, modules: MODS, reducedMotion: true }); const hc = calm.SIYL_COMMUNITY.countdownHtml(at(2026, 9, 22));
   assert.match(hc, /class="prep-sec pf-count is-in"/); assert.match(hc, /<span class="pf-num-live">159<\/span>/);
-  assert.match(src('profile.html'), /CM\.countdownHtml\(\)\+CM\.communityHtml\(CM\.data\(\),me\)\+CM\.numbersHtml\(\)/, 'still before WHO’S JOINING US');
+  assert.match(src('profile.html'), /\(CM\?CM\.countdownHtml\(\):''\)\+circle\(me,p\)\+\(CM\?CM\.numbersHtml\(\):''\)/, 'still before YOUR WEDDING CIRCLE (27 Sep 2026: the circle carries who is joining)');
 });

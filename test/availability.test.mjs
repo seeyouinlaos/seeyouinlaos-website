@@ -52,18 +52,23 @@ test('THE COUNT · the ring is the engine\'s answer, never a number written into
   assert.match(AV, /P\.planningWindow\(new Date\(\)\)/, 'the days and the window come from the one stay plan');
 });
 
-test('THE RING READS 5 / 6 ON ONE LINE · three parts in one row, the slash given room, REMAINING small beneath', () => {
-  /* the markup is one row of three boxes, never three stacked lines */
-  assert.match(RENDERED, /<span class="av-num"><b>'/, 'the count opens with the remaining number');
-  assert.match(RENDERED, /<\/b><s>\/<\/s><b>' \+ f\.max \+ '<\/b><\/span>/, 'then the slash, then the maximum — in one element');
-  assert.doesNotMatch(RENDERED, /av-num[\s\S]{0,120}<br>/, 'the count is never broken across lines');
-  assert.match(BLOCK, /\.av-num \{[\s\S]{0,200}display: flex; align-items: baseline;/, 'the three parts share one baseline row');
-  assert.match(BLOCK, /\.av-num s \{[^}]*margin: 0 3\.5px/, 'the slash is given room on both sides');
-  assert.match(BLOCK, /\.av-count i \{[\s\S]{0,220}text-transform: uppercase/, 'REMAINING sits beneath it, small');
-  /* the instrument is small: the ring never grows past 82px, whatever the screen offers */
+test('THE WEDDING STAY LEADS (Owner, 27 Sep 2026) · the rooms of the Wedding Stay first and large, from the engine; the Guest House beneath, its ring small, its count on one line', () => {
+  assert.ok(RENDERED.indexOf('<p class="av-rooms"') > 0 && RENDERED.indexOf('<p class="av-rooms"') < RENDERED.indexOf('<div class="av-gh"'), 'the Wedding Stay before the Guest House');
+  assert.match(RENDERED, /'<p class="t-l1 av-eyebrow">Wedding Stay · Vientiane<\/p>'/);
+  assert.match(RENDERED, /<p class="av-gh-count"><b>' \+ f\.remaining \+ '<\/b><s>\/<\/s><b>' \+ f\.max \+ '<\/b> <span>places left<\/span><\/p>/, 'the Guest House count on one line, its own words');
+  /* the instrument is small: the ring never grows past 82px, whatever the screen offers — and beneath the Wedding Stay it is smaller still */
   const rings = [...BLOCK.matchAll(/--av-ring:\s*(\d+)px/g)].map((m) => +m[1]);
-  assert.ok(rings.length >= 2, 'the ring has a size per class');
-  assert.ok(Math.max(...rings) <= 82, 'the ring is an instrument, not the hero of the page — ' + rings.join(' · '));
+  assert.ok(rings.length >= 2 && Math.max(...rings) <= 82, 'the ring is an instrument, not the hero of the page — ' + rings.join(' · '));
+  assert.match(CSS, /\.av-gh \.av-ring \{ width: 44px; height: 44px; \}/);
+  /* the count: the engine's rooms, a ROOM count (empty rooms), of the physical rooms it knows — the Guest House never inside it */
+  const w = object(); const sum = (e, n) => ({ emptyRooms: e, sourceRooms: n, remainingRooms: e });
+  w.SIYL_UNITS.view = () => ({ summary: { 'wedstay/heritage': sum(2, 5), 'wedstay/heritage-executive': sum(9, 13), 'wedstay/heritage-grand-premier': sum(0, 3), 'wedstay/noble-courtyard': sum(1, 1), 'wedstay/grand-majestic': sum(2, 2), 'wedstay/souphattra-majestic': sum(0, 1), 'wedstay/souphattra-presidential': sum(1, 1), 'guesthouse/guest-house': { sourceRooms: 1, emptyRooms: 0, sourcePlaces: 4 }, 'prewed/heritage': sum(5, 5) } });
+  assert.deepEqual(plain(w.SIYL_AVAILABILITY.stayRooms()), { available: 15, total: 26 }, '15 of the 26 Souphattra rooms, nothing of the Guest House or another stage');
+  w.SIYL_UNITS.view = () => ({ summary: { 'wedstay/heritage': { emptyRooms: 2 } } });
+  assert.equal(w.SIYL_AVAILABILITY.stayRooms(), null, 'a category the engine did not describe: unknown, never 0');
+  w.SIYL_UNITS.view = () => null;
+  assert.equal(w.SIYL_AVAILABILITY.stayRooms(), null, 'no engine answer: nothing shown');
+  assert.match(RENDERED, /'Rooms available' : 'Sold out'/, 'a full Wedding Stay says Sold out (the copy contract)');
 });
 
 test('THE COMPACT COMPOSITION · the ring and its status stand side by side, inside one column the page cannot inflate', () => {
@@ -122,8 +127,12 @@ test('THE HOUSE IS THE PROJECT\'S OWN · "Guest House complimentary", and the in
   assert.doesNotMatch(RENDERED, /Private Residence/i, 'the object never renders the invented label');
   assert.doesNotMatch(src('assets/i18n/siyl-i18n.js'), /Private Residence/, 'and the dictionary no longer carries it');
   assert.doesNotMatch(INDEX, /Private Residence/, 'nor the page that holds the object');
-  assert.match(RENDERED, /Hosted by Haruthai &amp; Suthep,<br>while places remain\./, 'the supporting line is the approved wording (TO-00738 · TO-00743) — and no second location label');
-  assert.doesNotMatch(RENDERED, /Vientiane/, 'the object carries no location line of its own');
+  /* the Guest House line (Owner, 27 Sep 2026): its own words, never the Wedding Stay's */
+  assert.match(RENDERED, /<p class="t-l1 av-gh-h">Guest House complimentary<\/p>/, 'the canonical name');
+  const A = object().SIYL_AVATAR || object().SIYL_AVAILABILITY;
+  assert.equal(A.ghState({ remaining: 0, max: 4, full: true }), 'Fully allocated');
+  assert.equal(A.ghState({ remaining: 2, max: 4 }), 'Complimentary alternative');
+  assert.match(RENDERED, /Souphattra Heritage · 27 February – 1 March/, 'the Wedding Stay names its house and its nights');
   assert.match(RENDERED, /See the Guest House/, 'the property link names the canonical house');
   /* and the booking engine's own naming is untouched */
   assert.match(src('src/stay-plan.js'), /name: 'Guest House complimentary'/);
@@ -188,5 +197,5 @@ test('THE TWO SIGNALS · the front page keeps both, unmerged, in the Owner\'s or
   assert.ok(INDEX.indexOf('assets/stay-bar.js') < INDEX.indexOf('assets/availability.js'));
   assert.equal((INDEX.match(/data-availability/g) || []).length, 1);
   assert.equal((INDEX.match(/data-stay-bar/g) || []).length, 1);
-  assert.match(RENDERED, /Your invitation shows what is still open to you\./); /* TO-00744 */
+  assert.match(RENDERED, /Your invitation shows the rooms currently open to you\./); /* the Owner's sentence, 27 Sep 2026 */
 });

@@ -54,7 +54,7 @@ import { SEED } from './inventory-seed.js';
 import { stageOf } from './rooms.js';
 import { composeGuestMail, composeOwnerMail } from './mail-templates.js';
 import { completion as graphCompletion, normalizeScope as graphScope, isRelevant as graphRelevant, STAGES as GRAPH_STAGES, STAGE_IDS as GRAPH_IDS, participationOf as graphParticipation, partyNeed as graphPartyNeed, travelsIn as graphTravels } from './stage-graph.js';
-import { profileMissing as questionnaireMissing, finaleOf, PHOTO_LABEL } from './questionnaire.js';   /* the one questionnaire: what About You and the wedding night require (Owner, 22 Sep 2026) */
+import { profileMissing as questionnaireMissing, finaleOf, PHOTO_LABEL, GENRES } from './questionnaire.js';   /* the one questionnaire: what About You and the wedding night require (Owner, 22 Sep 2026) */
 
 /* ---- the Guest Relations gate (F + G) ------------------------------------
  * A secret set with `wrangler secret put GR_TOKEN`, compared in constant
@@ -139,14 +139,14 @@ export default {
        the authenticated guest's own invitation — the one recipient of the confirmation email, the same on every device */
     if (url.pathname === '/api/contact') {
       if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders(request) });
-      return handleContact(request, env);
+      return afterWrite(request, env, handleContact(request, env));
     }
     /* THE PROFILE PHOTO (Owner, 18 Sep 2026 · MY PROFILE): one small image per authenticated guest, stored under the
        guest's own invitation in the register store — read, replaced and removed only with that guest's bearer; there is
        no public URL, no listing, and the bytes never enter the repository. */
     if (url.pathname === '/api/profile/photo') {
       if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders(request) });
-      return handleProfilePhoto(request, env);
+      return afterWrite(request, env, handleProfilePhoto(request, env));
     }
     /* THE JOURNEY DRAFT (Owner, 16 Sep 2026 · FINAL QUICKFIX): ONE server-side draft per authenticated guest — the complete
        journey (contact, answers, bag, wedding, documents state, sent stamp) keyed by the invitation; the browser is a cache.
@@ -165,7 +165,7 @@ export default {
       if (!env.GR_TOKEN) return json({ ok: false, error: 'not enabled' }, 503);
       if (!grAuthorised(request, env)) return json({ ok: false, error: 'unauthorised' }, 401);
       if (request.method !== 'POST') return json({ ok: false, error: 'method not allowed' }, 405);
-      return handleGrReset(request, env);
+      return afterWrite(request, env, handleGrReset(request, env));
     }
     /* GUEST RELATIONS: one guest's stored submission record as it was sent (the source of both emails) — the GR token only */
     if (url.pathname === '/api/gr/record') {
@@ -211,6 +211,13 @@ export default {
       if (request.method !== 'GET') return json({ ok: false, error: 'method not allowed' }, 405, corsHeaders(request));
       return handleCommunity(request, env);
     }
+    /* THE WEDDING PULSE (Owner, 27 Sep 2026): what is happening right now — who is joining, what everyone dances to, where the night
+       ends — for an authenticated guest only, in the narrowest form the pages need; nothing is written */
+    if (url.pathname === '/api/pulse') {
+      if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders(request) });
+      if (request.method !== 'GET') return json({ ok: false, error: 'method not allowed' }, 405, corsHeaders(request));
+      return handlePulse(request, env);
+    }
     /* THE CONFIRMATION (F): Guest Relations only, idempotent, never self-service */
     if (url.pathname === '/api/confirm') {
       if (request.method !== 'POST') return json({ ok: false, error: 'method not allowed' }, 405);
@@ -250,7 +257,7 @@ export default {
       if (request.method !== 'POST') {
         return json({ ok: false, error: 'method not allowed' }, 405, corsHeaders(request));
       }
-      return handleRegister(request, env);
+      return afterWrite(request, env, handleRegister(request, env));
     }
     /* the confirmation emails, sent again for a journey already stored — never a new submission (Owner, 16 Sep 2026) */
     if (url.pathname === '/api/register/mail-retry') {
@@ -992,7 +999,17 @@ async function handleGrJourneys(request, env) {
       bag: content['siyl.bag'] || null, wedding: content['siyl.temple'] || null, aboutYou: g.guests ? Object.values(g.guests).map((x) => ({ submitted: x.submitted, profile: x.profile })) : null, documents: content['siyl.docs'] || null,
       rooms, seats, mail: rec ? (rec.mailSummary || null) : null, text: rec ? rec.text : null, noteAck: noteAckOf(d), rulesAck: rulesAckOf(d) });
   }
-  return json({ ok: true, at: new Date().toISOString(), acknowledgements: acknowledgementSummary(entries, out), journeys: out });
+  /* THE TWO LIVE ANSWERS FOR THE PLANNER (Owner, 27 Sep 2026): the music of question 06 and the end of the wedding night — the counts,
+     the respondents and who chose each option, over the joining cohort — beside, never inside, the journeys */
+  let answers = null;
+  try {
+    const P = pulseOf(await joiningCohort(env, new URL(request.url).origin, true));
+    const named = (list) => list.map((p) => ({ guestId: p.guestId, invitationId: p.invitationId, name: p.name }));
+    answers = { joining: P.people.length, capacity: WEDDING_CAPACITY,
+      music: { responses: P.musicResponses, leaders: P.leaders, ranking: P.ranking.map((r) => ({ ...r, guests: named(P.people.filter((p) => p.music.includes(r.genre))) })) },
+      afterDinner: { responses: P.afterResponses, pool: { count: P.pool, guests: named(P.people.filter((p) => p.after === 'pool')) }, party: { count: P.party, guests: named(P.people.filter((p) => p.after === 'party')) } } };
+  } catch (e) { answers = null; }
+  return json({ ok: true, at: new Date().toISOString(), acknowledgements: acknowledgementSummary(entries, out), answers, journeys: out });
 }
 /* the guest's two acknowledgements, each on its own — read from the guest's own draft record (never the trip content) */
 function ackOf(d, field) {
@@ -1244,20 +1261,41 @@ async function listAll(kv, prefix) {
   return out;
 }
 const firstWord = (v) => String(v || '').trim().split(/\s+/)[0] || '';
-async function handleCommunity(request, env) {
-  const who = await identify(request, env);
-  if (!who) return json({ ok: false, error: 'unauthorised' }, 401, corsHeaders(request));
-  if (!env.REG_KV) return json({ ok: false, error: 'not enabled', enabled: false }, 503, corsHeaders(request));
+/* THE JOINING COHORT (Owner, 21 Sep 2026 · shared since 27 Sep 2026): every guest whose trip has been sent and who is joining, and
+   the couple, who are always there — ONE reading for "Who's joining us" and the Wedding Pulse, so the two can never disagree.
+   A guest who responded "not joining" is not in it; a guest no longer in the register (a cancelled invitation) is not in it; an
+   invitation alone is never joining. Nothing is written. */
+/* THE KV BUDGET (27 Sep 2026 · the account's daily KV lists and reads are limited): every signed-in homepage and My Profile asks
+   for the cohort, so it is read from the store at most once per COHORT_TTL in an isolate — and forgotten at once when this isolate
+   stores something it shows (a sent trip, a portrait, the contact details, a reset). Guest Relations always reads it fresh. */
+const COHORT_TTL = 2 * 60 * 1000;
+const cohortCache = new WeakMap();
+function joiningCohort(env, origin, fresh) {
+  const kv = env.REG_KV, hit = kv && cohortCache.get(kv);
+  if (!fresh && hit && Date.now() - hit.at < COHORT_TTL) return hit.p;
+  const p = readCohort(env, origin);
+  if (kv) { cohortCache.set(kv, { at: Date.now(), p }); p.catch(() => { if (cohortCache.get(kv) && cohortCache.get(kv).p === p) cohortCache.delete(kv); }); }
+  return p;
+}
+async function afterWrite(request, env, pending) {
+  const res = await pending;
+  if (request.method !== 'GET' && res.status < 300 && env.REG_KV) cohortStale(env);
+  return res;
+}
+function cohortStale(env) { cohortCache.delete(env.REG_KV); }
+async function readCohort(env, origin) {
   const [regKeys, avatarKeys] = await Promise.all([listAll(env.REG_KV, 'reg:'), listAll(env.REG_KV, 'avatar:')]);
   const photos = new Set(avatarKeys.map((k) => k.slice('avatar:'.length)));
   const readRec = async (key) => { try { return JSON.parse(await env.REG_KV.get(key) || 'null'); } catch (e) { return null; } };
-  const nameOf = async (invitationId, rec, fallback) => {
-    let contact = null; try { contact = JSON.parse(await env.REG_KV.get(contactKey(invitationId)) || 'null'); } catch (e) { contact = null; }
+  const contactOf = async (invitationId) => { try { return JSON.parse(await env.REG_KV.get(contactKey(invitationId)) || 'null'); } catch (e) { return null; } };
+  const nameOf = (rec, contact, fallback) => {
     const gr = (rec && rec.registration && rec.registration.guestRecord) || {};
     const g0 = Array.isArray(gr.guests) && gr.guests[0] ? gr.guests[0] : {};
     return (firstWord(contact && contact.firstName) || firstWord(g0.submitted && g0.submitted.preferredName) || firstWord(g0.source && g0.source.preferredName) || firstWord(g0.name) || fallback).slice(0, 24);
   };
-  const guests = [], records = {};
+  let entries = null; try { entries = await loadIndex(env, origin); } catch (err) { entries = null; }
+  const invited = entries ? new Set(Object.values(entries).filter(Boolean).map((e) => e.i)) : null;
+  const guests = [], records = {}, contacts = {};
   for (const key of regKeys) {
     if (key.indexOf(':prev:') >= 0) continue;                       /* the bounded history of earlier versions — the current record alone counts */
     const rec = await readRec(key);
@@ -1267,8 +1305,10 @@ async function handleCommunity(request, env) {
     const gr = rec.registration.guestRecord || {};
     if (gr.scope && gr.scope.none) continue;                       /* responded, not joining */
     if (rec.hosts) continue;                                      /* the couple stands apart, below — never counted as a guest */
+    if (invited && !invited.has(invitationId)) continue;          /* an invitation no longer in the register (cancelled) */
+    const contact = contacts[invitationId] = await contactOf(invitationId);
     const at = rec.firstSentAt || rec.submittedAt || null;
-    guests.push({ guestId: String(rec.guestId), name: await nameOf(invitationId, rec, 'Guest'), photo: photos.has(invitationId), joinedAt: at ? String(at).slice(0, 10) : null, _t: at ? Date.parse(at) || 0 : 0 });
+    guests.push({ guestId: String(rec.guestId), invitationId, name: nameOf(rec, contact, 'Guest'), photo: photos.has(invitationId), joinedAt: at ? String(at).slice(0, 10) : null, _t: at ? Date.parse(at) || 0 : 0 });
   }
   guests.sort((a, b) => (b._t - a._t) || a.name.localeCompare(b.name));
   /* THE BRIDE AND THE GROOM (Owner, 21 Sep 2026): the couple is the anchor of the community and is always visible — resolved from
@@ -1277,17 +1317,67 @@ async function handleCommunity(request, env) {
   /* THE COUPLE (21 Sep 2026): chosen by the register's role (h + r), never by a name; named as they spell themselves, else by the two first names printed on every page */
   const COUPLE_FIRST_NAMES = { B: 'Haruthai', G: 'Suthep' };
   const couple = [];
-  try {
-    const entries = await loadIndex(env, new URL(request.url).origin);
-    for (const e of Object.values(entries || {})) {
-      if (!e || e.h !== 1 || (e.r !== 'B' && e.r !== 'G')) continue;
-      const role = e.r === 'B' ? 'Bride' : 'Groom', rec = records[e.i] || null, at = rec ? (rec.firstSentAt || rec.submittedAt || null) : null;
-      couple.push({ guestId: String(e.g), name: await nameOf(e.i, rec, COUPLE_FIRST_NAMES[e.r]), photo: photos.has(e.i), joinedAt: at ? String(at).slice(0, 10) : null, role });
-    }
-  } catch (err) { /* the register unreadable: the guests stand alone */ }
+  for (const e of Object.values(entries || {})) {
+    if (!e || e.h !== 1 || (e.r !== 'B' && e.r !== 'G')) continue;
+    const role = e.r === 'B' ? 'Bride' : 'Groom', rec = records[e.i] || null, at = rec ? (rec.firstSentAt || rec.submittedAt || null) : null;
+    const contact = contacts[e.i] = await contactOf(e.i);
+    couple.push({ guestId: String(e.g), invitationId: e.i, name: nameOf(rec, contact, COUPLE_FIRST_NAMES[e.r]), photo: photos.has(e.i), joinedAt: at ? String(at).slice(0, 10) : null, role });
+  }
   couple.sort((a, b) => (a.role === 'Bride' ? 0 : 1) - (b.role === 'Bride' ? 0 : 1));   /* Haruthai (Bride) first, then Suthep (Groom) — PRQ-01-10 */
-  const out = couple.concat(guests.map(({ _t, ...g }) => g));
-  return json({ ok: true, count: out.length, guests: out, couple: couple.length, at: new Date().toISOString() }, 200, Object.assign({ 'cache-control': 'private, max-age=60' }, corsHeaders(request)));
+  return { list: couple.concat(guests.map(({ _t, ...g }) => g)), couple: couple.length, records, contacts };
+}
+async function handleCommunity(request, env) {
+  const who = await identify(request, env);
+  if (!who) return json({ ok: false, error: 'unauthorised' }, 401, corsHeaders(request));
+  if (!env.REG_KV) return json({ ok: false, error: 'not enabled', enabled: false }, 503, corsHeaders(request));
+  const c = await joiningCohort(env, new URL(request.url).origin);
+  const out = c.list.map(({ invitationId, ...g }) => g);
+  return json({ ok: true, count: out.length, guests: out, couple: c.couple, at: new Date().toISOString() }, 200, Object.assign({ 'cache-control': 'private, max-age=60' }, corsHeaders(request)));
+}
+
+/* THE TWO ANSWERS APPROVED FOR SOCIAL DISPLAY (Owner, 27 Sep 2026): question 06 "What makes you dance?" (the genres, multi-select)
+   and the final act of the wedding night (the pool jump · the party at BARON). Read from the guest's SENT record — the answers the
+   guest has sent — through the one questionnaire (src/questionnaire.js); asked of wedding guests only, so counted only for a guest
+   who joins the wedding (the couple always). No other answer is ever read here. */
+const WEDDING_CAPACITY = 52;   /* THE WHOLE WEDDING GROUP (Owner, 27 Sep 2026): the couple included — never the dinner's fifty seats */
+function socialAnswers(rec, hosts) {
+  const reg = rec && rec.registration; if (!reg) return { music: [], after: null };
+  const gr = reg.guestRecord || {};
+  if (!hosts && !(gr.scope && gr.scope.vientianeWedding)) return { music: [], after: null };
+  const g0 = Array.isArray(gr.guests) ? (gr.guests.find((g) => g && g.guestId === rec.guestId) || gr.guests[0] || {}) : {};
+  const raw = g0.profile && Array.isArray(g0.profile.genres) ? g0.profile.genres : [];
+  const music = GENRES.filter((x) => raw.includes(x));                                  /* the questionnaire's own order and values */
+  const tc = reg.templeCeremony && Array.isArray(reg.templeCeremony.guests) ? (reg.templeCeremony.guests.find((g) => g && g.guestId === rec.guestId) || reg.templeCeremony.guests[0]) : null;
+  const f = tc ? finaleOf(tc.finaleKey || tc.finale) : null;
+  return { music, after: f === 'pool' ? 'pool' : f === 'baron' ? 'party' : null };
+}
+/* the ranking: by the number of guests who chose a genre, ties in the questionnaire's own order — every genre, a zero included */
+function musicRanking(people) {
+  const counts = GENRES.map((g, i) => ({ genre: g, count: people.filter((p) => p.music.includes(g)).length, i }));
+  counts.sort((a, b) => (b.count - a.count) || (a.i - b.i));
+  return counts.map(({ i, ...x }) => x);
+}
+function pulseOf(cohort) {
+  const people = cohort.list.map((g) => ({ ...g, ...socialAnswers(cohort.records[g.invitationId], !!g.role) }));
+  const ranking = musicRanking(people), top = ranking[0] && ranking[0].count > 0 ? ranking.filter((r) => r.count === ranking[0].count).map((r) => r.genre) : [];
+  const pool = people.filter((p) => p.after === 'pool').length, party = people.filter((p) => p.after === 'party').length;
+  return { people, ranking, leaders: top, musicResponses: people.filter((p) => p.music.length).length, pool, party, afterResponses: pool + party };
+}
+async function handlePulse(request, env) {
+  const who = await identify(request, env);
+  if (!who) return json({ ok: false, error: 'unauthorised' }, 401, corsHeaders(request));
+  if (!env.REG_KV) return json({ ok: false, error: 'not enabled', enabled: false }, 503, corsHeaders(request));
+  const cohort = await joiningCohort(env, new URL(request.url).origin), P = pulseOf(cohort);
+  /* THE NARROWEST FORM (Owner, 27 Sep 2026 · data minimisation): per joining person the opaque guest id (the key of the portrait
+     read), the first name, a portrait flag, the nationality as the guest gave it, the day they joined, the couple's role, and the two
+     approved answers — never an email, a phone number, an address, a birthdate, a code, a travel detail or any other answer */
+  const people = P.people.map((g) => {
+    const nat = String((cohort.contacts[g.invitationId] || {}).nationality || '').trim().slice(0, 40);
+    return { id: g.guestId, name: g.name, photo: !!g.photo, nationality: nat || null, joinedAt: g.joinedAt, ...(g.role ? { role: g.role } : {}), music: g.music, after: g.after };
+  });
+  return json({ ok: true, at: new Date().toISOString(), capacity: WEDDING_CAPACITY, joining: people.length, couple: cohort.couple, people,
+    music: { responses: P.musicResponses, ranking: P.ranking, leaders: P.leaders },
+    after: { responses: P.afterResponses, pool: P.pool, party: P.party } }, 200, Object.assign({ 'cache-control': 'private, max-age=30' }, corsHeaders(request)));
 }
 async function handleStatus(request, env) {
   const url = new URL(request.url);
