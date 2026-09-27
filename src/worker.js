@@ -1065,6 +1065,8 @@ async function handleContact(request, env) {
   const personal = {};
   for (const k of PERSONAL_KEYS) personal[k] = body && typeof body[k] === 'string' ? body[k].trim().slice(0, PERSONAL_MAX[k] || 120) : (prev[k] || '');
   if (personal.birthdate && !validBirthdate(personal.birthdate)) return json({ ok: false, error: 'invalid date of birth', field: 'birthdate' }, 422, corsHeaders(request));
+  /* THE KV WRITE BUDGET (hotfix, 27 Sep 2026): a save that changes nothing writes nothing — the stored contact is the answer */
+  if (prev.at && prev.guestId === who.guestId && email === (prev.email || '') && phone === (prev.phone || '') && PERSONAL_KEYS.every((k) => personal[k] === (prev[k] || ''))) return json({ ok: true, invitationId: who.invitationId, contact: { ...publicContact(prev), at: prev.at } }, 200, corsHeaders(request));
   const contact = { invitationId: who.invitationId, guestId: who.guestId, email, phone, ...personal, at: new Date().toISOString() };
   try { await env.REG_KV.put(contactKey(who.invitationId), JSON.stringify(contact), { metadata: { invitationId: who.invitationId, at: contact.at } }); } catch (e) { return json({ ok: false, error: 'contact could not be stored' }, 503, corsHeaders(request)); }
   return json({ ok: true, invitationId: who.invitationId, contact: { ...publicContact(contact), at: contact.at } }, 200, corsHeaders(request));

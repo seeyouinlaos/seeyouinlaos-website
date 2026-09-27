@@ -6,7 +6,8 @@
    the write are one serialised step, so two devices (or two overlapping
    autosaves) can never both pass the same base revision and overwrite each
    other. KV keeps a mirror of the current draft for Guest Relations' listing
-   and as a read-through seed for drafts stored before this actor existed.
+   and as a read-through seed for drafts stored before this actor existed —
+   metered, at most one autosave per ten minutes (the KV write budget, below).
 
    ops (POST /op, body JSON):
      get                       → { ok, draft|null }
@@ -15,6 +16,7 @@
                                → 409 { ok:false, error:'stale', draft }   (an older revision was named)
    ========================================================================== */
 const DRAFT_KEYS = ['siyl.guest', 'siyl.bag', 'siyl.temple', 'siyl.docs', 'siyl.sent', 'siyl.skip', 'siyl.skip.by'];
+const MIRROR_EVERY = 10 * 60 * 1000, MIRROR_RETRY = 60 * 60 * 1000;
 const json = (obj, status = 200) => new Response(JSON.stringify(obj), { status, headers: { 'content-type': 'application/json; charset=utf-8' } });
 
 export class Drafts {
@@ -86,10 +88,41 @@ export class Drafts {
         const d = { invitationId, guestId: String(body.guestId || (prev && prev.guestId) || ''), keys, updatedAt: now, savedAt: now, clientUpdatedAt: body.clientUpdatedAt || null, reason: body.reason || null };
         await this.storage.put('draft', d);
         /* the KV mirror: Guest Relations' listing and the read-through seed — best effort, never the arbiter */
-        if (this.env && this.env.REG_KV) { try { await this.env.REG_KV.put('draft:' + invitationId, JSON.stringify(d), { metadata: { invitationId, guestId: d.guestId, updatedAt: now } }); } catch (e) { /* the actor's copy stands */ } }
+        await this.mirror(d, !prev);
         return json({ ok: true, draft: d });
       });
     }
     return json({ ok: false, error: 'unknown draft operation' }, 404);
+  }
+
+  /* THE KV WRITE BUDGET (hotfix, 27 Sep 2026): the account's KV accepts a limited number of writes per UTC day. On 27 Sep the
+     autosave mirror alone spent most of it before 08:00 UTC, and every KV write after that — a portrait, the contact details, a
+     sent journey — was refused until midnight. The mirror is metered: a guest's first draft, an explicit Save and a Send are
+     mirrored at once; an autosave at most once per MIRROR_EVERY, and the actor's alarm writes the latest revision when the
+     window closes — Guest Relations' copy is never more than MIRROR_EVERY behind and the last revision always lands. */
+  async mirror(d, first) {
+    if (!(this.env && this.env.REG_KV)) return;
+    let m = null; try { m = await this.storage.get('mirror'); } catch (e) { m = null; }
+    const now = Date.now(), due = first || !m || d.reason === 'save' || d.reason === 'send' || now - m.at >= MIRROR_EVERY;
+    if (due && await this.writeMirror(d)) return;
+    /* a refused write is tried again later; an actor without an alarm (a reduced test environment) mirrors every revision, as before */
+    try { const at = due ? now + MIRROR_RETRY : m.at + MIRROR_EVERY, cur = await this.storage.getAlarm(); if (cur == null || cur > at) await this.storage.setAlarm(at); }
+    catch (e) { if (!due) await this.writeMirror(d); }
+  }
+
+  async writeMirror(d) {
+    try { await this.env.REG_KV.put('draft:' + d.invitationId, JSON.stringify(d), { metadata: { invitationId: d.invitationId, guestId: d.guestId, updatedAt: d.updatedAt } }); }
+    catch (e) { return false; }   /* the actor's copy stands */
+    try { await this.storage.put('mirror', { at: Date.now(), updatedAt: d.updatedAt }); } catch (e) { /* the next revision is simply mirrored at once */ }
+    return true;
+  }
+
+  /* the window closes: the latest revision, unless it is already the mirror's; nothing after a reset (the draft is gone) */
+  async alarm() {
+    await this.state.blockConcurrencyWhile(async () => {
+      const d = await this.storage.get('draft'), m = await this.storage.get('mirror');
+      if (!d || !(this.env && this.env.REG_KV) || (m && m.updatedAt === d.updatedAt)) return;
+      if (!(await this.writeMirror(d))) await this.storage.setAlarm(Date.now() + MIRROR_RETRY);
+    });
   }
 }
