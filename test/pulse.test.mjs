@@ -100,10 +100,12 @@ function hold(v, seatId, holder, name, state) {
   const all = v.ceremony.rows.flatMap((r) => r.seats).concat(v.dinner.sides.T, v.dinner.sides.B);
   Object.assign(all.find((s) => s.seatId === seatId), { holder, name, state: state || 'taken' });
 }
+/* the circle's read races a real timeout: the sandbox runs every timer at once, so these pages get the platform's own timers */
+const timers = (w) => { w.setTimeout = (fn, ms) => setTimeout(fn, ms); w.clearTimeout = (t) => clearTimeout(t); return w; };
 const PULSE = ['assets/seatlabels.js', 'assets/pulse.js'];
 
 test('THE SEATS (read-only) · around a ceremony seat: the chairs that touch it in its block — never across the aisle; at the dinner: the neighbours in the plan\'s own order (12 beside 14), across = the same rank on the other side', () => {
-  const w = page({ auth: PEGGY, modules: PULSE }), P = w.SIYL_PULSE, v = seatsView();
+  const w = timers(page({ auth: PEGGY, modules: PULSE })), P = w.SIYL_PULSE, v = seatsView();
   hold(v, 'C-L-03-01', 'G2', 'Ben'); hold(v, 'C-L-04-02', 'G3', 'Cleo'); hold(v, 'C-R-03-01', 'G4', 'Dora'); hold(v, 'C-L-02-02', 'G5', 'Emil'); hold(v, 'C-L-06-02', 'G6', 'Far');
   const around = plain(P.aroundCeremony(v, 'C-L-03-02')).map((x) => [x.seat.holder, x.where]);
   assert.deepEqual(around, [['G2', 'left'], ['G5', 'front'], ['G3', 'behind']], 'B3: A3 beside, B2 in front, B4 behind — D3 across the aisle is not beside it, B6 is not near');
@@ -117,7 +119,7 @@ test('THE SEATS (read-only) · around a ceremony seat: the chairs that touch it 
 });
 
 test('YOUR WEDDING CIRCLE · the guest\'s seat, the people around, the pulse — read-only: no booking control, no seat can be chosen here; unassigned and unopened states are said as they are; the hosts see the whole plan', () => {
-  const w = page({ auth: PEGGY, modules: PULSE }), P = w.SIYL_PULSE, v = seatsView();
+  const w = timers(page({ auth: PEGGY, modules: PULSE })), P = w.SIYL_PULSE, v = seatsView();
   hold(v, 'C-L-03-02', PEGGY.guestId, 'Peggy', 'yours'); hold(v, 'C-L-03-01', 'G2', 'Ben'); hold(v, 'D-T-07', PEGGY.guestId, 'Peggy', 'yours'); hold(v, 'D-T-06', 'G2', 'Ben');
   w.SIYL_SEATS = { view: () => v, seatOf: (ev) => (ev === 'ceremony' ? 'C-L-03-02' : 'D-T-07') };
   const data = { ok: true, capacity: 52, joining: 3, people: [{ id: 'G2', name: 'Ben', photo: false, nationality: 'German', joinedAt: '2026-09-19', music: ['Pop'], after: 'party' }, { id: PEGGY.guestId, name: 'Peggy', photo: true, nationality: 'Swiss', joinedAt: '2026-09-18', music: ['Latin'], after: 'pool' }],

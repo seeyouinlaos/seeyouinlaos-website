@@ -91,7 +91,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 @media(min-width:768px){.pf-people{margin:0;padding-left:0;padding-right:0;flex-wrap:wrap;overflow:visible}.pf-grid{grid-template-columns:repeat(4,1fr)}.pf-stat:nth-child(odd){padding-right:20px}.pf-stat:nth-child(even){padding-left:20px}.pf-stat:nth-child(4n+3){padding-left:20px;border-left:1px solid #DAD9D7}.pf-stat:nth-child(4n+1){border-left:0;padding-left:0}.pf-num-v{font-size:120px}.pf-stat .pf-num-v{font-size:64px}}
 @media(prefers-reduced-motion:reduce){.pf-person{opacity:1;transform:none;transition:none}}
 </style>
-<script src="assets/i18n/siyl-i18n.js?v=583291cf"></script>
+<script src="assets/i18n/siyl-i18n.js?v=379d4169"></script>
 <link rel="stylesheet" href="assets/aman.css?v=8726da2c"><link rel="stylesheet" href="assets/prep.css?v=0a6eb26a"></head><body class="prep p-in">
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="My Bag"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main class="prep-page" id="profile">
@@ -129,7 +129,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/discover.js?v=566d844e"></script>
 <script src="assets/wedding-dinner.js?v=013ab52a"></script>
 <script src="assets/community.js?v=fb713917"></script>
-<script src="assets/pulse.js?v=f789cfbd"></script>
+<script src="assets/pulse.js?v=5e1358c6"></script>
 <script type="module" src="assets/invite.mjs?v=252eac2c"></script>
 <script>
 /* ============================================================================
@@ -221,8 +221,12 @@ function travelMeta(x){var cls=x.cls&&P.classOf?P.classOf(x.id,x.cls):null;retur
 function isHost(me,p){return !!(me&&(me.hostRole==='BRIDE'||me.hostRole==='GROOM'))||!!(p&&p.hosts)}
 /* YOUR WEDDING CIRCLE (Owner, 27 Sep 2026): who is joining (with where they come from), the two seats and the people around them,
    the whole plan for the hosts, the Wedding Pulse — read-only, beside the account; the former "Who's joining us" lives inside it */
-function circle(me,p){var PL=window.SIYL_PULSE,CM=window.SIYL_COMMUNITY;return PL?PL.circleHtml(me,isHost(me,p)):(CM?CM.communityHtml(CM.data(),me):'')}
-function redrawCircle(){var PL=window.SIYL_PULSE,old=document.getElementById('circle'),me=G.me();if(!PL||!old||!me)return;var t=document.createElement('div');t.innerHTML=circle(me,G.party());var fresh=t.firstElementChild;if(!fresh)return;old.replaceWith(fresh);PL.wireCircle(fresh,redrawCircle)}
+/* YOUR WEDDING CIRCLE, ALWAYS FINITE (Owner, 28 Sep 2026): when the circle's module could not be fetched, the section says so and
+   offers a retry that fetches it again — it never falls back to a block whose data nobody asks for */
+function circleDown(){return '<section class="prep-sec pl-circle" id="circle" data-pl-circle><p class="t-l1">Your wedding circle</p><h2 class="t-h2">Who you share this wedding with.</h2><div data-pl-circle-state="unavailable"><p class="t-b2 measure">We couldn’t load your Wedding Circle just now.</p><p style="margin-top:12px"><button type="button" class="p-act" data-pl-reload>Try again</button></p></div></section>'}
+function circle(me,p){var PL=window.SIYL_PULSE;if(!PL)return circleDown();try{return PL.circleHtml(me,isHost(me,p))}catch(e){return circleDown()}}
+function wirePulseRetry(root){var b=root&&root.querySelector('[data-pl-reload]');if(!b)return;b.addEventListener('click',function(){var src=(document.querySelector('script[src*="assets/pulse.js"]')||{}).src||'assets/pulse.js';b.disabled=true;var s=document.createElement('script');s.src=src+(src.indexOf('?')<0?'?':'&')+'r='+Date.now();s.onload=function(){render()};s.onerror=function(){b.disabled=false};document.head.appendChild(s)})}
+function redrawCircle(){var PL=window.SIYL_PULSE,old=document.getElementById('circle'),me=G.me();if(!PL||!old||!me)return;var t=document.createElement('div');t.innerHTML=circle(me,G.party());var fresh=t.firstElementChild;if(!fresh)return;old.replaceWith(fresh);PL.wireCircle(fresh,redrawCircle);wirePulseRetry(fresh)}
 
 /* ---- the sections ---- */
 function identity(me,p){
@@ -458,6 +462,7 @@ function render(){
   if(CM&&!out){CM.wire(page);CM.paintPortraits(page)}
   /* YOUR WEDDING CIRCLE (Owner, 27 Sep 2026): read, never written — the people, the two seats, the pulse */
   var PL=window.SIYL_PULSE;if(PL&&!out){PL.wireCircle(page.querySelector('[data-pl-circle]'),redrawCircle);if(!PL.data()&&!PL.failed())PL.load()}
+  if(!out)wirePulseRetry(page.querySelector('[data-pl-circle]'));
   page.querySelectorAll('input[data-c]').forEach(function(i){var save=function(){G.setContact(i.getAttribute('data-c'),i.value.trim())};i.addEventListener('change',function(){var f=i.id;save();render();var n=document.getElementById(f);if(n)try{n.focus({preventScroll:true})}catch(e){}});i.addEventListener('blur',save)});
   /* SIGN OUT SAVES FIRST (PRQ-01-03): only when the latest change is kept does the device forget the guest; otherwise the guest
      stays signed in and reads why */

@@ -116,7 +116,8 @@ test('WHO\'S JOINING US · the page: the count, the names, initials where no pho
   assert.match(c, /Recently joined<\/p><p class="t-b1">Linnea · Peggy<\/p>/, 'RECENTLY JOINED lists genuine days only, newest first — the couple without a day is not in it'); assert.match(c, /You are among them/);
   assert.match(src('profile.html'), /\.pf-person-r\{[^}]*text-transform:uppercase/);
   assert.match(src('profile.html'), /\(CM\?CM\.countdownHtml\(\):''\)\+circle\(me,p\)\+\(CM\?CM\.numbersHtml\(\):''\)/, 'the three stand between the account and the arrangements — who is joining now lives in YOUR WEDDING CIRCLE (Owner, 27 Sep 2026)');
-  assert.match(src('profile.html'), /function circle\(me,p\)\{var PL=window\.SIYL_PULSE,CM=window\.SIYL_COMMUNITY;return PL\?PL\.circleHtml\(me,isHost\(me,p\)\):\(CM\?CM\.communityHtml\(CM\.data\(\),me\):''\)\}/, 'the community block remains the fallback'); assert.match(src('profile.html'), /<script src="assets\/community\.js/);
+  /* 28 Sep 2026: the community block is no longer the fallback — nothing ever asked for its data, so it stayed on "Looking up…" for good; the circle's own failure stands in (test/wedding-circle.test.mjs) */
+  assert.match(src('profile.html'), /function circle\(me,p\)\{var PL=window\.SIYL_PULSE;if\(!PL\)return circleDown\(\);/, 'the circle, or its own calm failure'); assert.match(src('profile.html'), /<script src="assets\/community\.js/);
   assert.match(src('assets/community.js'), /AV\.of\(gid\)/, 'portraits through SIYL_AVATAR.of — the existing authenticated read'); assert.doesNotMatch(src('assets/community.js'), /photo\?of=|api\/profile\/photo/, 'no photo URL of its own');
   assert.match(src('assets/community.js'), /prefers-reduced-motion: reduce/); assert.match(src('profile.html'), /@media\(prefers-reduced-motion:reduce\)\{\.pf-person\{opacity:1;transform:none;transition:none\}\}/);
 });

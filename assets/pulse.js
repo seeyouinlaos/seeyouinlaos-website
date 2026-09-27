@@ -30,13 +30,18 @@
   var AFTER_WHO = { pool: 'Who’s jumping in?', party: 'Who’s going to the party?' };
 
   /* ---------------------------------------------------------------- the data */
-  var data = null, loading = null, failed = false;
+  /* ONE FINITE READ (Owner, 28 Sep 2026 · the circle once stayed on "Looking up…" for good): every read ends — in the data, or in a
+     calm failure the guest can retry — within LOAD_TIMEOUT; a stalled connection is a failure, never an endless wait */
+  var data = null, loading = null, failed = false, LOAD_TIMEOUT = 12000;
   function load(force) {
-    var a = auth(); if (!a || !a.bearer) { data = null; return Promise.resolve(null); }
+    var a = auth(); if (!a || !a.bearer) { data = null; loading = null; return Promise.resolve(null); }
     if (data && !force) return Promise.resolve(data);
     if (loading && !force) return loading;
-    loading = fetch(API, { headers: { 'x-siyl-auth': a.bearer }, cache: 'no-store' })
-      .then(function (r) { return r.ok ? r.json() : null; })
+    if (force) failed = false;
+    var ctl = typeof AbortController === 'function' ? new AbortController() : null, timer = null;
+    var timeout = new Promise(function (res, rej) { timer = setTimeout(function () { try { if (ctl) ctl.abort(); } catch (e) {} rej(new Error('timeout')); }, window.SIYL_PULSE_TIMEOUT || LOAD_TIMEOUT); });
+    loading = Promise.race([fetch(API, { headers: { 'x-siyl-auth': a.bearer }, cache: 'no-store', signal: ctl ? ctl.signal : undefined }), timeout])
+      .then(function (r) { clearTimeout(timer); return r.ok ? r.json() : null; }, function (e) { clearTimeout(timer); throw e; })
       .then(function (d) { loading = null; data = d && d.ok ? d : null; failed = !data; try { document.dispatchEvent(new CustomEvent('siyl:pulse')); } catch (e) {} return data; },
         function () { loading = null; failed = true; try { document.dispatchEvent(new CustomEvent('siyl:pulse')); } catch (e) {} return null; });
     return loading;
@@ -196,6 +201,9 @@
   function ceremonyHtml(v, me, hosts, byPeople) {
     var S = window.SIYL_SEATS, mine = hosts ? null : (S && S.seatOf ? S.seatOf('ceremony', me.guestId) : null);
     var head = '<div class="pl-seat" data-pl-seat="ceremony"><p class="pl-label">Vow Ceremony</p>';
+    /* UNKNOWN IS NOT "NOT ASSIGNED": a seating read still under way, or one that failed, is said as such */
+    if (!v && S && S.error && S.error()) return head + '<p class="pl-none" data-pl-seats="unavailable">The seating could not be read just now.</p></div>';
+    if (!v && S && S.ready && !S.ready()) return head + '<p class="pl-none" data-pl-seats="loading">Looking up the seating…</p></div>';
     if (!v || !v.ceremony) return head + '<p class="pl-yours"><span>Your seat</span> <b>Not assigned yet</b></p><p class="pl-none">The ceremony plan opens later.</p></div>';
     if (hosts) return head + '<p class="pl-yours"><span>Your place</span> <b>Front centre</b></p>' + ceremonyMap(v, null, true) + '</div>';
     if (!mine) return head + '<p class="pl-yours"><span>Your seat</span> <b>Not assigned yet</b></p>' + ceremonyMap(v, null, false) + '</div>';
@@ -207,6 +215,8 @@
     var S = window.SIYL_SEATS, mine = S && S.seatOf ? S.seatOf('dinner', me.guestId) : null;
     var sides = dinnerSides(v), total = sides ? sides.T.length + sides.B.length : 0;
     var head = '<div class="pl-seat" data-pl-seat="dinner"><p class="pl-label">Wedding Dinner</p>' + (total ? '<p class="pl-cap">One long table · <b>' + total + '</b> <span>seats</span></p>' : '');
+    if (!v && S && S.error && S.error()) return head + '<p class="pl-none" data-pl-seats="unavailable">The seating could not be read just now.</p></div>';
+    if (!v && S && S.ready && !S.ready()) return head + '<p class="pl-none" data-pl-seats="loading">Looking up the seating…</p></div>';
     if (!sides) return head + '<p class="pl-yours"><span>Your seat</span> <b>Not assigned yet</b></p><p class="pl-none">The dinner plan opens later.</p></div>';
     if (!mine) return head + '<p class="pl-yours"><span>Your seat</span> <b>Not assigned yet</b></p>' + dinnerMap(v, null) + '</div>';
     var a = aroundDinner(v, mine) || {};
@@ -218,7 +228,7 @@
   function fullSeatingHtml(v, byPeople) {
     if (!v || (!v.ceremony && !v.dinner)) return '';
     var who = function (s) { var x = seatPerson(s, byPeople); return x && !x.empty ? '<span class="pl-fn" data-i18n-skip>' + esc(x.p.name) + '</span>' : '<span class="pl-free">Not taken yet</span>'; };
-    var cer = v.ceremony ? v.ceremony.rows.map(function (r) { return (r.seats || []).map(function (s) { return '<li><span class="pl-seatno">' + esc(label(s.seatId)) + '</span> ' + who(s) + '</li>'; }).join(''); }).join('') : '';
+    var cer = v.ceremony ? (v.ceremony.rows || []).map(function (r) { return (r.seats || []).filter(Boolean).map(function (s) { return '<li><span class="pl-seatno">' + esc(label(s.seatId)) + '</span> ' + who(s) + '</li>'; }).join(''); }).join('') : '';
     var S = dinnerSides(v), din = S ? ['T', 'B'].map(function (k) { return S[k].map(function (s) { return '<li><span class="pl-seatno">' + esc(label(s.seatId)) + '</span> ' + who(s) + '</li>'; }).join(''); }).join('') : '';
     return '<details class="pl-full" data-pl-full><summary>View full seating</summary>' +
       (cer ? '<p class="pl-sub">Vow Ceremony</p><ul class="pl-plan">' + cer + '</ul>' : '') +
@@ -230,7 +240,9 @@
   function circleHtml(me, hosts) {
     var d = data, S = window.SIYL_SEATS, v = S && S.view ? S.view() : null;
     var h = '<section class="prep-sec pl-circle" id="circle" data-pl-circle><p class="t-l1">Your wedding circle</p><h2 class="t-h2">Who you share this wedding with.</h2>';
-    if (!d) return h + '<p class="t-b2 measure" data-pl-circle-state="' + (failed ? 'unavailable' : 'loading') + '">' + (failed ? 'The circle could not be read just now. Please try again in a moment.' : 'Looking up who is joining us…') + '</p></section>';
+    if (!d) return h + (failed
+      ? '<div data-pl-circle-state="unavailable"><p class="t-b2 measure">We couldn’t load your Wedding Circle just now.</p><p style="margin-top:12px"><button type="button" class="p-act" data-pl-retry>Try again</button></p></div></section>'
+      : '<p class="t-b2 measure" data-pl-circle-state="loading">Looking up who is joining us…</p></section>');
     var byPeople = byId(d);
     return h + '<div class="pl-circle-grid">' + joiningHtml(d, true) +
       '<div class="pl-seats">' + ceremonyHtml(v, me, hosts, byPeople) + dinnerHtml(v, me, byPeople) + (hosts ? fullSeatingHtml(v, byPeople) : '') + '</div>' +
@@ -264,7 +276,12 @@
   window.SIYL_PULSE = {
     API: API, load: load, data: function () { return data; }, failed: function () { return failed; },
     homeHtml: homeHtml, circleHtml: circleHtml, paint: paint, render: renderHome,
-    wireCircle: function (root, again) { wire(root, circleState, again, '[data-pl-circle]'); paint(root); },
+    wireCircle: function (root, again) {
+      wire(root, circleState, again, '[data-pl-circle]'); paint(root);
+      /* the one retry: back to "looking up" at once, then the read again */
+      var rb = root && root.querySelector('[data-pl-retry]');
+      if (rb) rb.addEventListener('click', function () { failed = false; if (typeof again === 'function') again(); load(true); });
+    },
     aroundCeremony: aroundCeremony, aroundDinner: aroundDinner, genreWords: genreWords
   };
   if (document.querySelector) { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wireHome); else wireHome(); }

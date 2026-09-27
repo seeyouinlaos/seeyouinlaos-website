@@ -56,7 +56,7 @@ export function page(opts = {}) {
     },
     location: { pathname: '/' + (opts.path || 'your-journey.html'), hostname: 'localhost', search: opts.search || '', hash: '' },
     CustomEvent: class { constructor(type, init) { this.type = type; this.detail = init && init.detail; } },
-    setTimeout: (fn) => fn(),
+    setTimeout: (fn) => fn(), clearTimeout: () => {},
     requestAnimationFrame: (fn) => fn(),
     /* reduced motion, when a test asks for it (22 Sep 2026): the pages read the media query once, at load */
     matchMedia: (q) => ({ matches: !!opts.reducedMotion && /prefers-reduced-motion: reduce/.test(q), addEventListener() {}, addListener() {} }),
