@@ -58,36 +58,39 @@ test('C · two guests, U Sathorn only → USD 384', () => {
  *                          row 32 28.02-01.03 carried by the host
  * → 145 is per person PER NIGHT. Pre-Wedding pays both nights (290 for The
  *   Heritage); the Wedding Stay pays the first night only (145). */
-test('Vientiane · the matrix is a per-person / per-night rate, not a window total', () => {
-  const rate = { heritage: 145, 'heritage-executive': 155, 'heritage-grand-premier': 170,
-                 'noble-courtyard': 240, 'grand-majestic': 250, 'souphattra-majestic': 290,
-                 'souphattra-presidential': 750 };
-  for (const [slug, r] of Object.entries(rate)) {
-    const pre = P.quote('prewed', slug);
-    assert.equal(pre.rate, r, `${slug} rate`);
-    assert.equal(pre.nights, 2);
-    assert.equal(pre.pay, 2, 'the pre-wedding window has no hosted night');
-    assert.equal(pre.total, r * 2, `prewed/${slug} = rate × 2 nights`);
-    assert.equal(total(pick('prewed', slug)), r * 2);
-
-    const wed = P.quote('wedstay', slug);
-    assert.equal(wed.nights, 2);
-    assert.equal(wed.pay, 1, 'the second wedding night is hosted');
-    assert.equal(wed.hosted, 1);
-    assert.equal(wed.total, r, `wedstay/${slug} = one payable night`);
-    assert.equal(total(pick('wedstay', slug)), r);
+/* THE SOUPHATTRA'S TWO PERIODS (Owner, 27 Sep 2026 · the live Operations Master, 002_Accommodation_Details): every category has
+ * a Package C rate (25 → 27 February, both nights payable) and a D1 rate (27 February → 1 March, the first night payable, the
+ * second complimentary) — per person and per room, per night. The pre-wedding stay once showed the Wedding Stay's rates: never
+ * again. All fourteen pairs, mechanically. */
+const SOUPHATTRA = {
+  prewed:  { heritage: [112.5, 225], 'heritage-executive': [130, 260], 'heritage-grand-premier': [162.5, 325], 'noble-courtyard': [247.5, 495], 'grand-majestic': [345, 690], 'souphattra-majestic': [385, 770], 'souphattra-presidential': [1095, 2190] },
+  wedstay: { heritage: [145, 290], 'heritage-executive': [155, 310], 'heritage-grand-premier': [170, 340], 'noble-courtyard': [195, 390], 'grand-majestic': [250, 500], 'souphattra-majestic': [200, 400], 'souphattra-presidential': [750, 1500] }
+};
+test('Vientiane · ALL FOURTEEN SOUPHATTRA PAIRS: Package C (25 – 27 Feb) and D1 (27 Feb – 1 Mar) each resolve their own rate, per person and per room', () => {
+  for (const [win, map] of Object.entries(SOUPHATTRA)) for (const [slug, [pp, room]] of Object.entries(map)) {
+    const q = P.quote(win, slug), tag = win + '/' + slug;
+    assert.equal(q.rate, pp, tag + ' per person per night'); assert.equal(q.roomRate, room, tag + ' per room per night');
+    assert.equal(q.roomRate, pp * 2, tag + ' the room is two guests');
+    assert.equal(q.nights, 2);
+    if (win === 'prewed') { assert.equal(q.pay, 2, 'the pre-wedding window has no hosted night'); assert.equal(q.total, pp * 2, tag + ' = rate × 2 nights'); assert.equal(total(pick(win, slug)), pp * 2); }
+    else { assert.equal(q.pay, 1, 'the second wedding night is hosted'); assert.equal(q.hosted, 1); assert.equal(q.total, pp, tag + ' = one payable night'); assert.equal(total(pick(win, slug)), pp); }
+    assert.equal(q.nightly, P.money(pp) + ' per person per night'); assert.equal(q.roomNightly, P.money(room) + ' per room per night');
   }
-  assert.equal(P.quote('prewed', 'heritage').total, 290);
-  assert.equal(P.quote('prewed', 'souphattra-majestic').total, 580);
-  assert.equal(P.quote('wedstay', 'souphattra-majestic').total, 290);
+  /* the fault itself: the pre-wedding stay never carries a D1 rate */
+  for (const slug of Object.keys(SOUPHATTRA.prewed)) assert.notEqual(P.quote('prewed', slug).rate, SOUPHATTRA.wedstay[slug][0], slug + ': Package C is not D1');
+  assert.equal(P.money(112.5), 'USD 112.50'); assert.equal(P.money(1095), 'USD 1,095'); assert.equal(P.money(2190), 'USD 2,190'); assert.equal(P.quote('prewed', 'heritage').nightly, 'USD 112.50 per person per night');
+  assert.equal(P.quote('prewed', 'heritage').total, 225); assert.equal(P.quote('prewed', 'souphattra-presidential').total, 2190);
+  assert.equal(P.quote('wedstay', 'noble-courtyard').total, 195); assert.equal(P.quote('wedstay', 'souphattra-majestic').total, 200);
+  /* the rooms keep the Operations Master's order in both periods */
+  assert.deepEqual(R.souphattra.rooms.map((r) => r.slug), Object.keys(SOUPHATTRA.prewed));
 });
 
 test('Vientiane · the guest is told exactly which nights an amount buys', () => {
   const pre = P.quote('prewed', 'heritage');
-  assert.equal(pre.amount, 'USD 290');
+  assert.equal(pre.amount, 'USD 225');
   assert.equal(pre.totalLine, '2 nights · 25 – 27 February 2027'); /* TO-01466 */
   assert.equal(pre.nightsCovered, '25 → 26 and 26 → 27 February'); /* TO-01464 */
-  assert.match(pre.basis, /^USD 290 per person · 2 nights/);
+  assert.match(pre.basis, /^USD 225 per person · 2 nights: 25 → 26 and 26 → 27 February · USD 112\.50 per person per night$/);
   assert.doesNotMatch(pre.basis, /complimentary/, 'the hosted night is the wedding stay only');
 
   const wed = P.quote('wedstay', 'heritage');
@@ -108,7 +111,7 @@ test('every stay multiplies its rate by its payable nights — one rule, no exce
   /* Shama Yen-Akat was DELETED (Owner, 24 Sep 2026): its stale slug never quotes its own USD 40 × 3 */
   assert.notEqual(P.quote('bkk-stay', 'shama-king-studio-balcony').roomSlug, 'shama-king-studio-balcony');
   assert.ok(P.items('bkk-stay', 'shama-king-studio-balcony').every((x) => x.room !== 'shama-king-studio-balcony' && x.price !== 120));
-  assert.equal(P.quote('prewed', 'heritage').total, 145 * 2);
+  assert.equal(P.quote('prewed', 'heritage').total, 112.5 * 2);
   assert.equal(P.quote('wedstay', 'heritage').total, 145 * 1);
   /* the Yifangju Designer Courtyard (Owner, 27 Sep 2026): per person for the three nights, the room's three-night total twice where two sleep */
   assert.equal(P.quote('kmg', 'elegant-residence').total, 126);
@@ -234,7 +237,7 @@ test('E · changing the Souphattra category replaces the one Wedding Stay item',
   assert.equal(before.length, 1);
   assert.equal(after.length, 1);
   assert.equal(total(before), 145);
-  assert.equal(total(after), 240, 'the payable amount follows the new category');
+  assert.equal(total(after), 195, 'the payable amount follows the new category (D1 · Noble Courtyard 195)');
   assert.deepEqual(after.map((x) => x.id), before.map((x) => x.id), 'same id — replaced, never duplicated');
 });
 
@@ -281,7 +284,7 @@ test('every accommodation window states rate, nights, total and breakfast', () =
     const q = P.quote(win, room.slug);
     assert.equal(q.nights, nights, win + ' nights');
     assert.equal(q.total, q.rate * q.pay, win + ' total = rate × payable nights');
-    assert.equal(q.nightly, 'USD ' + q.rate + ' per person per night', win + ' states its nightly rate (TO-01312: no slash notation)');
+    assert.equal(q.nightly, P.money(q.rate) + ' per person per night', win + ' states its nightly rate (TO-01312: no slash notation)');
     assert.match(q.basis, /^USD [\d,]+ per person · \d+ nights?/, win + ' basis');
     assert.ok(q.breakfast, win + ' breakfast status');
   }
@@ -355,15 +358,15 @@ test('the two approved Full Experience compositions come out of component pricin
    * them swapped, exactly as the Owner listed them */
   const BASE = ['train', 'prewed', 'wedstay', 'kmg', 'c86', 'ljg', 'return', 'kempinski'];
   assert.equal(P.FLAT.c86.price, 105, 'C86 is USD 105 — the current Operations Master (Owner, 19 Sep 2026), superseding the Edit 2 override of 85');
-  const base = 100 + 340 + 170 + 109 + P.FLAT.c86.price + 200 + 200 + 380;   /* 1,604 — the train USD 100 since 14 Sep 2026, C86 USD 105, Kunming the Yifangju 002 (USD 109, 27 Sep 2026) */
-  assert.equal(base, 1604);
+  const base = 100 + 325 + 170 + 109 + P.FLAT.c86.price + 200 + 200 + 380;   /* 1,589 — the train USD 100 since 14 Sep 2026, C86 USD 105, Kunming the Yifangju 002 (USD 109), the pre-wedding Heritage Grand Premier at Package C (USD 162.50 × 2, 27 Sep 2026) */
+  assert.equal(base, 1589);
   /* the Sathorn Penthouse (255) was deleted (Edit 6, 24 Sep 2026) and Shama Yen-Akat (120) on 24 Sep 2026:
      U Sathorn is the one Bangkok room, so two compositions remain (one per approved fare) */
   const bkk = { 'u-sathorn-superior-garden': 192 };
   const fly = { business: 275, 'economy-flexible': 155 };
   const want = {
-    'u-sathorn-superior-garden|business': 2071,
-    'u-sathorn-superior-garden|economy-flexible': 1951,
+    'u-sathorn-superior-garden|business': 2056,
+    'u-sathorn-superior-garden|economy-flexible': 1936,
   };
   assert.equal(Object.keys(want).length, 2);
   assert.deepEqual(R.sathorn.rooms.map((r) => r.slug), Object.keys(bkk), 'every Bangkok room is composed, and only those');
@@ -453,9 +456,9 @@ test('Full Experience lines come from the single pricing source, transport inclu
      Vientiane windows since 15 Sep 2026); it is simply no longer what Full
      Experience selects */
   /* Bangkok's dearest room is U Sathorn (192) since the Sathorn Penthouse was deleted (Edit 6, 24 Sep 2026) */
-  assert.equal(total(all), 192 + 100 + 1500 + 750 + 275 + 129 + 105 + 420 + 200 + 380);
-  assert.equal(total(all), 4051);
-  assert.notEqual(total(all), 2071);
+  assert.equal(total(all), 192 + 100 + 2190 + 750 + 275 + 129 + 105 + 420 + 200 + 380);   /* the Presidential at Package C (1,095 × 2) before the wedding, D1 (750) for it */
+  assert.equal(total(all), 4741);
+  assert.notEqual(total(all), 2056);
 });
 
 test('Review & Send: the Temple Ceremony is optional, the other three hosted', () => {
@@ -833,11 +836,11 @@ const STAGES = ['bkk-stay', 'train', 'prewed', 'wedstay', 'mu9646', 'kmg', 'c86'
 const fullExperience = (available) =>
   STAGES.flatMap((w) => (P.FLAT[w] ? P.items(w) : P.items(w, P.approved(w, available && available(w)).slug)));
 
-test('the ten Owner-preferred rooms and transports (SIYL_PRICE.approved — no package, 21 Sep 2026) sum to USD 2,071 — Bangkok falls to the premium open room, U Sathorn, since the Sathorn Penthouse was deleted (Edit 6, 24 Sep 2026) (train USD 100 since 14 Sep 2026, C86 USD 105 — the current Operations Master, 19 Sep 2026)', () => {
+test('the ten Owner-preferred rooms and transports (SIYL_PRICE.approved — no package, 21 Sep 2026) sum to USD 2,056 — Bangkok falls to the premium open room, U Sathorn, since the Sathorn Penthouse was deleted (Edit 6, 24 Sep 2026) (train USD 100 since 14 Sep 2026, C86 USD 105 — the current Operations Master, 19 Sep 2026)', () => {
   const expect = {
     'bkk-stay':  { room: 'u-sathorn-superior-garden', rate: 64, pay: 3, amount: 192 },
     train:       {                                             amount: 100 },
-    prewed:      { room: 'heritage-grand-premier', rate: 170, pay: 2, amount: 340 },
+    prewed:      { room: 'heritage-grand-premier', rate: 162.5, pay: 2, amount: 325 },
     wedstay:     { room: 'heritage-grand-premier', rate: 170, pay: 1, amount: 170 },
     mu9646:      {                                             amount: 275 },
     kmg:         { room: 'jinri-terrace-double',   rate: 36.33333333, pay: 3, amount: 109 },
@@ -857,9 +860,10 @@ test('the ten Owner-preferred rooms and transports (SIYL_PRICE.approved — no p
     assert.equal(q.total, e.amount, w + ' amount');
     sum += e.amount;
   }
-  assert.equal(sum, 2071);
-  /* 192 + 100 + 340 + 170 + 275 + 109 + 105 + 200 + 200 + 380 — Kunming the Yifangju 002 since 27 Sep 2026 */
-  assert.equal(192 + 100 + 340 + 170 + 275 + 109 + 105 + 200 + 200 + 380, 2071);
+  assert.equal(sum, 2056);
+  /* 192 + 100 + 325 + 170 + 275 + 109 + 105 + 200 + 200 + 380 — Kunming the Yifangju 002, the Souphattra's Package C (27 Sep 2026) */
+  assert.equal(192 + 100 + 325 + 170 + 275 + 109 + 105 + 200 + 200 + 380, 2056);
+  assert.notEqual(sum, 2071, 'the pre-wedding stay at the Wedding Stay\'s rate is not what the sum carries');
   assert.notEqual(sum, 2112, 'the former Kunming hotel is not what the sum carries');
   /* the deleted Penthouse's 255 is NOT what the sum carries */
   assert.notEqual(sum, 2175);
@@ -879,15 +883,15 @@ test('the total is never hard-coded: a sold-out room changes it', () => {
   const pre = lines.find((x) => x.id === 'prewed');
   assert.notEqual(pre.room, 'heritage-grand-premier', 'the sold-out room must not be selected');
   assert.equal(pre.room, 'heritage-executive', 'the nearest available approved option');
-  assert.equal(pre.price, 310);
+  assert.equal(pre.price, 260, 'Heritage Executive at Package C, USD 130 × 2');
   /* the two Vientiane windows are independent stock — the wedding stay keeps
      the approved room because it is a different window */
   const wed = lines.find((x) => x.id === 'wedstay');
   assert.equal(wed.room, 'heritage-grand-premier');
   assert.equal(wed.price, 170);
-  assert.equal(total(lines), 2071 - 340 + 310);
-  assert.equal(total(lines), 2041);
-  assert.notEqual(total(lines), 2071, 'the canonical total must not survive a substitution');
+  assert.equal(total(lines), 2056 - 325 + 260);
+  assert.equal(total(lines), 1991);
+  assert.notEqual(total(lines), 2056, 'the canonical total must not survive a substitution');
 });
 
 test('the approved room is preferred, and the fallback is the nearest, not the dearest', () => {
@@ -1085,16 +1089,16 @@ test('the Sangkhathan is a per-guest offering, not an admission', () => {
   assert.equal(line.room, undefined);
 });
 
-test('the Complete trip\'s defaults stay USD 2,071 (Bangkok = U Sathorn since Edit 6 · Kunming the Yifangju since 27 Sep 2026); one offering makes the journey 2,086', () => {
+test('the Complete trip\'s defaults stay USD 2,056 (Bangkok = U Sathorn since Edit 6 · Kunming the Yifangju · the Souphattra\'s two periods since 27 Sep 2026); one offering makes the journey 2,071', () => {
   const canonical = STAGES.flatMap((w) => (P.FLAT[w] ? P.items(w) : P.items(w, P.approved(w).slug)));
-  assert.equal(total(canonical), 2071, 'the canonical base is unchanged');
+  assert.equal(total(canonical), 2056, 'the canonical base is unchanged');
   const withOffering = [...canonical, { ...P.items('sangkhathan')[0], qty: 1 }];
   assert.equal(withOffering.length, 11, 'the offering is an addition, not a stage');
-  assert.equal(total(withOffering), 2086);
+  assert.equal(total(withOffering), 2071);
   /* the canonical configuration itself is never redefined */
-  assert.equal(total(canonical), 2071);
+  assert.equal(total(canonical), 2056);
   const two = [...canonical, { ...P.items('sangkhathan')[0], qty: 2 }];
-  assert.equal(total(two), 2101);
+  assert.equal(total(two), 2086);
 });
 
 test('the wedding page: four events, the Buddhist morning inside the ceremony', () => {
@@ -1154,19 +1158,20 @@ test('the retired imagery and the pool-side dinner narrative are gone', () => {
   assert.match(vy, /souphattra\/heritage-room\.jpg/);
 });
 
-/* WINDOW 007 · resolved Owner decision: the Souphattra Presidential is USD 750 per person per night */
-test('PRESIDENTIAL · USD 750 per person per night — USD 1,500 for the Pre-Wedding Stay, USD 750 for the Wedding Stay (TO-00461 · TO-01310)', () => {
+/* THE SOUPHATTRA PRESIDENTIAL in its two periods (the Operations Master, 27 Sep 2026): Package C USD 1,095 · D1 USD 750 per person per night */
+test('PRESIDENTIAL · USD 1,095 per person per night before the wedding (USD 2,190 for the two nights · USD 2,190 the room) — USD 750 for the Wedding Stay (USD 1,500 the room)', () => {
   const pre = P.quote('prewed', 'souphattra-presidential'), wed = P.quote('wedstay', 'souphattra-presidential');
-  assert.equal(pre.rate, 750); assert.equal(pre.nightly, 'USD 750 per person per night');
-  assert.equal(pre.amount, 'USD 1,500'); assert.equal(pre.total, 1500);
+  assert.equal(pre.rate, 1095); assert.equal(pre.nightly, 'USD 1,095 per person per night'); assert.equal(pre.roomNightly, 'USD 2,190 per room per night');
+  assert.equal(pre.amount, 'USD 2,190'); assert.equal(pre.total, 2190);
+  assert.equal(wed.roomNightly, 'USD 1,500 per room per night');
   assert.equal(wed.amount, 'USD 750'); assert.equal(wed.total, 750);
 });
 
 /* THE MY BAG BASIS (TO-01311 · TO-01312 · TO-01313): amount → for whom → how long, the nights named once, the nightly rate
    without slash or ×. Kept apart so a divergence is reported on its own. */
-test('MY BAG BASIS · “USD 290 per person · 2 nights: 25 → 26 and 26 → 27 February · USD 145 per person per night”', () => {
+test('MY BAG BASIS · “USD 225 per person · 2 nights: 25 → 26 and 26 → 27 February · USD 112.50 per person per night”', () => {
   const line = (win, slug) => { const it = P.items(win, slug)[0]; it.qty = 1; return it; };
-  assert.equal(P.lineBasis(line('prewed', 'heritage')), 'USD 290 per person · 2 nights: 25 → 26 and 26 → 27 February · USD 145 per person per night');
+  assert.equal(P.lineBasis(line('prewed', 'heritage')), 'USD 225 per person · 2 nights: 25 → 26 and 26 → 27 February · USD 112.50 per person per night');
   assert.match(P.lineBasis(line('kmg', 'jinri-terrace-double')), /^USD 109 per person · 3 nights: .+ · USD 36\.33 per person per night$/, 'a rate of thirds is written to the cent');
   for (const [w, s] of [['prewed', 'heritage'], ['kmg', 'jinri-terrace-double'], ['ljg', 'starry-sky']]) assert.doesNotMatch(P.lineBasis(line(w, s)), /total per person|\/ night|×/);
 });

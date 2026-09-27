@@ -53,8 +53,8 @@ test('no free additional-guest creation: unknown guest fails validation', () => 
 
 const GUEST_MATRIX = {
   heritage: 145, 'the-heritage': 155, 'heritage-grand-premier': 170,
-  'noble-courtyard': 240, 'grand-majestic-suite': 250,
-  'souphattra-majestic-suite': 290, 'souphattra-presidential': 750,
+  'noble-courtyard': 195, 'grand-majestic-suite': 250,   /* D1, the Operations Master (27 Sep 2026) */
+  'souphattra-majestic-suite': 200, 'souphattra-presidential': 750,
 };
 for (const [id, per] of Object.entries(GUEST_MATRIX)) {
   test('guest contribution — ' + id + ' = USD ' + per + ' per guest', () => {
@@ -68,9 +68,9 @@ test('couple examples from the final matrix', () => {
   assert.equal(partyTotal(byId('heritage'), ['g1', 'g2']), 290);
   assert.equal(partyTotal(byId('the-heritage'), ['g1', 'g2']), 310);
   assert.equal(partyTotal(byId('heritage-grand-premier'), ['g1', 'g2']), 340);
-  assert.equal(partyTotal(byId('noble-courtyard'), ['g1', 'g2']), 480);
+  assert.equal(partyTotal(byId('noble-courtyard'), ['g1', 'g2']), 390);
   assert.equal(partyTotal(byId('grand-majestic-suite'), ['g1', 'g2']), 500);
-  assert.equal(partyTotal(byId('souphattra-majestic-suite'), ['g1', 'g2']), 580);
+  assert.equal(partyTotal(byId('souphattra-majestic-suite'), ['g1', 'g2']), 400);
   assert.equal(partyTotal(byId('souphattra-presidential'), ['g1', 'g2']), 1500);
 });
 
@@ -625,7 +625,7 @@ test('rates are APPROVED for publication (Gate 1 closed by owner)', async () => 
 test('per-guest charges: one charge record per occupying guest', () => {
   const charges = partyCharges(byId('noble-courtyard'), ['g1', 'g2']);
   assert.equal(charges.length, 2);
-  assert.deepEqual(charges.map((c) => c.amount), [240, 240]);
+  assert.deepEqual(charges.map((c) => c.amount), [195, 195]);
 });
 
 

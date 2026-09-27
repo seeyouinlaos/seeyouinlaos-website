@@ -24,6 +24,8 @@ export async function signIn(browser, origin, code, ctxOpts) {
   await p.fill('.siyl-inv input', code);
   await p.evaluate(() => document.querySelector('.siyl-inv .igo').click());
   await p.waitForFunction(() => { try { return !!JSON.parse(localStorage.getItem('siyl.auth') || 'null').bearer; } catch (e) { return false; } }, null, { timeout: 20000 });
+  /* THE SOUPHATTRA RATE NOTICE (27 Sep 2026): read once, as a guest does — the audited states are the pages behind it */
+  await p.evaluate(() => { try { localStorage.setItem('siyl.notice.souphattra-rate-correction-2026-09-27', '1'); } catch (e) {} });
   /* THE NOTE FROM THE GUEST RELATIONS MANAGER (26 Sep 2026): acknowledged once, as a guest does — the box ticked, the button pressed,
      the draft saved — so the audited states are the journey behind it */
   const note = await p.waitForSelector('[data-guest-note] [data-note-ack]', { state: 'attached', timeout: 12000 }).catch(() => null);

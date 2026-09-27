@@ -99,7 +99,8 @@
   };
 
   /* a rate with cents is written to the cent (the Yifangju 002: USD 36.33 per person per night) — never three decimals */
-  function money(n) { return 'USD ' + Number(n).toLocaleString('en-US', { maximumFractionDigits: 2 }); }
+  /* an amount with cents is written with both digits (USD 112.50 · USD 36.33) — never three, never one */
+  function money(n) { n = Number(n); return 'USD ' + n.toLocaleString('en-US', n % 1 ? { minimumFractionDigits: 2, maximumFractionDigits: 2 } : {}); }
   /* no leading zero in a date: "06 – 08 March 2027" → "6 – 8 March 2027" */
   function unpad(t) { return String(t == null ? '' : t).replace(/(^|[^\d])0(\d)(?!\d)/g, '$1$2'); }
   var MONTH_RE = /\s+(January|February|March|April|May|June|July|August|September|October|November|December)$/;
@@ -148,6 +149,19 @@
     return null;
   }
 
+  /* THE RATE OF A WINDOW (Owner, 27 Sep 2026 · the Souphattra correction): a room priced per period carries rates[window]; the
+   * pre-wedding stay (Package C) and the Wedding Stay (D1) are two periods of the same rooms and never share a rate. A room with
+   * one rate has it in every window. */
+  function rateOf(windowId, room) {
+    if (!room) return null;
+    if (room.rates && room.rates[windowId] != null) return room.rates[windowId];
+    return room.rate != null ? room.rate : null;
+  }
+  function roomRateOf(windowId, room) {
+    if (!room) return null;
+    /* only a room priced per period states its room rate (the Souphattra); no other page changes */
+    return room.roomRates && room.roomRates[windowId] != null ? room.roomRates[windowId] : null;
+  }
   function roomOf(stay, slug) {
     var found = null;
     stay.rooms.forEach(function (r) { if (r.slug === slug) found = r; });
@@ -158,6 +172,8 @@
     FLAT: FLAT,
     money: money,
     locate: locate,
+    rateOf: function (windowId, room) { return rateOf(windowId, room); },
+    roomRateOf: function (windowId, room) { return roomRateOf(windowId, room); },
 
     /* THE quote for one selectable line — the only place rate × nights happens */
     quote: function (windowId, slug) {
@@ -170,7 +186,7 @@
       /* `pay` is how many of the window's nights the guest contributes. It is
        * only ever smaller than `nights` where a night is hosted. */
       var pay = at.win.pay || nights;
-      var rate = room && room.rate != null ? room.rate : null;
+      var rate = rateOf(at.win.id, room), roomRate = roomRateOf(at.win.id, room);
       var q = {
         cat: 'Accommodation',
         unit: 'guest',
@@ -183,6 +199,7 @@
         pay: pay,
         hosted: nights - pay,
         rate: rate,
+        roomRate: roomRate,
         windowFixed: at.win.window === 'fixed',
         nightsList: at.win.nightsList || null,
         breakfast: (room && room.breakfast) || at.stay.breakfast || '',
@@ -192,6 +209,7 @@
         total: rate == null ? null : Math.round(rate * pay * 100) / 100
       };
       q.nightly = rate == null ? '' : money(rate) + ' per person per night';
+      q.roomNightly = roomRate == null ? '' : money(roomRate) + ' per room per night';
       q.nightsLine = nights + (nights === 1 ? ' night' : ' nights');
       /* the unmistakable presentation: the amount, what it covers, and the
        * exact nights it covers — never the bare words "two-night stay" */
@@ -298,7 +316,7 @@
         ? open.filter(function (r) { return available(r.slug); })
         : open;
       if (!free.length) return null;      /* the whole stage is sold out */
-      return free.reduce(function (m, r) { return r.rate > m.rate ? r : m; }, free[0]);
+      return free.reduce(function (m, r) { return rateOf(windowId, r) > rateOf(windowId, m) ? r : m; }, free[0]);
     },
 
     /* THE FULL EXPERIENCE CHOICE for one accommodation stage.
@@ -324,9 +342,10 @@
       for (var i = 0; i < free.length; i++) if (free[i].slug === wish) return free[i];
       /* the approved room is gone — the nearest rate, cheaper side first */
       return free.reduce(function (best, r) {
-        var db = Math.abs(best.rate - first.rate), dr = Math.abs(r.rate - first.rate);
+        var fr = rateOf(windowId, first), br = rateOf(windowId, best), rr = rateOf(windowId, r);
+        var db = Math.abs(br - fr), dr = Math.abs(rr - fr);
         if (dr < db) return r;
-        if (dr === db) return r.rate < best.rate ? r : best;
+        if (dr === db) return rr < br ? r : best;
         return best;
       }, free[0]);
     },
@@ -342,7 +361,7 @@
         ? open.filter(function (r) { return available(r.slug); })
         : open;
       if (!free.length) return null;
-      return free.reduce(function (m, r) { return r.rate < m.rate ? r : m; }, free[0]);
+      return free.reduce(function (m, r) { return rateOf(windowId, r) < rateOf(windowId, m) ? r : m; }, free[0]);
     },
 
     /* does this product have a genuine alternative to change to? */
@@ -421,7 +440,7 @@
       var at = locate(windowId); if (!at) return '';
       var self = this, open = at.stay.rooms.filter(function (r) { return r.rate != null && !r.interest; });
       if (!open.length) return '';
-      var low = open.reduce(function (m, r) { return r.rate < m.rate ? r : m; }, open[0]);
+      var low = open.reduce(function (m, r) { return rateOf(at.win.id, r) < rateOf(at.win.id, m) ? r : m; }, open[0]);
       var q = self.quote(at.win.id, low.slug); if (!q || q.total == null) return '';
       if (q.hosted > 0) return 'From ' + money(q.total) + ' per person';
       if (open.length === 1) return money(q.total) + ' per person · ' + money(q.rate) + ' per person per night';

@@ -170,7 +170,7 @@ const roomNames = [...dataSrc.matchAll(/^\s*id: '[a-z0-9-]+', name: '([^']+)'/gm
 const roomImages = [...dataSrc.matchAll(/RM \+ '([a-z0-9-]+\.jpg)'/g)].map((m) => 'assets/images/rooms/' + m[1]);
 const missingImages = roomImages.filter((p) => !fs.existsSync(path.join(ROOT, p)));
 const missingCards = []; /* public room catalogue retired (owner final architecture order): rooms render only in the authenticated Guest Area */
-const noblePresent = /noble-courtyard/.test(dataSrc) && /contributionPerGuest: 240/.test(dataSrc);
+const noblePresent = /noble-courtyard/.test(dataSrc) && /contributionPerGuest: 195/.test(dataSrc);   /* D1 · the Operations Master, 27 Sep 2026 */
 const oldVillaGone = !/Cozy Villa|4BR|id: 'villa'/.test(dataSrc);
 const airbnbSeg = dataSrc.slice(dataSrc.indexOf("id: 'airbnb-2br'"));
 const airbnbOk = airbnbSeg.length > 10
@@ -180,7 +180,7 @@ const airbnbOk = airbnbSeg.length > 10
   && !/USD\s*\d|per night|guest rate/i.test(airbnbSeg); // owner 2026-08-28: complimentary + limited, never priced
 const bookingValueLeak = /123\.8/.test(dataSrc) || /123\.8/.test(appJs) || /123\.8/.test(indexHtml);
 const matrixOk = ['contributionPerGuest: 145', 'contributionPerGuest: 155', 'contributionPerGuest: 170',
-  'contributionPerGuest: 240', 'contributionPerGuest: 250', 'contributionPerGuest: 290', 'contributionPerGuest: 750']
+  'contributionPerGuest: 195', 'contributionPerGuest: 250', 'contributionPerGuest: 200', 'contributionPerGuest: 750']
   .every((s) => dataSrc.includes(s));
 const reservedOk = (dataSrc.match(/reservedNote: 'Reserved'/g) || []).length === 2;
 const internalRatesLeak = ['390', '430', '450', '640', '690', '770', '2190', '2,190']
@@ -191,11 +191,11 @@ gate('R3', 'Accommodation matrix complete and single-sourced (26 rooms + hosted 
   missingImages.length === 0 && missingCards.length === 0 && roomNames.length === 8 && noblePresent && oldVillaGone && airbnbOk && !bookingValueLeak && matrixOk && capsOk && reservedOk && !internalRatesLeak,
   [missingImages.length && 'missing room images: ' + missingImages.join(', '),
    missingCards.length && "public page missing generated cards: " + missingCards.join(', ') + " (run 'npm run build:rooms')",
-   !noblePresent && 'Noble Courtyard Suite must be active at USD 220 per guest',
+   !noblePresent && 'Noble Courtyard Suite must be active at USD 195 per guest (D1)',
    !oldVillaGone && "the cancelled 4BR 'Vientiane Urban Cozy Villa 2' must never return",
    !airbnbOk && 'the 2BR Airbnb must be present as COMPLIMENTARY + LIMITED AVAILABILITY (never priced) outside the room matrix',
    bookingValueLeak && 'INTERNAL BOOKING VALUE (USD 123.80) must never reach guest surfaces',
-   !matrixOk && 'guest contributions must be 145/155/170/240/250/290/750',
+   !matrixOk && 'guest contributions (D1) must be 145/155/170/195/250/200/750',
    !reservedOk && 'Majestic Suite + Presidential must be RESERVED',
    internalRatesLeak && 'INTERNAL Public/Selling rates must never reach guest sources',
    !capsOk && 'capacities must be 5/13/3/1/2/1/1 (26 rooms)']

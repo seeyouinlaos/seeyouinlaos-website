@@ -222,9 +222,9 @@ test('PRICING · one guest, one price: Sangkhathan USD 15 for this guest only, n
   assert.equal(T.offeringOf_('g-peggy'), null, 'not attending: the offering goes, and is asked again on return');
   assert.equal(B.has('sangkhathan'), false);
   assert.equal(P.FLAT.train.price, 100); assert.match(P.FLAT.train.basis, /USD 100 per person/);
-  /* the Souphattra Presidential (Owner, 24 Sep 2026): USD 750 per person per night — pre-wedding USD 1,500 per person for the 2 nights; the Wedding Stay pays its first night only */
+  /* the Souphattra Presidential in its two periods (the Operations Master, 27 Sep 2026): Package C USD 1,095 per person per night — USD 2,190 for the 2 nights; the Wedding Stay (D1) USD 750, its first night only */
   { const pre = P.quote('prewed', 'souphattra-presidential'), wed = P.quote('wedstay', 'souphattra-presidential');
-    assert.equal(pre.rate, 750); assert.equal(pre.total, 1500); assert.equal(pre.amount, 'USD 1,500'); assert.equal(pre.nightly, 'USD 750 per person per night');
+    assert.equal(pre.rate, 1095); assert.equal(pre.total, 2190); assert.equal(pre.amount, 'USD 2,190'); assert.equal(pre.nightly, 'USD 1,095 per person per night');
     assert.equal(wed.rate, 750); assert.equal(wed.pay, 1); assert.equal(wed.hosted, 1); assert.equal(wed.total, 750); }
   assert.equal(P.FLAT.suhring.price, 294); assert.equal(P.FLAT.baanphraya.price, 114); assert.equal(P.FLAT.cannubi.price, 165); assert.equal(P.FLAT.sangkhathan.price, 15);
   P.items('train').forEach((it) => { it.qty = 1; B.put(it); });

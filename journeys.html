@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>The Journey · See You In Laos</title><script src="assets/i18n/siyl-i18n.js?v=04049e8d"></script>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>The Journey · See You In Laos</title><script src="assets/i18n/siyl-i18n.js?v=70ac8e76"></script>
 <script src="assets/invite-early.js?v=fab5da19"></script><style>
 @font-face{font-family:'PP Editorial Old';src:url('assets/fonts/PPEditorialOld-Ultralight.otf') format('opentype');font-weight:200;font-display:swap}
 *{margin:0;padding:0;box-sizing:border-box}body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;font-weight:300;font-size:14px;line-height:1.6}
@@ -150,15 +150,16 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:26px;margin:40
 <div class="p" id="j-return"><div class="pgal" data-gal="[[&quot;assets/images/transport/mu5924-economy-cabin-1.jpg&quot;,&quot;Economy Class · China Eastern&quot;],[&quot;assets/images/transport/mu5924-economy-cabin-2.jpg&quot;,&quot;Economy Class seats&quot;],[&quot;assets/images/transport/mu5924-economy-cabin-3.jpg&quot;,&quot;Economy Class cabin&quot;],[&quot;assets/images/transport/mu5924-economy-meal.jpg&quot;,&quot;On board&quot;],[&quot;assets/images/transport/mu5924-economy-ife.jpg&quot;,&quot;Seatback entertainment&quot;]]"></div></a><p class="pw"><b>6 Mar</b> · Travel · Lijiang &rarr; Bangkok</p><p class="pn">MU5922 + MU741 · Lijiang → Bangkok</p><p class="pm">6 March · 10:00 → 14:55 · via Kunming · Economy Flexible</p><p class="pp" data-private>USD 200 per person</p><button class="add" data-private data-add='{"id":"return","name":"MU5922 + MU741 · Lijiang → Bangkok","meta":"6 March 2027 · Economy Flexible","price":200,"img":"assets/images/transport/mu5924-economy-cabin-1.jpg"}'>Add to My Bag</button><br><a class="vw" data-cta-swap href="transport.html?id=return">Details</a></div>
 <div class="p" id="j-kempinski" data-vprod="kempinski"><div class="pgal stay" data-stay-gal="kempinski" aria-label="Photographs of the Siam Kempinski Bangkok"></div><p class="pw"><b>6 – 8 Mar</b> · Accommodation · Bangkok</p><p class="pn">Siam Kempinski Bangkok</p><p class="pm">6 – 8 March · 2 nights · your cost · breakfast included</p><p class="pp" data-private>USD 380 per person</p><p class="pb" data-private>2 nights: 6 &rarr; 7 and 7 &rarr; 8 March · USD 190 per person per night</p><p class="vl" data-private>Rooms &amp; suites</p><div class="vars" data-private data-rooms="kempinski"></div><a class="vw jcta" data-private-cta href="invitation.html?open=1">Open your invitation</a></div>
 </main>
-<script src="assets/bag.js?v=95964aa5"></script>
-<script src="assets/draft.js?v=311024c1"></script>
+<script src="assets/bag.js?v=f151ee23"></script>
+<script src="assets/draft.js?v=a794e2cc"></script>
 <script src="assets/guest-note.js?v=625f88b5"></script>
 <script src="assets/rules-gate.js?v=d49dabdc"></script>
+<script src="assets/rate-notice.js?v=c13b32c6"></script>
 <script src="assets/shop-menu.js?v=03047fbc"></script>
 <script src="assets/aman.js?v=85e11d24"></script>
-<script src="assets/rooms-data.js?v=9ccd8c03"></script>
+<script src="assets/rooms-data.js?v=f6ce4708"></script>
 <script src="assets/stay-media.js?v=32ab9802"></script>
-<script src="assets/pricing.js?v=ad1450ed"></script>
+<script src="assets/pricing.js?v=a373f08d"></script>
 <script src="assets/stay-plan.js?v=5227fdc4"></script>
 <script src="assets/rooms.js?v=6b03be1c"></script>
 <script src="assets/stay.js?v=0d15179f"></script>
@@ -235,7 +236,7 @@ var right, sub='';
 if(q&&r.rate!=null){
   right='<span class="vp">'+P.money(q.total)+'<span class="vper"> per person</span></span>';
   /* the hosted night is said once, in the stay's own sentence above the rows (TO-01290) */
-  sub = q.hosted>0 ? '' : P.money(r.rate)+' per person per night';
+  sub = q.hosted>0 ? '' : P.money(q.rate)+' per person per night';
 }else{right='<span class="vr" style="margin:0">On request</span>'}
 /* BOOKING FIRST, DETAILS SECOND (Owner, 24 Sep 2026): every row is the room, its amount, what is left of it and its one
    action — SELECT — with DETAILS beside it as the optional way in. Select opens, in place, the rooms of the category with who
@@ -279,7 +280,7 @@ function paint(){
       '<p class="pcfacts">'+r.facts.slice(0,2).map(function(f){return f[1]}).join(' · ')+' · '+
         (r.breakfast||stay.breakfast)+'</p>'+
       '<p class="pcprice">'+P.money(q.total)+' <span>per person · '+q.nightsLine+'</span></p>'+
-      '<p class="pcrate">'+P.money(r.rate)+' per person per night</p>'+
+      '<p class="pcrate">'+P.money(q.rate)+' per person per night</p>'+
       (av?'<p class="pcav vav'+((U.scarce(win,r.slug)||U.soldOut(win,r.slug))?' low':'')+'">'+av+'</p>':'')+
       (on?'<span class="pcgo on" aria-current="true">&#10003; '+(ST.held(chosen)?'Held for you':'Selected')+'</span>'
          :gone?'<span class="pcgo off" aria-disabled="true">'+(U.ctaWords(win,r.slug)||'Sold out')+'</span>'

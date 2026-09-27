@@ -13,7 +13,7 @@ import { Rooms, unitsOf, stageOf, STAGES } from '../src/rooms.js';
 import { SEED } from '../src/inventory-seed.js';
 
 const SOUPHATTRA = ['heritage', 'heritage-executive', 'heritage-grand-premier', 'noble-courtyard', 'grand-majestic', 'souphattra-majestic', 'souphattra-presidential'];
-const RATES = { heritage: 145, 'heritage-executive': 155, 'heritage-grand-premier': 170, 'noble-courtyard': 240, 'grand-majestic': 250, 'souphattra-majestic': 290, 'souphattra-presidential': 750 };
+const RATES = { heritage: 145, 'heritage-executive': 155, 'heritage-grand-premier': 170, 'noble-courtyard': 195, 'grand-majestic': 250, 'souphattra-majestic': 200, 'souphattra-presidential': 750 };   /* D1 · the Operations Master, 27 Sep 2026 */
 const identity = (s) => ({ invitationId: s.invitationId, guestId: s.guestId, partyId: s.partyId, hosts: !!s.hosts, name: s.preferredName || '' });
 const other = (n) => ({ invitationId: 'INV-X' + n, guestId: 'g-x' + n, partyId: 'INV-X' + n, hosts: false });
 const call = (rooms) => async (who, op, body) => {
@@ -46,8 +46,8 @@ test('B/C/D · stage D, 1 SOUPHATTRA HERITAGE: every category from The Heritage 
     assert.equal(q.contribution, 'First night your cost, USD ' + rate + ' per person · second night complimentary, hosted by Haruthai & Suthep'); /* TO-01467 */
   }
   assert.equal(P.quote('wedstay', 'heritage').total, 145); assert.equal(P.quote('wedstay', 'heritage-executive').total, 155);
-  assert.equal(P.quote('prewed', 'heritage-executive').total, 310, 'the Pre-Wedding Stay charges both nights — the rule is the wedding window\'s alone');
-  assert.equal(P.quote('prewed', 'heritage-executive').total + P.quote('wedstay', 'heritage-executive').total, 465, 'C + D1 exists in arithmetic — and is composed by nobody');
+  assert.equal(P.quote('prewed', 'heritage-executive').total, 260, 'the Pre-Wedding Stay charges both nights at Package C (130 × 2) — the rule is the wedding window\'s alone');
+  assert.equal(P.quote('prewed', 'heritage-executive').total + P.quote('wedstay', 'heritage-executive').total, 415, 'C + D1 exists in arithmetic — and is composed by nobody');
   assert.equal(R.souphattra.windows.find((x) => x.id === 'wedstay').dates, '27 February – 1 March 2027'); /* TO-00818 */
   /* the journeys page: the order and the words */
   const jn = src('journeys.html');

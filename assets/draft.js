@@ -499,7 +499,10 @@
   function offline() { try { if (typeof navigator !== 'undefined' && navigator.onLine === false) return true; } catch (e) {} return !!state.offline; }
   function deviceSent() { try { return JSON.parse(localStorage.getItem(DEVICE_SENT) || 'null'); } catch (e) { return null; } }
   /* a line as sent vs as it stands: what the guest chose, not how it is displayed */
-  var LINE_FIELDS = ['id', 'price', 'qty', 'unit', 'room', 'nights', 'rate', 'variant', 'interest', 'request', 'date', 'party'];
+  /* WHAT THE GUEST CHOSE, never what the website charges for it (Owner, 27 Sep 2026 · the Souphattra correction): an amount the
+     website corrects is derived from the selection — the room, the class, the menu — so a corrected rate never reads as a change
+     the guest made; a different room, class or menu still does */
+  var LINE_FIELDS = ['id', 'qty', 'unit', 'room', 'nights', 'cls', 'menu', 'variant', 'interest', 'request', 'date', 'party'];
   function sameLine(a, b) { return LINE_FIELDS.every(function (k) { var x = a ? a[k] : undefined, y = b ? b[k] : undefined; if (k === 'qty') { x = x || 1; y = y || 1; } return JSON.stringify(x === undefined ? null : x) === JSON.stringify(y === undefined ? null : y); }); }
   /* the guest's own answers — anything beyond what the invitation prefilled (W7-074: no trip line before the first own answer) */
   function hasOwnContent() {

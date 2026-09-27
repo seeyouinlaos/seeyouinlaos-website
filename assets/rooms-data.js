@@ -78,7 +78,7 @@
 
        21 – 24 FEB  (the Sathorn Penthouse — deleted, Edit 6, 24 Sep 2026: the stage falls to SIYL_PRICE.premium)
        24 – 25 FEB  Special Express No. 25                      100
-       25 – 27 FEB  Heritage Grand Premier              170 × 2 = 340
+       25 – 27 FEB  Heritage Grand Premier           162.50 × 2 = 325   (Package C rates, 27 Sep 2026)
        27 FEB – 01 MAR  Heritage Grand Premier          170 × 1 = 170
        01 MAR       MU9646 Business                             275
        01 – 04 MAR  Jinri Building Scenic Terrace Tub Double  36.33 × 3 = 109   (the Kunming house replaced, 27 Sep 2026)
@@ -86,7 +86,7 @@
        04 – 06 MAR  270° Snow Mountain Viewing Room     100 × 2 = 200
        06 MAR       MU5922 + MU741 Economy flexible             200
        06 – 08 MAR  Deluxe Balcony King                 190 × 2 = 380
-                                                       = USD 2,134   (the current Operations Master, 27 Sep 2026)
+                                                       = USD 2,119   (the current Operations Master, 27 Sep 2026)
 
      The total is NEVER written down. It is the sum of whatever the engine
      actually selects, so that when the shared ledger says a preferred room is
@@ -105,27 +105,18 @@
       name: 'Souphattra Heritage Vientiane',
       place: 'Vientiane, Laos',
       breakfast: 'Breakfast included',
-      /* SOURCE OF THE SOUPHATTRA PRICE BASIS — verified 08 September 2026 against
-       * H&S_Wedding_Operations_Master:
-       *   Accommodation_Details, row "Price Per Room per NIght" = 290 and row
-       *   "Price per Person" = 145 for The Heritage → 145 is the PER PERSON,
-       *   PER NIGHT share of the room rate (the same construction as the
-       *   former Bangkok penthouse, 340 per room / night ÷ 4 = 85 per person / night).
-       *   Accommodation_Details, row "Number of Night" = "2+2
-       *   (25.02.–27.02. + 27.02.–01.03.2027)" → two consecutive two-night
-       *   windows, no uncovered night on 27 February.
-       *   Budget_Room - Rate, column E "Our Selling Rate / Room / Night" = 290,
-       *   column H "Guest See this on webpage to book per person" = 145.
-       *   Budget_Finance rows 25–30 book the guest revenue for the ONE night
-       *   27–28.02 at the per-room rate; row 32 ("All Categories Rooms",
-       *   28.02–01.03, 26 rooms × USD 150) is carried by the host — that is
-       *   the complimentary second wedding-stay night.
-       * Therefore: `n` nights in the window, `pay` of them payable by the guest.
-       *   PRE-WEDDING  25 – 27 FEB      2 nights, both payable  → rate × 2
-       *   WEDDING STAY 27 FEB – 01 MAR  2 nights, first payable → rate × 1
-       * `window: 'fixed'` records the Owner's duration rule (Overview_Hotel_
-       * Restaurant, Day 05-02 / Day 07: "2 tage fix" — a shorter stay changes
-       * nothing). It is a DURATION rule and never an arithmetic shortcut. */
+      /* SOURCE OF THE SOUPHATTRA PRICES — the live Operations Master, 002_Accommodation_Details (read 27 Sep 2026): TWO price
+       * periods for every category, never one rate for both (the fault corrected on 27 Sep 2026 — the pre-wedding stay showed the
+       * Wedding Stay's rates):
+       *   rates.prewed    Package C · 25 → 27 February · "Price per Person, per Night" (first block)
+       *   rates.wedstay   D1 · 27 February → 1 March    · "Price per Person, per Night" (second block)
+       *   roomRates       the same two blocks, "Price per Room, per Night"
+       * `rate` is the Package C figure (the order of the categories). assets/pricing.js resolves the rate of the WINDOW a line
+       * belongs to (SIYL_PRICE.rateOf) — a quote never falls back to the other period.
+       *   PRE-WEDDING  25 – 27 FEB      2 nights, both payable  → rates.prewed × 2
+       *   WEDDING STAY 27 FEB – 01 MAR  2 nights, first payable → rates.wedstay × 1 (the second night complimentary)
+       * `window: 'fixed'` records the Owner's duration rule (Overview_Hotel_Restaurant, Day 05-02 / Day 07: "2 tage fix" — a
+       * shorter stay changes nothing). It is a DURATION rule and never an arithmetic shortcut. */
       windows: [
         { id: 'prewed', label: 'Pre-Wedding Stay', dates: '25 – 27 February 2027', nights: '2 nights', n: 2, pay: 2,
           window: 'fixed', nightsList: ['25 → 26 February', '26 → 27 February'],
@@ -155,49 +146,49 @@
           facts: [['Size', '31 sq.m.'], ['Bed', '1 king bed (2.1 m)'], ['Occupancy', '2 adults · 1 child'], ['Location', 'Floors 1 – 3'], ['View', 'Courtyard, garden and pool']],
           story: 'Thirty-one square metres of French colonial elegance, with a private balcony over the garden. The minibar is replenished at no charge throughout your stay.',
           groups: soupGroups(['31 sq.m.', 'Private balcony', 'Courtyard, garden and pool views', 'Sofa, wardrobe, desk and coffee table', 'Cribs can be provided; extra beds cannot be added'], null, null),
-          rate: 145 },
+          rate: 112.5, rates: { prewed: 112.5, wedstay: 145 }, roomRates: { prewed: 225, wedstay: 290 } },
         { slug: 'heritage-executive', name: 'Heritage Executive', cat: 'Heritage Room',
           desc: 'A French colonial room with a balcony over the garden — the one category that takes both a crib and an extra bed.',
           gallery: [[RM + 'heritage-executive-1.jpg', 'The bedroom'], [RM + 'heritage-executive-2.jpg', 'Bedroom and balcony'], [RM + 'heritage-executive-3.jpg', 'The bathroom'], [RM + 'heritage-executive-4.jpg', 'Bedroom towards the balcony']],
           facts: [['Size', '37 – 44 sq.m.'], ['Bed', '1 king bed (1.9 m) or 3 twin beds'], ['Occupancy', '2 adults · 1 child'], ['Location', 'Floors 1 – 3'], ['Family', 'Cribs and extra beds can be added · connecting door']],
           story: 'Thirty-seven to forty-four square metres in the French colonial style, with a balcony over the garden. It is the one category in the house that takes both a crib and an extra bed, and it has a connecting door.',
           groups: soupGroups(['37 – 44 sq.m.', 'Balcony over the garden', 'Connecting door', 'Cribs and extra beds can be added', 'Sofa, wardrobe, desk and coffee table'], null, null),
-          rate: 155 },
+          rate: 130, rates: { prewed: 130, wedstay: 155 }, roomRates: { prewed: 260, wedstay: 310 } },
         { slug: 'heritage-grand-premier', name: 'Heritage Grand Premier', cat: 'Heritage Room',
           desc: 'The largest of the heritage rooms, with a private balcony over the garden and the pool.',
           gallery: [[RM + 'heritage-grand-premier-1.jpg', 'The bedroom'], [RM + 'heritage-grand-premier-2.jpg', 'The bedroom and the sofa'], [RM + 'heritage-grand-premier-3.jpg', 'Bedroom towards the balcony'], [RM + 'heritage-grand-premier-4.jpg', 'The sitting corner'], [RM + 'heritage-grand-premier-5.jpg', 'The sofa'], [RM + 'heritage-grand-premier-6.jpg', 'The balcony daybed'], [RM + 'heritage-grand-premier-7.jpg', 'The balcony']],
           facts: [['Size', '49 sq.m.'], ['Bed', '1 king bed'], ['Occupancy', '2 adults · 1 child sharing bedding'], ['Location', 'Floors 1 – 3'], ['View', 'Garden, pool and courtyard']],
           story: 'The largest of the heritage rooms at forty-nine square metres, with a private balcony and chairs set out on it, facing the garden and the pool. The minibar is replenished for you throughout the stay, and afternoon tea comes with the room.',
           groups: soupGroups(['49 sq.m.', 'Private balcony with chairs', 'Garden, pool and courtyard views', 'Sofa, wardrobe, desk and coffee table'], null, ['Minibar — complimentary, replenished throughout your stay', 'Afternoon tea', 'Bottled water and soft drinks — complimentary', 'Nespresso machine, coffee and tea', 'Electric kettle', 'Fresh fruit']),
-          rate: 170 },
+          rate: 162.5, rates: { prewed: 162.5, wedstay: 170 }, roomRates: { prewed: 325, wedstay: 340 } },
         { slug: 'noble-courtyard', name: 'Noble Courtyard Suite', cat: 'Suite',
           desc: 'Sixty-three square metres with a king bed, a separate living area, two bathrooms and a private balcony over the garden and the pool.',
           gallery: [[RM + 'noble-courtyard-1.jpg', 'The bedroom'], [RM + 'noble-courtyard-2.jpg', 'Bedroom and desk'], [RM + 'noble-courtyard-3.jpg', 'Bedroom towards the balcony']],
           facts: [['Size', '63 sq.m.'], ['Bed', '1 king bed'], ['Occupancy', '2 adults · 1 child'], ['Location', 'Ground floor, in the central garden'], ['Bathrooms', 'Two bathrooms and two shower rooms']],
           story: 'Sixty-three square metres arranged for two people who like their own space: a king bed, a separate living area with a sofa and a Smart TV, and — unusually — two bathrooms and two shower rooms, one each. It sits on the ground floor in the middle of the garden, with the balcony opening onto the greenery and the pool.',
           groups: soupGroups(['63 sq.m. on the ground floor', 'Separate living area with sofa and Smart TV', 'Two bathrooms and two shower rooms', 'Private balcony over the garden and pool', 'Set in the central garden'], null, null),
-          rate: 240 },
+          rate: 247.5, rates: { prewed: 247.5, wedstay: 195 }, roomRates: { prewed: 495, wedstay: 390 } },
         { slug: 'grand-majestic', name: 'Grand Majestic Suite', cat: 'Suite',
           desc: 'French colonial and Laotian design, with a living room under a high ceiling and a private balcony.',
           gallery: [[RM + 'grand-majestic-suite-1.jpg', 'The bedroom'], [RM + 'grand-majestic-suite-2.jpg', 'The bathroom'], [RM + 'grand-majestic-suite-3.jpg', 'Living and dining']],
           facts: [['Size', '66 – 75 sq.m.'], ['Bed', '1 king bed'], ['Occupancy', '2 adults · 1 child'], ['Location', '2nd floor'], ['Outside', 'Private balcony']],
           story: 'French colonial and Laotian design in sixty-six to seventy-five square metres: a living room under a high ceiling, a pantry of its own, and a private balcony to take the first coffee of the day on.',
           groups: soupGroups(['66 – 75 sq.m.', 'Separate living room', 'High ceiling', 'Pantry', 'Private balcony', 'Sofa, wardrobe, desk and coffee table'], null, null),
-          rate: 250 }   /* no reservation (Owner, 15 Sep 2026): available until booked */,
+          rate: 345, rates: { prewed: 345, wedstay: 250 }, roomRates: { prewed: 690, wedstay: 500 } }   /* no reservation (Owner, 15 Sep 2026): available until booked */,
         { slug: 'souphattra-majestic', name: 'Souphattra Majestic Suite', cat: 'Suite',
           desc: 'The house suite: a separate living area, pantry and bar, and a long balcony over the pool.',
           gallery: [[RM + 'souphattra-majestic-suite-1.jpg', 'Bedroom towards the balcony'], [RM + 'souphattra-majestic-suite-2.jpg', 'The living area'], [RM + 'souphattra-majestic-suite-4.jpg', 'The bedroom'], [RM + 'souphattra-majestic-suite-3.jpg', 'The bathroom'], [RM + 'souphattra-majestic-suite-5.jpg', 'The bed']],
           facts: [['Size', '84 sq.m.'], ['Bed', '1 king bed'], ['Occupancy', '2 adults · 2 children'], ['Location', '3rd floor'], ['View', 'Pool and garden panorama']],
           story: 'Eighty-four square metres on the top floor. A separate living area with its own pantry and bar sits beside the bedroom, and the balcony runs the length of the suite with the pool and the garden below it. Lao contemporary lines under French colonial ceilings.',
           groups: soupGroups(['84 sq.m. on the top floor', 'Separate living area', 'Pantry and bar', 'Spacious balcony over the pool and garden', 'High ceilings · Lao contemporary and French colonial design'], null, null),
-          rate: 290 },
+          rate: 385, rates: { prewed: 385, wedstay: 200 }, roomRates: { prewed: 770, wedstay: 400 } },
         { slug: 'souphattra-presidential', name: 'Souphattra Presidential', cat: 'Suite',
           desc: 'The largest suite of the house: two bedrooms, private bathrooms and a shared living space under a high ceiling.',
           gallery: [[RM + 'souphattra-presidential-1.jpg', 'The main bedroom'], [RM + 'souphattra-presidential-2.jpg', 'The second bedroom'], [RM + 'souphattra-presidential-3.jpg', 'The living space'], [RM + 'souphattra-presidential-4.jpg', 'The sitting corner'], [RM + 'souphattra-presidential-5.jpg', 'The bathroom'], [RM + 'souphattra-presidential-6.jpg', 'The sofa at the foot of the bed'], [RM + 'souphattra-presidential-7.jpg', 'The bathtub']],
           facts: [['Size', '118 sq.m.'], ['Bed', 'Two bedrooms · 1 king bed and twin beds'], ['Occupancy', '2 guests on this website (the suite sleeps up to 6 adults and 2 children)'], ['Location', '2nd floor'], ['Bathrooms', 'Two private bathrooms']],
           story: 'The only Presidential in the house. Two bedrooms, each with its own bathroom — a king in one, twins in the other — open onto a living area under a high ceiling, with a pantry and a dining table.',
           groups: soupGroups(['118 sq.m., the only one in the house', 'Two bedrooms, each with its own private bathroom', 'King bed and twin beds', 'Separate living area and a shared living space', 'High ceiling', 'Pantry and dining table'], null, null),
-          rate: 750 }   /* no reservation (Owner, 15 Sep 2026): available until booked */
+          rate: 1095, rates: { prewed: 1095, wedstay: 750 }, roomRates: { prewed: 2190, wedstay: 1500 } }   /* no reservation (Owner, 15 Sep 2026): available until booked */
       ]
     },
 
@@ -582,8 +573,9 @@
    * their place in the list but are never selectable. */
   Object.keys(window.SIYL_ROOMS).forEach(function (k) {
     /* THE SOUPHATTRA (Owner, 21 Sep 2026 · the global My Trip rebuild): every category shown from The Heritage upward —
-     * Heritage 145 · Heritage Executive 155 · Heritage Grand Premier 170 · Noble Courtyard 240 · Grand Majestic Suite 250 ·
-     * Souphattra Majestic Suite 290 · Souphattra Presidential 750 — the default room, The Heritage, first */
+     * the Package C order of the Operations Master — Heritage 112.50 · Heritage Executive 130 · Heritage Grand Premier 162.50 ·
+     * Noble Courtyard 247.50 · Grand Majestic Suite 345 · Souphattra Majestic Suite 385 · Souphattra Presidential 1,095 — the
+     * default room, The Heritage, first (the Wedding Stay keeps the same order; its own rates are rates.wedstay) */
     /* a house whose rooms carry the Owner's own numbers (the Yifangju: 001 · 002 · 003) keeps that order */
     if (window.SIYL_ROOMS[k].numbered) return;
     if (k === 'souphattra') { window.SIYL_ROOMS[k].rooms.sort(function (a, b) { return (a.rate == null ? 1e9 : a.rate) - (b.rate == null ? 1e9 : b.rate); }); return; }

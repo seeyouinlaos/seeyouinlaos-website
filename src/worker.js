@@ -569,11 +569,11 @@ async function handleRegister(request, env) {
          CONTENT one (PRQ-01-06) — stamps (at · by · history) left out, so a save that changes nothing, or a change undone, never
          reads as a change */
       const fps = await journeyFingerprints(env, who);
-      const draftFingerprint = fps.v1, contentFingerprint = fps.v2;
+      const draftFingerprint = fps.v1, contentFingerprint = fps.v2, selectionFingerprint = fps.v3;
       const now = new Date().toISOString();
       record = { invitationId, submittedAt: isUpdate ? existing.submittedAt : submittedAt, submissionId, version, kind: isUpdate ? 'update' : 'initial',
         firstSentAt: isUpdate ? (existing.firstSentAt || existing.submittedAt) : submittedAt, lastSentAt: now, updatedAt: now,
-        guestId: who.guestId, hosts: !!who.hosts, registration, text, rooms, recipient, draftFingerprint, contentFingerprint, fingerprintVersion: 2, mail: null };
+        guestId: who.guestId, hosts: !!who.hosts, registration, text, rooms, recipient, draftFingerprint, contentFingerprint, selectionFingerprint, fingerprintVersion: 3, mail: null };
       /* THE PERMANENT PERSON ID (Owner, 20 Sep 2026): CONxxx and COUPLxxx are the register's — stamped from the auth index, never taken from the body */
       if (registration && typeof registration === 'object') { const person = await personOf(env, new URL(request.url).origin, who); if (person.contactId) registration.contactId = person.contactId; else delete registration.contactId; if (person.couple) registration.couple = person.couple; else delete registration.couple; }
       /* THE RECOVERY SNAPSHOT (Owner, 25 Sep 2026): the personal details as the server stores them for THIS person (the page's
@@ -732,15 +732,46 @@ function contentOf(v) {
   if (v && typeof v === 'object') { const out = {}; for (const k of Object.keys(v).sort()) { if (STAMP_KEYS.has(k)) continue; out[k] = contentOf(v[k]); } return out; }
   return v;
 }
-/* v1: the historical fingerprint (every stored record carries it) · v2: the content fingerprint (records sent from now on) */
+/* v3 · THE SELECTION FINGERPRINT (Owner, 27 Sep 2026 · the Souphattra correction): what the guest chose — every line by its product,
+   room, class, menu, quantity and unit — never what the website charges for it. An amount the website corrects (a rate, a line's
+   price, its wording and frame) is derived from the selection, so a host-side correction never reads as a change of the guest's. */
+const DERIVED_LINE_KEYS = new Set(['price', 'rate', 'roomRate', 'pay', 'nightsList', 'windowFixed', 'note', 'noteBy', 'breakfast', 'img', 'name', 'meta', 'basis', 'unitName']);
+function selectionOf(content) {
+  const c = contentOf(content);
+  const bag = c && c.draft && Array.isArray(c.draft['siyl.bag']) ? c.draft['siyl.bag'] : null;
+  if (bag) c.draft['siyl.bag'] = bag.map((l) => (l && typeof l === 'object' ? Object.fromEntries(Object.entries(l).filter(([k]) => !DERIVED_LINE_KEYS.has(k))) : l));
+  return c;
+}
+/* THE SOUPHATTRA RATES BEFORE THE CORRECTION (27 Sep 2026) — only to recognise a trip sent before it: its Bag lines carried these
+   amounts, the corrected lines carry the Operations Master's two periods. Never an amount the website shows or charges. */
+const SOUPHATTRA_BEFORE = { heritage: 145, 'heritage-executive': 155, 'heritage-grand-premier': 170, 'noble-courtyard': 240, 'grand-majestic': 250, 'souphattra-majestic': 290, 'souphattra-presidential': 750 };
+const SOUPHATTRA_NOW = {
+  prewed: { heritage: 112.5, 'heritage-executive': 130, 'heritage-grand-premier': 162.5, 'noble-courtyard': 247.5, 'grand-majestic': 345, 'souphattra-majestic': 385, 'souphattra-presidential': 1095 },
+  wedstay: { heritage: 145, 'heritage-executive': 155, 'heritage-grand-premier': 170, 'noble-courtyard': 195, 'grand-majestic': 250, 'souphattra-majestic': 200, 'souphattra-presidential': 750 }
+};
+/* the draft as it read before the correction: a corrected Souphattra line back at its former rate — nothing else is touched */
+function beforeCorrection(d) {
+  if (!d || !d.keys || typeof d.keys['siyl.bag'] !== 'string') return null;
+  let bag; try { bag = JSON.parse(d.keys['siyl.bag']); } catch (e) { return null; }
+  if (!Array.isArray(bag)) return null;
+  let changed = false;
+  const back = bag.map((l) => {
+    const now = l && SOUPHATTRA_NOW[l.id] && SOUPHATTRA_NOW[l.id][l.room], was = l && SOUPHATTRA_BEFORE[l.room];
+    if (now == null || was == null || l.rate !== now || now === was) return l;
+    changed = true; const pay = Number(l.pay) || (l.id === 'prewed' ? 2 : 1);
+    return { ...l, rate: was, price: was * pay };
+  });
+  return changed ? { ...d, keys: { ...d.keys, 'siyl.bag': JSON.stringify(back) } } : null;
+}
+/* v1: the historical fingerprint (every stored record carries it) · v2: the content fingerprint · v3: the selection fingerprint */
 async function journeyFingerprints(env, who, draft) {
   const d = draft === undefined ? await storedDraft(env, who.invitationId) : draft;
   const [rooms, seats] = await Promise.all([engineRooms(env, who), engineSeats(env, who)]);
   /* the fingerprint is the guest's OWN journey: a waiting-list position moves when others leave the line — not a change of theirs */
   const own = rooms ? Object.fromEntries(Object.entries(rooms).map(([k, v]) => [k, v && v.waitlisted ? { stage: v.stage, waitlisted: true, size: v.size } : v])) : rooms;
   const content = draftContent(d && d.keys);
-  const [v1, v2] = await Promise.all([sha256Hex(JSON.stringify({ draft: content, rooms: own, seats })), sha256Hex(JSON.stringify(contentOf({ draft: content, rooms: own, seats })))]);
-  return { v1, v2 };
+  const [v1, v2, v3] = await Promise.all([sha256Hex(JSON.stringify({ draft: content, rooms: own, seats })), sha256Hex(JSON.stringify(contentOf({ draft: content, rooms: own, seats }))), sha256Hex(JSON.stringify(selectionOf({ draft: content, rooms: own, seats })))]);
+  return { v1, v2, v3, d };
 }
 /* A CONFIRMATION STANDS for the version Guest Relations confirmed (OQ-27 · PRQ-01-05 / 02-04 / 04-04): a confirmation that names
    its version stands while that version is the latest sent; an older confirmation (no version recorded) stands while nothing was
@@ -767,8 +798,18 @@ async function submissionFor(env, who, draft) {
   if (!record) return submissionStateOf(null, false);
   let conf = null; try { conf = JSON.parse(await env.REG_KV.get('conf:' + who.invitationId) || 'null'); } catch (e) { conf = null; }
   const fps = await journeyFingerprints(env, who, draft === undefined ? undefined : draft);
-  /* a record sent with the content fingerprint compares content; an older record keeps its historical comparison */
-  const unsent = record.contentFingerprint ? record.contentFingerprint !== fps.v2 : (!!record.draftFingerprint && record.draftFingerprint !== fps.v1);
+  /* a record sent with the selection fingerprint compares selections; an older one its content, the oldest its historical form */
+  const legacy = (f) => (record.contentFingerprint ? record.contentFingerprint !== f.v2 : (!!record.draftFingerprint && record.draftFingerprint !== f.v1));
+  let unsent;
+  if (record.selectionFingerprint) unsent = record.selectionFingerprint !== fps.v3;
+  else {
+    unsent = legacy(fps);
+    /* THE SOUPHATTRA CORRECTION (27 Sep 2026) is the website's, not the guest's: a trip sent before it still reads as sent when
+       the only difference is the corrected rate */
+    if (unsent) { const back = beforeCorrection(fps.d); if (back) { const f2 = await journeyFingerprints(env, who, back); if (!legacy(f2)) unsent = false; } }
+    /* the first time a sent trip is read unchanged, its selection fingerprint is kept with it — from then on only a selection counts */
+    if (!unsent && env.REG_KV) { try { record.selectionFingerprint = fps.v3; await env.REG_KV.put('reg:' + who.invitationId, JSON.stringify(record), { metadata: { invitationId: who.invitationId, submittedAt: record.submittedAt, submissionId: record.submissionId, version: record.version, lastSentAt: record.lastSentAt } }); } catch (e) { /* compared again next time */ } }
+  }
   return submissionStateOf(record, unsent, conf);
 }
 /* ONE TABLE FOR TWO (PRQ-07a-06, Window 007): the 1872 afternoon tea is one table for a party of two — when another member of the

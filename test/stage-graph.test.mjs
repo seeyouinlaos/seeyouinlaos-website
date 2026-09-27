@@ -148,7 +148,7 @@ test('T · former Complete: every real selection preserved; no package metadata 
   const w = page({ auth: PEGGY, seed: { 'siyl.guest': JSON.stringify({ scope: { bangkok: true, vientiane: true, china: true, none: false, at: '2026-09-19T10:00:00.000Z', by: 'g-peggy' }, guests: {} }), 'siyl.bag': JSON.stringify(bag), 'siyl.package': JSON.stringify({ kind: 'complete', sig: 'x' }) } });
   const G = w.SIYL_GUEST, J = w.SIYL_JOURNEY;
   assert.equal(G.joinsAll(), true); assert.equal(J.relevantSegments().length, 10); deq(J.SEGMENTS.map((s) => J.state(s)), Array(10).fill('selected'));
-  deq(w.SIYL_BAG.get().map((x) => x.id), bag.map((x) => x.id), 'all ten lines as they were'); assert.equal(w.SIYL_BAG.total(), 2071);
+  deq(w.SIYL_BAG.get().map((x) => x.id), bag.map((x) => x.id), 'all ten lines as they were'); assert.equal(w.SIYL_BAG.total(), 2056);
   for (const k of ['packages', 'packagePlan', 'planSignature']) assert.equal(J[k], undefined); assert.doesNotMatch(src('your-journey.html'), /siyl\.package|data-package/, 'no package metadata is read by the page');
 });
 
