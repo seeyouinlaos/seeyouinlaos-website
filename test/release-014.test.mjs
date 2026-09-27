@@ -124,11 +124,11 @@ test('PARTY CAPACITY · the client offers only units that take the whole party, 
 /* ────────────────────────────── 3 · THE WAITING LIST ────────────────────────────── */
 test('WAITING LIST · positions by time; leaving renumbers; a hold resolves the line; a guest with a place cannot wait; the reset clears the line; Guest Relations see it', async () => {
   const rooms = new Rooms(doState());
-  await fill(rooms, 'kmg/italian');
-  const a = await wait(rooms, LINI, 'kmg', 1, ['kmg/italian']);
+  await fill(rooms, 'kmg/jinri-terrace-double');
+  const a = await wait(rooms, LINI, 'kmg', 1, ['kmg/jinri-terrace-double']);
   assert.equal(a.status, 200); assert.equal(a.d.waited, 'kmg'); assert.equal(a.d.waitlist.kmg.position, 1); assert.equal(a.d.waiting.kmg, 1);
   await new Promise((r) => setTimeout(r, 3));
-  const b = await wait(rooms, PEG, 'kmg', 2, ['kmg/italian', 'kmg/light-french']);
+  const b = await wait(rooms, PEG, 'kmg', 2, ['kmg/jinri-terrace-double', 'kmg/jinri-family-suite']);
   assert.equal(b.d.waitlist.kmg.position, 2); assert.equal(b.d.waitlist.kmg.size, 2); assert.equal(b.d.waiting.kmg, 2);
   assert.equal((await wait(rooms, PEG, 'kmg', 2)).d.waitlist.kmg.position, 2, 'waiting twice is one entry');
   assert.equal((await wait(rooms, PEG, 'bogus', 1)).status, 400, 'only a real stage');
@@ -140,7 +140,7 @@ test('WAITING LIST · positions by time; leaving renumbers; a hold resolves the 
   assert.equal((await unwait(rooms, LINI, 'kmg')).d.waitlist.kmg, undefined);
   assert.equal((await call(rooms, 'read', null, PEG)).d.waitlist.kmg.position, 1);
   /* a place held resolves the entry */
-  assert.equal((await join(rooms, PEG, 'kmg/light-french', 'A', 1, 'Peggy')).status, 200);
+  assert.equal((await join(rooms, PEG, 'kmg/jinri-family-suite', 'A', 1, 'Peggy')).status, 200);
   const after = (await call(rooms, 'read', null, PEG)).d;
   assert.equal(after.waitlist.kmg, undefined); assert.equal(after.waiting.kmg, undefined);
   assert.equal((await wait(rooms, PEG, 'kmg', 1)).status, 409, 'a guest with a place in the stage does not wait for it');

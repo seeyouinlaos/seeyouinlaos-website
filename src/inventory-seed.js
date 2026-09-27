@@ -84,21 +84,14 @@ export const SEED = {
      ('riverside/superior-window', six rooms, no holder at the time). The house is not a website product any more — no stock,
      no page, no card, no gallery, no price — and is not replaced. The wedding window is the Souphattra and the Guest House. */
 
-  /* ------------------------------------------------------------ Kunming */
-  'kmg/left-bank':      { unit: 'room', capacity: 1, occupancy: 4, held: 0, name: 'Left Bank French-Style King Room' },
-  /* THE PENANG SUITE SLEEPS FOUR (Owner, 27 Sep 2026): two bedrooms, and the website books it for up to its own occupancy —
-     four guests — instead of the two places of every other room */
-  'kmg/penang':         { unit: 'room', capacity: 1, occupancy: 4, honourOccupancy: true, held: 0, name: 'Penang Forest Nanyang-Style Deluxe Suite' },
-  'kmg/family-suite':   { unit: 'room', capacity: 1, occupancy: 2, held: 0, name: 'Family Suite' },
-  'kmg/seine':          { unit: 'room', capacity: 1, occupancy: 4, held: 0, name: 'Seine Evening Glow Loft Family Room' },
-  'kmg/smart-family':   { unit: 'room', capacity: 1, occupancy: 2, held: 0, name: 'Smart Family Room' },
-  'kmg/solarium':       { unit: 'room', capacity: 1, occupancy: 2, held: 0, name: 'Solarium Bath Suite' },   /* opened to everyone (Owner, Edit 5 · 18 Sep 2026) */
-  'kmg/standard-single':{ unit: 'room', capacity: 1, occupancy: 2, held: 0, name: 'Standard Single Room' },
-  'kmg/junting':        { unit: 'room', capacity: 1, occupancy: 2, held: 0, name: 'Junting City-View Loft' },
-  'kmg/mid-century':    { unit: 'room', capacity: 1, occupancy: 2, held: 0, name: 'Mid-century Amber Suite' },
-  'kmg/milano':         { unit: 'room', capacity: 1, occupancy: 2, held: 0, name: 'Milano Minimalist Loft' },
-  'kmg/italian':        { unit: 'room', capacity: 1, occupancy: 2, held: 0, name: 'Italian Style Suite' },
-  'kmg/light-french':   { unit: 'room', capacity: 1, occupancy: 2, held: 0, name: 'Light French Suite' },
+  /* ------------------------------------------------------------ Kunming
+     THE KUNMING HOUSE IS REPLACED (Owner, 27 Sep 2026 · Package F, 1 – 4 March): the former hotel is no longer bookable and its
+     twelve categories are gone — a place held in one of them belongs to a retired key and is nobody's (occupancies() skips it),
+     the guest chooses again and nothing is moved for them. The Yifangju Designer Courtyard, Jinma Biji Archway, Kunming Old
+     Street: the three rooms of the current Accommodation_Details, one room each, sleeping what the sheet says. */
+  'kmg/elegant-residence':    { unit: 'room', capacity: 1, occupancy: 1, held: 0, name: '001 · Elegant Residence Double Bed Room' },
+  'kmg/jinri-terrace-double': { unit: 'room', capacity: 1, occupancy: 2, held: 0, name: '002 · Jinri Building Scenic Terrace Tub Double' },
+  'kmg/jinri-family-suite':   { unit: 'room', capacity: 1, occupancy: 2, held: 0, name: '003 · Jinri Terrace Tub Family Suite' },
 
   /* ------------------------------------------------------------ Lijiang */
   'ljg/starry-sky':            { unit: 'room', capacity: 6, occupancy: 2, held: 0, name: 'Luye Starry Sky Suite · Immersive View' },

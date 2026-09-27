@@ -145,7 +145,7 @@
       ],
       transfer: [
         'Departure from Vientiane is at 15:50 on 1 March, after the Wedding Stay ends.',
-        'Arrival in Kunming is at 18:25 the same evening, in time for the first night at Wanxiang Yueju.'
+        'Arrival in Kunming is at 18:25 the same evening, in time for the first night at the Yifangju Designer Courtyard.'
       ],
       good: [
         'The flight, the times and both fares are the ones we have planned for everyone.',

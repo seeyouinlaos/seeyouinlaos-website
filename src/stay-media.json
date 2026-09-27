@@ -273,51 +273,45 @@
   "lead": "room",
   "leadWhy": "a residence, not a hotel: its living room is the house; the balcony frames are window views"
  },
- "wanxiang": {
-  "name": "Wanxiang Yueju · Kunming",
+ "yifangju": {
+  "name": "Yifangju Designer Courtyard · Kunming",
   "city": "Kunming",
   "images": [
    {
-    "src": "assets/images/journey/kunming-wanxiang-yueju-entrance.jpg",
+    "src": "assets/images/yifangju/jinri-terrace-double-1.webp",
     "kind": "exterior",
-    "caption": "The entrance at night",
-    "source": "Owner Drive 023 - Hotel - Wanxiang Yueju Kunming"
+    "caption": "A private terrace at dusk, above the lit old street",
+    "source": "Owner Drive 800 · the Yifangju Designer Courtyard room folders (27 Sep 2026) · 002"
    },
    {
-    "src": "assets/images/journey/kunming-01.jpg",
+    "src": "assets/images/yifangju/jinri-family-suite-2.webp",
+    "kind": "grounds",
+    "caption": "A terrace towards the Jinri Building",
+    "source": "Owner Drive 800 · the Yifangju Designer Courtyard room folders (27 Sep 2026) · 003"
+   },
+   {
+    "src": "assets/images/yifangju/jinri-family-suite-1.webp",
     "kind": "suite",
-    "caption": "A designer suite",
-    "source": "Owner Drive 023 - Hotel - Wanxiang Yueju Kunming"
+    "caption": "The Jinri Terrace Tub Family Suite",
+    "source": "Owner Drive 800 · the Yifangju Designer Courtyard room folders (27 Sep 2026) · 003"
    },
    {
-    "src": "assets/images/journey/kunming-02.jpg",
+    "src": "assets/images/yifangju/jinri-terrace-double-2.webp",
     "kind": "suite",
-    "caption": "The mezzanine suite",
-    "source": "Owner Drive 023 - Hotel - Wanxiang Yueju Kunming"
+    "caption": "The Jinri Building Scenic Terrace Tub Double",
+    "source": "Owner Drive 800 · the Yifangju Designer Courtyard room folders (27 Sep 2026) · 002"
    },
    {
-    "src": "assets/images/journey/kunming-03.jpg",
+    "src": "assets/images/yifangju/jinri-family-suite-6.webp",
     "kind": "suite",
-    "caption": "The bath and the city",
-    "source": "Owner Drive 023 - Hotel - Wanxiang Yueju Kunming"
+    "caption": "A bathroom with a freestanding tub",
+    "source": "Owner Drive 800 · the Yifangju Designer Courtyard room folders (27 Sep 2026) · 003"
    },
    {
-    "src": "assets/images/kunming/wanxiang-a-bedroom-with-a-city-view.jpg",
+    "src": "assets/images/yifangju/elegant-residence-1.webp",
     "kind": "room",
-    "caption": "A bedroom with a city view",
-    "source": "Owner Drive 044 (Media Asset Agent, 26 Sep 2026)"
-   },
-   {
-    "src": "assets/images/kunming/wanxiang-a-bathtub-by-the-window.jpg",
-    "kind": "suite",
-    "caption": "A bathtub by the window",
-    "source": "Owner Drive 044 (Media Asset Agent, 26 Sep 2026)"
-   },
-   {
-    "src": "assets/images/kunming/wanxiang-the-entrance-of-the-hotel.jpg",
-    "kind": "exterior",
-    "caption": "The entrance of the hotel",
-    "source": "Owner Drive 044 (Media Asset Agent, 26 Sep 2026)"
+    "caption": "The Elegant Residence Double Bed Room",
+    "source": "Owner Drive 800 · the Yifangju Designer Courtyard room folders (27 Sep 2026) · 001"
    }
   ]
  },

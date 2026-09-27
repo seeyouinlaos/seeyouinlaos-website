@@ -92,8 +92,8 @@ test('A NOT JOINING / B JOINING · from the other side it is 1 as well; BOTH NOT
   await h.answer(h.A, NONE); await h.answer(h.B, ALL);
   assert.equal((await h.draft(h.B)).d.travel.need.prewed, 1, 'B books for B alone');
   assert.deepEqual(plain((await h.draft(h.B)).d.travel.members), { G501: 'not-joining' });
-  await h.join(h.B, 'kmg/smart-family', 'A', 2);
-  assert.deepEqual(await h.occ(), ['G502@kmg/smart-family|A']);
+  await h.join(h.B, 'kmg/jinri-terrace-double', 'A', 2);
+  assert.deepEqual(await h.occ(), ['G502@kmg/jinri-terrace-double|A']);
   /* both not joining: the joining flow offers nothing — no stage is part of the trip */
   const w = page({ auth: session({ guestId: 'G501', partyId: 'INV-501', partyName: 'A & B', fullName: 'A Test', preferredName: 'A', members: [{ guestId: 'G501', preferredName: 'A' }, { guestId: 'G502', preferredName: 'B' }] }) });
   w.SIYL_GUEST.setScope({ none: true });

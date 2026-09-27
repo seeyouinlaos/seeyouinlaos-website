@@ -5009,6 +5009,637 @@
    "status": "partial",
    "syncedAt": "2026-09-26T20:00:00Z"
   },
+  "800": {
+   "title": "800 - Hotel - Wanxiang Yueju Kunming",
+   "place": "The Journey · Package F · the Yifangju Designer Courtyard, Kunming — its three rooms (assets/rooms-data.js · kunming) and its house gallery (src/stay-media.json · yifangju)",
+   "slot": {
+    "route": "/room.html"
+   },
+   "role": "room-gallery",
+   "order": "one folder per room, the lead first (Owner, 27 Sep 2026)",
+   "items": [
+    {
+     "driveId": "1gMnUlKFzIXJgGOfZwrNkU0iYrj4jJJQo",
+     "title": "1mc1e12000rm18ps8F5F8_W_1280_853_R5.webp",
+     "path": "800 - Hotel - Wanxiang Yueju Kunming/001 - Elegant Residence Double Bed Room",
+     "mimeType": "image/webp",
+     "size": 52480,
+     "modifiedTime": "2026-09-27T18:51:57.223Z",
+     "kind": "image",
+     "status": "synced",
+     "asset": "assets/images/yifangju/elegant-residence-1.webp",
+     "slots": [
+      {
+       "route": "/room.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      },
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "syncedAt": "2026-09-27T21:00:00Z",
+     "how": "copied bit for bit (the Owner's WebP, no re-encode)",
+     "w": 1280,
+     "h": 853,
+     "display": {
+      "w": 1280,
+      "h": 853
+     },
+     "order": 1,
+     "lead": true
+    },
+    {
+     "driveId": "1VWrFom-O_OcDGy2MKtnJZh_kS90rEP_-",
+     "title": "1mc7112000rm18u664765_W_1280_853_R5.webp",
+     "path": "800 - Hotel - Wanxiang Yueju Kunming/001 - Elegant Residence Double Bed Room",
+     "mimeType": "image/webp",
+     "size": 74556,
+     "modifiedTime": "2026-09-27T18:51:48.953Z",
+     "kind": "image",
+     "status": "synced",
+     "asset": "assets/images/yifangju/elegant-residence-2.webp",
+     "slots": [
+      {
+       "route": "/room.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "syncedAt": "2026-09-27T21:00:00Z",
+     "how": "copied bit for bit (the Owner's WebP, no re-encode)",
+     "w": 1280,
+     "h": 853,
+     "display": {
+      "w": 1280,
+      "h": 853
+     },
+     "order": 2,
+     "lead": false
+    },
+    {
+     "driveId": "1RudbmCn-0BmGRiu4P9JqVXG_Dp4iSbav",
+     "title": "1mc4212000rm18auqB3C6_W_1280_853_R5.webp",
+     "path": "800 - Hotel - Wanxiang Yueju Kunming/001 - Elegant Residence Double Bed Room",
+     "mimeType": "image/webp",
+     "size": 45718,
+     "modifiedTime": "2026-09-27T18:51:53.201Z",
+     "kind": "image",
+     "status": "synced",
+     "asset": "assets/images/yifangju/elegant-residence-3.webp",
+     "slots": [
+      {
+       "route": "/room.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "syncedAt": "2026-09-27T21:00:00Z",
+     "how": "copied bit for bit (the Owner's WebP, no re-encode)",
+     "w": 1280,
+     "h": 853,
+     "display": {
+      "w": 1280,
+      "h": 853
+     },
+     "order": 3,
+     "lead": false
+    },
+    {
+     "driveId": "13h6O8bxVdfae-oBvyzeD4uHgBP15EXN1",
+     "title": "1mc1312000rm190zrC8F0_W_1280_853_R5.webp",
+     "path": "800 - Hotel - Wanxiang Yueju Kunming/001 - Elegant Residence Double Bed Room",
+     "mimeType": "image/webp",
+     "size": 113664,
+     "modifiedTime": "2026-09-27T18:52:00.570Z",
+     "kind": "image",
+     "status": "synced",
+     "asset": "assets/images/yifangju/elegant-residence-4.webp",
+     "slots": [
+      {
+       "route": "/room.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "syncedAt": "2026-09-27T21:00:00Z",
+     "how": "copied bit for bit (the Owner's WebP, no re-encode)",
+     "w": 1280,
+     "h": 853,
+     "display": {
+      "w": 1280,
+      "h": 853
+     },
+     "order": 4,
+     "lead": false
+    },
+    {
+     "driveId": "1oPTN7gpdirKsenPEoJM_9ZjAsIPZBmP0",
+     "title": "1mc5712000rm18qri0587_W_1280_853_R5.webp",
+     "path": "800 - Hotel - Wanxiang Yueju Kunming/001 - Elegant Residence Double Bed Room",
+     "mimeType": "image/webp",
+     "size": 81912,
+     "modifiedTime": "2026-09-27T18:52:03.834Z",
+     "kind": "image",
+     "status": "synced",
+     "asset": "assets/images/yifangju/elegant-residence-5.webp",
+     "slots": [
+      {
+       "route": "/room.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "syncedAt": "2026-09-27T21:00:00Z",
+     "how": "copied bit for bit (the Owner's WebP, no re-encode)",
+     "w": 1280,
+     "h": 853,
+     "display": {
+      "w": 1280,
+      "h": 853
+     },
+     "order": 5,
+     "lead": false
+    },
+    {
+     "driveId": "1kdl9MOZ7_n_pGqLy5KDa3dRjplqHEv8f",
+     "title": "1mc4z12000rm18tqqAF9F_W_1280_853_R5.webp",
+     "path": "800 - Hotel - Wanxiang Yueju Kunming/001 - Elegant Residence Double Bed Room",
+     "mimeType": "image/webp",
+     "size": 58616,
+     "modifiedTime": "2026-09-27T18:52:06.973Z",
+     "kind": "image",
+     "status": "synced",
+     "asset": "assets/images/yifangju/elegant-residence-6.webp",
+     "slots": [
+      {
+       "route": "/room.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "syncedAt": "2026-09-27T21:00:00Z",
+     "how": "copied bit for bit (the Owner's WebP, no re-encode)",
+     "w": 1280,
+     "h": 853,
+     "display": {
+      "w": 1280,
+      "h": 853
+     },
+     "order": 6,
+     "lead": false
+    },
+    {
+     "driveId": "1SbTh_KgJPndJpEG_yIY_W2MMoU1S-_Mr",
+     "title": "1mc1q12000rm18ifz6523_W_1280_853_R5.webp",
+     "path": "800 - Hotel - Wanxiang Yueju Kunming/001 - Elegant Residence Double Bed Room",
+     "mimeType": "image/webp",
+     "size": 42524,
+     "modifiedTime": "2026-09-27T18:52:10.091Z",
+     "kind": "image",
+     "status": "synced",
+     "asset": "assets/images/yifangju/elegant-residence-7.webp",
+     "slots": [
+      {
+       "route": "/room.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "syncedAt": "2026-09-27T21:00:00Z",
+     "how": "copied bit for bit (the Owner's WebP, no re-encode)",
+     "w": 1280,
+     "h": 853,
+     "display": {
+      "w": 1280,
+      "h": 853
+     },
+     "order": 7,
+     "lead": false
+    },
+    {
+     "driveId": "1rdFs7x3I5vwNdLLzdNvD1nCkA_gzTweQ",
+     "title": "1mc2m12000rm1o40x2A29_W_1280_853_R5.webp",
+     "path": "800 - Hotel - Wanxiang Yueju Kunming/002 - Jinri Building Scenic Terrace Tub Double",
+     "mimeType": "image/webp",
+     "size": 94510,
+     "modifiedTime": "2026-09-27T18:53:35.634Z",
+     "kind": "image",
+     "status": "synced",
+     "asset": "assets/images/yifangju/jinri-terrace-double-1.webp",
+     "slots": [
+      {
+       "route": "/room.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      },
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "syncedAt": "2026-09-27T21:00:00Z",
+     "how": "copied bit for bit (the Owner's WebP, no re-encode)",
+     "w": 1280,
+     "h": 853,
+     "display": {
+      "w": 1280,
+      "h": 853
+     },
+     "order": 1,
+     "lead": true
+    },
+    {
+     "driveId": "1cn8L5qTyMm4F7VwzjmOKTQnXWBXa3Lz_",
+     "title": "1mc3012000rm1oi6uBBFD_W_1280_853_R5.webp",
+     "path": "800 - Hotel - Wanxiang Yueju Kunming/002 - Jinri Building Scenic Terrace Tub Double",
+     "mimeType": "image/webp",
+     "size": 50364,
+     "modifiedTime": "2026-09-27T18:53:31.186Z",
+     "kind": "image",
+     "status": "synced",
+     "asset": "assets/images/yifangju/jinri-terrace-double-2.webp",
+     "slots": [
+      {
+       "route": "/room.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      },
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "syncedAt": "2026-09-27T21:00:00Z",
+     "how": "copied bit for bit (the Owner's WebP, no re-encode)",
+     "w": 1280,
+     "h": 853,
+     "display": {
+      "w": 1280,
+      "h": 853
+     },
+     "order": 2,
+     "lead": false
+    },
+    {
+     "driveId": "1d-jWB9fzjOmq7gO3daAByM_OlvLnqWMp",
+     "title": "1mc3112000rm1olpn3CCE_W_1280_853_R5.webp",
+     "path": "800 - Hotel - Wanxiang Yueju Kunming/002 - Jinri Building Scenic Terrace Tub Double",
+     "mimeType": "image/webp",
+     "size": 57032,
+     "modifiedTime": "2026-09-27T18:53:38.701Z",
+     "kind": "image",
+     "status": "synced",
+     "asset": "assets/images/yifangju/jinri-terrace-double-3.webp",
+     "slots": [
+      {
+       "route": "/room.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "syncedAt": "2026-09-27T21:00:00Z",
+     "how": "copied bit for bit (the Owner's WebP, no re-encode)",
+     "w": 1280,
+     "h": 853,
+     "display": {
+      "w": 1280,
+      "h": 853
+     },
+     "order": 3,
+     "lead": false
+    },
+    {
+     "driveId": "1x87j6qx7kn-cUwvr0W7dImW_S8BjqyW9",
+     "title": "1mc4e12000rm1o2h3A702_W_1280_853_R5.webp",
+     "path": "800 - Hotel - Wanxiang Yueju Kunming/002 - Jinri Building Scenic Terrace Tub Double",
+     "mimeType": "image/webp",
+     "size": 34588,
+     "modifiedTime": "2026-09-27T18:53:42.355Z",
+     "kind": "image",
+     "status": "synced",
+     "asset": "assets/images/yifangju/jinri-terrace-double-4.webp",
+     "slots": [
+      {
+       "route": "/room.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "syncedAt": "2026-09-27T21:00:00Z",
+     "how": "copied bit for bit (the Owner's WebP, no re-encode)",
+     "w": 1280,
+     "h": 853,
+     "display": {
+      "w": 1280,
+      "h": 853
+     },
+     "order": 4,
+     "lead": false
+    },
+    {
+     "driveId": "1QHABp-zf8pkCcne7VVfDvNw90em6wXhK",
+     "title": "1mc3n12000rm1o5j96769_W_1280_853_R5.webp",
+     "path": "800 - Hotel - Wanxiang Yueju Kunming/002 - Jinri Building Scenic Terrace Tub Double",
+     "mimeType": "image/webp",
+     "size": 43494,
+     "modifiedTime": "2026-09-27T18:53:45.641Z",
+     "kind": "image",
+     "status": "synced",
+     "asset": "assets/images/yifangju/jinri-terrace-double-5.webp",
+     "slots": [
+      {
+       "route": "/room.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "syncedAt": "2026-09-27T21:00:00Z",
+     "how": "copied bit for bit (the Owner's WebP, no re-encode)",
+     "w": 1280,
+     "h": 853,
+     "display": {
+      "w": 1280,
+      "h": 853
+     },
+     "order": 5,
+     "lead": false
+    },
+    {
+     "driveId": "1GFzklBTmDszcgxqOPpyGmYu5BBFQj97m",
+     "title": "1mc2a12000rm1nx1l062E_W_1280_853_R5.webp",
+     "path": "800 - Hotel - Wanxiang Yueju Kunming/002 - Jinri Building Scenic Terrace Tub Double",
+     "mimeType": "image/webp",
+     "size": 51068,
+     "modifiedTime": "2026-09-27T18:53:49.541Z",
+     "kind": "image",
+     "status": "synced",
+     "asset": "assets/images/yifangju/jinri-terrace-double-6.webp",
+     "slots": [
+      {
+       "route": "/room.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "syncedAt": "2026-09-27T21:00:00Z",
+     "how": "copied bit for bit (the Owner's WebP, no re-encode)",
+     "w": 1280,
+     "h": 853,
+     "display": {
+      "w": 1280,
+      "h": 853
+     },
+     "order": 6,
+     "lead": false
+    },
+    {
+     "driveId": "1yLoJv9wacIYy7itfhUw4_J9paNRPZJz5",
+     "title": "1mc2j12000rm1onyg4081_W_1280_853_R5.webp",
+     "path": "800 - Hotel - Wanxiang Yueju Kunming/002 - Jinri Building Scenic Terrace Tub Double",
+     "mimeType": "image/webp",
+     "size": 53942,
+     "modifiedTime": "2026-09-27T18:53:52.987Z",
+     "kind": "image",
+     "status": "synced",
+     "asset": "assets/images/yifangju/jinri-terrace-double-7.webp",
+     "slots": [
+      {
+       "route": "/room.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "syncedAt": "2026-09-27T21:00:00Z",
+     "how": "copied bit for bit (the Owner's WebP, no re-encode)",
+     "w": 1280,
+     "h": 853,
+     "display": {
+      "w": 1280,
+      "h": 853
+     },
+     "order": 7,
+     "lead": false
+    },
+    {
+     "driveId": "13jwnxnDgkSBo5NN2uoYL4hr46E6AQD4x",
+     "title": "1mc4m12000rm1nfslF7DF_W_1280_853_R5.webp",
+     "path": "800 - Hotel - Wanxiang Yueju Kunming/003 - Jinri Terrace Tub Family Suite",
+     "mimeType": "image/webp",
+     "size": 55924,
+     "modifiedTime": "2026-09-27T18:54:31.484Z",
+     "kind": "image",
+     "status": "synced",
+     "asset": "assets/images/yifangju/jinri-family-suite-1.webp",
+     "slots": [
+      {
+       "route": "/room.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      },
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "syncedAt": "2026-09-27T21:00:00Z",
+     "how": "copied bit for bit (the Owner's WebP, no re-encode)",
+     "w": 1280,
+     "h": 853,
+     "display": {
+      "w": 1280,
+      "h": 853
+     },
+     "order": 1,
+     "lead": true
+    },
+    {
+     "driveId": "1RE76ht8_69Y-L-gUK_xtx5Eh93uKybKp",
+     "title": "1mc4512000rm1nws116D0_W_1280_853_R5.webp",
+     "path": "800 - Hotel - Wanxiang Yueju Kunming/003 - Jinri Terrace Tub Family Suite",
+     "mimeType": "image/webp",
+     "size": 124932,
+     "modifiedTime": "2026-09-27T18:54:34.857Z",
+     "kind": "image",
+     "status": "synced",
+     "asset": "assets/images/yifangju/jinri-family-suite-2.webp",
+     "slots": [
+      {
+       "route": "/room.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      },
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "syncedAt": "2026-09-27T21:00:00Z",
+     "how": "copied bit for bit (the Owner's WebP, no re-encode)",
+     "w": 1280,
+     "h": 853,
+     "display": {
+      "w": 1280,
+      "h": 853
+     },
+     "order": 2,
+     "lead": false
+    },
+    {
+     "driveId": "12411rr0cU_ua42M3qvF1EGVgLenHlkR7",
+     "title": "1mc4b12000rm1nhoyC50C_W_1280_853_R5.webp",
+     "path": "800 - Hotel - Wanxiang Yueju Kunming/003 - Jinri Terrace Tub Family Suite",
+     "mimeType": "image/webp",
+     "size": 98192,
+     "modifiedTime": "2026-09-27T18:54:40.560Z",
+     "kind": "image",
+     "status": "synced",
+     "asset": "assets/images/yifangju/jinri-family-suite-3.webp",
+     "slots": [
+      {
+       "route": "/room.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "syncedAt": "2026-09-27T21:00:00Z",
+     "how": "copied bit for bit (the Owner's WebP, no re-encode)",
+     "w": 1280,
+     "h": 853,
+     "display": {
+      "w": 1280,
+      "h": 853
+     },
+     "order": 3,
+     "lead": false
+    },
+    {
+     "driveId": "1DwDF3DwIRJX0-EO5E16hDRB87a21lL_T",
+     "title": "1mc0j12000rm1nr790A1E_W_1280_853_R5.webp",
+     "path": "800 - Hotel - Wanxiang Yueju Kunming/003 - Jinri Terrace Tub Family Suite",
+     "mimeType": "image/webp",
+     "size": 47666,
+     "modifiedTime": "2026-09-27T18:54:44.067Z",
+     "kind": "image",
+     "status": "synced",
+     "asset": "assets/images/yifangju/jinri-family-suite-4.webp",
+     "slots": [
+      {
+       "route": "/room.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "syncedAt": "2026-09-27T21:00:00Z",
+     "how": "copied bit for bit (the Owner's WebP, no re-encode)",
+     "w": 1280,
+     "h": 853,
+     "display": {
+      "w": 1280,
+      "h": 853
+     },
+     "order": 4,
+     "lead": false
+    },
+    {
+     "driveId": "1UOH6rQDezdJhsknRjk_R7nfL_YbQqO6I",
+     "title": "1mc6g12000rm1o0xg13F7_W_1280_853_R5.webp",
+     "path": "800 - Hotel - Wanxiang Yueju Kunming/003 - Jinri Terrace Tub Family Suite",
+     "mimeType": "image/webp",
+     "size": 52240,
+     "modifiedTime": "2026-09-27T18:54:47.737Z",
+     "kind": "image",
+     "status": "synced",
+     "asset": "assets/images/yifangju/jinri-family-suite-5.webp",
+     "slots": [
+      {
+       "route": "/room.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "syncedAt": "2026-09-27T21:00:00Z",
+     "how": "copied bit for bit (the Owner's WebP, no re-encode)",
+     "w": 1280,
+     "h": 853,
+     "display": {
+      "w": 1280,
+      "h": 853
+     },
+     "order": 5,
+     "lead": false
+    },
+    {
+     "driveId": "1vF7lgadtfRhFZCZ7DT-5nDI1MVe5nujF",
+     "title": "1mc4z12000rm1n7eq5D9A_W_1280_853_R5.webp",
+     "path": "800 - Hotel - Wanxiang Yueju Kunming/003 - Jinri Terrace Tub Family Suite",
+     "mimeType": "image/webp",
+     "size": 40226,
+     "modifiedTime": "2026-09-27T18:54:51.633Z",
+     "kind": "image",
+     "status": "synced",
+     "asset": "assets/images/yifangju/jinri-family-suite-6.webp",
+     "slots": [
+      {
+       "route": "/room.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      },
+      {
+       "route": "/journeys.html",
+       "role": "product-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "syncedAt": "2026-09-27T21:00:00Z",
+     "how": "copied bit for bit (the Owner's WebP, no re-encode)",
+     "w": 1280,
+     "h": 853,
+     "display": {
+      "w": 1280,
+      "h": 853
+     },
+     "order": 6,
+     "lead": false
+    },
+    {
+     "driveId": "1V3yUil-gD9LK16ePsMw7PJOVsQDpnQYS",
+     "title": "1mc0d12000rm1nigq612C_W_1280_853_R5.webp",
+     "path": "800 - Hotel - Wanxiang Yueju Kunming/003 - Jinri Terrace Tub Family Suite",
+     "mimeType": "image/webp",
+     "size": 42596,
+     "modifiedTime": "2026-09-27T18:54:55.495Z",
+     "kind": "image",
+     "status": "synced",
+     "asset": "assets/images/yifangju/jinri-family-suite-7.webp",
+     "slots": [
+      {
+       "route": "/room.html",
+       "role": "room-gallery",
+       "focal": "50% 50%"
+      }
+     ],
+     "syncedAt": "2026-09-27T21:00:00Z",
+     "how": "copied bit for bit (the Owner's WebP, no re-encode)",
+     "w": 1280,
+     "h": 853,
+     "display": {
+      "w": 1280,
+      "h": 853
+     },
+     "order": 7,
+     "lead": false
+    }
+   ],
+   "status": "synced",
+   "syncedAt": "2026-09-27T21:00:00Z"
+  },
   "001": {
    "title": "001 - Main -  Hero ",
    "formerTitle": "000 - Hero Image",
@@ -10040,8 +10671,8 @@
      "w": 960,
      "h": 576,
      "aspect": 1.667,
-     "status": "synced",
-     "note": "published by \"Synchronize media.\" on 26 Sep 2026 (the same photograph in the new library)",
+     "status": "excluded",
+     "note": "the Kunming house was replaced (Owner, 27 Sep 2026): the former hotel is no longer bookable; the Yifangju Designer Courtyard stands in collection 800",
      "asset": "assets/images/kunming/wanxiang-the-entrance-of-the-hotel.jpg",
      "match": {
       "bits": 2
@@ -10087,7 +10718,7 @@
      "w": 1137,
      "h": 853,
      "aspect": 1.333,
-     "status": "synced",
+     "status": "excluded",
      "asset": "assets/images/kunming/penang-5.jpg",
      "match": {
       "bits": 11,
@@ -10112,7 +10743,8 @@
        "x": 0,
        "y": 0.3083
       }
-     }
+     },
+     "note": "the Kunming house was replaced (Owner, 27 Sep 2026): the former hotel is no longer bookable; the Yifangju Designer Courtyard stands in collection 800"
     },
     {
      "driveId": "1-CerB6jYmPw3lqZM0Mc5WktANo0riMA6",
@@ -10125,8 +10757,8 @@
      "w": 1137,
      "h": 853,
      "aspect": 1.333,
-     "status": "synced",
-     "note": "published by \"Synchronize media.\" on 26 Sep 2026 (the same photograph in the new library)",
+     "status": "excluded",
+     "note": "the Kunming house was replaced (Owner, 27 Sep 2026): the former hotel is no longer bookable; the Yifangju Designer Courtyard stands in collection 800",
      "asset": "assets/images/kunming/wanxiang-a-bedroom-with-a-city-view.jpg",
      "match": {
       "bits": 1
@@ -10163,7 +10795,7 @@
      "w": 1024,
      "h": 683,
      "aspect": 1.499,
-     "status": "synced",
+     "status": "excluded",
      "asset": "assets/images/kunming/solarium-5.jpg",
      "match": {
       "bits": 6,
@@ -10188,7 +10820,8 @@
        "x": 0.0314,
        "y": 0.0468
       }
-     }
+     },
+     "note": "the Kunming house was replaced (Owner, 27 Sep 2026): the former hotel is no longer bookable; the Yifangju Designer Courtyard stands in collection 800"
     },
     {
      "driveId": "1cV5V6Rj0_f2DG4cr8CiLLiQgvNGUCVYL",
@@ -10201,7 +10834,7 @@
      "w": 1024,
      "h": 768,
      "aspect": 1.333,
-     "status": "synced",
+     "status": "excluded",
      "asset": "assets/images/kunming/standardsingle-3.jpg",
      "match": {
       "bits": 14,
@@ -10226,7 +10859,8 @@
        "x": 0.0502,
        "y": 0.1415
       }
-     }
+     },
+     "note": "the Kunming house was replaced (Owner, 27 Sep 2026): the former hotel is no longer bookable; the Yifangju Designer Courtyard stands in collection 800"
     },
     {
      "driveId": "18bWFbNMv0aiikgJcgHTReLFtwU8awj5_",
@@ -10239,7 +10873,7 @@
      "w": 1024,
      "h": 683,
      "aspect": 1.499,
-     "status": "synced",
+     "status": "excluded",
      "asset": "assets/images/kunming/italian-3.jpg",
      "match": {
       "bits": 12,
@@ -10264,7 +10898,8 @@
        "x": 0.0892,
        "y": 0.076
       }
-     }
+     },
+     "note": "the Kunming house was replaced (Owner, 27 Sep 2026): the former hotel is no longer bookable; the Yifangju Designer Courtyard stands in collection 800"
     },
     {
      "driveId": "1c8lwFoyMBjiSXFPpakaMihnholpP5NMD",
@@ -10277,8 +10912,8 @@
      "w": 960,
      "h": 576,
      "aspect": 1.667,
-     "status": "synced",
-     "note": "published by \"Synchronize media.\" on 26 Sep 2026 (the same photograph in the new library)",
+     "status": "excluded",
+     "note": "the Kunming house was replaced (Owner, 27 Sep 2026): the former hotel is no longer bookable; the Yifangju Designer Courtyard stands in collection 800",
      "asset": "assets/images/kunming/wanxiang-a-bathtub-by-the-window.jpg",
      "match": {
       "bits": 1
@@ -10324,7 +10959,7 @@
      "w": 500,
      "h": 375,
      "aspect": 1.333,
-     "status": "synced",
+     "status": "excluded",
      "asset": "assets/images/kunming/smartfamily-5.jpg",
      "match": {
       "bits": 21,
@@ -10349,7 +10984,8 @@
        "x": 0.1239,
        "y": 0.2101
       }
-     }
+     },
+     "note": "the Kunming house was replaced (Owner, 27 Sep 2026): the former hotel is no longer bookable; the Yifangju Designer Courtyard stands in collection 800"
     },
     {
      "driveId": "1Fc5ZdUcSWH8hwpGYd7N5A-qF0B9FGxNv",
@@ -10362,12 +10998,13 @@
      "w": 2048,
      "h": 848,
      "aspect": 2.415,
-     "status": "pending",
-     "note": "a slot the website already has — published by the next \"Synchronize media.\" (or \"Synchronize <no>.\") after visual composition, focal points and Media QA"
+     "status": "excluded",
+     "note": "the Kunming house was replaced (Owner, 27 Sep 2026): the former hotel is no longer bookable; the Yifangju Designer Courtyard stands in collection 800"
     }
    ],
-   "status": "partial",
-   "syncedAt": "2026-09-26T13:30:00Z"
+   "status": "retired",
+   "syncedAt": "2026-09-26T13:30:00Z",
+   "note": "the Kunming house was replaced (Owner, 27 Sep 2026): the former hotel is no longer bookable; the Yifangju Designer Courtyard stands in collection 800"
   },
   "027": {
    "title": "027 - The Journey - Travel · Kunming → Lijiang",
@@ -12901,7 +13538,7 @@
      "size": 137808,
      "modifiedTime": "2026-09-26T11:23:51.415Z",
      "kind": "image",
-     "status": "synced",
+     "status": "excluded",
      "asset": "assets/images/kunming/wanxiang-the-entrance-of-the-hotel.jpg",
      "slots": [
       {
@@ -12935,7 +13572,8 @@
        "at": "2026-09-26",
        "focal": "50% 50%"
       }
-     }
+     },
+     "note": "the Kunming house was replaced (Owner, 27 Sep 2026): the former hotel is no longer bookable; the Yifangju Designer Courtyard stands in collection 800"
     },
     {
      "driveId": "1Cm0ViS63VlI1QjmFNQttStCs-iBkK2Vf",
@@ -12945,7 +13583,7 @@
      "size": 82234,
      "modifiedTime": "2026-09-26T11:24:00.368Z",
      "kind": "image",
-     "status": "synced",
+     "status": "excluded",
      "asset": "assets/images/kunming/penang-5.jpg",
      "slots": [],
      "syncedAt": "2026-09-26T20:00:00Z",
@@ -12954,7 +13592,8 @@
       "bits": 11
      },
      "w": 1137,
-     "h": 853
+     "h": 853,
+     "note": "the Kunming house was replaced (Owner, 27 Sep 2026): the former hotel is no longer bookable; the Yifangju Designer Courtyard stands in collection 800"
     },
     {
      "driveId": "1-ORw9Oj9jSeyolzE6kg1yRqyqmyDQ9qe",
@@ -12964,7 +13603,7 @@
      "size": 62850,
      "modifiedTime": "2026-09-26T11:24:05.603Z",
      "kind": "image",
-     "status": "synced",
+     "status": "excluded",
      "asset": "assets/images/kunming/wanxiang-a-bedroom-with-a-city-view.jpg",
      "slots": [
       {
@@ -12989,7 +13628,8 @@
        "w": 0.9137,
        "h": 0.4658
       }
-     }
+     },
+     "note": "the Kunming house was replaced (Owner, 27 Sep 2026): the former hotel is no longer bookable; the Yifangju Designer Courtyard stands in collection 800"
     },
     {
      "driveId": "1DQLABaYQYspTDcFe_HsastPUcRtK4PaD",
@@ -12999,7 +13639,7 @@
      "size": 71505,
      "modifiedTime": "2026-09-26T11:24:10.877Z",
      "kind": "image",
-     "status": "synced",
+     "status": "excluded",
      "asset": "assets/images/kunming/solarium-5.jpg",
      "slots": [],
      "syncedAt": "2026-09-26T20:00:00Z",
@@ -13008,7 +13648,8 @@
       "bits": 6
      },
      "w": 1024,
-     "h": 683
+     "h": 683,
+     "note": "the Kunming house was replaced (Owner, 27 Sep 2026): the former hotel is no longer bookable; the Yifangju Designer Courtyard stands in collection 800"
     },
     {
      "driveId": "1P5MFu_BRa2Nwbs685Kys_qyDq3XIv_xS",
@@ -13018,7 +13659,7 @@
      "size": 68381,
      "modifiedTime": "2026-09-26T11:24:15.901Z",
      "kind": "image",
-     "status": "synced",
+     "status": "excluded",
      "asset": "assets/images/kunming/standardsingle-3.jpg",
      "slots": [],
      "syncedAt": "2026-09-26T20:00:00Z",
@@ -13027,7 +13668,8 @@
       "bits": 14
      },
      "w": 1024,
-     "h": 768
+     "h": 768,
+     "note": "the Kunming house was replaced (Owner, 27 Sep 2026): the former hotel is no longer bookable; the Yifangju Designer Courtyard stands in collection 800"
     },
     {
      "driveId": "1F9CU0aKmSSXn4_5hQk0rgf9k7LZ75ie8",
@@ -13037,7 +13679,7 @@
      "size": 89413,
      "modifiedTime": "2026-09-26T11:24:22.040Z",
      "kind": "image",
-     "status": "synced",
+     "status": "excluded",
      "asset": "assets/images/kunming/italian-3.jpg",
      "slots": [],
      "syncedAt": "2026-09-26T20:00:00Z",
@@ -13046,7 +13688,8 @@
       "bits": 12
      },
      "w": 1024,
-     "h": 683
+     "h": 683,
+     "note": "the Kunming house was replaced (Owner, 27 Sep 2026): the former hotel is no longer bookable; the Yifangju Designer Courtyard stands in collection 800"
     },
     {
      "driveId": "1AHa9t9IhT6KyHfn9etNgzNGyb-5GI-BT",
@@ -13056,7 +13699,7 @@
      "size": 71007,
      "modifiedTime": "2026-09-26T11:24:26.610Z",
      "kind": "image",
-     "status": "synced",
+     "status": "excluded",
      "asset": "assets/images/kunming/wanxiang-a-bathtub-by-the-window.jpg",
      "slots": [
       {
@@ -13090,7 +13733,8 @@
        "at": "2026-09-26",
        "focal": "50% 50%"
       }
-     }
+     },
+     "note": "the Kunming house was replaced (Owner, 27 Sep 2026): the former hotel is no longer bookable; the Yifangju Designer Courtyard stands in collection 800"
     },
     {
      "driveId": "1HXymneD41Zbe6kFFZIwCqpyg0e2oyJQ2",
@@ -13100,7 +13744,7 @@
      "size": 22740,
      "modifiedTime": "2026-09-26T11:24:31.038Z",
      "kind": "image",
-     "status": "synced",
+     "status": "excluded",
      "asset": "assets/images/kunming/smartfamily-5.jpg",
      "slots": [],
      "syncedAt": "2026-09-26T20:00:00Z",
@@ -13109,7 +13753,8 @@
       "bits": 21
      },
      "w": 500,
-     "h": 375
+     "h": 375,
+     "note": "the Kunming house was replaced (Owner, 27 Sep 2026): the former hotel is no longer bookable; the Yifangju Designer Courtyard stands in collection 800"
     },
     {
      "driveId": "1EJSTKVzIeY-hV4dx8Z0aXHUozGpY1isq",
@@ -13120,11 +13765,12 @@
      "modifiedTime": "2026-09-26T11:24:35.081Z",
      "kind": "image",
      "status": "excluded",
-     "note": "not published: food, drink, a menu or a chef portrait (the gallery taxonomy: a restaurant, café or bar is shown by its place, never its dishes), a map, or a near-duplicate of a frame already shown — reviewed by eye, 26 Sep 2026"
+     "note": "the Kunming house was replaced (Owner, 27 Sep 2026): the former hotel is no longer bookable; the Yifangju Designer Courtyard stands in collection 800"
     }
    ],
-   "status": "synced",
-   "syncedAt": "2026-09-26T20:00:00Z"
+   "status": "retired",
+   "syncedAt": "2026-09-26T20:00:00Z",
+   "note": "the Kunming house was replaced (Owner, 27 Sep 2026): the former hotel is no longer bookable; the Yifangju Designer Courtyard stands in collection 800"
   },
   "045": {
    "title": "045 - Stays - The Houses - Lyue Baisha",
@@ -22674,5 +23320,323 @@
   "show": "the Hero slideshow (assets/hero-show.js): a film starts muted; Play / Pause on every film; Sound on / Mute only when the file has a meaningful audio track (data-audio)",
   "clip": "the editorial clip (assets/clip.js, .a-clip-ctl): muted by itself; Play / Pause; Sound on / Mute only with a meaningful audio track; only the guest's own gesture unmutes",
   "ambient": "the card and chapter loop (assets/aman.js): always muted, no controls, aria-hidden, the photograph underneath; a source with sound keeps it in the file (never stripped) — OWNER QUESTION OPEN: should a chapter film with meaningful sound become a clip with Sound on / Mute?"
- }
+ },
+ "retired": [
+  {
+   "asset": "assets/images/kunming/familysuite-1.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/familysuite-2.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/familysuite-3.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/familysuite-4.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/familysuite-5.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/familysuite-6.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/italian-1.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/italian-2.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/italian-3.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/italian-4.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/italian-5.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/italian-6.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/junting-1.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/junting-2.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/junting-3.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/junting-4.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/junting-5.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/junting-6.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/leftbank-1.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/leftbank-2.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/leftbank-3.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/leftbank-4.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/leftbank-5.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/leftbank-6.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/light-french-1.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/light-french-2.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/light-french-3.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/light-french-4.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/light-french-5.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/light-french-6.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/midcentury-1.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/midcentury-2.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/midcentury-3.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/midcentury-4.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/midcentury-5.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/midcentury-6.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/milano-1.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/milano-2.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/milano-3.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/milano-4.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/milano-5.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/milano-6.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/penang-1.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/penang-2.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/penang-3.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/penang-4.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/penang-5.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/penang-6.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/seine-1.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/seine-2.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/seine-3.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/seine-4.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/seine-5.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/seine-6.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/smartfamily-1.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/smartfamily-2.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/smartfamily-3.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/smartfamily-4.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/smartfamily-5.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/smartfamily-6.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/solarium-1.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/solarium-2.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/solarium-3.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/solarium-4.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/solarium-5.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/solarium-6.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/standardsingle-1.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/standardsingle-2.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/standardsingle-3.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/standardsingle-4.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/standardsingle-5.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/standardsingle-6.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/wanxiang-a-bathtub-by-the-window.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/wanxiang-a-bedroom-with-a-city-view.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/kunming/wanxiang-the-entrance-of-the-hotel.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/journey/kunming-01.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/journey/kunming-02.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/journey/kunming-03.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/journey/kunming-wanxiang-yueju-entrance.jpg",
+   "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  }
+ ]
 }

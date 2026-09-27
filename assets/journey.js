@@ -29,7 +29,7 @@
     { key: 'mu9646', when: '1 Mar', cat: 'Transportation', place: 'Vientiane → Kunming',
       label: 'MU9646', ids: ['mu9646'], anchor: 'j-mu9646' },
     { key: 'kmg', when: '1 – 4 Mar', cat: 'Accommodation', place: 'Kunming',
-      label: 'Wanxiang Yueju', ids: ['kmg'], anchor: 'j-kmg' },
+      label: 'Yifangju Designer Courtyard', ids: ['kmg'], anchor: 'j-kmg' },
     { key: 'c86', when: '4 Mar', cat: 'Transportation', place: 'Kunming → Lijiang',
       label: 'C86', ids: ['c86'], anchor: 'j-c86' },
     { key: 'ljg', when: '4 – 6 Mar', cat: 'Accommodation', place: 'Lijiang',

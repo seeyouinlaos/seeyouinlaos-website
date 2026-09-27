@@ -21,7 +21,7 @@
 (function () {
   'use strict';
   var RM = 'assets/images/rooms/';
-  var KMG = 'assets/images/kunming/';
+  var YFJ = 'assets/images/yifangju/';   /* the Yifangju Designer Courtyard, Kunming (Owner Drive 800) */
   var LJG = 'assets/images/lijiang/', JNY = 'assets/images/journey/';
   /* ONE SOURCE MAP for the Bangkok accommodation imagery (Owner, 16 Sep 2026 · image quality quickfix): the hero of the
    * detail page, the card of every rail and overview (Your Journey, the journeys page, "Other rooms at …", THE HOUSES),
@@ -81,12 +81,12 @@
        25 – 27 FEB  Heritage Grand Premier              170 × 2 = 340
        27 FEB – 01 MAR  Heritage Grand Premier          170 × 1 = 170
        01 MAR       MU9646 Business                             275
-       01 – 04 MAR  Italian Style Suite                  50 × 3 = 150
+       01 – 04 MAR  Jinri Building Scenic Terrace Tub Double  36.33 × 3 = 109   (the Kunming house replaced, 27 Sep 2026)
        04 MAR       C86 Business                                105
        04 – 06 MAR  270° Snow Mountain Viewing Room     100 × 2 = 200
        06 MAR       MU5922 + MU741 Economy flexible             200
        06 – 08 MAR  Deluxe Balcony King                 190 × 2 = 380
-                                                       = USD 2,175   (the current Operations Master, 19 Sep 2026)
+                                                       = USD 2,134   (the current Operations Master, 27 Sep 2026)
 
      The total is NEVER written down. It is the sum of whatever the engine
      actually selects, so that when the shared ledger says a preferred room is
@@ -95,7 +95,7 @@
   window.SIYL_FULL_EXPERIENCE = {
     prewed:      'heritage-grand-premier',
     wedstay:     'heritage-grand-premier',
-    kmg:         'italian',
+    kmg:         'jinri-terrace-double',
     ljg:         'viewing-270',
     kempinski:   'deluxe-balcony-king'
   };
@@ -278,179 +278,68 @@
       ]
     },
 
+    /* THE KUNMING HOUSE IS REPLACED (Owner, 27 Sep 2026 · Package F, Days 09 – 11): the former hotel is no longer bookable. The
+       Yifangju Designer Courtyard in Kunming's Old Street is the stay of 1 – 4 March — exactly the three rooms of the current
+       Accommodation_Details, each one room, each with its own photographs (Owner Drive 800, one folder per room). The rate is
+       the sheet's "Price per Person" per night; the per-person amount for the three nights is rate × 3, rounded to the cent in
+       assets/pricing.js alone (002: USD 36.33333333 × 3 = USD 109 per person · USD 218 the room). The rooms keep the Owner's
+       numbered order. */
     kunming: {
-      name: 'Wanxiang Yueju · Kunming',
-      place: 'Kunming Railway Station MixC Branch',
-      breakfast: 'Breakfast not included (the hotel serves it at CNY 100 per person)',
+      name: 'Yifangju Designer Courtyard · Kunming',
+      place: 'Jinma Biji Archway · Kunming Old Street',
+      breakfast: 'Breakfast included',
       windows: [{ id: 'kmg', label: 'After the Wedding', dates: '1 – 4 March 2027', nights: '3 nights', n: 3,
-        bagName: 'Wanxiang Yueju · Kunming', bagImg: 'assets/images/journey/kunming-wanxiang-yueju-entrance.jpg' }],
+        bagName: 'Yifangju Designer Courtyard · Kunming', bagImg: YFJ + 'jinri-terrace-double-1.webp' }],
       includes: [
         'Three nights, 1 → 2, 2 → 3 and 3 → 4 March.',
-        'Free Wi-Fi, air conditioning and daily housekeeping in every room.',
-        'Breakfast is not included: the hotel serves it at CNY 100 per person, and plenty of places around the station do too.',
-        'City transport, meals and anything bought in Kunming are your own.'
+        'Free Wi-Fi, air conditioning, a smart toilet and daily housekeeping in every room.',
+        'Breakfast is included every morning.',
+        'City transport, other meals and anything bought in Kunming are your own.'
       ],
-      /* All twelve operational categories from Accommodation_Details, each with
-       * the Owner-approved per-person / per-night rate ("Price per Person").
-       * The per-person total is rate × nights and is produced only by
-       * assets/pricing.js — never stored twice. */
+      numbered: true,
       rooms: [
-        { slug: 'junting', name: 'Junting City-View Loft', cat: 'Designer loft · 68 sq.m.',
-          desc: '68 sq.m. · 1 queen bed · 16th floor',
+        { slug: 'elegant-residence', name: '001 · Elegant Residence Double Bed Room', cat: 'Double room · 20 – 22 sq.m.',
+          desc: '20 – 22 sq.m. · 1 queen bed (1.65 m) · for one guest · floors 1 – 3',
           gallery: [
-          [KMG + 'junting-1.jpg', 'The loft living room and the stair'],
-          [KMG + 'junting-2.jpg', 'The living room below the mezzanine'],
-          [KMG + 'junting-3.jpg', 'The sitting area by the window'],
-          [KMG + 'junting-4.jpg', 'The bedroom'],
-          [KMG + 'junting-5.jpg', 'The bathroom'],
-          [KMG + 'junting-6.jpg', 'The sofa by the window']],
-          facts: [['Size', '68 sq.m.'], ['Bed', '1 queen bed (1.8 m)'], ['Occupancy', '2 Adults'], ['Location', '16th floor']],
-          story: 'A double-height loft with its own washing machine, microwave and refrigerator, sixteen floors above Kunming.',
-          amenities: ['Air conditioning', 'Balcony', 'Butler service', 'Clothes dryer', 'Coffee maker and teapot', 'Dining table', 'Electric blanket', 'Electric kettle', 'Free bottled water', 'Free Wi-Fi', 'Hair dryer', 'Heating', 'Iron and ironing board', 'Microwave', 'Minibar', 'Refrigerator', 'Shower', 'Slippers', 'Smart door lock', 'Smart toilet', 'Sofa', 'TV', 'Wardrobe', 'Washing machine'],
-          rate: 51 },
-        { slug: 'milano', name: 'Milano Minimalist Loft', cat: 'Designer loft · 68 sq.m.',
-          desc: '68 sq.m. · 1 queen bed and 1 sofa bed · 19th floor',
+          [YFJ + 'elegant-residence-1.webp', 'The bedroom, with the landscape painting above the bed'],
+          [YFJ + 'elegant-residence-2.webp', 'The room from the door, with the vanity'],
+          [YFJ + 'elegant-residence-3.webp', 'The bed and the vanity mirror'],
+          [YFJ + 'elegant-residence-4.webp', 'The table by the window'],
+          [YFJ + 'elegant-residence-5.webp', 'The vanity, the wardrobe and the refrigerator'],
+          [YFJ + 'elegant-residence-6.webp', 'The washbasin beside the bed'],
+          [YFJ + 'elegant-residence-7.webp', 'The smart toilet']],
+          facts: [['Size', '20 – 22 sq.m.'], ['Bed', '1 queen bed (1.65 m)'], ['Occupancy', '1 adult'], ['Location', 'Floors 1 – 3'], ['In the room', 'A smart-home system for the whole room · wet and dry areas apart · vanity mirror'], ['Family', 'Extra beds and cribs are not available']],
+          story: 'A double room for one guest in the courtyard house: a queen bed, a smart-home system for the whole room, the wet and dry areas kept apart, and a lit vanity mirror.',
+          amenities: ['Air conditioning', 'Audio equipment', 'Daily housekeeping', 'Free Wi-Fi', 'Hair dryer', 'LCD TV', 'Non-smoking rooms', 'Private bathroom', 'Refrigerator', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Vanity mirror', 'Window'],
+          rate: 42, roomRate: 42 },
+        { slug: 'jinri-terrace-double', name: '002 · Jinri Building Scenic Terrace Tub Double', cat: 'Double suite · 60 – 62 sq.m.',
+          desc: '60 – 62 sq.m. · 1 king bed (1.81 m) · a private terrace and a bathtub · 3rd floor',
           gallery: [
-          [KMG + 'milano-1.jpg', 'The living room and the stair'],
-          [KMG + 'milano-2.jpg', 'The living room from the stair'],
-          [KMG + 'milano-3.jpg', 'The sitting area by the window'],
-          [KMG + 'milano-4.jpg', 'The living room from above'],
-          [KMG + 'milano-5.jpg', 'The bedroom'],
-          [KMG + 'milano-6.jpg', 'The bathroom']],
-          facts: [['Size', '68 sq.m.'], ['Bed', '1 queen bed (1.8 m) and 1 sofa bed (1.5 m)'], ['Occupancy', '2 Adults'], ['Location', '19th floor']],
-          story: 'A deliberately spare loft with a queen bed, a sofa bed and its own washing machine, nineteen floors above the city.',
-          amenities: ['Air conditioning', 'Balcony', 'Butler service', 'Dining table', 'Electric blanket', 'Electric kettle', 'Free bottled water', 'Free Wi-Fi', 'Hair dryer', 'Heating', 'Iron and ironing board', 'Microwave', 'Minibar', 'Refrigerator', 'Shower', 'Slippers', 'Smart door lock', 'Sofa', 'TV', 'Wardrobe', 'Washing machine'],
-          rate: 50 },
-        { slug: 'italian', name: 'Italian Style Suite', cat: 'Designer suite · 68 sq.m.',
-          desc: '68 sq.m. · 1 queen bed and 1 futon · 16th floor',
+          [YFJ + 'jinri-terrace-double-1.webp', 'The private terrace at dusk, above the lit old street'],
+          [YFJ + 'jinri-terrace-double-2.webp', 'The bedroom, with the terrace beyond the glass'],
+          [YFJ + 'jinri-terrace-double-3.webp', 'The table by the terrace door'],
+          [YFJ + 'jinri-terrace-double-4.webp', 'The bed and the terrace window'],
+          [YFJ + 'jinri-terrace-double-5.webp', 'The king bed'],
+          [YFJ + 'jinri-terrace-double-6.webp', 'The bedroom and the glass-walled bathroom with the tub'],
+          [YFJ + 'jinri-terrace-double-7.webp', 'The bathtub and the bathroom']],
+          facts: [['Size', '60 – 62 sq.m.'], ['Bed', '1 king bed (1.81 m)'], ['Occupancy', '2 adults'], ['Location', '3rd floor'], ['In the room', 'A private terrace · views over the Jinri Building courtyard · a bathtub'], ['Family', 'Extra beds and cribs are not available']],
+          story: 'The Jinri Building Scenic Terrace Tub Double Bed Suite: a private terrace above the old street, views over the Jinri Building courtyard, and a bathtub to end the day in.',
+          amenities: ['Air conditioning', 'Audio equipment', 'Bathtub', 'Coffee table', 'Daily housekeeping', 'Desk', 'Free Wi-Fi', 'Garden and courtyard view', 'Hair dryer', 'Landmark view', 'LCD TV', 'Non-smoking rooms', 'Private bathroom', 'Refrigerator', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa', 'Terrace', 'Wardrobe'],
+          rate: 36.33333333, roomRate: 72.66666667 },
+        { slug: 'jinri-family-suite', name: '003 · Jinri Terrace Tub Family Suite', cat: 'Family suite · 71 – 74 sq.m.',
+          desc: '71 – 74 sq.m. · 1 king bed and 1 double bed · a terrace and a bathtub · 3rd floor',
           gallery: [
-          [KMG + 'italian-1.jpg', 'The tea table below the mezzanine'],
-          [KMG + 'italian-2.jpg', 'The living room from above'],
-          [KMG + 'italian-3.jpg', 'The armchair by the window'],
-          [KMG + 'italian-4.jpg', 'The bedroom'],
-          [KMG + 'italian-5.jpg', 'The tea table and the stair'],
-          [KMG + 'italian-6.jpg', 'The kitchen']],
-          facts: [['Size', '68 sq.m.'], ['Bed', '1 queen bed (1.8 m) and 1 futon (1.35 m)'], ['Occupancy', '2 Adults'], ['Location', '16th floor']],
-          story: 'A queen bed and a futon in sixty-eight square metres, with a balcony and the city view from the sixteenth floor.',
-          amenities: ['Air conditioning', 'Audio equipment', 'Balcony', 'Butler service', 'Coffee maker and teapot', 'Dining table', 'Electric blanket', 'Electric fan', 'Electric kettle', 'Free bottled water', 'Free Wi-Fi', 'Hair dryer', 'Heating', 'Iron and ironing board', 'Microwave', 'Minibar', 'Refrigerator', 'Shower', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa', 'TV', 'Wardrobe', 'Washing machine'],
-          rate: 50 },
-        { slug: 'light-french', name: 'Light French Suite', cat: 'Designer suite · 68 sq.m.',
-          desc: '68 sq.m. · 1 queen bed · 11th floor',
-          gallery: [
-          [KMG + 'light-french-1.jpg', 'The living room and the stair'],
-          [KMG + 'light-french-2.jpg', 'The entrance and the stair'],
-          [KMG + 'light-french-3.jpg', 'The living room by the window'],
-          [KMG + 'light-french-4.jpg', 'The bedroom'],
-          [KMG + 'light-french-5.jpg', 'The washbasin by the window'],
-          [KMG + 'light-french-6.jpg', 'The living room from above']],
-          facts: [['Size', '68 sq.m.'], ['Bed', '1 queen bed (1.8 m)'], ['Occupancy', '2 Adults'], ['Location', '11th floor']],
-          story: 'Sixty-eight square metres with a queen bed, a balcony and the city view from the eleventh floor.',
-          amenities: ['Air conditioning', 'Audio equipment', 'Balcony', 'Butler service', 'Clothes dryer', 'Dining table', 'Electric blanket', 'Electric kettle', 'Free bottled water', 'Free Wi-Fi', 'Hair dryer', 'Heating', 'Iron and ironing board', 'Microwave', 'Minibar', 'Range hood', 'Refrigerator', 'Shower', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa', 'TV', 'Wardrobe', 'Washing machine'],
-          rate: 49 },
-        { slug: 'left-bank', name: 'Left Bank French-Style Room', cat: 'Designer room · 69 sq.m.',
-          desc: '69 sq.m. · 1 queen bed · 14th floor',
-          gallery: [
-          [KMG + 'leftbank-1.jpg', 'The living room'],
-          [KMG + 'leftbank-2.jpg', 'The kitchen'],
-          [KMG + 'leftbank-3.jpg', 'The bedroom'],
-          [KMG + 'leftbank-4.jpg', 'The living room and the stair'],
-          [KMG + 'leftbank-5.jpg', 'The bedroom from the other side'],
-          [KMG + 'leftbank-6.jpg', 'Living and dining']],
-          facts: [['Size', '69 sq.m.'], ['Bed', '1 queen bed (1.8 m)'], ['Occupancy', '2 guests on this website (the room sleeps up to 4 adults)'], ['Location', '14th floor']],
-          story: 'Left Bank French-Style, high on the fourteenth floor: a sound-and-vision room with the city laid out through the window, a washing machine and a refrigerator of its own.',
-          amenities: ['Air conditioning', 'Balcony', 'Butler service', 'Dining table', 'Electric blanket', 'Electric fan', 'Electric kettle', 'Free bottled water', 'Free Wi-Fi', 'Hair dryer', 'Heating', 'Iron and ironing board', 'Microwave', 'Minibar', 'Projector', 'Range hood', 'Refrigerator', 'Shower', 'Slippers', 'Smart door lock', 'Smart toilet', 'Sofa', 'TV', 'Wardrobe', 'Washing machine'],
-          rate: 87 },
-        { slug: 'penang', name: 'Penang Forest Nanyang-Style Deluxe Suite', cat: 'Designer suite · 136 sq.m.',
-          desc: '136 sq.m. · two bedrooms and two bathrooms · 16th floor',
-          gallery: [
-          [KMG + 'penang-1.jpg', 'The bedroom'],
-          [KMG + 'penang-2.jpg', 'The living room'],
-          [KMG + 'penang-3.jpg', 'The kitchen and dining'],
-          [KMG + 'penang-4.jpg', 'The reading corner'],
-          [KMG + 'penang-5.jpg', 'The living room below the mezzanine'],
-          [KMG + 'penang-6.jpg', 'The entrance hall']],
-          facts: [['Size', '136 sq.m.'], ['Bed', '1 king bed (2 m) and 1 futon (1.35 m) in one bedroom · 1 queen bed (1.8 m) in the other'], ['Occupancy', '4 guests on this website (the suite sleeps up to 4 adults)'], ['Location', '16th floor']],
-          story: 'One hundred and thirty-six square metres over two bedrooms and two bathrooms, around a shared living room, in the Nanyang style.',
-          amenities: ['Air conditioning', 'Balcony', 'Butler service', 'Dining table', 'Electric blanket', 'Electric kettle', 'Free bottled water', 'Free Wi-Fi', 'Heating', 'Iron and ironing board', 'Microwave', 'Minibar', 'Shower', 'Slippers', 'Smart door lock', 'Sofa', 'Wardrobe', 'Washing machine'],
-          rate: 79 },
-        { slug: 'family-suite', name: 'Family Suite', cat: 'Designer suite · 68 sq.m.',
-          desc: '68 sq.m. · 1 queen bed and 1 double bed · floors 15 – 22',
-          gallery: [
-          [KMG + 'familysuite-1.jpg', 'The window seat'],
-          [KMG + 'familysuite-2.jpg', 'The living room'],
-          [KMG + 'familysuite-3.jpg', 'The living room and the stair'],
-          [KMG + 'familysuite-4.jpg', 'The living room from above'],
-          [KMG + 'familysuite-5.jpg', 'The second bedroom'],
-          [KMG + 'familysuite-6.jpg', 'The bedroom']],
-          facts: [['Size', '68 sq.m.'], ['Bed', '1 queen bed (1.8 m) and 1 double bed (1.5 m)'], ['Occupancy', '2 Adults'], ['Location', 'Floors 15 – 22']],
-          story: 'A queen and a double in one 68 sq.m. suite on the upper floors, arranged so a family does not have to divide itself between two rooms.',
-          amenities: ['Air conditioning', 'Audio equipment', 'Balcony', 'Butler service', 'Dining table', 'Electric blanket', 'Electric kettle', 'Free bottled water', 'Free Wi-Fi', 'Hair dryer', 'Heating', 'Iron and ironing board', 'Microwave', 'Minibar', 'Refrigerator', 'Shower', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa', 'Wardrobe', 'Washing machine'],
-          rate: 66 },
-        { slug: 'seine', name: 'Seine Evening Glow Loft Family Room', cat: 'Designer loft · 68 – 70 sq.m.',
-          desc: '68 – 70 sq.m. · 1 queen bed and 1 double bed · 12th floor',
-          gallery: [
-          [KMG + 'seine-1.jpg', 'The living room and stair'],
-          [KMG + 'seine-2.jpg', 'The bedroom'],
-          [KMG + 'seine-3.jpg', 'The sitting corner'],
-          [KMG + 'seine-4.jpg', 'The bathroom'],
-          [KMG + 'seine-5.jpg', 'The kitchen'],
-          [KMG + 'seine-6.jpg', 'Living room and bed']],
-          facts: [['Size', '68 – 70 sq.m.'], ['Bed', '1 queen bed (1.8 m) and 1 double bed (1.5 m)'], ['Occupancy', '2 guests on this website (the room sleeps up to 4 adults)'], ['Location', '12th floor']],
-          story: 'A two-storey family loft with smart room controls, its own washing machine and the city view from the twelfth floor.',
-          amenities: ['Air conditioning', 'Audio equipment', 'Balcony', 'Butler service', 'Clothes dryer', 'Dining table', 'Electric blanket', 'Electric kettle', 'Free bottled water', 'Free Wi-Fi', 'Hair dryer', 'Heating', 'Iron and ironing board', 'Microwave', 'Minibar', 'Projector', 'Range hood', 'Refrigerator', 'Shower', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa', 'Wardrobe', 'Washing machine'],
-          rate: 66 },
-        { slug: 'smart-family', name: 'Smart Family Room', cat: 'Designer room · 68 sq.m.',
-          desc: '68 sq.m. · 1 queen bed · floors 9 – 24',
-          gallery: [
-          [KMG + 'smartfamily-1.jpg', 'The stair and window'],
-          [KMG + 'smartfamily-2.jpg', 'The living room'],
-          [KMG + 'smartfamily-3.jpg', 'The bedroom'],
-          [KMG + 'smartfamily-4.jpg', 'The bathroom'],
-          [KMG + 'smartfamily-5.jpg', 'The desk at dusk'],
-          [KMG + 'smartfamily-6.jpg', 'Wardrobe and laundry']],
-          facts: [['Size', '68 sq.m.'], ['Bed', '1 queen bed (1.8 m)'], ['Occupancy', '2 Adults'], ['Location', 'Floors 9 – 24']],
-          story: 'A family room on the upper floors, with its own washing machine and a corner for laundry.',
-          amenities: ['Air conditioning', 'Audio equipment', 'Balcony', 'Butler service', 'Clothes dryer', 'Dining table', 'Electric blanket', 'Electric kettle', 'Free bottled water', 'Free Wi-Fi', 'Hair dryer', 'Heating', 'Iron and ironing board', 'Microwave', 'Minibar', 'Refrigerator', 'Shower', 'Slippers', 'Smart door lock', 'Smart toilet', 'Sofa', 'TV', 'Wardrobe', 'Washing machine'],
-          rate: 55 },
-        { slug: 'solarium', name: 'Solarium Bath Suite', cat: 'Designer suite · 68 sq.m.',
-          desc: '68 sq.m. · 1 queen bed · 14th floor',
-          gallery: [
-          [KMG + 'solarium-1.jpg', 'The living room'],
-          [KMG + 'solarium-2.jpg', 'The bedroom'],
-          [KMG + 'solarium-3.jpg', 'The bathtub and the city'],
-          [KMG + 'solarium-4.jpg', 'The stair and the living room'],
-          [KMG + 'solarium-5.jpg', 'The living room from above'],
-          [KMG + 'solarium-6.jpg', 'The lounge']],
-          facts: [['Size', '68 sq.m.'], ['Bed', '1 queen bed (1.8 m)'], ['Occupancy', '2 Adults'], ['Location', '14th floor']],
-          story: 'The Solarium Bath Suite is the one with the bathtub set into the light: 68 sq.m. on the fourteenth floor, non-smoking, with the city beyond the glass.',
-          amenities: ['Air conditioning', 'Audio equipment', 'Balcony', 'Bathtub', 'Butler service', 'Clothes dryer', 'Dining table', 'Electric blanket', 'Electric kettle', 'Free bottled water', 'Free Wi-Fi', 'Hair dryer', 'Heating', 'Iron and ironing board', 'Microwave', 'Minibar', 'Refrigerator', 'Shower', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa', 'TV', 'Wardrobe', 'Washing machine'],
-          rate: 54 }   /* no reservation (Owner, 15 Sep 2026): available until booked */,
-        { slug: 'standard-single', name: 'Standard Single Room', cat: 'Designer room · 68 sq.m.',
-          desc: '68 sq.m. · 1 queen bed and 1 futon · 16th floor',
-          gallery: [
-          [KMG + 'standardsingle-1.jpg', 'The kitchen'],
-          [KMG + 'standardsingle-2.jpg', 'The living room'],
-          [KMG + 'standardsingle-3.jpg', 'The bathroom'],
-          [KMG + 'standardsingle-4.jpg', 'The bedroom'],
-          [KMG + 'standardsingle-5.jpg', 'The living room by day'],
-          [KMG + 'standardsingle-6.jpg', 'The window at dusk']],
-          facts: [['Size', '68 sq.m.'], ['Bed', '1 queen bed (1.8 m) and 1 futon (1.5 m)'], ['Occupancy', '2 Adults'], ['Location', '16th floor']],
-          story: 'The simplest room in the house is still 68 sq.m. with a balcony — a queen bed, a futon, and the city view every floor here gets.',
-          amenities: ['Air conditioning', 'Balcony', 'Butler service', 'Dining table', 'Electric blanket', 'Electric kettle', 'Free bottled water', 'Free Wi-Fi', 'Hair dryer', 'Heating', 'Iron and ironing board', 'Microwave', 'Minibar', 'Refrigerator', 'Shower', 'Slippers', 'Smart door lock', 'Smart toilet', 'Sofa', 'TV', 'Wardrobe', 'Washing machine'],
-          rate: 53 },
-        { slug: 'mid-century', name: 'Mid-century Amber Suite', cat: 'Designer suite · 68 sq.m.',
-          desc: '68 sq.m. · 1 queen bed and 1 futon · 12th floor',
-          gallery: [
-          [KMG + 'midcentury-1.jpg', 'The kitchen and bathroom'],
-          [KMG + 'midcentury-2.jpg', 'The living room'],
-          [KMG + 'midcentury-3.jpg', 'The sofa and the city window'],
-          [KMG + 'midcentury-4.jpg', 'The bathroom'],
-          [KMG + 'midcentury-5.jpg', 'The living room and the stair'],
-          [KMG + 'midcentury-6.jpg', 'The bedroom']],
-          facts: [['Size', '68 sq.m.'], ['Bed', '1 queen bed (1.8 m) and 1 futon (1.35 m)'], ['Occupancy', '2 Adults'], ['Location', '12th floor']],
-          story: 'Mid-century Amber: warm timber, a queen bed and a futon, twelve floors up, with a balcony onto the city.',
-          amenities: ['Air conditioning', 'Air purifier', 'Audio equipment', 'Balcony', 'Butler service', 'Dining table', 'Electric blanket', 'Electric kettle', 'Free bottled water', 'Free Wi-Fi', 'Hair dryer', 'Heating', 'Iron and ironing board', 'Microwave', 'Minibar', 'Projector', 'Range hood', 'Refrigerator', 'Shower', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa', 'Wardrobe', 'Washing machine'],
-          rate: 51 },
+          [YFJ + 'jinri-family-suite-1.webp', 'The bedroom, opening onto the terrace'],
+          [YFJ + 'jinri-family-suite-2.webp', 'The terrace, towards the Jinri Building'],
+          [YFJ + 'jinri-family-suite-3.webp', 'The terrace outside the suite'],
+          [YFJ + 'jinri-family-suite-4.webp', 'The bed and the window to the garden'],
+          [YFJ + 'jinri-family-suite-5.webp', 'The bedroom and the bathroom beyond'],
+          [YFJ + 'jinri-family-suite-6.webp', 'The bathroom with the freestanding tub'],
+          [YFJ + 'jinri-family-suite-7.webp', 'The double washbasin']],
+          facts: [['Size', '71 – 74 sq.m.'], ['Bed', '1 king bed (1.81 m) and 1 double bed (1.35 m)'], ['Occupancy', '2 adults'], ['Location', '3rd floor'], ['In the room', 'Courtyard views on two sides · a premium bath'], ['Family', 'Extra beds and cribs are not available']],
+          story: 'The Jinri Terrace Tub Family Suite: a king bed and a double bed, a terrace with the courtyard on two sides, and a bathroom with a freestanding tub and two basins.',
+          amenities: ['Air conditioning', 'Audio equipment', 'Coffee table', 'Daily housekeeping', 'Desk', 'Free Wi-Fi', 'Garden and courtyard view', 'Hair dryer', 'Landmark view', 'LCD TV', 'Non-smoking', 'Private bathroom', 'Refrigerator', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa', 'Terrace', 'Wardrobe'],
+          rate: 43, roomRate: 86 }
       ]
     },
 
@@ -641,12 +530,12 @@
     sathorn:    ['assets/images/usathorn/'],
     souphattra: ['assets/images/souphattra/', 'assets/images/rooms/'],   /* assets/images/rooms/ = the Souphattra's own room categories (its Drive folder) */
     guesthouse: ['assets/images/guesthouse/'],
-    kunming:    ['assets/images/kunming/', 'assets/images/journey/kunming-'],
+    kunming:    ['assets/images/yifangju/'],   /* the Yifangju Designer Courtyard alone (Owner, 27 Sep 2026) */
     lijiang:    ['assets/images/lijiang/', 'assets/images/journey/lijiang-'],
     kempinski:  ['assets/images/kempinski/', 'assets/images/journey/kempinski-']
   };
   /* the stay-media records (assets/stay-media.js) that belong to each property */
-  var STAY_MEDIA_KEYS = { sathorn: ['uSathorn'], souphattra: ['souphattra'], guesthouse: ['guestHouse'], kunming: ['wanxiang'], lijiang: ['luyeBaisha'], kempinski: ['kempinski'] };
+  var STAY_MEDIA_KEYS = { sathorn: ['uSathorn'], souphattra: ['souphattra'], guesthouse: ['guestHouse'], kunming: ['yifangju'], lijiang: ['luyeBaisha'], kempinski: ['kempinski'] };
   /* a frame the property may never show, whatever folder it sits in: destination photography by kind (the peak, the village, the city) */
   var NEVER = /snow-mountain-viewing-1\.jpg$|\/city\/|\/experiences\/|\/1872\/|\/marsilea\/|\/hero\/|\/event\/|\/venue\/|\/temple\/|\/dress|\/train\/|\/transport\/|\/timeline\/|\/alms\//;
   function inFolder(stayKey, src) {
@@ -695,6 +584,8 @@
     /* THE SOUPHATTRA (Owner, 21 Sep 2026 · the global My Trip rebuild): every category shown from The Heritage upward —
      * Heritage 145 · Heritage Executive 155 · Heritage Grand Premier 170 · Noble Courtyard 240 · Grand Majestic Suite 250 ·
      * Souphattra Majestic Suite 290 · Souphattra Presidential 750 — the default room, The Heritage, first */
+    /* a house whose rooms carry the Owner's own numbers (the Yifangju: 001 · 002 · 003) keeps that order */
+    if (window.SIYL_ROOMS[k].numbered) return;
     if (k === 'souphattra') { window.SIYL_ROOMS[k].rooms.sort(function (a, b) { return (a.rate == null ? 1e9 : a.rate) - (b.rate == null ? 1e9 : b.rate); }); return; }
     window.SIYL_ROOMS[k].rooms.sort(function (a, b) {
       return (b.rate == null ? -1 : b.rate) - (a.rate == null ? -1 : a.rate);

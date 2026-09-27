@@ -98,7 +98,8 @@
                 basis: 'USD 15 per guest · a personal offering, prepared for you and presented by you' }
   };
 
-  function money(n) { return 'USD ' + Number(n).toLocaleString('en-US'); }
+  /* a rate with cents is written to the cent (the Yifangju 002: USD 36.33 per person per night) — never three decimals */
+  function money(n) { return 'USD ' + Number(n).toLocaleString('en-US', { maximumFractionDigits: 2 }); }
   /* no leading zero in a date: "06 – 08 March 2027" → "6 – 8 March 2027" */
   function unpad(t) { return String(t == null ? '' : t).replace(/(^|[^\d])0(\d)(?!\d)/g, '$1$2'); }
   var MONTH_RE = /\s+(January|February|March|April|May|June|July|August|September|October|November|December)$/;
@@ -187,7 +188,8 @@
         breakfast: (room && room.breakfast) || at.stay.breakfast || '',
         note: at.win.note || '',
         noteBy: at.win.noteBy || '',
-        total: rate == null ? null : rate * pay
+        /* rounded to the cent: a rate of thirds still makes its exact amount (USD 36.33333333 × 3 = USD 109) */
+        total: rate == null ? null : Math.round(rate * pay * 100) / 100
       };
       q.nightly = rate == null ? '' : money(rate) + ' per person per night';
       q.nightsLine = nights + (nights === 1 ? ' night' : ' nights');

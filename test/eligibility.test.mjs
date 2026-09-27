@@ -126,9 +126,11 @@ test('PHYSICAL ROOM COUNT IS AUTHORITATIVE · 1 room → 1 unit → 2 places; 5 
   assert.equal(SEED['bkk-stay/penthouse'], undefined, 'the Sathorn Penthouse is deleted (Edit 6, 24 Sep 2026)'); assert.equal(pent.length, 6); assert.deepEqual(pent.map((u) => u.label), ['A', 'B', 'C', 'D', 'E', 'F']); assert.equal(pent.reduce((n, u) => n + u.places, 0), 12);
   assert.ok(!pent.some((u) => u.label === 'G')); assert.ok(pent.every((u) => u.kind === 'room' && u.places === 2));
   const thirteen = unitsOf('wedstay/heritage-executive'); assert.equal(thirteen.length, 13); assert.equal(thirteen.reduce((n, u) => n + u.places, 0), 26);
-  /* the Light French Suite and the Snow Mountain Viewing Room: Pax "2 Adults" in Accommodation_Details → two places each (final release, 15 Sep 2026) */
-  for (const key of ['kmg/light-french', 'ljg/snow-mountain-viewing']) for (const u of unitsOf(key)) assert.equal(u.places, 2, key + ' sleeps two adults: two places');
-  assert.ok(!Object.values(SEED).some((s) => s.unit === 'room' && s.occupancy === 1), 'no room is seeded as a single');
+  /* the Jinri Terrace Tub Family Suite (27 Sep 2026) and the Snow Mountain Viewing Room: Pax "2 Adults" in Accommodation_Details → two places each */
+  for (const key of ['kmg/jinri-family-suite', 'ljg/snow-mountain-viewing']) for (const u of unitsOf(key)) assert.equal(u.places, 2, key + ' sleeps two adults: two places');
+  /* the one room for a single guest: the Yifangju 001, Elegant Residence Double Bed Room (1 adult · Owner, 27 Sep 2026) */
+  assert.deepEqual(Object.keys(SEED).filter((k) => SEED[k].unit === 'room' && SEED[k].occupancy === 1), ['kmg/elegant-residence']);
+  assert.equal(unitsOf('kmg/elegant-residence')[0].places, 1, 'a single room stays what it is: one place');
   /* the invariant across the whole inventory: units = source room count; places = count × 2 for standard rooms */
   for (const [key, s] of Object.entries(SEED)) {
     const units = unitsOf(key);
@@ -259,12 +261,12 @@ test('THE WORDS · category lines are derived from the physical rooms the engine
   assert.equal(U.label('bkk-stay', 'u-sathorn-superior-garden'), '6 of 6 rooms left', 'another stage is untouched');
   /* THE WAITING LIST: a stage no room could take — one entry, positioned; a stage where a place is held refuses the line */
   const refused = await U.wait('wedstay', 2, ['wedstay/souphattra-presidential']); assert.equal(refused.ok, false); assert.equal(refused.status, 409); assert.equal(refused.error, 'a place is held in this stage');
-  const waited = await U.wait('kmg', 2, ['kmg/solarium']); assert.equal(waited.ok, true);
-  assert.equal(U.waitlisted('kmg').position, 1); assert.equal(U.waitlisted('kmg').size, 2); assert.deepEqual(plain(U.waitlisted('kmg').wanted), ['kmg/solarium']); assert.deepEqual(plain(U.waitlistedStages()), ['kmg']); assert.equal(U.waiting('kmg'), 1); assert.equal(U.waitlisted('wedstay'), null);
-  assert.equal(U.label('kmg', 'solarium'), 'One room only · free', 'the line holds nothing');
+  const waited = await U.wait('kmg', 2, ['kmg/jinri-family-suite']); assert.equal(waited.ok, true);
+  assert.equal(U.waitlisted('kmg').position, 1); assert.equal(U.waitlisted('kmg').size, 2); assert.deepEqual(plain(U.waitlisted('kmg').wanted), ['kmg/jinri-family-suite']); assert.deepEqual(plain(U.waitlistedStages()), ['kmg']); assert.equal(U.waiting('kmg'), 1); assert.equal(U.waitlisted('wedstay'), null);
+  assert.equal(U.label('kmg', 'jinri-family-suite'), 'One room only · free', 'the line holds nothing');
   /* a place held in the stage resolves the entry */
-  const k = await U.join('kmg', 'solarium', 'A'); assert.equal(k.ok, true);
-  assert.equal(U.waitlisted('kmg'), null); assert.deepEqual(plain(U.waitlistedStages()), []); assert.equal(U.waiting('kmg'), 0); assert.equal(U.label('kmg', 'solarium'), 'Held for you · Room A');
+  const k = await U.join('kmg', 'jinri-family-suite', 'A'); assert.equal(k.ok, true);
+  assert.equal(U.waitlisted('kmg'), null); assert.deepEqual(plain(U.waitlistedStages()), []); assert.equal(U.waiting('kmg'), 0); assert.equal(U.label('kmg', 'jinri-family-suite'), 'Held for you · Room A');
   const un = await U.unwait('kmg'); assert.equal(un.ok, true, 'leaving a line one is not in changes nothing');
 });
 

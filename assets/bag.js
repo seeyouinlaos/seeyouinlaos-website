@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded',function(){window.SIYL_BAG.badge()}
 /* One engine, one total: the sticky Journey bar, the header badge, Your Journey,
  * Your Costs and Review & Send all read SIYL_BAG.total() — nothing recalculates. */
 (function(){var B=window.SIYL_BAG;
-B.money=function(n){return 'USD '+n.toLocaleString('en-US')};
+B.money=function(n){return 'USD '+n.toLocaleString('en-US',{maximumFractionDigits:2})};
 B.bar=function(){
 if(document.querySelector('.jbar'))return;
 var css=document.createElement('style');

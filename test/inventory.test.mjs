@@ -53,7 +53,7 @@ test('nothing is reserved for anyone in the seed (Owner, 19 Sep 2026 · no fixed
     assert.equal(unitsOf(key).every((u) => u.reservedFor === null), true, key + ' has no reserved unit');
   }
   /* the rooms the old ledger kept back — the Presidential, the Bangkok Room A (U Sathorn since the Sathorn Penthouse was deleted, Edit 6), the Grand Majestic, the Solarium, the 270° suite — are open to everyone */
-  for (const k of ['prewed/souphattra-presidential', 'wedstay/souphattra-presidential', 'bkk-stay/u-sathorn-superior-garden', 'prewed/grand-majestic', 'wedstay/grand-majestic', 'kmg/solarium', 'ljg/view-suite-270']) assert.equal(sellable(k), SEED[k].capacity, k + ' is open to everyone');
+  for (const k of ['prewed/souphattra-presidential', 'wedstay/souphattra-presidential', 'bkk-stay/u-sathorn-superior-garden', 'prewed/grand-majestic', 'wedstay/grand-majestic', 'kmg/jinri-family-suite', 'ljg/view-suite-270']) assert.equal(sellable(k), SEED[k].capacity, k + ' is open to everyone');
   /* who may join: any authenticated guest, any unit — a host like a guest */
   const guest = identity(PEGGY), host = identity(HARUTHAI, true);
   assert.deepEqual(mayJoin(unitOf('bkk-stay/u-sathorn-superior-garden', 'A'), null), { ok: false, error: 'unauthorised' });
@@ -76,8 +76,9 @@ test('a party consumes rooms, not seats — ceil(guests ÷ occupancy)', () => {
   assert.equal(unitsFor('prewed/heritage', 4), 2);
   assert.equal(unitsFor('prewed/heritage', 5), 3);
   /* a four-adult suite takes one room for four guests */
-  assert.equal(unitsFor('kmg/left-bank', 4), 1);
-  assert.equal(unitsFor('kmg/left-bank', 5), 2);
+  assert.equal(unitsFor('kmg/jinri-family-suite', 2), 1);
+  assert.equal(unitsFor('kmg/jinri-family-suite', 3), 2);
+  assert.equal(unitsFor('kmg/elegant-residence', 2), 2, 'a room for one guest: one room per guest');
 });
 
 test('a six-room Bangkok category (U Sathorn — the Sathorn Penthouse deleted, Edit 6; Shama Yen-Akat deleted, 24 Sep 2026) is six rooms of two places; the Guest House complimentary (D2) is ONE unit of FOUR places held in GUESTS (one bedroom, Edit 7); the wedding window is ONE stage (Owner, 19 Sep 2026)', () => {
@@ -191,7 +192,7 @@ test('the Owner\'s preferred rooms (SIYL_FULL_EXPERIENCE, read by SIYL_PRICE.pre
   const FE = sandbox.window.SIYL_FULL_EXPERIENCE;
   /* no preferred Bangkok room since the Sathorn Penthouse was deleted (Edit 6, 24 Sep 2026): that stage falls to SIYL_PRICE.premium */
   assert.deepEqual(FE, { prewed: 'heritage-grand-premier',
-    wedstay: 'heritage-grand-premier', kmg: 'italian', ljg: 'viewing-270',
+    wedstay: 'heritage-grand-premier', kmg: 'jinri-terrace-double', ljg: 'viewing-270',
     kempinski: 'deluxe-balcony-king' });
   assert.equal(FE['bkk-stay'], undefined);
   assert.ok(sellable('bkk-stay/u-sathorn-superior-garden') > 0, 'the premium Bangkok fallback has stock behind it');

@@ -29,7 +29,7 @@
     ['Stays', 'accommodation.html', [
       ['Souphattra Heritage Vientiane', 'journeys.html#j-prewed'],
       ['Guest House complimentary', 'room.html?stay=guesthouse&room=guest-house'],
-      ['Wanxiang Yueju Kunming', 'journeys.html#j-kmg'],
+      ['Yifangju Designer Courtyard Kunming', 'journeys.html#j-kmg'],
       ['Luye Baisha Lijiang', 'journeys.html#j-ljg'],
       ['Siam Kempinski Bangkok', 'journeys.html#j-kempinski']
     ]],

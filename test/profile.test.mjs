@@ -116,7 +116,7 @@ test('8 · the overview reflects selections, holds and the waiting list — noth
   const rooms = new Rooms(doState()); let held = null;
   const p = await dashboard(rooms, PEGGY, async (w) => {
     held = await w.SIYL_STAY.select('wedstay', 'heritage', null, 2); assert.equal(held.ok, true); assert.ok(held.unit, 'a unit that takes the party of two');
-    assert.equal((await w.SIYL_UNITS.wait('kmg', 2, ['kmg/italian'])).ok, true);
+    assert.equal((await w.SIYL_UNITS.wait('kmg', 2, ['kmg/jinri-terrace-double'])).ok, true);
   });
   const J = p.w.SIYL_JOURNEY, B = p.w.SIYL_BAG, seg = (k) => J.SEGMENTS.find((s) => s.key === k), html = p.el.innerHTML;
   assert.equal(J.state(seg('wedstay')), 'selected'); assert.equal(J.state(seg('kmg')), 'waitlisted'); assert.equal(J.waitPosition(seg('kmg')), 1);
@@ -125,7 +125,7 @@ test('8 · the overview reflects selections, holds and the waiting list — noth
   const item = (d) => cards.find((c) => c.includes('data-stay="' + d + '"'));
   assert.ok(html.indexOf('data-stay="stay:wedstay"') > html.indexOf('id="your-stay"'), 'inside Your stay');
   const wl = item('waitlist:kmg'); assert.ok(wl, 'the waiting-list card of the one waitlisted stage');
-  assert.match(wl, /Wanxiang Yueju/); assert.match(wl, /· 2 places together</); assert.match(wl, /On the waiting list — number 1</); assert.match(wl, /href="your-journey\.html#s-kmg"/);
+  assert.match(wl, /Yifangju Designer Courtyard/); assert.match(wl, /· 2 places together</); assert.match(wl, /On the waiting list — number 1</); assert.match(wl, /href="your-journey\.html#s-kmg"/);
   assert.doesNotMatch(wl, /USD|pf-cost/, 'a waiting-list stage carries no amount');
   const st = item('stay:wedstay'); assert.ok(st, 'the held stay is a card of Your stay');
   assert.match(st, new RegExp('>Room ' + held.unit + ' · you · 1 place kept for Steffie · held for you<'), 'the held place in the contract words, the unit the engine gave, the party member by first name');
