@@ -86,7 +86,9 @@ export const SEED = {
 
   /* ------------------------------------------------------------ Kunming */
   'kmg/left-bank':      { unit: 'room', capacity: 1, occupancy: 4, held: 0, name: 'Left Bank French-Style King Room' },
-  'kmg/penang':         { unit: 'room', capacity: 1, occupancy: 4, held: 0, name: 'Penang Forest Nanyang-Style Deluxe Suite' },
+  /* THE PENANG SUITE SLEEPS FOUR (Owner, 27 Sep 2026): two bedrooms, and the website books it for up to its own occupancy —
+     four guests — instead of the two places of every other room */
+  'kmg/penang':         { unit: 'room', capacity: 1, occupancy: 4, honourOccupancy: true, held: 0, name: 'Penang Forest Nanyang-Style Deluxe Suite' },
   'kmg/family-suite':   { unit: 'room', capacity: 1, occupancy: 2, held: 0, name: 'Family Suite' },
   'kmg/seine':          { unit: 'room', capacity: 1, occupancy: 4, held: 0, name: 'Seine Evening Glow Loft Family Room' },
   'kmg/smart-family':   { unit: 'room', capacity: 1, occupancy: 2, held: 0, name: 'Smart Family Room' },

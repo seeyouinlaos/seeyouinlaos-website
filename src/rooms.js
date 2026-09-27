@@ -4,7 +4,8 @@
    A room is no longer an abstract count. Every category of every stay is a
    set of persistent ALLOCATION UNITS — ROOM A, ROOM B, ROOM C … — derived
    once from the seed and never renumbered: a category of five rooms is five
-   units, and every room unit has TWO GUEST PLACES. A guest chooses the unit
+   units, and every room unit has TWO GUEST PLACES (a room the Owner opened to its
+   own occupancy has that many — honourOccupancy in the seed). A guest chooses the unit
    they belong in, exactly as they choose a chair: a place is held in the
    guest's own name, the first names of the guests already there are shown
    to every authenticated guest, and a full unit is full.
@@ -85,8 +86,9 @@ export function unitsOf(key) {
   for (let i = 0; i < s.capacity; i++) {
     const label = i < 26 ? LETTERS[i] : LETTERS[Math.floor(i / 26) - 1] + LETTERS[i % 26];
     out.push({ key, label, name: 'Room ' + label, kind: 'room',
-      /* the Owner's rule (15 Sep 2026): two guest places per room; a single room stays what it is */
-      places: s.occupancy === 1 ? 1 : PLACES,
+      /* the Owner's rule (15 Sep 2026): two guest places per room; a single room stays what it is; a room the Owner opened to its
+         whole occupancy (honourOccupancy — the Penang suite, 27 Sep 2026) has that many */
+      places: s.occupancy === 1 ? 1 : s.honourOccupancy ? s.occupancy : PLACES,
       reservedFor: null });
   }
   return out;

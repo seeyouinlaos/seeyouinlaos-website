@@ -369,7 +369,7 @@
           [KMG + 'penang-4.jpg', 'The reading corner'],
           [KMG + 'penang-5.jpg', 'The living room below the mezzanine'],
           [KMG + 'penang-6.jpg', 'The entrance hall']],
-          facts: [['Size', '136 sq.m.'], ['Bed', '1 king bed (2 m) and 1 futon (1.35 m) in one bedroom · 1 queen bed (1.8 m) in the other'], ['Occupancy', '2 guests on this website (the suite sleeps up to 4 adults)'], ['Location', '16th floor']],
+          facts: [['Size', '136 sq.m.'], ['Bed', '1 king bed (2 m) and 1 futon (1.35 m) in one bedroom · 1 queen bed (1.8 m) in the other'], ['Occupancy', '4 guests on this website (the suite sleeps up to 4 adults)'], ['Location', '16th floor']],
           story: 'One hundred and thirty-six square metres over two bedrooms and two bathrooms, around a shared living room, in the Nanyang style.',
           amenities: ['Air conditioning', 'Balcony', 'Butler service', 'Dining table', 'Electric blanket', 'Electric kettle', 'Free bottled water', 'Free Wi-Fi', 'Heating', 'Iron and ironing board', 'Microwave', 'Minibar', 'Shower', 'Slippers', 'Smart door lock', 'Sofa', 'Wardrobe', 'Washing machine'],
           rate: 79 },

@@ -44,7 +44,7 @@ for (const [key, s] of Object.entries(SEED)) {
   const [win] = key.split('/');
   const units = unitsOf(key);
   const expectedUnits = s.unit === 'guest' ? 1 : s.capacity;
-  const expectedPlaces = s.unit === 'guest' ? s.capacity : s.capacity * (s.occupancy === 1 ? 1 : PLACES);
+  const expectedPlaces = s.unit === 'guest' ? s.capacity : s.capacity * (s.occupancy === 1 ? 1 : s.honourOccupancy ? s.occupancy : PLACES);
   const places = units.reduce((n, u) => n + u.places, 0);
   const occ = plan ? (plan.units[key] || []).reduce((n, u) => n + (u.occupants || []).length, 0) : 0;
   const reservedUnits = units.filter((u) => u.reservedFor), reservedPlaces = reservedUnits.reduce((n, u) => n + u.places, 0);

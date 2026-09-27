@@ -134,7 +134,8 @@ test('PHYSICAL ROOM COUNT IS AUTHORITATIVE · 1 room → 1 unit → 2 places; 5 
     const units = unitsOf(key);
     if (s.unit === 'guest') { assert.equal(units.length, 1, key); assert.equal(units[0].places, s.capacity, key + ' sleeps what the source says'); continue; }
     assert.equal(units.length, s.capacity, key + ' units = source room count');
-    assert.equal(units.reduce((n, u) => n + u.places, 0), s.capacity * (s.occupancy === 1 ? 1 : 2), key + ' places = rooms × 2 (singles × 1)');
+    /* the one room opened to its own occupancy (the Penang suite, Owner, 27 Sep 2026) sleeps what the source says */
+    assert.equal(units.reduce((n, u) => n + u.places, 0), s.capacity * (s.occupancy === 1 ? 1 : s.honourOccupancy ? s.occupancy : 2), key + ' places = rooms × 2 (singles × 1)');
   }
 });
 
