@@ -345,9 +345,9 @@
       breakfast: 'Breakfast included',
       windows: [{ id: 'ljg', label: 'After the Wedding', dates: '4 – 6 March 2027', nights: '2 nights', n: 2,
         bagName: 'Luye Baisha · Lijiang', bagImg: 'assets/images/lijiang/view270-1.jpg',
-        /* GUEST_SELF_BOOKING (002 · R31 – T31). The note's link opens the right hotel for 6 → 8 March — the stay is 4 → 6 March:
-           the dates contradict the sheet's own rows 17 / 22, so no booking link is offered until the source is corrected */
-        booking: 'self', bookingUrl: '' }],
+        /* GUEST_SELF_BOOKING (002 · R31 – T31, corrected by the Owner 28 Sep 2026): the hotel's own page for 4 → 6 March — the
+           stay's own dates (rows 17 / 22); the former 6 → 8 March link is gone */
+        booking: 'self', bookingUrl: 'https://www.trip.com/hotels/detail/?cityEnName=Yulong&cityId=21360&hotelId=132995703&checkIn=2027-03-04&checkOut=2027-03-06&adult=2&children=0&crn=1&ages=&curr=USD&barcurr=USD&hoteluniquekey=H4sIAAAAAAAA_-M6wcTFJMEkdZCJY-LrO-fZhBgNLG5FOIqsc39Y1dHl4MkAAgpzHAJ4CsFMhw6HRsZqkPSndocZjN-3bLVfwci4kXGHXOvrwIpIhx2MTAcYWU4w1i9gWrxzq_0pFlaOd9wSLJdYtjBGVytlp1YqWZnoKJVkluSkKlkphTmGKOkopaQWJwM5QFZibn5pXgmQbWiqZ2gBFChJrPBMAWtJTsxJLs1JLEkNqSwAajXTUcosdi4pyiwISs3NLClJBapKS8wpTgWJB6UWA2WSwYJKfkBjiqACmfl5EO2GKGJhiTmlqRAXAC10S4XaYVgb-4iFKTr2EwvDL6A__utIsDSxMnSxMkxiZeP4cJFRgmUXK1uwibmHk9EF1h2MUgqGBgYGpobGpqa6BokWaUYGxoa6JpbmxpamukZGxsaWBhqLzl4-02diVChltnjduybWi79mzmLsO_7uIeu6q9Mstzed-Md8sH1vP8vyLSs_M_97tqqX_fH-ndNYt004-Yl5f-_DZewKjFqC8SGeIR6GWfn5BSaZZuZ5aSUGjJMYmUI8TjFKGZpbmJsbmZiYGZuZG-lZmpmmFGSUmGaXOBd4MAWxuRi6uJlZRtlwMTv7RQqCY5Phg70Uc2iwi-IOh6ZHx29IOWiB5AxhcoEwRiRMPok1NU83IiJjhXgBYxejoACjB2MEYwVjAyPjC0bGD4yMqxgZNjAy7mD8DwOMrxhBFgAAlIWDJWcCAAA&masterhotelid_tracelogid=100051355-0a8f2031-497395-223390&detailFilters=17%7C1%7E17%7E1*31%7C132995703%7E31%7E132995703*80%7C0%7C1%7E80%7E0*29%7C1%7E29%7E1%7C2&display=exavg&subStamp=360&isCT=true&isFlexible=F&locale=en-XX' }],
       includes: [
         'Two nights, 4 → 5 and 5 → 6 March, below Jade Dragon Snow Mountain.',
         'Breakfast included on both mornings.',

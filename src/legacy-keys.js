@@ -61,3 +61,30 @@ export function viewAs(v, dir, seed) {
   for (const [k, x] of Object.entries(v)) out[k] = k === 'key' ? to : k === 'name' ? (s ? s.name : to) : k === 'stay' ? (s && s.stay ? s.stay : null) : x;
   return out;
 }
+
+/* ============================================================================
+   THE CLOSING HOTEL — SOURCE NORMALISATION (Owner decision, 28 Sep 2026 · ABSOLUTE)
+   The guests' hotel for 6 – 8 March 2027 is Hotel Muse Bangkok, Autograph Collection · the Jatu Room. 002_Accommodation_Details
+   says so; other tabs of the Operations Master (001_Overview_Hotel_Restaurant Day 14 – 16, 000_Master_Timeline, 003 contextual
+   copy) may still name the Siam Kempinski as the hotel. Those are stale remnants: whatever a secondary source says, a hotel,
+   check-in, check-out, hotel breakfast, overnight stay or transfer endpoint of these nights is Hotel Muse Bangkok.
+
+   The Siam Kempinski survives ONLY as the physical location of two real venues the guests visit — ALATi (Sunday brunch) and
+   Firefly Bar (drinks) — never as where they stay. Gate K1 (src/release-check.cjs) enforces this on every served source.
+   ========================================================================== */
+export const CLOSING_HOTEL = Object.freeze({ name: 'Hotel Muse Bangkok, Autograph Collection', room: 'Jatu Room', dates: '6 – 8 March 2027', stage: 'kempinski', key: 'kempinski/jatu-room' });
+/* the only guest-facing Kempinski words: a venue's own location, on that venue's own record */
+export const KEMPINSKI_VENUES = Object.freeze({ 'bkk-alati': 'Siam Kempinski Hotel Bangkok', 'bkk-firefly': 'Siam Kempinski Hotel Bangkok' });
+/* a HOTEL value read from any source for the closing nights: a stale Kempinski value is Hotel Muse Bangkok; anything else as is */
+export function closingHotel(value) {
+  const v = String(value == null ? '' : value).trim();
+  return !v || /kempinski/i.test(v) ? CLOSING_HOTEL.name : v;
+}
+/* a TRANSFER / itinerary line read from a secondary source (000_Master_Timeline): every Siam Kempinski HOTEL endpoint is Hotel
+   Muse Bangkok — "Siam Kempinski - Bangkok-Suvarnabhumi (BKK)" is the checkout transfer from Hotel Muse. A line that names one of
+   the two venues (ALATi, Firefly Bar) keeps its real location: going there is a trip to a venue, not to the hotel. */
+export function closingTransfer(text) {
+  const t = String(text == null ? '' : text);
+  if (/\bALATi\b|\bFirefly\b/i.test(t)) return t;
+  return t.replace(/(?:Hotel\s+)?Siam\s+Kempinski(?:\s+Hotel)?(?:\s+Bangkok)?|\bKempinski\b/gi, CLOSING_HOTEL.name);
+}

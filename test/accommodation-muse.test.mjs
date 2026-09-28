@@ -58,8 +58,9 @@ test('THE BOOKING METHOD (002 · "Note for Guest") · self-booking stays name th
   assert.equal(b('bkk-stay').method, 'self'); assert.match(b('bkk-stay').url, /^https:\/\/www\.trip\.com\/hotels\/detail\/\?.*hotelId=1530783.*checkIn=2027-02-21&checkOut=2027-02-24/);
   assert.equal(b('kmg').method, 'self'); assert.match(b('kmg').url, /^https:\/\/www\.trip\.com\/.*checkIn=2027-03-01&checkOut=2027-03-04/);
   assert.equal(b('kempinski').method, 'self'); assert.match(b('kempinski').url, /^https:\/\/www\.marriott\.com\/en-us\/hotels\/bkkhm-hotel-muse-bangkok-autograph-collection\//);
-  /* LUYE BAISHA: the sheet's link is for 06 – 08 March, the stay is 04 – 06 March — isolated, never published */
-  assert.equal(b('ljg').method, 'self'); assert.equal(b('ljg').url, '', 'no link whose dates contradict the stay');
+  /* LUYE BAISHA: the Owner corrected the sheet's link (28 Sep 2026) — the stay's own 4 → 6 March; the former 6 → 8 March link is gone */
+  assert.equal(b('ljg').method, 'self'); assert.match(b('ljg').url, /^https:\/\/www\.trip\.com\/hotels\/detail\/\?cityEnName=Yulong&cityId=21360&hotelId=132995703&checkIn=2027-03-04&checkOut=2027-03-06&/);
+  assert.doesNotMatch(src('assets/rooms-data.js'), /checkIn=2027-03-06/, 'no 6 → 8 March Luye Baisha link anywhere');
   for (const win of ['prewed', 'wedstay', 'guesthouse']) assert.equal(b(win).method, 'bride-groom', win);
   /* every CTA opens in a new tab, never an invoice of the Bride & Groom */
   for (const f of ['journeys.html', 'room.html', 'your-journey.html', 'cart.html']) {
@@ -78,12 +79,13 @@ test('HOTEL MUSE BANGKOK · ONE product, the Jatu Room, 6 – 8 March 2027, two 
   assert.equal(w.SIYL_ROOMS.kempinski, undefined);
 });
 
-test('NO KEMPINSKI ON ANY GUEST-FACING PAGE · every page, the data it reads and the Thai catalogue', () => {
+test('NO KEMPINSKI AS A HOTEL ON ANY GUEST-FACING PAGE · every page, the data it reads and the Thai catalogue — only ALATi\'s and Firefly Bar\'s real location names it', () => {
   const pages = readdirSync(ROOT).filter((f) => f.endsWith('.html'));
   const data = ['assets/rooms-data.js', 'assets/pricing.js', 'assets/journey.js', 'assets/stay.js', 'assets/experiences.js', 'assets/transport-data.js', 'assets/aman.js', 'assets/stay-media.js', 'assets/stay-art.js', 'src/i18n-th.json'];
   for (const f of pages.concat(data)) {
     let t; try { t = src(f); } catch (e) { continue; }
-    assert.doesNotMatch(strip(t), /Kempinski|images\/kempinski\/|kempinski-0\d\.jpg/, f + ' still shows the Siam Kempinski');
+    const u = strip(t).replace(/(\{ id: 'bkk-(?:alati|firefly)'[^\n]*?)where: 'Siam Kempinski Hotel Bangkok'/g, '$1where: VENUE').replace(/"Siam Kempinski Hotel Bangkok"/g, 'VENUE');
+    assert.doesNotMatch(u, /Kempinski|images\/kempinski\/|kempinski-0\d\.jpg|Deluxe Balcony King/, f + ' still shows the Siam Kempinski');
   }
 });
 

@@ -492,6 +492,44 @@ gate('P7', 'Dress Code imagery real (23 — resort-01 retired by the owner), no 
   || '23 owner dress images across 4 groups (resort 02–06); no visible arrow/expand icon; invisible in-lightbox tap-zone + dots navigation present');
 
 
+/* GATE K1 — THE CLOSING HOTEL IS HOTEL MUSE (Owner decision, 28 Sep 2026 · ABSOLUTE · src/legacy-keys.js). Every SERVED source
+ * (the pages and everything under assets/, comments aside) is scanned: the Siam Kempinski is never the guests' hotel — its name
+ * appears only as the physical location of the two real venues on their own records (ALATi, Firefly Bar); no Kempinski room,
+ * frame or link is served; the replaced room is read only through the client's legacy map; the stay of 6 – 8 March is Hotel Muse
+ * Bangkok's Jatu Room; and the Luye Baisha link is the stay's own 4 → 6 March (never the former 6 → 8 March link). A stale
+ * secondary tab of the Operations Master can therefore never bring the Kempinski back as a hotel in a future build. */
+{
+  const vm = require('vm');
+  const strip = (t) => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '').replace(/<!--[\s\S]*?-->/g, '');
+  const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => e.isDirectory() ? walk(path.join(d, e.name)) : [path.join(d, e.name)]);
+  const served = fs.readdirSync(ROOT).filter((f) => f.endsWith('.html') && f !== 'register-landing.html').map((f) => path.join(ROOT, f))
+    .concat(walk(path.join(ROOT, 'assets')).filter((f) => /\.(js|json|html|txt|webmanifest)$/.test(f) && !f.includes(path.join('assets', 'images', 'incoming'))));
+  const bad = [];
+  let venues = 0;
+  for (const f of served) {
+    const rel = path.relative(ROOT, f); let t = strip(fs.readFileSync(f, 'utf8'));
+    if (rel === path.join('assets', 'experiences.js')) {
+      for (const id of ['bkk-alati', 'bkk-firefly']) { const re = new RegExp("(\\{ id: '" + id + "'[^\\n]*?)where: 'Siam Kempinski Hotel Bangkok'"); if (re.test(t)) { venues++; t = t.replace(re, '$1where: \'<venue>\''); } }
+    }
+    if (rel === path.join('assets', 'pricing.js')) t = t.replace("var LEGACY_ROOMS = { kempinski: { 'deluxe-balcony-king': 'jatu-room' } };", '');
+    t = t.replace(/"Siam Kempinski Hotel Bangkok"/g, '"<venue>"');   /* the Thai catalogue keeps the venue location untranslated */
+    if (/Kempinski/.test(t)) bad.push(rel + ': names the Siam Kempinski outside a venue location');
+    if (/images\/kempinski\/|kempinski-0\d\.(jpe?g|webp)|Deluxe Balcony King|deluxe-balcony-king/i.test(t)) bad.push(rel + ': serves a Kempinski room, name or frame');
+    if (/hotelId=132995703[^'"\s]*checkIn=2027-03-06|checkIn=2027-03-06&checkOut=2027-03-08/.test(t)) bad.push(rel + ': the former 6 → 8 March Luye Baisha link');
+  }
+  if (venues !== 2) bad.push('assets/experiences.js: ALATi and Firefly Bar must name their real location (' + venues + ' of 2)');
+  const sb = { window: {} }; sb.window.window = sb.window; vm.createContext(sb);
+  try { vm.runInContext(fs.readFileSync(path.join(ROOT, 'assets/rooms-data.js'), 'utf8'), sb); } catch (e) { bad.push('assets/rooms-data.js does not evaluate: ' + e.message); }
+  const R = sb.window.SIYL_ROOMS || {};
+  const at = Object.values(R).find((st) => (st.windows || []).some((w) => w.id === 'kempinski'));
+  if (R.kempinski) bad.push('a Kempinski stay record is served');
+  if (!at || at.name !== 'Hotel Muse Bangkok, Autograph Collection' || (at.rooms || []).map((r) => r.slug).join() !== 'jatu-room') bad.push('the 6 – 8 March stay is not Hotel Muse Bangkok · the Jatu Room');
+  const lj = R.lijiang && R.lijiang.windows.find((w) => w.id === 'ljg');
+  if (!lj || lj.booking !== 'self' || !/^https:\/\/www\.trip\.com\/hotels\/detail\/\?[^\s]*hotelId=132995703[^\s]*checkIn=2027-03-04&checkOut=2027-03-06/.test(lj.bookingUrl || '')) bad.push('the Luye Baisha self-booking link is not the stay\'s own 4 → 6 March');
+  gate('K1', 'The closing hotel is Hotel Muse Bangkok: no stale Kempinski hotel, room, frame or link is served; ALATi and Firefly Bar keep their real location; Luye Baisha links its own 4 → 6 March',
+    bad.length === 0, bad.length ? bad.slice(0, 6).join(' · ') : served.length + ' served sources clean · ALATi and Firefly Bar at the Siam Kempinski Hotel Bangkok (venues) · the Jatu Room of Hotel Muse Bangkok · Luye Baisha 4 → 6 March');
+}
+
 /* GATE L1 — localization completeness (HSW-001 P0 §8/§20).
  * The catalog is regenerated from the ACTUAL page sources on every run, so a
  * newly added English string fails the release until it is translated. */

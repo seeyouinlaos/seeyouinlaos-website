@@ -101,8 +101,8 @@ export const SEED = {
 
   /* ------------------------------------------------------ Bangkok, closing */
   /* HOTEL MUSE BANGKOK, AUTOGRAPH COLLECTION (002 · V24: three rooms, V14: two adults — 28 Sep 2026). The Siam Kempinski's
-     'kempinski/deluxe-balcony-king' is gone: its holds are nobody's any more (Rooms.occupancies skips a key the seed no longer
-     has) and stay in storage as history; nothing is moved to this room. The stage keeps its id. */
+     'kempinski/deluxe-balcony-king' is not offered any more, but a hold stored under it is the SAME hold of this room — read as
+     it by the engine (src/legacy-keys.js · Rooms.occupancies), same guest, unit and time, counted once. The stage keeps its id. */
   'kempinski/jatu-room':
     { unit: 'room', capacity: 3, occupancy: 2, held: 0, name: 'Jatu Room', stay: 'Hotel Muse Bangkok, Autograph Collection' }
 };
