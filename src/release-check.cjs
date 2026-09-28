@@ -673,6 +673,21 @@ gate('P7', 'Dress Code imagery real (23 — resort-01 retired by the owner), no 
       if (!streams.some((x) => /^video,h264,yuv420p$/.test(x))) problems.push(d.src + ': not H.264 yuv420p (' + streams.join(' · ') + ')');
     }
   }
+  /* THE SOURCE ITSELF (28 Sep 2026): a card may also name its Owner's HEVC bytes (data-video-hevc), offered first — the same
+     file rules, and it must be HEVC tagged hvc1 (the tag Safari requires); the H.264 of data-video stays for every other browser */
+  for (const f of fs.readdirSync(ROOT).filter((x) => /\.html$/.test(x))) {
+    for (const m of read(f).matchAll(/data-video-hevc="([^"]*)"/g)) {
+      const src = m[1], file = path.join(ROOT, src);
+      if (!/^assets\/video\/[a-z0-9-]+\.mp4$/.test(src)) { problems.push(f + ': ' + src + ' is not a same-origin assets/video/*.mp4'); continue; }
+      if (!fs.existsSync(file)) { problems.push(f + ': ' + src + ' missing'); continue; }
+      if (fs.readFileSync(file).subarray(0, 4096).toString('latin1').indexOf('moov') < 0) problems.push(src + ': moov atom not at the start (faststart)');
+      if (ffprobe) {
+        const r = spawnSync(ffprobe, ['-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=codec_name,codec_tag_string', '-of', 'csv=p=0', file], { encoding: 'utf8' });
+        if (!/^hevc,hvc1/.test((r.stdout || '').trim())) problems.push(src + ': not HEVC tagged hvc1 (' + (r.stdout || '').trim() + ')');
+      }
+      decl.push({ page: f, src });
+    }
+  }
   /* the ambient module never lets a card clip speak: muted as a property and as an attribute, before play() */
   const am = read('assets/aman.js');
   if (!/v\.muted = true; v\.defaultMuted = true;/.test(am) || !/v\.setAttribute\('muted', ''\)/.test(am)) problems.push('assets/aman.js: the card clip is not muted before it plays');

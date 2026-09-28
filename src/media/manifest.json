@@ -6021,8 +6021,40 @@
      "size": 18901028,
      "modifiedTime": "2026-09-26T07:17:48.349Z",
      "kind": "video",
-     "status": "pending",
-     "note": "larger than the Drive connector delivers (a hard 10 MB limit: \"File too large for download, over limit of 10 MB\", 28 Sep 2026) and no copy of these bytes exists on this machine: the Owner uploads the file (18 901 028 bytes) into the chat with the next sync request; the Vientiane card keeps its current film until then"
+     "status": "synced",
+     "w": 1920,
+     "h": 1080,
+     "aspect": 1.778,
+     "width": 1920,
+     "height": 1080,
+     "fps": 29.97,
+     "duration": 28.61,
+     "videoFrames": 857,
+     "codec": "hevc",
+     "bitrate": 5150433,
+     "audio": true,
+     "audioFrames": 1234,
+     "audioBitrate": 128209,
+     "asset": "assets/video/vientiane-journey-card.mp4",
+     "assetSource": "assets/video/vientiane-journey-card-hevc.mp4",
+     "slots": [
+      {
+       "route": "/index.html",
+       "role": "card"
+      }
+     ],
+     "syncedAt": "2026-09-28T07:45:00Z",
+     "poster": "assets/images/city/002-vientiane-journey-card-poster.jpg",
+     "quality": {
+      "source": "assets/video/vientiane-journey-card-hevc.mp4 — the Owner's bytes, a lossless remux (HEVC Main, hvc1, level 5.0), offered FIRST by its codec: every browser that decodes HEVC plays the source itself",
+      "fallback": "assets/video/vientiane-journey-card.mp4 — H.264 High, two-pass 6.8 Mb/s (above the source's 5.15 Mb/s), veryslow, tune film, every frame kept, sound copied; for browsers without HEVC only",
+      "bitrate": 6806152,
+      "vmaf": 98.48,
+      "vmafMin": 88.43,
+      "ssim": 0.9851,
+      "why": "gate V1 needs an H.264 for every browser, and a static asset may not exceed 25 MiB: an H.264 equal to the source on every frame (CRF 16 · 51 MB, CRF 18 · 42 MB) cannot be served, so the source itself is served wherever it can play and the best H.264 that fits (24.8 MB) only where it cannot"
+     },
+     "note": "The Owner's upload of 28 Sep 2026 — 18 901 028 bytes, byte-for-byte this Drive file's size. Vientiane from above by day (Lane Xang Avenue, Patuxai, Pha That Luang). Sound: real (−23 dB) — ambient card: muted, no controls, the sound kept in the file. Original: _asset_originals/002-vientiane-card-film/source.mp4."
     },
     {
      "driveId": "1sSlqH2TK-30XiVMAVDadqh_suJw0CxUA",
@@ -7729,13 +7761,9 @@
        "route": "/destination.html",
        "role": "destination-film",
        "focal": "50% 50%"
-      },
-      {
-       "route": "/index.html",
-       "role": "card",
-       "focal": "50% 50%"
       }
-     ]
+     ],
+     "note": "The first page's Vientiane card plays 002 \"02 - Laos - Vientiane.mp4\" since 28 Sep 2026 (the Drive folder is the placement instruction); this film stays the chapter's own on destination.html."
     },
     {
      "driveId": "1f1B9S1JguAu_lgwdV3oDEAmS01WBeA-U",

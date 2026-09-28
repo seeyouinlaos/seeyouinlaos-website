@@ -282,11 +282,22 @@
     v.setAttribute('aria-hidden', 'true'); v.setAttribute('tabindex', '-1'); v.disablePictureInPicture = true;
     var poster = (frame.style.backgroundImage || '').replace(/^url\(["']?|["']?\)$/g, '');
     if (poster) v.setAttribute('poster', poster);
+    /* THE SOURCE ITSELF FIRST (Owner, 28 Sep 2026 · source quality is the minimum): a card whose Owner film is HEVC names those
+       bytes in data-video-hevc (a lossless remux) — offered first, by its exact codec, so every browser that decodes HEVC
+       (Safari and iOS, Chrome and Edge with the hardware) plays the source; the H.264 of data-video is the second source, for
+       the rest. A browser that cannot play the first simply moves on; only the last source's failure leaves the photograph. */
+    var hevc = frame.getAttribute('data-video-hevc');
+    var h = null;
+    if (hevc) { h = document.createElement('source'); h.src = hevc.replace(/^(?:\.\/)?assets\/video\/([a-z0-9-]+\.mp4)$/, 'media/$1'); h.type = 'video/mp4; codecs="hvc1.1.6.L150.90"'; v.appendChild(h); }
     var s = document.createElement('source'); s.src = src.replace(/^(?:\.\/)?assets\/video\/([a-z0-9-]+\.mp4)$/, 'media/$1'); s.type = 'video/mp4';   /* the byte-range route: Safari plays it */
     v.appendChild(s);
     var fail = function () { unmountVideo(frame); frame.setAttribute('data-video-state', 'still'); };
     s.addEventListener('error', fail);
-    v.addEventListener('error', fail);
+    /* a browser that said it decodes HEVC and then cannot: the H.264 once, before the photograph */
+    v.addEventListener('error', function () {
+      if (h && h.parentNode && v.currentSrc === h.src) { h.parentNode.removeChild(h); try { v.load(); var p = v.play(); if (p && p.then) p.then(null, function () {}); } catch (e) { fail(); } return; }
+      fail();
+    });
     v.addEventListener('playing', function () { frame.classList.add('am-playing'); frame.setAttribute('data-video-state', 'playing'); });
     frame.setAttribute('data-video-state', 'loading');
     frame.insertBefore(v, frame.firstChild);

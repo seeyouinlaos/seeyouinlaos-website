@@ -92,7 +92,9 @@ test('THE VIENTIANE FILM · the Owner\'s "night of Vientiane" replaces the Buddh
   assert.ok(probe.some((l) => /^h264,video,720,1280,yuv420p$/.test(l)), 'the source geometry, untouched');
   assert.ok(probe.some((l) => /^aac,audio/.test(l)), 'the source sound, kept in the file');
   assert.match(src('assets/aman.js'), /v\.muted = true; v\.defaultMuted = true;/, 'the card clip never speaks');
-  for (const page of ['index.html', 'destination.html']) {
+  /* 28 Sep 2026: the first page's Vientiane card plays the Drive 002 card film (test/vientiane-card-film.test.mjs); the night of
+     Vientiane stays the chapter's own film on destination.html */
+  for (const page of ['destination.html']) {
     const s = src(page);
     /* PRQ-07a-10: the index card is a link and no longer carries role="img" (announced as a link with its name); destination.html keeps it */
     assert.match(s, page === 'index.html' ? /data-video="assets\/video\/vientiane-card\.mp4" style="background-image:url\(assets\/images\/city\/002-vientiane-card-poster\.jpg\)" aria-label="A night of Vientiane — the train at the platform, the neon streets of the evening"/ : /data-video="assets\/video\/vientiane-card\.mp4" style="background-image:url\(assets\/images\/city\/002-vientiane-card-poster\.jpg\)" role="img" aria-label="A night of Vientiane — the train at the platform, the neon streets of the evening"/, page);
