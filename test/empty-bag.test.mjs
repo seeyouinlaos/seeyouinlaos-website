@@ -140,7 +140,7 @@ test('CLIENT · a hold is a Bag line with its amount and the guest\'s to give ba
   const bkk = P.quote('bkk-stay', 'u-sathorn-superior-garden').total;
   /* THE DELETED SHAMA (Owner, 24 Sep 2026): Bangkok's one alternative left is U Sathorn — a Shama room cannot be selected and nothing changes */
   await ST.select('bkk-stay', 'shama-king-studio-balcony');
-  assert.ok(!B.get().some((x) => /shama/i.test((x.room || '') + (x.name || '') + (x.meta || ''))), 'no Bag line names Shama'); assert.equal(bkk, 192, 'U Sathorn: USD 64 × 3 nights');
+  assert.ok(!B.get().some((x) => /shama/i.test((x.room || '') + (x.name || '') + (x.meta || ''))), 'no Bag line names Shama'); assert.equal(bkk, 203.42, 'U Sathorn: USD 67.805 × 3 nights, to the cent (the live 002, 28 Sep 2026)');
   assert.deepEqual((await rooms.view(ident(PEGGY))).mine, { 'bkk-stay': { key: 'bkk-stay/u-sathorn-superior-garden', label: 'A' } }, 'the engine hold is untouched'); assert.equal(B.get().length, 1); assert.equal(B.get()[0].room, 'u-sathorn-superior-garden'); assert.equal(B.total(), bkk);
   /* ONE selection per stage: another address of the same stage replaces the line and the hold (a stage that still has two alternatives) */
   const s1 = await ST.select('prewed', 'heritage'); assert.equal(s1.ok, true);
@@ -165,12 +165,12 @@ test('CLIENT · a hold is a Bag line with its amount and the guest\'s to give ba
   const r2 = await ST.remove('bkk-stay'); assert.deepEqual(plain(r2), { ok: true });
   assert.deepEqual(plain(await ST.remove('prewed')), { ok: true }); assert.equal((await rooms.view(ident(PEGGY))).mine.prewed, undefined);
   const r3 = await ST.remove('wedstay'); assert.deepEqual(plain(r3), { ok: true }); assert.deepEqual(plain(B.get()), []); assert.equal(B.total(), 0); assert.deepEqual((await rooms.view(ident(PEGGY))).mine, {});
-  /* A FULL ROOM IS REFUSED: two guests — a host among them, who is just a guest — fill the Noble Courtyard's one room */
-  assert.equal((await call(rooms, 'join', { invitationId: LIN.invitationId, guestId: LIN.guestId, key: 'prewed/noble-courtyard', label: 'A', name: 'Lin' }, ident(LIN))).status, 200);
-  assert.equal((await call(rooms, 'join', { invitationId: HARUTHAI.invitationId, guestId: HARUTHAI.guestId, key: 'prewed/noble-courtyard', label: 'A', name: 'Haruthai' }, ident(HARUTHAI))).status, 200);
-  await U.load(true); assert.equal(U.soldOut('prewed', 'noble-courtyard'), true); assert.equal(U.label('prewed', 'noble-courtyard'), 'Sold out');
-  const f1 = await ST.select('prewed', 'noble-courtyard', 'A'); assert.deepEqual(plain(f1), { ok: false, error: 'full' });
-  const f2 = await ST.select('prewed', 'noble-courtyard'); assert.deepEqual(plain(f2), { ok: false, error: 'full' });
+  /* A FULL ROOM IS REFUSED: two guests — a host among them, who is just a guest — fill the Noble Courtyard's one room (the Wedding Stay's: since the live 002, 28 Sep 2026, the suite is not a pre-wedding room) */
+  assert.equal((await call(rooms, 'join', { invitationId: LIN.invitationId, guestId: LIN.guestId, key: 'wedstay/noble-courtyard', label: 'A', name: 'Lin' }, ident(LIN))).status, 200);
+  assert.equal((await call(rooms, 'join', { invitationId: HARUTHAI.invitationId, guestId: HARUTHAI.guestId, key: 'wedstay/noble-courtyard', label: 'A', name: 'Haruthai' }, ident(HARUTHAI))).status, 200);
+  await U.load(true); assert.equal(U.soldOut('wedstay', 'noble-courtyard'), true); assert.equal(U.label('wedstay', 'noble-courtyard'), 'Sold out');
+  const f1 = await ST.select('wedstay', 'noble-courtyard', 'A'); assert.deepEqual(plain(f1), { ok: false, error: 'full' });
+  const f2 = await ST.select('wedstay', 'noble-courtyard'); assert.deepEqual(plain(f2), { ok: false, error: 'full' });
   assert.equal(ST.refusal(f1), 'Someone took the last place in this room a moment ago. Nothing in your trip has changed — please choose another room.', 'TO-01272'); assert.deepEqual(plain(B.get()), [], 'a refusal writes nothing');
   /* A ROOM TOO SMALL FOR THE PARTY: one place left, a party of two — refused, nothing partial */
   assert.equal((await call(rooms, 'join', { invitationId: LIN.invitationId, guestId: LIN.guestId, key: 'wedstay/souphattra-majestic', label: 'A', name: 'Lin' }, ident(LIN))).status, 200);

@@ -53,6 +53,7 @@ import { identify, owns, loadIndex } from './auth.js';
 import { MEDIA_SIZES } from './media-sizes.js';
 import { giftsFor, verifiedLines } from './gifts.js';   /* the Bride & Groom's hospitality: one guest's own charge (Owner, 28 Sep 2026) */   /* every film's size, written at build time (src/build-media-sizes.cjs) */
 import { SEED } from './inventory-seed.js';
+import { canonicalKey, canonicalLines, lineAs, viewAs } from './legacy-keys.js';   /* the replaced Kempinski room read as Hotel Muse Bangkok's Jatu Room (28 Sep 2026) */
 import { stageOf } from './rooms.js';
 import { composeGuestMail, composeOwnerMail } from './mail-templates.js';
 import { completion as graphCompletion, normalizeScope as graphScope, isRelevant as graphRelevant, STAGES as GRAPH_STAGES, STAGE_IDS as GRAPH_IDS, participationOf as graphParticipation, partyNeed as graphPartyNeed, travelsIn as graphTravels } from './stage-graph.js';
@@ -572,7 +573,8 @@ async function handleRegister(request, env) {
      holds that gift — the emails and Guest Relations never read a gift a device merely claims */
   if (registration && Array.isArray(registration.selections)) {
     const person = await personOf(env, new URL(request.url).origin, who);
-    registration.selections = verifiedLines(registration.selections, giftsFor(person && person.contactId));
+    /* a line of the former Kempinski room is written as its successor (only the canonical key is ever written) */
+    registration.selections = verifiedLines(canonicalLines(registration.selections), giftsFor(person && person.contactId));
   }
   /* THE ONE VALIDATOR (Owner, 21 Sep 2026 · the global My Trip rebuild): the same graph the pages read decides here whether the
      trip is complete — every relevant stage answered (a hold or a waiting-list place the engine persists, a chosen transport,
@@ -589,7 +591,7 @@ async function handleRegister(request, env) {
          CONTENT one (PRQ-01-06) — stamps (at · by · history) left out, so a save that changes nothing, or a change undone, never
          reads as a change */
       const fps = await journeyFingerprints(env, who);
-      const draftFingerprint = fps.v1, contentFingerprint = fps.v2, selectionFingerprint = fps.v3;
+      const draftFingerprint = fps.v1, contentFingerprint = fps.v2, selectionFingerprint = await canonicalV3(fps, fps.rooms, fps.seats);
       const now = new Date().toISOString();
       record = { invitationId, submittedAt: isUpdate ? existing.submittedAt : submittedAt, submissionId, version, kind: isUpdate ? 'update' : 'initial',
         firstSentAt: isUpdate ? (existing.firstSentAt || existing.submittedAt) : submittedAt, lastSentAt: now, updatedAt: now,
@@ -756,7 +758,7 @@ function contentOf(v) {
    room, class, menu, quantity and unit — never what the website charges for it. An amount the website corrects (a rate, a line's
    price, its wording and frame) is derived from the selection, so a host-side correction never reads as a change of the guest's. */
 /* `gift` (Owner, 28 Sep 2026 · src/gifts.js): who pays is the Bride & Groom's decision, never a change of the guest's selection */
-const DERIVED_LINE_KEYS = new Set(['price', 'rate', 'roomRate', 'pay', 'nightsList', 'windowFixed', 'note', 'noteBy', 'breakfast', 'img', 'name', 'meta', 'basis', 'unitName', 'gift']);
+const DERIVED_LINE_KEYS = new Set(['price', 'rate', 'roomRate', 'pay', 'nightsList', 'windowFixed', 'note', 'noteBy', 'breakfast', 'img', 'name', 'meta', 'basis', 'unitName', 'gift', 'personal']);   /* `personal` (28 Sep 2026): a personal rate is who pays, not what was chosen */
 function selectionOf(content) {
   const c = contentOf(content);
   const bag = c && c.draft && Array.isArray(c.draft['siyl.bag']) ? c.draft['siyl.bag'] : null;
@@ -770,6 +772,10 @@ const SOUPHATTRA_NOW = {
   prewed: { heritage: 112.5, 'heritage-executive': 130, 'heritage-grand-premier': 162.5, 'noble-courtyard': 247.5, 'grand-majestic': 345, 'souphattra-majestic': 385, 'souphattra-presidential': 1095 },
   wedstay: { heritage: 145, 'heritage-executive': 155, 'heritage-grand-premier': 170, 'noble-courtyard': 195, 'grand-majestic': 250, 'souphattra-majestic': 200, 'souphattra-presidential': 750 }
 };
+/* THE LIVE 002 CORRECTION (28 Sep 2026) — only to recognise a trip sent before it without a selection fingerprint: [now, before]
+   per person per night of every room whose rate the Operations Master corrected. Never an amount the website shows or charges. */
+const RATES_0928 = { 'bkk-stay': { 'u-sathorn-superior-garden': [67.805, 64] }, kmg: { 'elegant-residence': [39.12, 42], 'jinri-family-suite': [42.89, 43] },
+  ljg: { 'private-soup-view': [116.37, 125], 'view-suite-270': [108.435, 120] } };
 /* the draft as it read before the correction: a corrected Souphattra line back at its former rate — nothing else is touched */
 function beforeCorrection(d) {
   if (!d || !d.keys || typeof d.keys['siyl.bag'] !== 'string') return null;
@@ -777,6 +783,8 @@ function beforeCorrection(d) {
   if (!Array.isArray(bag)) return null;
   let changed = false;
   const back = bag.map((l) => {
+    const r28 = l && RATES_0928[l.id] && RATES_0928[l.id][l.room];
+    if (r28 && l.rate === r28[0]) { changed = true; const pay = Number(l.pay) || 1; return { ...l, rate: r28[1], price: Math.round(r28[1] * pay * 100) / 100 }; }
     const now = l && SOUPHATTRA_NOW[l.id] && SOUPHATTRA_NOW[l.id][l.room], was = l && SOUPHATTRA_BEFORE[l.room];
     if (now == null || was == null || l.rate !== now || now === was) return l;
     changed = true; const pay = Number(l.pay) || (l.id === 'prewed' ? 2 : 1);
@@ -789,15 +797,33 @@ function beforeCorrection(d) {
 function withoutGifts(d) {
   if (!d || !d.keys || typeof d.keys['siyl.bag'] !== 'string') return null;
   let bag; try { bag = JSON.parse(d.keys['siyl.bag']); } catch (e) { return null; }
-  if (!Array.isArray(bag) || !bag.some((l) => l && l.gift)) return null;
-  const back = bag.map((l) => { if (!l || !l.gift) return l; const { gift, ...rest } = l; const rate = Number(rest.rate), pay = Number(rest.pay) || 1; if (Number.isFinite(rate)) rest.price = Math.round(rate * pay * 100) / 100; return rest; });
+  if (!Array.isArray(bag) || !bag.some((l) => l && (l.gift || l.personal))) return null;
+  const back = bag.map((l) => { if (!l || !(l.gift || l.personal)) return l; const { gift, personal, ...rest } = l; const rate = Number(rest.rate), pay = Number(rest.pay) || 1; if (Number.isFinite(rate)) rest.price = Math.round(rate * pay * 100) / 100; return rest; });
   return { ...d, keys: { ...d.keys, 'siyl.bag': JSON.stringify(back) } };
+}
+/* the draft and the guest's engine view with the replaced room in one form ('legacy' · 'canonical'), or null when nothing
+   of it is there — only for comparing fingerprints, never written */
+function replacedAs(d, rooms, dir) {
+  let changed = false, keys = d && d.keys;
+  if (keys && typeof keys['siyl.bag'] === 'string') {
+    let bag = null; try { bag = JSON.parse(keys['siyl.bag']); } catch (e) { bag = null; }
+    if (Array.isArray(bag)) { const alt = bag.map((l) => lineAs(l, dir)); if (alt.some((l, i) => l !== bag[i])) { changed = true; keys = { ...keys, 'siyl.bag': JSON.stringify(alt) }; } }
+  }
+  let r = rooms;
+  if (rooms && typeof rooms === 'object') { const alt = Object.fromEntries(Object.entries(rooms).map(([k, v]) => [k, viewAs(v, dir, SEED)])); if (Object.keys(alt).some((k) => alt[k] !== rooms[k])) { changed = true; r = alt; } }
+  return changed ? { d: { ...d, keys }, rooms: r } : null;
+}
+/* the selection fingerprint of the CANONICAL form (the one a record keeps): a draft or engine view that still names the replaced
+   room is fingerprinted as its successor, so a record never keeps a half-migrated form */
+async function canonicalV3(fps, rooms, seats) {
+  const alt = replacedAs(fps.d, rooms, 'canonical');
+  return alt ? (await fingerprintsOf(alt.d, alt.rooms, seats)).v3 : fps.v3;
 }
 /* v1: the historical fingerprint (every stored record carries it) · v2: the content fingerprint · v3: the selection fingerprint */
 async function journeyFingerprints(env, who, draft) {
   const d = draft === undefined ? await storedDraft(env, who.invitationId) : draft;
   const [rooms, seats] = await Promise.all([engineRooms(env, who), engineSeats(env, who)]);
-  return fingerprintsOf(d, rooms, seats);
+  return { ...(await fingerprintsOf(d, rooms, seats)), rooms, seats };
 }
 /* the same three fingerprints from a draft and the guest's engine views already in hand (Guest Relations' overview reads the
    engines once for everyone — 28 Sep 2026) */
@@ -825,7 +851,7 @@ function submissionStateOf(record, hasUnsentChanges, conf) {
   const stands = confirmationStands(conf, record), confirmed = stands && !hasUnsentChanges;
   return { submissionStatus: hasUnsentChanges ? 'changes-not-sent' : 'sent', submissionId: record.submissionId, submittedAt: record.submittedAt, lastSentAt: record.lastSentAt || record.submittedAt, version: record.version || 1, hasUnsentChanges: !!hasUnsentChanges, mail: record.mailSummary || null,
     /* the last send as the guest's own pages read it: a "not joining" reply or a trip, and the Bag lines it carried */
-    declined: !!(gr.scope && gr.scope.none), sentSelections: Array.isArray(reg.selections) ? reg.selections : [],
+    declined: !!(gr.scope && gr.scope.none), sentSelections: Array.isArray(reg.selections) ? canonicalLines(reg.selections) : [],
     confirmed, confirmedAt: confirmed ? conf.confirmedAt : null, confirmedVersion: conf && conf.confirmedAt ? (conf.version != null ? conf.version : null) : null, lapsed: !!(conf && conf.confirmedAt) && !confirmed };
 }
 /* `pre` (Guest Relations' overview, 28 Sep 2026): the record, the confirmation and the engine views already read for everyone —
@@ -836,21 +862,29 @@ async function submissionFor(env, who, draft, pre) {
   if (!record) return submissionStateOf(null, false);
   let conf = null;
   if (pre) conf = pre.conf || null; else { try { conf = JSON.parse(await env.REG_KV.get('conf:' + who.invitationId) || 'null'); } catch (e) { conf = null; } }
-  const fpsOf = pre ? (dd) => fingerprintsOf(dd, pre.rooms, pre.seats) : (dd) => journeyFingerprints(env, who, dd);
-  const fps = await fpsOf(pre ? draft : (draft === undefined ? undefined : draft));
+  let R0, S0;
+  if (pre) { R0 = pre.rooms; S0 = pre.seats; } else { [R0, S0] = await Promise.all([engineRooms(env, who), engineSeats(env, who)]); }
+  const fpsOf = (dd, rr) => fingerprintsOf(dd, rr === undefined ? R0 : rr, S0);
+  const fps = await fpsOf(pre ? draft : (draft === undefined ? await storedDraft(env, who.invitationId) : draft));
+  /* THE HOTEL MUSE REPLACEMENT (28 Sep 2026) is the website's, not the guest's: a trip sent naming the Siam Kempinski's room
+     (or sent since, while this device still named it) is the same trip — the draft and the engine view in the other form */
+  const otherForms = async () => { const out = []; for (const dir of ['canonical', 'legacy']) { const alt = replacedAs(fps.d, R0, dir); if (alt) out.push(await fpsOf(alt.d, alt.rooms)); } return out; };
   /* a record sent with the selection fingerprint compares selections; an older one its content, the oldest its historical form */
   const legacy = (f) => (record.contentFingerprint ? record.contentFingerprint !== f.v2 : (!!record.draftFingerprint && record.draftFingerprint !== f.v1));
   let unsent;
-  if (record.selectionFingerprint) unsent = record.selectionFingerprint !== fps.v3;
-  else {
+  if (record.selectionFingerprint) {
+    unsent = record.selectionFingerprint !== fps.v3;
+    if (unsent) for (const f2 of await otherForms()) if (record.selectionFingerprint === f2.v3) { unsent = false; break; }
+  } else {
     unsent = legacy(fps);
+    if (unsent) for (const f2 of await otherForms()) if (!legacy(f2)) { unsent = false; break; }
     /* THE SOUPHATTRA CORRECTION (27 Sep 2026) is the website's, not the guest's: a trip sent before it still reads as sent when
        the only difference is the corrected rate */
     if (unsent) { const back = beforeCorrection(fps.d); if (back) { const f2 = await fpsOf(back); if (!legacy(f2)) unsent = false; } }
     /* THE BRIDE & GROOM'S GIFT (28 Sep 2026) is theirs, not the guest's: the same trip with the gift taken back reads as sent */
     if (unsent) { const back = withoutGifts(fps.d); if (back) { const f2 = await fpsOf(back); if (!legacy(f2)) unsent = false; } }
     /* the first time a sent trip is read unchanged, its selection fingerprint is kept with it — from then on only a selection counts */
-    if (!unsent && env.REG_KV && !pre) { try { record.selectionFingerprint = fps.v3; await env.REG_KV.put('reg:' + who.invitationId, JSON.stringify(record), { metadata: { invitationId: who.invitationId, submittedAt: record.submittedAt, submissionId: record.submissionId, version: record.version, lastSentAt: record.lastSentAt } }); } catch (e) { /* compared again next time */ } }
+    if (!unsent && env.REG_KV && !pre) { try { record.selectionFingerprint = await canonicalV3(fps, R0, S0); await env.REG_KV.put('reg:' + who.invitationId, JSON.stringify(record), { metadata: { invitationId: who.invitationId, submittedAt: record.submittedAt, submissionId: record.submissionId, version: record.version, lastSentAt: record.lastSentAt } }); } catch (e) { /* compared again next time */ } }
   }
   return submissionStateOf(record, unsent, conf);
 }
@@ -1126,7 +1160,7 @@ async function handleGrJourneys(request, env) {
     out[n] = { invitationId: inv, guestId: who.guestId, partyId: who.partyId, hosts: who.hosts, contactId: who.contactId || null, couple: who.couple || null, name: rec ? guestNameOf(rec) : null,
       status: sub.submissionStatus, submissionId: sub.submissionId, version: sub.version, submittedAt: sub.submittedAt, lastSentAt: sub.lastSentAt, hasUnsentChanges: sub.hasUnsentChanges,
       draftUpdatedAt: d ? d.updatedAt : null, contact: contact ? publicContact(contact) : (g.contact || null),
-      bag: content['siyl.bag'] || null, wedding: content['siyl.temple'] || null, aboutYou: g.guests ? Object.values(g.guests).map((x) => ({ submitted: x.submitted, profile: x.profile })) : null, documents: content['siyl.docs'] || null,
+      bag: Array.isArray(content['siyl.bag']) ? canonicalLines(content['siyl.bag']) : (content['siyl.bag'] || null), wedding: content['siyl.temple'] || null, aboutYou: g.guests ? Object.values(g.guests).map((x) => ({ submitted: x.submitted, profile: x.profile })) : null, documents: content['siyl.docs'] || null,
       rooms, seats, mail: rec ? (rec.mailSummary || null) : null, text: rec ? rec.text : null, noteAck: noteAckOf(d), rulesAck: rulesAckOf(d) };
   });
   /* THE TWO LIVE ANSWERS FOR THE PLANNER (Owner, 27 Sep 2026): the music of question 06 and the end of the wedding night — the counts,
@@ -1332,7 +1366,7 @@ function roomsViewOf(v) {
   {
     if (!v || !v.ok || !v.mine) return null;
     const out = {};
-    const entry = (m, stage) => { const s = SEED[m.key]; return { stage, key: m.key, label: m.label, name: s ? s.name : m.key, stay: s && s.stay ? s.stay : null, room: s && s.unit === 'guest' ? s.name : 'Room ' + m.label }; };
+    const entry = (m, stage) => { m = { ...m, key: canonicalKey(m.key) }; const s = SEED[m.key]; return { stage, key: m.key, label: m.label, name: s ? s.name : m.key, stay: s && s.stay ? s.stay : null, room: s && s.unit === 'guest' ? s.name : 'Room ' + m.label }; };
     for (const [stage, m] of Object.entries(v.mine)) out[stage] = entry(m, stage);
     /* THE WAITING LIST (Owner, 19 Sep 2026): a stage the guest waits for, with the position — no product, no amount */
     for (const [stage, w] of Object.entries(v.waitlist || {})) if (!out[stage]) out[stage] = { stage, waitlisted: true, position: w.position, since: w.at, size: w.size || 1 };

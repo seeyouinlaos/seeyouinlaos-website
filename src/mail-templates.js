@@ -16,6 +16,8 @@
    come from the schema every page reads — this file keeps no copy of its own */
 import { PROFILE as Q_PROFILE, display, displayList, FINALE } from './questionnaire.js';
 import { isRelevant as stageRelevant, normalizeScope as scopeOf } from './stage-graph.js';
+import { canonicalLines, viewAs } from './legacy-keys.js';
+import { SEED as ROOM_SEED } from './inventory-seed.js';   /* a record naming the replaced Kempinski room reads as Hotel Muse Bangkok (28 Sep 2026) */
 /* THE GUEST'S LANGUAGE (Owner, 24 Sep 2026 · EN / TH): a guest who chose Thai receives their copy in Thai — the same authored
    dictionary as the pages (src/i18n-th.json → src/i18n-th.dict.js), the same locale core. The Guest Relations email stays English. */
 import I18N_CORE from './i18n-core.js';
@@ -51,6 +53,9 @@ const SERIF = "Georgia, 'Times New Roman', Times, serif", SANS = "'Helvetica Neu
 const STAGES = ['bkk-stay', 'train', 'prewed', 'wedstay', 'mu9646', 'kmg', 'c86', 'ljg', 'return', 'kempinski'];
 const TRAVEL = new Set(['train', 'mu9646', 'c86', 'return']);
 const STAGE_OF_STAY = { 'bkk-stay': 'bkk-stay', prewed: 'prewed', wedstay: 'wedstay', guesthouse: 'wedstay', kmg: 'kmg', ljg: 'ljg', kempinski: 'kempinski' };
+/* WHO BOOKS EACH STAY (Owner, 28 Sep 2026 · 002 "Note for Guest") — the same words as the guest's pages (assets/rooms-data.js windows) */
+const BOOKING_OF = { 'bkk-stay': 'self', prewed: 'bride-groom', wedstay: 'bride-groom', guesthouse: 'bride-groom', kmg: 'self', ljg: 'self', kempinski: 'self' };
+export const BOOKING_WORDS = { self: 'Guest will book by themselves.', 'bride-groom': 'Will be booked by the bride & groom and charged within 14 days after booking.' };
 /* DATE ORDER (PRQ-04-11): the Guest House (27 February – 1 March) stands between the Pre-Wedding Stay and the Wedding Stay */
 const ORDER_OF = Object.assign({}, ...STAGES.map((id, i) => ({ [id]: i })), { guesthouse: STAGES.indexOf('wedstay') - 0.5 });
 const EVENTS = [
@@ -72,7 +77,7 @@ function profileValue(profile, k) {
 /* a document's state (PRQ-06-11): a key from now on ('none' / 'received'), the older words in records sent before — one reading */
 const docWords = (st) => { const v = String(st || '').trim(); if (/^(received|provided|replaced|reviewed)$/i.test(v)) return 'Received'; if (/^(none|not provided|not added yet|)$/i.test(v)) return 'Not added yet'; return v; };
 /* the amount with its basis (PRQ-04-11): per person, the 1872 tea for the table */
-const perOf = (x) => (x && (x.id === '1872' || x.id === 'tea1872')) ? ' for the table' : ' per person';
+const perOf = (x) => (x && (x.id === '1872' || x.id === 'tea1872')) ? ' for the table' : (x && x.personal === 'employee') ? ' for the room' : ' per person';
 const INTEREST_WORDS = 'Interest · Guest Relations confirms your time · paid at the spa';
 const REQUEST_WORDS = 'Request · Guest Relations will confirm your table';
 const NOT_AT_WEDDING = 'You are not joining us for the wedding in Vientiane.';
@@ -142,7 +147,10 @@ export function journeyModel(record) {
      stage: a line for a stage the engine has WAITLISTED for this guest (a stale device, a replayed draft) is not a stay and
      not a cost; the total is recomputed without it */
   const engineWaits = Object.entries(record.rooms || {}).filter(([, m]) => m && m.waitlisted).map(([k, m]) => m.stage || k);
-  const lines0 = (Array.isArray(r.selections) ? r.selections : (Array.isArray(r.shared) ? r.shared : []));
+  const raw0 = Array.isArray(r.selections) ? r.selections : (Array.isArray(r.shared) ? r.shared : []);
+  /* THE HOTEL MUSE REPLACEMENT (28 Sep 2026): a line of the Siam Kempinski's room reads as the Jatu Room at today's rate, and
+     the total is recomputed from the lines — no amount of a room the website no longer offers is shown */
+  const lines0 = canonicalLines(raw0), replaced = lines0.some((x, i) => x !== raw0[i]);
   /* A DELETED PRODUCT IS NOT CHARGED (Owner, 24 Sep 2026 · Edit 6): the Sathorn Penthouse Bangkok is not a website product any
      more. A record sent before the deletion still carries its line; the line is not a stay and not a cost, and the total is
      recomputed from the lines that remain — the submission itself is history and is never rewritten. */
@@ -151,13 +159,13 @@ export function journeyModel(record) {
   const dropped = lines0.length !== lines.length;
   const order = (x) => (x && Object.prototype.hasOwnProperty.call(ORDER_OF, x.id) ? ORDER_OF[x.id] : 50);
   const sorted = lines.slice().sort((a, b) => order(a) - order(b));
-  const rooms = record.rooms || null;
+  const rooms = record.rooms ? Object.fromEntries(Object.entries(record.rooms).map(([k, v]) => [k, viewAs(v, 'canonical', ROOM_SEED)])) : null;
   const roomOf = (x) => { const st = STAGE_OF_STAY[x.id]; const m = rooms && rooms[st]; if (m && m.room && !m.waitlisted) return m.room; return x.unitName || (x.unit ? 'Room ' + x.unit : ''); };
   /* THE WAITING LIST (Owner, 19 Sep 2026): a stage no defined option could take — named with its position, never an amount */
-  const STAGE_WORDS = { 'bkk-stay': 'Bangkok · Before the Wedding', prewed: 'Vientiane · Pre-Wedding Stay', wedstay: 'Vientiane · Wedding Stay', kmg: 'Kunming', ljg: 'Lijiang', kempinski: 'Bangkok · Siam Kempinski' };
+  const STAGE_WORDS = { 'bkk-stay': 'Bangkok · Before the Wedding', prewed: 'Vientiane · Pre-Wedding Stay', wedstay: 'Vientiane · Wedding Stay', kmg: 'Kunming', ljg: 'Lijiang', kempinski: 'Bangkok · Hotel Muse' };
   const waitlisted = Object.entries(rooms || {}).filter(([, m]) => m && m.waitlisted).map(([k, m]) => ({ stage: m.stage || k, name: STAGE_WORDS[m.stage || k] || (m.stage || k), position: m.position, size: m.size || 1 }));
   const arranged = [];
-  const stays = sorted.filter((x) => (x.stay || STAGE_OF_STAY[x.id])).map((x) => ({ id: x.id, name: x.name, dates: (x.meta || '').split(' · ')[0], category: (x.meta || '').split(' · ').slice(1).join(' · '), room: roomOf(x), price: x.price, per: perOf(x), complimentary: !!x.complimentary, gift: x.gift || '', rate: x.rate, nights: x.nights, note: x.note ? x.note + (x.noteBy ? ' · ' + x.noteBy : '') : '', breakfast: x.breakfast || '', interest: !!x.interest }));
+  const stays = sorted.filter((x) => (x.stay || STAGE_OF_STAY[x.id])).map((x) => ({ id: x.id, name: x.name, dates: (x.meta || '').split(' · ')[0], category: (x.meta || '').split(' · ').slice(1).join(' · '), room: roomOf(x), price: x.price, per: perOf(x), complimentary: !!x.complimentary, gift: x.gift || '', personal: x.personal || '', booking: BOOKING_OF[x.id] || '', rate: x.rate, nights: x.nights, note: x.note ? x.note + (x.noteBy ? ' · ' + x.noteBy : '') : '', breakfast: x.breakfast || '', interest: !!x.interest }));
   const travel = sorted.filter((x) => TRAVEL.has(x.id) || (x.cls && !x.stay)).map((x) => ({ id: x.id, name: x.name, meta: x.meta || '', price: x.price, per: perOf(x) }));
   /* a spa interest and a restaurant request carry their state (PRQ-04-12): an interest is never part of the total */
   const experiences = sorted.filter((x) => !stays.some((s) => s.name === x.name) && !travel.some((t) => t.name === x.name) && x.id !== 'sangkhathan').map((x) => ({ id: x.id, name: x.name, meta: x.meta || '', price: x.price, per: perOf(x), interest: !!x.interest, request: !!x.request, status: x.interest ? INTEREST_WORDS : x.request ? REQUEST_WORDS : '' }));
@@ -207,7 +215,7 @@ export function journeyModel(record) {
      carries — exactly as a record whose stage went to the waiting list is — so no guest is billed for something the website
      no longer offers. Every other stated amount is the device's own one calculation and is left alone. */
   const withdrawn = !!(record.rooms && record.rooms.stayext);
-  const total0 = stated == null ? null : ((dropped || withdrawn) ? linesTotal : stated);
+  const total0 = stated == null ? null : ((dropped || withdrawn || replaced) ? linesTotal : stated);
   const total = total0;
   const upd = record.kind === 'update' && (record.version || 1) > 1;
   /* THE RECOVERY SNAPSHOT (Owner, 25 Sep 2026): everything else the guest submitted that Guest Relations needs to rebuild the
@@ -271,13 +279,13 @@ function shell(title, inner, eyebrow) {
 /* the shared journey sections (guest and Guest Relations read the same facts) */
 const waitWords = (w) => (w.position ? 'Number ' + w.position + ' on the waiting list' : 'On the waiting list') + (w.size > 1 ? ', for ' + w.size + ' places together' : '');
 /* the Bride & Groom's gift (Owner, 28 Sep 2026 · src/gifts.js): a line the Worker verified against the sender's identity */
-const amountOf = (x) => x.gift === 'bride-groom' ? 'Complimentary · from the Bride & Groom' : x.complimentary ? 'Complimentary' : x.interest ? 'Not in your total' : x.price != null ? money(x.price) + (x.per || ' per person') : '';
+const amountOf = (x) => x.gift === 'bride-groom' ? 'Complimentary · from the Bride & Groom' : x.personal === 'employee' ? money(x.price) + ' for the room · personal employee rate, paid in full by the guest' : x.personal === 'special' ? money(x.price) + ' per person · personal special rate' : x.complimentary ? 'Complimentary' : x.interest ? 'Not in your total' : x.price != null ? money(x.price) + (x.per || ' per person') : '';
 const seatValue = (label, hosts) => /^Front/.test(label) ? label : 'Seat ' + label + ' · held for you';
 function journeySections(M, forOwner) {
   let s = '';
   if (M.travel.length) s += section('Travel', M.travel.map((t) => item(t.name, esc(t.meta), t.price != null ? amountOf(t) : '')).join(''));
   if (M.waitlisted && M.waitlisted.length) s += section('On the waiting list', M.waitlisted.map((w) => item(w.name, esc(waitWords(w)) + '. No room yet, and no cost.' + (forOwner ? '' : '<br>We will tell you as soon as a place frees up, and Guest Relations will find an arrangement with you.'), '')).join(''));
-  if (M.stays.length) s += section('Stays', M.stays.map((x) => item(x.name, esc(x.dates) + (x.category ? '<br>' + esc(x.category) : '') + (x.room ? '<br><span style="color:' + INK + ';">' + esc(x.room + (forOwner ? '' : ', held for you')) + '</span>' : '') + (x.breakfast ? '<br>' + esc(x.breakfast) : '') + (x.note ? '<br>' + esc(x.note) : '') + (x.interest ? '<br>' + esc(INTEREST_WORDS) : ''), amountOf(x))).join(''));
+  if (M.stays.length) s += section('Stays', M.stays.map((x) => item(x.name, esc(x.dates) + (x.category ? '<br>' + esc(x.category) : '') + (x.room ? '<br><span style="color:' + INK + ';">' + esc(x.room + (forOwner ? '' : ', held for you')) + '</span>' : '') + (x.breakfast ? '<br>' + esc(x.breakfast) : '') + (x.note ? '<br>' + esc(x.note) : '') + (x.interest ? '<br>' + esc(INTEREST_WORDS) : '') + (x.booking ? '<br>' + esc(BOOKING_WORDS[x.booking]) : ''), amountOf(x))).join(''));
   if (M.experiences.length) s += section('Experiences', M.experiences.map((e) => item(e.name, esc(e.meta) + (e.status ? '<br>' + esc(e.status) : ''), amountOf(e))).join(''));
   /* THE WEDDING FOLLOWS PARTICIPATION (PRQ-04-19): a guest not at the wedding reads one line, never four "Not joining" moments */
   if (!forOwner && M.away) s += section('The wedding · Sunday, 28 February 2027', para(esc(NOT_AT_WEDDING)));
@@ -338,7 +346,7 @@ function composeGuestMailEn(record) {
   if (!reply) {
     if (M.travel.length) { T.push('TRAVEL'); M.travel.forEach((t) => T.push('· ' + t.name + ' — ' + t.meta + (t.price != null ? ' — ' + amountOf(t) : ''))); T.push(''); }
     if (M.waitlisted && M.waitlisted.length) { T.push('ON THE WAITING LIST'); M.waitlisted.forEach((w) => T.push('· ' + w.name + ' — ' + waitWords(w).replace(/^N/, 'n').replace(/^On/, 'on') + ' · no room yet, and no cost')); T.push('We will tell you as soon as a place frees up, and Guest Relations will find an arrangement with you.', ''); }
-    if (M.stays.length) { T.push('STAYS'); M.stays.forEach((x) => T.push('· ' + x.name + ' — ' + x.dates + (x.category ? ' — ' + x.category : '') + (x.room ? ' — ' + x.room + ', held for you' : '') + (amountOf(x) ? ' — ' + amountOf(x) : '') + (x.note ? ' (' + x.note + ')' : ''))); T.push(''); }
+    if (M.stays.length) { T.push('STAYS'); M.stays.forEach((x) => T.push('· ' + x.name + ' — ' + x.dates + (x.category ? ' — ' + x.category : '') + (x.room ? ' — ' + x.room + ', held for you' : '') + (amountOf(x) ? ' — ' + amountOf(x) : '') + (x.note ? ' (' + x.note + ')' : '') + (x.booking ? ' — ' + BOOKING_WORDS[x.booking] : ''))); T.push(''); }
     if (M.experiences.length) { T.push('EXPERIENCES'); M.experiences.forEach((e) => T.push('· ' + e.name + ' — ' + e.meta + (e.status ? ' — ' + e.status : '') + (amountOf(e) ? ' — ' + amountOf(e) : ''))); T.push(''); }
     T.push('THE WEDDING · SUNDAY, 28 FEBRUARY 2027');
     if (M.away) T.push(NOT_AT_WEDDING);
@@ -356,7 +364,7 @@ function composeGuestMailEn(record) {
 /* THE RECOVERY SNAPSHOT (Owner, 25 Sep 2026): Guest Relations' email is also the human-readable copy from which a guest's
    submitted record can be rebuilt after a reset — every field the guest submitted, attributed to the person who submitted it,
    in sections an operator reads top to bottom. Never a code, a bearer or a secret: none of them is ever part of a record. */
-const STAGE_NAMES = { 'bkk-stay': 'Bangkok · Before the Wedding (stay)', train: 'Special Express No. 25', prewed: 'Vientiane · Pre-Wedding Stay', wedstay: 'Vientiane · Wedding Stay', mu9646: 'MU9646 · Vientiane → Kunming', kmg: 'Kunming (stay)', c86: 'C86 · Kunming → Lijiang', ljg: 'Lijiang (stay)', return: 'Lijiang → Bangkok (return flights)', kempinski: 'Bangkok · Siam Kempinski (stay)' };
+const STAGE_NAMES = { 'bkk-stay': 'Bangkok · Before the Wedding (stay)', train: 'Special Express No. 25', prewed: 'Vientiane · Pre-Wedding Stay', wedstay: 'Vientiane · Wedding Stay', mu9646: 'MU9646 · Vientiane → Kunming', kmg: 'Kunming (stay)', c86: 'C86 · Kunming → Lijiang', ljg: 'Lijiang (stay)', return: 'Lijiang → Bangkok (return flights)', kempinski: 'Bangkok · Hotel Muse (stay)' };
 const STATE_WORDS = { selected: 'Chosen', waitlisted: 'On the waiting list', declined: 'Not needed (the guest said so)', open: 'Not answered', excluded: 'Not part of the trip' };
 const PARTICIPATION_WORDS = { joining: 'Joining', 'not-joining': 'Not joining', unanswered: 'Not answered yet' };
 export function recoverySections(M) {

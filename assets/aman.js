@@ -31,7 +31,7 @@
       ['Guest House complimentary', 'room.html?stay=guesthouse&room=guest-house'],
       ['Yifangju Designer Courtyard Kunming', 'journeys.html#j-kmg'],
       ['Luye Baisha Lijiang', 'journeys.html#j-ljg'],
-      ['Siam Kempinski Bangkok', 'journeys.html#j-kempinski']
+      ['Hotel Muse Bangkok', 'journeys.html#j-muse']
     ]],
     ['Experiences', 'experiences.html', [
       ['Bangkok', 'experiences.html#bkk'],

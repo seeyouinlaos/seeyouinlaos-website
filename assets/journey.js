@@ -37,7 +37,7 @@
     { key: 'return', when: '6 Mar', cat: 'Transportation', place: 'Lijiang → Bangkok',
       label: 'MU5922 + MU741 · Lijiang → Bangkok', ids: ['return'], anchor: 'j-return' },
     { key: 'kempinski', when: '6 – 8 Mar', cat: 'Accommodation', place: 'Bangkok',
-      label: 'Siam Kempinski Bangkok', ids: ['kempinski'], anchor: 'j-kempinski', bookend: 'close' }
+      label: 'Hotel Muse Bangkok, Autograph Collection', ids: ['kempinski'], anchor: 'j-muse', bookend: 'close' }   /* the stage id stays (stored answers); the hotel is Hotel Muse (28 Sep 2026) */
   ];
 
   /* Chronological position of a line that is not itself a stage.
@@ -187,6 +187,9 @@
       if (x.complimentary) return 'Complimentary';
       /* the Bride & Groom's gift (Owner, 28 Sep 2026 · src/gifts.js) */
       if (x.gift) return 'Complimentary · from the Bride & Groom';
+      /* a personal rate (28 Sep 2026): the guest's own stated total — an employee rate is the whole room */
+      if (x.personal === 'employee') return (P && P.money ? P.money(x.price) : 'USD ' + x.price) + ' for the room · your employee rate';
+      if (x.personal === 'special') return (P && P.money ? P.money(x.price) : 'USD ' + x.price) + ' per person · your special rate';
       if (m.unit === 'experience') return q === 1 ? 'For two guests' : 'For ' + (q * 2) + ' guests';
       var amt = P && P.money ? P.money(x.price) : 'USD ' + String(x.price).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
       return amt + ' per person · your cost';

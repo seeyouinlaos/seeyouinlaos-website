@@ -104,6 +104,6 @@ test('THE JOURNEY IN NUMBERS · counted from unique places: 14 restaurants · 11
   const names = (c) => X.filter((x) => x.category === c).map((x) => x.name).sort();
   assert.deepEqual(names('restaurant'), ['3 Merchants Restaurant', 'ALATi', 'Baan Phraya', 'Cam On Restaurant', 'Cannubi by Umberto Bombana', 'Curvy.Dining', 'Lao Derm', 'Le Du Kaan', 'Petits Plats Bangkok', 'Phra Nakhon', 'River Moon', 'Sühring', 'Tang Jai Yang', 'Thong Smith']);
   assert.deepEqual(names('cafe'), ['Cafe Madeleine', 'Café Craft by CHANINTR', 'Dior Café', 'Harudot', 'Kaogee Le Triomphe', 'LV Café', 'Lacuna VTE', 'Le Café at Souphattra Heritage', 'Moo Yoo Rose House', 'Time Space Cafe', 'Whispering Cafe']);
-  assert.deepEqual(names('bar').concat(names('club')), ['BKK Social Club', 'Bar Us', 'Firefly Bar, Siam Kempinski', 'Selene Sky Bar', 'Sona Cafe and Bar', 'BARON Vientiane']);
+  assert.deepEqual(names('bar').concat(names('club')), ['BKK Social Club', 'Bar Us', 'Firefly Bar', 'Selene Sky Bar', 'Sona Cafe and Bar', 'BARON Vientiane']);
   assert.match(src('assets/community.js'), /var D = window\.SIYL_DISCOVER, c = D \? D\.counts\(\) : null;/, 'the numbers read the one taxonomy'); assert.match(src('profile.html'), /<script src="assets\/discover\.js/);
 });

@@ -175,7 +175,8 @@
       var gone = function (x) {
         if (!x || !x.room || x.interest) return false;
         var at = p.locate(p.windowOf(x.id));
-        return !!(at && at.stay && Array.isArray(at.stay.rooms)) && !at.stay.rooms.some(function (r) { return r.slug === x.room; });
+        var slug = p.canonicalRoom ? p.canonicalRoom(p.windowOf(x.id), x.room) : x.room;   /* a replaced room is its successor, never gone (28 Sep 2026) */
+        return !!(at && at.stay && Array.isArray(at.stay.rooms)) && !at.stay.rooms.some(function (r) { return r.slug === slug; });
       };
       var kept = bag.filter(function (x) { return !ST.leftover(x) && !gone(x); });
       if (kept.length !== bag.length) { bag = kept; changed = true; }

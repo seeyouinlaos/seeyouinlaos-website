@@ -147,7 +147,7 @@ test('WAITING LIST · positions by time; leaving renumbers; a hold resolves the 
   assert.equal(after.waitlist.kmg, undefined); assert.equal(after.waiting.kmg, undefined);
   assert.equal((await wait(rooms, PEG, 'kmg', 1)).status, 409, 'a guest with a place in the stage does not wait for it');
   /* Guest Relations: the plan lists the line; the reset clears it */
-  assert.equal((await wait(rooms, LINI, 'ljg', 1, ['ljg/viewing-270'])).status, 200);
+  assert.equal((await wait(rooms, LINI, 'ljg', 1, ['ljg/private-soup-view'])).status, 200);
   const plan = (await call(rooms, 'plan', {}, null, true)).d;
   assert.equal(plan.ok, true); assert.ok(Array.isArray(plan.waitlist)); assert.equal(plan.waitlist.length, 1); assert.equal(plan.waitlist[0].stage, 'ljg'); assert.equal(plan.waitlist[0].position, 1);
   const dry = (await call(rooms, 'reset', { dryRun: true }, null, true)).d;
@@ -159,14 +159,14 @@ test('WAITING LIST · positions by time; leaving renumbers; a hold resolves the 
 
 test('WAITING LIST · on the client it is an answered stage at USD 0: readiness never asks for it, counts carry it, the Bag does not; Not joining leaves the line', async () => {
   const rooms = new Rooms(doState());
-  await fill(rooms, 'ljg/viewing-270');
+  await fill(rooms, 'ljg/private-soup-view');
   const w = await guestPage(rooms, LINI, LIN);
   const U = w.SIYL_UNITS, J = w.SIYL_JOURNEY, G = w.SIYL_GUEST, B = w.SIYL_BAG;
   G.setScope({ china: true });
   await U.load(true);
   const ljg = J.SEGMENTS.find((s) => s.key === 'ljg');
   assert.equal(J.state(ljg), 'open');
-  assert.equal((await U.wait('ljg', 1, ['ljg/viewing-270'])).ok, true);
+  assert.equal((await U.wait('ljg', 1, ['ljg/private-soup-view'])).ok, true);
   await U.load(true);
   assert.equal(J.state(ljg), 'waitlisted'); assert.equal(J.waitPosition(ljg), 1);
   const c = J.counts();
@@ -181,7 +181,7 @@ test('WAITING LIST · on the client it is an answered stage at USD 0: readiness 
 /* ────────────────────────────── 4 · THE PACKAGES ────────────────────────────── */
 test('COUNTS · relevant = confirmed + waitlisted + declined + open; excluded are the stages outside the scope; bagItems are the lines; bagTotal the chargeable confirmed lines', async () => {
   const rooms = new Rooms(doState());
-  await fill(rooms, 'ljg/viewing-270');
+  await fill(rooms, 'ljg/private-soup-view');
   const w = await guestPage(rooms, PEG, PEGGY);
   const U = w.SIYL_UNITS, J = w.SIYL_JOURNEY, G = w.SIYL_GUEST, ST = w.SIYL_STAY, B = w.SIYL_BAG;
   const check = (c) => { assert.equal(c.relevant, c.confirmed + c.waitlisted + c.declined + c.open, 'the invariant'); assert.equal(c.resolved, c.confirmed + c.waitlisted + c.declined); assert.equal(c.relevant + c.excluded, 10); };
@@ -191,7 +191,7 @@ test('COUNTS · relevant = confirmed + waitlisted + declined + open; excluded ar
   assert.equal((await ST.select('guesthouse', 'guest-house', null, 2)).ok, true, 'the guest house — complimentary');
   B.put({ id: 'mu9646', name: 'MU9646', price: 275, qty: 1 });
   J.decline(J.SEGMENTS.find((s) => s.key === 'prewed'));
-  assert.equal((await U.wait('ljg', 2, ['ljg/viewing-270'])).ok, true);
+  assert.equal((await U.wait('ljg', 2, ['ljg/private-soup-view'])).ok, true);
   await U.load(true);
   c = J.counts(); check(c);
   assert.equal(c.confirmed, 2); assert.equal(c.waitlisted, 1); assert.equal(c.declined, 1); assert.equal(c.open, 2);
@@ -256,10 +256,11 @@ test('MAIL · the waiting list is a section of both emails without an amount; th
 });
 
 /* ────────────────────────────── 8 · THE CURRENT MASTER WINS ────────────────────────────── */
-test('THE CURRENT MASTER · C86 USD 105 at the one price source; Lijiang and Kempinski six rooms per category; the retired Riverside absent from the photographed', () => {
+test('THE CURRENT MASTER · C86 USD 105 at the one price source; Lijiang the sheet\'s three rooms (1 · 1 · 2), Hotel Muse three rooms; the retired Riverside absent from the photographed', () => {
   const w = page({ auth: PEGGY, modules: WITH_MEDIA });
   assert.equal(w.SIYL_PRICE.FLAT.c86.price, 105); assert.match(w.SIYL_PRICE.FLAT.c86.basis, /^USD 105 per person/);
-  for (const [k, s] of Object.entries(SEED)) { if (k.startsWith('ljg/')) assert.equal(s.capacity, 6, k); if (k.startsWith('kempinski/')) assert.equal(s.capacity, 6, k); }
+  /* 002_Accommodation_Details (28 Sep 2026): R · S · T rooms available 1 · 1 · 2; V (Hotel Muse, the Jatu Room) 3 */
+  assert.deepEqual(Object.fromEntries(Object.entries(SEED).filter(([k]) => /^(ljg|kempinski)\//.test(k)).map(([k, s]) => [k, s.capacity])), { 'ljg/private-soup-view': 2, 'ljg/view-suite-270': 1, 'ljg/snow-mountain-viewing': 1, 'kempinski/jatu-room': 3 });
   assert.equal(SEED['prewed/souphattra-presidential'].capacity, 1); assert.equal(unitsOf('prewed/souphattra-presidential')[0].places, 2, 'one room of two places — the Owner\'s rule');
   /* RIVERSIDE HOTEL VIENTIANE IS COMPLETELY RETIRED (Owner, 23 Sep 2026): neither the media record nor the property record
      knows the house any more, so there is no photography to pin — and nothing renders it. */
@@ -297,7 +298,8 @@ test('THE REGISTER · the builder skips a relationship placeholder and a "." sur
 });
 
 test('PARTY CAPACITY · a party larger than a room: the family fills one room and keeps the rest of its places in the next rooms of the category — or is refused as a whole; the kept places go with the party', async () => {
-  const rooms = new Rooms(doState()), key = 'ljg/viewing-270';
+  /* a category of six rooms (28 Sep 2026: the Lijiang categories are the sheet's one or two rooms — U Sathorn keeps six) */
+  const rooms = new Rooms(doState()), key = 'bkk-stay/u-sathorn-superior-garden';
   const FAM = { invitationId: 'INV-F001', guestId: 'F001', partyId: 'INV-FAM', hosts: false, firstName: 'Mira' }, FAM2 = { invitationId: 'INV-F002', guestId: 'F002', partyId: 'INV-FAM', hosts: false, firstName: 'Nok' };
   const r = await join(rooms, FAM, key, 'A', 3, 'Mira');
   assert.equal(r.status, 200);
@@ -316,11 +318,11 @@ test('PARTY CAPACITY · a party larger than a room: the family fills one room an
   const w = await guestPage(rooms, FAM, { ...LIN, invitationId: 'INV-F001', guestId: 'F001', partyId: 'INV-FAM', members: [{ guestId: 'F001' }, { guestId: 'F002' }, { guestId: 'F003' }] });
   const U = w.SIYL_UNITS; await U.load(true);
   assert.equal(w.SIYL_JOURNEY.partySize(), 3);
-  assert.equal(U.canTake('ljg', 'viewing-270'), true, 'she already holds a place here');
-  assert.equal(U.canTake('ljg', 'starry-sky'), true, 'an empty category of six rooms takes a party of three');
+  assert.equal(U.canTake('bkk-stay', 'u-sathorn-superior-garden'), true, 'she already holds a place here');
+  assert.equal(U.canTake('prewed', 'heritage-executive'), true, 'an empty category of thirteen rooms takes a party of three');
   /* the family leaves: every kept place goes with its last member */
-  assert.equal((await call(rooms, 'leave', { invitationId: FAM2.invitationId, guestId: FAM2.guestId, stage: 'ljg' }, FAM2)).status, 200);
-  assert.equal((await call(rooms, 'leave', { invitationId: FAM.invitationId, guestId: FAM.guestId, stage: 'ljg' }, FAM)).status, 200);
+  assert.equal((await call(rooms, 'leave', { invitationId: FAM2.invitationId, guestId: FAM2.guestId, stage: 'bkk-stay' }, FAM2)).status, 200);
+  assert.equal((await call(rooms, 'leave', { invitationId: FAM.invitationId, guestId: FAM.guestId, stage: 'bkk-stay' }, FAM)).status, 200);
   const v = (await call(rooms, 'read', null, FAM)).d;
   assert.equal(unit(v, key, 'A').taken, 0); assert.equal(unit(v, key, 'B').taken, 0);
 });

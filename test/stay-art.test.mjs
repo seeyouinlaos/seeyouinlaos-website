@@ -16,7 +16,7 @@ const DESTINATION = imgsOf('destination.html');
 const HIGHLIGHTS = ['assets/experiences.js', 'assets/experience-galleries.js', 'experiences.html', 'experience.html'].filter((f) => existsSync(join(ROOT, f))).flatMap(imgsOf);
 
 test('every active accommodation resolves its frames from its own approved set — and only from there', () => {
-  assert.deepEqual(plain(STAYS).sort(), ['guesthouse', 'kempinski', 'kunming', 'lijiang', 'sathorn', 'souphattra']);
+  assert.deepEqual(plain(STAYS).sort(), ['guesthouse', 'kunming', 'lijiang', 'muse', 'sathorn', 'souphattra']   /* Hotel Muse Bangkok replaced the Siam Kempinski (28 Sep 2026) */);
   for (const k of STAYS) {
     const ok = A.approved(k); assert.ok(ok.length > 0, k + ' has an approved set');
     for (const p of ok) { assert.ok(A.FOLDERS[k].some((f) => p.startsWith(f)), k + ': ' + p + ' is inside the property\'s own folders'); assert.ok(existsSync(join(ROOT, p)), p + ' is on disk'); }
@@ -55,7 +55,7 @@ test('every surface reads the one resolver; THE HOUSES\' static cards are each t
   assert.match(src('journeys.html'), /SIYL_STAY_ART\.card\(sk,r\.slug\)/); assert.match(src('your-journey.html'), /SIYL_STAY_ART\.card\('sathorn',r\.slug\)/);
   assert.match(src('room.html'), /SIYL_STAY_ART\.card\(stayKey, r\.slug\)/); assert.match(src('profile.html'), /SIYL_STAY_ART\.card\(stayKey,slug\)/); assert.match(src('assets/pricing.js'), /SIYL_STAY_ART\.bag\(at\.key/);
   for (const f of ['journeys.html', 'your-journey.html', 'room.html', 'profile.html', 'assets/pricing.js']) assert.doesNotMatch(src(f), /r\.cardImg\|\|\(r\.gallery|room\.cardImg \|\| \(room\.gallery/, f + ' has no resolver of its own');
-  const HOUSES = { 'j-bkk-stay': 'sathorn', 'j-prewed': 'souphattra', 'j-wedstay': 'souphattra', 'j-guesthouse': 'guesthouse', 'j-riverside': 'riverside', 'j-kmg': 'kunming', 'j-ljg': 'lijiang', 'j-kempinski': 'kempinski' };
+  const HOUSES = { 'j-bkk-stay': 'sathorn', 'j-prewed': 'souphattra', 'j-wedstay': 'souphattra', 'j-guesthouse': 'guesthouse', 'j-riverside': 'riverside', 'j-kmg': 'kunming', 'j-ljg': 'lijiang', 'j-muse': 'muse' };
   const cards = [...src('accommodation.html').matchAll(/href="journeys\.html#(j-[a-z-]+)" style="background-image:url\(([^)]+)\)"/g)];
   assert.ok(cards.length >= 4, 'THE HOUSES carry static cards (the Bangkok three are drawn from the one source map)');
   for (const [, anchor, img] of cards) { const k = HOUSES[anchor]; assert.ok(k, anchor); assert.ok(A.approved(k).includes(img), anchor + ' → ' + img + ' is ' + k + '\'s own approved frame'); }

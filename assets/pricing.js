@@ -100,7 +100,8 @@
 
   /* a rate with cents is written to the cent (the Yifangju 002: USD 36.33 per person per night) — never three decimals */
   /* an amount with cents is written with both digits (USD 112.50 · USD 36.33) — never three, never one */
-  function money(n) { n = Number(n); return 'USD ' + n.toLocaleString('en-US', n % 1 ? { minimumFractionDigits: 2, maximumFractionDigits: 2 } : {}); }
+  function cents(n) { return Math.round(Number(n) * 100 + 1e-7) / 100; }   /* a half cent rounds up (67.805 → 67.81), never a float artefact down */
+  function money(n) { n = cents(n); return 'USD ' + n.toLocaleString('en-US', n % 1 ? { minimumFractionDigits: 2, maximumFractionDigits: 2 } : {}); }
   /* THE BRIDE & GROOM'S HOSPITALITY (Owner, 28 Sep 2026 · src/gifts.js): a stay may be the couple's gift to one guest — that
    * guest's charge for that one room of that one stay is USD 0, said as "Complimentary · from the Bride & Groom". The hotel's
    * rate never changes; another room of the same stay is priced as usual. The Worker says which (GET /api/gifts, the guest's own
@@ -110,7 +111,10 @@
   function authNow() { try { var a = JSON.parse(localStorage.getItem('siyl.auth') || 'null'); return a && a.guestId && a.bearer ? a : null; } catch (e) { return null; } }
   function giftCache() { try { return JSON.parse(localStorage.getItem(GIFT_KEY) || 'null'); } catch (e) { return null; } }
   function giftsNow() { var a = authNow(), c = a ? giftCache() : null; return c && c.guestId === a.guestId && Array.isArray(c.gifts) ? c.gifts : []; }
+  /* the guest's own entry for this room of this window: a gift (nothing to pay), a special rate (the stated total for the window,
+   * per person) or an employee rate (the whole room, paid by this guest alone) — src/gifts.js */
   function giftFor(windowId, slug) { var g = giftsNow(); for (var i = 0; i < g.length; i++) if (g[i] && g[i].window === windowId && g[i].room === slug) return g[i]; return null; }
+  var BOOKING_WORDS = { self: 'Guest will book by themselves.', 'bride-groom': 'Will be booked by the bride & groom and charged within 14 days after booking.' };
   /* no leading zero in a date: "06 – 08 March 2027" → "6 – 8 March 2027" */
   function unpad(t) { return String(t == null ? '' : t).replace(/(^|[^\d])0(\d)(?!\d)/g, '$1$2'); }
   var MONTH_RE = /\s+(January|February|March|April|May|June|July|August|September|October|November|December)$/;
@@ -147,6 +151,10 @@
   /* which stay and which window an id belongs to. LEGACY holds the two ids the
    * retired two-row wedding model wrote, so an old bag can still be migrated. */
   var LEGACY = { 'wedstay-n1': 'wedstay', 'wedstay-n2': 'wedstay' };
+  /* A REPLACED ROOM IS READ AS ITS SUCCESSOR (Owner, 28 Sep 2026 · the same map as src/legacy-keys.js): a Bag line of the Siam
+     Kempinski's Deluxe Balcony King is the stage's Hotel Muse Bangkok line — the Jatu Room — never dropped, never chosen again */
+  var LEGACY_ROOMS = { kempinski: { 'deluxe-balcony-king': 'jatu-room' } };
+  function canonicalRoom(windowId, room) { var m = LEGACY_ROOMS[windowId]; return (m && room && m[room]) || room; }
   function locate(windowId) {
     var id = LEGACY[windowId] || windowId;
     var R = window.SIYL_ROOMS || {};
@@ -220,7 +228,7 @@
         note: at.win.note || '',
         noteBy: at.win.noteBy || '',
         /* rounded to the cent: a rate of thirds still makes its exact amount (USD 36.33333333 × 3 = USD 109) */
-        total: rate == null ? null : Math.round(rate * pay * 100) / 100
+        total: rate == null ? null : cents(rate * pay)
       };
       q.nightly = rate == null ? '' : money(rate) + ' per person per night';
       q.roomNightly = roomRate == null ? '' : money(roomRate) + ' per room per night';
@@ -240,13 +248,25 @@
       q.basis = rate == null ? 'Amount on request' : q.amount + ' per person · ' + q.nightsLine + (q.nightsCovered ? ': ' + q.nightsCovered : '') + (q.nightly ? ' · ' + q.nightly : '');
       /* the Bride & Groom's gift to this guest for this room: the guest's charge is nothing; the hotel's rate stays a fact */
       var gift = rate == null ? null : giftFor(at.win.id, room && room.slug);
-      if (gift) {
+      if (gift && (gift.kind || 'gift') === 'gift') {
         q.gift = gift.by || 'bride-groom'; q.hotelTotal = q.total; q.total = 0;
         q.amount = GIFT_WORDS.title; q.giftBy = GIFT_WORDS.by; q.giftWords = GIFT_WORDS.line;
         q.contribution = q.nightly + ' · the hotel rate, not charged to you';
         q.hostedBasis = GIFT_WORDS.by;
         q.basis = GIFT_WORDS.line + ' · ' + q.nightsLine + (q.nightsCovered ? ': ' + q.nightsCovered : '');
+      } else if (gift && typeof gift.charge === 'number') {
+        /* A PERSONAL RATE (Owner, 28 Sep 2026 · 002 "Special Rate and Special Payment Terms"): this guest's own charge for the whole
+           window — the stated total, never a rate per night; an employee rate is the whole room, paid by this guest alone */
+        var room2 = gift.per === 'room';
+        q.personal = gift.kind; q.hotelTotal = q.total; q.total = cents(gift.charge);
+        q.amount = money(q.total); q.per = room2 ? 'for the room' : 'per person';
+        q.personalWords = gift.kind === 'employee' ? 'Your employee rate · the whole room, paid by you' : 'Your special rate';
+        q.contribution = q.personalWords + ' · ' + q.nightsLine + (q.nightly ? ' · the listed rate: ' + q.nightly : '');
+        q.hostedBasis = q.per + ' · ' + q.personalWords.charAt(0).toLowerCase() + q.personalWords.slice(1) + ' · ' + q.nightsLine;
+        q.basis = q.amount + ' ' + q.per + ' · ' + q.personalWords.charAt(0).toLowerCase() + q.personalWords.slice(1) + ' · ' + q.nightsLine + (q.nightsCovered ? ': ' + q.nightsCovered : '');
       }
+      /* THE BOOKING METHOD (002 · "Note for Guest"): who books this stay */
+      q.booking = at.win.booking || ''; q.bookingUrl = at.win.bookingUrl || ''; q.bookingWords = BOOKING_WORDS[q.booking] || '';
       return q;
     },
 
@@ -280,6 +300,7 @@
       /* a room asked for by name that the website no longer offers yields no line — never another room's (Owner, 24 Sep 2026) */
       var room = roomOf(at.stay, slug) || (slug ? null : at.stay.rooms[0]);
       if (!room) return [];
+      if (room.notIn && room.notIn.indexOf(at.win.id) >= 0) return [];   /* not offered in this window (002 · G21 / H21 / I21) */
       /* THE ACCOMMODATION MEDIA RULE (Owner, 21 Sep 2026): the line's frame comes from the one resolver — the property's own approved set or nothing */
       var img = window.SIYL_STAY_ART ? window.SIYL_STAY_ART.bag(at.key, room ? room.slug : '', at.win.id) : '';
       /* where a window offers whole properties rather than room categories,
@@ -297,7 +318,7 @@
       return [{
         id: at.win.id, name: bagName, meta: at.win.dates + ' · ' + room.name,
         price: q.total, stay: at.key, room: room.slug,
-        gift: q.gift || undefined,
+        gift: q.gift || undefined, personal: q.personal || undefined,
         rate: q.rate, nights: q.nights, pay: q.pay,
         nightsList: q.nightsList, windowFixed: q.windowFixed,
         note: q.note, noteBy: q.noteBy,
@@ -334,7 +355,7 @@
     premium: function (windowId, available) {
       var at = locate(windowId);
       if (!at) return null;
-      var open = at.stay.rooms.filter(function (r) { return r.rate != null && !r.interest; });
+      var open = at.stay.rooms.filter(function (r) { return r.rate != null && !r.interest && !(r.notIn && r.notIn.indexOf(at.win.id) >= 0); });
       if (!open.length) return null;
       var free = typeof available === 'function'
         ? open.filter(function (r) { return available(r.slug); })
@@ -354,7 +375,7 @@
       var at = locate(windowId);
       if (!at) return null;
       var wish = (window.SIYL_FULL_EXPERIENCE || {})[windowId];
-      var open = at.stay.rooms.filter(function (r) { return r.rate != null && !r.interest; });
+      var open = at.stay.rooms.filter(function (r) { return r.rate != null && !r.interest && !(r.notIn && r.notIn.indexOf(at.win.id) >= 0); });
       if (!open.length) return null;
       var free = typeof available === 'function'
         ? open.filter(function (r) { return available(r.slug); })
@@ -380,7 +401,7 @@
     cheapest: function (windowId, available) {
       var at = locate(windowId);
       if (!at) return null;
-      var open = at.stay.rooms.filter(function (r) { return r.rate != null && !r.interest; });
+      var open = at.stay.rooms.filter(function (r) { return r.rate != null && !r.interest && !(r.notIn && r.notIn.indexOf(at.win.id) >= 0); });
       var free = typeof available === 'function'
         ? open.filter(function (r) { return available(r.slug); })
         : open;
@@ -431,16 +452,25 @@
      * false — withdrawn or unknown (My Bag drops it); null — this page cannot tell (the room data SIYL_ROOMS is not
      * loaded): never drop a line on a null. */
     known: function (x) {
-      var id = x && typeof x === 'object' ? x.id : x, room = x && typeof x === 'object' ? x.room : null;
+      var id = x && typeof x === 'object' ? x.id : x, room = x && typeof x === 'object' ? canonicalRoom(x.id, x.room) : null;
       if (!id) return false;
       id = ALIAS[id] || id;
       if (FLAT[id] || CLASSES[id]) return true;
       if (!window.SIYL_ROOMS) return null;
       var at = locate(id);
       if (!at) return false;
-      return room ? !!roomOf(at.stay, room) : true;
+      if (!room) return true;
+      var r = roomOf(at.stay, room);
+      return !!r && !(r.notIn && r.notIn.indexOf(at.win.id) >= 0);
     },
+    /* THE BOOKING METHOD of a window (002 · "Note for Guest", 28 Sep 2026): 'self' — the guest books the hotel themselves (the
+       sheet's link, when it gives one); 'bride-groom' — booked by the Bride & Groom and charged within 14 days after booking */
+    bookingOf: function (windowId) { var at = locate(windowId); var w = at && at.win; if (!w || !w.booking) return null; return { method: w.booking, url: w.bookingUrl || '', words: BOOKING_WORDS[w.booking] || '' }; },
+    BOOKING_WORDS: BOOKING_WORDS,
+    offeredIn: function (windowId, room) { return !(room && room.notIn && room.notIn.indexOf(windowId) >= 0); },
     canonical: function (id) { return ALIAS[id] || id; },
+    canonicalRoom: canonicalRoom,
+    LEGACY_ROOMS: LEGACY_ROOMS,
     /* the amount column of a line (OQ-21 · TO-01616): a spa interest is not a cost of the trip — "Not in your total" */
     amountWords: function (x) {
       if (!x) return '';
@@ -462,7 +492,7 @@
      *   one room type       "USD 192 per person · USD 64 per person per night" */
     fromLine: function (windowId) {
       var at = locate(windowId); if (!at) return '';
-      var self = this, open = at.stay.rooms.filter(function (r) { return r.rate != null && !r.interest; });
+      var self = this, open = at.stay.rooms.filter(function (r) { return r.rate != null && !r.interest && !(r.notIn && r.notIn.indexOf(at.win.id) >= 0); });
       if (!open.length) return '';
       var low = open.reduce(function (m, r) { return rateOf(at.win.id, r) < rateOf(at.win.id, m) ? r : m; }, open[0]);
       var q = self.quote(at.win.id, low.slug); if (!q || q.total == null) return '';
@@ -521,16 +551,21 @@
         return x;
       }
       if (!x.stay || !x.room || x.interest || x.complimentary) return x;
+      /* the former Kempinski room: the same line of the same stage, now the Jatu Room — the guest's unit is kept for the room
+         engine's own (read-normalised) hold, and the line is re-quoted below by today's rules, a personal rate included */
+      var cr = canonicalRoom(x.id, x.room);
+      if (cr !== x.room) { var z = {}; for (var zk in x) z[zk] = x[zk]; z.room = cr; x = z; changed = true; }
       /* a line of a room the website no longer offers (the Sathorn Penthouse, deleted — Owner, 24 Sep 2026 · Edit 6) is
          never re-quoted into another room: it leaves the Bag, and the stage asks for a choice again */
       var at = locate(x.id);
       if (at && !roomOf(at.stay, x.room)) { changed = true; return null; }
       var fresh = window.SIYL_PRICE.items(x.id, x.room)[0];
       if (!fresh || fresh.price == null) return x;
-      if (x.price === fresh.price && x.pay === fresh.pay && x.name === fresh.name && (x.gift || null) === (fresh.gift || null) && !('fixed' in x)) return x;
+      if (x.price === fresh.price && x.pay === fresh.pay && x.name === fresh.name && (x.gift || null) === (fresh.gift || null) && (x.personal || null) === (fresh.personal || null) && !('fixed' in x)) return x;
       changed = true;
       fresh.qty = x.qty || 1;           /* the guest's own choice is preserved */
-      if (!fresh.gift) delete fresh.gift;
+      if (x.unit) { fresh.unit = x.unit; if (x.unitName) fresh.unitName = x.unitName; }   /* …and the unit the engine holds for them */
+      if (!fresh.gift) delete fresh.gift; if (!fresh.personal) delete fresh.personal;
       return fresh;                     /* name, meta, amount, basis and who pays are re-derived */
     }).filter(Boolean);
     if (changed) B.set(next);

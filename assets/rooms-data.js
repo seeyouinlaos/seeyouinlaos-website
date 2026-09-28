@@ -36,7 +36,7 @@
         [USA + 'superior-garden-bed-terrace.jpg', 'The room and its garden terrace'], [USA + 'superior-garden-bed-mirror.jpg', 'Towards the terrace doors'], [USA + 'superior-garden-desk-lawn.jpg', 'The desk and the lawn beyond'],
         [USA + 'terrace-frangipani.jpg', 'The terrace, under the frangipani'], [USA + 'superior-garden-depth.jpg', 'The desk and the terrace doors'], [USA + 'superior-garden-entry.jpg', 'The entry and the television wall']] },
   };
-  var KEM = 'assets/images/kempinski/';
+  var MUSE = 'assets/images/muse/';
 
   /* ------------------------------------------------------------------ groups
    * Amenities are never a wall of text. Every room carries `groups`: a small
@@ -83,10 +83,9 @@
        01 MAR       MU9646 Business                             275
        01 – 04 MAR  Jinri Building Scenic Terrace Tub Double  36.33 × 3 = 109   (the Kunming house replaced, 27 Sep 2026)
        04 MAR       C86 Business                                105
-       04 – 06 MAR  270° Snow Mountain Viewing Room     100 × 2 = 200
+       04 – 06 MAR  (the 270° Snow Mountain Viewing Room — no longer a product, 28 Sep 2026: the stage falls to SIYL_PRICE.premium)
        06 MAR       MU5922 + MU741 Economy flexible             200
-       06 – 08 MAR  Deluxe Balcony King                 190 × 2 = 380
-                                                       = USD 2,119   (the current Operations Master, 27 Sep 2026)
+       06 – 08 MAR  Hotel Muse Bangkok · Jatu Room     92.10 × 2 = 184.20   (the Siam Kempinski is gone, 28 Sep 2026)
 
      The total is NEVER written down. It is the sum of whatever the engine
      actually selects, so that when the shared ledger says a preferred room is
@@ -96,8 +95,9 @@
     prewed:      'heritage-grand-premier',
     wedstay:     'heritage-grand-premier',
     kmg:         'jinri-terrace-double',
-    ljg:         'viewing-270',
-    kempinski:   'deluxe-balcony-king'
+    /* ljg: the 270° Snow Mountain Viewing Room is no longer a product (002, 28 Sep 2026 — the sheet's three rooms): the stage
+       falls to SIYL_PRICE.premium, as the Bangkok stage did (Edit 6) */
+    kempinski:   'jatu-room'   /* Hotel Muse Bangkok · the Jatu Room, the stage's one room (28 Sep 2026) */
   };
 
   window.SIYL_ROOMS = {
@@ -120,7 +120,7 @@
       windows: [
         { id: 'prewed', label: 'Pre-Wedding Stay', dates: '25 – 27 February 2027', nights: '2 nights', n: 2, pay: 2,
           window: 'fixed', nightsList: ['25 → 26 February', '26 → 27 February'],
-          bagName: 'Pre-Wedding Stay · Souphattra Heritage', bagImg: 'assets/images/souphattra/heritage-courtyard-front.jpg' },
+          bagName: 'Pre-Wedding Stay · Souphattra Heritage', bagImg: 'assets/images/souphattra/heritage-courtyard-front.jpg', booking: 'bride-groom' },
         /* ONE Wedding Stay selection for the two-night window: the first night is
          * the guest's cost, the second night is complimentary, hosted by
          * Haruthai & Suthep. The note is ONE sentence (Window 007 · TO-00820), printed only where no amount line says it
@@ -128,7 +128,7 @@
         { id: 'wedstay', label: 'Wedding Stay', dates: '27 February – 1 March 2027', nights: '2 nights', n: 2, pay: 1,
           window: 'fixed', nightsList: ['27 → 28 February', '28 February → 1 March'],
           note: 'Second night complimentary, hosted by Haruthai & Suthep',
-          bagName: 'Wedding Stay · Souphattra Heritage', bagImg: 'assets/images/souphattra/heritage-arches-dusk.jpg' }
+          bagName: 'Wedding Stay · Souphattra Heritage', bagImg: 'assets/images/souphattra/heritage-arches-dusk.jpg', booking: 'bride-groom' }
       ],
       includes: [
         'Pre-Wedding Stay (25 – 27 February): two nights, 25 → 26 and 26 → 27 February, both at your cost.',
@@ -167,6 +167,7 @@
           facts: [['Size', '63 sq.m.'], ['Bed', '1 king bed'], ['Occupancy', '2 adults · 1 child'], ['Location', 'Ground floor, in the central garden'], ['Bathrooms', 'Two bathrooms and two shower rooms']],
           story: 'Sixty-three square metres arranged for two people who like their own space: a king bed, a separate living area with a sofa and a Smart TV, and — unusually — two bathrooms and two shower rooms, one each. It sits on the ground floor in the middle of the garden, with the balcony opening onto the greenery and the pool.',
           groups: soupGroups(['63 sq.m. on the ground floor', 'Separate living area with sofa and Smart TV', 'Two bathrooms and two shower rooms', 'Private balcony over the garden and pool', 'Set in the central garden'], null, null),
+          notIn: ['prewed'],   /* 002 · G21 / H21 / I21: "pre wedding, not available" — this suite is offered for the Wedding Stay only (28 Sep 2026) */
           rate: 247.5, rates: { prewed: 247.5, wedstay: 195 }, roomRates: { prewed: 495, wedstay: 390 } },
         { slug: 'grand-majestic', name: 'Grand Majestic Suite', cat: 'Suite',
           desc: 'French colonial and Laotian design, with a living room under a high ceiling and a private balcony.',
@@ -174,6 +175,7 @@
           facts: [['Size', '66 – 75 sq.m.'], ['Bed', '1 king bed'], ['Occupancy', '2 adults · 1 child'], ['Location', '2nd floor'], ['Outside', 'Private balcony']],
           story: 'French colonial and Laotian design in sixty-six to seventy-five square metres: a living room under a high ceiling, a pantry of its own, and a private balcony to take the first coffee of the day on.',
           groups: soupGroups(['66 – 75 sq.m.', 'Separate living room', 'High ceiling', 'Pantry', 'Private balcony', 'Sofa, wardrobe, desk and coffee table'], null, null),
+          notIn: ['prewed'],   /* 002 · G21 / H21 / I21: "pre wedding, not available" — this suite is offered for the Wedding Stay only (28 Sep 2026) */
           rate: 345, rates: { prewed: 345, wedstay: 250 }, roomRates: { prewed: 690, wedstay: 500 } }   /* no reservation (Owner, 15 Sep 2026): available until booked */,
         { slug: 'souphattra-majestic', name: 'Souphattra Majestic Suite', cat: 'Suite',
           desc: 'The house suite: a separate living area, pantry and bar, and a long balcony over the pool.',
@@ -181,6 +183,7 @@
           facts: [['Size', '84 sq.m.'], ['Bed', '1 king bed'], ['Occupancy', '2 adults · 2 children'], ['Location', '3rd floor'], ['View', 'Pool and garden panorama']],
           story: 'Eighty-four square metres on the top floor. A separate living area with its own pantry and bar sits beside the bedroom, and the balcony runs the length of the suite with the pool and the garden below it. Lao contemporary lines under French colonial ceilings.',
           groups: soupGroups(['84 sq.m. on the top floor', 'Separate living area', 'Pantry and bar', 'Spacious balcony over the pool and garden', 'High ceilings · Lao contemporary and French colonial design'], null, null),
+          notIn: ['prewed'],   /* 002 · G21 / H21 / I21: "pre wedding, not available" — this suite is offered for the Wedding Stay only (28 Sep 2026) */
           rate: 385, rates: { prewed: 385, wedstay: 200 }, roomRates: { prewed: 770, wedstay: 400 } },
         { slug: 'souphattra-presidential', name: 'Souphattra Presidential', cat: 'Suite',
           desc: 'The largest suite of the house: two bedrooms, private bathrooms and a shared living space under a high ceiling.',
@@ -202,7 +205,7 @@
       place: 'Vientiane, Laos',
       breakfast: 'Breakfast not included · your own cost',
       windows: [{ id: 'guesthouse', label: 'Wedding Stay', dates: '27 February – 1 March 2027', nights: '2 nights', n: 2,
-        bagName: 'Guest House complimentary · Vientiane', bagImg: 'assets/images/guesthouse/guesthouse-01.jpg' }],
+        bagName: 'Guest House complimentary · Vientiane', bagImg: 'assets/images/guesthouse/guesthouse-01.jpg', booking: 'bride-groom' }],
       includes: [
         'Two nights, 27 → 28 February and 28 February → 1 March — the two wedding nights.',
         'Complimentary — nothing to pay. The house is shared by four guests; your place is held for you as soon as you take it.',
@@ -230,7 +233,8 @@
       place: 'Bangkok',
       breakfast: 'Breakfast included',
       windows: [{ id: 'bkk-stay', label: 'Before the Wedding', dates: '21 – 24 February 2027', nights: '3 nights', n: 3,
-        bagName: 'Bangkok · Before the Wedding', bagImg: USA + 'pool-pavilion-day.jpg' }],
+        bagName: 'Bangkok · Before the Wedding', bagImg: USA + 'pool-pavilion-day.jpg',
+        booking: 'self', bookingUrl: 'https://www.trip.com/hotels/detail/?cityEnName=Bangkok&cityId=359&hotelId=1530783&checkIn=2027-02-21&checkOut=2027-02-24&adult=2&children=0&crn=1&ages=&curr=USD&barcurr=USD&hoteluniquekey=H4sIAAAAAAAA_-PqZOFikmCSamLhWPh86xs2IUYDi9-Cjg-rRNa5n2xz8Gx9HbhjnuwShwCeQgYQYFno0Mi4Qw4oLDTHYQbj_O2xKxgZNzKC1ZtWOOxgZDrAyHaCMXcB0-UvkyxPsbBy9OtKsFxi-cQUXa2UnVqpZGWio1SSWZKTqmSlFOYYoqSjlJJanAzkAFmJufmleSVAtpGRnoUxUKAkscIzBawlOTEnuTQnsSQ1pLIAqNVMRymz2LmkKLMgKDU3s6QkFagqLTGnOBUkHpRaDJRJBgsq-QGNKYIKZObnQbQboIiFJeaUpkJcALTQLRVqh2GtDqaTg1OLyjKTUxWSMxKL0lOxu97YRM_SCOF68wFxvXFt7CMWpujYTywMv4CxcDREgqWJlaGLlWESKxvH39VMEiy7WLlCTLzNPPx1PXQNL7DeZJSSNzQwMDA1NDY11TVItEg1sjBN0zWxNLM0NtY1NjE3tdDYc-Lcpg4Toxwps8WHZ79hWbzuXRPrxV8zZzGuuzrNctuEk5-YH-_fOY3137NVvezLt6z8zLy96cQ_5v29D5exH2zf28-iwKglGB_iGeJhmJWfX2CSaWael1ZiwHiKUcrQ3MLc3MjExMzYzNxIz9LMNKUgo8Q0u8S5wIM5iM3Y0dLVwijKhos5xMNJcM3fuW8vSp-yl2IODXZRzPL93Bd8RcpBCyRnCJMLBKdWhg_2kTD5JNbUPN2IiIy54gWMXYzcAowejBGMFYwNjIyrGNm5mA2MjASYNjAy7mD8DwOMrxhBNgAASwMxdSMDAAA&masterhotelid_tracelogid=100051355-0a8e285f-496933-34758&detailFilters=17%7C1%7E17%7E1*31%7C1530783%7E31%7E1530783*80%7C0%7C1%7E80%7E0*29%7C1%7E29%7E1%7C2&display=exavg&subStamp=781&isCT=true&isFlexible=F&locale=en-XX' }],
       /* the Bangkok address says what IT includes (room.includes);
        * the group carries only what is true for every one of them */
       includes: [
@@ -258,7 +262,7 @@
           story: 'A room of thirty-two square metres looking onto the garden, in a hotel built around a courtyard and a pool. Breakfast is included; the spa, the gym, the restaurants and the bar are all in the hotel.',
           groups: [['The room', ['32 sq.m. · 2 adults', 'Garden view', 'Non-smoking', 'Private bathroom', 'Air conditioning', 'Free Wi-Fi']],
             ['The hotel', ['Outdoor swimming pool', 'Spa', 'Gym', 'Restaurants', 'Bar', 'Garden', 'Concierge', 'Room service']]],
-          amenities: null, rate: 64, roomRate: 128,
+          amenities: null, rate: 67.805, roomRate: 135.61,   /* 002 · B26 USD 135.61 the room per night · B25 = B26 / 2 per person (28 Sep 2026) */
           includes: [
             'Three nights, 21 → 22, 22 → 23 and 23 → 24 February.',
             'Arrival on 21 February 2027: Haruthai picks you up herself — nothing to pay.',
@@ -280,7 +284,8 @@
       place: 'Jinma Biji Archway · Kunming Old Street',
       breakfast: 'Breakfast included',
       windows: [{ id: 'kmg', label: 'After the Wedding', dates: '1 – 4 March 2027', nights: '3 nights', n: 3,
-        bagName: 'Yifangju Designer Courtyard · Kunming', bagImg: YFJ + 'house-1.webp' }],   /* the HOUSE frame (Owner Drive 026, the property folder) — never a room's */
+        bagName: 'Yifangju Designer Courtyard · Kunming', bagImg: YFJ + 'house-1.webp',
+        booking: 'self', bookingUrl: 'https://www.trip.com/hotels/detail/?cityEnName=Kunming&cityId=34&hotelId=133686376&checkIn=2027-03-01&checkOut=2027-03-04&adult=2&children=0&crn=1&ages=&curr=USD&barcurr=USD&hoteluniquekey=H4sIAAAAAAAA_-M6yMTFJMEktYuJY-OmlffYhBgNLG5FOM6aCQSdOQ6eDCCwoc0hgKcQzGQwcmhkXFJgy3Vd2c1hBuOLE_ftVzAybmQ8ewYIelwcdjAynWBUWsD0EihxioWV4wmLBMslls2M0dVK2amVSlYmOkolmSU5qUpWSmGOIUo6SimpxclADpCVmJtfmlcCZJvpGRoB-SWJFZ4pYB3JiTnJpTmJJakhlQVAnWY6SpnFziVFmQVBqbmZJSWpQFVpiTnFqSDxoNRioEwyWFDJD2hMEVQgMz8Pot0QRSwsMac0FeIAoIVuqVA7DGtjH7EwRcd-YmH4xcLC4SXB0sTK0MXKMImVleNuiATLLla24DC_SG_fC6zKUgqGBgYGRqamRua6BomWiSZGBim6Jpbmxmbmuobmhubmlhor5nfN7jMxkj3FKGVobmlgamRoYGRmaWiuZ2RslOjs6mYRkJPl4cEcxOZq5Opo5hRlw8Xs7BcpCAnyD_ZSzKHBLop33JgruJ9IOWiB5AxhcoEwRmTNpw0B2bekHJJYU_N0IyIylooXMHYxCgowejBGMFYwNjAyvmBk_MDIuIqRYQMj4w7G_zDA-IoRZAEAtefLBAwCAAA&masterhotelid_tracelogid=100025527-0a9a420d-497367-171779&detailFilters=17%7C1%7E17%7E1*31%7C131953969%7E31%7E131953969*6%7C10%7E6%7E10*16%7C4%7E16%7E4*80%7C0%7C1%7E80%7E0*29%7C1%7E29%7E1%7C2&display=exavg&subStamp=527&isCT=true&isFlexible=F&locale=en-XX' }],   /* the HOUSE frame (Owner Drive 026, the property folder) — never a room's */
       includes: [
         'Three nights, 1 → 2, 2 → 3 and 3 → 4 March.',
         'Free Wi-Fi, air conditioning, a smart toilet and daily housekeeping in every room.',
@@ -302,7 +307,7 @@
           facts: [['Size', '20 – 22 sq.m.'], ['Bed', '1 queen bed (1.65 m)'], ['Occupancy', '1 adult'], ['Location', 'Floors 1 – 3'], ['In the room', 'A smart-home system for the whole room · wet and dry areas apart · vanity mirror'], ['Family', 'Extra beds and cribs are not available']],
           story: 'A double room for one guest in the courtyard house: a queen bed, a smart-home system for the whole room, the wet and dry areas kept apart, and a lit vanity mirror.',
           amenities: ['Air conditioning', 'Audio equipment', 'Daily housekeeping', 'Free Wi-Fi', 'Hair dryer', 'LCD TV', 'Non-smoking rooms', 'Private bathroom', 'Refrigerator', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Vanity mirror', 'Window'],
-          rate: 42, roomRate: 42 },
+          rate: 39.12, roomRate: 39.12 },   /* 002 · N27 USD 117.36 the room, 3 nights (28 Sep 2026) */
         { slug: 'jinri-terrace-double', name: '002 · Jinri Building Scenic Terrace Tub Double', cat: 'Double suite · 60 – 62 sq.m.',
           desc: '60 – 62 sq.m. · 1 king bed (1.81 m) · a private terrace and a bathtub · 3rd floor',
           gallery: [
@@ -330,7 +335,7 @@
           facts: [['Size', '71 – 74 sq.m.'], ['Bed', '1 king bed (1.81 m) and 1 double bed (1.35 m)'], ['Occupancy', '2 adults'], ['Location', '3rd floor'], ['In the room', 'Courtyard views on two sides · a premium bath'], ['Family', 'Extra beds and cribs are not available']],
           story: 'The Jinri Terrace Tub Family Suite: a king bed and a double bed, a terrace with the courtyard on two sides, and a bathroom with a freestanding tub and two basins.',
           amenities: ['Air conditioning', 'Audio equipment', 'Coffee table', 'Daily housekeeping', 'Desk', 'Free Wi-Fi', 'Garden and courtyard view', 'Hair dryer', 'Landmark view', 'LCD TV', 'Non-smoking', 'Private bathroom', 'Refrigerator', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa', 'Terrace', 'Wardrobe'],
-          rate: 43, roomRate: 86 }
+          rate: 42.89, roomRate: 85.78 }   /* 002 · P27 USD 257.34 the room, 3 nights (28 Sep 2026) */
       ]
     },
 
@@ -339,51 +344,20 @@
       place: 'Baisha, Lijiang · Rizhao Jinshan',
       breakfast: 'Breakfast included',
       windows: [{ id: 'ljg', label: 'After the Wedding', dates: '4 – 6 March 2027', nights: '2 nights', n: 2,
-        bagName: 'Luye Baisha · Lijiang', bagImg: 'assets/images/lijiang/view270-1.jpg' }],
+        bagName: 'Luye Baisha · Lijiang', bagImg: 'assets/images/lijiang/view270-1.jpg',
+        /* GUEST_SELF_BOOKING (002 · R31 – T31). The note's link opens the right hotel for 6 → 8 March — the stay is 4 → 6 March:
+           the dates contradict the sheet's own rows 17 / 22, so no booking link is offered until the source is corrected */
+        booking: 'self', bookingUrl: '' }],
       includes: [
         'Two nights, 4 → 5 and 5 → 6 March, below Jade Dragon Snow Mountain.',
         'Breakfast included on both mornings.',
         'Free Wi-Fi, and a private hot-spring pool in the rooms that have one.',
         'Transfers to and from Lijiang station, meals other than breakfast and excursions are your own.'
       ],
-      /* All nine operational categories with the Owner-approved per-person /
-       * per-night rate from Accommodation_Details. */
+      /* THE SHEET'S THREE ROOMS (Owner · 002_Accommodation_Details R · S · T, 28 Sep 2026): the other six categories are no longer
+       * products. S and T: the sheet's per-person rate (S25 = S26 / 2 · T25 = T26 / 2). R (the Snow Mountain Viewing Room) keeps
+       * its rate: the sheet gives it one night (R23) for the stay's two (R17 → R22), so its price cannot be read without a guess. */
       rooms: [
-        { slug: 'manor-suite', name: 'Snow Mountain Manor Suite', cat: 'Snow mountain suite',
-          desc: '70 sq.m. · 1 king bed · ground floor',
-          gallery: [
-          [LJG + 'starry-8.jpg', 'The private pool and the garden'],
-          [LJG + 'starry-9.jpg', 'The garden towards the mountain'],
-          [LJG + 'starry-3.jpg', 'The bedroom towards the mountain']],
-          facts: [['Size', '70 sq.m.'], ['Bed', '1 king bed (2 m)'], ['Occupancy', '2 Adults'], ['Location', 'Ground floor (1st floor locally)']],
-          story: 'The Manor Suite opens onto its own snow-view garden on the ground floor, with a private hot-spring pool and a fireplace to sit at afterwards.',
-          amenities: ['Air conditioning', 'Air purifier', 'Audio equipment', 'Balcony', 'Bathrobe', 'Bathtub or shower', 'Butler service', 'Coffee maker and teapot', 'Electric kettle', 'Fireplace', 'Free Wi-Fi', 'Garden', 'Hair dryer', 'Heating', 'Iron and ironing board', 'Minibar', 'Private hot-spring pool', 'Projector', 'Refrigerator', 'Safe in the room', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa', 'Terrace'],
-          rate: 120 },
-        { slug: 'soup-pool-270', name: '270° Snow Mountain View Room Private Soup Pool', cat: 'Snow mountain room',
-          desc: '55 sq.m. · 1 king bed · 2nd floor',
-          gallery: [
-          [LJG + 'souppool-1.jpg', 'The room and private pool'],
-          [LJG + 'souppool-2.jpg', 'The room towards the mountain'],
-          [LJG + 'souppool-3.jpg', 'The fireplace and the peak'],
-          [LJG + 'souppool-4.jpg', 'The room at dusk'],
-          [LJG + 'souppool-5.jpg', 'The bathroom'],
-          [LJG + 'souppool-6.jpg', 'The room in the evening']],
-          facts: [['Size', '55 sq.m.'], ['Bed', '1 king bed (2 m)'], ['Occupancy', '2 Adults'], ['Location', '2nd floor']],
-          story: 'Fifty-five square metres wrapped in 270 degrees of valley, with a private hot-spring pool beside the window and a fireplace behind it.',
-          amenities: ['Air conditioning', 'Air purifier', 'Audio equipment', 'Bathrobe', 'Bathtub or shower', 'Butler service', 'Coffee maker and teapot', 'Electric kettle', 'Fireplace', 'Free Wi-Fi', 'Hair dryer', 'Heating', 'Iron and ironing board', 'Minibar', 'Private hot-spring pool', 'Projector', 'Refrigerator', 'Safe in the room', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa'],
-          rate: 105 },
-        { slug: 'private-courtyard-270', name: '270° Private Courtyard Snow Mountain View', cat: 'Snow mountain room',
-          desc: '55 sq.m. · 1 king bed · ground floor',
-          gallery: [
-          [LJG + 'courtyard-1.jpg', 'The room towards the courtyard'],
-          [LJG + 'courtyard-2.jpg', 'The bed and the mountain view'],
-          [LJG + 'courtyard-3.jpg', 'The soaking tub and the fireplace'],
-          [LJG + 'courtyard-4.jpg', 'The room at dawn'],
-          [LJG + 'courtyard-5.jpg', 'The bathroom']],
-          facts: [['Size', '55 sq.m.'], ['Bed', '1 king bed (2 m)'], ['Occupancy', '2 Adults'], ['Location', 'Ground floor (1st floor locally)']],
-          story: 'A ground-floor room with its own courtyard: 270 degrees of snow mountain, a private hot-spring pool and a snow-view fireplace.',
-          amenities: ['Air conditioning', 'Air purifier', 'Audio equipment', 'Bathrobe', 'Bathtub or shower', 'Butler service', 'Coffee maker and teapot', 'Electric kettle', 'Fireplace', 'Free Wi-Fi', 'Heating', 'Iron and ironing board', 'Minibar', 'Private courtyard', 'Private hot-spring pool', 'Projector', 'Safe in the room', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa'],
-          rate: 105 },
         { slug: 'snow-mountain-viewing', name: 'Snow Mountain Viewing Room', cat: 'Snow mountain room',
           desc: '50 sq.m. · 1 king bed · 2nd floor',
           /* the Owner's ruling of 21 Sep 2026: the three room photographs that stood for the house on The Journey (the bedroom
@@ -397,46 +371,9 @@
           story: 'Fifty square metres facing the peak: a starry-sky terrace, a private hot-spring pool and a fireplace for the cold end of the day.',
           amenities: ['Air conditioning', 'Air purifier', 'Audio equipment', 'Balcony', 'Bathrobe', 'Bathtub or shower', 'Butler service', 'Coffee maker and teapot', 'Electric kettle', 'Fireplace', 'Free Wi-Fi', 'Heating', 'Iron and ironing board', 'Minibar', 'Private hot-spring pool', 'Projector', 'Safe in the room', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa', 'Terrace'],
           rate: 75 },
-        { slug: 'viewing-270', name: '270° Snow Mountain Viewing', cat: 'Snow mountain room',
-          desc: '55 sq.m. · 1 king bed · 2nd – 3rd floor',
-          gallery: [
-          [LJG + 'view270-1.jpg', 'The room at dusk'],
-          [LJG + 'view270-2.jpg', 'The wraparound windows'],
-          [LJG + 'view270-3.jpg', 'The room at night'],
-          [LJG + 'view270-4.jpg', 'Towards the mountain'],
-          [LJG + 'view270-5.jpg', 'The bed and the soaking tub'],
-          [LJG + 'view270-6.jpg', 'The bathroom']],
-          facts: [['Size', '55 sq.m.'], ['Bed', '1 king bed (2 m)'], ['Occupancy', '2 Adults'], ['Location', '2nd – 3rd floor']],
-          story: 'The 270-degree viewing room — a snow-view fireplace, a private hot-spring pool, and the moon over the mountain from the second and third floors.',
-          amenities: ['Air conditioning', 'Air purifier', 'Audio equipment', 'Bathrobe', 'Bathtub or shower', 'Butler service', 'Coffee maker and teapot', 'Electric kettle', 'Fireplace', 'Free Wi-Fi', 'Hair dryer', 'Heating', 'Iron and ironing board', 'Minibar', 'Private hot-spring pool', 'Projector', 'Refrigerator', 'Safe in the room', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa'],
-          rate: 100 },
-        { slug: 'starry-sky', name: 'Luye Starry Sky Suite · Immersive View', cat: 'Snow mountain suite',
-          desc: '88 sq.m. · 1 king bed · 3rd floor',
-          gallery: [
-          [LJG + 'starry-1.jpg', 'The round bed and the peak'],
-          [LJG + 'starry-2.jpg', 'The suite at dusk'],
-          [LJG + 'starry-5.jpg', 'The bed by candlelight'],
-          [LJG + 'starry-7.jpg', 'The suite in the evening'],
-          [LJG + 'starry-6.jpg', 'The sitting area towards the mountain'],
-          [LJG + 'starry-4.jpg', 'The bathroom']],
-          facts: [['Size', '88 sq.m.'], ['Bed', '1 king bed (3.1 m)'], ['Occupancy', '2 Adults'], ['Location', '3rd floor']],
-          story: 'Eighty-eight square metres behind a ten-metre curtain of floor-to-ceiling glass, with a round bed set to face it. The mountain is the whole third wall; at night the sky replaces it.',
-          amenities: ['Air conditioning', 'Air purifier', 'Audio equipment', 'Bathrobe', 'Bathtub or shower', 'Butler service', 'Coffee maker and teapot', 'Electric kettle', 'Fireplace', 'Free Wi-Fi', 'Heating', 'Iron and ironing board', 'Minibar', 'Projector', 'Safe in the room', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa'],
-          rate: 210 },
-        { slug: 'boundless', name: 'Boundless Floor-to-Ceiling Glass Sunlit Suite', cat: 'Snow mountain suite',
-          desc: '88 sq.m. · 1 king bed · 3rd floor',
-          gallery: [
-          [LJG + 'boundless-1.jpg', 'The suite and the pool'],
-          [LJG + 'boundless-2.jpg', 'The bathroom'],
-          [LJG + 'boundless-3.jpg', 'The shower and the toilet'],
-          [LJG + 'boundless-4.jpg', 'The fireplace and the mountain'],
-          [LJG + 'boundless-5.jpg', 'The bed and the mountain'],
-          [LJG + 'boundless-6.jpg', 'The round bed and the fireplace'],
-          [LJG + 'boundless-7.jpg', 'The terrace']],
-          facts: [['Size', '88 sq.m.'], ['Bed', '1 king bed (3.1 m)'], ['Occupancy', '2 Adults'], ['Location', '3rd floor']],
-          story: 'The Boundless suite: a ten-metre screen of glass, a five-metre private hot-spring pool and a round bed under the sunlit Jinshan face of the mountain.',
-          amenities: ['Air conditioning', 'Air purifier', 'Audio equipment', 'Bathrobe', 'Bathtub or shower', 'Butler service', 'Coffee maker and teapot', 'Electric kettle', 'Fireplace', 'Free Wi-Fi', 'Heating', 'Iron and ironing board', 'Minibar', 'Private hot-spring pool', 'Projector', 'Safe in the room', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa'],
-          rate: 170 },
+        
+        
+        
         { slug: 'private-soup-view', name: 'Snow Mountain Private Soup Viewing Suite', cat: 'Snow mountain suite',
           desc: '88 sq.m. · 1 king bed · 2nd floor',
           gallery: [
@@ -451,7 +388,7 @@
           facts: [['Size', '88 sq.m.'], ['Bed', '1 king bed (2 m)'], ['Occupancy', '2 Adults'], ['Location', '2nd floor']],
           story: 'A nine-metre ultra-wide window, a five-metre private hot-spring pool and a snow-viewing fireplace — 88 sq.m. on the second floor.',
           amenities: ['Air conditioning', 'Air purifier', 'Audio equipment', 'Bathrobe', 'Bathtub or shower', 'Butler service', 'Coffee maker and teapot', 'Electric kettle', 'Fireplace', 'Free Wi-Fi', 'Heating', 'Iron and ironing board', 'Minibar', 'Private hot-spring pool', 'Projector', 'Safe in the room', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa'],
-          rate: 125 },
+          rate: 116.37, roomRate: 232.74 },
         { slug: 'view-suite-270', name: '270° Snow Mountain View Suite', cat: 'Snow mountain suite',
           desc: '70 sq.m. · 1 king bed · 3rd floor',
           gallery: [
@@ -466,45 +403,47 @@
           facts: [['Size', '70 sq.m.'], ['Bed', '1 king bed (2 m)'], ['Occupancy', '2 Adults'], ['Location', '3rd floor']],
           story: 'Two hundred and seventy degrees of mountain from the third floor, with a snow-view terrace, a private hot-spring pool and a fireplace.',
           amenities: ['Air conditioning', 'Air purifier', 'Audio equipment', 'Balcony', 'Bathrobe', 'Bathtub or shower', 'Butler service', 'Coffee maker and teapot', 'Electric kettle', 'Fireplace', 'Free Wi-Fi', 'Hair dryer', 'Heating', 'Iron and ironing board', 'Minibar', 'Private hot-spring pool', 'Projector', 'Refrigerator', 'Safe in the room', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa', 'Terrace'],
-          rate: 120 }   /* no reservation (Owner, 15 Sep 2026): available until booked */,
+          rate: 108.435, roomRate: 216.87 }   /* no reservation (Owner, 15 Sep 2026): available until booked */,
       ]
     },
 
-    kempinski: {
-      name: 'Siam Kempinski Bangkok',
-      place: 'Bangkok, Thailand',
-      breakfast: 'Breakfast included',
+    /* HOTEL MUSE BANGKOK, AUTOGRAPH COLLECTION (Owner, 28 Sep 2026 · 002_Accommodation_Details V / W · Package J): the closing
+       Bangkok stay of 6 – 8 March. The Siam Kempinski is no longer part of the journey — its record, its stock and its photographs
+       are gone; a Bag line naming its room leaves the Bag on load and the stage asks for a choice again (nothing is remapped).
+       ONE product, the Jatu Room: V is its rate for every guest (V27 USD 368.40 the room for two nights · V26 USD 184.20 the room
+       per night · V25 USD 92.10 per person per night); W is the same room at one guest's personal employee rate, resolved on the
+       server for that guest alone (src/gifts.js) — never a second product. Breakfast is not included. GUEST_SELF_BOOKING: guests
+       book the hotel themselves (V31 · the hotel's own page); the window keeps its internal id `kempinski` so no stored answer
+       changes. Photography: the hotel (Drive 030 · seven frames) and the Jatu Room (Drive 801 · Jatu Room) apart. */
+    muse: {
+      name: 'Hotel Muse Bangkok, Autograph Collection',
+      place: 'Langsuan, Bangkok',
+      breakfast: 'Breakfast not included',
       windows: [{ id: 'kempinski', label: 'The Return', dates: '6 – 8 March 2027', nights: '2 nights', n: 2,
-        bagName: 'Siam Kempinski Bangkok', bagImg: 'assets/images/journey/kempinski-01.jpg' }],
+        bagName: 'Hotel Muse Bangkok, Autograph Collection', bagImg: MUSE + 'hotel-1.jpg',
+        booking: 'self', bookingUrl: 'https://www.marriott.com/en-us/hotels/bkkhm-hotel-muse-bangkok-autograph-collection/overview/?scid=f2ae0541-1279-4f24-b197-a979c79310b0' }],
       includes: [
         'Two nights, 6 → 7 and 7 → 8 March, to close the journey.',
-        'Breakfast included on both mornings, for two guests.',
-        'Complimentary minibar, bottled water, soft drinks and snacks.',
-        'Daily housekeeping and turndown service.',
-        'Airport transfers, meals other than breakfast and anything charged to the room are your own.'
+        'Breakfast is not included.',
+        'You book the hotel yourself, with the hotel — the link is beside the room.',
+        'Airport transfers, meals and anything charged to the room are your own.'
       ],
       rooms: [
-        { slug: 'deluxe-balcony-king', name: 'Deluxe Balcony King', cat: 'Deluxe room · non-smoking',
-          desc: 'A balcony room in the Royal Wing, for the two closing nights in Bangkok.',
-          /* Room photography from the owner's 025 hotel folder (IMG_3453/3455/3456/3457 —
-           * bedroom, balcony, sitting corner, bathroom) followed by the property. */
+        { slug: 'jatu-room', name: 'Jatu Room', cat: 'Hotel room · 39 sq.m.',
+          property: 'Hotel Muse Bangkok, Autograph Collection', place: 'Langsuan, Bangkok',
+          breakfast: 'Breakfast not included',
+          desc: '39 sq.m. · 1 king bed or 2 single beds · floors 8 – 16',
           gallery: [
-            [KEM + 'room-bedroom-balcony.jpg', 'The room towards the balcony'],
-            [KEM + 'room-balcony-view.jpg', 'The balcony'],
-            [KEM + 'room-sitting-corner.jpg', 'The sitting corner'],
-            [KEM + 'room-bathroom.jpg', 'The bathroom'],
-            ['assets/images/journey/kempinski-01.jpg', 'The lagoon courtyard from above'],
-            ['assets/images/journey/kempinski-03.jpg', 'The lobby'],
-            [KEM + 'lobby-staircase.jpg', 'The grand staircase'],
-            [KEM + 'lounge.jpg', 'The lounge']],
-          facts: [['Size', '45 sq.m.'], ['Bed', '1 king bed'], ['Occupancy', '2 guests on this website (the room sleeps up to 3 adults and 1 child, or 2 adults and 2 children under 12)'], ['Location', 'Royal Wing · 8th floor'], ['Outside', 'Private balcony with seating'], ['Breakfast', 'Included for two']],
-          story: 'The Royal Wing, eighth floor. The balcony looks over the hotel’s lawns and water features with seating set out on it; inside there is a generous living area, a working desk and a marble bathroom with a walk-in rain shower. Two breakfasts are included, and the minibar is complimentary.',
-          groups: [['The room', ['45 sq.m. in the Royal Wing, 8th floor', 'Private balcony with outdoor seating', 'Garden and water-feature outlook', 'Generous living area with sofa and chairs', 'Working desk', 'Non-smoking · blackout curtains and down duvet']],
-            ['Bathroom', ['Marble bathroom', 'Spacious walk-in shower', 'Rainfall shower head', 'Bathrobes, slippers and towels', 'Hair dryer and full toiletries', 'Bidet sprayer']],
-            ['Food & drink', ['Breakfast included for two guests', 'Minibar — complimentary', 'Bottled water, soft drinks and snacks — complimentary', 'Coffee machine, tea and electric kettle', 'Fresh fruit', 'Refrigerator']],
-            ['Technology', ['Free Wi-Fi and wired internet', 'Television and audio equipment', 'Smart room controls and smart door lock', 'Multi-standard power outlets', 'Telephone']],
-            ['Service', ['Daily housekeeping', 'Turndown service', 'Safe in the room', 'Iron and ironing board', 'Welcome gift', 'Baby bath, children’s slippers and bathrobes on request']]],
-          rate: 190 }
+            [MUSE + 'jatu-room-1.webp', 'The Jatu Room'],
+            [MUSE + 'jatu-room-2.webp', 'The bathroom, with its bathtub']],
+          facts: [['Size', '39 sq.m.'], ['Bed', '1 king bed (1.81 m) or 2 single beds (1.05 m)'], ['Occupancy', '2 adults'], ['Location', 'Floors 8 – 16'],
+            ['Stay', '6 – 8 March 2027 · 2 nights'], ['Breakfast', 'Not included']],
+          story: 'Thirty-nine square metres on one of the upper floors, with a bathtub, a sofa and a desk; the hotel has an outdoor pool, a sauna, a gym, three restaurants and its bars.',
+          groups: [['The room', ['39 sq.m. · 2 adults', 'Windows', 'Non-smoking', 'Sofa and desk', 'Air conditioning', 'Blackout curtains', 'Free Wi-Fi']],
+            ['Bathroom', ['Private bathroom', 'Bathtub and shower', 'Bathrobes and slippers', 'Hair dryer', 'Toiletries', 'Hot water (24 hours)']],
+            ['Food & drink', ['Coffee maker and teapot', 'Tea bags', 'Electric kettle', 'Bottled water and soft drinks — free']],
+            ['The hotel', ['Outdoor swimming pool', 'Sauna', 'Gym', 'Three restaurants', 'Bar and pool bar', 'Room service', 'Concierge', 'Free private parking']]],
+          amenities: null, rate: 92.1, roomRate: 184.2 }
       ]
     }
   };
@@ -523,10 +462,10 @@
     guesthouse: ['assets/images/guesthouse/'],
     kunming:    ['assets/images/yifangju/'],   /* the Yifangju Designer Courtyard alone (Owner, 27 Sep 2026): house-N = the property (Drive 026), <room>-N = that room only (Drive 800) */
     lijiang:    ['assets/images/lijiang/', 'assets/images/journey/lijiang-'],
-    kempinski:  ['assets/images/kempinski/', 'assets/images/journey/kempinski-']
+    muse:       ['assets/images/muse/']   /* Hotel Muse Bangkok: hotel-N = the hotel (Drive 030), jatu-room-N = the Jatu Room (Drive 801) */
   };
   /* the stay-media records (assets/stay-media.js) that belong to each property */
-  var STAY_MEDIA_KEYS = { sathorn: ['uSathorn'], souphattra: ['souphattra'], guesthouse: ['guestHouse'], kunming: ['yifangju'], lijiang: ['luyeBaisha'], kempinski: ['kempinski'] };
+  var STAY_MEDIA_KEYS = { sathorn: ['uSathorn'], souphattra: ['souphattra'], guesthouse: ['guestHouse'], kunming: ['yifangju'], lijiang: ['luyeBaisha'], muse: ['hotelMuse'] };
   /* a frame the property may never show, whatever folder it sits in: destination photography by kind (the peak, the village, the city) */
   var NEVER = /snow-mountain-viewing-1\.jpg$|\/city\/|\/experiences\/|\/1872\/|\/marsilea\/|\/hero\/|\/event\/|\/venue\/|\/temple\/|\/dress|\/train\/|\/transport\/|\/timeline\/|\/alms\//;
   function inFolder(stayKey, src) {

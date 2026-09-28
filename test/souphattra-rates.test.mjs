@@ -47,6 +47,9 @@ test('THE FOURTEEN PAIRS · the data, the quote and the Details words of every c
   for (const [win, map] of Object.entries(PAIRS)) for (const [slug, [pp, room]] of Object.entries(map)) {
     const r = S.rooms.find((x) => x.slug === slug);
     assert.equal(r.rates[win], pp, win + '/' + slug); assert.equal(r.roomRates[win], room, win + '/' + slug + ' room');
+    /* the live 002 (28 Sep 2026 · G21 / H21 / I21 "pre wedding, not available"): three suites are offered for the Wedding Stay only —
+       their pre-wedding figure is never quoted, never a Bag line */
+    if (r.notIn && r.notIn.includes(win)) { assert.equal(P.offeredIn(win, r), false, win + '/' + slug + ' not offered'); assert.equal(P.items(win, slug).length, 0, 'never a Bag line'); assert.equal(P.known({ id: win, room: slug }), false); continue; }
     const q = P.quote(win, slug);
     assert.equal(q.rate, pp); assert.equal(q.roomRate, room); assert.equal(q.total, win === 'prewed' ? pp * 2 : pp);
     assert.equal(q.roomNightly, P.money(room) + ' per room per night');

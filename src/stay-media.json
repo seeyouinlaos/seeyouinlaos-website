@@ -412,53 +412,51 @@
   ],
   "leadNote": "Owner decision, 26 Sep 2026: the gallery presents the property itself in the Owner's numbered order (045 · 001–009); the mountain-terrace frame (010) stays out"
  },
- "kempinski": {
-  "name": "Siam Kempinski Bangkok",
+ "hotelMuse": {
+  "name": "Hotel Muse Bangkok, Autograph Collection",
   "city": "Bangkok",
   "images": [
    {
-    "src": "assets/images/kempinski/facade-garden.jpg",
+    "src": "assets/images/muse/hotel-1.jpg",
     "kind": "exterior",
-    "caption": "The facade and the garden",
-    "source": "Owner Drive 025 - Hotel - Siam Kempinski Bangkok"
+    "caption": "The hotel tower at dusk",
+    "source": "Owner Drive 030 - The Journey - Accommodation · Bangkok - After the Wedding (the property folder, 28 Sep 2026)"
    },
    {
-    "src": "assets/images/journey/kempinski-01.jpg",
-    "kind": "grounds",
-    "caption": "The lagoon courtyard from above",
-    "source": "Owner Drive 025 - Hotel - Siam Kempinski Bangkok"
+    "src": "assets/images/muse/hotel-6.webp",
+    "kind": "exterior",
+    "caption": "The entrance",
+    "source": "Owner Drive 030 - The Journey - Accommodation · Bangkok - After the Wedding (the property folder, 28 Sep 2026)"
    },
    {
-    "src": "assets/images/journey/kempinski-03.jpg",
+    "src": "assets/images/muse/hotel-3.jpg",
     "kind": "lobby",
-    "caption": "The lobby",
-    "source": "Owner Drive 025 - Hotel - Siam Kempinski Bangkok"
-   },
-   {
-    "src": "assets/images/kempinski/lobby-palms.jpg",
-    "kind": "lobby",
-    "caption": "The lobby palms",
-    "source": "Owner Drive 025 - Hotel - Siam Kempinski Bangkok",
-    "focal": "50% 90%",
-    "focalWhy": "the walking figure gives the lobby its scale; the centred 5:4 / 3:2 crop cut him off (Media Asset Agent, 26 Sep 2026)"
-   },
-   {
-    "src": "assets/images/kempinski/lobby-staircase.jpg",
-    "kind": "architecture",
-    "caption": "The grand staircase",
-    "source": "Owner Drive 025 - Hotel - Siam Kempinski Bangkok"
-   },
-   {
-    "src": "assets/images/kempinski/lounge.jpg",
-    "kind": "facilities",
     "caption": "The lounge",
-    "source": "Owner Drive 025 - Hotel - Siam Kempinski Bangkok"
+    "source": "Owner Drive 030 - The Journey - Accommodation · Bangkok - After the Wedding (the property folder, 28 Sep 2026)"
    },
    {
-    "src": "assets/images/kempinski/room-bedroom-balcony.jpg",
-    "kind": "room",
-    "caption": "The Deluxe Balcony King room",
-    "source": "Owner Drive 025 - Hotel - Siam Kempinski Bangkok"
+    "src": "assets/images/muse/hotel-5.jpg",
+    "kind": "facilities",
+    "caption": "The rooftop terrace at dusk",
+    "source": "Owner Drive 030 - The Journey - Accommodation · Bangkok - After the Wedding (the property folder, 28 Sep 2026)"
+   },
+   {
+    "src": "assets/images/muse/hotel-2.jpg",
+    "kind": "facilities",
+    "caption": "The rooftop bar under its dome",
+    "source": "Owner Drive 030 - The Journey - Accommodation · Bangkok - After the Wedding (the property folder, 28 Sep 2026)"
+   },
+   {
+    "src": "assets/images/muse/hotel-4.jpg",
+    "kind": "facilities",
+    "caption": "The rooftop bar at night",
+    "source": "Owner Drive 030 - The Journey - Accommodation · Bangkok - After the Wedding (the property folder, 28 Sep 2026)"
+   },
+   {
+    "src": "assets/images/muse/hotel-7.webp",
+    "kind": "facilities",
+    "caption": "The bar and its red staircase",
+    "source": "Owner Drive 030 - The Journey - Accommodation · Bangkok - After the Wedding (the property folder, 28 Sep 2026)"
    }
   ]
  }

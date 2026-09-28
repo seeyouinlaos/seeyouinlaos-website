@@ -13,7 +13,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 @media (prefers-reduced-motion:reduce){.cart-line{transition:none}}
 .cart-state{margin-top:var(--s3,12px)}
 </style>
-<script src="assets/i18n/siyl-i18n.js?v=fe22e4f3"></script>
+<script src="assets/i18n/siyl-i18n.js?v=11c9adfb"></script>
 <link rel="stylesheet" href="assets/aman.css?v=8726da2c"><link rel="stylesheet" href="assets/prep.css?v=0a6eb26a"></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="My Bag" aria-current="page"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main class="prep-page" id="cart">
@@ -27,9 +27,9 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 </main>
 <script src="assets/bag.js?v=f151ee23"></script>
 <script src="assets/shop-menu.js?v=03047fbc"></script>
-<script src="assets/aman.js?v=5b2ba99a"></script>
-<script src="assets/rooms-data.js?v=0538f694"></script>
-<script src="assets/pricing.js?v=3820641f"></script>
+<script src="assets/aman.js?v=641d956e"></script>
+<script src="assets/rooms-data.js?v=a96529a0"></script>
+<script src="assets/pricing.js?v=0b34a44e"></script>
 <script src="assets/stage-graph.js?v=f5f4dc76"></script>
 <script src="assets/questionnaire.js?v=1dc3e01d"></script>
 <script src="assets/guest.js?v=f30d0df8"></script>
@@ -40,12 +40,12 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/temple.js?v=a2f797fc"></script>
 <script src="assets/stay-plan.js?v=5227fdc4"></script>
 <script src="assets/rooms.js?v=6b03be1c"></script>
-<script src="assets/stay.js?v=0d15179f"></script>
+<script src="assets/stay.js?v=cf7d1019"></script>
 <script src="assets/seatlabels.js?v=411e8a27"></script>
 <script src="assets/seating.js?v=a8578ba3"></script>
 <script src="assets/confirm.js?v=d1b9a554"></script>
-<script src="assets/transport-data.js?v=c7bb48e5"></script>
-<script src="assets/journey.js?v=b7321cf6"></script>
+<script src="assets/transport-data.js?v=3391c527"></script>
+<script src="assets/journey.js?v=2941fe09"></script>
 <script type="module" src="assets/invite.mjs?v=252eac2c"></script>
 <script>
 /* ============================================================================
@@ -124,7 +124,12 @@ function amount(x){
   if(x.complimentary)return '<p class="p-line-amt"><span class="t-l1">Complimentary</span></p>';
   /* the Bride & Groom's gift (Owner, 28 Sep 2026): nothing to pay, and who gives it */
   if(x.gift)return '<p class="p-line-amt"><span class="t-l1">Complimentary</span><span class="t-l1">from the Bride &amp; Groom</span></p>';
-  return '<p class="p-line-amt">'+money(x.price||0)+'<span class="t-l1">'+(x.id==='1872'||x.id==='tea1872'?'for the table':'per person')+'</span></p>'}
+  /* a personal employee rate is the whole room, paid by this guest alone (Owner, 28 Sep 2026 · src/gifts.js) */
+  return '<p class="p-line-amt">'+money(x.price||0)+'<span class="t-l1">'+(x.id==='1872'||x.id==='tea1872'?'for the table':x.personal==='employee'?'for the room':'per person')+'</span></p>'}
+/* THE BOOKING METHOD of a stay line (Owner, 28 Sep 2026 · 002 "Note for Guest"): booked by the guest (the hotel's own link, in a new
+   tab — following it books nothing here and the line stays as it is) or by the Bride & Groom (charged within 14 days after booking) */
+function bookingHtml(x){var b=x&&x.stay&&P&&P.bookingOf?P.bookingOf(x.id):null;if(!b)return '';
+  return '<p class="t-b2" data-booking="'+esc(b.method)+'">'+esc(b.words)+(b.url?' <a class="p-link" href="'+esc(b.url)+'" target="_blank" rel="noopener noreferrer" data-booking-link>Book with the hotel</a>':'')+'</p>'}
 function item(x){
   var seg=segOf(x),when=J.when(x),m=J.meta(x),held=!(seg&&seg.cat==='Accommodation')||ST.held(x);
   /* CART = CART (Owner, 15 Sep 2026): the line, its state, its price, CHANGE · REMOVE · DETAILS — the ticket and its code live on the ticket, never here */
@@ -134,6 +139,7 @@ function item(x){
     '<h3 class="t-h2">'+esc(x.name)+'</h3><p class="t-b2">'+esc(x.meta||'')+'</p>'+
     '<p class="t-l1'+(held?' on':' open')+'">'+esc(status(x))+'</p>'+
     (m.basis&&!x.interest?'<p class="t-b2">'+esc(m.basis)+'</p>':'')+
+    bookingHtml(x)+
     '<div class="p-actions" data-line-actions>'+
       '<a class="p-link" href="'+changeHref(x)+'" data-change="'+esc(x.id)+'">'+(seg&&seg.cat==='Accommodation'&&!held?'Choose your room':'Change')+'</a>'+
       '<button type="button" class="p-link mute" data-remove="'+esc(x.id)+'">Remove</button>'+

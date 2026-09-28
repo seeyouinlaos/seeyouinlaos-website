@@ -91,9 +91,12 @@ test('FOCAL POINTS ON THE SITE · the decisions recorded in the contract are the
   assert.equal(slot('assets/images/city/002-vientiane-g02-patuxai-from-above.jpg', 'destination-gallery-item').focal, '50% 50%');
   assert.match(src('destination.html'), /002-vientiane-g02-patuxai-from-above\.jpg" data-focal="50% 50%"/);
   assert.match(src('assets/refgal.js'), /img\.style\.objectPosition = img\.getAttribute\('data-focal'\)/);
-  /* portrait source, landscape gallery: the Kempinski lobby keeps the walking figure */
-  assert.equal(slot('assets/images/kempinski/lobby-palms.jpg', 'product-gallery').focal, '50% 90%');
-  assert.match(src('assets/stay-media.js'), /lobby-palms\.jpg","kind":"lobby","caption":"[^"]+","focal":"50% 90%"/);
+  /* portrait source, landscape gallery: the one stay frame that carried a focal point (the Siam Kempinski lobby) left with its
+     hotel (Hotel Muse Bangkok replaced it, 28 Sep 2026) — the frame is retired, nothing aims at it, and the mechanism stays: the
+     record's focal is carried by the builder and read by the stay gallery */
+  assert.equal(slot('assets/images/kempinski/lobby-palms.jpg', 'product-gallery'), undefined);
+  assert.doesNotMatch(src('assets/stay-media.js'), /lobby-palms/);
+  assert.match(src('src/build-stay-media.cjs'), /im\.focal \? \{ focal: im\.focal \} : \{\}/);
   assert.match(src('journeys.html'), /var f4=x\[4\]\|\|x\[2\],fp=f4&&/);
   /* a transport frame carries its own focal point as the tuple's third value (the C86 departure, aimed at the train) */
   assert.match(src('assets/transport-data.js'), /c642-leaving-kunming-dusk\.jpg', 'Leaving Kunming at dusk', '50% 80%'/);

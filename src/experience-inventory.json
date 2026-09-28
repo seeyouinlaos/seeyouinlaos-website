@@ -737,7 +737,7 @@
  {
   "id": "bkk-alati",
   "name": "ALATi",
-  "city": "Siam Kempinski Bangkok",
+  "city": "Siam, Bangkok",
   "roles": [
    "lunch"
   ],
@@ -887,8 +887,8 @@
  },
  {
   "id": "bkk-firefly",
-  "name": "Firefly Bar, Siam Kempinski",
-  "city": "Bangkok",
+  "name": "Firefly Bar",
+  "city": "Siam, Bangkok",
   "roles": [
    "bar"
   ],
@@ -908,7 +908,7 @@
    "assets/images/experiences/bkk-firefly-03.jpg",
    "assets/images/experiences/bkk-firefly-04.jpg"
   ],
-  "note": "the Owner's own folder (22 Sep 2026): the bar of the Siam Kempinski, four frames",
+  "note": "the Owner's own folder (22 Sep 2026), four frames; named without its hotel since Hotel Muse Bangkok replaced the Siam Kempinski as the closing stay (28 Sep 2026)",
   "price": null,
   "hours": null,
   "maps": null,

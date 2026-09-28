@@ -117,13 +117,13 @@ test('SATHORN PENTHOUSE · DELETED (Owner, 24 Sep 2026 · Edit 6): no room recor
   for (const f of ACTIVE) { const t = stripComments(src(f)); assert.doesNotMatch(t, /USD 90 per person|rate: 90\b/, f + ' carries the retired USD 90 rate'); assert.doesNotMatch(t, /Sathorn Penthouse|slug: 'penthouse'/, f + ' names the deleted Sathorn Penthouse'); }
 });
 
-test('EDIT 4 (Owner, 16 Sep 2026) · Luye Baisha and Siam Kempinski say “your cost” (was self-pay) everywhere the stay summary appears; Harudot sits in the existing Bangkok Cafés rail, never in a rail of its own; the stage never stays invisible', () => {
+test('EDIT 4 (Owner, 16 Sep 2026) · Luye Baisha and the closing Bangkok stay (Hotel Muse Bangkok since 28 Sep 2026) say “your cost” (was self-pay) everywhere the stay summary appears; Harudot sits in the existing Bangkok Cafés rail, never in a rail of its own; the stage never stays invisible', () => {
   /* Window 007 (TO-00717 · TO-00719 · TO-01301 · TO-01305): “self-pay” is retired site-wide; the same rule now reads “your cost”, before the breakfast */
   assert.match(src('accommodation.html'), /<span class="sn">Luye Baisha<\/span><span class="sw">4 – 6 Mar<\/span><span class="sc">Lijiang · 2 nights · your cost · breakfast included<\/span>/);
-  assert.match(src('accommodation.html'), /<span class="sn">Siam Kempinski<\/span><span class="sw">6 – 8 Mar<\/span><span class="sc">Bangkok · 2 nights · your cost · breakfast included<\/span>/);
+  assert.match(src('accommodation.html'), /<span class="sn">Hotel Muse Bangkok<\/span><span class="sw">6 – 8 Mar<\/span><span class="sc">Bangkok · 2 nights · your cost · breakfast not included<\/span>/);
   assert.match(src('journeys.html'), /<p class="pm">4 – 6 March · 2 nights · your cost · breakfast included<\/p>/);
-  assert.match(src('journeys.html'), /<p class="pm">6 – 8 March · 2 nights · your cost · breakfast included<\/p>/);
-  for (const f of ['accommodation.html', 'journeys.html']) { assert.doesNotMatch(src(f), /2 nights · breakfast included/, f + ': no summary of the two stays without “your cost”'); assert.doesNotMatch(src(f), /self-pay/i, f + ': the retired word'); }
+  assert.match(src('journeys.html'), /<p class="pm">6 – 8 March 2027 · 2 nights: 6 &rarr; 7 and 7 &rarr; 8 March · Langsuan, Bangkok · your cost · breakfast not included<\/p>/);
+  for (const f of ['accommodation.html', 'journeys.html']) { assert.doesNotMatch(src(f), /2 nights · breakfast (not )?included/, f + ': no summary of the two stays without “your cost”'); assert.doesNotMatch(src(f), /self-pay/i, f + ': the retired word'); }
   /* the taxonomy (22 Sep 2026): Bangkok is one chapter with one Cafés rail in the order of the days — Harudot once, in it */
   const x = src('experiences.html');
   assert.match(x, /box\.innerHTML = D\.rails\(key\)\.map\(function \(r\) \{ return rail\(r, key\); \}\)\.join\(''\);/, 'one rail per category of the chapter, from the one taxonomy');

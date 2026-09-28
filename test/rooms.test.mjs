@@ -58,9 +58,10 @@ test('ROOMS · 1 room = 2 places; 5 rooms = 10 places; units are persistent labe
   assert.equal(SEED['guesthouse/guest-house'].unit, 'guest'); assert.equal(SEED['guesthouse/guest-house'].capacity, 4);
   assert.equal(SEED['airbnb-2br/private-residence'], undefined, 'the invented "Private Residence" key no longer exists'); assert.deepEqual(unitsOf('airbnb-2br/private-residence'), []);
   assert.equal(unitsOf('kmg/jinri-family-suite')[0].places, 2, 'the Jinri Terrace Tub Family Suite sleeps two adults (Accommodation_Details, 27 Sep 2026)'); assert.equal(unitsOf('kmg/elegant-residence')[0].places, 1, 'the Elegant Residence room sleeps one adult: one place');
-  /* the current Operations Master (19 Sep 2026): Lijiang six rooms per category, Kempinski six */
-  for (const key of Object.keys(SEED).filter((k) => k.startsWith('ljg/'))) assert.equal(unitsOf(key).length, 6, key + ' is six rooms');
-  assert.equal(unitsOf('kempinski/deluxe-balcony-king').length, 6);
+  /* the current Operations Master (002, 28 Sep 2026): Lijiang the sheet's three rooms — 1 · 1 · 2 rooms, the Viewing Room one
+     adult; Hotel Muse Bangkok, the Jatu Room, three rooms of two (the Siam Kempinski is gone) */
+  assert.deepEqual(Object.keys(SEED).filter((k) => k.startsWith('ljg/')).map((k) => [k, unitsOf(k).length, unitsOf(k)[0].places]), [['ljg/private-soup-view', 2, 2], ['ljg/view-suite-270', 1, 2], ['ljg/snow-mountain-viewing', 1, 1]]);
+  assert.equal(unitsOf('kempinski/jatu-room').length, 3); assert.deepEqual(unitsOf('kempinski/deluxe-balcony-king'), []);
   assert.equal(allUnits().length, Object.keys(SEED).reduce((n, k) => n + (SEED[k].unit === 'guest' ? 1 : SEED[k].capacity), 0));
 });
 
@@ -85,7 +86,7 @@ test('ROOMS · nothing is reserved (Owner, 19 Sep 2026): no unit is anyone\'s in
   assert.equal(unitOf('bkk-stay/u-sathorn-superior-garden', 'G'), null, 'there is no Room G'); assert.equal(unitOf('bkk-stay/penthouse', 'A'), null, 'the deleted Penthouse has no Room A');
   /* Kunming: the Solarium and Lijiang: the 270° View Suite are open to everyone (Owner, Edit 5 · 18 Sep 2026) */
   assert.equal(unitsOf('kmg/jinri-family-suite')[0].reservedFor, null); assert.equal(unitsOf('kmg/elegant-residence')[0].reservedFor, null);
-  assert.deepEqual(unitsOf('ljg/view-suite-270').map((u) => u.reservedFor), [null, null, null, null, null, null]);
+  assert.deepEqual(unitsOf('ljg/view-suite-270').map((u) => u.reservedFor), [null]);
   /* the stages of the journey: the Guest House is the wedding stage, as the hotel is (the Riverside was retired 23 Sep 2026) */
   assert.deepEqual(STAGES, ['bkk-stay', 'prewed', 'wedstay', 'kmg', 'ljg', 'kempinski']);
   assert.equal(stageOf('guesthouse/guest-house'), 'wedstay', 'the Guest House is the wedding stage'); assert.equal(stageOf('wedstay/heritage'), 'wedstay');
@@ -276,7 +277,7 @@ test('WAITING LIST · a guest no room can take waits for the STAGE: one entry, p
   r = await unwait(rooms, PEG, 'kmg'); assert.equal(r.status, 200); assert.equal(r.d.ok, true); assert.equal(r.d.waiting.kmg, 2);
   r = await unwait(rooms, PEG, 'bogus'); assert.equal(r.status, 400);
   /* a different stage is its own line */
-  r = await wait(rooms, STE, 'ljg', 2, ['ljg/viewing-270'], 'Steffie');
+  r = await wait(rooms, STE, 'ljg', 2, ['ljg/private-soup-view'], 'Steffie');
   assert.deepEqual(Object.fromEntries(Object.entries(r.d.waitlist).map(([s, w]) => [s, w.position])), { kmg: 2, ljg: 1 }); assert.deepEqual(r.d.waiting, { kmg: 2, ljg: 1 });
   r = await call(rooms, 'mine', null, STE);
   assert.deepEqual(r.d, { ok: true, mine: {}, waitlist: r.d.waitlist, complimentary: r.d.complimentary }); assert.deepEqual(Object.keys(r.d.waitlist).sort(), ['kmg', 'ljg'], '`mine` carries the holds, the waits, the guest\'s own extension and the complimentary allocation — nothing else');
@@ -289,7 +290,7 @@ test('WAITING LIST · a place held resolves the line: a join clears the guest\'s
   await call(rooms, 'join', { invitationId: SUT.invitationId, guestId: SUT.guestId, key, label: 'A', name: 'Suthep' }, SUT);
   await wait(rooms, LIN, 'kmg', 1, [key], 'Lin'); await tick();
   await wait(rooms, PEG, 'kmg', 2, [key, 'kmg/jinri-family-suite'], 'Peggy'); await tick();
-  let r = await wait(rooms, LIN, 'ljg', 1, ['ljg/viewing-270'], 'Lin');
+  let r = await wait(rooms, LIN, 'ljg', 1, ['ljg/private-soup-view'], 'Lin');
   assert.deepEqual(Object.fromEntries(Object.entries(r.d.waitlist).map(([s, w]) => [s, w.position])), { kmg: 1, ljg: 1 }); assert.deepEqual(r.d.waiting, { kmg: 2, ljg: 1 });
   /* Haruthai gives her place up; Lin takes it: her kmg wait is resolved, her ljg wait stays, Peggy moves up to 1 */
   r = await call(rooms, 'leave', { invitationId: HAR.invitationId, guestId: HAR.guestId, key }, HAR);
@@ -305,7 +306,7 @@ test('WAITING LIST · a place held resolves the line: a join clears the guest\'s
   assert.equal(r.d.ok, true); assert.ok(Array.isArray(r.d.waitlist)); assert.equal(r.d.waitlist.length, 2);
   const peg = r.d.waitlist.find((w) => w.stage === 'kmg'), lin = r.d.waitlist.find((w) => w.stage === 'ljg');
   assert.deepEqual([peg.guestId, peg.invitationId, peg.partyId, peg.name, peg.position, peg.size, peg.wanted], ['G001', 'INV-G001', 'INV-002', 'Peggy', 1, 2, [key, 'kmg/jinri-family-suite']]);
-  assert.deepEqual([lin.guestId, lin.invitationId, lin.name, lin.position, lin.size, lin.wanted], ['G003', 'INV-G003', 'Lin', 1, 1, ['ljg/viewing-270']]); assert.match(String(lin.at), /^\d{4}-\d\d-\d\dT/);
+  assert.deepEqual([lin.guestId, lin.invitationId, lin.name, lin.position, lin.size, lin.wanted], ['G003', 'INV-G003', 'Lin', 1, 1, ['ljg/private-soup-view']]); assert.match(String(lin.at), /^\d{4}-\d\d-\d\dT/);
   assert.deepEqual(unit(r.d, key, 'A').occupants.map((o) => o.guestId).sort(), ['G003', 'G049']);
   /* an assignment by Guest Relations resolves the entry — Peggy is placed, her kmg wait goes */
   r = await call(rooms, 'assign', { occupants: [{ key: 'kmg/jinri-family-suite', label: 'A', guestId: PEG.guestId, invitationId: PEG.invitationId, partyId: PEG.partyId, name: 'Peggy' }] }, null, true);

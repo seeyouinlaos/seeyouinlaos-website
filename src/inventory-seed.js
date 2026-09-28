@@ -56,10 +56,9 @@ export const SEED = {
   /* ------------------------------------------ Vientiane · Pre-Wedding Stay */
   'prewed/heritage':                 { unit: 'room', capacity: 5,  occupancy: 2, held: 0, name: 'The Heritage' },
   'prewed/heritage-executive':       { unit: 'room', capacity: 13, occupancy: 2, held: 0, name: 'Heritage Executive' },
+  /* NOT BEFORE THE WEDDING (002 · G21 / H21 / I21, 28 Sep 2026): the Noble Courtyard, the Grand Majestic and the Souphattra
+     Majestic suites are offered for the Wedding Stay only — no pre-wedding stock (no guest held one) */
   'prewed/heritage-grand-premier':   { unit: 'room', capacity: 3,  occupancy: 2, held: 0, name: 'Heritage Grand Premier' },
-  'prewed/noble-courtyard':          { unit: 'room', capacity: 1,  occupancy: 2, held: 0, name: 'Noble Courtyard Suite' },
-  'prewed/grand-majestic':           { unit: 'room', capacity: 2,  occupancy: 2, held: 0, name: 'Grand Majestic Suite' },   /* opened to everyone (Owner, Edit 5 · 18 Sep 2026) */
-  'prewed/souphattra-majestic':      { unit: 'room', capacity: 1,  occupancy: 2, held: 0, name: 'Souphattra Majestic Suite' },
   'prewed/souphattra-presidential':  { unit: 'room', capacity: 1,  occupancy: 4, held: 0, name: 'Souphattra Presidential' },
 
   /* ---------------------------------------------- Vientiane · Wedding Stay */
@@ -90,23 +89,22 @@ export const SEED = {
      the guest chooses again and nothing is moved for them. The Yifangju Designer Courtyard, Jinma Biji Archway, Kunming Old
      Street: the three rooms of the current Accommodation_Details, one room each, sleeping what the sheet says. */
   'kmg/elegant-residence':    { unit: 'room', capacity: 1, occupancy: 1, held: 0, name: '001 · Elegant Residence Double Bed Room' },
-  'kmg/jinri-terrace-double': { unit: 'room', capacity: 1, occupancy: 2, held: 0, name: '002 · Jinri Building Scenic Terrace Tub Double' },
+  'kmg/jinri-terrace-double': { unit: 'room', capacity: 2, occupancy: 2,   /* 002 · O24: two rooms (28 Sep 2026) */ held: 0, name: '002 · Jinri Building Scenic Terrace Tub Double' },
   'kmg/jinri-family-suite':   { unit: 'room', capacity: 1, occupancy: 2, held: 0, name: '003 · Jinri Terrace Tub Family Suite' },
 
   /* ------------------------------------------------------------ Lijiang */
-  'ljg/starry-sky':            { unit: 'room', capacity: 6, occupancy: 2, held: 0, name: 'Luye Starry Sky Suite · Immersive View' },
-  'ljg/boundless':             { unit: 'room', capacity: 6, occupancy: 2, held: 0, name: 'Boundless Floor-to-Ceiling Glass Sunlit Suite' },
-  'ljg/private-soup-view':     { unit: 'room', capacity: 6, occupancy: 2, held: 0, name: 'Snow Mountain Private Soup Viewing Suite' },
-  'ljg/manor-suite':           { unit: 'room', capacity: 6, occupancy: 2, held: 0, name: 'Snow Mountain Manor Suite' },
-  'ljg/view-suite-270':        { unit: 'room', capacity: 6, occupancy: 2, held: 0, name: '270° Snow Mountain View Suite' },   /* opened to everyone (Owner, Edit 5 · 18 Sep 2026) */
-  'ljg/soup-pool-270':         { unit: 'room', capacity: 6, occupancy: 2, held: 0, name: '270° Snow Mountain View Room Private Soup Pool' },
-  'ljg/private-courtyard-270': { unit: 'room', capacity: 6, occupancy: 2, held: 0, name: '270° Private Courtyard Snow Mountain View' },
-  'ljg/viewing-270':           { unit: 'room', capacity: 6, occupancy: 2, held: 0, name: '270° Snow Mountain Viewing Room' },
-  'ljg/snow-mountain-viewing': { unit: 'room', capacity: 6, occupancy: 2, held: 0, name: 'Snow Mountain Viewing Room' },
+  /* THE SHEET'S THREE ROOMS (002 · R / S / T, 28 Sep 2026): rooms available 1 · 1 · 2, pax 1 · 2 · 2 — every current hold stands
+     (Private Soup View in rooms A and B, the 270° suite in A, the Viewing Room in A for one guest) */
+  'ljg/private-soup-view':     { unit: 'room', capacity: 2, occupancy: 2, held: 0, name: 'Snow Mountain Private Soup Viewing Suite' },
+  'ljg/view-suite-270':        { unit: 'room', capacity: 1, occupancy: 2, held: 0, name: '270° Snow Mountain View Suite' },   /* opened to everyone (Owner, Edit 5 · 18 Sep 2026) */
+  'ljg/snow-mountain-viewing': { unit: 'room', capacity: 1, occupancy: 1, held: 0, name: 'Snow Mountain Viewing Room' },
 
   /* ------------------------------------------------------ Bangkok, closing */
-  'kempinski/deluxe-balcony-king':
-    { unit: 'room', capacity: 6, occupancy: 2, held: 0, name: 'Deluxe Balcony King' }
+  /* HOTEL MUSE BANGKOK, AUTOGRAPH COLLECTION (002 · V24: three rooms, V14: two adults — 28 Sep 2026). The Siam Kempinski's
+     'kempinski/deluxe-balcony-king' is gone: its holds are nobody's any more (Rooms.occupancies skips a key the seed no longer
+     has) and stay in storage as history; nothing is moved to this room. The stage keeps its id. */
+  'kempinski/jatu-room':
+    { unit: 'room', capacity: 3, occupancy: 2, held: 0, name: 'Jatu Room', stay: 'Hotel Muse Bangkok, Autograph Collection' }
 };
 
 /* how many units a party of `guests` consumes in this category */

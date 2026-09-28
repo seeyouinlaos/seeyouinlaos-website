@@ -90,8 +90,10 @@ gate(2, 'Inventory display decision recorded',
   if (!/retired — use \/api\/rooms/.test(worker)) inv.push('the retired category ledger still answers');
   if (fs.existsSync(path.join(ROOT, 'assets/inventory.js'))) inv.push('the retired inventory client is still shipped');
   const keys = (seed.match(/^\s*'[a-z0-9-]+\/[a-z0-9-]+':/gm) || []).length;
-  /* 29 since the Kunming house was replaced (Owner, 27 Sep 2026): the former hotel's twelve categories became the Yifangju's three */
-  if (keys < 29) inv.push('inventory seed covers only ' + keys + ' categories');
+  /* 29 when the Kunming house was replaced (Owner, 27 Sep 2026): the former hotel's twelve categories became the Yifangju's three */
+  /* the live 002_Accommodation_Details (28 Sep 2026): pre-wedding 4 (three suites are Wedding Stay only) · Wedding Stay 7 · Guest House 1 ·
+     Bangkok 1 · Kunming 3 · Lijiang 3 · Hotel Muse Bangkok 1 = 20 categories (was 29: nine Lijiang categories and the Siam Kempinski) */
+  if (keys < 20) inv.push('inventory seed covers only ' + keys + ' categories');
   gate('2b', 'Room occupancy engine: persistent units of two places, atomic join/change/release in the guest\'s own name, no client-side allocation',
     inv.length === 0,
     inv.length ? inv.join(' · ')

@@ -144,12 +144,20 @@ test('S · former Essential: D1 preserved, the scope is the wedding', () => {
   assert.equal(JSON.parse(w.localStorage.getItem('siyl.guest')).scope.vientiane, true, 'read-time normalization: nothing was written'); assert.equal(G.applicable('wedding'), true);
 });
 test('T · former Complete: every real selection preserved; no package metadata drives the UI', () => {
-  const bag = [{ id: 'bkk-stay', price: 192, qty: 1, stay: 'sathorn', room: 'u-sathorn-superior-garden', unit: 'A' }, { id: 'train', price: 100, qty: 1 }, { id: 'prewed', price: 340, qty: 1, stay: 'souphattra', room: 'heritage-grand-premier', unit: 'B' }, { id: 'wedstay', price: 170, qty: 1, stay: 'souphattra', room: 'heritage-grand-premier', unit: 'B' }, { id: 'mu9646', price: 275, qty: 1 }, { id: 'kmg', price: 109, qty: 1, stay: 'kunming', room: 'jinri-terrace-double', unit: 'A' }, { id: 'c86', price: 105, qty: 1 }, { id: 'ljg', price: 200, qty: 1, stay: 'luyeBaisha', room: 'viewing-270', unit: 'A' }, { id: 'return', price: 200, qty: 1 }, { id: 'kempinski', price: 380, qty: 1, stay: 'kempinski', room: 'deluxe-balcony-king', unit: 'A' }];
+  const bag = [{ id: 'bkk-stay', price: 203.42, qty: 1, stay: 'sathorn', room: 'u-sathorn-superior-garden', unit: 'A' }, { id: 'train', price: 100, qty: 1 }, { id: 'prewed', price: 340, qty: 1, stay: 'souphattra', room: 'heritage-grand-premier', unit: 'B' }, { id: 'wedstay', price: 170, qty: 1, stay: 'souphattra', room: 'heritage-grand-premier', unit: 'B' }, { id: 'mu9646', price: 275, qty: 1 }, { id: 'kmg', price: 109, qty: 1, stay: 'kunming', room: 'jinri-terrace-double', unit: 'A' }, { id: 'c86', price: 105, qty: 1 }, { id: 'ljg', price: 232.74, qty: 1, stay: 'lijiang', room: 'private-soup-view', unit: 'A' }, { id: 'return', price: 200, qty: 1 }, { id: 'kempinski', price: 184.2, qty: 1, stay: 'muse', room: 'jatu-room', unit: 'A' }];   /* the live 002 rooms (28 Sep 2026) */
   const w = page({ auth: PEGGY, seed: { 'siyl.guest': JSON.stringify({ scope: { bangkok: true, vientiane: true, china: true, none: false, at: '2026-09-19T10:00:00.000Z', by: 'g-peggy' }, guests: {} }), 'siyl.bag': JSON.stringify(bag), 'siyl.package': JSON.stringify({ kind: 'complete', sig: 'x' }) } });
   const G = w.SIYL_GUEST, J = w.SIYL_JOURNEY;
   assert.equal(G.joinsAll(), true); assert.equal(J.relevantSegments().length, 10); deq(J.SEGMENTS.map((s) => J.state(s)), Array(10).fill('selected'));
-  deq(w.SIYL_BAG.get().map((x) => x.id), bag.map((x) => x.id), 'all ten lines as they were'); assert.equal(w.SIYL_BAG.total(), 2056);
-  for (const k of ['packages', 'packagePlan', 'planSignature']) assert.equal(J[k], undefined); assert.doesNotMatch(src('your-journey.html'), /siyl\.package|data-package/, 'no package metadata is read by the page');
+  deq(w.SIYL_BAG.get().map((x) => x.id), bag.map((x) => x.id), 'all ten lines as they were'); assert.equal(Math.round(w.SIYL_BAG.total() * 100) / 100, 1904.36, 'each line at its window\'s current rate');
+  /* a room the live 002 no longer offers (the former Lijiang categories · 28 Sep 2026) is a retired key, as Kunming's was: its line
+     leaves the Bag and its stage asks again. The Siam Kempinski's room is different — it was REPLACED (Owner, 28 Sep 2026 ·
+     src/legacy-keys.js): its line is the Jatu Room of Hotel Muse Bangkok, still selected, the guest's unit kept, nothing asked */
+  const old = bag.map((x) => x.id === 'ljg' ? { ...x, room: 'viewing-270', price: 200 } : x.id === 'kempinski' ? { ...x, stay: 'kempinski', room: 'deluxe-balcony-king', price: 380, name: 'Siam Kempinski Bangkok' } : x);
+  const w2 = page({ auth: PEGGY, seed: { 'siyl.guest': JSON.stringify({ scope: { bangkok: true, vientiane: true, china: true, none: false, at: '2026-09-19T10:00:00.000Z', by: 'g-peggy' }, guests: {} }), 'siyl.bag': JSON.stringify(old) } });
+  deq(w2.SIYL_BAG.get().map((x) => x.id), bag.map((x) => x.id).filter((id) => id !== 'ljg'));
+  deq(w2.SIYL_JOURNEY.SEGMENTS.filter((s) => w2.SIYL_JOURNEY.state(s) !== 'selected').map((s) => [s.key, w2.SIYL_JOURNEY.state(s)]), [['ljg', 'open']]);
+  const k = w2.SIYL_BAG.get().find((x) => x.id === 'kempinski');
+  deq([k.room, k.stay, k.name, k.price, k.unit], ['jatu-room', 'muse', 'Hotel Muse Bangkok, Autograph Collection', 184.2, 'A']);
 });
 
 /* ───────────────────────────── THE PAGE ───────────────────────────── */

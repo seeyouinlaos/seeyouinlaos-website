@@ -126,10 +126,11 @@ test('PHYSICAL ROOM COUNT IS AUTHORITATIVE · 1 room → 1 unit → 2 places; 5 
   assert.equal(SEED['bkk-stay/penthouse'], undefined, 'the Sathorn Penthouse is deleted (Edit 6, 24 Sep 2026)'); assert.equal(pent.length, 6); assert.deepEqual(pent.map((u) => u.label), ['A', 'B', 'C', 'D', 'E', 'F']); assert.equal(pent.reduce((n, u) => n + u.places, 0), 12);
   assert.ok(!pent.some((u) => u.label === 'G')); assert.ok(pent.every((u) => u.kind === 'room' && u.places === 2));
   const thirteen = unitsOf('wedstay/heritage-executive'); assert.equal(thirteen.length, 13); assert.equal(thirteen.reduce((n, u) => n + u.places, 0), 26);
-  /* the Jinri Terrace Tub Family Suite (27 Sep 2026) and the Snow Mountain Viewing Room: Pax "2 Adults" in Accommodation_Details → two places each */
-  for (const key of ['kmg/jinri-family-suite', 'ljg/snow-mountain-viewing']) for (const u of unitsOf(key)) assert.equal(u.places, 2, key + ' sleeps two adults: two places');
-  /* the one room for a single guest: the Yifangju 001, Elegant Residence Double Bed Room (1 adult · Owner, 27 Sep 2026) */
-  assert.deepEqual(Object.keys(SEED).filter((k) => SEED[k].unit === 'room' && SEED[k].occupancy === 1), ['kmg/elegant-residence']);
+  /* the Jinri Terrace Tub Family Suite (27 Sep 2026): Pax "2 Adults" in Accommodation_Details → two places */
+  for (const key of ['kmg/jinri-family-suite']) for (const u of unitsOf(key)) assert.equal(u.places, 2, key + ' sleeps two adults: two places');
+  /* the rooms for a single guest: the Yifangju 001, Elegant Residence Double Bed Room (1 adult · Owner, 27 Sep 2026) and the Luye
+     Baisha 001, Snow Mountain Viewing Room (002 · R14 Pax 1, 28 Sep 2026) */
+  assert.deepEqual(Object.keys(SEED).filter((k) => SEED[k].unit === 'room' && SEED[k].occupancy === 1), ['kmg/elegant-residence', 'ljg/snow-mountain-viewing']);
   assert.equal(unitsOf('kmg/elegant-residence')[0].places, 1, 'a single room stays what it is: one place');
   /* the invariant across the whole inventory: units = source room count; places = count × 2 for standard rooms */
   for (const [key, s] of Object.entries(SEED)) {
@@ -142,7 +143,7 @@ test('PHYSICAL ROOM COUNT IS AUTHORITATIVE · 1 room → 1 unit → 2 places; 5 
 });
 
 test('BOOKING · one occupant → 1 place available; two → FULL; a third guest is refused and the room is unchanged; separate codes join the same room', async () => {
-  const E = engine(), key = 'prewed/noble-courtyard';   /* one open room of two places */
+  const E = engine(), key = 'wedstay/noble-courtyard';   /* one open room of two places (the Noble Courtyard is the Wedding Stay's only — 002 G21, 28 Sep 2026) */
   const r0 = await E.call('read', null, asId(HARUTHAI));
   assert.equal(r0.units[key][0].free, 2); assert.equal(r0.units[key][0].eligible, true); assert.equal(r0.summary[key].free, 2); assert.equal(r0.summary[key].rooms, 1);
   const h = await join(E, HARUTHAI, key, 'A'); assert.equal(h.status, 200);

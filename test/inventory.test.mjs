@@ -28,17 +28,17 @@ const holdAs = (call) => (who, key, label, need) => call(who, 'join', { invitati
 test('the Souphattra stock is the Sheet stock: 26 rooms, per window', () => {
   const cats = ['heritage', 'heritage-executive', 'heritage-grand-premier', 'noble-courtyard',
                 'grand-majestic', 'souphattra-majestic', 'souphattra-presidential'];
-  for (const win of ['prewed', 'wedstay']) {
-    const total = cats.reduce((t, c) => t + SEED[`${win}/${c}`].capacity, 0);
-    assert.equal(total, 26, win + ' must hold the whole house');
-  }
+  /* the Wedding Stay holds the whole house; before the wedding the three suites are not offered (002 · G21 / H21 / I21, 28 Sep 2026) */
+  assert.equal(cats.reduce((t, c) => t + SEED[`wedstay/${c}`].capacity, 0), 26, 'wedstay must hold the whole house');
+  assert.equal(cats.reduce((t, c) => t + (SEED[`prewed/${c}`] ? SEED[`prewed/${c}`].capacity : 0), 0), 22, 'prewed: the house without the Noble Courtyard, the Grand Majestic and the Souphattra Majestic');
+  for (const c of ['noble-courtyard', 'grand-majestic', 'souphattra-majestic']) assert.equal(SEED[`prewed/${c}`], undefined, c + ' is not offered before the wedding');
   /* the individual counts, from Budget_Room - Rate column C */
   assert.equal(SEED['prewed/heritage'].capacity, 5);
   assert.equal(SEED['prewed/heritage-executive'].capacity, 13);
   assert.equal(SEED['prewed/heritage-grand-premier'].capacity, 3);
-  assert.equal(SEED['prewed/noble-courtyard'].capacity, 1);
-  assert.equal(SEED['prewed/grand-majestic'].capacity, 2);
-  assert.equal(SEED['prewed/souphattra-majestic'].capacity, 1);
+  assert.equal(SEED['wedstay/noble-courtyard'].capacity, 1);
+  assert.equal(SEED['wedstay/grand-majestic'].capacity, 2);
+  assert.equal(SEED['wedstay/souphattra-majestic'].capacity, 1);
   assert.equal(SEED['prewed/souphattra-presidential'].capacity, 1);
   /* and the two windows are SEPARATE stock — the same rooms, sold twice */
   assert.notEqual('prewed/heritage', 'wedstay/heritage');
@@ -53,7 +53,7 @@ test('nothing is reserved for anyone in the seed (Owner, 19 Sep 2026 · no fixed
     assert.equal(unitsOf(key).every((u) => u.reservedFor === null), true, key + ' has no reserved unit');
   }
   /* the rooms the old ledger kept back — the Presidential, the Bangkok Room A (U Sathorn since the Sathorn Penthouse was deleted, Edit 6), the Grand Majestic, the Solarium, the 270° suite — are open to everyone */
-  for (const k of ['prewed/souphattra-presidential', 'wedstay/souphattra-presidential', 'bkk-stay/u-sathorn-superior-garden', 'prewed/grand-majestic', 'wedstay/grand-majestic', 'kmg/jinri-family-suite', 'ljg/view-suite-270']) assert.equal(sellable(k), SEED[k].capacity, k + ' is open to everyone');
+  for (const k of ['prewed/souphattra-presidential', 'wedstay/souphattra-presidential', 'bkk-stay/u-sathorn-superior-garden', 'wedstay/grand-majestic', 'kmg/jinri-family-suite', 'ljg/view-suite-270']) assert.equal(sellable(k), SEED[k].capacity, k + ' is open to everyone');
   /* who may join: any authenticated guest, any unit — a host like a guest */
   const guest = identity(PEGGY), host = identity(HARUTHAI, true);
   assert.deepEqual(mayJoin(unitOf('bkk-stay/u-sathorn-superior-garden', 'A'), null), { ok: false, error: 'unauthorised' });
@@ -107,9 +107,9 @@ test('a six-room Bangkok category (U Sathorn — the Sathorn Penthouse deleted, 
   /* the wedding window is ONE stage whether spent in the hotel or the Guest House (the Riverside was retired 23 Sep 2026) */
   assert.equal(stageOf('guesthouse/guest-house'), 'wedstay'); assert.equal(stageOf('wedstay/heritage'), 'wedstay');
   assert.deepEqual(STAGES, ['bkk-stay', 'prewed', 'wedstay', 'kmg', 'ljg', 'kempinski']);
-  /* Lijiang every category six rooms, the Kempinski six — the current Operations Master */
-  for (const k of Object.keys(SEED).filter((k) => k.startsWith('ljg/'))) assert.equal(SEED[k].capacity, 6, k);
-  assert.equal(SEED['kempinski/deluxe-balcony-king'].capacity, 6);
+  /* Lijiang the sheet's three rooms (1 · 1 · 2), Hotel Muse the Jatu Room's three — the current Operations Master (28 Sep 2026) */
+  assert.deepEqual(Object.keys(SEED).filter((k) => k.startsWith('ljg/')).map((k) => SEED[k].capacity), [2, 1, 1]);
+  assert.equal(SEED['kempinski/jatu-room'].capacity, 3); assert.equal(SEED['kempinski/deluxe-balcony-king'], undefined, 'the Siam Kempinski is gone');
 });
 
 test('every selectable room in the shop is stock-controlled', () => {
@@ -121,6 +121,7 @@ test('every selectable room in the shop is stock-controlled', () => {
   for (const key of Object.keys(R)) {
     for (const w of R[key].windows) {
       for (const room of R[key].rooms) {
+        if (room.notIn && room.notIn.includes(w.id)) { if (SEED[`${w.id}/${room.slug}`]) missing.push('stock for a room not offered: ' + w.id + '/' + room.slug); continue; }
         if (!SEED[`${w.id}/${room.slug}`]) missing.push(`${w.id}/${room.slug}`);
       }
     }
@@ -192,8 +193,8 @@ test('the Owner\'s preferred rooms (SIYL_FULL_EXPERIENCE, read by SIYL_PRICE.pre
   const FE = sandbox.window.SIYL_FULL_EXPERIENCE;
   /* no preferred Bangkok room since the Sathorn Penthouse was deleted (Edit 6, 24 Sep 2026): that stage falls to SIYL_PRICE.premium */
   assert.deepEqual(FE, { prewed: 'heritage-grand-premier',
-    wedstay: 'heritage-grand-premier', kmg: 'jinri-terrace-double', ljg: 'viewing-270',
-    kempinski: 'deluxe-balcony-king' });
+    wedstay: 'heritage-grand-premier', kmg: 'jinri-terrace-double',
+    kempinski: 'jatu-room' });   /* ljg: the 270° Viewing Room is no longer a product (28 Sep 2026) — the stage falls to SIYL_PRICE.premium */
   assert.equal(FE['bkk-stay'], undefined);
   assert.ok(sellable('bkk-stay/u-sathorn-superior-garden') > 0, 'the premium Bangkok fallback has stock behind it');
   for (const [win, slug] of Object.entries(FE)) {
@@ -372,12 +373,12 @@ test('the hosts have no special room and the Bag carries only actual selections 
   /* the couple book their own places like everyone else: Room A of U Sathorn, then a change of room — ONE hold per stage */
   assert.deepEqual(plain(await ST.select('bkk-stay', 'u-sathorn-superior-garden', undefined, 2)), { ok: true, unit: 'A' });
   assert.deepEqual(plain(U.mine('bkk-stay')), { key: 'bkk-stay/u-sathorn-superior-garden', label: 'A' });
-  assert.equal(B.total(), 192);   /* U Sathorn · USD 64 × 3 nights */ assert.deepEqual(plain(B.get().map((x) => [x.id, x.unit, x.unitName])), [['bkk-stay', 'A', 'Room A']]);
+  assert.equal(B.total(), 203.42);   /* U Sathorn · USD 135.61 the room per night / 2 = USD 67.805 × 3 nights (002 · B26, 28 Sep 2026) */ assert.deepEqual(plain(B.get().map((x) => [x.id, x.unit, x.unitName])), [['bkk-stay', 'A', 'Room A']]);
   assert.deepEqual(plain(await ST.select('bkk-stay', 'u-sathorn-superior-garden', 'C', 2)), { ok: true, unit: 'C' });
   assert.deepEqual(plain(U.mine('bkk-stay')), { key: 'bkk-stay/u-sathorn-superior-garden', label: 'C' });
   assert.deepEqual(plain(U.units('bkk-stay', 'u-sathorn-superior-garden').map((u) => u.taken)), [0, 0, 2, 0, 0, 0], 'the old place — and the place kept for her party there — was released once the new one was held; the new room keeps a place for her party');
   assert.deepEqual(plain(B.get().map((x) => [x.id, x.unit])), [['bkk-stay', 'C']]);
-  c = plain(J.counts()); assert.deepEqual([c.confirmed, c.open, c.bagItems, c.bagTotal], [1, 9, 1, 192]);
+  c = plain(J.counts()); assert.deepEqual([c.confirmed, c.open, c.bagItems, c.bagTotal], [1, 9, 1, 203.42]);
   /* Suthep sees Haruthai by first name, and the unit she holds is the one suggested to him */
   const w2 = page({ auth: SUTHEP, fetch: await roomsFetch(rooms, identity(SUTHEP, true)) }); await w2.SIYL_UNITS.load(true);
   assert.deepEqual(plain(w2.SIYL_UNITS.units('bkk-stay', 'u-sathorn-superior-garden')[2].occupants), [{ name: 'Haruthai', mine: false, party: true }, { name: '', mine: false, party: true, placeholder: true }], 'Haruthai, and the place she keeps for him (a kept place carries no name, PRQ-GAP-02)');

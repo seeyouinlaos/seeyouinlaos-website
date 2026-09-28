@@ -86,7 +86,7 @@ test('THE WORKER · no extension write is routed and no extension component is s
   /* A RECORD SENT BEFORE THE WITHDRAWAL still names the extension and its figure still includes it: such a record is
      recomputed from the lines it carries, so no guest is billed for something the website no longer offers. */
   assert.match(m, /const withdrawn = !!\(record\.rooms && record\.rooms\.stayext\);/);
-  assert.match(m, /const total0 = stated == null \? null : \(\(dropped \|\| withdrawn\) \? linesTotal : stated\);/);
+  assert.match(m, /const total0 = stated == null \? null : \(\(dropped \|\| withdrawn(?: \|\| replaced)?\) \? linesTotal : stated\);/);
 });
 
 test('THE GUEST\'S SURFACES · no control, no line, no placeholder, and no hotel is named', () => {

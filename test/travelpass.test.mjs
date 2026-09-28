@@ -148,7 +148,7 @@ test('ONE PRICE SOURCE (Owner, 15 Sep 2026 · Edit 2): a bag line saved at C86 8
   const before = B.total(); B.remove('c86'); assert.equal(B.total(), before - 105);
   B.put(P.items('c86')[0]); assert.equal(B.total(), before); assert.equal(B.get().find((x) => x.id === 'c86').price, 105);
   /* every surface reads the same line and the same total: no second arithmetic anywhere */
-  assert.match(src('cart.html'), /'<p class="p-line-amt">'\+money\(x\.price\|\|0\)\+'<span class="t-l1">'\+\(x\.id==='1872'\|\|x\.id==='tea1872'\?'for the table':'per person'\)\+'<\/span><\/p>'/, 'the cart line price is the line, with its basis (PRQ-04-11)');
+  assert.match(src('cart.html'), /'<p class="p-line-amt">'\+money\(x\.price\|\|0\)\+'<span class="t-l1">'\+\(x\.id==='1872'\|\|x\.id==='tea1872'\?'for the table':x\.personal==='employee'\?'for the room':'per person'\)\+'<\/span><\/p>'/, 'the cart line price is the line, with its basis (PRQ-04-11)');
   assert.match(src('cart.html'), /money\(B\.total\(\)\)/); assert.match(src('assets/bag.js'), /B\.money\(B\.total\(\)\)/, 'the sticky bar');
   assert.match(src('your-journey.html'), /money\(SIYL_BAG\.total\(\)\)/); assert.match(src('review.html'), /SIYL_BAG\.total\(\)\.toLocaleString/, 'Review & Send');
   assert.match(src('review.html'), /'TOTAL: USD '\+SIYL_BAG\.total\(\)\.toLocaleString/, 'the sent journey');

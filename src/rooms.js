@@ -42,6 +42,7 @@
    ========================================================================== */
 
 import { SEED } from './inventory-seed.js';
+import { canonicalKey } from './legacy-keys.js';
 import { COMPLIMENTARY, deadlineState } from './stay-plan.js';
 
 export const PLACES = 2;
@@ -144,8 +145,14 @@ export class Rooms {
     const out = [];
     for (const [k, v] of map) {
       const parts = k.slice(OCC.length).split('|');   /* occ:<key>|<label>|<guestId>  ·  a party place: guestId '~<partyId>~<n>' */
-      if (!SEED[parts[0]]) continue;   /* a row of a retired key (an older release) is nobody's and blocks nothing */
-      out.push({ key: parts[0], label: parts[1], guestId: parts[2], placeholder: parts[2].charAt(0) === '~', ...v });
+      /* A REPLACED PRODUCT IS READ AS ITS SUCCESSOR (Owner, 28 Sep 2026 · src/legacy-keys.js): a hold stored under the Siam
+         Kempinski's room is a hold of Hotel Muse Bangkok's Jatu Room — the same guest, unit and time, counted once. The row stays
+         where it is until that guest's own write; `sk` is where it really lives, so a release always reaches it. */
+      const key = canonicalKey(parts[0]);
+      if (!SEED[key]) continue;   /* a row of a retired key (an older release) is nobody's and blocks nothing */
+      const row = { key, label: parts[1], guestId: parts[2], placeholder: parts[2].charAt(0) === '~', ...v };
+      Object.defineProperty(row, 'sk', { value: k, enumerable: false });
+      out.push(row);
     }
     return out;
   }
@@ -167,7 +174,7 @@ export class Rooms {
           /* a place is kept for each member who travels in this stage and holds no place of their own in it */
           const owed = Object.keys(T).filter((g) => T[g] && T[g][stage] === true && !holders.has(g)).length;
           const kept = inStage.filter((o) => o.placeholder).sort((a, b) => String(b.at || '').localeCompare(String(a.at || '')));
-          for (const ph of kept.slice(0, Math.max(0, kept.length - owed))) { await this.storage.delete(this.keyOf(ph.key, ph.label, ph.guestId)); trimmed.push(ph.key + '|' + ph.label); }
+          for (const ph of kept.slice(0, Math.max(0, kept.length - owed))) { await this.storage.delete(this.rowKey(ph)); trimmed.push(ph.key + '|' + ph.label); }
         }
       }
       const need = Number(identity.partyNeed[stage]);
@@ -184,6 +191,8 @@ export class Rooms {
     return list.filter((o) => o.placeholder && o.key === key && o.label === label && o.partyId === partyId);
   }
   keyOf(key, label, guestId) { return OCC + key + '|' + label + '|' + guestId; }
+  /* where an occupancy row really lives (a legacy row keeps its former key until its guest writes) */
+  rowKey(o) { return o.sk || this.keyOf(o.key, o.label, o.guestId); }
   /* the guest's own HOLDS in a stage */
   async mineIn(stage, guestId, occ) {
     const list = occ || await this.occupancies();
@@ -292,7 +301,7 @@ export class Rooms {
       const invitationId = String(body && body.invitationId || '').trim();
       const guestId = String(body && body.guestId || '').trim();
       if (invitationId !== identity.invitationId || guestId !== identity.guestId) return json({ ok: false, error: 'not your guest' }, 403);
-      const key = String(body && body.key || '').trim();
+      const key = canonicalKey(String(body && body.key || '').trim());   /* the former key is read as its successor; only the canonical one is written */
       const label = String(body && body.label || '').trim().toUpperCase();
       /* the name a browser sends is not trusted (PRQ-GAP-02): the place carries the register's first name the Worker verified */
       const name = firstNameOf(identity);
@@ -307,21 +316,21 @@ export class Rooms {
           const win = String(body && body.window || '').trim();
           const occ0 = await this.occupancies();
           const had = (await this.mineIn(stage, guestId, occ0)).filter((o) => !win || String(o.key).split('/')[0] === win);
-          for (const o of had) await this.storage.delete(this.keyOf(o.key, o.label, o.guestId));
+          for (const o of had) await this.storage.delete(this.rowKey(o));
           if (identity.partyId) {
             if (had.length) {
               /* the last real party member leaving a unit takes the party's kept places with them */
               for (const o of had) {
                 const others = occ0.filter((x) => !x.placeholder && x.key === o.key && x.label === o.label && x.partyId === identity.partyId && x.guestId !== guestId);
-                if (!others.length) for (const ph of await this.partyPlaces(o.key, o.label, identity.partyId, occ0)) await this.storage.delete(this.keyOf(ph.key, ph.label, ph.guestId));
+                if (!others.length) for (const ph of await this.partyPlaces(o.key, o.label, identity.partyId, occ0)) await this.storage.delete(this.rowKey(ph));
                 /* …and with the last real member of the party in the whole category, every place kept for it there */
                 const anyLeft = occ0.some((x) => !x.placeholder && x.key === o.key && x.partyId === identity.partyId && x.guestId !== guestId);
-                if (!anyLeft) for (const ph of occ0.filter((x) => x.placeholder && x.key === o.key && x.partyId === identity.partyId)) await this.storage.delete(this.keyOf(ph.key, ph.label, ph.guestId));
+                if (!anyLeft) for (const ph of occ0.filter((x) => x.placeholder && x.key === o.key && x.partyId === identity.partyId)) await this.storage.delete(this.rowKey(ph));
               }
             } else {
               /* a member who holds nothing in the stage and says "not joining" gives ONE kept party place of the stage back */
               const ph = occ0.filter((x) => x.placeholder && x.partyId === identity.partyId && stageOf(x.key) === stage && (!win || String(x.key).split('/')[0] === win))[0];
-              if (ph) await this.storage.delete(this.keyOf(ph.key, ph.label, ph.guestId));
+              if (ph) await this.storage.delete(this.rowKey(ph));
             }
           }
           return json({ ok: true, released: had.map((o) => ({ key: o.key, label: o.label })), ...(await this.view(identity)) });
@@ -334,7 +343,7 @@ export class Rooms {
           if ((await this.mineIn(stage, guestId)).length) return json({ ...(await this.view(identity)), ok: false, error: 'a place is held in this stage' }, 409);
           const cur = await this.storage.get(this.wlKey(stage, guestId));
           const size = capNeed(identity, stage, Math.max(1, Math.min(6, parseInt(body && body.size, 10) || 1)));
-          const wanted = (Array.isArray(body && body.wanted) ? body.wanted : []).map((x) => String(x).slice(0, 64)).filter((x) => SEED[x]).slice(0, 12);
+          const wanted = (Array.isArray(body && body.wanted) ? body.wanted : []).map((x) => canonicalKey(String(x).slice(0, 64))).filter((x) => SEED[x]).slice(0, 12);
           /* a second wait keeps the place in the line (`at`) and updates what is asked for (a party that grew, another chain) */
           await this.storage.put(this.wlKey(stage, guestId), { invitationId, partyId: identity.partyId || null, name, at: cur && cur.at ? cur.at : new Date().toISOString(), size, wanted });
           return json({ ok: true, waited: stage, ...(await this.view(identity)) });
@@ -391,11 +400,14 @@ export class Rooms {
             if (rest > 0) return json({ ...(await this.view(identity)), ok: false, error: 'full for your party', need, free: catUnits.reduce((n, u) => n + freeIn(u), 0) }, 409);
           }
         }
-        /* HOLD THE NEW PLACE FIRST … */
-        await this.storage.put(this.keyOf(key, label, guestId), { invitationId, partyId: identity.partyId || null, name, at: new Date().toISOString() });
+        /* HOLD THE NEW PLACE FIRST … — a place this guest already holds here under the former key is the same place: it is
+           re-keyed to the canonical key with its own time, never released and taken again */
+        const heldHere = occ.find((o) => !o.placeholder && o.key === key && o.label === label && o.guestId === guestId);
+        await this.storage.put(this.keyOf(key, label, guestId), { invitationId, partyId: identity.partyId || null, name, at: heldHere && heldHere.at ? heldHere.at : new Date().toISOString() });
+        if (heldHere && this.rowKey(heldHere) !== this.keyOf(key, label, guestId)) await this.storage.delete(this.rowKey(heldHere));
         if (identity.partyId) {
           /* … this guest's own join takes one place kept for the party here; the places the absent members still need are kept */
-          if (keptHere.length) await this.storage.delete(this.keyOf(keptHere[0].key, keptHere[0].label, keptHere[0].guestId));
+          if (keptHere.length) await this.storage.delete(this.rowKey(keptHere[0]));
           const stamp = Date.now();
           for (let n = 0; n < keepHere; n++) await this.storage.put(this.partyKey(key, label, identity.partyId, stamp + '-' + n), { invitationId: null, partyId: identity.partyId, name: '', at: new Date().toISOString(), by: guestId });
           for (const [u, take] of spread) for (let n = 0; n < take; n++) await this.storage.put(this.partyKey(key, u.label, identity.partyId, stamp + '-' + u.label + n), { invitationId: null, partyId: identity.partyId, name: '', at: new Date().toISOString(), by: guestId });
@@ -404,10 +416,10 @@ export class Rooms {
         const stage = stageOf(key);
         for (const o of occ) {
           if (o.guestId === guestId && stageOf(o.key) === stage && !(o.key === key && o.label === label)) {
-            await this.storage.delete(this.keyOf(o.key, o.label, o.guestId));
+            await this.storage.delete(this.rowKey(o));
             /* the party's kept places leave the old unit with its last real party member */
             if (identity.partyId && !occ.some((x) => !x.placeholder && x.key === o.key && x.label === o.label && myParty(x) && x.guestId !== guestId)) {
-              for (const ph of await this.partyPlaces(o.key, o.label, identity.partyId, occ)) await this.storage.delete(this.keyOf(ph.key, ph.label, ph.guestId));
+              for (const ph of await this.partyPlaces(o.key, o.label, identity.partyId, occ)) await this.storage.delete(this.rowKey(ph));
             }
           }
         }
@@ -457,15 +469,17 @@ export class Rooms {
       return await this.state.blockConcurrencyWhile(async () => {
         const done = [], refused = [];
         for (const o of list) {
-          const key = String(o.key || ''), label = String(o.label || '').toUpperCase(), guestId = String(o.guestId || '');
+          const key = canonicalKey(String(o.key || '')), label = String(o.label || '').toUpperCase(), guestId = String(o.guestId || '');
           const unit = unitOf(key, label);
           if (!unit || !guestId || !o.invitationId) { refused.push({ ...o, error: 'invalid' }); continue; }
           const occ = await this.occupancies();
           const others = occ.filter((x) => x.key === key && x.label === label && x.guestId !== guestId).length;
           if (others >= unit.places && !body.force) { refused.push({ ...o, error: 'full' }); continue; }
+          const legacyHere = occ.find((x) => !x.placeholder && x.key === key && x.label === label && x.guestId === guestId && this.rowKey(x) !== this.keyOf(key, label, guestId));
+          if (legacyHere) await this.storage.delete(this.rowKey(legacyHere));
           await this.storage.put(this.keyOf(key, label, guestId), { invitationId: String(o.invitationId), partyId: o.partyId || null, name: String(o.name || '').slice(0, 24), at: new Date().toISOString(), by: String(body.actor || 'guest-relations') });
           const stage = stageOf(key);
-          for (const x of occ) if (x.guestId === guestId && stageOf(x.key) === stage && !(x.key === key && x.label === label)) await this.storage.delete(this.keyOf(x.key, x.label, x.guestId));
+          for (const x of occ) if (x.guestId === guestId && stageOf(x.key) === stage && !(x.key === key && x.label === label)) await this.storage.delete(this.rowKey(x));
           await this.resolveWait(stage, guestId);   /* an assignment by Guest Relations resolves the waiting-list entry */
           done.push({ key, label, guestId });
         }
@@ -479,7 +493,7 @@ export class Rooms {
       return await this.state.blockConcurrencyWhile(async () => {
         const occ = await this.occupancies();
         const had = occ.filter((o) => o.guestId === guestId && (!stage || stageOf(o.key) === stage));
-        for (const o of had) await this.storage.delete(this.keyOf(o.key, o.label, o.guestId));
+        for (const o of had) await this.storage.delete(this.rowKey(o));
         return json({ ok: true, released: had.map((o) => ({ key: o.key, label: o.label })) });
       });
     }

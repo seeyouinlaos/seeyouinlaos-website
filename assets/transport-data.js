@@ -265,7 +265,7 @@
         'Anything you buy on board or at the airport.'
       ],
       transfer: [
-        'Arrival in Bangkok is at 14:55, in time to check in at the Siam Kempinski the same afternoon.'
+        'Arrival in Bangkok is at 14:55, in time to check in at Hotel Muse Bangkok the same afternoon.'
       ],
       good: [
         'The flights, the times and the fare are the ones we have planned for everyone. Guest Relations confirms each seat with you by name.'

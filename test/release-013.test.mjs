@@ -99,7 +99,7 @@ test('THE CLEAN RESET · the dry run names everything and writes nothing; the sn
   assert.equal((await gr(h, '/api/gr/reset', { dryRun: false, confirm: 'RESET ALL GUEST STATE' })).status, 400, 'no digest, no execution');
   assert.equal((await gr(h, '/api/gr/reset', { dryRun: false, confirm: 'reset all guest state', digest: snap.d.digest })).status, 400);
   await h.env.REG_KV.put('contact:INV-G777', JSON.stringify({ email: 'changed@example.org' }), { metadata: {} });
-  await call(h, '/api/rooms/join', h.sam, { invitationId: 'INV-G777', guestId: 'G777', key: 'ljg/viewing-270', label: 'A', name: 'x' });
+  await call(h, '/api/rooms/join', h.sam, { invitationId: 'INV-G777', guestId: 'G777', key: 'ljg/private-soup-view', label: 'A', name: 'x' });
   const stale = await gr(h, '/api/gr/reset', { dryRun: false, confirm: 'RESET ALL GUEST STATE', digest: snap.d.digest });
   assert.equal(stale.status, 409, 'the state changed since the snapshot (a new hold): snapshot again'); assert.notEqual(stale.d.digest, snap.d.digest);
   assert.equal((await counts(h)).occ, 5, 'a refused execution wrote nothing');
@@ -151,7 +151,7 @@ test('THE CLEAN RESET · a write racing the sweep: the actor takes the epoch bef
   roomsStub.fetch = async (r) => { const body = await r.clone().json().catch(() => ({})); if (/\/reset$/.test(new URL(r.url).pathname) && body.dryRun === false && !putDuringSweep) { putDuringSweep = await call(h, '/api/draft', h.peggy, { invitationId: 'INV-G001', keys: { 'siyl.bag': JSON.stringify([{ id: 'train', price: 100, qty: 1 }]) }, seenReset: null }, 'PUT'); } return orig(r); };
   let joinDuringSweep = null, seatDuringSweep = null;
   const seatStub = h.env.SEATING.get(); const origSeat = seatStub.fetch;
-  seatStub.fetch = async (r) => { const body = await r.clone().json().catch(() => ({})); if (/\/reset$/.test(new URL(r.url).pathname) && body.dryRun === false && !joinDuringSweep) { joinDuringSweep = await call(h, '/api/rooms/join', h.sam, { invitationId: 'INV-G777', guestId: 'G777', key: 'ljg/viewing-270', label: 'A', name: 'x' }); seatDuringSweep = await call(h, '/api/seating/select', h.sam, { invitationId: 'INV-G777', guestId: 'G777', event: 'dinner', seatId: 'D-T-01', name: 'Sam' }); } return origSeat(r); };
+  seatStub.fetch = async (r) => { const body = await r.clone().json().catch(() => ({})); if (/\/reset$/.test(new URL(r.url).pathname) && body.dryRun === false && !joinDuringSweep) { joinDuringSweep = await call(h, '/api/rooms/join', h.sam, { invitationId: 'INV-G777', guestId: 'G777', key: 'ljg/private-soup-view', label: 'A', name: 'x' }); seatDuringSweep = await call(h, '/api/seating/select', h.sam, { invitationId: 'INV-G777', guestId: 'G777', event: 'dinner', seatId: 'D-T-01', name: 'Sam' }); } return origSeat(r); };
   const run = await gr(h, '/api/gr/reset', { dryRun: false, confirm: 'RESET ALL GUEST STATE', digest: snap.d.digest });
   assert.equal(run.status, 200);
   assert.ok(putDuringSweep, 'the racing write happened during the sweep'); assert.equal(putDuringSweep.status, 409); assert.equal(putDuringSweep.d.error, 'reset');
@@ -159,7 +159,7 @@ test('THE CLEAN RESET · a write racing the sweep: the actor takes the epoch bef
   assert.equal((await call(h, '/api/draft', h.peggy)).d.draft, null, 'nothing of it was stored');
   assert.deepEqual(await counts(h), { occ: 0, fixed: 0, held: 0, keys: 0, open: true, frozen: false });
   assert.equal(h.env.REG_KV.m.has('reset:lock'), false, 'the gate is lifted after the sweep');
-  const afterJoin = await call(h, '/api/rooms/join', h.sam, { invitationId: 'INV-G777', guestId: 'G777', key: 'ljg/viewing-270', label: 'A', name: 'x' }); assert.equal(afterJoin.status, 200, 'and writes are open again');
+  const afterJoin = await call(h, '/api/rooms/join', h.sam, { invitationId: 'INV-G777', guestId: 'G777', key: 'ljg/private-soup-view', label: 'A', name: 'x' }); assert.equal(afterJoin.status, 200, 'and writes are open again');
   /* the digest covers VALUES: a draft saved after the snapshot (same keys) refuses the execution */
   const h2 = await harness(); await populate(h2);
   const s1 = await gr(h2, '/api/gr/reset', { dryRun: true, snapshot: true });
@@ -167,7 +167,7 @@ test('THE CLEAN RESET · a write racing the sweep: the actor takes the epoch bef
   const r2 = await gr(h2, '/api/gr/reset', { dryRun: false, confirm: 'RESET ALL GUEST STATE', digest: s1.d.digest }); assert.equal(r2.status, 409, 'a value changed since the snapshot: the same keys, a different digest');
   /* a stale lock (a sweep that never finished) never blocks guests for good */
   await h2.env.REG_KV.put('reset:lock', new Date(Date.now() - 6 * 60 * 1000).toISOString(), { metadata: {} });
-  assert.equal((await call(h2, '/api/rooms/join', h2.sam, { invitationId: 'INV-G777', guestId: 'G777', key: 'ljg/viewing-270', label: 'A', name: 'x' })).status, 200, 'a lock older than five minutes is ignored');
+  assert.equal((await call(h2, '/api/rooms/join', h2.sam, { invitationId: 'INV-G777', guestId: 'G777', key: 'ljg/private-soup-view', label: 'A', name: 'x' })).status, 200, 'a lock older than five minutes is ignored');
 });
 
 test('THE CLEAN RESET · a device that synchronised before the epoch drops its whole cached journey (a key touched while the copy was being read included); every later write names the epoch; a refused write clears and reads again; a device that never synchronised keeps what it typed', async () => {

@@ -13,21 +13,22 @@ import { SEED } from '../src/inventory-seed.js';
 const ident = (s) => ({ invitationId: s.invitationId, guestId: s.guestId, partyId: s.partyId, hosts: !!s.hosts, firstName: String(s.preferredName || '').split(/\s+/)[0] });
 const call = async (rooms, op, body, as) => { const r = await rooms.fetch(new Request('https://x/api/rooms/' + op, { method: 'POST', headers: as ? { 'x-siyl-identity': JSON.stringify(as) } : {}, body: JSON.stringify(body || {}) })); return { status: r.status, d: await r.json() }; };
 const ROOMS = [
-  { key: 'kmg/elegant-residence', slug: 'elegant-residence', name: '001 · Elegant Residence Double Bed Room', places: 1, rate: 42, roomRate: 42, pp3: 126, room3: 126 },
-  { key: 'kmg/jinri-terrace-double', slug: 'jinri-terrace-double', name: '002 · Jinri Building Scenic Terrace Tub Double', places: 2, rate: 36.33333333, roomRate: 72.66666667, pp3: 109, room3: 218 },
-  { key: 'kmg/jinri-family-suite', slug: 'jinri-family-suite', name: '003 · Jinri Terrace Tub Family Suite', places: 2, rate: 43, roomRate: 86, pp3: 129, room3: 258 }
+  /* the live 002 (28 Sep 2026): N 39.12 · O 36.33 (two rooms, O24) · P 42.89 per person per night */
+  { key: 'kmg/elegant-residence', slug: 'elegant-residence', name: '001 · Elegant Residence Double Bed Room', places: 1, rooms: 1, rate: 39.12, roomRate: 39.12, pp3: 117.36, room3: 117.36 },
+  { key: 'kmg/jinri-terrace-double', slug: 'jinri-terrace-double', name: '002 · Jinri Building Scenic Terrace Tub Double', places: 2, rooms: 2, rate: 36.33333333, roomRate: 72.66666667, pp3: 109, room3: 218 },
+  { key: 'kmg/jinri-family-suite', slug: 'jinri-family-suite', name: '003 · Jinri Terrace Tub Family Suite', places: 2, rooms: 1, rate: 42.89, roomRate: 85.78, pp3: 128.67, room3: 257.34 }
 ];
 
-test('THE INVENTORY · Package F is exactly three rooms, one each, sleeping 1 · 2 · 2; no key of the former hotel is left', () => {
+test('THE INVENTORY · Package F is exactly three room types — one, two (the live 002, 28 Sep 2026) and one rooms — sleeping 1 · 2 · 2; no key of the former hotel is left', () => {
   assert.deepEqual(Object.keys(SEED).filter((k) => stageOf(k) === 'kmg'), ROOMS.map((r) => r.key));
   for (const r of ROOMS) {
-    assert.equal(SEED[r.key].capacity, 1, r.key + ': one room'); assert.equal(SEED[r.key].name, r.name);
-    const u = unitsOf(r.key); assert.equal(u.length, 1); assert.equal(u[0].places, r.places, r.key + ' sleeps ' + r.places);
+    assert.equal(SEED[r.key].capacity, r.rooms, r.key + ': ' + r.rooms + ' room(s)'); assert.equal(SEED[r.key].name, r.name);
+    const u = unitsOf(r.key); assert.equal(u.length, r.rooms); assert.equal(u[0].places, r.places, r.key + ' sleeps ' + r.places);
   }
   for (const old of ['left-bank', 'penang', 'family-suite', 'seine', 'smart-family', 'solarium', 'standard-single', 'junting', 'mid-century', 'milano', 'italian', 'light-french']) assert.equal(SEED['kmg/' + old], undefined, old + ' is retired');
 });
 
-test('THE PRICES · the sheet\'s per-person rate per night, three nights, to the cent: 126 · 109 · 129 per person, the room 126 · 218 · 258; USD 36.33 is written, never 36.333', () => {
+test('THE PRICES · the sheet\'s per-person rate per night, three nights, to the cent: 117.36 · 109 · 128.67 per person, the room 117.36 · 218 · 257.34; USD 36.33 is written, never 36.333', () => {
   const w = page({ auth: PEGGY }); const P = w.SIYL_PRICE, K = w.SIYL_ROOMS.kunming;
   assert.equal(K.name, 'Yifangju Designer Courtyard · Kunming'); assert.equal(K.place, 'Jinma Biji Archway · Kunming Old Street'); assert.equal(K.breakfast, 'Breakfast included');
   assert.deepEqual(plain(K.windows.map((x) => [x.id, x.dates, x.n])), [['kmg', '1 – 4 March 2027', 3]]);
@@ -37,7 +38,7 @@ test('THE PRICES · the sheet\'s per-person rate per night, three nights, to the
     assert.equal(room.name, r.name); assert.equal(room.rate, r.rate); assert.equal(room.roomRate, r.roomRate);
     const q = P.quote('kmg', r.slug);
     assert.equal(q.nights, 3); assert.equal(q.pay, 3); assert.equal(q.total, r.pp3, r.slug + ' per person for three nights');
-    assert.equal(q.total * r.places, r.room3, r.slug + ' the room for three nights');
+    assert.equal(Math.round(q.total * r.places * 100) / 100, r.room3, r.slug + ' the room for three nights');
     assert.equal(room.facts.find((f) => f[0] === 'Occupancy')[1], r.places === 1 ? '1 adult' : '2 adults');
   }
   assert.equal(P.money(36.33333333), 'USD 36.33'); assert.equal(P.money(72.66666667), 'USD 72.67'); assert.equal(P.money(109), 'USD 109');

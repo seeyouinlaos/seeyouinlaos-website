@@ -25,29 +25,30 @@ const pick = (win, slug, qty = 1) => P.items(win, slug).map((x) => ({ ...x, qty 
 
 /* The Sathorn Penthouse was DELETED (Owner, 24 Sep 2026 · Edit 6): the Bangkok stage keeps two
  * approved rooms. The scenarios are replayed on U Sathorn Bangkok · Superior Room With Garden View:
- *   USD 64 per person / night (128 per room ÷ 2) · 3 nights (21 – 24 February 2027). */
-test('A · one guest, U Sathorn only → USD 192', () => {
+ *   the live 002 (28 Sep 2026): USD 135.61 per room per night (B26) ÷ 2 = USD 67.805 per person (B25) · 3 nights
+ *   (21 – 24 February 2027) = USD 203.415 per person, written to the cent as USD 203.42 (a half cent rounds up). */
+test('A · one guest, U Sathorn only → USD 203.42', () => {
   const q = P.quote('bkk-stay', 'u-sathorn-superior-garden');
-  assert.equal(q.rate, 64);
+  assert.equal(q.rate, 67.805); assert.equal(q.nightly, 'USD 67.81 per person per night');
   assert.equal(q.nights, 3);
   assert.equal(q.pay, 3);
-  assert.equal(q.total, 192);
-  assert.equal(total(pick('bkk-stay', 'u-sathorn-superior-garden')), 192);
+  assert.equal(q.total, 203.42);
+  assert.equal(total(pick('bkk-stay', 'u-sathorn-superior-garden')), 203.42);
   /* TO-00540: “total” retired; the amount → for whom → how long (the approved My Bag basis is pinned in its own test below) */
-  assert.match(q.basis, /^USD 192 per person · 3 nights/); assert.doesNotMatch(q.basis, /total per person|\//);
+  assert.match(q.basis, /^USD 203\.42 per person · 3 nights/); assert.doesNotMatch(q.basis, /total per person|\//);
   assert.equal(q.breakfast, 'Breakfast included');
   /* the deleted room no longer exists: a stale 'penthouse' slug resolves to a surviving room, never to itself */
   assert.notEqual(P.quote('bkk-stay', 'penthouse').roomSlug, 'penthouse');
   assert.ok(P.items('bkk-stay', 'penthouse').every((x) => x.room !== 'penthouse' && x.price !== 255));
 });
 
-test('B · one guest, U Sathorn + Special Express No. 25 → USD 292', () => {
+test('B · one guest, U Sathorn + Special Express No. 25 → USD 303.42', () => {
   const bag = [...pick('bkk-stay', 'u-sathorn-superior-garden'), { ...P.FLAT.train, price: 100, qty: 1 }];
-  assert.equal(total(bag), 292);
+  assert.equal(Math.round(total(bag) * 100) / 100, 303.42);
 });
 
-test('C · two guests, U Sathorn only → USD 384', () => {
-  assert.equal(total(pick('bkk-stay', 'u-sathorn-superior-garden', 2)), 384);
+test('C · two guests, U Sathorn only → USD 406.84 (two places of USD 203.42 — the room\'s USD 406.83 split to the cent)', () => {
+  assert.equal(Math.round(total(pick('bkk-stay', 'u-sathorn-superior-garden', 2)) * 100) / 100, 406.84);
 });
 
 /* SOURCE-VERIFIED 08 September 2026 — H&S_Wedding_Operations_Master:
@@ -72,6 +73,8 @@ test('Vientiane · ALL FOURTEEN SOUPHATTRA PAIRS: Package C (25 – 27 Feb) and 
     assert.equal(q.rate, pp, tag + ' per person per night'); assert.equal(q.roomRate, room, tag + ' per room per night');
     assert.equal(q.roomRate, pp * 2, tag + ' the room is two guests');
     assert.equal(q.nights, 2);
+    /* 002 · G21 / H21 / I21 (28 Sep 2026): three suites are not offered before the wedding — the rate is kept, no line is made */
+    if (win === 'prewed' && !P.offeredIn(win, R.souphattra.rooms.find((r) => r.slug === slug))) { assert.deepEqual(P.items(win, slug), [], tag + ' is not offered'); assert.ok(['noble-courtyard', 'grand-majestic', 'souphattra-majestic'].includes(slug), tag); continue; }
     if (win === 'prewed') { assert.equal(q.pay, 2, 'the pre-wedding window has no hosted night'); assert.equal(q.total, pp * 2, tag + ' = rate × 2 nights'); assert.equal(total(pick(win, slug)), pp * 2); }
     else { assert.equal(q.pay, 1, 'the second wedding night is hosted'); assert.equal(q.hosted, 1); assert.equal(q.total, pp, tag + ' = one payable night'); assert.equal(total(pick(win, slug)), pp); }
     assert.equal(q.nightly, P.money(pp) + ' per person per night'); assert.equal(q.roomNightly, P.money(room) + ' per room per night');
@@ -107,19 +110,19 @@ test('Vientiane · the guest is told exactly which nights an amount buys', () =>
 });
 
 test('every stay multiplies its rate by its payable nights — one rule, no exception', () => {
-  assert.equal(P.quote('bkk-stay', 'u-sathorn-superior-garden').total, 64 * 3);
+  assert.equal(P.quote('bkk-stay', 'u-sathorn-superior-garden').total, 203.42);   /* 67.805 × 3 = 203.415, to the cent */
   /* Shama Yen-Akat was DELETED (Owner, 24 Sep 2026): its stale slug never quotes its own USD 40 × 3 */
   assert.notEqual(P.quote('bkk-stay', 'shama-king-studio-balcony').roomSlug, 'shama-king-studio-balcony');
   assert.ok(P.items('bkk-stay', 'shama-king-studio-balcony').every((x) => x.room !== 'shama-king-studio-balcony' && x.price !== 120));
   assert.equal(P.quote('prewed', 'heritage').total, 112.5 * 2);
   assert.equal(P.quote('wedstay', 'heritage').total, 145 * 1);
   /* the Yifangju Designer Courtyard (Owner, 27 Sep 2026): per person for the three nights, the room's three-night total twice where two sleep */
-  assert.equal(P.quote('kmg', 'elegant-residence').total, 126);
+  assert.equal(P.quote('kmg', 'elegant-residence').total, 117.36);   /* 002 · N27 (28 Sep 2026) */
   assert.equal(P.quote('kmg', 'jinri-terrace-double').total, 109, 'USD 36.33333333 × 3 is exactly USD 109 — never 108.99999999');
   assert.equal(P.quote('kmg', 'jinri-terrace-double').total * 2, 218);
-  assert.equal(P.quote('kmg', 'jinri-family-suite').total, 129); assert.equal(P.quote('kmg', 'jinri-family-suite').total * 2, 258);
-  assert.equal(P.quote('ljg', 'starry-sky').total, 210 * 2);
-  assert.equal(P.quote('kempinski', 'deluxe-balcony-king').total, 190 * 2);
+  assert.equal(P.quote('kmg', 'jinri-family-suite').total, 128.67); assert.equal(P.quote('kmg', 'jinri-family-suite').total * 2, 257.34);   /* 002 · P27 */
+  assert.equal(P.quote('ljg', 'private-soup-view').total, 232.74); assert.equal(P.quote('ljg', 'view-suite-270').total, 216.87);   /* 002 · T27 · S27, two guests the room */
+  assert.equal(P.quote('kempinski', 'jatu-room').total, 184.2);   /* Hotel Muse · 002 V27 USD 368.40 the room, two nights, two guests */
 });
 
 test('the words "fixed two-night stay" are gone from every guest surface — except the one approved Pre-Wedding line, where the nights are named beside it', () => {
@@ -254,16 +257,17 @@ test('the retired two-row wedding model is gone from the data and the code', () 
 test('F · changing a paid Kunming / Lijiang variant replaces, never duplicates', () => {
   const bag = [];
   const put = (line) => { const i = bag.findIndex((x) => x.id === line.id); if (i >= 0) bag[i] = line; else bag.push(line); };
+  const c = (n) => Math.round(n * 100) / 100;
   pick('kmg', 'elegant-residence').forEach(put);
-  assert.equal(total(bag), 126);              /* USD 42 × 3 nights */
+  assert.equal(c(total(bag)), 117.36);        /* USD 39.12 × 3 nights (002 · N27, 28 Sep 2026) */
   pick('kmg', 'jinri-family-suite').forEach(put);
   assert.equal(bag.length, 1, 'one Kunming line, not two');
-  assert.equal(total(bag), 129);              /* USD 43 × 3 nights */
+  assert.equal(c(total(bag)), 128.67);        /* USD 42.89 × 3 nights (002 · P25) */
   pick('ljg', 'snow-mountain-viewing').forEach(put);
-  assert.equal(total(bag), 129 + 150);        /* USD 75 × 2 nights */
-  pick('ljg', 'starry-sky').forEach(put);
+  assert.equal(c(total(bag)), 278.67);        /* 128.67 + USD 75 × 2 nights (R · the rate kept: the sheet's nights contradict its dates) */
+  pick('ljg', 'private-soup-view').forEach(put);
   assert.equal(bag.length, 2);
-  assert.equal(total(bag), 129 + 420);        /* USD 210 × 2 nights */
+  assert.equal(c(total(bag)), c(128.67 + 232.74)); /* USD 116.37 × 2 nights (002 · T25) */
 });
 
 test('G · Special Express No. 25 is USD 100 per person and carries no cabin upgrade', () => {
@@ -283,9 +287,9 @@ test('every accommodation window states rate, nights, total and breakfast', () =
     const room = at.stay.rooms.find((r) => r.rate != null);
     const q = P.quote(win, room.slug);
     assert.equal(q.nights, nights, win + ' nights');
-    assert.equal(q.total, q.rate * q.pay, win + ' total = rate × payable nights');
+    assert.equal(q.total, Math.round(q.rate * q.pay * 100 + 1e-7) / 100, win + ' total = rate × payable nights, to the cent');
     assert.equal(q.nightly, P.money(q.rate) + ' per person per night', win + ' states its nightly rate (TO-01312: no slash notation)');
-    assert.match(q.basis, /^USD [\d,]+ per person · \d+ nights?/, win + ' basis');
+    assert.match(q.basis, /^USD [\d,]+(\.\d\d)? per person · \d+ nights?/, win + ' basis');
     assert.ok(q.breakfast, win + ' breakfast status');
   }
 });
@@ -308,7 +312,7 @@ test('Bangkok offers one approved address, one window, one active choice (the Sa
   assert.ok(!rooms.some((r) => /penthouse/i.test(r.slug + ' ' + r.name)), 'the Sathorn Penthouse is deleted');
   assert.ok(!rooms.some((r) => /shama/i.test(r.slug + ' ' + r.name + ' ' + r.property)), 'Shama Yen-Akat is deleted');
   /* the Owner's rate, and the three-night guest price it produces */
-  const want = { 'u-sathorn-superior-garden': [64, 192] };
+  const want = { 'u-sathorn-superior-garden': [67.805, 203.42] };   /* 002 · B25 / B26, 28 Sep 2026 */
   rooms.forEach((r) => {
     const [rate, total] = want[r.slug];
     assert.equal(r.rate, rate, r.slug + ' rate');
@@ -358,20 +362,22 @@ test('the two approved Full Experience compositions come out of component pricin
    * them swapped, exactly as the Owner listed them */
   const BASE = ['train', 'prewed', 'wedstay', 'kmg', 'c86', 'ljg', 'return', 'kempinski'];
   assert.equal(P.FLAT.c86.price, 105, 'C86 is USD 105 — the current Operations Master (Owner, 19 Sep 2026), superseding the Edit 2 override of 85');
-  const base = 100 + 325 + 170 + 109 + P.FLAT.c86.price + 200 + 200 + 380;   /* 1,589 — the train USD 100 since 14 Sep 2026, C86 USD 105, Kunming the Yifangju 002 (USD 109), the pre-wedding Heritage Grand Premier at Package C (USD 162.50 × 2, 27 Sep 2026) */
-  assert.equal(base, 1589);
+  /* 28 Sep 2026 (the live 002): Lijiang falls to the premium open room, the Private Soup View (USD 232.74 — the 270° Viewing Room is no
+     longer a product), and the closing stay is Hotel Muse Bangkok, the Jatu Room (USD 184.20 — the Siam Kempinski is gone) */
+  const base = Math.round((100 + 325 + 170 + 109 + P.FLAT.c86.price + 232.74 + 200 + 184.2) * 100) / 100;   /* 1,589 — the train USD 100 since 14 Sep 2026, C86 USD 105, Kunming the Yifangju 002 (USD 109), the pre-wedding Heritage Grand Premier at Package C (USD 162.50 × 2, 27 Sep 2026) */
+  assert.equal(base, 1425.94);
   /* the Sathorn Penthouse (255) was deleted (Edit 6, 24 Sep 2026) and Shama Yen-Akat (120) on 24 Sep 2026:
      U Sathorn is the one Bangkok room, so two compositions remain (one per approved fare) */
-  const bkk = { 'u-sathorn-superior-garden': 192 };
+  const bkk = { 'u-sathorn-superior-garden': 203.42 };
   const fly = { business: 275, 'economy-flexible': 155 };
   const want = {
-    'u-sathorn-superior-garden|business': 2056,
-    'u-sathorn-superior-garden|economy-flexible': 1936,
+    'u-sathorn-superior-garden|business': 1904.36,
+    'u-sathorn-superior-garden|economy-flexible': 1784.36,
   };
   assert.equal(Object.keys(want).length, 2);
   assert.deepEqual(R.sathorn.rooms.map((r) => r.slug), Object.keys(bkk), 'every Bangkok room is composed, and only those');
   Object.keys(bkk).forEach((room) => Object.keys(fly).forEach((cls) => {
-    const total = base + P.items('bkk-stay', room)[0].price + P.items('mu9646', cls)[0].price;
+    const total = Math.round((base + P.items('bkk-stay', room)[0].price + P.items('mu9646', cls)[0].price) * 100) / 100;
     assert.equal(total, want[room + '|' + cls], room + ' + ' + cls);
   }));
   /* and the base really is the sum of the untouched eight */
@@ -437,8 +443,8 @@ test('the premium room of a stage is the dearest a guest may take — no room is
   assert.equal(P.premium('prewed').slug, 'souphattra-presidential');   /* the Presidential (750) is available until booked, like every room */
   assert.equal(P.premium('wedstay').slug, 'souphattra-presidential');
   assert.equal(P.premium('kmg').slug, 'jinri-family-suite');
-  assert.equal(P.premium('ljg').slug, 'starry-sky');
-  assert.equal(P.premium('kempinski').slug, 'deluxe-balcony-king');
+  assert.equal(P.premium('ljg').slug, 'private-soup-view');   /* the sheet's three Lijiang rooms (28 Sep 2026) */
+  assert.equal(P.premium('kempinski').slug, 'jatu-room');     /* Hotel Muse Bangkok's one product (28 Sep 2026) */
   for (const w of ['prewed', 'wedstay', 'kmg', 'ljg']) assert.equal(P.premium(w).reserved, undefined);
 });
 
@@ -456,9 +462,9 @@ test('Full Experience lines come from the single pricing source, transport inclu
      Vientiane windows since 15 Sep 2026); it is simply no longer what Full
      Experience selects */
   /* Bangkok's dearest room is U Sathorn (192) since the Sathorn Penthouse was deleted (Edit 6, 24 Sep 2026) */
-  assert.equal(total(all), 192 + 100 + 2190 + 750 + 275 + 129 + 105 + 420 + 200 + 380);   /* the Presidential at Package C (1,095 × 2) before the wedding, D1 (750) for it */
-  assert.equal(total(all), 4741);
-  assert.notEqual(total(all), 2056);
+  assert.equal(Math.round(total(all) * 100) / 100, Math.round((203.42 + 100 + 2190 + 750 + 275 + 128.67 + 105 + 232.74 + 200 + 184.2) * 100) / 100);   /* the Presidential at Package C (1,095 × 2) before the wedding, D1 (750) for it · the live 002, 28 Sep 2026 */
+  assert.equal(Math.round(total(all) * 100) / 100, 4369.03);
+  assert.notEqual(Math.round(total(all) * 100) / 100, 1904.36);
 });
 
 test('Review & Send: the Temple Ceremony is optional, the other three hosted', () => {
@@ -838,16 +844,16 @@ const fullExperience = (available) =>
 
 test('the ten Owner-preferred rooms and transports (SIYL_PRICE.approved — no package, 21 Sep 2026) sum to USD 2,056 — Bangkok falls to the premium open room, U Sathorn, since the Sathorn Penthouse was deleted (Edit 6, 24 Sep 2026) (train USD 100 since 14 Sep 2026, C86 USD 105 — the current Operations Master, 19 Sep 2026)', () => {
   const expect = {
-    'bkk-stay':  { room: 'u-sathorn-superior-garden', rate: 64, pay: 3, amount: 192 },
+    'bkk-stay':  { room: 'u-sathorn-superior-garden', rate: 67.805, pay: 3, amount: 203.42 },
     train:       {                                             amount: 100 },
     prewed:      { room: 'heritage-grand-premier', rate: 162.5, pay: 2, amount: 325 },
     wedstay:     { room: 'heritage-grand-premier', rate: 170, pay: 1, amount: 170 },
     mu9646:      {                                             amount: 275 },
     kmg:         { room: 'jinri-terrace-double',   rate: 36.33333333, pay: 3, amount: 109 },
     c86:        {                                             amount: 105 },
-    ljg:         { room: 'viewing-270',            rate: 100, pay: 2, amount: 200 },
+    ljg:         { room: 'private-soup-view',      rate: 116.37, pay: 2, amount: 232.74 },   /* no preferred Lijiang room since 28 Sep 2026: the premium open room */
     'return':    {                                             amount: 200 },
-    kempinski:   { room: 'deluxe-balcony-king',    rate: 190, pay: 2, amount: 380 }
+    kempinski:   { room: 'jatu-room',              rate: 92.1, pay: 2, amount: 184.2 }       /* Hotel Muse Bangkok (28 Sep 2026) */
   };
   let sum = 0;
   for (const [w, e] of Object.entries(expect)) {
@@ -860,9 +866,12 @@ test('the ten Owner-preferred rooms and transports (SIYL_PRICE.approved — no p
     assert.equal(q.total, e.amount, w + ' amount');
     sum += e.amount;
   }
-  assert.equal(sum, 2056);
-  /* 192 + 100 + 325 + 170 + 275 + 109 + 105 + 200 + 200 + 380 — Kunming the Yifangju 002, the Souphattra's Package C (27 Sep 2026) */
-  assert.equal(192 + 100 + 325 + 170 + 275 + 109 + 105 + 200 + 200 + 380, 2056);
+  sum = Math.round(sum * 100) / 100;
+  assert.equal(sum, 1904.36);
+  /* 203.42 + 100 + 325 + 170 + 275 + 109 + 105 + 232.74 + 200 + 184.20 — the live 002 (28 Sep 2026): U Sathorn USD 135.61 the room, Lijiang the
+     sheet's three rooms, Hotel Muse Bangkok for the Siam Kempinski */
+  assert.equal(Math.round((203.42 + 100 + 325 + 170 + 275 + 109 + 105 + 232.74 + 200 + 184.2) * 100) / 100, 1904.36);
+  assert.notEqual(sum, 2056, 'the former U Sathorn, Lijiang and Kempinski figures are not what the sum carries');
   assert.notEqual(sum, 2071, 'the pre-wedding stay at the Wedding Stay\'s rate is not what the sum carries');
   assert.notEqual(sum, 2112, 'the former Kunming hotel is not what the sum carries');
   /* the deleted Penthouse's 255 is NOT what the sum carries */
@@ -889,22 +898,25 @@ test('the total is never hard-coded: a sold-out room changes it', () => {
   const wed = lines.find((x) => x.id === 'wedstay');
   assert.equal(wed.room, 'heritage-grand-premier');
   assert.equal(wed.price, 170);
-  assert.equal(total(lines), 2056 - 325 + 260);
-  assert.equal(total(lines), 1991);
-  assert.notEqual(total(lines), 2056, 'the canonical total must not survive a substitution');
+  const t = Math.round(total(lines) * 100) / 100;
+  assert.equal(t, Math.round((1904.36 - 325 + 260) * 100) / 100);
+  assert.equal(t, 1839.36);
+  assert.notEqual(t, 1904.36, 'the canonical total must not survive a substitution');
 });
 
 test('the approved room is preferred, and the fallback is the nearest, not the dearest', () => {
   assert.equal(P.approved('prewed').slug, 'heritage-grand-premier');
   assert.equal(P.approved('prewed', (s) => s !== 'heritage-grand-premier').slug, 'heritage-executive');
   assert.equal(P.approved('kmg').slug, 'jinri-terrace-double');
-  assert.equal(P.approved('kmg', (s) => s !== 'jinri-terrace-double').slug, 'elegant-residence', 'the nearest rate (42), not the dearest (43)');
-  assert.equal(P.approved('ljg').slug, 'viewing-270');
-  assert.equal(P.approved('ljg', (s) => s !== 'viewing-270').slug, 'soup-pool-270');
+  assert.equal(P.approved('kmg', (s) => s !== 'jinri-terrace-double').slug, 'elegant-residence', 'the nearest rate (39.12), not the dearest (42.89)');
+  assert.equal(P.approved('ljg').slug, 'private-soup-view', 'no preferred Lijiang room since 28 Sep 2026: the premium open room');
+  assert.equal(P.approved('ljg', (s) => s !== 'private-soup-view').slug, 'view-suite-270', 'the nearest rate');
   /* it never reaches for the most expensive suite just because it is there */
   assert.notEqual(P.approved('prewed', (s) => s !== 'heritage-grand-premier').slug, 'souphattra-majestic');
-  /* no room is held back (Owner, 15 Sep 2026): with only the Grand Majestic left, it is the room */
-  assert.equal(P.approved('prewed', (s) => s === 'grand-majestic').slug, 'grand-majestic');
+  /* no room is held back (Owner, 15 Sep 2026): with only the Heritage Executive left, it is the room — the Grand Majestic is not
+     a pre-wedding room at all (the live 002, 28 Sep 2026: offered for the Wedding Stay only) */
+  assert.equal(P.approved('prewed', (s) => s === 'heritage-executive').slug, 'heritage-executive');
+  assert.equal(P.approved('prewed', (s) => s === 'grand-majestic'), null, 'a room not offered in the window is never the fallback');
   assert.equal(P.approved('prewed', () => false), null, 'a stage with nothing left returns nothing');
 });
 
@@ -1004,13 +1016,14 @@ test('every room carries its own paragraph — no two rooms read the same', () =
   assert.equal(new Set(stories).size, stories.length, 'a room paragraph is repeated');
 });
 
-test('Sathorn, Souphattra and Kempinski carry grouped, source-backed amenities', () => {
+test('Sathorn, Souphattra and Hotel Muse carry grouped, source-backed amenities', () => {
   /* the Sathorn Penthouse was deleted (Edit 6, 24 Sep 2026) and Shama Yen-Akat (24 Sep 2026): the one Bangkok
      room carries its own grouped, source-backed facts, and not one of the deleted rooms' */
   const bkk = Object.fromEntries(R.sathorn.rooms.map((r) => [r.slug, r]));
   const us = bkk['u-sathorn-superior-garden'];
   assert.equal(bkk['shama-king-studio-balcony'], undefined, 'Shama Yen-Akat is deleted');
-  assert.equal(us.rate, 64);
+  assert.equal(us.rate, 67.805);   /* the live 002 (28 Sep 2026): USD 135.61 the room per night, two guests */
+  assert.equal(us.roomRate, 135.61);
   assert.ok(us.groups.length >= 2, us.slug + ' is not grouped');
   assert.match(JSON.stringify(us.facts), /32 sq\.m\./);
   assert.match(JSON.stringify(us.groups), /Outdoor swimming pool/);
@@ -1031,11 +1044,13 @@ test('Sathorn, Souphattra and Kempinski carry grouped, source-backed amenities',
   assert.match(JSON.stringify(R.souphattra.rooms.find((r) => r.slug === 'heritage-grand-premier').groups), /Afternoon tea/);
   assert.match(JSON.stringify(R.souphattra.rooms.find((r) => r.slug === 'heritage-executive').groups), /Connecting door/);
 
-  const kem = R.kempinski.rooms[0];
-  assert.match(JSON.stringify(kem.facts), /45 sq\.m\./);
-  assert.ok(!JSON.stringify(kem.facts).includes('37'), 'the Deluxe Twin size is not this room');
-  assert.match(JSON.stringify(kem.groups), /Royal Wing/);
-  assert.match(JSON.stringify(kem.groups), /marble bathroom/i);
+  /* Hotel Muse Bangkok replaced the Siam Kempinski (28 Sep 2026): ONE product, the Jatu Room */
+  assert.equal(R.kempinski, undefined, 'the Siam Kempinski is gone');
+  assert.deepEqual(R.muse.rooms.map((r) => r.slug), ['jatu-room']);
+  const jatu = R.muse.rooms[0];
+  assert.match(JSON.stringify(jatu.facts), /39 sq\.m\./);
+  assert.match(JSON.stringify(jatu.groups), /Bathtub/);
+  assert.doesNotMatch(JSON.stringify(R.muse), /Kempinski|Royal Wing/);
 });
 
 test('every stay says what is included and what the guest arranges', () => {
@@ -1061,7 +1076,7 @@ test('every stay says what is included and what the guest arranges', () => {
   assert.doesNotMatch(rh, /(?<![.\w])stay\.breakfast(?! ?\))/, 'the amount block never borrows the group breakfast line');
   assert.match(rh, /room\.breakfast \|\| stay\.breakfast/, 'breakfast is the room\'s own fact');
   assert.equal(byId['u-sathorn-superior-garden'].breakfast, 'Breakfast included');
-  assert.match(R.kempinski.includes.join(' '), /Breakfast included/);
+  assert.match(R.muse.includes.join(' '), /Breakfast is not included/);   /* Hotel Muse Bangkok, the live 002 (28 Sep 2026) */
   assert.match(R.souphattra.includes.join(' '), /The two stays run back to back: if you take both, every night from 25 February to 1 March is covered\./); /* TO-00824 */
 });
 
@@ -1089,16 +1104,17 @@ test('the Sangkhathan is a per-guest offering, not an admission', () => {
   assert.equal(line.room, undefined);
 });
 
-test('the Complete trip\'s defaults stay USD 2,056 (Bangkok = U Sathorn since Edit 6 · Kunming the Yifangju · the Souphattra\'s two periods since 27 Sep 2026); one offering makes the journey 2,071', () => {
+test('the Complete trip\'s defaults stay USD 1,904.36 (the live 002, 28 Sep 2026: U Sathorn USD 135.61 the room · Lijiang the sheet\'s three rooms · Hotel Muse Bangkok); one offering makes the journey 1,919.36', () => {
+  const c = (n) => Math.round(n * 100) / 100;
   const canonical = STAGES.flatMap((w) => (P.FLAT[w] ? P.items(w) : P.items(w, P.approved(w).slug)));
-  assert.equal(total(canonical), 2056, 'the canonical base is unchanged');
+  assert.equal(c(total(canonical)), 1904.36, 'the canonical base is unchanged');
   const withOffering = [...canonical, { ...P.items('sangkhathan')[0], qty: 1 }];
   assert.equal(withOffering.length, 11, 'the offering is an addition, not a stage');
-  assert.equal(total(withOffering), 2071);
+  assert.equal(c(total(withOffering)), 1919.36);
   /* the canonical configuration itself is never redefined */
-  assert.equal(total(canonical), 2056);
+  assert.equal(c(total(canonical)), 1904.36);
   const two = [...canonical, { ...P.items('sangkhathan')[0], qty: 2 }];
-  assert.equal(total(two), 2086);
+  assert.equal(c(total(two)), 1934.36);
 });
 
 test('the wedding page: four events, the Buddhist morning inside the ceremony', () => {
@@ -1173,7 +1189,7 @@ test('MY BAG BASIS · “USD 225 per person · 2 nights: 25 → 26 and 26 → 27
   const line = (win, slug) => { const it = P.items(win, slug)[0]; it.qty = 1; return it; };
   assert.equal(P.lineBasis(line('prewed', 'heritage')), 'USD 225 per person · 2 nights: 25 → 26 and 26 → 27 February · USD 112.50 per person per night');
   assert.match(P.lineBasis(line('kmg', 'jinri-terrace-double')), /^USD 109 per person · 3 nights: .+ · USD 36\.33 per person per night$/, 'a rate of thirds is written to the cent');
-  for (const [w, s] of [['prewed', 'heritage'], ['kmg', 'jinri-terrace-double'], ['ljg', 'starry-sky']]) assert.doesNotMatch(P.lineBasis(line(w, s)), /total per person|\/ night|×/);
+  for (const [w, s] of [['prewed', 'heritage'], ['kmg', 'jinri-terrace-double'], ['ljg', 'private-soup-view'], ['kempinski', 'jatu-room'], ['bkk-stay', 'u-sathorn-superior-garden']]) assert.doesNotMatch(P.lineBasis(line(w, s)), /total per person|\/ night|×/);
 });
 
 test('EDIT 8 (Aui, 25 Sep 2026) · the Guest House complimentary includes no breakfast (the guest’s own cost), said on the stay itself and in its list — EN and TH; no line promises a shared breakfast', () => {
