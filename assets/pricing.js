@@ -101,6 +101,16 @@
   /* a rate with cents is written to the cent (the Yifangju 002: USD 36.33 per person per night) — never three decimals */
   /* an amount with cents is written with both digits (USD 112.50 · USD 36.33) — never three, never one */
   function money(n) { n = Number(n); return 'USD ' + n.toLocaleString('en-US', n % 1 ? { minimumFractionDigits: 2, maximumFractionDigits: 2 } : {}); }
+  /* THE BRIDE & GROOM'S HOSPITALITY (Owner, 28 Sep 2026 · src/gifts.js): a stay may be the couple's gift to one guest — that
+   * guest's charge for that one room of that one stay is USD 0, said as "Complimentary · from the Bride & Groom". The hotel's
+   * rate never changes; another room of the same stay is priced as usual. The Worker says which (GET /api/gifts, the guest's own
+   * bearer); this browser keeps the answer for that guest only, and nothing here is a table of anyone's gifts. */
+  var GIFT_KEY = 'siyl.gifts', GIFT_TTL = 10 * 60 * 1000;
+  var GIFT_WORDS = { title: 'Complimentary', by: 'from the Bride & Groom', line: 'Complimentary · from the Bride & Groom' };
+  function authNow() { try { var a = JSON.parse(localStorage.getItem('siyl.auth') || 'null'); return a && a.guestId && a.bearer ? a : null; } catch (e) { return null; } }
+  function giftCache() { try { return JSON.parse(localStorage.getItem(GIFT_KEY) || 'null'); } catch (e) { return null; } }
+  function giftsNow() { var a = authNow(), c = a ? giftCache() : null; return c && c.guestId === a.guestId && Array.isArray(c.gifts) ? c.gifts : []; }
+  function giftFor(windowId, slug) { var g = giftsNow(); for (var i = 0; i < g.length; i++) if (g[i] && g[i].window === windowId && g[i].room === slug) return g[i]; return null; }
   /* no leading zero in a date: "06 – 08 March 2027" → "6 – 8 March 2027" */
   function unpad(t) { return String(t == null ? '' : t).replace(/(^|[^\d])0(\d)(?!\d)/g, '$1$2'); }
   var MONTH_RE = /\s+(January|February|March|April|May|June|July|August|September|October|November|December)$/;
@@ -173,6 +183,10 @@
     money: money,
     locate: locate,
     rateOf: function (windowId, room) { return rateOf(windowId, room); },
+    GIFT_WORDS: GIFT_WORDS,
+    giftFor: function (windowId, slug) { return giftFor(windowId, slug); },
+    /* the words of a line's amount wherever a line is shown: the gift, else the ordinary amount */
+    lineGift: function (x) { return !!(x && x.gift); },
     roomRateOf: function (windowId, room) { return roomRateOf(windowId, room); },
 
     /* THE quote for one selectable line — the only place rate × nights happens */
@@ -224,6 +238,15 @@
       q.hostedBasis = q.hosted > 0 ? 'per person · first night your cost · second night complimentary, hosted by Haruthai & Suthep' : '';
       /* TO-01311–01313: the amount, what it covers, the exact nights, and the rate per night */
       q.basis = rate == null ? 'Amount on request' : q.amount + ' per person · ' + q.nightsLine + (q.nightsCovered ? ': ' + q.nightsCovered : '') + (q.nightly ? ' · ' + q.nightly : '');
+      /* the Bride & Groom's gift to this guest for this room: the guest's charge is nothing; the hotel's rate stays a fact */
+      var gift = rate == null ? null : giftFor(at.win.id, room && room.slug);
+      if (gift) {
+        q.gift = gift.by || 'bride-groom'; q.hotelTotal = q.total; q.total = 0;
+        q.amount = GIFT_WORDS.title; q.giftBy = GIFT_WORDS.by; q.giftWords = GIFT_WORDS.line;
+        q.contribution = q.nightly + ' · the hotel rate, not charged to you';
+        q.hostedBasis = GIFT_WORDS.by;
+        q.basis = GIFT_WORDS.line + ' · ' + q.nightsLine + (q.nightsCovered ? ': ' + q.nightsCovered : '');
+      }
       return q;
     },
 
@@ -274,6 +297,7 @@
       return [{
         id: at.win.id, name: bagName, meta: at.win.dates + ' · ' + room.name,
         price: q.total, stay: at.key, room: room.slug,
+        gift: q.gift || undefined,
         rate: q.rate, nights: q.nights, pay: q.pay,
         nightsList: q.nightsList, windowFixed: q.windowFixed,
         note: q.note, noteBy: q.noteBy,
@@ -484,7 +508,7 @@
    * source holds the pre-wedding window at one night instead of two. Every
    * accommodation line is re-quoted from the data above, so a returning guest
    * never carries a stale amount into Review & Send. */
-  (function repriceAccommodation() {
+  function repriceAccommodation() {
     var B = window.SIYL_BAG;
     if (!B || !window.SIYL_ROOMS) return;
     var bag = B.get(), changed = false;
@@ -503,12 +527,31 @@
       if (at && !roomOf(at.stay, x.room)) { changed = true; return null; }
       var fresh = window.SIYL_PRICE.items(x.id, x.room)[0];
       if (!fresh || fresh.price == null) return x;
-      if (x.price === fresh.price && x.pay === fresh.pay && x.name === fresh.name && !('fixed' in x)) return x;
+      if (x.price === fresh.price && x.pay === fresh.pay && x.name === fresh.name && (x.gift || null) === (fresh.gift || null) && !('fixed' in x)) return x;
       changed = true;
       fresh.qty = x.qty || 1;           /* the guest's own choice is preserved */
-      return fresh;                     /* name, meta, amount and basis are re-derived */
+      if (!fresh.gift) delete fresh.gift;
+      return fresh;                     /* name, meta, amount, basis and who pays are re-derived */
     }).filter(Boolean);
     if (changed) B.set(next);
+  }
+  repriceAccommodation();
+  /* THE GIFTS OF THIS GUEST, from the Worker (at most every ten minutes, and at once for another guest on this browser); a change
+     re-prices the Bag and every surface redraws from it. A failed read keeps what this browser last knew. */
+  (function refreshGifts() {
+    var a = authNow(); if (!a || typeof fetch !== 'function') return;
+    var c = giftCache(); if (c && c.guestId === a.guestId && Date.now() - (c.at || 0) < GIFT_TTL) return;
+    var before = JSON.stringify(giftsNow());
+    try {
+      fetch('/api/gifts', { headers: { 'x-siyl-auth': a.bearer }, cache: 'no-store' })
+        .then(function (r) { return r && r.ok ? r.json() : null; })
+        .then(function (j) {
+          var now = authNow(); if (!j || !j.ok || !now || j.guestId !== now.guestId || j.guestId !== a.guestId) return;
+          var gifts = Array.isArray(j.gifts) ? j.gifts : [];
+          try { localStorage.setItem(GIFT_KEY, JSON.stringify({ guestId: a.guestId, gifts: gifts, at: Date.now() })); } catch (e) { /* this view only */ }
+          if (JSON.stringify(gifts) !== before) { repriceAccommodation(); try { document.dispatchEvent(new CustomEvent('siyl:bag')); document.dispatchEvent(new CustomEvent('siyl:gifts')); } catch (e) { /* nothing listens */ } }
+        }, function () { /* offline: what this browser last knew */ });
+    } catch (e) { /* no network */ }
   })();
 
   /* ---- migration -------------------------------------------------------

@@ -60,7 +60,9 @@ test('NO FIXED ARRANGEMENT · no served page, module or email carries the concep
   assert.ok(!existsSync('assets/arranged.js'), 'arranged.js is gone');
   for (const f of ['your-journey.html', 'cart.html', 'review.html', 'profile.html', 'journeys.html', 'room.html', 'assets/journey.js', 'assets/stay.js', 'assets/rooms.js', 'assets/guest.js', 'src/worker.js', 'src/mail-templates.js', 'src/drafts.js', 'src/rooms.js']) {
     const s = src(f).replace(/\/\*[\s\S]*?\*\//g, '');
-    assert.doesNotMatch(s, /SIYL_ARRANGED|arranged\.js|Arranged for you|Fixed arrangement|fixedStagesOf|withoutFixed|reserved · bride|Bride & Groom/, f + ' carries the deleted concept');
+    /* 28 Sep 2026: "Complimentary · from the Bride & Groom" is the Owner's own words for a guest's gifted stay (src/gifts.js) — the
+       charge of one guest, never an arrangement; any other use of the words is still the deleted concept */
+    assert.doesNotMatch(s, /SIYL_ARRANGED|arranged\.js|Arranged for you|Fixed arrangement|fixedStagesOf|withoutFixed|reserved · bride|(?<!from the )Bride & Groom/, f + ' carries the deleted concept');
   }
   assert.doesNotMatch(src('src/mail-templates.js'), /import \{ FIXED \}/, 'the composer does not read FIXED');
   assert.match(src('src/worker.js'), /hosts: !!who\.hosts, registration, text, rooms, recipient/, 'the record carries the authenticated host flag');

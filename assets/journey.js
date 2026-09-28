@@ -185,6 +185,8 @@
       if (x.price == null) return '';
       /* the only USD 0 besides an empty Bag: the Guest House (OQ-44) */
       if (x.complimentary) return 'Complimentary';
+      /* the Bride & Groom's gift (Owner, 28 Sep 2026 · src/gifts.js) */
+      if (x.gift) return 'Complimentary · from the Bride & Groom';
       if (m.unit === 'experience') return q === 1 ? 'For two guests' : 'For ' + (q * 2) + ' guests';
       var amt = P && P.money ? P.money(x.price) : 'USD ' + String(x.price).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
       return amt + ' per person · your cost';

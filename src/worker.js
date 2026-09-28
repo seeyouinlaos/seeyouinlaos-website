@@ -50,7 +50,8 @@ export { Seating } from './seating.js';
 export { Rooms } from './rooms.js';
 export { Drafts } from './drafts.js';
 import { identify, owns, loadIndex } from './auth.js';
-import { MEDIA_SIZES } from './media-sizes.js';   /* every film's size, written at build time (src/build-media-sizes.cjs) */
+import { MEDIA_SIZES } from './media-sizes.js';
+import { giftsFor, verifiedLines } from './gifts.js';   /* the Bride & Groom's hospitality: one guest's own charge (Owner, 28 Sep 2026) */   /* every film's size, written at build time (src/build-media-sizes.cjs) */
 import { SEED } from './inventory-seed.js';
 import { stageOf } from './rooms.js';
 import { composeGuestMail, composeOwnerMail } from './mail-templates.js';
@@ -218,6 +219,16 @@ export default {
       if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders(request) });
       if (request.method !== 'GET') return json({ ok: false, error: 'method not allowed' }, 405, corsHeaders(request));
       return handlePulse(request, env);
+    }
+    /* THE BRIDE & GROOM'S HOSPITALITY (Owner, 28 Sep 2026 · src/gifts.js): the signed-in guest's own complimentary stays, from
+       the register's person id of their own bearer — never anyone else's, no public table, nothing read from a store or written */
+    if (url.pathname === '/api/gifts') {
+      if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders(request) });
+      if (request.method !== 'GET') return json({ ok: false, error: 'method not allowed' }, 405, corsHeaders(request));
+      const who = await identify(request, env);
+      if (!who) return json({ ok: false, error: 'unauthorised' }, 401, corsHeaders(request));
+      const person = await personOf(env, url.origin, who);
+      return json({ ok: true, guestId: who.guestId, gifts: giftsFor(person && person.contactId) }, 200, { ...corsHeaders(request), 'cache-control': 'no-store' });
     }
     /* THE CONFIRMATION (F): Guest Relations only, idempotent, never self-service */
     if (url.pathname === '/api/confirm') {
@@ -557,6 +568,12 @@ async function handleRegister(request, env) {
   /* THE PERSISTED ROOMS (Owner, 16 Sep 2026): the rooms this guest holds are read from the room engine on the server —
      the emails name the room the engine persists, never a room the client claims */
   const rooms = await engineRooms(env, who);
+  /* THE BRIDE & GROOM'S GIFT (28 Sep 2026 · src/gifts.js): a sent line is complimentary only when the sender's register identity
+     holds that gift — the emails and Guest Relations never read a gift a device merely claims */
+  if (registration && Array.isArray(registration.selections)) {
+    const person = await personOf(env, new URL(request.url).origin, who);
+    registration.selections = verifiedLines(registration.selections, giftsFor(person && person.contactId));
+  }
   /* THE ONE VALIDATOR (Owner, 21 Sep 2026 · the global My Trip rebuild): the same graph the pages read decides here whether the
      trip is complete — every relevant stage answered (a hold or a waiting-list place the engine persists, a chosen transport,
      an explicit "not joining this stage" where the stage allows it), the wedding's answers, the seats while seating is open,
@@ -738,7 +755,8 @@ function contentOf(v) {
 /* v3 · THE SELECTION FINGERPRINT (Owner, 27 Sep 2026 · the Souphattra correction): what the guest chose — every line by its product,
    room, class, menu, quantity and unit — never what the website charges for it. An amount the website corrects (a rate, a line's
    price, its wording and frame) is derived from the selection, so a host-side correction never reads as a change of the guest's. */
-const DERIVED_LINE_KEYS = new Set(['price', 'rate', 'roomRate', 'pay', 'nightsList', 'windowFixed', 'note', 'noteBy', 'breakfast', 'img', 'name', 'meta', 'basis', 'unitName']);
+/* `gift` (Owner, 28 Sep 2026 · src/gifts.js): who pays is the Bride & Groom's decision, never a change of the guest's selection */
+const DERIVED_LINE_KEYS = new Set(['price', 'rate', 'roomRate', 'pay', 'nightsList', 'windowFixed', 'note', 'noteBy', 'breakfast', 'img', 'name', 'meta', 'basis', 'unitName', 'gift']);
 function selectionOf(content) {
   const c = contentOf(content);
   const bag = c && c.draft && Array.isArray(c.draft['siyl.bag']) ? c.draft['siyl.bag'] : null;
@@ -765,6 +783,15 @@ function beforeCorrection(d) {
     return { ...l, rate: was, price: was * pay };
   });
   return changed ? { ...d, keys: { ...d.keys, 'siyl.bag': JSON.stringify(back) } } : null;
+}
+/* THE BRIDE & GROOM'S GIFT (28 Sep 2026) — only to recognise a trip sent before it (a record without the selection fingerprint): a
+   gifted line back at the hotel's rate, as it was sent; nothing else is touched */
+function withoutGifts(d) {
+  if (!d || !d.keys || typeof d.keys['siyl.bag'] !== 'string') return null;
+  let bag; try { bag = JSON.parse(d.keys['siyl.bag']); } catch (e) { return null; }
+  if (!Array.isArray(bag) || !bag.some((l) => l && l.gift)) return null;
+  const back = bag.map((l) => { if (!l || !l.gift) return l; const { gift, ...rest } = l; const rate = Number(rest.rate), pay = Number(rest.pay) || 1; if (Number.isFinite(rate)) rest.price = Math.round(rate * pay * 100) / 100; return rest; });
+  return { ...d, keys: { ...d.keys, 'siyl.bag': JSON.stringify(back) } };
 }
 /* v1: the historical fingerprint (every stored record carries it) · v2: the content fingerprint · v3: the selection fingerprint */
 async function journeyFingerprints(env, who, draft) {
@@ -810,6 +837,8 @@ async function submissionFor(env, who, draft) {
     /* THE SOUPHATTRA CORRECTION (27 Sep 2026) is the website's, not the guest's: a trip sent before it still reads as sent when
        the only difference is the corrected rate */
     if (unsent) { const back = beforeCorrection(fps.d); if (back) { const f2 = await journeyFingerprints(env, who, back); if (!legacy(f2)) unsent = false; } }
+    /* THE BRIDE & GROOM'S GIFT (28 Sep 2026) is theirs, not the guest's: the same trip with the gift taken back reads as sent */
+    if (unsent) { const back = withoutGifts(fps.d); if (back) { const f2 = await journeyFingerprints(env, who, back); if (!legacy(f2)) unsent = false; } }
     /* the first time a sent trip is read unchanged, its selection fingerprint is kept with it — from then on only a selection counts */
     if (!unsent && env.REG_KV) { try { record.selectionFingerprint = fps.v3; await env.REG_KV.put('reg:' + who.invitationId, JSON.stringify(record), { metadata: { invitationId: who.invitationId, submittedAt: record.submittedAt, submissionId: record.submissionId, version: record.version, lastSentAt: record.lastSentAt } }); } catch (e) { /* compared again next time */ } }
   }

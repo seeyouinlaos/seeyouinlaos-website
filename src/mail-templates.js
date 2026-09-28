@@ -157,7 +157,7 @@ export function journeyModel(record) {
   const STAGE_WORDS = { 'bkk-stay': 'Bangkok · Before the Wedding', prewed: 'Vientiane · Pre-Wedding Stay', wedstay: 'Vientiane · Wedding Stay', kmg: 'Kunming', ljg: 'Lijiang', kempinski: 'Bangkok · Siam Kempinski' };
   const waitlisted = Object.entries(rooms || {}).filter(([, m]) => m && m.waitlisted).map(([k, m]) => ({ stage: m.stage || k, name: STAGE_WORDS[m.stage || k] || (m.stage || k), position: m.position, size: m.size || 1 }));
   const arranged = [];
-  const stays = sorted.filter((x) => (x.stay || STAGE_OF_STAY[x.id])).map((x) => ({ id: x.id, name: x.name, dates: (x.meta || '').split(' · ')[0], category: (x.meta || '').split(' · ').slice(1).join(' · '), room: roomOf(x), price: x.price, per: perOf(x), complimentary: !!x.complimentary, rate: x.rate, nights: x.nights, note: x.note ? x.note + (x.noteBy ? ' · ' + x.noteBy : '') : '', breakfast: x.breakfast || '', interest: !!x.interest }));
+  const stays = sorted.filter((x) => (x.stay || STAGE_OF_STAY[x.id])).map((x) => ({ id: x.id, name: x.name, dates: (x.meta || '').split(' · ')[0], category: (x.meta || '').split(' · ').slice(1).join(' · '), room: roomOf(x), price: x.price, per: perOf(x), complimentary: !!x.complimentary, gift: x.gift || '', rate: x.rate, nights: x.nights, note: x.note ? x.note + (x.noteBy ? ' · ' + x.noteBy : '') : '', breakfast: x.breakfast || '', interest: !!x.interest }));
   const travel = sorted.filter((x) => TRAVEL.has(x.id) || (x.cls && !x.stay)).map((x) => ({ id: x.id, name: x.name, meta: x.meta || '', price: x.price, per: perOf(x) }));
   /* a spa interest and a restaurant request carry their state (PRQ-04-12): an interest is never part of the total */
   const experiences = sorted.filter((x) => !stays.some((s) => s.name === x.name) && !travel.some((t) => t.name === x.name) && x.id !== 'sangkhathan').map((x) => ({ id: x.id, name: x.name, meta: x.meta || '', price: x.price, per: perOf(x), interest: !!x.interest, request: !!x.request, status: x.interest ? INTEREST_WORDS : x.request ? REQUEST_WORDS : '' }));
@@ -216,7 +216,7 @@ export function journeyModel(record) {
   const scopeParts = gr.scope && typeof gr.scope === 'object' ? gr.scope : null;
   const stageStates = r.stages && typeof r.stages === 'object' ? r.stages : null;
   const partyMembers = Array.isArray(r.partyParticipation) ? r.partyParticipation : null;
-  const selections = lines0.map((x) => ({ id: x.id, name: x.name || x.id, variant: x.cls || x.variant || x.room || '', stay: x.stay || '', unit: x.unit || '', qty: Number(x.qty) || 1, price: x.price, date: x.date || '', party: x.party || '', request: !!x.request, interest: !!x.interest, complimentary: !!x.complimentary, deleted: deleted(x) || (STAGE_OF_STAY[x.id] && engineWaits.includes(STAGE_OF_STAY[x.id])) }));
+  const selections = lines0.map((x) => ({ id: x.id, name: x.name || x.id, variant: x.cls || x.variant || x.room || '', stay: x.stay || '', unit: x.unit || '', qty: Number(x.qty) || 1, price: x.price, date: x.date || '', party: x.party || '', request: !!x.request, interest: !!x.interest, complimentary: !!x.complimentary, gift: x.gift || '', deleted: deleted(x) || (STAGE_OF_STAY[x.id] && engineWaits.includes(STAGE_OF_STAY[x.id])) }));
   const profileAll = Q_PROFILE.map((q) => ({ label: q.label, value: profileValue(g0.profile, q.key) })).filter((p) => p.value);
   const recovery = { profileAll, personal, partyId: gr.partyId || r.partyId || '', contactId: r.contactId || '', couple: r.couple || '', lang: r.lang || '', scopeParts, stageStates, partyMembers, selections,
     nameWritten: [personal.firstName, personal.lastName].filter(Boolean).join(' ') || (g0.submitted && g0.submitted.fullName) || '' };
@@ -270,7 +270,8 @@ function shell(title, inner, eyebrow) {
 
 /* the shared journey sections (guest and Guest Relations read the same facts) */
 const waitWords = (w) => (w.position ? 'Number ' + w.position + ' on the waiting list' : 'On the waiting list') + (w.size > 1 ? ', for ' + w.size + ' places together' : '');
-const amountOf = (x) => x.complimentary ? 'Complimentary' : x.interest ? 'Not in your total' : x.price != null ? money(x.price) + (x.per || ' per person') : '';
+/* the Bride & Groom's gift (Owner, 28 Sep 2026 · src/gifts.js): a line the Worker verified against the sender's identity */
+const amountOf = (x) => x.gift === 'bride-groom' ? 'Complimentary · from the Bride & Groom' : x.complimentary ? 'Complimentary' : x.interest ? 'Not in your total' : x.price != null ? money(x.price) + (x.per || ' per person') : '';
 const seatValue = (label, hosts) => /^Front/.test(label) ? label : 'Seat ' + label + ' · held for you';
 function journeySections(M, forOwner) {
   let s = '';
@@ -373,7 +374,7 @@ export function recoverySections(M) {
   const nsc = sc ? scopeOf(sc) : null;
   const stages = R.stageStates ? Object.keys(STAGE_NAMES).filter((k) => R.stageStates[k]).map((k) => row(STAGE_NAMES[k], nsc && !stageRelevant(k, nsc) ? STATE_WORDS.excluded : (STATE_WORDS[R.stageStates[k]] || R.stageStates[k]))) : [];
   const selections = (R.selections || []).map((x) => row(x.name, ['code ' + x.id + (x.variant ? ' · ' + x.variant : '') + (x.unit ? ' · unit ' + x.unit : ''), 'quantity ' + x.qty, x.price != null ? money(x.price) + ' each' : 'no amount',
-    x.date ? 'date ' + x.date : '', x.party ? 'party ' + x.party : '', x.request ? 'request' : '', x.interest ? 'interest' : '', x.complimentary ? 'complimentary' : '', x.deleted ? 'not counted (withdrawn or on the waiting list)' : ''].filter(Boolean).join(' · ')));
+    x.date ? 'date ' + x.date : '', x.party ? 'party ' + x.party : '', x.request ? 'request' : '', x.interest ? 'interest' : '', x.complimentary ? 'complimentary' : '', x.gift === 'bride-groom' ? 'complimentary from the Bride & Groom (the hotel rate stays, the guest pays nothing)' : '', x.deleted ? 'not counted (withdrawn or on the waiting list)' : ''].filter(Boolean).join(' · ')));
   /* every About You answer the record carries, whether or not the guest is at the wedding (the guest's email shows only those
      that apply; the recovery copy keeps what was submitted) */
   const about = [row('Food allergies', M.allergy ? (M.allergy === 'yes' ? 'Yes · ' + (M.allergyDetails || 'no details') : 'None') : 'Not answered')]

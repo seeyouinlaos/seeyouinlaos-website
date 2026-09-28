@@ -102,7 +102,7 @@ test('THE GUEST\'S SURFACES · no control, no line, no placeholder, and no hotel
   /* TO-00312 / PRQ-01-04 / OQ-44: one stayCard per stay; the Guest House card has no kicker and reads “Your cost · Complimentary”;
      the kicker “Guest House complimentary” only on the offer shown before any stay is chosen */
   assert.match(prof, /stays\.forEach\(function\(x\)\{n\+\+;[\s\S]*?h\+=stayCard\(\{data:/);
-  assert.match(prof, /rows:\[gh\?\['Your cost','Complimentary'\]:\['Your total',/);
+  assert.match(prof, /rows:\[gh\?\['Your cost','Complimentary'\]:x\.gift\?\['Your cost','Complimentary · from the Bride & Groom'\]:\['Your total',/);
   assert.match(prof, /stayCard\(\{kicker:'Guest House complimentary',name:cw\.headline/);
   assert.doesNotMatch(prof, /'Complimentary stay'/);
   assert.doesNotMatch(code('profile.html'), /Riverside/, 'My Profile names no hotel for extra nights');

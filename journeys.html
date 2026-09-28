@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>The Journey · See You In Laos</title><script src="assets/i18n/siyl-i18n.js?v=49bd81c2"></script>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>The Journey · See You In Laos</title><script src="assets/i18n/siyl-i18n.js?v=fe22e4f3"></script>
 <script src="assets/invite-early.js?v=fab5da19"></script><style>
 @font-face{font-family:'PP Editorial Old';src:url('assets/fonts/PPEditorialOld-Ultralight.otf') format('opentype');font-weight:200;font-display:swap}
 *{margin:0;padding:0;box-sizing:border-box}body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;font-weight:300;font-size:14px;line-height:1.6}
@@ -159,12 +159,12 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:26px;margin:40
 <script src="assets/aman.js?v=5b2ba99a"></script>
 <script src="assets/rooms-data.js?v=0538f694"></script>
 <script src="assets/stay-media.js?v=7915e372"></script>
-<script src="assets/pricing.js?v=a373f08d"></script>
+<script src="assets/pricing.js?v=3820641f"></script>
 <script src="assets/stay-plan.js?v=5227fdc4"></script>
 <script src="assets/rooms.js?v=6b03be1c"></script>
 <script src="assets/stay.js?v=0d15179f"></script>
 <script src="assets/stage-graph.js?v=f5f4dc76"></script>
-<script src="assets/journey.js?v=2d1f8d92"></script>
+<script src="assets/journey.js?v=b7321cf6"></script>
 <script src="assets/wizard.js?v=f9c66d86"></script>
 <script type="module" src="assets/invite.mjs?v=252eac2c"></script>
 <script>
@@ -232,8 +232,13 @@ box.setAttribute('data-picking', changing?'1':'');
 box.innerHTML=stay.rooms.map(function(r){
 var img=window.SIYL_STAY_ART?SIYL_STAY_ART.card(sk,r.slug):'';
 var q=P.quote(win, r.slug);
-var right, sub='';
-if(q&&r.rate!=null){
+var right, sub='', sub2='';
+if(q&&r.rate!=null&&q.gift){
+  /* THE BRIDE & GROOM'S GIFT (Owner, 28 Sep 2026 · src/gifts.js): this guest's charge for this room is nothing — the same row,
+     the amount says who gives it; the hotel's rate stays beneath as a fact, not as the guest's cost */
+  right='<span class="vp">'+P.GIFT_WORDS.title+'</span>';
+  sub = P.GIFT_WORDS.by.replace(/&/g,'&amp;'); sub2 = q.contribution;
+}else if(q&&r.rate!=null){
   right='<span class="vp">'+P.money(q.total)+'<span class="vper"> per person</span></span>';
   /* the hosted night is said once, in the stay's own sentence above the rows (TO-01290) */
   sub = q.hosted>0 ? '' : P.money(q.rate)+' per person per night';
@@ -248,7 +253,7 @@ var nm=r.name.replace(/"/g,'&quot;'),open=OPEN[win]===r.slug;
 return '<div class="var vroom'+(open?' open':'')+'" data-room="'+r.slug+'" data-win="'+win+'" data-stay="'+sk+'" data-name="'+nm+'">'+
 '<a class="vt'+(img?'':' none')+'"'+(img?' style="background-image:url('+img+')"':'')+' href="'+href+'" aria-label="Details of '+nm+'"></a>'+
 '<span class="vbody"><a class="vname" href="'+href+'">'+r.name+'</a>'+
-(sub?'<span class="vn">'+sub+'</span>':'')+'</span>'+
+(sub?'<span class="vn">'+sub+'</span>':'')+(sub2?'<span class="vn">'+sub2+'</span>':'')+'</span>'+
 right+
 '<span class="vact"><button type="button" class="add vsbtn" data-row-select="'+r.slug+'"'+(changing?' data-pick="1"':'')+'>Select</button><a class="vdet" href="'+href+'">Details</a></span>'+
 '</div>'+(open?'<div class="vunits" data-units-for="'+r.slug+'"></div>':'')}).join('');
@@ -473,6 +478,8 @@ if(el&&window.SIYL_JOURNEY)el.textContent=SIYL_JOURNEY.statusLine()}
 
 function paintAll(){paintRooms();paintStayActions();paintGuestHouse();paintDecisions();paintStatus()}
 document.addEventListener('siyl:bag',paintAll);
+/* the Bride & Groom's gift arrived after the rows were drawn (the first visit): the rows say it at once (Owner, 28 Sep 2026) */
+document.addEventListener('siyl:gifts',function(){document.querySelectorAll('[data-rooms]').forEach(function(box){renderRows(box,box.getAttribute('data-picking')==='1')});paintAll()});
 document.addEventListener('siyl:units',paintAll);
 /* the line's own state word (Selected · Held for you · Sent to us …) follows the send */
 document.addEventListener('siyl:draft',paintStayActions);
