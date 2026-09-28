@@ -797,6 +797,11 @@ function withoutGifts(d) {
 async function journeyFingerprints(env, who, draft) {
   const d = draft === undefined ? await storedDraft(env, who.invitationId) : draft;
   const [rooms, seats] = await Promise.all([engineRooms(env, who), engineSeats(env, who)]);
+  return fingerprintsOf(d, rooms, seats);
+}
+/* the same three fingerprints from a draft and the guest's engine views already in hand (Guest Relations' overview reads the
+   engines once for everyone — 28 Sep 2026) */
+async function fingerprintsOf(d, rooms, seats) {
   /* the fingerprint is the guest's OWN journey: a waiting-list position moves when others leave the line — not a change of theirs */
   const own = rooms ? Object.fromEntries(Object.entries(rooms).map(([k, v]) => [k, v && v.waitlisted ? { stage: v.stage, waitlisted: true, size: v.size } : v])) : rooms;
   const content = draftContent(d && d.keys);
@@ -823,11 +828,16 @@ function submissionStateOf(record, hasUnsentChanges, conf) {
     declined: !!(gr.scope && gr.scope.none), sentSelections: Array.isArray(reg.selections) ? reg.selections : [],
     confirmed, confirmedAt: confirmed ? conf.confirmedAt : null, confirmedVersion: conf && conf.confirmedAt ? (conf.version != null ? conf.version : null) : null, lapsed: !!(conf && conf.confirmedAt) && !confirmed };
 }
-async function submissionFor(env, who, draft) {
-  let record = null; try { record = JSON.parse(await env.REG_KV.get('reg:' + who.invitationId) || 'null'); } catch (e) { record = null; }
+/* `pre` (Guest Relations' overview, 28 Sep 2026): the record, the confirmation and the engine views already read for everyone —
+   nothing is read again, and the overview never writes (the one-time keeping of the selection fingerprint is the guest's own read's) */
+async function submissionFor(env, who, draft, pre) {
+  let record = null;
+  if (pre) record = pre.record || null; else { try { record = JSON.parse(await env.REG_KV.get('reg:' + who.invitationId) || 'null'); } catch (e) { record = null; } }
   if (!record) return submissionStateOf(null, false);
-  let conf = null; try { conf = JSON.parse(await env.REG_KV.get('conf:' + who.invitationId) || 'null'); } catch (e) { conf = null; }
-  const fps = await journeyFingerprints(env, who, draft === undefined ? undefined : draft);
+  let conf = null;
+  if (pre) conf = pre.conf || null; else { try { conf = JSON.parse(await env.REG_KV.get('conf:' + who.invitationId) || 'null'); } catch (e) { conf = null; } }
+  const fpsOf = pre ? (dd) => fingerprintsOf(dd, pre.rooms, pre.seats) : (dd) => journeyFingerprints(env, who, dd);
+  const fps = await fpsOf(pre ? draft : (draft === undefined ? undefined : draft));
   /* a record sent with the selection fingerprint compares selections; an older one its content, the oldest its historical form */
   const legacy = (f) => (record.contentFingerprint ? record.contentFingerprint !== f.v2 : (!!record.draftFingerprint && record.draftFingerprint !== f.v1));
   let unsent;
@@ -836,11 +846,11 @@ async function submissionFor(env, who, draft) {
     unsent = legacy(fps);
     /* THE SOUPHATTRA CORRECTION (27 Sep 2026) is the website's, not the guest's: a trip sent before it still reads as sent when
        the only difference is the corrected rate */
-    if (unsent) { const back = beforeCorrection(fps.d); if (back) { const f2 = await journeyFingerprints(env, who, back); if (!legacy(f2)) unsent = false; } }
+    if (unsent) { const back = beforeCorrection(fps.d); if (back) { const f2 = await fpsOf(back); if (!legacy(f2)) unsent = false; } }
     /* THE BRIDE & GROOM'S GIFT (28 Sep 2026) is theirs, not the guest's: the same trip with the gift taken back reads as sent */
-    if (unsent) { const back = withoutGifts(fps.d); if (back) { const f2 = await journeyFingerprints(env, who, back); if (!legacy(f2)) unsent = false; } }
+    if (unsent) { const back = withoutGifts(fps.d); if (back) { const f2 = await fpsOf(back); if (!legacy(f2)) unsent = false; } }
     /* the first time a sent trip is read unchanged, its selection fingerprint is kept with it — from then on only a selection counts */
-    if (!unsent && env.REG_KV) { try { record.selectionFingerprint = fps.v3; await env.REG_KV.put('reg:' + who.invitationId, JSON.stringify(record), { metadata: { invitationId: who.invitationId, submittedAt: record.submittedAt, submissionId: record.submissionId, version: record.version, lastSentAt: record.lastSentAt } }); } catch (e) { /* compared again next time */ } }
+    if (!unsent && env.REG_KV && !pre) { try { record.selectionFingerprint = fps.v3; await env.REG_KV.put('reg:' + who.invitationId, JSON.stringify(record), { metadata: { invitationId: who.invitationId, submittedAt: record.submittedAt, submissionId: record.submissionId, version: record.version, lastSentAt: record.lastSentAt } }); } catch (e) { /* compared again next time */ } }
   }
   return submissionStateOf(record, unsent, conf);
 }
@@ -1053,30 +1063,78 @@ async function resetLocked(env) {
   return Date.now() - Date.parse(at) < 5 * 60 * 1000;
 }
 /* ---- GUEST RELATIONS: the canonical current data of every guest with a draft or a submission ---- */
+/* THE OVERVIEW WITHIN THE WORKER'S LIMITS (hotfix, 28 Sep 2026): the overview had become "Worker exceeded resource limits" (Cloudflare
+   measured 327 ms of Worker CPU for 89 guests — the Free plan allows 10 ms). The cause was the shape of the reads, not the data (192 KB):
+   for every guest the two engines were asked once for the trip state, once for the fingerprint and again for each correction check,
+   every engine call first re-read and re-parsed the guest's record and contact to learn a first name a read never needs, the record
+   and confirmation were read twice, the joining cohort read every record a third time — about eight round trips per guest, each
+   costing Worker CPU — and a first read wrote the selection fingerprint back into the record. Now ONE bounded traversal: the keys
+   listed once, every record, confirmation and contact read once (KV's multi-key read where the runtime has it), the two engines
+   read ONCE for everyone (their Guest Relations-only `gr-mine`), each guest's draft once (the actor is the truth), a bounded number
+   in flight at a time; the fingerprints from what is already in hand; the cohort from the records already read. Nothing is written. */
+async function kvMany(kv, keys) {
+  const out = new Map();
+  for (let i = 0; i < keys.length; i += 100) {
+    const chunk = keys.slice(i, i + 100);
+    let got = null;
+    try { got = chunk.length ? await kv.get(chunk) : new Map(); } catch (e) { got = null; }
+    if (got instanceof Map) { for (const k of chunk) out.set(k, got.has(k) ? got.get(k) : null); continue; }
+    await pool(chunk, 10, async (k) => { let v = null; try { v = await kv.get(k); } catch (e) { v = null; } out.set(k, v); });
+  }
+  return out;
+}
+async function pool(items, width, fn) {
+  let next = 0;
+  const run = async () => { while (next < items.length) { const i = next++; await fn(items[i], i); } };
+  await Promise.all(Array.from({ length: Math.min(width, items.length) }, run));
+}
+const parsed = (raw) => { if (raw == null) return null; try { return JSON.parse(raw); } catch (e) { return null; } };
+async function grEngine(env, binding, name, path) {
+  const ns = env[binding]; if (!ns) return null;
+  try { const r = await ns.get(ns.idFromName(name)).fetch(new Request('https://' + name + path, { headers: { 'x-gr-verified': 'yes' } })); const v = await r.json(); return v && v.ok ? v : null; } catch (e) { return null; }
+}
 async function handleGrJourneys(request, env) {
   if (!env.REG_KV) return json({ ok: false, error: 'no store' }, 503);
-  const entries = await loadIndex(env, new URL(request.url).origin, false);
+  const origin = new URL(request.url).origin;
+  const entries = await loadIndex(env, origin, false);
   const byInv = {}; for (const e of Object.values(entries || {})) byInv[e.i] = e;
-  const invs = new Set();
-  for (const prefix of ['draft:', 'reg:']) { let cursor; do { const l = await env.REG_KV.list({ prefix, cursor }); for (const k of l.keys) { const inv = k.name.slice(prefix.length); if (!inv.includes(':')) invs.add(inv); } cursor = l.list_complete ? null : l.cursor; } while (cursor); }
-  const out = [];
-  for (const inv of [...invs].sort()) {
+  /* 1 · the keys, once */
+  const [draftKeys, regKeys, avatarKeys] = await Promise.all([listAll(env.REG_KV, 'draft:'), listAll(env.REG_KV, 'reg:'), listAll(env.REG_KV, 'avatar:')]);
+  const invs = new Set(), sent = new Set();
+  for (const k of draftKeys) { const inv = k.slice(6); if (!inv.includes(':')) invs.add(inv); }
+  for (const k of regKeys) { const inv = k.slice(4); if (!inv.includes(':')) { invs.add(inv); sent.add(inv); } }
+  const list = [...invs].sort();
+  /* 2 · every record, confirmation and contact, once; the couple's contacts with them (the cohort names the couple) */
+  const couple = Object.values(entries || {}).filter((e) => e && e.h === 1 && e.i).map((e) => e.i);
+  const contactInvs = [...new Set(list.concat(couple))];
+  const kv = await kvMany(env.REG_KV, [...sent].map((i) => 'reg:' + i).concat([...sent].map((i) => 'conf:' + i), contactInvs.map((i) => contactKey(i))));
+  const recs = {}, confs = {}, contacts = {};
+  for (const i of sent) { recs[i] = parsed(kv.get('reg:' + i)); confs[i] = parsed(kv.get('conf:' + i)); }
+  for (const i of contactInvs) contacts[i] = parsed(kv.get(contactKey(i)));
+  /* 3 · the two engines, once for everyone */
+  const [roomsAll, seatsAll] = await Promise.all([grEngine(env, 'ROOMS', 'rooms', '/api/rooms/gr-mine'), grEngine(env, 'SEATING', 'seating', '/api/seating/gr-mine')]);
+  /* 4 · each guest: the draft (its own actor), then what is already in hand */
+  const out = new Array(list.length);
+  await pool(list, 8, async (inv, n) => {
     const e = byInv[inv] || null, who = e ? { invitationId: inv, guestId: e.g, partyId: e.p, hosts: e.h === 1, contactId: e.c || null, couple: e.k || null } : { invitationId: inv, guestId: inv.replace(/^INV-/, ''), partyId: null, hosts: false };
-    const d = await storedDraft(env, inv); let rec = null; try { rec = JSON.parse(await env.REG_KV.get('reg:' + inv) || 'null'); } catch (x) { rec = null; }
-    const content = draftContent(d && d.keys), g = content['siyl.guest'] || {}, sub = await submissionFor(env, who, d);
-    const [rooms, seats] = await Promise.all([engineRooms(env, who), engineSeats(env, who)]);
-    const contact = await storedContact(env, inv);
-    out.push({ invitationId: inv, guestId: who.guestId, partyId: who.partyId, hosts: who.hosts, contactId: who.contactId || null, couple: who.couple || null, name: rec ? guestNameOf(rec) : null,
+    const d = await storedDraft(env, inv), rec = recs[inv] || null;
+    const rooms = roomsAll ? roomsViewOf({ ok: true, ...((roomsAll.byGuest || {})[who.guestId] || { mine: {}, waitlist: {} }) }) : null;
+    const seats = seatsAll ? ((seatsAll.byInvitation || {})[inv] || { ceremony: {}, dinner: {} }) : null;
+    const content = draftContent(d && d.keys), g = content['siyl.guest'] || {};
+    const sub = await submissionFor(env, who, d, { record: rec, conf: confs[inv] || null, rooms, seats });
+    const contact = contacts[inv] || null;
+    out[n] = { invitationId: inv, guestId: who.guestId, partyId: who.partyId, hosts: who.hosts, contactId: who.contactId || null, couple: who.couple || null, name: rec ? guestNameOf(rec) : null,
       status: sub.submissionStatus, submissionId: sub.submissionId, version: sub.version, submittedAt: sub.submittedAt, lastSentAt: sub.lastSentAt, hasUnsentChanges: sub.hasUnsentChanges,
       draftUpdatedAt: d ? d.updatedAt : null, contact: contact ? publicContact(contact) : (g.contact || null),
       bag: content['siyl.bag'] || null, wedding: content['siyl.temple'] || null, aboutYou: g.guests ? Object.values(g.guests).map((x) => ({ submitted: x.submitted, profile: x.profile })) : null, documents: content['siyl.docs'] || null,
-      rooms, seats, mail: rec ? (rec.mailSummary || null) : null, text: rec ? rec.text : null, noteAck: noteAckOf(d), rulesAck: rulesAckOf(d) });
-  }
+      rooms, seats, mail: rec ? (rec.mailSummary || null) : null, text: rec ? rec.text : null, noteAck: noteAckOf(d), rulesAck: rulesAckOf(d) };
+  });
   /* THE TWO LIVE ANSWERS FOR THE PLANNER (Owner, 27 Sep 2026): the music of question 06 and the end of the wedding night — the counts,
-     the respondents and who chose each option, over the joining cohort — beside, never inside, the journeys */
+     the respondents and who chose each option, over the joining cohort — beside, never inside, the journeys; read fresh, from the
+     records already in hand */
   let answers = null;
   try {
-    const P = pulseOf(await joiningCohort(env, new URL(request.url).origin, true));
+    const P = pulseOf(await readCohort(env, origin, { regKeys, avatarKeys, recs, contacts }));
     const named = (list) => list.map((p) => ({ guestId: p.guestId, invitationId: p.invitationId, name: p.name }));
     answers = { joining: P.people.length, capacity: WEDDING_CAPACITY,
       music: { responses: P.musicResponses, leaders: P.leaders, ranking: P.ranking.map((r) => ({ ...r, guests: named(P.people.filter((p) => p.music.includes(r.genre))) })) },
@@ -1266,7 +1324,12 @@ async function engineRooms(env, who) {
   try {
     const stub = env.ROOMS.get(env.ROOMS.idFromName('rooms'));
     const r = await stub.fetch(new Request('https://rooms/api/rooms/mine', { headers: { 'x-siyl-identity': JSON.stringify(await withFirstName(env, who)) } }));
-    const v = await r.json();
+    return roomsViewOf(await r.json());
+  } catch (e) { return null; }
+}
+/* one guest's stays from the engine's answer (`mine` · `waitlist`) — the per-guest read and Guest Relations' single read alike */
+function roomsViewOf(v) {
+  {
     if (!v || !v.ok || !v.mine) return null;
     const out = {};
     const entry = (m, stage) => { const s = SEED[m.key]; return { stage, key: m.key, label: m.label, name: s ? s.name : m.key, stay: s && s.stay ? s.stay : null, room: s && s.unit === 'guest' ? s.name : 'Room ' + m.label }; };
@@ -1277,7 +1340,7 @@ async function engineRooms(env, who) {
        self-service extension is gone, so nothing of the kind is written any more and no confirmation can name a hotel for
        extra nights; Guest Relations arranges those outside this engine. */
     return out;
-  } catch (e) { return null; }
+  }
 }
 /* both emails for one stored record — the content is the journey as sent, never an access code */
 async function sendJourneyMail(env, record, request, only) {
@@ -1356,11 +1419,15 @@ async function afterWrite(request, env, pending) {
   return res;
 }
 function cohortStale(env) { cohortCache.delete(env.REG_KV); }
-async function readCohort(env, origin) {
-  const [regKeys, avatarKeys] = await Promise.all([listAll(env.REG_KV, 'reg:'), listAll(env.REG_KV, 'avatar:')]);
+/* `pre` (Guest Relations' overview): the keys, the records and the contacts it already read — the same reading, nothing read twice */
+async function readCohort(env, origin, pre) {
+  const [regKeys, avatarKeys] = pre ? [pre.regKeys, pre.avatarKeys] : await Promise.all([listAll(env.REG_KV, 'reg:'), listAll(env.REG_KV, 'avatar:')]);
   const photos = new Set(avatarKeys.map((k) => k.slice('avatar:'.length)));
-  const readRec = async (key) => { try { return JSON.parse(await env.REG_KV.get(key) || 'null'); } catch (e) { return null; } };
-  const contactOf = async (invitationId) => { try { return JSON.parse(await env.REG_KV.get(contactKey(invitationId)) || 'null'); } catch (e) { return null; } };
+  const readRec = pre ? async (key) => (Object.prototype.hasOwnProperty.call(pre.recs, key.slice(4)) ? pre.recs[key.slice(4)] : null)
+    : async (key) => { try { return JSON.parse(await env.REG_KV.get(key) || 'null'); } catch (e) { return null; } };
+  const contactOf = async (invitationId) => {
+    if (pre && Object.prototype.hasOwnProperty.call(pre.contacts, invitationId)) return pre.contacts[invitationId];
+    try { return JSON.parse(await env.REG_KV.get(contactKey(invitationId)) || 'null'); } catch (e) { return null; } };
   const nameOf = (rec, contact, fallback) => {
     const gr = (rec && rec.registration && rec.registration.guestRecord) || {};
     const g0 = Array.isArray(gr.guests) && gr.guests[0] ? gr.guests[0] : {};

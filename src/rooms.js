@@ -275,6 +275,16 @@ export class Rooms {
       const v = await this.view(identity);
       return json({ ok: true, mine: v.mine, waitlist: v.waitlist, complimentary: v.complimentary });
     }
+    /* GUEST RELATIONS' OVERVIEW (28 Sep 2026): every guest's own `mine` and waiting-list entries in ONE read — exactly what `mine`
+       answers one guest at a time (the same order, the same fields); the Guest Relations token only; nothing is written */
+    if (op === 'gr-mine') {
+      if (!gr) return json({ ok: false, error: 'unauthorised' }, 401);
+      const occ = await this.occupancies(), wl = await this.waitlist(), byGuest = {};
+      const of = (g) => byGuest[g] || (byGuest[g] = { mine: {}, waitlist: {} });
+      for (const o of occ) if (!o.placeholder && o.guestId) of(o.guestId).mine[stageOf(o.key)] = { key: o.key, label: o.label };
+      for (const r of wl) if (r.guestId) of(r.guestId).waitlist[r.stage] = { at: r.at, position: r.position, size: r.size || 1, wanted: r.wanted || [] };
+      return json({ ok: true, byGuest });
+    }
 
     if (op === 'join' || op === 'leave' || op === 'wait' || op === 'unwait') {
       if (!identity) return json({ ok: false, error: 'unauthorised' }, 401);

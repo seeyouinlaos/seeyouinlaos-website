@@ -293,6 +293,21 @@ export class Seating {
       const v = await this.view(identity || url.searchParams.get('invitation') || '');
       return json({ ok: true, open: v.open, frozen: v.frozen, configured: v.configured, mine: v.mine });
     }
+    /* GUEST RELATIONS' OVERVIEW (28 Sep 2026): every invitation's own seats in ONE read — exactly the `mine` of the per-guest read
+       (a family seat is never a guest's; a hold on a seat of the plan, by its invitation); the Guest Relations token only; nothing is written */
+    if (op === 'gr-mine') {
+      if (!gr) return json({ ok: false, error: 'unauthorised' }, 401);
+      const cfg = await this.config(), byInvitation = {};
+      for (const event of EVENTS) {
+        const holds = await this.holds(event);
+        for (const s of seatsOf(cfg, event)) {
+          const h = holds[s.seatId]; if (!h || s.family || !h.invitationId) continue;
+          const m = byInvitation[h.invitationId] || (byInvitation[h.invitationId] = { ceremony: {}, dinner: {} });
+          (m[event] || (m[event] = {}))[h.guestId] = s.seatId;
+        }
+      }
+      return json({ ok: true, byInvitation });
+    }
 
     if (op === 'select') {
       if (!identity) return json({ ok: false, error: 'unauthorised' }, 401);
