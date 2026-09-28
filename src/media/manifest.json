@@ -6022,7 +6022,7 @@
      "modifiedTime": "2026-09-26T07:17:48.349Z",
      "kind": "video",
      "status": "pending",
-     "note": "larger than the Drive connector delivers (~6 MB): the Owner uploads it with the next sync request (18.9 MB); the Vientiane card keeps its current film until then"
+     "note": "larger than the Drive connector delivers (a hard 10 MB limit: \"File too large for download, over limit of 10 MB\", 28 Sep 2026) and no copy of these bytes exists on this machine: the Owner uploads the file (18 901 028 bytes) into the chat with the next sync request; the Vientiane card keeps its current film until then"
     },
     {
      "driveId": "1sSlqH2TK-30XiVMAVDadqh_suJw0CxUA",
@@ -6065,7 +6065,7 @@
      "modifiedTime": "2026-09-26T07:22:59.684Z",
      "kind": "video",
      "status": "excluded",
-     "note": "the rail has no Lijiang card (Bangkok · Vientiane · China, the China card opens Kunming); this file is Lijiang's Main 01 (015), placed there"
+     "note": "the rail has no Lijiang card (Bangkok · Vientiane · China, the China card opens Kunming); the same 8 364 170 bytes as Lijiang's Main 01 (015), published there as assets/video/lijiang-main-01.mp4"
     }
    ],
    "status": "partial",
@@ -6153,8 +6153,38 @@
      "size": 10339106,
      "modifiedTime": "2026-09-26T08:26:19.206Z",
      "kind": "video",
-     "status": "pending",
-     "note": "larger than the Drive connector delivers (~6 MB): the Owner uploads it with the next sync request (10.3 MB, QuickTime); the Before the Wedding card stays photographs until then"
+     "status": "synced",
+     "w": 720,
+     "h": 1280,
+     "aspect": 0.562,
+     "width": 720,
+     "height": 1280,
+     "fps": 30,
+     "duration": 15.07,
+     "videoFrames": 452,
+     "codec": "hevc",
+     "bitrate": 5480735,
+     "audio": false,
+     "audioFrames": 650,
+     "audioBitrate": 2067,
+     "asset": "assets/video/chapter-before.mp4",
+     "slots": [
+      {
+       "route": "/index.html",
+       "role": "card"
+      }
+     ],
+     "syncedAt": "2026-09-28T06:00:00Z",
+     "poster": "assets/images/city/chapter-before-poster.jpg",
+     "quality": {
+      "encoder": "libx264 High · veryslow · tune film · CRF 14 · yuv420p · bt709 · every frame kept (passthrough) · sound track copied",
+      "bitrate": 7756980,
+      "vmaf": 98.36,
+      "vmafMin": 95.44,
+      "ssim": 0.9937,
+      "why": "the source is HEVC (Main, hvc1) and gate V1 requires H.264 for every browser; re-encoded above the source bitrate (7.76 vs 5.48 Mb/s) and proven equal — the worst frame (446) compared at 200 % shows no difference"
+     },
+     "note": "The Owner's own bytes (the upload of 19 Sep 2026, 10 339 106 bytes QuickTime = this Drive file). Its sound track is digital silence (−91 dB): a silent film, ambient, no sound control. Leads the Before the Wedding card; the ten photographs follow."
     },
     {
      "driveId": "1ON8S6EqEtEwxYUjvPu4zVoZ_JK4FuyC1",
@@ -8323,8 +8353,31 @@
      "size": 8364170,
      "modifiedTime": "2026-09-26T09:00:43.914Z",
      "kind": "video",
-     "status": "pending",
-     "note": "larger than the Drive connector delivers (~6 MB): the Owner uploads it with the next sync request — the live lijiang-impression.mp4 (1024 × 436, 5.6 MB) cannot be verified against this 8.4 MB source until then"
+     "status": "synced",
+     "w": 1280,
+     "h": 720,
+     "aspect": 1.778,
+     "width": 720,
+     "height": 1280,
+     "rotation": 90,
+     "fps": 24,
+     "duration": 48.13,
+     "videoFrames": 1155,
+     "codec": "h264",
+     "bitrate": 1320209,
+     "audio": true,
+     "audioFrames": 1035,
+     "audioBitrate": 64389,
+     "asset": "assets/video/lijiang-main-01.mp4",
+     "slots": [
+      {
+       "route": "/destination.html",
+       "role": "destination-clip"
+      }
+     ],
+     "syncedAt": "2026-09-28T06:00:00Z",
+     "poster": "assets/images/city/004-lijiang-main-01-poster.jpg",
+     "note": "Main 01 leads the Lijiang chapter, Main 02 – 05 follow. The Owner's own bytes (the upload of 21 Sep 2026, 8 364 170 bytes = this Drive file), remuxed bit for bit: 720 × 1280 coded with a 90° display matrix = 1280 × 720, 24 fps, 1 155 frames, AAC sound. The picture is letterboxed (1280 × 544 active), so destination.html places the frame with the bands outside the box (a presentation crop, top −16.176 % · height 132.353 %); the still 004-lijiang-main-01-still.jpg is the same frame without the bands. It replaces lijiang-impression.mp4 (1024 × 436, 30 fps, 0.81 Mb/s — cropped, downscaled and re-encoded from this source; VMAF 85.4 against it, visibly softer), now deleted."
     },
     {
      "driveId": "1o-Hv4guYSN94Fo4WsR7xxZuY7OgJrB2j",
@@ -23833,6 +23886,14 @@
   {
    "asset": "assets/images/journey/kunming-wanxiang-yueju-entrance.jpg",
    "why": "the former Kunming hotel — replaced by the Yifangju Designer Courtyard (Owner, 27 Sep 2026)"
+  },
+  {
+   "asset": "assets/video/lijiang-impression.mp4",
+   "why": "the former Lijiang lead film — a cropped, downscaled (1024 × 436), re-timed (30 fps) and re-encoded (0.81 Mb/s) derivative of the Owner's Main 01; replaced by the source itself, assets/video/lijiang-main-01.mp4 (Owner, 28 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/city/004-lijiang-impression-poster.jpg",
+   "why": "the poster of that derivative; the same frame is now 004-lijiang-main-01-poster.jpg (with the bands) and 004-lijiang-main-01-still.jpg (without)"
   }
  ]
 }
