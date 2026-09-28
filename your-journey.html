@@ -208,7 +208,10 @@ function bkkHtml(){
   /* three addresses, one of them yours — nothing is arranged for anyone in advance (Owner, 19 Sep 2026) */
   var fixed=false,fixedSlug='';
   var line=lineOf({ids:[win]}),pick=line?line.room:null,many=stay.rooms.length>1;
-  var h='<div id="bkksel"><div class="'+(many?'acar ':'')+'p-rail-car"><div class="'+(many?'atrk p-rail':'')+'">'+stay.rooms.map(function(r){
+  /* ONE ROOM CARD (Owner, 28 Sep 2026): once a room is chosen or held, Bangkok says so the way every other stay does — the
+     one stay card below (state, room, who shares it, Details · Change room · Remove); the photographed chooser is for choosing
+     only, never a second, differently shaped card of the same choice */
+  var h='<div id="bkksel">'+(line?'':'<div class="'+(many?'acar ':'')+'p-rail-car"><div class="'+(many?'atrk p-rail':'')+'">'+stay.rooms.map(function(r){
     var q=P.quote(win,r.slug),img=window.SIYL_STAY_ART?SIYL_STAY_ART.card('sathorn',r.slug):'',on=pick===r.slug;
     var av=U&&U.ready()&&U.tracked(win,r.slug)?U.label(win,r.slug):'',onWord=on?stateWord(line,ST.held(line)&&!!(U&&U.ready()&&U.tracked(win,r.slug))):'';
     return '<article class="'+(many?'aslide ':'')+'p-card p-stay'+(on?' p-chosen':'')+'" data-slug="'+r.slug+'">'+
@@ -226,7 +229,7 @@ function bkkHtml(){
       '</article>'}).join('')+'</div>'+
     (many?'<div class="arow"><div class="arail"><i></i></div><div class="anav">'+
     '<button type="button" data-a="prev" aria-label="Previous stay"></button>'+
-    '<button type="button" data-a="next" aria-label="Next stay"></button></div></div>':'')+'</div>';
+    '<button type="button" data-a="next" aria-label="Next stay"></button></div></div>':'')+'</div>');
   var seg0=J.SEGMENTS.filter(function(z){return z.key==='bkk-stay'})[0];
   if(line){var held=ST.held(line),unit=ST.unitOf(line),tracked=U&&U.ready()&&U.tracked(win,line.room),choosing=(!held||ROOMFOR==='bkk-stay')&&tracked;
     h+='<div class="p-card" id="stay-bkk-stay"><p class="t-l1 on">'+esc(stateWord(line,tracked&&held))+'</p><h3 class="t-h1">'+esc(line.name)+'</h3><p class="t-b2">'+esc(line.meta||'')+'</p>'+

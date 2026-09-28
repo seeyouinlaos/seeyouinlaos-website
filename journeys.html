@@ -266,6 +266,25 @@ function paint(){
   var chosen=(window.SIYL_BAG?SIYL_BAG.get().filter(function(x){return x.id===win})[0]:null);
   var pick=chosen?chosen.room:null;
   var many=stay.rooms.length>1;
+  /* ONE ROOM CARD (Owner, 28 Sep 2026): a stay with one room is the same room row as every other stay on The Journey —
+     thumbnail, room, rate, amount, action, Details. Held, selected, open and not-for-you are states of that one row: only
+     the status line and the action change (a held room says its room and "Held for you", never Select). Presentation only —
+     the choice still goes through select(), exactly as before. */
+  if(!many){box.innerHTML='<div class="vars">'+stay.rooms.map(function(r){
+    var q=P.quote(win,r.slug),img=window.SIYL_STAY_ART?SIYL_STAY_ART.card(sk,r.slug):'',on=pick===r.slug,held=on&&ST.held(chosen);
+    var tr=!!(U&&U.ready()&&U.tracked(win,r.slug)),av=tr?U.label(win,r.slug):'',gone=!!av&&!U.canTake(win,r.slug)&&!on;
+    var unit=held&&av.indexOf('Held for you · ')===0?av.slice(15):'',href='room.html?stay='+sk+'&room='+r.slug,nm=r.name.replace(/"/g,'&quot;');
+    return '<div class="var vroom'+(on?' on':'')+(gone?' gone':'')+'" data-room="'+r.slug+'" data-win="'+win+'" data-stay="'+sk+'" data-name="'+nm+'" data-card-state="'+(held?'held':on?'selected':gone?'unavailable':'available')+'">'+
+      '<a class="vt'+(img?'':' none')+'"'+(img?' style="background-image:url('+img+')"':'')+' href="'+href+'" aria-label="Details of '+nm+'"></a>'+
+      '<span class="vbody"><a class="vname" href="'+href+'">'+r.name+'</a>'+
+      '<span class="vn">'+P.money(q.rate)+' per person per night</span>'+
+      (on?(unit?'<span class="vsel">'+unit+'</span>':''):av?'<span class="vav'+((U.scarce(win,r.slug)||U.soldOut(win,r.slug))?' low':'')+'">'+av+'</span>':'')+'</span>'+
+      '<span class="vp">'+P.money(q.total)+'<span class="vper"> per person</span></span>'+
+      '<span class="vact">'+(on?'<span class="add vsbtn sel" aria-current="true">&#10003; <span>'+(held?'Held for you':'Selected')+'</span></span>'
+        :gone?'<button type="button" class="add vsbtn" disabled aria-disabled="true">'+(U.ctaWords(win,r.slug)||'Sold out')+'</button>'
+        :'<button type="button" class="add vsbtn" data-choose="'+r.slug+'">Select</button>')+
+      '<a class="vdet" href="'+href+'">Details</a></span></div>'}).join('')+'</div>';
+  }else
   box.innerHTML='<div class="'+(many?'acar ':'')+'psel-car"><div class="atrk">'+stay.rooms.map(function(r){
     var q=P.quote(win,r.slug),img=window.SIYL_STAY_ART?SIYL_STAY_ART.card(sk,r.slug):'';
     var on=pick===r.slug;
