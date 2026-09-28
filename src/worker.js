@@ -50,6 +50,7 @@ export { Seating } from './seating.js';
 export { Rooms } from './rooms.js';
 export { Drafts } from './drafts.js';
 import { identify, owns, loadIndex } from './auth.js';
+import { MEDIA_SIZES } from './media-sizes.js';   /* every film's size, written at build time (src/build-media-sizes.cjs) */
 import { SEED } from './inventory-seed.js';
 import { stageOf } from './rooms.js';
 import { composeGuestMail, composeOwnerMail } from './mail-templates.js';
@@ -324,7 +325,9 @@ async function mediaRange(request, env, url, name) {
   const src = await env.ASSETS.fetch(new Request(url.origin + '/assets/video/' + name, { method: 'GET' }));
   if (!src.ok || !src.body) return new Response('Not found', { status: 404 });
   const head = { 'content-type': 'video/mp4', 'accept-ranges': 'bytes', 'cache-control': 'public, max-age=86400' };
-  let size = Number(src.headers.get('content-length'));
+  /* the size from the response, else from the build-time list (a large film not yet in the edge cache can come without a
+     content-length, and reading it whole to count it exceeded the Worker's limits); a film missing from both is read, as before */
+  let size = Number(src.headers.get('content-length')) || Number(MEDIA_SIZES[name]) || 0;
   let body = src.body;
   if (!size) { const buf = await src.arrayBuffer(); size = buf.byteLength; body = new Response(buf).body; }
   const m = /^bytes=(\d*)-(\d*)$/.exec((request.headers.get('range') || '').trim());

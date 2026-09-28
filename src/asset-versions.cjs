@@ -29,5 +29,7 @@ for (const page of PAGES) {
   const after = before.replace(RE, (m, a, rel, z) => { const h = hashOf(rel); if (!h) return m; stamped++; return a + rel + '?v=' + h + z; });
   if (after !== before) { stale++; if (!CHECK) { fs.writeFileSync(p, after); files++; } }
 }
+/* the films' sizes for the byte-range route travel with every build of the references (src/build-media-sizes.cjs) */
+if (!CHECK) require('./build-media-sizes.cjs');
 if (CHECK) { console.log(stale ? 'ASSET VERSIONS: ' + stale + ' page(s) reference a stale asset — run node src/asset-versions.cjs' : 'ASSET VERSIONS: every reference carries the current hash (' + stamped + ' references, ' + PAGES.length + ' pages)'); process.exit(stale ? 1 : 0); }
 console.log('asset versions: ' + stamped + ' references on ' + PAGES.length + ' pages · ' + files + ' page(s) rewritten');

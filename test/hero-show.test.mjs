@@ -125,7 +125,7 @@ test('THE DOTS (Owner, 22 Sep 2026): one small dot per slide, centred at the foo
 test('HERO FILMS · the Worker answers byte ranges for a film (Safari needs 206): whole file, a range, a suffix, an impossible range; nothing outside assets/video/', async () => {
   const w = (await import('../src/worker.js')).default;
   const bytes = new Uint8Array(1000).map((_, k) => k % 251);
-  const env = { ASSETS: { fetch: async (req) => (new URL(req.url).pathname === '/assets/video/hero-000.mp4' ? new Response(bytes, { status: 200 }) : new Response('nope', { status: 404 })) } };
+  const env = { ASSETS: { fetch: async (req) => (new URL(req.url).pathname === '/assets/video/hero-000.mp4' ? new Response(bytes, { status: 200, headers: { 'content-length': '1000' } }) : new Response('nope', { status: 404 })) } };
   const get = (p, range, method) => w.fetch(new Request('https://example.test' + p, { method: method || 'GET', headers: range ? { Range: range } : {} }), env);
   let r = await get('/media/hero-000.mp4'); assert.equal(r.status, 200); assert.equal(r.headers.get('accept-ranges'), 'bytes'); assert.equal(r.headers.get('content-type'), 'video/mp4'); assert.equal((await r.arrayBuffer()).byteLength, 1000);
   r = await get('/media/hero-000.mp4', 'bytes=100-199'); assert.equal(r.status, 206); assert.equal(r.headers.get('content-range'), 'bytes 100-199/1000'); const b = new Uint8Array(await r.arrayBuffer()); assert.equal(b.length, 100); assert.equal(b[0], 100);

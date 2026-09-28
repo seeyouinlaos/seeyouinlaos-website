@@ -34,3 +34,22 @@ test('THE CONTRACT · 002 Vientiane synced: the source\'s own facts, the source 
   const c = (M.collections['013'].items || M.collections['013'].sources).find((x) => x.asset === 'assets/video/vientiane-card.mp4');
   assert.deepEqual(c.slots.map((s) => s.route), ['/destination.html']);
 });
+
+test('THE BYTE-RANGE ROUTE · a large film that comes without a content-length is never read whole: its size is the build-time list\'s, its slice streamed', async () => {
+  const { execFileSync } = await import('node:child_process');
+  execFileSync('node', [new URL('../src/build-media-sizes.cjs', import.meta.url).pathname, '--check']);   /* the list is current */
+  const { MEDIA_SIZES } = await import('../src/media-sizes.js');
+  assert.equal(MEDIA_SIZES['vientiane-journey-card.mp4'], fs.statSync(new URL('../assets/video/vientiane-journey-card.mp4', import.meta.url)).size);
+  const w = (await import('../src/worker.js')).default;
+  const name = 'chapter-wedding.mp4', size = MEDIA_SIZES[name];
+  let whole = 0;
+  const env = { ASSETS: { fetch: async (req) => {
+    if (new URL(req.url).pathname !== '/assets/video/' + name) return new Response('nope', { status: 404 });
+    let sent = 0; const stream = new ReadableStream({ pull(c) { if (sent >= size) { c.close(); return; } const n = Math.min(65536, size - sent); c.enqueue(new Uint8Array(n).map((_, k) => (sent + k) % 251)); sent += n; } });
+    const r = new Response(stream, { status: 200 }); r.arrayBuffer = async () => { whole++; throw new Error('read whole'); }; return r; } } };
+  const get = (range, method) => w.fetch(new Request('https://example.test/media/' + name, { method: method || 'GET', headers: range ? { Range: range } : {} }), env);
+  let r = await get('bytes=0-1'); assert.equal(r.status, 206); assert.equal(r.headers.get('content-range'), 'bytes 0-1/' + size); assert.equal((await r.arrayBuffer()).byteLength, 2);
+  r = await get('bytes=500000-500099'); assert.equal(r.status, 206); const b = new Uint8Array(await r.arrayBuffer()); assert.equal(b.length, 100); assert.equal(b[0], 500000 % 251);
+  r = await get('bytes=0-1', 'HEAD'); assert.equal(r.status, 206); assert.equal(r.headers.get('content-length'), '2');
+  assert.equal(whole, 0, 'never read whole');
+});
