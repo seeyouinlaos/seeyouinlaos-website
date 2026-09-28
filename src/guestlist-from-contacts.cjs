@@ -32,8 +32,10 @@ const ROOT = path.join(__dirname, '..');
 const args = process.argv.slice(2);
 const flag = (n) => args.includes('--' + n);
 const TSV = args.find((a) => a.endsWith('.tsv')) || path.join(ROOT, 'src', 'contacts-2026-09-19.private.tsv');
-const LIST = path.join(ROOT, 'src', 'guestlist.private.json');
-const REPORT = path.join(ROOT, 'src', 'guestlist-from-contacts.report.private.txt');
+/* SIYL_REGISTER_WORKDIR (tests, 28 Sep 2026): the same run on a synthetic list in another folder — never set for the real register */
+const WORK = process.env.SIYL_REGISTER_WORKDIR || null;
+const LIST = WORK ? path.join(WORK, 'guestlist.private.json') : path.join(ROOT, 'src', 'guestlist.private.json');
+const REPORT = WORK ? path.join(WORK, 'guestlist-from-contacts.report.private.txt') : path.join(ROOT, 'src', 'guestlist-from-contacts.report.private.txt');
 
 /* THE PERMANENT PERSON ID (Owner, 20 Sep 2026): CONxxx is one person for ever — never renumbered, never recycled. The register
    remembers it per guest (`contactId`) and matches by it first. The sheet was renumbered between the 19 Sep and the 20 Sep
@@ -172,7 +174,7 @@ function main() {
   console.log('report: ' + path.basename(REPORT) + ' (KEEP PRIVATE)');
   if (!flag('write')) { console.log('report only — nothing written to the list'); return; }
   const stamp = new Date().toISOString().slice(0, 10);
-  const backup = path.join(ROOT, 'src', 'guestlist.' + stamp + '-before-007.backup.private.json');
+  const backup = path.join(WORK || path.join(ROOT, 'src'), 'guestlist.' + stamp + '-before-007.backup.private.json');
   /* the parties keep their ids across runs; the profile fields are the sheet's — the guest corrects them on the site */
   if (!fs.existsSync(backup)) fs.copyFileSync(LIST, backup);
   fs.writeFileSync(LIST, JSON.stringify(outParties, null, 2) + '\n');

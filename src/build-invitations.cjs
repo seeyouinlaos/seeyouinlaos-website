@@ -40,10 +40,12 @@ const path = require('path');
 const crypto = require('crypto');
 
 const ROOT = path.join(__dirname, '..');
-const LIST = path.join(ROOT, 'src', 'guestlist.private.json');
-const TOKENS = path.join(ROOT, 'src', 'invitation-tokens.private.csv');
-const OUT = path.join(ROOT, 'register', 'invitations.enc.json');
-const INDEX = path.join(ROOT, 'register', 'auth-index.json');
+/* SIYL_REGISTER_WORKDIR (tests, 28 Sep 2026): the same build on a synthetic list in another folder — never set for the real register */
+const WORK = process.env.SIYL_REGISTER_WORKDIR || null;
+const LIST = WORK ? path.join(WORK, 'guestlist.private.json') : path.join(ROOT, 'src', 'guestlist.private.json');
+const TOKENS = WORK ? path.join(WORK, 'invitation-tokens.private.csv') : path.join(ROOT, 'src', 'invitation-tokens.private.csv');
+const OUT = WORK ? path.join(WORK, 'invitations.enc.json') : path.join(ROOT, 'register', 'invitations.enc.json');
+const INDEX = WORK ? path.join(WORK, 'auth-index.json') : path.join(ROOT, 'register', 'auth-index.json');
 const DRY = process.argv.includes('--dry-run');
 
 const HEADER = 'guestId,invitationId,partyId,partyName,name,token,link,status';
@@ -180,7 +182,7 @@ async function main() {
   /* the old register survives beside the new one, dated, private */
   if (reg.format === 'party') {
     const stampd = new Date().toISOString().replace(/[:.]/g, '-');
-    const backup = path.join(ROOT, 'src', 'invitation-tokens.party.' + stampd + '.backup.private.csv');
+    const backup = path.join(WORK || path.join(ROOT, 'src'), 'invitation-tokens.party.' + stampd + '.backup.private.csv');
     fs.copyFileSync(TOKENS, backup);
     console.log('legacy register backed up: ' + path.basename(backup) + ' (KEEP PRIVATE)');
   }
