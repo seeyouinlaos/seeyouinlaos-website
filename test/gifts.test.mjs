@@ -184,5 +184,7 @@ test('THE PAGES · every place a line or a room shows its amount says the gift i
 test('THE FIRST VISIT · a gift that arrives after the page is drawn redraws the rows (The Journey) and rebuilds the room page once', () => {
   assert.match(src('assets/pricing.js'), /document\.dispatchEvent\(new CustomEvent\('siyl:gifts'\)\)/);
   assert.match(src('journeys.html'), /document\.addEventListener\('siyl:gifts',function\(\)\{document\.querySelectorAll\('\[data-rooms\]'\)\.forEach\(function\(box\)\{renderRows\(box,/);
+  /* …and the stay's own line with them (29 Sep 2026: a first visit drew it before the guest's own rates had arrived) */
+  assert.match(src('journeys.html'), /renderRows\(box,box\.getAttribute\('data-picking'\)==='1'\)\}\);paintFromLines\(\);paintAll\(\)\}\);/);
   assert.match(src('room.html'), /document\.addEventListener\('siyl:gifts', function \(\) \{ try \{ if \(sessionStorage\.getItem\('siyl\.gifts\.rebuilt'\)\) return;/);
 });

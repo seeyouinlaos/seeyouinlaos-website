@@ -375,11 +375,13 @@ document.querySelectorAll('.p[data-vprod]').forEach(function(sec){
   var at=sec.querySelector('.pm');if(at&&at.nextSibling)sec.insertBefore(p,at.nextSibling);else sec.appendChild(p);
 });
 /* "from" line on each accommodation card — the lowest available per-person total */
-document.querySelectorAll('.pb[data-from]').forEach(function(el){
+/* the stay's own line — drawn again when this guest's own rates arrive (an employee rate is her own room's line, 29 Sep 2026) */
+function paintFromLines(){document.querySelectorAll('.pb[data-from]').forEach(function(el){
 var win=el.getAttribute('data-from');
 el.textContent=P.fromLine?P.fromLine(win):'';
-if(!el.textContent)el.hidden=true;
-});
+el.hidden=!el.textContent;
+});}
+paintFromLines();
 /* ---------------- adds are invitation-gated (real engine validation) ------ */
 function gated(fn){if(window.SIYL_INVITE){SIYL_INVITE.require(fn)}
 else document.addEventListener('siyl:invite-ready',function(){SIYL_INVITE.require(fn)},{once:true})}
@@ -495,7 +497,7 @@ if(el&&window.SIYL_JOURNEY)el.textContent=SIYL_JOURNEY.statusLine()}
 function paintAll(){paintRooms();paintStayActions();paintGuestHouse();paintDecisions();paintStatus()}
 document.addEventListener('siyl:bag',paintAll);
 /* the Bride & Groom's gift arrived after the rows were drawn (the first visit): the rows say it at once (Owner, 28 Sep 2026) */
-document.addEventListener('siyl:gifts',function(){document.querySelectorAll('[data-rooms]').forEach(function(box){renderRows(box,box.getAttribute('data-picking')==='1')});paintAll()});
+document.addEventListener('siyl:gifts',function(){document.querySelectorAll('[data-rooms]').forEach(function(box){renderRows(box,box.getAttribute('data-picking')==='1')});paintFromLines();paintAll()});
 document.addEventListener('siyl:units',paintAll);
 /* the line's own state word (Selected · Held for you · Sent to us …) follows the send */
 document.addEventListener('siyl:draft',paintStayActions);
