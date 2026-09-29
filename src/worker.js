@@ -54,7 +54,7 @@ import { MEDIA_SIZES } from './media-sizes.js';
 import { giftsFor, verifiedLines } from './gifts.js';   /* the Bride & Groom's hospitality: one guest's own charge (Owner, 28 Sep 2026) */   /* every film's size, written at build time (src/build-media-sizes.cjs) */
 import { SEED } from './inventory-seed.js';
 import { canonicalKey, canonicalLines, lineAs, viewAs } from './legacy-keys.js';   /* the replaced Kempinski room read as Hotel Muse Bangkok's Jatu Room (28 Sep 2026) */
-import { stageOf } from './rooms.js';
+import { stageOf, dedicatedStages } from './rooms.js';
 import { composeGuestMail, composeOwnerMail } from './mail-templates.js';
 import { completion as graphCompletion, normalizeScope as graphScope, isRelevant as graphRelevant, STAGES as GRAPH_STAGES, STAGE_IDS as GRAPH_IDS, participationOf as graphParticipation, partyNeed as graphPartyNeed, travelsIn as graphTravels } from './stage-graph.js';
 import { profileMissing as questionnaireMissing, finaleOf, PHOTO_LABEL, GENRES } from './questionnaire.js';   /* the one questionnaire: what About You and the wedding night require (Owner, 22 Sep 2026) */
@@ -103,6 +103,9 @@ export default {
         const who = await identify(request, env);
         if (who) {
           const id = await withFirstName(env, who, url.origin, request);
+          /* THE REGISTER ID (Owner, 29 Sep 2026 · a dedicated room, 002 · W): the engine shows a guest the room that is theirs alone —
+             resolved here from the bearer's own index entry, never from anything a client sends */
+          try { const person = await personOf(env, url.origin, who); if (person && person.contactId) id.contactId = person.contactId; } catch (e) { /* the standard pool */ }
           /* the engine books only the members who travel in a stage (never a member who is not joining) */
           try { const tr = await partyTravel(env, who, url.origin); if (tr) { id.partyNeed = tr.need; id.partyTravels = tr.travels; } } catch (e) { /* unknown: the engine keeps its own rule */ }
           headers.set('x-siyl-identity', JSON.stringify(id));
@@ -938,9 +941,13 @@ async function partyTravel(env, who, origin) {
   /* need: the places a booking by this guest takes (the guest and the others who travel) · travels: per member of the party
      (the guest by their own answer), the stay stages they travel in — what the engine may keep places for */
   const need = {}, travels = {};
-  for (const k of TRAVEL_STAGES) need[k] = graphPartyNeed(k, scopes);
-  const everyone = [[who.guestId, own]].concat(mates.map((m, i) => [m.g, scopes[i]]));
-  for (const [g, sc] of everyone) { travels[g] = {}; for (const k of TRAVEL_STAGES) travels[g][k] = graphTravels(k, sc); }
+  /* A ROOM OF ONE'S OWN (Owner, 29 Sep 2026 · 002 · W): in a stage where a member has a dedicated room, that member is not part
+     of the party's booking — nobody books or keeps a place for them, and they book their own room alone (never a split) */
+  const selfEntry = Object.values(entries || {}).find((e) => e && e.i === who.invitationId && e.g === who.guestId);
+  const ownDed = dedicatedStages(selfEntry && selfEntry.c), mateDed = mates.map((m) => dedicatedStages(m.c));
+  for (const k of TRAVEL_STAGES) need[k] = ownDed.includes(k) ? graphPartyNeed(k, []) : graphPartyNeed(k, scopes.filter((sc, i) => !mateDed[i].includes(k)));
+  const everyone = [[who.guestId, own, ownDed]].concat(mates.map((m, i) => [m.g, scopes[i], mateDed[i]]));
+  for (const [g, sc, ded] of everyone) { travels[g] = {}; for (const k of TRAVEL_STAGES) travels[g][k] = graphTravels(k, sc) && !(g !== who.guestId && ded.includes(k)); }
   return { members, need, travels };
 }
 async function handleDraft(request, env) {
@@ -1366,7 +1373,8 @@ function roomsViewOf(v) {
   {
     if (!v || !v.ok || !v.mine) return null;
     const out = {};
-    const entry = (m, stage) => { m = { ...m, key: canonicalKey(m.key) }; const s = SEED[m.key]; return { stage, key: m.key, label: m.label, name: s ? s.name : m.key, stay: s && s.stay ? s.stay : null, room: s && s.unit === 'guest' ? s.name : 'Room ' + m.label }; };
+    /* a dedicated room (002 · W) is named as the guest's own room, the whole room */
+    const entry = (m, stage) => { m = { ...m, key: canonicalKey(m.key) }; const s = SEED[m.key]; const own = !!(s && (s.dedicated || []).some((d) => d.label === m.label)); return { stage, key: m.key, label: m.label, name: s ? s.name : m.key, stay: s && s.stay ? s.stay : null, room: s && s.unit === 'guest' ? s.name : own ? 'Own room · Room ' + m.label : 'Room ' + m.label }; };
     for (const [stage, m] of Object.entries(v.mine)) out[stage] = entry(m, stage);
     /* THE WAITING LIST (Owner, 19 Sep 2026): a stage the guest waits for, with the position — no product, no amount */
     for (const [stage, w] of Object.entries(v.waitlist || {})) if (!out[stage]) out[stage] = { stage, waitlisted: true, position: w.position, since: w.at, size: w.size || 1 };

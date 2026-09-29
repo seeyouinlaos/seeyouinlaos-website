@@ -236,7 +236,7 @@
         var act = isMine ? '<span class="t-l1 on">' + (property ? 'Your place' : 'Your room') + '</span>'
                 : fullForMe ? '<span class="t-l1">Full</span>'
                 : !x.eligible || !fits ? ''
-                : '<button type="button" class="p-act quiet" data-join="' + esc(win) + '|' + esc(slug) + '|' + esc(x.label) + '">' + (property ? 'Take a place' : (names.length || keptForMe ? 'Join this room' : 'Choose this room')) + '</button>';
+                : '<button type="button" class="p-act quiet" data-join="' + esc(win) + '|' + esc(slug) + '|' + esc(x.label) + '">' + (property ? 'Take a place' : x.dedicated ? 'Take your room' : (names.length || keptForMe ? 'Join this room' : 'Choose this room')) + '</button>';
         h += '<div class="p-unit' + (isMine ? ' mine' : '') + (fullForMe ? ' full' : '') + '" data-unit="' + esc(x.label) + '" data-free="' + x.free + '">' +
              '<div><p class="p-unit-name">' + esc(u.unitName(x)) + '</p><p class="p-unit-who"><span class="p-places">' + dots + '</span>' + (who ? who + ' · ' : '') + state + '</p></div>' + act + '</div>';
       });

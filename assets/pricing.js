@@ -261,7 +261,10 @@
         q.personal = gift.kind; q.hotelTotal = q.total; q.total = cents(gift.charge);
         q.amount = money(q.total); q.per = room2 ? 'for the room' : 'per person';
         q.personalWords = gift.kind === 'employee' ? 'Your employee rate · the whole room, paid by you' : 'Your special rate';
-        q.contribution = q.personalWords + ' · ' + q.nightsLine + (q.nightly ? ' · the listed rate: ' + q.nightly : '');
+        /* AN EMPLOYEE RATE IS ITS OWN POOL (002 · W, Owner 29 Sep 2026): the room's own rate per night — never the standard pool's
+           per-person rate (column V) beside it, no "listed rate"; the room is the guest's alone */
+        if (room2) { q.nightly = money(cents(gift.charge / (pay || nights || 1))) + ' per room per night'; q.roomNightly = ''; }
+        q.contribution = q.personalWords + ' · ' + q.nightsLine + (q.nightly ? (room2 ? ' · ' : ' · the listed rate: ') + q.nightly : '');
         q.hostedBasis = q.per + ' · ' + q.personalWords.charAt(0).toLowerCase() + q.personalWords.slice(1) + ' · ' + q.nightsLine;
         q.basis = q.amount + ' ' + q.per + ' · ' + q.personalWords.charAt(0).toLowerCase() + q.personalWords.slice(1) + ' · ' + q.nightsLine + (q.nightsCovered ? ': ' + q.nightsCovered : '');
       }
@@ -496,6 +499,10 @@
       if (!open.length) return '';
       var low = open.reduce(function (m, r) { return rateOf(at.win.id, r) < rateOf(at.win.id, m) ? r : m; }, open[0]);
       var q = self.quote(at.win.id, low.slug); if (!q || q.total == null) return '';
+      /* an employee rate (002 · W) is the guest's own room: its own amount and its own rate per room — never the standard pool's */
+      if (q.personal === 'employee') return money(q.total) + ' ' + q.per + ' · ' + q.nightly;
+      /* any other personal charge or gift is the guest's alone: the stay's own line stays the hotel's listing */
+      if ((q.personal || q.gift) && q.hotelTotal != null) q = { total: q.hotelTotal, rate: q.rate, hosted: q.hosted };
       if (q.hosted > 0) return 'From ' + money(q.total) + ' per person';
       if (open.length === 1) return money(q.total) + ' per person · ' + money(q.rate) + ' per person per night';
       return 'From ' + money(q.total) + ' per person · from ' + money(q.rate) + ' per person per night';

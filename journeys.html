@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>The Journey · See You In Laos</title><script src="assets/i18n/siyl-i18n.js?v=f0d6fd59"></script>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>The Journey · See You In Laos</title><script src="assets/i18n/siyl-i18n.js?v=42ee823a"></script>
 <script src="assets/invite-early.js?v=fab5da19"></script><style>
 @font-face{font-family:'PP Editorial Old';src:url('assets/fonts/PPEditorialOld-Ultralight.otf') format('opentype');font-weight:200;font-display:swap}
 *{margin:0;padding:0;box-sizing:border-box}body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;font-weight:300;font-size:14px;line-height:1.6}
@@ -159,10 +159,10 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:26px;margin:40
 <script src="assets/aman.js?v=641d956e"></script>
 <script src="assets/rooms-data.js?v=34b800cf"></script>
 <script src="assets/stay-media.js?v=690eb7f7"></script>
-<script src="assets/pricing.js?v=0b34a44e"></script>
+<script src="assets/pricing.js?v=76be7639"></script>
 <script src="assets/stay-plan.js?v=5227fdc4"></script>
-<script src="assets/rooms.js?v=6b03be1c"></script>
-<script src="assets/stay.js?v=cf7d1019"></script>
+<script src="assets/rooms.js?v=2f2ff2ba"></script>
+<script src="assets/stay.js?v=878b1e60"></script>
 <script src="assets/stage-graph.js?v=f5f4dc76"></script>
 <script src="assets/journey.js?v=2941fe09"></script>
 <script src="assets/wizard.js?v=f9c66d86"></script>
@@ -243,7 +243,7 @@ if(q&&r.rate!=null&&q.gift){
   /* A PERSONAL RATE (Owner, 28 Sep 2026 · src/gifts.js): this guest's own charge for the window — the stated total, per person or
      (an employee rate) for the whole room; the listed rate stays beneath as a fact */
   right='<span class="vp">'+P.money(q.total)+'<span class="vper"> '+q.per+'</span></span>';
-  sub = q.personalWords; sub2 = q.nightly ? 'The listed rate: '+q.nightly : '';
+  sub = q.personalWords; sub2 = q.personal==='employee' ? q.nightly : (q.nightly ? 'The listed rate: '+q.nightly : '');
 }else if(q&&r.rate!=null){
   right='<span class="vp">'+P.money(q.total)+'<span class="vper"> per person</span></span>';
   /* the hosted night is said once, in the stay's own sentence above the rows (TO-01290) */

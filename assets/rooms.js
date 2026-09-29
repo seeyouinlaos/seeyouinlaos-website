@@ -108,6 +108,8 @@
     fitsParty: function (win, slug, u, need) {
       if (!u) return false;
       if (this.mineFor(win, slug) && this.mineFor(win, slug).label === u.label) return true;
+      /* a room of the guest's own (002 · W): it takes the guest alone — the party books its own rooms */
+      if (u.dedicated) return u.free >= 1;
       need = need || 1;
       /* the party members already here count for the party; a place KEPT for the party (the engine's party place) is the guest's to take */
       var here = u.occupants.filter(function (o) { return o.party && !o.mine && !o.placeholder; }).length;
@@ -172,6 +174,9 @@
       var s = this.summary(win, slug);
       if (!s) return '';
       var list = this.units(win, slug), mine = this.mineFor(win, slug);
+      /* A ROOM OF THE GUEST'S OWN (002 · W · Owner, 29 Sep 2026): the guest's dedicated room is the whole room, never a count
+         of the standard pool, never a shared room */
+      if (list.length && list.every(function (u) { return u.dedicated; })) return mine ? 'Held for you · your own room' : (s.remainingPlaces > 0 ? 'Your own room · the whole room, for you alone' : 'Sold out');
       if (mine) return 'Held for you · ' + this.unitName(list.filter(function (u) { return u.label === mine.label; })[0] || { kind: 'room', label: mine.label });
       /* a place a party member kept is the viewer's own: it is never counted as gone */
       var kept = this.keptForMe(win, slug);
@@ -213,7 +218,7 @@
       return n > 1 ? 'No room here for the ' + n + ' of you together' : 'Sold out';
     },
     scarce: function (win, slug) { var s = this.summary(win, slug); return !!s && s.free > 0 && s.free <= 2; },
-    unitName: function (u) { return u ? (u.kind === 'property' ? u.name : 'Room ' + u.label) : ''; },
+    unitName: function (u) { return u ? (u.kind === 'property' ? u.name : u.dedicated ? 'Your own room' : 'Room ' + u.label) : ''; },
     /* the category's own name (PRQ-03-03): "Luye Starry Sky Suite · Immersive View", never the last segment of a meta */
     roomName: function (win, slug) {
       var P = window.SIYL_PRICE, at = P && P.locate ? P.locate(win) : null, r = null;
@@ -237,6 +242,7 @@
       var stage = u.key ? U.stageOf(u.key) : null;
       var free = u.free, parts = [];
       var youHoldStage = mineIn || (stage ? !!U.mine(stage) : false);
+      if (u.dedicated) return { names: mineIn ? ['You'] : [], who: mineIn ? 'You' : '', state: mineIn ? 'the whole room is yours' : 'the whole room · for you alone' };
       if (!real.length && !keptMine) return { names: [], who: '', state: 'empty · ' + u.places + (u.places === 1 ? ' place' : ' places') };
       if (u.kind === 'property') parts.push(free + ' of ' + u.places + ' places free');
       else if (free > 0) parts.push(free + (free === 1 ? ' place free' : ' places free'));
@@ -261,6 +267,7 @@
       if (!u) return '';
       var real = u.occupants.filter(function (o) { return !o.placeholder; });
       if (!real.some(function (o) { return o.mine; })) return '';
+      if (u.dedicated) return 'Your own room: the whole room is yours, paid by you alone.';
       var names = real.slice().sort(function (a, b) { return (b.mine ? 1 : 0) - (a.mine ? 1 : 0); }).map(whoOf);
       var H = real.length, K = u.occupants.filter(function (o) { return o.placeholder; }).length, F = u.free;
       var subject = u.kind === 'property' ? 'The Guest House' : this.unitName(u);

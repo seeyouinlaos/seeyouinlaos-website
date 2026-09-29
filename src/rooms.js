@@ -92,7 +92,22 @@ export function unitsOf(key) {
       places: s.occupancy === 1 ? 1 : s.honourOccupancy ? s.occupancy : PLACES,
       reservedFor: null });
   }
+  /* A DEDICATED ROOM (002 · W · Owner, 29 Sep 2026): one more unit of the same category, for one register id only — its own
+     label after the standard pool, its own place count; never the standard pool's */
+  for (const d of s.dedicated || []) out.push({ key, label: d.label, name: 'Room ' + d.label, kind: 'room', places: d.places, reservedFor: null, dedicatedTo: d.contactId, rate: d.rate || null });
   return out;
+}
+/* the units ONE guest may see and take: the guest a dedicated room belongs to sees that room alone (never the standard pool);
+   everyone else — and a view without an identity — the standard pool alone (a dedicated room is nobody else's, not even to count) */
+export function unitsFor(key, identity) {
+  const all = unitsOf(key), cid = identity && identity.contactId;
+  const own = cid ? all.filter((u) => u.dedicatedTo === cid) : [];
+  return own.length ? own : all.filter((u) => !u.dedicatedTo);
+}
+/* the stages in which this register id has a room of their own (the Worker leaves them out of their party's booking there) */
+export function dedicatedStages(contactId) {
+  if (!contactId) return [];
+  return [...new Set(Object.keys(SEED).filter((k) => (SEED[k].dedicated || []).some((d) => d.contactId === contactId)).map(stageOf))];
 }
 export function allUnits() {
   const out = [];
@@ -231,7 +246,7 @@ export class Rooms {
     const names = identity ? await this.firstNames() : {};
     const units = {}, mine = {};
     for (const key of Object.keys(SEED)) {
-      units[key] = unitsOf(key).map((u) => {
+      units[key] = unitsFor(key, identity).map((u) => {
         const here = occ.filter((o) => o.key === key && o.label === u.label);
         const taken = here.length;
         /* THE OCCUPANCY IS VISIBLE (Owner, 19 Sep 2026): every authenticated guest sees who already holds a place — the first
@@ -243,7 +258,7 @@ export class Rooms {
               : { name: shownName(o, names), mine: o.guestId === identity.guestId, party: !!(identity.partyId && o.partyId === identity.partyId), ...(o.guestId === identity.guestId ? { guestId: o.guestId } : {}) }))
           : here.map(() => ({}));
         const elig = !identity ? { ok: false } : mayJoin(u, identity);
-        return { key, label: u.label, name: u.name, kind: u.kind, places: u.places, reservedFor: null,
+        return { key, label: u.label, name: u.name, kind: u.kind, places: u.places, reservedFor: null, ...(u.dedicatedTo ? { dedicated: true, rate: u.rate } : {}),
                  eligible: elig.ok, occupants, taken, free: Math.max(0, u.places - taken), full: taken >= u.places };
       });
     }
@@ -348,8 +363,10 @@ export class Rooms {
           await this.storage.put(this.wlKey(stage, guestId), { invitationId, partyId: identity.partyId || null, name, at: cur && cur.at ? cur.at : new Date().toISOString(), size, wanted });
           return json({ ok: true, waited: stage, ...(await this.view(identity)) });
         }
-        const unit = unitOf(key, label);
-        if (!unit) return json({ ok: false, error: 'unknown room' }, 404);
+        const unit = unitsFor(key, identity).find((u) => u.label === label) || null;
+        /* a dedicated room is its guest's alone, and that guest's room is the dedicated one (002 · W): anyone else asking for it —
+           or its guest asking for a room of the standard pool — is refused, nothing is written */
+        if (!unit) return unitOf(key, label) ? json({ ...(await this.view(identity)), ok: false, error: 'not your room' }, 403) : json({ ok: false, error: 'unknown room' }, 404);
         /* THE COMPLIMENTARY DEADLINE (Owner, 22 Sep 2026): after 30 November 2026 no NEW place in the Guest House may be
            claimed — a place released afterwards is an administrative decision, never a silent reopening. A guest who already
            holds a place there keeps it, and may confirm it again; every paid option stays open. */
@@ -371,7 +388,8 @@ export class Rooms {
         /* PARTY CAPACITY (Owner, 19 Sep 2026 · never partially booked): `need` = the party's size. A party that fits ONE unit
            takes it whole (the members already here and the places kept for them count). A party larger than a unit fills
            this unit and keeps the rest of its places in the other units of the category — or is refused as a whole. */
-        const need = capNeed(identity, stageOf(key), Math.max(1, Math.min(6, parseInt(body && body.need, 10) || 1)));
+        /* a dedicated room takes its one guest and nobody of the party: no place is ever kept there for a party member */
+        const need = unit.dedicatedTo ? 1 : capNeed(identity, stageOf(key), Math.max(1, Math.min(6, parseInt(body && body.need, 10) || 1)));
         const partyHere = identity.partyId ? occ.filter((o) => o.key === key && o.label === label && myParty(o) && o.guestId !== guestId).length : 0;
         const freeForMe = unit.places - others;
         const catUnits = unitsOf(key);
@@ -472,6 +490,8 @@ export class Rooms {
           const key = canonicalKey(String(o.key || '')), label = String(o.label || '').toUpperCase(), guestId = String(o.guestId || '');
           const unit = unitOf(key, label);
           if (!unit || !guestId || !o.invitationId) { refused.push({ ...o, error: 'invalid' }); continue; }
+          /* a dedicated room is assigned to its own guest only (the register id must be named) */
+          if (unit.dedicatedTo && o.contactId !== unit.dedicatedTo) { refused.push({ ...o, error: 'dedicated room' }); continue; }
           const occ = await this.occupancies();
           const others = occ.filter((x) => x.key === key && x.label === label && x.guestId !== guestId).length;
           if (others >= unit.places && !body.force) { refused.push({ ...o, error: 'full' }); continue; }

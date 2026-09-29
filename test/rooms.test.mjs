@@ -61,8 +61,9 @@ test('ROOMS · 1 room = 2 places; 5 rooms = 10 places; units are persistent labe
   /* the current Operations Master (002, 28 Sep 2026): Lijiang the sheet's three rooms — 1 · 1 · 2 rooms, the Viewing Room one
      adult; Hotel Muse Bangkok, the Jatu Room, three rooms of two (the Siam Kempinski is gone) */
   assert.deepEqual(Object.keys(SEED).filter((k) => k.startsWith('ljg/')).map((k) => [k, unitsOf(k).length, unitsOf(k)[0].places]), [['ljg/private-soup-view', 2, 2], ['ljg/view-suite-270', 1, 2], ['ljg/snow-mountain-viewing', 1, 1]]);
-  assert.equal(unitsOf('kempinski/jatu-room').length, 3); assert.deepEqual(unitsOf('kempinski/deluxe-balcony-king'), []);
-  assert.equal(allUnits().length, Object.keys(SEED).reduce((n, k) => n + (SEED[k].unit === 'guest' ? 1 : SEED[k].capacity), 0));
+  /* …plus one dedicated room of one place (002 · W, CON005's employee rate, 29 Sep 2026) — never part of the standard pool */
+  assert.deepEqual(unitsOf('kempinski/jatu-room').map((u) => [u.label, u.places, u.dedicatedTo || null]), [['A', 2, null], ['B', 2, null], ['C', 2, null], ['D', 1, 'CON005']]); assert.deepEqual(unitsOf('kempinski/deluxe-balcony-king'), []);
+  assert.equal(allUnits().length, Object.keys(SEED).reduce((n, k) => n + (SEED[k].unit === 'guest' ? 1 : SEED[k].capacity + (SEED[k].dedicated || []).length), 0), 'a dedicated room (002 · W) is one more unit');
 });
 
 test('ROOMS · nothing is reserved (Owner, 19 Sep 2026): no unit is anyone\'s in advance, mayJoin asks only for an identity, the hosts are ordinary guests, every room of every stay is open to every authenticated guest; nobody without an identity', () => {

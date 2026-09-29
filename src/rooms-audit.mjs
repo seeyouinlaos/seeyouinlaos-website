@@ -43,8 +43,10 @@ const rows = [], blockers = [];
 for (const [key, s] of Object.entries(SEED)) {
   const [win] = key.split('/');
   const units = unitsOf(key);
-  const expectedUnits = s.unit === 'guest' ? 1 : s.capacity;
-  const expectedPlaces = s.unit === 'guest' ? s.capacity : s.capacity * (s.occupancy === 1 ? 1 : s.honourOccupancy ? s.occupancy : PLACES);
+  /* a dedicated room (002 · W) is one more unit of its own place count, beside the standard pool */
+  const ded = s.dedicated || [];
+  const expectedUnits = (s.unit === 'guest' ? 1 : s.capacity) + ded.length;
+  const expectedPlaces = (s.unit === 'guest' ? s.capacity : s.capacity * (s.occupancy === 1 ? 1 : s.honourOccupancy ? s.occupancy : PLACES)) + ded.reduce((n, d) => n + d.places, 0);
   const places = units.reduce((n, u) => n + u.places, 0);
   const occ = plan ? (plan.units[key] || []).reduce((n, u) => n + (u.occupants || []).length, 0) : 0;
   const reservedUnits = units.filter((u) => u.reservedFor), reservedPlaces = reservedUnits.reduce((n, u) => n + u.places, 0);

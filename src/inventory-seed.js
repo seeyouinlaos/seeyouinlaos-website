@@ -103,8 +103,13 @@ export const SEED = {
   /* HOTEL MUSE BANGKOK, AUTOGRAPH COLLECTION (002 · V24: three rooms, V14: two adults — 28 Sep 2026). The Siam Kempinski's
      'kempinski/deluxe-balcony-king' is not offered any more, but a hold stored under it is the SAME hold of this room — read as
      it by the engine (src/legacy-keys.js · Rooms.occupancies), same guest, unit and time, counted once. The stage keeps its id. */
+  /* ONE PRODUCT, TWO POOLS (002 · V / W, 28 Sep 2026): the standard pool is column V — three rooms of two places, for every guest.
+     Column W is ONE more Jatu Room (W24: one room · W14: one guest) at an employee rate, dedicated to one register id (CON005 ·
+     src/gifts.js): that guest sees and takes only this room, the whole room is hers, nobody else sees it or can join it, and it
+     is never counted as the standard pool's availability. It is not a second product: the same key, one more unit. */
   'kempinski/jatu-room':
-    { unit: 'room', capacity: 3, occupancy: 2, held: 0, name: 'Jatu Room', stay: 'Hotel Muse Bangkok, Autograph Collection' }
+    { unit: 'room', capacity: 3, occupancy: 2, held: 0, name: 'Jatu Room', stay: 'Hotel Muse Bangkok, Autograph Collection',
+      dedicated: [{ label: 'D', places: 1, contactId: 'CON005', rate: 'employee' }] }
 };
 
 /* how many units a party of `guests` consumes in this category */
