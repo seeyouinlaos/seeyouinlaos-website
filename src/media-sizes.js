@@ -13,10 +13,6 @@ export const MEDIA_SIZES = {
  "hero-000.mp4": 2245140,
  "kunming-card.mp4": 5834536,
  "lijiang-main-01.mp4": 8373199,
- "lijiang-main-02.mp4": 2669544,
- "lijiang-main-03.mp4": 1487335,
- "lijiang-main-04.mp4": 1097494,
- "lijiang-main-05.mp4": 3141973,
  "vientiane-card.mp4": 2856658,
  "vientiane-journey-card-hevc.mp4": 18900843,
  "vientiane-journey-card.mp4": 24817973

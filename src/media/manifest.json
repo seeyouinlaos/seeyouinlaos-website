@@ -1337,16 +1337,9 @@
      "size": 2669320,
      "modifiedTime": "2026-09-26T14:23:12.637Z",
      "kind": "video",
-     "status": "synced",
-     "asset": "assets/video/lijiang-main-02.mp4",
-     "slots": [
-      {
-       "route": "/destination.html",
-       "role": "destination-clip"
-      }
-     ],
+     "status": "excluded",
      "syncedAt": "2026-09-26T21:00:00Z",
-     "note": "a copy of 015 in the Experiences library",
+     "note": "removed from the website (Owner, 29 Sep 2026): the Lijiang chapter shows ONE film, Main 01 — the Drive folder 015 holds that film alone (this was the Experiences library copy)",
      "duration": 11.4,
      "width": 1280,
      "height": 720,
@@ -1357,7 +1350,8 @@
      "audioBitrate": 46458,
      "videoFrames": 342,
      "audioFrames": 248,
-     "poster": "assets/images/city/004-lijiang-main-02-poster.jpg"
+     "formerAsset": "assets/video/lijiang-main-02.mp4",
+     "formerPoster": "assets/images/city/004-lijiang-main-02-poster.jpg"
     },
     {
      "driveId": "1sv6KlYO8KhK0AXN8BzzNxNEHiQZ4vGXd",
@@ -1367,16 +1361,9 @@
      "size": 1487123,
      "modifiedTime": "2026-09-26T14:23:12.637Z",
      "kind": "video",
-     "status": "synced",
-     "asset": "assets/video/lijiang-main-03.mp4",
-     "slots": [
-      {
-       "route": "/destination.html",
-       "role": "destination-clip"
-      }
-     ],
+     "status": "excluded",
      "syncedAt": "2026-09-26T21:00:00Z",
-     "note": "a copy of 015 in the Experiences library",
+     "note": "removed from the website (Owner, 29 Sep 2026): the Lijiang chapter shows ONE film, Main 01 — the Drive folder 015 holds that film alone (this was the Experiences library copy)",
      "duration": 10.53,
      "width": 1280,
      "height": 720,
@@ -1387,7 +1374,8 @@
      "audioBitrate": 40508,
      "videoFrames": 316,
      "audioFrames": 229,
-     "poster": "assets/images/city/004-lijiang-main-03-poster.jpg"
+     "formerAsset": "assets/video/lijiang-main-03.mp4",
+     "formerPoster": "assets/images/city/004-lijiang-main-03-poster.jpg"
     },
     {
      "driveId": "1B5XtYhOWXKcZh-sLgWSn-gjjMCeQ9kMM",
@@ -1397,16 +1385,9 @@
      "size": 1097270,
      "modifiedTime": "2026-09-26T14:23:12.637Z",
      "kind": "video",
-     "status": "synced",
-     "asset": "assets/video/lijiang-main-04.mp4",
-     "slots": [
-      {
-       "route": "/destination.html",
-       "role": "destination-clip"
-      }
-     ],
+     "status": "excluded",
      "syncedAt": "2026-09-26T21:00:00Z",
-     "note": "a copy of 015 in the Experiences library",
+     "note": "removed from the website (Owner, 29 Sep 2026): the Lijiang chapter shows ONE film, Main 01 — the Drive folder 015 holds that film alone (this was the Experiences library copy)",
      "duration": 10.24,
      "width": 1280,
      "height": 720,
@@ -1417,7 +1398,8 @@
      "audioBitrate": 63279,
      "videoFrames": 307,
      "audioFrames": 223,
-     "poster": "assets/images/city/004-lijiang-main-04-poster.jpg"
+     "formerAsset": "assets/video/lijiang-main-04.mp4",
+     "formerPoster": "assets/images/city/004-lijiang-main-04-poster.jpg"
     },
     {
      "driveId": "1lUNSyMfN9MgRAKS4o5nGs-hHkWLSdrOV",
@@ -1427,16 +1409,9 @@
      "size": 3141749,
      "modifiedTime": "2026-09-26T14:23:12.637Z",
      "kind": "video",
-     "status": "synced",
-     "asset": "assets/video/lijiang-main-05.mp4",
-     "slots": [
-      {
-       "route": "/destination.html",
-       "role": "destination-clip"
-      }
-     ],
+     "status": "excluded",
      "syncedAt": "2026-09-26T21:00:00Z",
-     "note": "a copy of 015 in the Experiences library",
+     "note": "removed from the website (Owner, 29 Sep 2026): the Lijiang chapter shows ONE film, Main 01 — the Drive folder 015 holds that film alone (this was the Experiences library copy)",
      "duration": 10,
      "width": 1280,
      "height": 720,
@@ -1447,7 +1422,8 @@
      "audioBitrate": 43461,
      "videoFrames": 300,
      "audioFrames": 218,
-     "poster": "assets/images/city/004-lijiang-main-05-poster.jpg"
+     "formerAsset": "assets/video/lijiang-main-05.mp4",
+     "formerPoster": "assets/images/city/004-lijiang-main-05-poster.jpg"
     },
     {
      "driveId": "1_OqqEetL0PbR1GVe5ZcImuEYx8lSZZd0",
@@ -8428,16 +8404,11 @@
      "audio": true,
      "audioFrames": 248,
      "audioBitrate": 46458,
-     "status": "synced",
-     "asset": "assets/video/lijiang-main-02.mp4",
-     "slots": [
-      {
-       "route": "/destination.html",
-       "role": "destination-clip"
-      }
-     ],
+     "status": "excluded",
      "syncedAt": "2026-09-26T21:00:00Z",
-     "poster": "assets/images/city/004-lijiang-main-02-poster.jpg"
+     "formerAsset": "assets/video/lijiang-main-02.mp4",
+     "formerPoster": "assets/images/city/004-lijiang-main-02-poster.jpg",
+     "note": "removed from the website (Owner, 29 Sep 2026): the Lijiang chapter shows ONE film, Main 01 — the Drive folder 015 holds that film alone"
     },
     {
      "driveId": "1I2lVnMPv3wn5qE-sMhu-fkD_MZa8dtYP",
@@ -8460,16 +8431,11 @@
      "audio": true,
      "audioFrames": 229,
      "audioBitrate": 40508,
-     "status": "synced",
-     "asset": "assets/video/lijiang-main-03.mp4",
-     "slots": [
-      {
-       "route": "/destination.html",
-       "role": "destination-clip"
-      }
-     ],
+     "status": "excluded",
      "syncedAt": "2026-09-26T21:00:00Z",
-     "poster": "assets/images/city/004-lijiang-main-03-poster.jpg"
+     "formerAsset": "assets/video/lijiang-main-03.mp4",
+     "formerPoster": "assets/images/city/004-lijiang-main-03-poster.jpg",
+     "note": "removed from the website (Owner, 29 Sep 2026): the Lijiang chapter shows ONE film, Main 01 — the Drive folder 015 holds that film alone"
     },
     {
      "driveId": "1yJmPKKeoa6Tm6nPTMKa9o2nHa-ejqJam",
@@ -8492,16 +8458,11 @@
      "audio": true,
      "audioFrames": 223,
      "audioBitrate": 63279,
-     "status": "synced",
-     "asset": "assets/video/lijiang-main-04.mp4",
-     "slots": [
-      {
-       "route": "/destination.html",
-       "role": "destination-clip"
-      }
-     ],
+     "status": "excluded",
      "syncedAt": "2026-09-26T21:00:00Z",
-     "poster": "assets/images/city/004-lijiang-main-04-poster.jpg"
+     "formerAsset": "assets/video/lijiang-main-04.mp4",
+     "formerPoster": "assets/images/city/004-lijiang-main-04-poster.jpg",
+     "note": "removed from the website (Owner, 29 Sep 2026): the Lijiang chapter shows ONE film, Main 01 — the Drive folder 015 holds that film alone"
     },
     {
      "driveId": "1-4K-9tKcrMxVtRP_KblfF9GvCPzzfjN1",
@@ -8524,16 +8485,11 @@
      "audio": true,
      "audioFrames": 218,
      "audioBitrate": 43461,
-     "status": "synced",
-     "asset": "assets/video/lijiang-main-05.mp4",
-     "slots": [
-      {
-       "route": "/destination.html",
-       "role": "destination-clip"
-      }
-     ],
+     "status": "excluded",
      "syncedAt": "2026-09-26T21:00:00Z",
-     "poster": "assets/images/city/004-lijiang-main-05-poster.jpg"
+     "formerAsset": "assets/video/lijiang-main-05.mp4",
+     "formerPoster": "assets/images/city/004-lijiang-main-05-poster.jpg",
+     "note": "removed from the website (Owner, 29 Sep 2026): the Lijiang chapter shows ONE film, Main 01 — the Drive folder 015 holds that film alone"
     },
     {
      "driveId": "1d2qkEv7rNsctHjzhPlSo7INVIYDFUcyp",
@@ -24135,6 +24091,38 @@
   {
    "asset": "assets/images/journey/kempinski-03.jpg",
    "why": "the Siam Kempinski is no longer part of the journey (Owner, 28 Sep 2026): Hotel Muse Bangkok replaces it"
+  },
+  {
+   "asset": "assets/video/lijiang-main-02.mp4",
+   "why": "removed from the website (Owner, 29 Sep 2026): the Lijiang chapter shows ONE film, Main 01 — the Drive folder 015 holds that film alone"
+  },
+  {
+   "asset": "assets/images/city/004-lijiang-main-02-poster.jpg",
+   "why": "the poster of a removed Lijiang film (Owner, 29 Sep 2026)"
+  },
+  {
+   "asset": "assets/video/lijiang-main-03.mp4",
+   "why": "removed from the website (Owner, 29 Sep 2026): the Lijiang chapter shows ONE film, Main 01 — the Drive folder 015 holds that film alone"
+  },
+  {
+   "asset": "assets/images/city/004-lijiang-main-03-poster.jpg",
+   "why": "the poster of a removed Lijiang film (Owner, 29 Sep 2026)"
+  },
+  {
+   "asset": "assets/video/lijiang-main-04.mp4",
+   "why": "removed from the website (Owner, 29 Sep 2026): the Lijiang chapter shows ONE film, Main 01 — the Drive folder 015 holds that film alone"
+  },
+  {
+   "asset": "assets/images/city/004-lijiang-main-04-poster.jpg",
+   "why": "the poster of a removed Lijiang film (Owner, 29 Sep 2026)"
+  },
+  {
+   "asset": "assets/video/lijiang-main-05.mp4",
+   "why": "removed from the website (Owner, 29 Sep 2026): the Lijiang chapter shows ONE film, Main 01 — the Drive folder 015 holds that film alone"
+  },
+  {
+   "asset": "assets/images/city/004-lijiang-main-05-poster.jpg",
+   "why": "the poster of a removed Lijiang film (Owner, 29 Sep 2026)"
   }
  ]
 }
