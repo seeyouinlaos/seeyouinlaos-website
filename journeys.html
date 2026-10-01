@@ -157,7 +157,7 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:26px;margin:40
 <script src="assets/rate-notice.js?v=c13b32c6"></script>
 <script src="assets/shop-menu.js?v=03047fbc"></script>
 <script src="assets/aman.js?v=641d956e"></script>
-<script src="assets/rooms-data.js?v=8b33672c"></script>
+<script src="assets/rooms-data.js?v=b82bd495"></script>
 <script src="assets/stay-media.js?v=5e3c3b23"></script>
 <script src="assets/pricing.js?v=76be7639"></script>
 <script src="assets/stay-plan.js?v=5227fdc4"></script>
@@ -254,7 +254,7 @@ if(q&&r.rate!=null&&q.gift){
    already holds a place in each (the engine's own units: names, places, free places, Full) — the guest joins someone they
    know or takes an empty room; nobody is placed by the website. */
 var href = 'room.html?stay='+sk+'&room='+r.slug;
-if(!img) sub = (sub?sub+' · ':'')+'Photography to follow';
+/* a room without its own photography promises none (Owner, 1 Oct 2026): its tile is the quiet no-photo mark */
 var nm=r.name.replace(/"/g,'&quot;'),open=OPEN[win]===r.slug;
 return '<div class="var vroom'+(open?' open':'')+'" data-room="'+r.slug+'" data-win="'+win+'" data-stay="'+sk+'" data-name="'+nm+'">'+
 '<a class="vt'+(img?'':' none')+'"'+(img?' style="background-image:url('+img+')"':'')+' href="'+href+'" aria-label="Details of '+nm+'"></a>'+
@@ -302,7 +302,7 @@ function paint(){
     /* live availability from the room engine (Owner, 16 Sep 2026): the words of the category, no Choose at 0 */
     var av=(U&&U.ready()&&U.tracked(win,r.slug))?U.label(win,r.slug):'',gone=!!av&&!U.canTake(win,r.slug)&&!on;
     return '<div class="aslide pcard'+(on?' picked':'')+(gone?' gone':'')+'" data-room="'+r.slug+'">'+
-      '<span class="pcimg"'+(img?' style="background-image:url('+img+')"':'')+' aria-hidden="true"></span>'+
+      (img?'<span class="pcimg" style="background-image:url('+img+')" aria-hidden="true"></span>':'')+   /* no photograph of its own: no empty frame (1 Oct 2026) */
       '<div class="pcbody">'+
       ((on||r.role)?'<p class="pceyebrow'+(on?' picked':'')+'">'+(on?(ST.held(chosen)?'Held for you':'Selected'):r.role)+'</p>':'')+
       '<h3 class="pcname">'+(r.property||stay.name)+'</h3>'+

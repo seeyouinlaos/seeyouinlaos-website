@@ -22,7 +22,7 @@
   'use strict';
   var RM = 'assets/images/rooms/';
   var YFJ = 'assets/images/yifangju/';   /* the Yifangju Designer Courtyard, Kunming (Owner Drive 800) */
-  var LJG = 'assets/images/lijiang/', JNY = 'assets/images/journey/';
+
   /* ONE SOURCE MAP for the Bangkok accommodation imagery (Owner, 16 Sep 2026 · image quality quickfix): the hero of the
    * detail page, the card of every rail and overview (Your Journey, the journeys page, "Other rooms at …", THE HOUSES),
    * the gallery — one assignment per property, read everywhere. U Sathorn: the Owner's Drive folder of 16 Sep 2026
@@ -361,13 +361,10 @@
       rooms: [
         { slug: 'snow-mountain-viewing', name: 'Snow Mountain Viewing Room', cat: 'Snow mountain room',
           desc: '50 sq.m. · 1 king bed · 2nd floor',
-          /* the Owner's ruling of 21 Sep 2026: the three room photographs that stood for the house on The Journey (the bedroom
-             towards the valley, the private soup pool, the sitting room and its fireplace towards the mountain) ARE this room —
-             they are its gallery; the peak over the Baisha rooftops is the house's own frame (assets/stay-media.js). */
-          gallery: [
-          [JNY + 'lijiang-01.jpg', 'The room towards the valley'],
-          [JNY + 'lijiang-02.jpg', 'The private soaking pool below Jade Dragon Snow Mountain'],
-          [JNY + 'lijiang-03.jpg', 'The sitting room and the fireplace towards the mountain']],
+          /* NO ROOM PHOTOGRAPHY (Owner, 1 Oct 2026): the Luye Baisha rooms have no authoritative room-media source (no Drive room
+             folder); their former photographs are gone. The room is shown by its words, facts and price alone — never by a frame of
+             The Journey (028) or the Stays card (045). */
+          gallery: [],   /* no authoritative room-media source exists for this room (Owner, 1 Oct 2026): no room photography is shown */
           facts: [['Size', '50 sq.m.'], ['Bed', '1 king bed (2 m)'], ['Occupancy', '2 Adults'], ['Location', '2nd floor']],
           story: 'Fifty square metres facing the peak: a starry-sky terrace, a private hot-spring pool and a fireplace for the cold end of the day.',
           amenities: ['Air conditioning', 'Air purifier', 'Audio equipment', 'Balcony', 'Bathrobe', 'Bathtub or shower', 'Butler service', 'Coffee maker and teapot', 'Electric kettle', 'Fireplace', 'Free Wi-Fi', 'Heating', 'Iron and ironing board', 'Minibar', 'Private hot-spring pool', 'Projector', 'Safe in the room', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa', 'Terrace'],
@@ -377,30 +374,14 @@
         
         { slug: 'private-soup-view', name: 'Snow Mountain Private Soup Viewing Suite', cat: 'Snow mountain suite',
           desc: '88 sq.m. · 1 king bed · 2nd floor',
-          gallery: [
-          [LJG + 'soupview-1.jpg', 'The suite towards the mountain'],
-          [LJG + 'soupview-2.jpg', 'The lounge and the pool'],
-          [LJG + 'soupview-3.jpg', 'The bathroom'],
-          [LJG + 'soupview-4.jpg', 'The washbasin'],
-          [LJG + 'soupview-5.jpg', 'The suite at dawn'],
-          [LJG + 'soupview-6.jpg', 'The soaking pool'],
-          [LJG + 'soupview-7.jpg', 'The living space'],
-          [LJG + 'soupview-8.jpg', 'The terrace']],
+          gallery: [],   /* no authoritative room-media source exists for this room (Owner, 1 Oct 2026): no room photography is shown */
           facts: [['Size', '88 sq.m.'], ['Bed', '1 king bed (2 m)'], ['Occupancy', '2 Adults'], ['Location', '2nd floor']],
           story: 'A nine-metre ultra-wide window, a five-metre private hot-spring pool and a snow-viewing fireplace — 88 sq.m. on the second floor.',
           amenities: ['Air conditioning', 'Air purifier', 'Audio equipment', 'Bathrobe', 'Bathtub or shower', 'Butler service', 'Coffee maker and teapot', 'Electric kettle', 'Fireplace', 'Free Wi-Fi', 'Heating', 'Iron and ironing board', 'Minibar', 'Private hot-spring pool', 'Projector', 'Safe in the room', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa'],
           rate: 116.31, roomRate: 232.62 },   /* 002 · T25 / T26, T27 USD 465.24 the room for the two nights (Owner, 1 Oct 2026) */
         { slug: 'view-suite-270', name: '270° Snow Mountain View Suite', cat: 'Snow mountain suite',
           desc: '70 sq.m. · 1 king bed · 3rd floor',
-          gallery: [
-          [LJG + 'suite270-1.jpg', 'The suite and the tub'],
-          [LJG + 'suite270-2.jpg', 'The bathroom'],
-          [LJG + 'suite270-3.jpg', 'The bed towards the mountain'],
-          [LJG + 'suite270-4.jpg', 'The tub and the peak'],
-          [LJG + 'suite270-5.jpg', 'The suite at dusk'],
-          [LJG + 'suite270-6.jpg', 'The bed and the wardrobe'],
-          [LJG + 'suite270-7.jpg', 'The bed and the tub'],
-          [LJG + 'suite270-8.jpg', 'The fireplace and the peak']],
+          gallery: [],   /* no authoritative room-media source exists for this room (Owner, 1 Oct 2026): no room photography is shown */
           facts: [['Size', '70 sq.m.'], ['Bed', '1 king bed (2 m)'], ['Occupancy', '2 Adults'], ['Location', '3rd floor']],
           story: 'Two hundred and seventy degrees of mountain from the third floor, with a snow-view terrace, a private hot-spring pool and a fireplace.',
           amenities: ['Air conditioning', 'Air purifier', 'Audio equipment', 'Balcony', 'Bathrobe', 'Bathtub or shower', 'Butler service', 'Coffee maker and teapot', 'Electric kettle', 'Fireplace', 'Free Wi-Fi', 'Hair dryer', 'Heating', 'Iron and ironing board', 'Minibar', 'Private hot-spring pool', 'Projector', 'Refrigerator', 'Safe in the room', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa', 'Terrace'],

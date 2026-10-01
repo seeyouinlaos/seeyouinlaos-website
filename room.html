@@ -106,7 +106,7 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:24px;margin:44
 <script src="assets/rate-notice.js?v=c13b32c6"></script>
 <script src="assets/shop-menu.js?v=03047fbc"></script>
 <script src="assets/aman.js?v=641d956e"></script>
-<script src="assets/rooms-data.js?v=8b33672c"></script>
+<script src="assets/rooms-data.js?v=b82bd495"></script>
 <script src="assets/pricing.js?v=76be7639"></script>
 <script src="assets/stay-plan.js?v=5227fdc4"></script>
 <script src="assets/rooms.js?v=2f2ff2ba"></script>
@@ -176,9 +176,7 @@ if (room.gallery.length) {
   if (room.gallery.length > 1) h += '<button class="gn gp" aria-label="Previous photograph">‹</button><button class="gn gx" aria-label="Next photograph">›</button>';
   h += '<span class="gl" id="gl">' + esc(room.gallery[0][1]) + '</span>';
   h += '<span class="gc" id="gc">1 / ' + room.gallery.length + '</span></div>';
-} else {
-  h += '<div class="pend">Photography to follow</div>';
-}
+}   /* a room without its own photography shows none (Owner, 1 Oct 2026): no placeholder, the words and the booking follow the title */
 /* ---- BOOKING FIRST, DETAILS SECOND (Owner, 24 Sep 2026): the room, its amount and its one action — with the rooms of the
  *      category and who already holds a place in them — stand directly under the photographs; the story, the facts, the
  *      amenities and the other rooms follow as optional detail. (Formerly the last block of the page.) ---- */
@@ -279,7 +277,7 @@ if (others.length) {
   h += '<section class="others"><h2>Other rooms at ' + esc(stay.name) + '</h2><div class="oc" id="oc">';
   others.forEach(function (r) {
     var art = window.SIYL_STAY_ART ? SIYL_STAY_ART.card(stayKey, r.slug) : '';
-    var img = art ? '<div class="ph" style="background-image:url(' + art + ')"></div>' : '<div class="ph" style="display:flex;align-items:center;justify-content:center;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#6B6964">Photography to follow</div>';
+    var img = art ? '<div class="ph" style="background-image:url(' + art + ')"></div>' : '';   /* no photograph of its own: the card is its words (1 Oct 2026) */
     h += '<a class="occard" href="room.html?stay=' + stayKey + '&room=' + r.slug + '">' + img +
       '<div class="ot"><p class="oe">' + esc(r.cat) + '</p><p class="on">' + esc(r.name) + '</p>' +
       '<p class="od">' + esc(r.desc) + '</p>' +

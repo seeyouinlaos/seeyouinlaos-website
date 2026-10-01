@@ -21,7 +21,7 @@ test('every active accommodation resolves its frames from its own approved set �
     const ok = A.approved(k); assert.ok(ok.length > 0, k + ' has an approved set');
     for (const p of ok) { assert.ok(A.FOLDERS[k].some((f) => p.startsWith(f)), k + ': ' + p + ' is inside the property\'s own folders'); assert.ok(existsSync(join(ROOT, p)), p + ' is on disk'); }
     assert.ok(A.house(k) && ok.includes(A.house(k)), k + ': the house frame is its own');
-    for (const r of R[k].rooms) { const c = A.card(k, r.slug); assert.ok(c === '' || ok.includes(c), k + '/' + r.slug + ': the card is its own or nothing'); assert.ok(c !== '' , k + '/' + r.slug + ' has a card of its own'); }
+    for (const r of R[k].rooms) { const c = A.card(k, r.slug); assert.ok(c === '' || ok.includes(c), k + '/' + r.slug + ': the card is its own or nothing'); assert.ok(c !== '' || (r.gallery.length === 0 && !r.cardImg), k + '/' + r.slug + ' has a card of its own, or no photography at all'); }
     for (const win of R[k].windows) for (const r of R[k].rooms) { const it = P.items(win.id, r.slug)[0]; if (it) assert.ok(!it.img || ok.includes(it.img), k + '/' + win.id + '/' + r.slug + ': the Bag line\'s frame is the property\'s'); }
   }
 });
@@ -45,7 +45,7 @@ test('LUYE BAISHA · LIJIANG: the property itself, each slot from its own Drive 
   assert.equal(lb.images[0].src, 'assets/images/lijiang/luye-restaurant.jpg', 'the Owner\'s 028 · 001 leads'); assert.deepEqual(plain(M.luyeBaisha.images.map((i) => i.src)), lb.images.map((i) => i.src));
   for (const im of lb.images) { assert.ok(['exterior', 'lobby', 'facilities', 'room', 'suite'].includes(im.kind), im.src + ' is the hotel itself'); assert.doesNotMatch(im.caption, /terrace facing|Jade Dragon/i, 'the mountain terrace stays out'); assert.doesNotMatch(im.src, /snow-mountain-viewing-1|city\//); assert.doesNotMatch(im.caption, /over the Baisha rooftops|village/i); }
   assert.equal(A.house('lijiang'), 'assets/images/lijiang/luye-hotel-at-night.jpg'); assert.equal(R.lijiang.windows[0].bagImg, 'assets/images/lijiang/luye-hotel-at-night.jpg');
-  assert.equal(P.items('ljg', 'snow-mountain-viewing')[0].img, 'assets/images/journey/lijiang-01.jpg', 'the Snow Mountain Viewing Room line carries its bedroom');
+  assert.equal(A.card('lijiang', 'snow-mountain-viewing'), '', 'no room photograph (Owner, 1 Oct 2026)'); assert.equal(P.items('ljg', 'snow-mountain-viewing')[0].img, 'assets/images/lijiang/luye-hotel-at-night.jpg', 'the Bag line shows the house (045 · 001), never a room frame');
   assert.equal(existsSync(join(ROOT, 'assets/images/lijiang/snow-mountain-viewing-1.jpg')), false, 'the mountain frame is retired from the hotel folder');
   for (const f of ['accommodation.html', 'journeys.html', 'your-journey.html', 'room.html', 'cart.html', 'review.html', 'profile.html', 'assets/rooms-data.js', 'assets/stay-media.js', 'assets/pricing.js']) assert.doesNotMatch(src(f).replace(/\/\*[\s\S]*?\*\//g, '').replace(/var NEVER = \/[^\n]*/, ''), /snow-mountain-viewing-1/, f + ' no longer names the peak (except on the never-list)');
   assert.match(src('accommodation.html'), /href="journeys\.html#j-ljg" style="background-image:url\(assets\/images\/lijiang\/luye-hotel-at-night\.jpg\)"/, 'THE HOUSES: 045 · 001, the hotel at night'); assert.match(src('accommodation.html'), /three room categories/);

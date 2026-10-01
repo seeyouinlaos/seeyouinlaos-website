@@ -215,5 +215,5 @@ test('THE REFERENCE GALLERIES · one carousel for the dress references (3:4 card
   const prep = src('assets/prep.css');
   assert.match(prep, /\.p-sum-ticket \{ padding: var\(--s4\) var\(--s5\) var\(--s5\)/); assert.match(prep, /\.p-sum-ticket \{ grid-column: 1 \/ -1; padding: var\(--s5\) var\(--s6\) var\(--s6\); \}/);
   /* Lijiang (the Owner's ruling of 21 Sep 2026): the three room photographs are the Snow Mountain Viewing Room's; the peak over the rooftops is the house's frame (pinned in pricing.test.mjs) */
-  const rd = src('assets/rooms-data.js'); assert.doesNotMatch(rd, /not yet photographed|viewOnly/); assert.match(rd, /\[JNY \+ 'lijiang-03\.jpg', 'The sitting room and the fireplace towards the mountain'\]/);
+  const rd = src('assets/rooms-data.js'); assert.doesNotMatch(rd, /not yet photographed|viewOnly/); assert.doesNotMatch(rd, /lijiang-0[1-3]\.jpg|soupview-|suite270-/, 'the Luye rooms show no photograph without a room-media source (Owner, 1 Oct 2026)');
 });

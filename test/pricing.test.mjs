@@ -814,22 +814,17 @@ test('no rule is ever drawn through the word BLUE', () => {
   assert.match(link, /border-bottom: 1px solid/);
 });
 
-test('Snow Mountain Viewing Room carries its own three room photographs (the Owner\'s ruling of 21 Sep 2026), used by no other room; the house is shown by its own room, never by the peak', () => {
-  const room = R.lijiang.rooms.find((r) => r.slug === 'snow-mountain-viewing');
-  assert.deepEqual(room.gallery.map((g) => g[0]), ['assets/images/journey/lijiang-01.jpg', 'assets/images/journey/lijiang-02.jpg', 'assets/images/journey/lijiang-03.jpg']);
-  assert.ok(room.gallery.every((g) => /room|pool|sitting room/i.test(g[1])), 'every caption names the room'); assert.equal(room.viewOnly, undefined);
-  const everyOther = Object.values(R).flatMap((s) => s.rooms).filter((r) => r !== room).flatMap((r) => r.gallery.map((g) => g[0]));
-  for (const g of room.gallery) assert.ok(!everyOther.includes(g[0]), g[0] + ' not borrowed by another room');
-  assert.ok(!Object.values(R).flatMap((s) => s.rooms).some((r) => r.gallery.some((g) => /snow-mountain-viewing-1/.test(g[0]))), 'the view stands for no room');
-  /* THE ACCOMMODATION MEDIA RULE (Owner, 21 Sep 2026): the house is shown by its own rooms — the peak over the Baisha rooftops is destination photography and stands for no hotel (test/stay-art.test.mjs) */
+test('THE LUYE BAISHA ROOMS HAVE NO PHOTOGRAPHY OF THEIR OWN (Owner, 1 Oct 2026): no authoritative room-media source exists, so no room shows a frame — never one of The Journey (028) or the Stays card (045); the house keeps its own slots', () => {
+  for (const r of R.lijiang.rooms) { assert.deepEqual(r.gallery, [], r.slug); assert.equal(r.cardImg, undefined, r.slug); }
   const media = {}; new Function('window', readFileSync(join(ROOT, 'assets/stay-media.js'), 'utf8'))(media);
-  /* Owner rule, 1 Oct 2026 — the Drive folder is the website slot: The Journey's gallery is 028 in its own order, the Stays card 045 · 001;
-     no room photograph stands for the house */
   const M028 = JSON.parse(readFileSync(join(ROOT, 'src/media/manifest.json'), 'utf8')).collections['028'].items.filter((it) => it.status === 'synced').map((it) => it.asset);
   assert.deepEqual(media.SIYL_STAY_MEDIA.luyeBaisha.images.map((im) => im.src), M028, 'The Journey: exactly the synced 028 frames, in 028 order');
   assert.equal(R.lijiang.windows[0].bagImg, 'assets/images/lijiang/luye-hotel-at-night.jpg');
   assert.match(readFileSync(join(ROOT, 'accommodation.html'), 'utf8'), /href="journeys\.html#j-ljg" style="background-image:url\(assets\/images\/lijiang\/luye-hotel-at-night\.jpg\)"/);
-  assert.equal(P.items('ljg', 'snow-mountain-viewing')[0].img, room.gallery[0][0], 'the bag line carries the room');
+  /* the pages draw no placeholder: no "Photography to follow", no empty frame */
+  const rh = readFileSync(join(ROOT, 'room.html'), 'utf8'), jh = readFileSync(join(ROOT, 'journeys.html'), 'utf8');
+  assert.doesNotMatch(rh, /Photography to follow/, 'the room page draws no placeholder'); assert.doesNotMatch(jh, /\+'Photography to follow'/, 'no room row promises photographs');
+  assert.match(jh, /\(img\?'<span class="pcimg" style="background-image:url\('\+img\+'\)" aria-hidden="true"><\/span>':''\)/);
 });
 
 
