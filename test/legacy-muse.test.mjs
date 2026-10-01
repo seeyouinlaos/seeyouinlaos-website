@@ -236,11 +236,35 @@ test('AN OLDER RECORD (no selection fingerprint) · a trip sent before the live 
     const reg = complete({ channel: 'journey-shop', guestId: 'T901', partyId: 'INV-P901', selections: oldBag, totalUsd: 292, contact: { email: 'older@example.org', phone: '+66 81 000 0000' }, guestRecord: { guests: [{ guestId: 'T901', name: 'Test', source: { fullName: 'Test Example', preferredName: 'Test' } }] } });
     assert.equal((await W.go(W.Old, eo, '/api/register', { invitationId: 'INV-T901', registration: reg, text: 'SEE YOU IN LAOS — JOURNEY SELECTION\nInvitation: INV-T901' })).status, 202);
     /* an older record: the selection fingerprint is not there yet */
-    const rec = JSON.parse(W.m.get('reg:INV-T901').v); delete rec.selectionFingerprint; rec.fingerprintVersion = 2; W.m.set('reg:INV-T901', { v: JSON.stringify(rec) });
     const en = W.envOf(W.New);
     await W.putDraft(W.New, en, { 'siyl.guest': guest, 'siyl.bag': JSON.stringify([oldBag[0], line(67.805)]) });
+    /* only now the record loses its selection fingerprint (a read before the write would keep it again) */
+    const rec = JSON.parse(W.m.get('reg:INV-T901').v); delete rec.selectionFingerprint; rec.fingerprintVersion = 2; W.m.set('reg:INV-T901', { v: JSON.stringify(rec) });
     assert.equal(await W.status(W.New, en), 'sent', 'the corrected rate alone is not a change of the guest\'s');
     await W.putDraft(W.New, en, { 'siyl.guest': guest, 'siyl.bag': JSON.stringify([oldBag[0]]) });
     assert.equal(await W.status(W.New, en), 'changes-not-sent');
   } finally { W.done(); }
+});
+
+test('A ROOM CORRECTED TWICE · a Private Soup View trip sent at either former rate (USD 125 · USD 116.37) without a selection fingerprint stays SENT at today\'s USD 116.31 (Owner, 1 Oct 2026); a real change still counts', { skip: !preTree && 'the pre-release commit is not in this history' }, async () => {
+  for (const sentAt of [116.37, 125]) {
+    const W = await migrationWorld('legacy-soup-' + sentAt);
+    try {
+      const en = W.envOf(W.New);
+      await W.kv.put('contact:INV-T901', JSON.stringify({ invitationId: 'INV-T901', guestId: 'T901', email: 'soup@example.org', phone: '+66 81 000 0000', birthdate: '1990-01-01', nationality: 'Testland', address1: '1 Test Street', postal: '10000', city: 'Testcity', country: 'Testland', at: '2026-09-27T09:00:00.000Z' }));
+      const guest = JSON.stringify({ contact: { email: 'soup@example.org', phone: '+66 81 000 0000' }, guests: { T901: { submitted: {}, profile: { coffeetea: 'Tea', flavor: 'Pandan', drink: 'Water', film: 'Amélie' } } } });
+      const line = (rate) => ({ id: 'ljg', name: 'Luye Baisha · Lijiang', meta: '4 – 6 March 2027 · Snow Mountain Private Soup Viewing Suite', price: Math.round(rate * 2 * 100) / 100, stay: 'lijiang', room: 'private-soup-view', rate, nights: 2, pay: 2, breakfast: 'Breakfast included', qty: 1 });
+      const oldBag = [{ id: 'train', price: 100, qty: 1 }, line(sentAt)];
+      await W.putDraft(W.New, en, { 'siyl.guest': guest, 'siyl.bag': JSON.stringify(oldBag) });
+      const reg = complete({ channel: 'journey-shop', guestId: 'T901', partyId: 'INV-P901', selections: oldBag, totalUsd: 100 + sentAt * 2, contact: { email: 'soup@example.org', phone: '+66 81 000 0000' }, guestRecord: { guests: [{ guestId: 'T901', name: 'Test', source: { fullName: 'Test Example', preferredName: 'Test' } }] } });
+      const r = await W.go(W.New, en, '/api/register', { invitationId: 'INV-T901', registration: reg, text: 'SEE YOU IN LAOS — JOURNEY SELECTION\nInvitation: INV-T901' });
+      assert.equal(r.status, 202, (await r.clone().text()).slice(0, 200));
+      /* the draft changes first (a read before the write would keep the selection fingerprint again), then the record loses it */
+      await W.putDraft(W.New, en, { 'siyl.guest': guest, 'siyl.bag': JSON.stringify([oldBag[0], line(116.31)]) });
+      const rec = JSON.parse(W.m.get('reg:INV-T901').v); delete rec.selectionFingerprint; rec.fingerprintVersion = 2; W.m.set('reg:INV-T901', { v: JSON.stringify(rec) });
+      assert.equal(await W.status(W.New, en), 'sent', 'sent at USD ' + sentAt + ': the corrected rate alone is not a change');
+      await W.putDraft(W.New, en, { 'siyl.guest': guest, 'siyl.bag': JSON.stringify([oldBag[0]]) });
+      assert.equal(await W.status(W.New, en), 'changes-not-sent');
+    } finally { W.done(); }
+  }
 });
