@@ -95,8 +95,9 @@
     prewed:      'heritage-grand-premier',
     wedstay:     'heritage-grand-premier',
     kmg:         'jinri-terrace-double',
-    /* ljg: the 270° Snow Mountain Viewing Room is no longer a product (002, 28 Sep 2026 — the sheet's three rooms): the stage
-       falls to SIYL_PRICE.premium, as the Bangkok stage did (Edit 6) */
+    /* ljg: the Private Soup View, the room the stage has defaulted to since 28 Sep 2026 — named here so the Snow Mountain
+       Viewing Room's corrected one-guest rate (USD 134.14 per night, 1 Oct 2026) does not move the default */
+    ljg:         'private-soup-view',
     kempinski:   'jatu-room'   /* Hotel Muse Bangkok · the Jatu Room, the stage's one room (28 Sep 2026) */
   };
 
@@ -355,8 +356,8 @@
         'Transfers to and from Lijiang station, meals other than breakfast and excursions are your own.'
       ],
       /* THE SHEET'S THREE ROOMS (Owner · 002_Accommodation_Details R · S · T, 28 Sep 2026): the other six categories are no longer
-       * products. S and T: the sheet's per-person rate (S25 = S26 / 2 · T25 = T26 / 2). R (the Snow Mountain Viewing Room) keeps
-       * its rate: the sheet gives it one night (R23) for the stay's two (R17 → R22), so its price cannot be read without a guess. */
+       * products. S and T: the sheet's per-person rate (S25 = S26 / 2 · T25 = T26 / 2). R (the Snow Mountain Viewing Room, one
+       * guest): R27 USD 268.28 for the two nights (R23 = 2), R25 = R26 = USD 134.14 per night (Owner, 1 Oct 2026). */
       rooms: [
         { slug: 'snow-mountain-viewing', name: 'Snow Mountain Viewing Room', cat: 'Snow mountain room',
           desc: '50 sq.m. · 1 king bed · 2nd floor',
@@ -370,7 +371,7 @@
           facts: [['Size', '50 sq.m.'], ['Bed', '1 king bed (2 m)'], ['Occupancy', '2 Adults'], ['Location', '2nd floor']],
           story: 'Fifty square metres facing the peak: a starry-sky terrace, a private hot-spring pool and a fireplace for the cold end of the day.',
           amenities: ['Air conditioning', 'Air purifier', 'Audio equipment', 'Balcony', 'Bathrobe', 'Bathtub or shower', 'Butler service', 'Coffee maker and teapot', 'Electric kettle', 'Fireplace', 'Free Wi-Fi', 'Heating', 'Iron and ironing board', 'Minibar', 'Private hot-spring pool', 'Projector', 'Safe in the room', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa', 'Terrace'],
-          rate: 75 },
+          rate: 134.14, roomRate: 134.14 },
         
         
         

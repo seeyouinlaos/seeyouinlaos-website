@@ -778,7 +778,7 @@ const SOUPHATTRA_NOW = {
 /* THE LIVE 002 CORRECTION (28 Sep 2026) — only to recognise a trip sent before it without a selection fingerprint: [now, before]
    per person per night of every room whose rate the Operations Master corrected. Never an amount the website shows or charges. */
 const RATES_0928 = { 'bkk-stay': { 'u-sathorn-superior-garden': [67.805, 64] }, kmg: { 'elegant-residence': [39.12, 42], 'jinri-family-suite': [42.89, 43] },
-  ljg: { 'private-soup-view': [116.37, 125], 'view-suite-270': [108.435, 120] } };
+  ljg: { 'private-soup-view': [116.37, 125], 'view-suite-270': [108.435, 120], 'snow-mountain-viewing': [134.14, 75] } };   /* R27 USD 268.28 (Owner, 1 Oct 2026) */
 /* the draft as it read before the correction: a corrected Souphattra line back at its former rate — nothing else is touched */
 function beforeCorrection(d) {
   if (!d || !d.keys || typeof d.keys['siyl.bag'] !== 'string') return null;

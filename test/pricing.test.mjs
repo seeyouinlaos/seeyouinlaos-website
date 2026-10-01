@@ -264,7 +264,7 @@ test('F · changing a paid Kunming / Lijiang variant replaces, never duplicates'
   assert.equal(bag.length, 1, 'one Kunming line, not two');
   assert.equal(c(total(bag)), 128.67);        /* USD 42.89 × 3 nights (002 · P25) */
   pick('ljg', 'snow-mountain-viewing').forEach(put);
-  assert.equal(c(total(bag)), 278.67);        /* 128.67 + USD 75 × 2 nights (R · the rate kept: the sheet's nights contradict its dates) */
+  assert.equal(c(total(bag)), 396.95);        /* 128.67 + USD 134.14 × 2 nights = 268.28 (002 · R27, Owner 1 Oct 2026) */
   pick('ljg', 'private-soup-view').forEach(put);
   assert.equal(bag.length, 2);
   assert.equal(c(total(bag)), c(128.67 + 232.74)); /* USD 116.37 × 2 nights (002 · T25) */
@@ -443,7 +443,7 @@ test('the premium room of a stage is the dearest a guest may take — no room is
   assert.equal(P.premium('prewed').slug, 'souphattra-presidential');   /* the Presidential (750) is available until booked, like every room */
   assert.equal(P.premium('wedstay').slug, 'souphattra-presidential');
   assert.equal(P.premium('kmg').slug, 'jinri-family-suite');
-  assert.equal(P.premium('ljg').slug, 'private-soup-view');   /* the sheet's three Lijiang rooms (28 Sep 2026) */
+  assert.equal(P.premium('ljg').slug, 'snow-mountain-viewing');   /* the dearest per guest since 1 Oct 2026 (USD 134.14 a night, one guest) — the stage's default is named in SIYL_FULL_EXPERIENCE */
   assert.equal(P.premium('kempinski').slug, 'jatu-room');     /* Hotel Muse Bangkok's one product (28 Sep 2026) */
   for (const w of ['prewed', 'wedstay', 'kmg', 'ljg']) assert.equal(P.premium(w).reserved, undefined);
 });
@@ -462,8 +462,8 @@ test('Full Experience lines come from the single pricing source, transport inclu
      Vientiane windows since 15 Sep 2026); it is simply no longer what Full
      Experience selects */
   /* Bangkok's dearest room is U Sathorn (192) since the Sathorn Penthouse was deleted (Edit 6, 24 Sep 2026) */
-  assert.equal(Math.round(total(all) * 100) / 100, Math.round((203.42 + 100 + 2190 + 750 + 275 + 128.67 + 105 + 232.74 + 200 + 184.2) * 100) / 100);   /* the Presidential at Package C (1,095 × 2) before the wedding, D1 (750) for it · the live 002, 28 Sep 2026 */
-  assert.equal(Math.round(total(all) * 100) / 100, 4369.03);
+  assert.equal(Math.round(total(all) * 100) / 100, Math.round((203.42 + 100 + 2190 + 750 + 275 + 128.67 + 105 + 268.28 + 200 + 184.2) * 100) / 100);   /* the Presidential at Package C (1,095 × 2) before the wedding, D1 (750) for it · the live 002, 28 Sep 2026 */
+  assert.equal(Math.round(total(all) * 100) / 100, 4404.57);
   assert.notEqual(Math.round(total(all) * 100) / 100, 1904.36);
 });
 

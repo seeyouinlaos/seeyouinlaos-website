@@ -194,7 +194,7 @@ test('the Owner\'s preferred rooms (SIYL_FULL_EXPERIENCE, read by SIYL_PRICE.pre
   /* no preferred Bangkok room since the Sathorn Penthouse was deleted (Edit 6, 24 Sep 2026): that stage falls to SIYL_PRICE.premium */
   assert.deepEqual(FE, { prewed: 'heritage-grand-premier',
     wedstay: 'heritage-grand-premier', kmg: 'jinri-terrace-double',
-    kempinski: 'jatu-room' });   /* ljg: the 270° Viewing Room is no longer a product (28 Sep 2026) — the stage falls to SIYL_PRICE.premium */
+    ljg: 'private-soup-view', kempinski: 'jatu-room' });   /* ljg: named on 1 Oct 2026 so the Snow Mountain Viewing Room's corrected rate does not move the default */
   assert.equal(FE['bkk-stay'], undefined);
   assert.ok(sellable('bkk-stay/u-sathorn-superior-garden') > 0, 'the premium Bangkok fallback has stock behind it');
   for (const [win, slug] of Object.entries(FE)) {
