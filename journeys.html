@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>The Journey · See You In Laos</title><script src="assets/i18n/siyl-i18n.js?v=b4e91de8"></script>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>The Journey · See You In Laos</title><script src="assets/i18n/siyl-i18n.js?v=418cb6c8"></script>
 <script src="assets/invite-early.js?v=fab5da19"></script><style>
 @font-face{font-family:'PP Editorial Old';src:url('assets/fonts/PPEditorialOld-Ultralight.otf') format('opentype');font-weight:200;font-display:swap}
 *{margin:0;padding:0;box-sizing:border-box}body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;font-weight:300;font-size:14px;line-height:1.6}
@@ -563,7 +563,7 @@ if(line){
   var ro=ST.roomOf?ST.roomOf(line):{room:'',words:''},room=ro.room||String(line.meta||'').split(' · ').pop(),words=ST.unitWords(line);
   var tracked=!!(U&&U.ready()&&U.tracked(win,line.room)),D=window.SIYL_DRAFT,ls=D&&D.lineState?D.lineState(line):{key:'selected',label:'Selected'};
   var stateWord=((ls.key==='selected'||ls.key==='unsent')&&tracked&&ST.held(line))?'Held for you':ls.label;   /* the same words as My Trip */
-  act.innerHTML='<p class="stsel"><span class="stsel-l">'+esc0(stateWord)+'</span><b>'+esc0(room)+'</b>'+(words?'<span class="stsel-l" style="margin-top:6px">'+esc0(words)+'</span>':'')+'</p>'+
+  act.innerHTML='<p class="stsel" data-i18n-parts><span class="stsel-l">'+esc0(stateWord)+'</span><b>'+esc0(room)+'</b>'+(words?'<span class="stsel-l" style="margin-top:6px">'+esc0(words)+'</span>':'')+'</p>'+
     '<div class="stbtns">'+
     (ST.held(line)&&tracked?'<a class="stlink" href="your-journey.html?room='+win+'#s-'+win+'">Change room</a>':'')+
     '<button type="button" class="stlink" data-stay-remove="'+win+'">Remove</button></div>'+
@@ -624,8 +624,8 @@ line0.textContent=g.closed&&!mine?'Closed on 30 November 2026 — new places can
 var esc1=function(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;')};
 var sib=!mine&&!line1&&ST.sibling?ST.sibling('guesthouse'):null;
 var h='';
-if(mine){h='<p class="stsel"><span class="stsel-l">Held for you</span><b>A place in the Guest House</b></p><div class="stbtns"><button type="button" class="stlink" data-gh-remove>Remove</button></div>'}
-else if(g.canTake){if(line1)h+='<p class="stsel"><span class="stsel-l">Selected</span><b>A place in the Guest House</b></p>';h+='<button type="button" class="add" data-gh-take aria-expanded="'+(GH_OPEN?'true':'false')+'">'+(GH_OPEN?'Close':'Take a place')+'</button>'+
+if(mine){h='<p class="stsel" data-i18n-parts><span class="stsel-l">Held for you</span><b>A place in the Guest House</b></p><div class="stbtns"><button type="button" class="stlink" data-gh-remove>Remove</button></div>'}
+else if(g.canTake){if(line1)h+='<p class="stsel" data-i18n-parts><span class="stsel-l">Selected</span><b>A place in the Guest House</b></p>';h+='<button type="button" class="add" data-gh-take aria-expanded="'+(GH_OPEN?'true':'false')+'">'+(GH_OPEN?'Close':'Take a place')+'</button>'+
   (GH_OPEN?'<div class="vunits" style="border-top:1px solid #313131;margin-top:12px"><p class="vuh">Who is already in the house</p>'+ST.unitsHtml(g.win,g.slug)+'</div>':'')+
   (sib?'<p class="chgnote" style="margin:12px 0 0">You already hold '+esc1(holdWords(sib))+' for these nights. Taking a place here replaces it; you keep it until the new place is held.</p>':'')}
 h+='<p class="chgnote" role="status" aria-live="polite"'+(GH_SAID?'':' hidden')+'>'+esc1(GH_SAID)+'</p>';

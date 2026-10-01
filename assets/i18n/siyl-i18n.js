@@ -222,6 +222,9 @@
   var INLINE = /^(B|STRONG|EM|I|SPAN|BR|U|SMALL|MARK|SUP|SUB|NOBR)$/;
   function whole(el) {
     if (lang !== 'th' || !BLOCK.test(el.nodeName) || !el.firstChild || !el.firstElementChild) return false;
+    /* a block of separate parts (a label, a name, a state — data-i18n-parts) is never one sentence: each part is translated on its own
+       and keeps its element, so its lines never run together (the Thai "Sent to us" block, 1 Oct 2026) */
+    if (el.hasAttribute('data-i18n-parts')) return false;
     if (el.querySelector('a,button,input,select,textarea,img,svg,[data-i18n-skip]')) return false;
     var kids = el.querySelectorAll('*'); for (var i = 0; i < kids.length; i++) if (!INLINE.test(kids[i].nodeName) || kids[i].children.length) return false;
     var full = CORE.norm(el.textContent); if (!full || !LATIN.test(full)) return false;
