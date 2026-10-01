@@ -23,7 +23,10 @@
   // through a real provider. The key is a Worker secret — `wrangler secret put BREVO_API_KEY`
   // (or RESEND_API_KEY); MAIL_FROM is the validated sender address of that provider account
   // (Brevo account of 16 Sep 2026: the sender validated there is the Owner's own address; replies go to Guest Relations).
-  "vars": { "MAIL_FROM": "suthep.hrg@gmail.com" },
+  // OWNER-INFRA-CHANGE (1 Oct 2026): the sender is the Brevo-authenticated domain address guest.relations@seeyouinlaos.com (DKIM
+  // brevo1/brevo2 · DMARC on seeyouinlaos.com) — a real address, forwarded by Cloudflare Email Routing to the Guest Relations inbox; it
+  // replaced suthep.hrg@gmail.com, which Brevo had to rewrite to an unreceivable @brevosend.com address. Rollback: set it back.
+  "vars": { "MAIL_FROM": "guest.relations@seeyouinlaos.com" },
 
   /* THE DOCUMENT STORE (Owner, 21 Sep 2026 · OWNER-INFRA-CHANGE): ONE private R2
      bucket bound as DOCS — passports and flight documents, written by the guest

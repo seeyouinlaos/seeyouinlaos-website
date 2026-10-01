@@ -27,7 +27,7 @@
       "register/crypto.mjs": "8e045a46b059242cf4de0b3c2e949076e158170621f10ed219df48fd05100cfe"
     }
   },
-  "email": { "provider": "brevo", "endpoint": "https://api.brevo.com/v3/smtp/email", "secret": "BREVO_API_KEY", "from": "suthep.hrg@gmail.com" },
+  "email": { "provider": "brevo", "endpoint": "https://api.brevo.com/v3/smtp/email", "secret": "BREVO_API_KEY", "from": "guest.relations@seeyouinlaos.com", "fromChanged": "2026-10-01 · OWNER-INFRA-CHANGE: authenticated sender domain seeyouinlaos.com in Brevo (DKIM brevo1/brevo2, DMARC p=none) + Cloudflare Email Routing guest.relations@seeyouinlaos.com → guest.relation.seeyouinlaos@gmail.com; previous from suthep.hrg@gmail.com" },
   "guestFacingRoots": ["assets", "src", "journey", "build", "register"],
   "forbiddenHosts": ["github.io", "pages.dev", "trycloudflare.com"]
 }
