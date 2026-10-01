@@ -40,15 +40,15 @@ test('no destination, city, mountain, Highlights, other-hotel, keyword or filena
   assert.match(A.NEVER.source, /city|experiences|hero|venue|temple/, 'the never-list names the destination and Highlights folders');
 });
 
-test('LUYE BAISHA · LIJIANG: the property itself (Owner decision, 26 Sep 2026: house photography now exists) — never a mountain-terrace, view or village frame', () => {
-  const lb = JSON.parse(readFileSync(join(ROOT, 'src/stay-media.json'), 'utf8')).luyeBaisha; assert.equal(lb.lead, undefined, 'no rooms-only lead any more'); assert.match(lb.leadNote, /presents the property itself/); assert.ok(lb.images.length >= 3);
-  assert.equal(lb.images[0].src, 'assets/images/lijiang/luye-hotel-at-night.jpg', 'the Owner\'s 045 · 001 leads: the hotel at night'); assert.deepEqual(plain(M.luyeBaisha.images.map((i) => i.src)), lb.images.map((i) => i.src));
+test('LUYE BAISHA · LIJIANG: the property itself, each slot from its own Drive folder (Owner rule, 1 Oct 2026: The Journey = 028, the Stays card = 045) — never a mountain-terrace, view or village frame', () => {
+  const lb = JSON.parse(readFileSync(join(ROOT, 'src/stay-media.json'), 'utf8')).luyeBaisha; assert.equal(lb.lead, 'facilities', '028 · 001 (the restaurant) leads, the folder\'s own order'); assert.match(lb.leadNote, /Drive 028/); assert.ok(lb.images.every((im) => /Owner Drive 028 · /.test(im.source)), 'every frame is slot 028'); assert.ok(lb.images.length >= 3);
+  assert.equal(lb.images[0].src, 'assets/images/lijiang/luye-restaurant.jpg', 'the Owner\'s 028 · 001 leads'); assert.deepEqual(plain(M.luyeBaisha.images.map((i) => i.src)), lb.images.map((i) => i.src));
   for (const im of lb.images) { assert.ok(['exterior', 'lobby', 'facilities', 'room', 'suite'].includes(im.kind), im.src + ' is the hotel itself'); assert.doesNotMatch(im.caption, /terrace facing|Jade Dragon/i, 'the mountain terrace stays out'); assert.doesNotMatch(im.src, /snow-mountain-viewing-1|city\//); assert.doesNotMatch(im.caption, /over the Baisha rooftops|village/i); }
-  assert.equal(A.house('lijiang'), 'assets/images/lijiang/view270-1.jpg'); assert.equal(R.lijiang.windows[0].bagImg, 'assets/images/lijiang/view270-1.jpg');
+  assert.equal(A.house('lijiang'), 'assets/images/lijiang/luye-hotel-at-night.jpg'); assert.equal(R.lijiang.windows[0].bagImg, 'assets/images/lijiang/luye-hotel-at-night.jpg');
   assert.equal(P.items('ljg', 'snow-mountain-viewing')[0].img, 'assets/images/journey/lijiang-01.jpg', 'the Snow Mountain Viewing Room line carries its bedroom');
   assert.equal(existsSync(join(ROOT, 'assets/images/lijiang/snow-mountain-viewing-1.jpg')), false, 'the mountain frame is retired from the hotel folder');
   for (const f of ['accommodation.html', 'journeys.html', 'your-journey.html', 'room.html', 'cart.html', 'review.html', 'profile.html', 'assets/rooms-data.js', 'assets/stay-media.js', 'assets/pricing.js']) assert.doesNotMatch(src(f).replace(/\/\*[\s\S]*?\*\//g, '').replace(/var NEVER = \/[^\n]*/, ''), /snow-mountain-viewing-1/, f + ' no longer names the peak (except on the never-list)');
-  assert.match(src('accommodation.html'), /href="journeys\.html#j-ljg" style="background-image:url\(assets\/images\/lijiang\/view270-1\.jpg\)"/, 'THE HOUSES: the room at dusk');
+  assert.match(src('accommodation.html'), /href="journeys\.html#j-ljg" style="background-image:url\(assets\/images\/lijiang\/luye-hotel-at-night\.jpg\)"/, 'THE HOUSES: 045 · 001, the hotel at night'); assert.match(src('accommodation.html'), /three room categories/);
 });
 
 test('every surface reads the one resolver; THE HOUSES\' static cards are each their property\'s own frame', () => {

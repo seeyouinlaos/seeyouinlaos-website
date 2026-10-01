@@ -823,11 +823,12 @@ test('Snow Mountain Viewing Room carries its own three room photographs (the Own
   assert.ok(!Object.values(R).flatMap((s) => s.rooms).some((r) => r.gallery.some((g) => /snow-mountain-viewing-1/.test(g[0]))), 'the view stands for no room');
   /* THE ACCOMMODATION MEDIA RULE (Owner, 21 Sep 2026): the house is shown by its own rooms — the peak over the Baisha rooftops is destination photography and stands for no hotel (test/stay-art.test.mjs) */
   const media = {}; new Function('window', readFileSync(join(ROOT, 'assets/stay-media.js'), 'utf8'))(media);
-  /* Owner decision, 26 Sep 2026: the house is now photographed — the gallery leads with the hotel itself (045 · 001) */
-  assert.equal(media.SIYL_STAY_MEDIA.luyeBaisha.images[0].src, 'assets/images/lijiang/luye-hotel-at-night.jpg', 'the house on The Journey: the hotel at night');
-  assert.ok(media.SIYL_STAY_MEDIA.luyeBaisha.images.some((im) => im.src === 'assets/images/lijiang/view270-1.jpg'), 'its own room at dusk stays in the gallery');
-  assert.equal(R.lijiang.windows[0].bagImg, 'assets/images/lijiang/view270-1.jpg');
-  assert.match(readFileSync(join(ROOT, 'accommodation.html'), 'utf8'), /href="journeys\.html#j-ljg" style="background-image:url\(assets\/images\/lijiang\/view270-1\.jpg\)"/);
+  /* Owner rule, 1 Oct 2026 — the Drive folder is the website slot: The Journey's gallery is 028 in its own order, the Stays card 045 · 001;
+     no room photograph stands for the house */
+  const M028 = JSON.parse(readFileSync(join(ROOT, 'src/media/manifest.json'), 'utf8')).collections['028'].items.filter((it) => it.status === 'synced').map((it) => it.asset);
+  assert.deepEqual(media.SIYL_STAY_MEDIA.luyeBaisha.images.map((im) => im.src), M028, 'The Journey: exactly the synced 028 frames, in 028 order');
+  assert.equal(R.lijiang.windows[0].bagImg, 'assets/images/lijiang/luye-hotel-at-night.jpg');
+  assert.match(readFileSync(join(ROOT, 'accommodation.html'), 'utf8'), /href="journeys\.html#j-ljg" style="background-image:url\(assets\/images\/lijiang\/luye-hotel-at-night\.jpg\)"/);
   assert.equal(P.items('ljg', 'snow-mountain-viewing')[0].img, room.gallery[0][0], 'the bag line carries the room');
 });
 

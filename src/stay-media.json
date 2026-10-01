@@ -320,97 +320,63 @@
   "city": "Lijiang",
   "images": [
    {
-    "src": "assets/images/lijiang/luye-hotel-at-night.jpg",
-    "kind": "exterior",
-    "caption": "The hotel at night, its rooms lit",
-    "source": "Owner Drive 045 · 001 - Luye Baisha · Lijiang (Owner decision, 26 Sep 2026)"
-   },
-   {
-    "src": "assets/images/lijiang/luye-lobby.jpg",
-    "kind": "lobby",
-    "caption": "The lobby and its windows to the mountain",
-    "source": "Owner Drive 045 · 002 - Luye Baisha · Lijiang (Owner decision, 26 Sep 2026)"
-   },
-   {
-    "src": "assets/images/lijiang/luye-lounge-lantern.jpg",
-    "kind": "lobby",
-    "caption": "The lounge beneath the lantern",
-    "source": "Owner Drive 045 · 003 - Luye Baisha · Lijiang (Owner decision, 26 Sep 2026)"
-   },
-   {
-    "src": "assets/images/lijiang/luye-fireside-painting.jpg",
+    "src": "assets/images/lijiang/luye-restaurant.jpg",
     "kind": "facilities",
-    "caption": "A fireside lounge with a painted wall",
-    "source": "Owner Drive 045 · 004 - Luye Baisha · Lijiang (Owner decision, 26 Sep 2026)"
-   },
-   {
-    "src": "assets/images/lijiang/luye-fireside-lounge.jpg",
-    "kind": "facilities",
-    "caption": "The fireside lounge",
-    "source": "Owner Drive 045 · 005 - Luye Baisha · Lijiang (Owner decision, 26 Sep 2026)"
-   },
-   {
-    "src": "assets/images/lijiang/luye-fireside-mountain.jpg",
-    "kind": "facilities",
-    "caption": "A fireside lounge before the mountain",
-    "source": "Owner Drive 045 · 006 - Luye Baisha · Lijiang (Owner decision, 26 Sep 2026)"
+    "caption": "The restaurant",
+    "source": "Owner Drive 028 · 001 - Luye Baisha · Lijiang (the Journey slot, Owner rule: the Drive folder is the website slot — 1 Oct 2026)"
    },
    {
     "src": "assets/images/lijiang/luye-lounge-fire.jpg",
     "kind": "lobby",
     "caption": "The lounge by the fire",
-    "source": "Owner Drive 045 · 007 - Luye Baisha · Lijiang (Owner decision, 26 Sep 2026)"
+    "source": "Owner Drive 028 · 002 - Luye Baisha · Lijiang (the Journey slot, Owner rule: the Drive folder is the website slot — 1 Oct 2026)"
+   },
+   {
+    "src": "assets/images/lijiang/luye-fireside-painting.jpg",
+    "kind": "facilities",
+    "caption": "A fireside lounge with a painted wall",
+    "source": "Owner Drive 028 · 004 - Luye Baisha · Lijiang (the Journey slot, Owner rule: the Drive folder is the website slot — 1 Oct 2026)"
+   },
+   {
+    "src": "assets/images/lijiang/luye-fireside-lounge.jpg",
+    "kind": "facilities",
+    "caption": "The fireside lounge",
+    "source": "Owner Drive 028 · 005 - Luye Baisha · Lijiang (the Journey slot, Owner rule: the Drive folder is the website slot — 1 Oct 2026)"
+   },
+   {
+    "src": "assets/images/lijiang/luye-fireside-mountain.jpg",
+    "kind": "facilities",
+    "caption": "A fireside lounge before the mountain",
+    "source": "Owner Drive 028 · 006 - Luye Baisha · Lijiang (the Journey slot, Owner rule: the Drive folder is the website slot — 1 Oct 2026)"
+   },
+   {
+    "src": "assets/images/lijiang/luye-lounge-lantern.jpg",
+    "kind": "lobby",
+    "caption": "The lounge beneath the lantern",
+    "source": "Owner Drive 028 · 007 - Luye Baisha · Lijiang (the Journey slot, Owner rule: the Drive folder is the website slot — 1 Oct 2026)"
+   },
+   {
+    "src": "assets/images/lijiang/luye-lobby.jpg",
+    "kind": "lobby",
+    "caption": "The lobby and its windows to the mountain",
+    "source": "Owner Drive 028 · 008 - Luye Baisha · Lijiang (the Journey slot, Owner rule: the Drive folder is the website slot — 1 Oct 2026)"
+   },
+   {
+    "src": "assets/images/lijiang/luye-hotel-at-night.jpg",
+    "kind": "exterior",
+    "caption": "The hotel at night, its rooms lit",
+    "source": "Owner Drive 028 · 009 - Luye Baisha · Lijiang (the Journey slot, Owner rule: the Drive folder is the website slot — 1 Oct 2026)"
    },
    {
     "src": "assets/images/lijiang/luye-room-fireplace.jpg",
     "kind": "room",
     "caption": "A room with its own fireplace",
-    "source": "Owner Drive 045 · 008 - Luye Baisha · Lijiang (Owner decision, 26 Sep 2026)"
-   },
-   {
-    "src": "assets/images/lijiang/luye-restaurant.jpg",
-    "kind": "facilities",
-    "caption": "The restaurant",
-    "source": "Owner Drive 045 · 009 - Luye Baisha · Lijiang (Owner decision, 26 Sep 2026)"
-   },
-   {
-    "src": "assets/images/lijiang/view270-1.jpg",
-    "kind": "room",
-    "caption": "The 270° Snow Mountain Viewing room at dusk",
-    "source": "Owner Drive 024 - Hotel - Luye Baisha Lijiang"
-   },
-   {
-    "src": "assets/images/journey/lijiang-01.jpg",
-    "kind": "room",
-    "caption": "The Snow Mountain Viewing Room towards the valley",
-    "source": "Owner Drive 024 - Hotel - Luye Baisha Lijiang"
-   },
-   {
-    "src": "assets/images/lijiang/courtyard-2.jpg",
-    "kind": "room",
-    "caption": "The private courtyard room",
-    "source": "Owner Drive 024 - Hotel - Luye Baisha Lijiang"
-   },
-   {
-    "src": "assets/images/lijiang/souppool-1.jpg",
-    "kind": "room",
-    "caption": "The room with the private hot-spring pool",
-    "source": "Owner Drive 024 - Hotel - Luye Baisha Lijiang"
-   },
-   {
-    "src": "assets/images/lijiang/starry-1.jpg",
-    "kind": "suite",
-    "caption": "The Starry Sky suite",
-    "source": "Owner Drive 024 - Hotel - Luye Baisha Lijiang"
-   },
-   {
-    "src": "assets/images/journey/lijiang-03.jpg",
-    "kind": "room",
-    "caption": "The sitting room and the fireplace",
-    "source": "Owner Drive 024 - Hotel - Luye Baisha Lijiang"
+    "source": "Owner Drive 028 · 010 - Luye Baisha · Lijiang (the Journey slot, Owner rule: the Drive folder is the website slot — 1 Oct 2026)"
    }
   ],
-  "leadNote": "Owner decision, 26 Sep 2026: the gallery presents the property itself in the Owner's numbered order (045 · 001–009); the mountain-terrace frame (010) stays out"
+  "leadNote": "Owner rule (1 Oct 2026): The Journey's Luye Baisha gallery is its own slot, Drive 028, in that folder's numbered order (001–010, the mountain terrace 003 excluded); the Stays card is slot 045. No room photograph stands for the house.",
+  "lead": "facilities",
+  "leadWhy": "028 · 001 leads: the Owner's own numbering of the Journey slot"
  },
  "hotelMuse": {
   "name": "Hotel Muse Bangkok, Autograph Collection",

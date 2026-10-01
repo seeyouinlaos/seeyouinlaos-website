@@ -11560,7 +11560,7 @@
       }
      ],
      "syncedAt": "2026-09-26T21:00:00Z",
-     "note": "the same house photograph as 045 (fingerprint 0 bits)",
+     "note": "The Journey's Luye Baisha gallery (slot 028, in this folder's order); the same photograph as 045 by fingerprint — each slot keeps its own",
      "vision": {
       "faces": [],
       "salient": {
@@ -11599,7 +11599,7 @@
       }
      ],
      "syncedAt": "2026-09-26T21:00:00Z",
-     "note": "the same house photograph as 045 (fingerprint 0 bits)",
+     "note": "The Journey's Luye Baisha gallery (slot 028, in this folder's order); the same photograph as 045 by fingerprint — each slot keeps its own",
      "vision": {
       "faces": [],
       "salient": {
@@ -11656,7 +11656,7 @@
       }
      ],
      "syncedAt": "2026-09-26T21:00:00Z",
-     "note": "the same house photograph as 045 (fingerprint 0 bits)",
+     "note": "The Journey's Luye Baisha gallery (slot 028, in this folder's order); the same photograph as 045 by fingerprint — each slot keeps its own",
      "vision": {
       "faces": [],
       "salient": {
@@ -11695,7 +11695,7 @@
       }
      ],
      "syncedAt": "2026-09-26T21:00:00Z",
-     "note": "the same house photograph as 045 (fingerprint 0 bits)",
+     "note": "The Journey's Luye Baisha gallery (slot 028, in this folder's order); the same photograph as 045 by fingerprint — each slot keeps its own",
      "vision": {
       "faces": [],
       "salient": {
@@ -11734,7 +11734,7 @@
       }
      ],
      "syncedAt": "2026-09-26T21:00:00Z",
-     "note": "the same house photograph as 045 (fingerprint 0 bits)",
+     "note": "The Journey's Luye Baisha gallery (slot 028, in this folder's order); the same photograph as 045 by fingerprint — each slot keeps its own",
      "vision": {
       "faces": [],
       "salient": {
@@ -11773,7 +11773,7 @@
       }
      ],
      "syncedAt": "2026-09-26T21:00:00Z",
-     "note": "the same house photograph as 045 (fingerprint 0 bits)",
+     "note": "The Journey's Luye Baisha gallery (slot 028, in this folder's order); the same photograph as 045 by fingerprint — each slot keeps its own",
      "vision": {
       "faces": [],
       "salient": {
@@ -11812,7 +11812,7 @@
       }
      ],
      "syncedAt": "2026-09-26T21:00:00Z",
-     "note": "the same house photograph as 045 (fingerprint 0 bits)",
+     "note": "The Journey's Luye Baisha gallery (slot 028, in this folder's order); the same photograph as 045 by fingerprint — each slot keeps its own",
      "vision": {
       "faces": [],
       "salient": {
@@ -11851,7 +11851,7 @@
       }
      ],
      "syncedAt": "2026-09-26T21:00:00Z",
-     "note": "the same house photograph as 045 (fingerprint 0 bits)",
+     "note": "The Journey's Luye Baisha gallery (slot 028, in this folder's order); the same photograph as 045 by fingerprint — each slot keeps its own",
      "vision": {
       "faces": [],
       "salient": {
@@ -11887,7 +11887,7 @@
      "h": 683,
      "aspect": 1.499,
      "status": "synced",
-     "note": "the same house photograph as 045 (fingerprint 0 bits)",
+     "note": "The Journey's Luye Baisha gallery (slot 028, in this folder's order); the same photograph as 045 by fingerprint — each slot keeps its own",
      "asset": "assets/images/lijiang/luye-room-fireplace.jpg",
      "match": {
       "bits": 0
@@ -14129,7 +14129,7 @@
   },
   "045": {
    "title": "045 - Stays - The Houses - Lyue Baisha",
-   "place": "",
+   "place": "Stays · The Houses — the Luye Baisha card (accommodation.html)",
    "slot": {},
    "role": null,
    "order": "title-ascending",
@@ -14150,9 +14150,8 @@
      "asset": "assets/images/lijiang/luye-hotel-at-night.jpg",
      "slots": [
       {
-       "route": "/journeys.html",
-       "role": "product-gallery",
-       "focal": "50% 50%"
+       "route": "/accommodation.html",
+       "role": "card"
       }
      ],
      "vision": {
@@ -14175,6 +14174,13 @@
        "by": "eye · crop sheet of every class",
        "at": "2026-09-26",
        "focal": "50% 50%"
+      },
+      "/accommodation.html card": {
+       "verdict": "kept",
+       "why": "the lit grid of rooms across the facade stays whole at the centre; only the two outer bays and the empty sky leave the 5 : 4 card",
+       "by": "eye · the source frame against the card ratio",
+       "at": "2026-10-01",
+       "focal": "50% 50%"
       }
      }
     },
@@ -14192,13 +14198,7 @@
      "w": 1024,
      "h": 683,
      "asset": "assets/images/lijiang/luye-lobby.jpg",
-     "slots": [
-      {
-       "route": "/journeys.html",
-       "role": "product-gallery",
-       "focal": "50% 50%"
-      }
-     ],
+     "slots": [],
      "vision": {
       "faces": [],
       "salient": {
@@ -14211,7 +14211,8 @@
      "display": {
       "w": 1024,
       "h": 683
-     }
+     },
+     "note": "the Stays slot shows one frame, its card (045 · 001); The Journey's gallery is its own slot, 028 (Owner rule, 1 Oct 2026)"
     },
     {
      "driveId": "1864bUN8YvoqwfPxYJDbnpjcTLugDxQaz",
@@ -14227,13 +14228,7 @@
      "w": 1024,
      "h": 683,
      "asset": "assets/images/lijiang/luye-lounge-lantern.jpg",
-     "slots": [
-      {
-       "route": "/journeys.html",
-       "role": "product-gallery",
-       "focal": "50% 50%"
-      }
-     ],
+     "slots": [],
      "vision": {
       "faces": [],
       "salient": {
@@ -14246,7 +14241,8 @@
      "display": {
       "w": 1024,
       "h": 683
-     }
+     },
+     "note": "the Stays slot shows one frame, its card (045 · 001); The Journey's gallery is its own slot, 028 (Owner rule, 1 Oct 2026)"
     },
     {
      "driveId": "1aqjgx2VLlQIJjiSM6fbR3gV53uUpVU4t",
@@ -14262,13 +14258,7 @@
      "w": 1024,
      "h": 683,
      "asset": "assets/images/lijiang/luye-fireside-painting.jpg",
-     "slots": [
-      {
-       "route": "/journeys.html",
-       "role": "product-gallery",
-       "focal": "50% 50%"
-      }
-     ],
+     "slots": [],
      "vision": {
       "faces": [],
       "salient": {
@@ -14281,7 +14271,8 @@
      "display": {
       "w": 1024,
       "h": 683
-     }
+     },
+     "note": "the Stays slot shows one frame, its card (045 · 001); The Journey's gallery is its own slot, 028 (Owner rule, 1 Oct 2026)"
     },
     {
      "driveId": "1hVimu8tdd9cu7BawPb-5Es4zddwwpCDc",
@@ -14297,13 +14288,7 @@
      "w": 1024,
      "h": 682,
      "asset": "assets/images/lijiang/luye-fireside-lounge.jpg",
-     "slots": [
-      {
-       "route": "/journeys.html",
-       "role": "product-gallery",
-       "focal": "50% 50%"
-      }
-     ],
+     "slots": [],
      "vision": {
       "faces": [],
       "salient": {
@@ -14316,7 +14301,8 @@
      "display": {
       "w": 1024,
       "h": 682
-     }
+     },
+     "note": "the Stays slot shows one frame, its card (045 · 001); The Journey's gallery is its own slot, 028 (Owner rule, 1 Oct 2026)"
     },
     {
      "driveId": "1KjjOUNBnEbfy3717SEKowU65-MXXgjjy",
@@ -14332,13 +14318,7 @@
      "w": 1024,
      "h": 683,
      "asset": "assets/images/lijiang/luye-fireside-mountain.jpg",
-     "slots": [
-      {
-       "route": "/journeys.html",
-       "role": "product-gallery",
-       "focal": "50% 50%"
-      }
-     ],
+     "slots": [],
      "vision": {
       "faces": [],
       "salient": {
@@ -14351,7 +14331,8 @@
      "display": {
       "w": 1024,
       "h": 683
-     }
+     },
+     "note": "the Stays slot shows one frame, its card (045 · 001); The Journey's gallery is its own slot, 028 (Owner rule, 1 Oct 2026)"
     },
     {
      "driveId": "1DWiUxr5ss9k13iACOtKsAW9MCvm6x6Lw",
@@ -14367,13 +14348,7 @@
      "w": 1024,
      "h": 683,
      "asset": "assets/images/lijiang/luye-lounge-fire.jpg",
-     "slots": [
-      {
-       "route": "/journeys.html",
-       "role": "product-gallery",
-       "focal": "50% 50%"
-      }
-     ],
+     "slots": [],
      "vision": {
       "faces": [],
       "salient": {
@@ -14386,7 +14361,8 @@
      "display": {
       "w": 1024,
       "h": 683
-     }
+     },
+     "note": "the Stays slot shows one frame, its card (045 · 001); The Journey's gallery is its own slot, 028 (Owner rule, 1 Oct 2026)"
     },
     {
      "driveId": "1YJF6tPuy_5ixAtJ8kEecNqAaByN3NlFg",
@@ -14398,13 +14374,7 @@
      "kind": "image",
      "status": "synced",
      "asset": "assets/images/lijiang/luye-room-fireplace.jpg",
-     "slots": [
-      {
-       "route": "/journeys.html",
-       "role": "product-gallery",
-       "focal": "50% 50%"
-      }
-     ],
+     "slots": [],
      "syncedAt": "2026-09-26T21:00:00Z",
      "how": "published",
      "w": 1024,
@@ -14421,7 +14391,8 @@
        "w": 0.8326,
        "h": 0.6882
       }
-     }
+     },
+     "note": "the Stays slot shows one frame, its card (045 · 001); The Journey's gallery is its own slot, 028 (Owner rule, 1 Oct 2026)"
     },
     {
      "driveId": "1-WGKaW8IANLzv6cCn0HoiDhwuAUIjbcO",
@@ -14437,13 +14408,7 @@
      "w": 1024,
      "h": 683,
      "asset": "assets/images/lijiang/luye-restaurant.jpg",
-     "slots": [
-      {
-       "route": "/journeys.html",
-       "role": "product-gallery",
-       "focal": "50% 50%"
-      }
-     ],
+     "slots": [],
      "vision": {
       "faces": [],
       "salient": {
@@ -14456,7 +14421,8 @@
      "display": {
       "w": 1024,
       "h": 683
-     }
+     },
+     "note": "the Stays slot shows one frame, its card (045 · 001); The Journey's gallery is its own slot, 028 (Owner rule, 1 Oct 2026)"
     },
     {
      "driveId": "1BUfKybR_--IiaawMjeKse6tZkcFUyE70",
@@ -24123,6 +24089,18 @@
   {
    "asset": "assets/images/city/004-lijiang-main-05-poster.jpg",
    "why": "the poster of a removed Lijiang film (Owner, 29 Sep 2026)"
+  },
+  {
+   "asset": "assets/images/lijiang/view270-1.jpg",
+   "why": "a former Luye Baisha frame with no current Drive slot: The Journey's gallery is 028, the Stays card 045 (Owner rule, 1 Oct 2026)"
+  },
+  {
+   "asset": "assets/images/lijiang/souppool-1.jpg",
+   "why": "a former Luye Baisha frame with no current Drive slot: The Journey's gallery is 028, the Stays card 045 (Owner rule, 1 Oct 2026)"
+  },
+  {
+   "asset": "assets/images/lijiang/starry-1.jpg",
+   "why": "a former Luye Baisha frame with no current Drive slot: The Journey's gallery is 028, the Stays card 045 (Owner rule, 1 Oct 2026)"
   }
  ]
 }
