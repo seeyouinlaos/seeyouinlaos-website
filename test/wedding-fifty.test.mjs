@@ -325,3 +325,84 @@ test('FORTY-EIGHT GUEST CHAIRS, NEVER MORE · the 48th chair is the last a guest
   for (const id of ['C-L-10-01', 'C-L-10-02']) assert.equal((await call(l, 'select', { invitationId: BEN.invitationId, guestId: BEN.guestId, event: 'ceremony', seatId: id }, { as: BEN })).status, 404, id + ' never opens');
   assert.match(src('src/seating.js'), /the ceremony is full/, 'and a defensive cap refuses a 49th new hold whatever the grid');
 });
+
+/* ------------------------------------------------------------------------------------------------ THE CANONICAL JOINED UNION (Owner, 2 Oct 2026) */
+/* JOINED = the joining cohort (a sent, joining trip · the couple) ∪ every holder of an active Vow Ceremony or Wedding Dinner seat —
+   by the register's guest id, each person once; nothing stored, nothing written; the ledger behind the Worker is the real one */
+async function unionHarness(setupKv, setupSeats) {
+  const w = (await import('../src/worker.js')).default;
+  const ada = await bearerOf('demo-union-ada');
+  const entries = { [await authIdOf(ada)]: { i: 'INV-G101', g: 'G101', p: 'INV-101' } };
+  for (const g of ['G102', 'G103', 'G104', 'G105', 'G106', 'G107']) entries[g.repeat(16)] = { i: 'INV-' + g, g, p: 'INV-' + g };
+  entries['a'.repeat(64)] = { i: 'INV-G048', g: 'G048', p: 'INV-001', h: 1, r: 'B' }; entries['b'.repeat(64)] = { i: 'INV-G049', g: 'G049', p: 'INV-001', h: 1, r: 'G' };
+  entries['c'.repeat(64)] = { i: 'INV-G049', g: 'G049', p: 'INV-001', h: 1, r: 'G' };   /* a second index entry for the Groom (a rotated code) */
+  const l = ledger(); assert.equal((await call(l, 'config', GRID, { gr: true })).ok, true); await call(l, 'state', { open: true }, { gr: true });
+  const hold = (event, seatId, g, name) => l.st.m.set('hold:' + event + ':' + seatId, { invitationId: 'INV-' + g, guestId: g, partyId: 'INV-' + g, name: name || '', at: '2026-09-25T10:00:00.000Z', state: 'held' });
+  setupSeats(hold, l);
+  const before = JSON.stringify([...l.st.m.entries()]);
+  const store = kv(); let writes = 0; const put0 = store.put; store.put = async (...a) => { writes++; return put0(...a); };
+  setupKv((k, v) => store.m.set(k, { v }));
+  const seen = [];
+  const env = { REG_KV: store, ASSETS: { fetch: async (r) => (new URL(r.url).pathname === '/register/auth-index.json' ? new Response(JSON.stringify({ v: 2, entries })) : new Response('no', { status: 404 })) },
+    SEATING: { idFromName: () => 'seating', get: () => ({ fetch: async (req) => { seen.push([req.method, new URL(req.url).pathname]); return l.fetch(req); } }) } };
+  const d = await (await w.fetch(new Request('https://seeyouinlaos-website.suthep-hrg.workers.dev/api/pulse', { headers: { 'x-siyl-auth': ada } }), env)).json();
+  return { d, writes, seen, unchanged: JSON.stringify([...l.st.m.entries()]) === before, l };
+}
+const UNION_KV = (put) => {
+  put('reg:INV-G101', rec('INV-G101', 'G101', { name: 'Ada' }));                                   /* joined, no seat */
+  put('reg:INV-G104', rec('INV-G104', 'G104', { name: 'Dora' }));                                  /* joined and seated */
+  put('reg:INV-G107', rec('INV-G107', 'G107', { name: 'Gus', scope: { none: true } }));           /* declined, no seat */
+};
+const UNION_SEATS = (hold) => {
+  hold('ceremony', 'C-R-02-01', 'G102', 'Ben');                                                     /* a ceremony seat only */
+  hold('dinner', 'D-T-03', 'G103', 'Cleo');                                                        /* a dinner seat only */
+  hold('ceremony', 'C-L-01-01', 'G104', 'Dora'); hold('dinner', 'D-T-04', 'G104', 'Dora');          /* both seats, and the cohort */
+  hold('ceremony', 'C-R-03-01', 'G105', 'Ben'); hold('dinner', 'D-B-05', 'G106', 'Ben');            /* two other "Ben"s */
+  hold('dinner', 'D-B-11', 'G049', 'Suthep'); hold('dinner', 'D-B-12', 'G048', 'Haruthai');        /* the couple's dinner chairs */
+  hold('dinner', 'D-T-01', 'G999', 'Zed');                                                         /* a cancelled invitation: not active */
+};
+
+test('JOINED · the cohort ∪ the seat holders, by guest id, each person once: no seat, ceremony only, dinner only, both, the couple, three "Ben"s; the numerator is the union', async () => {
+  const { d, writes, seen, unchanged } = await unionHarness(UNION_KV, UNION_SEATS);
+  const ids = d.people.map((p) => p.id);
+  assert.deepEqual(ids.slice(0, 2), ['G048', 'G049'], 'the Bride and the Groom, once each, first');
+  assert.deepEqual(ids.slice().sort(), ['G048', 'G049', 'G101', 'G102', 'G103', 'G104', 'G105', 'G106'], 'Ada (no seat) · Ben (ceremony) · Cleo (dinner) · Dora (both) · two more Bens — never Gus (declined, no seat), never Zed (cancelled)');
+  assert.equal(new Set(ids).size, ids.length, 'nobody twice');
+  assert.equal(d.joining, ids.length, 'the numerator IS the union'); assert.equal(d.joining, 8); assert.equal(d.capacity, 50);
+  assert.deepEqual(d.people.filter((p) => p.name === 'Ben').map((p) => p.id).sort(), ['G102', 'G105', 'G106'], 'the same first name, three people');
+  assert.equal(d.people.find((p) => p.id === 'G102').joinedAt, '2026-09-25', 'joined on the day the seat was taken');
+  /* the invariant: every active seat holder is a joined person */
+  const holders = ['G102', 'G103', 'G104', 'G105', 'G106', 'G048', 'G049']; for (const g of holders) assert.ok(ids.includes(g), g);
+  /* reading the circle writes nothing: no store write, the ledger byte for byte, only the plan read */
+  assert.equal(writes, 0); assert.ok(unchanged, 'no seat moved, released or created');
+  assert.deepEqual(seen, [['GET', '/api/seating/plan']]);
+  assert.doesNotMatch(JSON.stringify(d), /INV-|@|"label"|"rate"|"invitationId"/, 'no invitation, contact or internal field');
+});
+
+test('JOINED · giving a seat back: a guest of the cohort stays joined; a guest joined only by the seat follows it; a retired 13 is never a seat', async () => {
+  const kept = await unionHarness(UNION_KV, (hold, l) => { UNION_SEATS(hold); l.st.m.delete('hold:ceremony:C-L-01-01'); l.st.m.delete('hold:dinner:D-T-04'); l.st.m.delete('hold:ceremony:C-R-02-01'); });
+  const ids = kept.d.people.map((p) => p.id);
+  assert.ok(ids.includes('G104'), 'Dora (cohort) gave both seats back and is still joined');
+  assert.ok(!ids.includes('G102'), 'Ben (seat only) gave his only seat back: no longer joined');
+  assert.equal(kept.d.joining, 7);
+  const t13 = await unionHarness(() => {}, (hold) => { hold('dinner', 'D-T-13', 'G103', 'Cleo'); });
+  assert.ok(!t13.d.people.some((p) => p.id === 'G103'), 'a hold on a retired 13 is not an active seat');
+  assert.equal(t13.d.joining, 2, 'the couple');
+});
+
+test('JOINED · the denominator is fifty and the count is the truth: the couple inside it once each, nobody truncated, no booking refused by the count', async () => {
+  const { d } = await unionHarness(() => {}, (hold) => { for (let n = 1; n <= 7; n++) { hold('dinner', 'D-T-' + two(n), 'G1' + two(n), 'T' + n); } hold('dinner', 'D-T-08', 'G188', 'X'); hold('dinner', 'D-B-11', 'G049', 'Suthep'); hold('dinner', 'D-B-12', 'G048', 'Haruthai'); });
+  assert.equal(d.capacity, 50); assert.equal(d.joining, 9, 'the 7 registered seat holders + the couple, who hold dinner chairs and count once; G188 is no invitation of the register');
+  assert.equal(d.people.filter((p) => p.role).length, 2);
+  assert.doesNotMatch(src('src/seating.js'), /the dinner is full/, 'the joined count never changes who may book');
+});
+
+test('JOINED · an unsafe ledger label is never shown (a Guest Relations allocation may carry anything); an unreadable ledger is a calm failure, never a smaller count', async () => {
+  const { d } = await unionHarness(() => {}, (hold) => { hold('dinner', 'D-T-02', 'G102', 'person@example.test'); hold('ceremony', 'C-R-04-01', 'G103', '+66 81 000'); });
+  assert.deepEqual(d.people.filter((p) => !p.role).map((p) => p.name).sort(), ['Guest', 'Guest']); assert.doesNotMatch(JSON.stringify(d), /@|\+66/);
+  const w = (await import('../src/worker.js')).default, ada = await bearerOf('demo-union-down');
+  const env = { REG_KV: kv(), ASSETS: { fetch: async (r) => (new URL(r.url).pathname === '/register/auth-index.json' ? new Response(JSON.stringify({ v: 2, entries: { [await authIdOf(ada)]: { i: 'INV-G101', g: 'G101', p: 'INV-101' } } })) : new Response('no', { status: 404 })) },
+    SEATING: { idFromName: () => 'seating', get: () => ({ fetch: async () => new Response('boom', { status: 500 }) }) } };
+  const r = await w.fetch(new Request('https://seeyouinlaos-website.suthep-hrg.workers.dev/api/pulse', { headers: { 'x-siyl-auth': ada } }), env);
+  assert.equal(r.status, 503); assert.equal((await r.json()).retry, true);
+});

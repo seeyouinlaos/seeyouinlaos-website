@@ -265,6 +265,8 @@ export default {
       const forwarded = new Request(request, { headers });
       const stub = env.SEATING.get(env.SEATING.idFromName('seating'));
       const res = await stub.fetch(forwarded);
+      /* a seat held or given back changes who is joined (the canonical union): this isolate reads the circle again at once */
+      if (request.method === 'POST' && res.status < 300 && env.REG_KV) cohortStale(env);
       const out = new Response(res.body, res);
       for (const [k, v] of Object.entries(corsHeaders(request))) out.headers.set(k, v);
       return out;
@@ -1150,6 +1152,16 @@ async function grEngine(env, binding, name, path) {
   const ns = env[binding]; if (!ns) return null;
   try { const r = await ns.get(ns.idFromName(name)).fetch(new Request('https://' + name + path, { headers: { 'x-gr-verified': 'yes' } })); const v = await r.json(); return v && v.ok ? v : null; } catch (e) { return null; }
 }
+/* the ledger's plan as every invitation's own seats { inv: { ceremony: { guestId: seatId }, dinner: { … } } } — the gr-mine projection */
+function seatsByInvitation(plan) {
+  const out = {};
+  for (const event of ['ceremony', 'dinner']) for (const s of ((plan.events && plan.events[event] && plan.events[event].seats) || [])) {
+    if (!s || !s.guestId || !s.invitationId || s.state === 'family' || s.state === 'available') continue;
+    const m = out[s.invitationId] || (out[s.invitationId] = { ceremony: {}, dinner: {} });
+    m[event][s.guestId] = s.seatId;
+  }
+  return out;
+}
 async function handleGrJourneys(request, env) {
   if (!env.REG_KV) return json({ ok: false, error: 'no store' }, 503);
   const origin = new URL(request.url).origin;
@@ -1169,7 +1181,10 @@ async function handleGrJourneys(request, env) {
   for (const i of sent) { recs[i] = parsed(kv.get('reg:' + i)); confs[i] = parsed(kv.get('conf:' + i)); }
   for (const i of contactInvs) contacts[i] = parsed(kv.get(contactKey(i)));
   /* 3 · the two engines, once for everyone */
-  const [roomsAll, seatsAll] = await Promise.all([grEngine(env, 'ROOMS', 'rooms', '/api/rooms/gr-mine'), grEngine(env, 'SEATING', 'seating', '/api/seating/gr-mine')]);
+  /* the seat ledger ONCE: its plan gives every invitation's own seats (exactly the `gr-mine` projection — a chair of the plan, held,
+     never a family chair) and the seat holders the joined union (readCohort) needs */
+  const [roomsAll, seatPlan] = await Promise.all([grEngine(env, 'ROOMS', 'rooms', '/api/rooms/gr-mine'), grEngine(env, 'SEATING', 'seating', '/api/seating/plan')]);
+  const seatsAll = seatPlan ? { ok: true, byInvitation: seatsByInvitation(seatPlan) } : null;
   /* 4 · each guest: the draft (its own actor), then what is already in hand */
   const out = new Array(list.length);
   await pool(list, 8, async (inv, n) => {
@@ -1191,7 +1206,7 @@ async function handleGrJourneys(request, env) {
      records already in hand */
   let answers = null;
   try {
-    const P = pulseOf(await readCohort(env, origin, { regKeys, avatarKeys, recs, contacts }));
+    const P = pulseOf(await readCohort(env, origin, { regKeys, avatarKeys, recs, contacts, plan: seatPlan }));
     const named = (list) => list.map((p) => ({ guestId: p.guestId, invitationId: p.invitationId, name: p.name }));
     answers = { joining: P.people.length, capacity: WEDDING_CAPACITY,
       music: { responses: P.musicResponses, leaders: P.leaders, ranking: P.ranking.map((r) => ({ ...r, guests: named(P.people.filter((p) => p.music.includes(r.genre))) })) },
@@ -1517,20 +1532,55 @@ async function readCohort(env, origin, pre) {
   const couple = [];
   for (const e of Object.values(entries || {})) {
     if (!e || e.h !== 1 || (e.r !== 'B' && e.r !== 'G')) continue;
+    if (couple.some((c) => c.guestId === String(e.g))) continue;   /* one entry per person, however many index entries (a rotated code) name them */
     const role = e.r === 'B' ? 'Bride' : 'Groom', rec = records[e.i] || null, at = rec ? (rec.firstSentAt || rec.submittedAt || null) : null;
     const contact = contacts[e.i] = await contactOf(e.i);
     couple.push({ guestId: String(e.g), invitationId: e.i, name: nameOf(rec, contact, COUPLE_FIRST_NAMES[e.r]), photo: photos.has(e.i), joinedAt: at ? String(at).slice(0, 10) : null, role });
   }
   couple.sort((a, b) => (a.role === 'Bride' ? 0 : 1) - (b.role === 'Bride' ? 0 : 1));   /* Haruthai (Bride) first, then Suthep (Groom) — PRQ-01-10 */
+  /* THE CANONICAL JOINED UNION (Owner, 2 Oct 2026): a person is JOINED when they are in the joining cohort above (a sent trip that is
+     joining, or the couple) OR hold at least one active wedding seat — a Vow Ceremony chair or a Wedding Dinner chair. A UNION by the
+     register's guest id: never a sum of counters, never a name match; a person with both seats, or in the cohort and seated, counts
+     once. An active seat is a hold in the seating ledger on a chair of the plan, by an invitation still in the register. Derived on
+     every read from the ledger as it stands — no flag is stored, nothing is written: a guest of the cohort who gives a seat back
+     stays joined; a guest who is joined only by a seat follows the seat. */
+  const known = new Set(couple.map((c) => c.guestId).concat(guests.map((g) => g.guestId)));
+  const plan = pre && 'plan' in pre ? pre.plan : await grEngine(env, 'SEATING', 'seating', '/api/seating/plan');
+  /* UNKNOWN IS NEVER A SMALLER NUMBER: a ledger that cannot be read fails the reading (the page says so and offers a retry) — it never
+     publishes the cohort alone as the joined count. A failed reading is never cached (joiningCohort). */
+  if (env.SEATING && !plan) throw new Error('the seating ledger could not be read');
+  const seated = new Map();
+  for (const event of ['ceremony', 'dinner']) {
+    for (const s of ((plan && plan.events && plan.events[event] && plan.events[event].seats) || [])) {
+      if (!s || !s.guestId || !s.invitationId || s.state === 'available' || s.state === 'family') continue;
+      if (invited && !invited.has(s.invitationId)) continue;      /* a hold of a cancelled invitation is not an active seat */
+      const g = String(s.guestId), t = s.at ? Date.parse(s.at) || 0 : 0, cur = seated.get(g);
+      /* the ledger's label is a first name only when it looks like one — one word of letters; anything else is never shown */
+      const nm = String(s.name || '').replace(/[^\p{L}\p{M}' \-.]/gu, ' ').trim().split(/\s+/)[0] || '';
+      const safe = /@|\d/.test(String(s.name || '')) ? '' : nm.slice(0, 24);
+      if (!cur) seated.set(g, { invitationId: s.invitationId, name: safe, t, events: [event] });
+      else { cur.events.push(event); if (t && (!cur.t || t < cur.t)) cur.t = t; if (!cur.name && safe) cur.name = safe; }
+    }
+  }
+  const bySeat = [];
+  for (const [g, x] of seated) {
+    if (known.has(g)) continue;
+    const rec = records[x.invitationId] || null;
+    const contact = contacts[x.invitationId] = await contactOf(x.invitationId);
+    bySeat.push({ guestId: g, invitationId: x.invitationId, name: nameOf(rec, contact, x.name || 'Guest'), photo: photos.has(x.invitationId), joinedAt: x.t ? new Date(x.t).toISOString().slice(0, 10) : null, _t: x.t });
+  }
+  /* ONE PERSON, ONE ENTRY: the three sources merged by guest id — the couple first (their role wins), then the cohort, then the seats */
+  const one = new Map(); for (const p of couple.map((c) => ({ ...c, _t: Infinity })).concat(guests, bySeat)) if (!one.has(p.guestId)) one.set(p.guestId, p);
+  const joined = [...one.values()].filter((p) => !p.role).sort((a, b) => (b._t - a._t) || a.name.localeCompare(b.name));
   /* the register's guest id → invitation (identity is always the guest id, never a name) and the portraits, for Who stays where */
   const invOf = {}; for (const e of Object.values(entries || {})) if (e && e.g && e.i) invOf[String(e.g)] = e.i;
-  return { list: couple.concat(guests.map(({ _t, ...g }) => g)), couple: couple.length, records, contacts, invOf, photos };
+  return { list: couple.concat(joined.map(({ _t, ...g }) => g)), couple: couple.length, records, contacts, invOf, photos, seatsKnown: !!plan, seated: new Set(seated.keys()) };
 }
 async function handleCommunity(request, env) {
   const who = await identify(request, env);
   if (!who) return json({ ok: false, error: 'unauthorised' }, 401, corsHeaders(request));
   if (!env.REG_KV) return json({ ok: false, error: 'not enabled', enabled: false }, 503, corsHeaders(request));
-  const c = await joiningCohort(env, new URL(request.url).origin);
+  let c; try { c = await joiningCohort(env, new URL(request.url).origin); } catch (e) { return json({ ok: false, error: 'unavailable', retry: true }, 503, corsHeaders(request)); }
   const out = c.list.map(({ invitationId, ...g }) => g);
   return json({ ok: true, count: out.length, guests: out, couple: c.couple, at: new Date().toISOString() }, 200, Object.assign({ 'cache-control': 'private, max-age=60' }, corsHeaders(request)));
 }
@@ -1604,7 +1654,8 @@ async function handlePulse(request, env) {
   const who = await identify(request, env);
   if (!who) return json({ ok: false, error: 'unauthorised' }, 401, corsHeaders(request));
   if (!env.REG_KV) return json({ ok: false, error: 'not enabled', enabled: false }, 503, corsHeaders(request));
-  const cohort = await joiningCohort(env, new URL(request.url).origin), P = pulseOf(cohort);
+  let cohort; try { cohort = await joiningCohort(env, new URL(request.url).origin); } catch (e) { return json({ ok: false, error: 'unavailable', retry: true }, 503, corsHeaders(request)); }
+  const P = pulseOf(cohort);
   let stays = null; try { stays = await staysOf(env, cohort); } catch (e) { stays = null; }
   /* THE NARROWEST FORM (Owner, 27 Sep 2026 · data minimisation): per joining person the opaque guest id (the key of the portrait
      read), the first name, a portrait flag, the nationality as the guest gave it, the day they joined, the couple's role, and the two
