@@ -309,6 +309,14 @@ export class Rooms {
       for (const r of wl) if (r.guestId) of(r.guestId).waitlist[r.stage] = { at: r.at, position: r.position, size: r.size || 1, wanted: r.wanted || [] };
       return json({ ok: true, byGuest });
     }
+    /* WHO STAYS WHERE (Owner, 2 Oct 2026): every real place held — the guest id, the stay and its unit, the first name the engine
+       learned — for the Worker's Wedding Circle, which joins it to the joining cohort by guest id and returns no unit label, no
+       invitation and no party; a place kept for a party is not a person and is not listed. Verified callers only; nothing is written. */
+    if (op === 'gr-occupants') {
+      if (!gr) return json({ ok: false, error: 'unauthorised' }, 401);
+      const occ = await this.occupancies(), names = await this.firstNames();
+      return json({ ok: true, occupants: occ.filter((o) => !o.placeholder && o.guestId).map((o) => ({ guestId: o.guestId, key: o.key, label: o.label, name: shownName(o, names) })) });
+    }
 
     if (op === 'join' || op === 'leave' || op === 'wait' || op === 'unwait') {
       if (!identity) return json({ ok: false, error: 'unauthorised' }, 401);

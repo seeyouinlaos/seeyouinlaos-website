@@ -266,17 +266,21 @@ const call = (l, op, body, opts = {}) => l.fetch(new Request('https://x/api/seat
 test('G · the geometry contract enforces the Owner geometry and refuses the retired truth', () => {
   const ok = validateGeometry(SEAT_FIXTURE);
   assert.equal(ok.ok, true, ok.errors.join(' · '));
-  const c = seatsOf(ok.config, 'ceremony');
-  assert.equal(c.length, 50, 'ceremony capacity 50');
-  assert.equal(c.filter((s) => s.side === 'L').length, 20, 'left 20');
+  /* FIFTY PEOPLE IN ALL, THE COUPLE INCLUDED (Owner, 2 Oct 2026): the uploaded grid stays 10 × 2 + 10 × 3 = 50 positions; the plan
+     retires two unheld positions (nobody holds anything here: A10 and B10, the back of the left block) — 48 guest chairs + the couple */
+  assert.equal(ok.config.ceremony.rows.flatMap((r) => r.seats).length, 50, 'the stored grid keeps its 50 positions (round-trip safe)');
+  const c = seatsOf(ok.config, 'ceremony', {});
+  assert.equal(c.length, 48, 'ceremony guest chairs 48');
+  assert.equal(c.filter((s) => s.side === 'L').length, 18, 'left 18');
   assert.equal(c.filter((s) => s.side === 'R').length, 30, 'right 30');
-  assert.equal(new Set(c.filter((s) => s.side === 'L').map((s) => s.row)).size, 10, '10 rows left');
+  assert.equal(new Set(c.filter((s) => s.side === 'L').map((s) => s.row)).size, 9, '9 rows left');
   assert.equal(new Set(c.filter((s) => s.side === 'R').map((s) => s.row)).size, 10, '10 rows right');
   for (let r = 1; r <= 10; r++) {
-    assert.equal(c.filter((s) => s.side === 'L' && s.row === r).length, 2, 'left row ' + r + ' has 2 chairs');
+    assert.equal(c.filter((s) => s.side === 'L' && s.row === r).length, r === 10 ? 0 : 2, 'left row ' + r);
     assert.equal(c.filter((s) => s.side === 'R' && s.row === r).length, 3, 'right row ' + r + ' has 3 chairs');
   }
-  assert.equal(new Set(c.map((s) => s.seatId)).size, 50, 'unique ids');
+  assert.equal(new Set(c.map((s) => s.seatId)).size, 48, 'unique ids');
+  assert.equal(validateGeometry(ok.config).ok, true, 'the stored configuration validates again as it is');
   assert.ok(c.every((s) => RULES.ceremony.id.test(s.seatId)), 'C-L-[ROW]-[SEAT] / C-R-[ROW]-[SEAT], rows 01–10');
   const d = seatsOf(ok.config, 'dinner');
   /* Owner override 25 Sep 2026 (superseding the 48 of OQ-03): fifty bookable dinner chairs — A1–A12, A14–A26 · B1–B12, B14–B26,
@@ -292,11 +296,12 @@ test('G · the geometry contract enforces the Owner geometry and refuses the ret
   assert.equal(ok.config.dinner.fixed, undefined, 'no fixed dinner position for anyone');
   /* Owner 13 Sep 2026 (§14): the ceremony carries BRIDE and GROOM at the front
    * centre — positions, not chairs: no seat id, never inventory, never selectable */
-  assert.deepEqual(ok.config.ceremony.fixed, ['BRIDE', 'GROOM'], 'the ceremony front-centre positions');
-  assert.equal(c.length, 50, 'the two positions are not counted as guest chairs');
+  assert.deepEqual(ok.config.ceremony.fixed, ['BRIDE', 'GROOM'], 'the ceremony front-centre places of the couple');
+  assert.equal(c.length + ok.config.ceremony.fixed.length, 50, 'the couple\'s two places + 48 guest chairs = fifty');
   assert.equal(ok.config.dinner.totalPeople, 50, 'represented total = 50 people');
   assert.ok(d.every((s) => RULES.dinner.id.test(s.seatId)), 'D-T-01…26 / D-B-01…26');
-  assert.equal(CAPACITY.ceremony.guestSeats, 50); assert.equal(CAPACITY.dinner.guestSeats, 50); assert.equal(CAPACITY.dinner.totalPeople, 50);
+  assert.equal(CAPACITY.ceremony.guestSeats, 48); assert.equal(CAPACITY.ceremony.couple, 2); assert.equal(CAPACITY.ceremony.guestSeats + CAPACITY.ceremony.couple, 50); assert.equal(CAPACITY.ceremony.totalPeople, 50);
+  assert.equal(CAPACITY.dinner.guestSeats, 50); assert.equal(CAPACITY.dinner.totalPeople, 50);
   assert.ok(!('fixed' in CAPACITY.dinner), 'the capacity contract knows no fixed chair');
   /* FAMILY ids are optional configuration — a plan without any is valid */
   const noFam = JSON.parse(JSON.stringify(SEAT_FIXTURE));
@@ -338,7 +343,7 @@ test('G · production ships no geometry: unconfigured, not open, NOT OPEN YET', 
   const s = await call(l, 'select', { invitationId: 'INV-g-peggy', guestId: PEGGY, event: 'ceremony', seatId: 'C-L-01-01' }, { as: ID_PEGGY });
   assert.equal(s.status, 423);
   assert.equal((await call(l, 'select', { invitationId: 'INV-g-peggy', guestId: PEGGY, event: 'ceremony', seatId: 'C-L-01-01' })).status, 401, 'no identity, no hold');
-  assert.deepEqual(JSON.parse(JSON.stringify(v.capacity)), { ceremony: { guestSeats: 50, left: 20, right: 30, fixed: 2 }, dinner: { guestSeats: 50, top: 25, bottom: 25, totalPeople: 50 } }, 'the capacity contract is the Owner geometry even before configuration (dinner 50 · Owner 25 Sep 2026)');
+  assert.deepEqual(JSON.parse(JSON.stringify(v.capacity)), { ceremony: { guestSeats: 48, left: 18, right: 30, fixed: 2, couple: 2, totalPeople: 50 }, dinner: { guestSeats: 50, top: 25, bottom: 25, totalPeople: 50 } }, 'the capacity contract is the Owner geometry even before configuration (dinner 50 · Owner 25 Sep 2026)');
   for (const f of ['assets/seating.js', 'src/seating.js', 'wedding-preparation.html', 'src/worker.js']) {
     assert.doesNotMatch(src(f), /seatId:\s*'[CD]-[LRTB]-\d|'C-[LR]-\d+-\d+'|'D-[LRTB]-\d+'/, f + ' carries a floor plan of its own');
     assert.doesNotMatch(src(f), /40 guest|20 \+ 20|34 selectable|perSide: 20/, f + ' still carries the retired 40-seat truth');
@@ -405,7 +410,8 @@ test('G · a seat belongs to a named guest; the new chair is held before the old
     assert.equal(rr.status, 404, id + ' is a position, not a chair');
   }
   const cv = await call(l, 'read', null, { q: '?invitation=INV-g-peggy' });
-  assert.deepEqual(cv.ceremony.fixed, ['BRIDE', 'GROOM']); assert.equal(cv.ceremony.rows.flatMap((r) => r.seats).length, 50);
+  assert.deepEqual(cv.ceremony.fixed, ['BRIDE', 'GROOM']); assert.equal(cv.ceremony.rows.flatMap((r) => r.seats).length, 48);
+  assert.equal(cv.ceremony.couple.length, 2); assert.equal(cv.ceremony.totalPeople, 50, '48 chairs + the couple\'s two places');
   /* the pool side: RUN A ('T') is the source of truth (Owner, 15 Sep 2026); Guest Relations may record B; null returns to run A */
   assert.equal(cv.dinner.poolSide, 'T');
   await call(l, 'state', { poolSide: 'X' }, { gr: true });
@@ -427,12 +433,12 @@ test('G · a seat belongs to a named guest; the new chair is held before the old
   r = await call(l, 'assign', { invitationId: 'INV-g-steffie', guestId: STEFFIE, event: 'ceremony', seatId: free[3], actor: 'GR' }, { gr: true });
   assert.equal(r.ok, true); assert.equal(r.state, 'allocated');
   const plan = await call(l, 'plan', null, { gr: true });
-  assert.equal(plan.events.ceremony.guestSeats, 50);
-  assert.equal(plan.events.ceremony.capacity.left, 20); assert.equal(plan.events.ceremony.capacity.right, 30);
+  assert.equal(plan.events.ceremony.guestSeats, 48);
+  assert.equal(plan.events.ceremony.capacity.left, 18); assert.equal(plan.events.ceremony.capacity.right, 30); assert.equal(plan.events.ceremony.capacity.totalPeople, 50);
   assert.equal(plan.events.ceremony.family, 6);
   assert.equal(plan.events.ceremony.held, 1);
   assert.equal(plan.events.ceremony.allocated, 1);
-  assert.equal(plan.events.ceremony.available, 42);
+  assert.equal(plan.events.ceremony.available, 40, '48 chairs − 6 family − 2 held');
   assert.equal(plan.events.ceremony.seats.find((s) => s.seatId === free[1]).name, 'Peggy', 'the plan carries the first name');
   assert.equal(plan.events.ceremony.seats.find((s) => s.seatId === free[3]).guestId, STEFFIE);
   /* operations output: GUEST SEATS · 50 = TOTAL PEOPLE · 50, no separate fixed positions */
@@ -446,15 +452,19 @@ test('G · the renderer draws only what it is given: rows facing the ceremony, o
   const w = page();
   const S = w.SIYL_SEATS;
   const cfg = validateGeometry(SEAT_FIXTURE).config;
-  const view = { ceremony: { rows: cfg.ceremony.rows.map((r) => ({ ...r, seats: r.seats.map((s, i) => ({ ...s, state: s.family ? 'family' : (i === 0 && r.row === 3 && r.side === 'L' ? 'yours' : 'available'), guestId: PEGGY })) })), fixed: ['BRIDE', 'GROOM'] },
+  /* the plan as the ledger reads it (Owner, 2 Oct 2026): 48 guest chairs, the couple's two places held by them */
+  const onPlan = new Set(seatsOf(cfg, 'ceremony', {}).map((s) => s.seatId));
+  const view = { named: false, ceremony: { rows: cfg.ceremony.rows.map((r) => ({ ...r, seats: r.seats.filter((s) => onPlan.has(s.seatId)).map((s, i) => ({ ...s, state: s.family ? 'family' : (i === 0 && r.row === 3 && r.side === 'L' ? 'yours' : 'available'), guestId: PEGGY })) })), fixed: ['BRIDE', 'GROOM'],
+    couple: [{ position: 'BRIDE', role: 'Bride', fixed: true, state: 'couple' }, { position: 'GROOM', role: 'Groom', fixed: true, state: 'couple' }] },
                  dinner: { sides: { T: cfg.dinner.sides.T.map((s, i) => ({ ...s, state: s.family ? 'family' : (i === 5 ? 'taken' : 'available') })), B: cfg.dinner.sides.B.map((s) => ({ ...s, state: s.family ? 'family' : 'available' })) }, fixed: ['BRIDE', 'GROOM'], totalPeople: 50 } };
   const c = S.svg('ceremony', view, { guestId: PEGGY, selectable: true });
-  assert.equal((c.match(/<g class="seat/g) || []).length, 50, 'visual total 50');
+  assert.equal((c.match(/<g class="seat/g) || []).length, 50, 'visual total 50: 48 chairs + the couple\'s two places, one plan');
+  assert.equal((c.match(/seat-couple/g) || []).length, 2, 'the couple drawn with the same chair');
   assert.equal((c.match(/seat-family/g) || []).length, 6);
   assert.equal((c.match(/seat-yours/g) || []).length, 1);
-  assert.equal((c.match(/role="button"/g) || []).length, 43, 'the available chairs are selectable; the own chair is changed through CHANGE SEAT, family never');
+  assert.equal((c.match(/role="button"/g) || []).length, 41, 'the available chairs are selectable; the own chair is changed through CHANGE SEAT, family never');
   /* Window 007: the plan speaks in sentence case with the counts computed from the plan (TO-01935 / TO-01938) */
-  assert.match(c, />Ceremony · front</); assert.match(c, />Left block · 20 seats</); assert.match(c, />Right block · 30 seats</); assert.match(c, />Aisle</);
+  assert.match(c, />Ceremony · front</); assert.match(c, />Left block · 18 seats</); assert.match(c, />Right block · 30 seats</); assert.match(c, />Aisle</);
   /* the guest-facing labels: columns A B | aisle | D E F, never C; the words carry the label, never the ledger id */
   assert.match(c, /aria-label="Ceremony seat E4, available"/); assert.match(c, /aria-label="Ceremony seat A3, your seat"/);
   assert.doesNotMatch(c, /aria-label="[^"]*C-[LR]-\d\d/, 'no ledger id in the words');
@@ -466,9 +476,10 @@ test('G · the renderer draws only what it is given: rows facing the ceremony, o
   const still = S.svg('ceremony', view, { guestId: PEGGY, selectable: true, choosing: false });
   assert.equal((still.match(/role="button"/g) || []).length, 0); assert.match(still, /aria-label="Ceremony seat A3, your seat"/);
   /* the front-centre positions are drawn, named, and are not chairs */
-  assert.match(c, /class="fixed" aria-label="The Bride and the Groom, at the front centre"/, 'TO-01933');
-  assert.match(c, />BRIDE</); assert.match(c, />GROOM</);
+  assert.match(c, /class="fixed couple" aria-label="The Bride and the Groom, at the front centre"/, 'TO-01933');
+  assert.match(c, /data-place="BRIDE"[^>]*aria-label="Ceremony, the Bride’s place at the front centre"[\s\S]*?>Bride</); assert.match(c, /data-place="GROOM"[\s\S]*?>Groom</);
   assert.ok(!/data-seat="(BRIDE|GROOM)"/.test(c), 'never selectable');
+  assert.match(c, /aria-label="Ceremony seating plan: 50 places/);
   /* ten rows, numbered, the asymmetry kept: the right block is wider than the left */
   for (let r = 1; r <= 10; r++) assert.match(c, new RegExp('>' + r + '</text>'));
   const d = S.svg('dinner', view, { guestId: STEFFIE, selectable: true });

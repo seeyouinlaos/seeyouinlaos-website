@@ -1,8 +1,8 @@
 {
  "mode": "full",
- "fingerprint": "e4e047b7a46d82cf",
+ "fingerprint": "a9e89064d3aed460",
  "origin": "local stage",
- "finished": "2026-09-27T10:49:47.130Z",
+ "finished": "2026-10-02T01:45:01.071Z",
  "engines": [
   "chromium",
   "webkit"
@@ -24,23 +24,23 @@
  ],
  "skippedStates": [],
  "routes": 24,
- "measurements": 25448,
- "loads": 10360,
+ "measurements": 24848,
+ "loads": 9760,
  "widths": 61,
  "unexplained": 0,
  "rootCauses": [],
  "exceptions": {
-  "button, .p-act, .a-cta, .cta, .x-cta, .dcta": 53770,
-  ".acar .atrk, .refgal .atrk, .others .oc": 7396,
+  "button, .p-act, .a-cta, .cta, .x-cta, .dcta": 51218,
+  ".acar .atrk, .refgal .atrk, .others .oc": 7246,
   ".a-duo .a-map": 976,
-  "footer.sfoot": 23496,
+  "footer.sfoot": 22896,
   ".a-band": 504,
   ".x-clip .am": 40,
-  ".prep-head .p-media": 8598,
-  ".intro, .lede, .plane h2, .ed .body, .ok, main > h2, main > p": 7426,
+  ".prep-head .p-media": 8148,
+  ".intro, .lede, .plane h2, .ed .body, .ok, main > h2, main > p": 7006,
   "main > .media": 168,
-  ".jbar": 11804,
-  "section.buy, section.plane": 1802,
+  ".jbar": 11504,
+  "section.buy, section.plane": 1652,
   "main > .gal": 504
  }
 }

@@ -55,6 +55,7 @@ import { giftsFor, verifiedLines } from './gifts.js';   /* the Bride & Groom's h
 import { SEED } from './inventory-seed.js';
 import { canonicalKey, canonicalLines, lineAs, viewAs } from './legacy-keys.js';   /* the replaced Kempinski room read as Hotel Muse Bangkok's Jatu Room (28 Sep 2026) */
 import { stageOf, dedicatedStages } from './rooms.js';
+import { WEDDING_PEOPLE } from './seating.js';
 import { composeGuestMail, composeOwnerMail } from './mail-templates.js';
 import { completion as graphCompletion, normalizeScope as graphScope, isRelevant as graphRelevant, STAGES as GRAPH_STAGES, STAGE_IDS as GRAPH_IDS, participationOf as graphParticipation, partyNeed as graphPartyNeed, travelsIn as graphTravels } from './stage-graph.js';
 import { profileMissing as questionnaireMissing, finaleOf, PHOTO_LABEL, GENRES } from './questionnaire.js';   /* the one questionnaire: what About You and the wedding night require (Owner, 22 Sep 2026) */
@@ -247,7 +248,10 @@ export default {
       if (!env.SEATING) return json({ ok: false, error: 'seating unavailable' }, 503, corsHeaders(request));
       const op = url.pathname.replace(/^\/api\/seating\/?/, '') || 'read';
       const headers = new Headers(request.headers);
-      headers.delete('x-gr-verified'); headers.delete('x-siyl-identity');   /* a client can never claim either */
+      headers.delete('x-gr-verified'); headers.delete('x-siyl-identity'); headers.delete('x-siyl-couple');   /* a client can never claim any */
+      /* THE COUPLE'S PLACES (Owner, 2 Oct 2026): the two ceremony places belong to the register's Bride and Groom — named for the ledger
+         here, from the index's roles, never from a name or anything a client sent */
+      try { const cp = await coupleOfIndex(env, url.origin); if (cp) headers.set('x-siyl-couple', JSON.stringify(cp)); } catch (e) { /* the places stay unnamed */ }
       if (GR_SEATING_OPS.includes(op)) {
         if (!env.GR_TOKEN) return json({ ok: false, error: 'seating operations are not enabled' }, 503);
         if (!grAuthorised(request, env)) return json({ ok: false, error: 'unauthorised' }, 401);
@@ -359,6 +363,16 @@ async function mediaRange(request, env, url, name) {
   return new Response(sliceBody(body, start, end), { status: 206, headers: range });
 }
 
+/* the register's Bride and Groom for the seating ledger: { BRIDE: { g, p, n }, GROOM: { g, p, n } } by role (h = 1 · r = B / G) */
+const COUPLE_NAMES = { B: 'Haruthai', G: 'Suthep' };
+async function coupleOfIndex(env, origin) {
+  const entries = await loadIndex(env, origin || lastOrigin), out = {};
+  for (const e of Object.values(entries || {})) {
+    if (!e || e.h !== 1 || (e.r !== 'B' && e.r !== 'G') || !e.g) continue;
+    out[e.r === 'B' ? 'BRIDE' : 'GROOM'] = { g: String(e.g), p: e.p ? String(e.p) : null, n: COUPLE_NAMES[e.r] };
+  }
+  return Object.keys(out).length ? out : null;
+}
 /* THE HOLDER'S FIRST NAME (PRQ-GAP-02): the engines name a room or seat holder only from the verified identity, never from a
    request body — the Worker adds `firstName`: the couple by the register's role (Bride → Haruthai, Groom → Suthep), otherwise the
    guest's own first name as the server knows it (the contact → the sent record's preferred name → its source name). Computed
@@ -1508,7 +1522,9 @@ async function readCohort(env, origin, pre) {
     couple.push({ guestId: String(e.g), invitationId: e.i, name: nameOf(rec, contact, COUPLE_FIRST_NAMES[e.r]), photo: photos.has(e.i), joinedAt: at ? String(at).slice(0, 10) : null, role });
   }
   couple.sort((a, b) => (a.role === 'Bride' ? 0 : 1) - (b.role === 'Bride' ? 0 : 1));   /* Haruthai (Bride) first, then Suthep (Groom) — PRQ-01-10 */
-  return { list: couple.concat(guests.map(({ _t, ...g }) => g)), couple: couple.length, records, contacts };
+  /* the register's guest id → invitation (identity is always the guest id, never a name) and the portraits, for Who stays where */
+  const invOf = {}; for (const e of Object.values(entries || {})) if (e && e.g && e.i) invOf[String(e.g)] = e.i;
+  return { list: couple.concat(guests.map(({ _t, ...g }) => g)), couple: couple.length, records, contacts, invOf, photos };
 }
 async function handleCommunity(request, env) {
   const who = await identify(request, env);
@@ -1523,7 +1539,9 @@ async function handleCommunity(request, env) {
    and the final act of the wedding night (the pool jump · the party at BARON). Read from the guest's SENT record — the answers the
    guest has sent — through the one questionnaire (src/questionnaire.js); asked of wedding guests only, so counted only for a guest
    who joins the wedding (the couple always). No other answer is ever read here. */
-const WEDDING_CAPACITY = 52;   /* THE WHOLE WEDDING GROUP (Owner, 27 Sep 2026): the couple included — never the dinner's fifty seats */
+/* THE WHOLE WEDDING (Owner, 2 Oct 2026 — supersedes the 52 of 27 Sep): FIFTY PEOPLE IN ALL, Haruthai and Suthep included — the same
+   fifty the ceremony (the couple's two places + 48 chairs) and the dinner (fifty chairs) hold; one constant, src/seating.js */
+const WEDDING_CAPACITY = WEDDING_PEOPLE;
 function socialAnswers(rec, hosts) {
   const reg = rec && rec.registration; if (!reg) return { music: [], after: null };
   const gr = reg.guestRecord || {};
@@ -1547,19 +1565,60 @@ function pulseOf(cohort) {
   const pool = people.filter((p) => p.after === 'pool').length, party = people.filter((p) => p.after === 'party').length;
   return { people, ranking, leaders: top, musicResponses: people.filter((p) => p.music.length).length, pool, party, afterResponses: pool + party };
 }
+/* WHO STAYS WHERE (Owner, 2 Oct 2026): every real place the room engine holds, joined to people BY GUEST ID — never by a name, so
+   two guests who share a first name stay two people. Per place: the stage, the stay (its canonical key — the page names it from
+   the current product data), who shares the unit (guest ids; the unit's allocation label never leaves the server), and the state:
+   'sent' only when the holder's last sent trip (not a "not joining" reply) carries exactly this stay, room and unit; otherwise
+   'held' — chosen on the website, not yet sent. Nothing is confirmed here; nothing is written. Null when the engine is unreadable. */
+/* the stays a sent trip carried, as key | unit: the room snapshot the record kept at the send (record.rooms — the engine's own view
+   of the guest's places then), else the Bag lines that name their unit. A line without its unit is unverifiable and proves nothing. */
+function sentStays(rec) {
+  const out = new Set();
+  if (!rec || !rec.submissionId || !rec.registration) return out;
+  const gr = rec.registration.guestRecord || {};
+  if (gr.scope && gr.scope.none) return out;
+  const snap = rec.rooms && typeof rec.rooms === 'object' ? Object.values(rec.rooms).filter((m) => m && m.key && m.label && !m.waitlisted) : [];
+  if (snap.length) { for (const m of snap) out.add(canonicalKey(m.key) + '|' + String(m.label)); return out; }
+  for (const l of canonicalLines(Array.isArray(rec.registration.selections) ? rec.registration.selections : [])) {
+    if (!l || typeof l !== 'object' || !l.id || !l.room || !l.unit) continue;
+    out.add(canonicalKey(l.id + '/' + l.room) + '|' + String(l.unit));
+  }
+  return out;
+}
+async function staysOf(env, cohort) {
+  const v = await grEngine(env, 'ROOMS', 'rooms', '/api/rooms/gr-occupants');
+  if (!v || !Array.isArray(v.occupants)) return null;
+  const occ = v.occupants.map((o) => ({ ...o, key: canonicalKey(o.key) })).filter((o) => o.guestId && SEED[o.key]);
+  const unit = {}; for (const o of occ) (unit[o.key + '|' + o.label] = unit[o.key + '|' + o.label] || []).push(String(o.guestId));
+  const byGuest = {}, names = {}, sent = {};
+  for (const o of occ) {
+    const g = String(o.guestId), inv = cohort.invOf[g];
+    if (!(g in sent)) sent[g] = sentStays(inv ? cohort.records[inv] : null);
+    const state = sent[g].has(o.key + '|' + o.label) ? 'sent' : 'held';
+    (byGuest[g] = byGuest[g] || []).push({ stage: stageOf(o.key), key: o.key, with: unit[o.key + '|' + o.label].filter((x) => x !== g), state });
+    if (o.name && !names[g]) names[g] = String(o.name).slice(0, 24);
+  }
+  return { byGuest, names };
+}
 async function handlePulse(request, env) {
   const who = await identify(request, env);
   if (!who) return json({ ok: false, error: 'unauthorised' }, 401, corsHeaders(request));
   if (!env.REG_KV) return json({ ok: false, error: 'not enabled', enabled: false }, 503, corsHeaders(request));
   const cohort = await joiningCohort(env, new URL(request.url).origin), P = pulseOf(cohort);
+  let stays = null; try { stays = await staysOf(env, cohort); } catch (e) { stays = null; }
   /* THE NARROWEST FORM (Owner, 27 Sep 2026 · data minimisation): per joining person the opaque guest id (the key of the portrait
      read), the first name, a portrait flag, the nationality as the guest gave it, the day they joined, the couple's role, and the two
      approved answers — never an email, a phone number, an address, a birthdate, a code, a travel detail or any other answer */
   const people = P.people.map((g) => {
     const nat = String((cohort.contacts[g.invitationId] || {}).nationality || '').trim().slice(0, 40);
-    return { id: g.guestId, name: g.name, photo: !!g.photo, nationality: nat || null, joinedAt: g.joinedAt, ...(g.role ? { role: g.role } : {}), music: g.music, after: g.after };
+    return { id: g.guestId, name: g.name, photo: !!g.photo, nationality: nat || null, joinedAt: g.joinedAt, ...(g.role ? { role: g.role } : {}), music: g.music, after: g.after,
+      ...(stays ? { stays: stays.byGuest[g.guestId] || [] } : {}) };
   });
-  return json({ ok: true, at: new Date().toISOString(), capacity: WEDDING_CAPACITY, joining: people.length, couple: cohort.couple, people,
+  /* the people who hold a stay but are not (yet) in the joining cohort — a trip not sent yet: their first name, a portrait flag and
+     their stays, so the rooms they hold are never anonymous; nothing else */
+  const known = new Set(people.map((p) => p.id));
+  const others = stays ? Object.keys(stays.byGuest).filter((g) => !known.has(g)).map((g) => ({ id: g, name: stays.names[g] || '', photo: !!(cohort.invOf[g] && cohort.photos.has(cohort.invOf[g])), stays: stays.byGuest[g] })) : [];
+  return json({ ok: true, at: new Date().toISOString(), capacity: WEDDING_CAPACITY, joining: people.length, couple: cohort.couple, people, staysKnown: !!stays, others,
     music: { responses: P.musicResponses, ranking: P.ranking, leaders: P.leaders },
     after: { responses: P.afterResponses, pool: P.pool, party: P.party } }, 200, Object.assign({ 'cache-control': 'private, max-age=30' }, corsHeaders(request)));
 }

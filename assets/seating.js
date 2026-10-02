@@ -13,9 +13,10 @@
      13 Sep 2026 configures none — every guest, the couple included, holds a
      chair through the same ledger, and the legend never lists a state that
      no chair on the plan can have)
-   The ceremony has two fixed positions at the FRONT CENTRE — BRIDE and
-   GROOM — that are not chairs, carry no seat id and are never selectable
-   (Owner, 13 Sep 2026). The dinner is fifty bookable chairs at one long
+   The ceremony is FIFTY PLACES, the couple included (Owner, 2 Oct 2026): the
+   Bride's and the Groom's fixed places at the FRONT CENTRE are drawn as seats
+   of the same plan — the same chair, held, named — never selectable, never a
+   seat label; and 48 guest chairs. The dinner is fifty bookable chairs at one long
    table — side A and side B, 24 each; the two seats numbered 13 were removed
    (Owner, 24 Sep 2026) and nothing was renumbered — and the couple hold two of
    them like every other guest. Every count in the words is read from the plan.
@@ -124,14 +125,17 @@
       function short(n) { n = String(n || ''); return n.length > 9 ? n.slice(0, 8) + '…' : n; }
       /* one chair: backrest bar + seat pan, its label inside, its state in words */
       function chair(s, x, y) {
-        var st = s.state === 'yours' ? (forGuest && s.guestId !== forGuest ? 'party' : 'yours') : s.state;
+        /* THE COUPLE'S PLACE (Owner, 2 Oct 2026): the same chair as every guest's, held — its label the role, its owner the holder */
+        var place = !!(s && s.fixed);
+        var st = place ? (s.state === 'yours' && (!forGuest || s.holder === forGuest) ? 'yours' : s.state === 'yours' || s.state === 'party' ? 'party' : 'taken')
+          : s.state === 'yours' ? (forGuest && s.guestId !== forGuest ? 'party' : 'yours') : s.state;
         if (pending && s.seatId === pending) st = 'selected';
-        var lab = S.label(s.seatId);
-        var selectable = choosing && (st === 'available' || st === 'selected');
+        var lab = place ? (s.role || '') : S.label(s.seatId);
+        var selectable = !place && choosing && (st === 'available' || st === 'selected');
         /* the spoken state names the guest being chosen for when that is not the person continuing */
         var who = s.name && st !== 'yours' && st !== 'selected' ? s.name : '';
         var words = st === 'available' ? 'available' : st === 'selected' ? (opts.subjectName ? 'selected for ' + opts.subjectName : 'selected') : st === 'yours' ? (opts.subjectName ? opts.subjectName + '’s seat' : 'your seat') : st === 'party' ? (who ? who + ', travelling with you' : 'travelling with you') : st === 'family' ? 'reserved for family' : (who ? 'taken by ' + who : 'unavailable');
-        var aria = EV + ' seat ' + lab + ', ' + words;
+        var aria = place ? EV + ', the ' + lab + '’s place at the front centre' + (who ? ', ' + who : st === 'yours' ? ', your place' : '') : EV + ' seat ' + lab + ', ' + words;
         /* available = an outlined chair (rim 3.3:1 on the card) · unavailable = a filled chair, struck through, its label 4.3:1 on the fill */
         var pan = st === 'selected' ? '#313131' : st === 'yours' ? '#F3EEE7' : st === 'taken' ? '#E7E3DB' : st === 'family' ? '#EDEBE7' : '#FCFAF6';
         var stroke = st === 'selected' || st === 'yours' || st === 'party' ? '#313131' : st === 'taken' ? '#D5D0C7' : st === 'family' ? '#6B6964' : '#8F8A82';
@@ -139,14 +143,14 @@
         var ink = st === 'selected' ? '#F3EEE7' : st === 'taken' ? '#6B6964' : '#313131';
         var sw = st === 'yours' ? 1.8 : st === 'party' ? 1.4 : 1;
         var dash = st === 'party' || st === 'family' ? ' stroke-dasharray="3 2"' : '';
-        var extra = st === 'taken' ? '<line x1="' + (x + 6) + '" y1="' + (y + seat - 5) + '" x2="' + (x + seat - 6) + '" y2="' + (y + 12) + '" stroke="#8F8A82" stroke-width="1"/>'
+        var extra = st === 'taken' && !place ? '<line x1="' + (x + 6) + '" y1="' + (y + seat - 5) + '" x2="' + (x + seat - 6) + '" y2="' + (y + 12) + '" stroke="#8F8A82" stroke-width="1"/>'
                   : st === 'selected' ? '<rect x="' + (x - 3) + '" y="' + (y - 3) + '" width="' + (seat + 6) + '" height="' + (seat + 6) + '" rx="8" fill="none" stroke="#313131" stroke-width="1"/>'
                   : st === 'yours' ? '<circle cx="' + (x + seat - 4) + '" cy="' + (y + 4) + '" r="3" fill="#313131"/>' : '';
-        return '<g class="seat seat-' + st + '"' + (selectable ? ' role="button" tabindex="0" data-seat="' + esc(s.seatId) + '" data-label="' + esc(lab) + '"' : ' aria-disabled="true" data-label="' + esc(lab) + '"') +
+        return '<g class="seat seat-' + st + (place ? ' seat-couple' : '') + '"' + (place ? ' data-place="' + esc(s.position || '') + '"' : '') + (selectable ? ' role="button" tabindex="0" data-seat="' + esc(s.seatId) + '" data-label="' + esc(lab) + '"' : ' aria-disabled="true" data-label="' + esc(lab) + '"') +
           ' aria-label="' + esc(aria) + '">' +
           '<rect class="back" x="' + (x + 3) + '" y="' + y + '" width="' + (seat - 6) + '" height="6" rx="2" fill="' + back + '"/>' +
           '<rect class="pan" x="' + x + '" y="' + (y + 8) + '" width="' + seat + '" height="' + (seat - 8) + '" rx="5" fill="' + pan + '" stroke="' + stroke + '" stroke-width="' + sw + '"' + dash + '/>' +
-          '<text x="' + (x + seat / 2) + '" y="' + (y + 8 + (seat - 8) / 2 + 3.4) + '" text-anchor="middle" font-family="' + FONT + '" font-size="9.5" letter-spacing=".4" fill="' + ink + '">' + esc(lab) + '</text>' + extra +
+          '<text x="' + (x + seat / 2) + '" y="' + (y + 8 + (seat - 8) / 2 + 3.4) + '" text-anchor="middle" font-family="' + FONT + '" font-size="' + (place ? '6.6' : '9.5') + '" letter-spacing="' + (place ? '.2' : '.4') + '" fill="' + (place && st === 'taken' ? '#313131' : ink) + '">' + esc(lab) + '</text>' + extra +
           (named && (who || st === 'yours') ? '<text class="seat-name" x="' + (x + seat / 2) + '" y="' + (y + seat + 9) + '" text-anchor="middle" font-family="' + FONT + '" font-size="7" letter-spacing=".3" fill="#313131">' + esc(st === 'yours' ? 'You' : short(who)) + '</text>' : '') + '</g>';
       }
       var T = 'font-family="' + FONT + '" font-size="8.5" letter-spacing="2" fill="#6B6964"';
@@ -159,24 +163,24 @@
         var nums = Object.keys(byRow).map(Number).sort(function (a, b) { return a - b; });
         var maxL = Math.max.apply(null, nums.map(function (n) { return byRow[n].L.length; }).concat([1]));
         var maxR = Math.max.apply(null, nums.map(function (n) { return byRow[n].R.length; }).concat([1]));
-        var aisle = 52, pad = 20, frontH = 30, fixedC = (v && v.ceremony && v.ceremony.fixed) || [];
-        var headY = frontH + (fixedC.length ? 44 : 10), top = headY + 18;
-        var W = pad * 2 + maxL * U + aisle + maxR * U, H = top + nums.length * RH + 26;
+        var aisle = 52, pad = 20, frontH = 30, places = (v && v.ceremony && v.ceremony.couple) || ((v && v.ceremony && v.ceremony.fixed) || []).map(function (p) { return { position: p, role: p === 'BRIDE' ? 'Bride' : 'Groom', fixed: true }; });
+        var headY = frontH + (places.length ? seat + NAME_H + 22 : 10), top = headY + 18;
+        var W = pad * 2 + maxL * U + aisle + maxR * U, H = top + nums.length * RH + 42;
         var cxC = pad + maxL * U + aisle / 2;
         /* the chairs keep a real size on a narrow screen: the plan scrolls sideways rather than shrinking its labels */
-        var h = '<svg class="p-seatmap p-seatmap-ceremony" viewBox="0 0 ' + W + ' ' + H + '" style="min-width:' + Math.round(W * 1.1) + 'px" role="group" aria-label="Ceremony seating plan: the front with the Bride and Groom, a left block of two seats and a right block of three seats per row, ten rows, a centre aisle">';
+        var nPlaces = rows.reduce(function (n, r) { return n + (r.seats || []).length; }, 0) + places.length;
+        var h = '<svg class="p-seatmap p-seatmap-ceremony" viewBox="0 0 ' + W + ' ' + H + '" style="min-width:' + Math.round(W * 1.1) + 'px" role="group" aria-label="Ceremony seating plan: ' + nPlaces + ' places — the Bride and the Groom at the front centre, then a left block of two seats and a right block of three seats per row, a centre aisle">';
         /* the front: a fine rule the whole width, named */
         h += '<line x1="' + pad + '" y1="14" x2="' + (W - pad) + '" y2="14" stroke="#313131" stroke-width="1"/>' +
              '<text x="' + cxC + '" y="27" text-anchor="middle" ' + T + '>Ceremony · front</text>';
         /* the couple's place: front centre, between the two blocks, in front of
          * row 1 — marked, named, never a chair, no seat label */
-        if (fixedC.length) {
-          var yC = frontH + 6, TF = 'font-family="' + FONT + '" font-size="7.5" letter-spacing="1.4" fill="#313131"';
-          h += '<g class="fixed" aria-label="The Bride and the Groom, at the front centre">' +
-               '<rect x="' + (cxC - 60) + '" y="' + yC + '" width="56" height="22" rx="11" fill="#F3EEE7" stroke="#313131" stroke-width="1"/>' +
-               '<text x="' + (cxC - 32) + '" y="' + (yC + 14.5) + '" text-anchor="middle" ' + TF + '>' + esc(fixedC[0] || '') + '</text>' +
-               '<rect x="' + (cxC + 4) + '" y="' + yC + '" width="56" height="22" rx="11" fill="#F3EEE7" stroke="#313131" stroke-width="1"/>' +
-               '<text x="' + (cxC + 32) + '" y="' + (yC + 14.5) + '" text-anchor="middle" ' + TF + '>' + esc(fixedC[1] || '') + '</text></g>';
+        if (places.length) {
+          /* the couple's two places: front centre, over the aisle, in front of row 1 — two chairs of the same plan */
+          var yC = frontH + 8, gapC = 8;
+          h += '<g class="fixed couple" aria-label="The Bride and the Groom, at the front centre">';
+          places.forEach(function (p, k) { h += chair(p, cxC + (k === 0 ? -(seat + gapC / 2) : gapC / 2), yC); });
+          h += '</g>';
         }
         /* column letters over the blocks; the aisle between them is column C, unnamed */
         var LC = (S.LABELS && S.LABELS.COLS) || { L: ['A', 'B'], R: ['D', 'E', 'F'] };
@@ -187,14 +191,15 @@
           var y = top + i * RH;
           var L = byRow[n].L, R = byRow[n].R;
           /* each chair stands in the column its own id names (…-01, -02, -03), whatever order the configuration lists it in */
-          L.forEach(function (s, j) { var m = /-(\d\d)$/.exec(s.seatId || ''), col = m ? Number(m[1]) - 1 : j; h += chair(s, pad + (maxL - L.length + col) * U, y); });
+          L.forEach(function (s, j) { var m = /-(\d\d)$/.exec(s.seatId || ''), col = m ? Number(m[1]) - 1 : j; h += chair(s, pad + col * U, y); });   /* its own column, even beside a retired position */
           R.forEach(function (s, j) { var m = /-(\d\d)$/.exec(s.seatId || ''), col = m ? Number(m[1]) - 1 : j; h += chair(s, pad + maxL * U + aisle + col * U, y); });
           h += '<text class="rownum" x="' + cxC + '" y="' + (y + 8 + (seat - 8) / 2 + 3) + '" text-anchor="middle" ' + T + '>' + n + '</text>';
         });
         var nL = rows.filter(function (r) { return r.side === 'L'; }).reduce(function (n, r) { return n + r.seats.length; }, 0);
         var nR = rows.filter(function (r) { return r.side === 'R'; }).reduce(function (n, r) { return n + r.seats.length; }, 0);
-        h += '<text x="' + (pad + (maxL * U) / 2) + '" y="' + (H - 8) + '" text-anchor="middle" ' + T + '>Left block · ' + nL + ' seats</text>' +
-             '<text x="' + (pad + maxL * U + aisle + (maxR * U) / 2) + '" y="' + (H - 8) + '" text-anchor="middle" ' + T + '>Right block · ' + nR + ' seats</text>';
+        /* the block captions stand on the plan's own edges, one line each, so neither is ever cut by the frame or by the other */
+        h += '<text x="' + pad + '" y="' + (H - 24) + '" text-anchor="start" ' + T + '>Left block · ' + nL + ' seats</text>' +
+             '<text x="' + (W - pad) + '" y="' + (H - 8) + '" text-anchor="end" ' + T + '>Right block · ' + nR + ' seats</text>';
         return h + '</svg>';
       }
 
@@ -290,14 +295,18 @@
       if (!v || !v.named || !v[event]) return '';
       var list = event === 'ceremony' ? [].concat.apply([], ((v.ceremony && v.ceremony.rows) || []).map(function (r) { return r.seats; })) : ((v.dinner && v.dinner.sides) ? v.dinner.sides.T.concat(v.dinner.sides.B) : []);
       var held = list.filter(function (s) { return s && (s.state === 'yours' || s.state === 'party' || s.state === 'taken') && (s.name || s.guestId || s.holder); });
-      if (!held.length) return '';
       held.sort(function (a, b) { return S.label(a.seatId).localeCompare(S.label(b.seatId), undefined, { numeric: true }); });
+      /* the Bride and the Groom are on the roll call too, first, by their places (Owner, 2 Oct 2026) */
+      if (event === 'ceremony') held = ((v.ceremony && v.ceremony.couple) || []).filter(function (c) { return c && c.holder; }).map(function (c) {
+        return { fixed: true, role: c.role, holder: c.holder, name: c.name, state: c.state === 'yours' ? 'yours' : c.state === 'party' ? 'party' : 'taken', guestId: c.state === 'yours' ? c.holder : undefined };
+      }).concat(held);
+      if (!held.length) return '';
       var me = opts.guestId || null;
       return '<div class="p-seatrail" data-seatrail="' + esc(event) + '"><p class="t-l1">Who sits where · ' + held.length + (held.length === 1 ? ' seat' : ' seats') + ' held</p><ul>' + held.map(function (s) {
         /* FIRST NAMES ONLY (GAP-082): the avatar is named by the first name ("A guest" when none is known), its initial taken
            from the first name alone — never a surname's letter */
         var gid = s.holder || s.guestId || '', first = String(s.name || '').trim().split(/\s+/)[0] || '', name = S.whoWords(s, me), ini = (first.charAt(0) || 'G').toUpperCase();
-        return '<li' + (s.state === 'yours' ? ' class="me"' : '') + ' data-seat-of="' + esc(gid) + '"><span class="p-seatava" data-ava="' + esc(gid) + '" role="img" aria-label="' + esc(first || 'A guest') + '"><i aria-hidden="true">' + esc(ini) + '</i></span><span class="n">' + esc(name) + '</span><span class="s">' + esc(S.label(s.seatId)) + '</span></li>';
+        return '<li' + (s.state === 'yours' ? ' class="me"' : '') + ' data-seat-of="' + esc(gid) + '"><span class="p-seatava" data-ava="' + esc(gid) + '" role="img" aria-label="' + esc(first || 'A guest') + '"><i aria-hidden="true">' + esc(ini) + '</i></span><span class="n">' + esc(name) + '</span><span class="s">' + esc(s.fixed ? s.role : S.label(s.seatId)) + '</span></li>';
       }).join('') + '</ul></div>';
     },
     /* the portraits of the rail, read with this session — a photo replaces the initials as it arrives */

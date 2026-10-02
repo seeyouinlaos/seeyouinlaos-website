@@ -1268,10 +1268,12 @@ html[data-session="in"] .a-sec.a-avail { display: none; }
 .pl-c { display: inline-block; width: 12px; height: 12px; border-radius: 50%; border: 1px solid #BDB6AA; background: transparent; }
 .pl-c.is-held { background: #CFC7B9; border-color: #CFC7B9; }
 .pl-c.is-me { background: var(--cherry); border-color: var(--cherry); }
+.pl-c.is-gap { visibility: hidden; }
 .pl-cmap { display: inline-flex; flex-direction: column; gap: 6px; padding: 12px 0 4px; max-width: 100%; }
-.pl-front { margin: 0 0 6px; text-align: center; }
-.pl-couple { display: inline-block; font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10.5px; letter-spacing: 2px; text-transform: uppercase; color: var(--a-mute); padding: 2px 10px; border: 1px solid var(--a-line); border-radius: 12px; }
-.pl-couple.is-me { color: var(--cherry); border-color: var(--cherry); }
+/* THE COUPLE'S PLACES (Owner, 2 Oct 2026): two seats of the same plan at the front centre — the same dot, held; a small role under it */
+.pl-front { margin: 0 0 8px; display: flex; justify-content: center; gap: 14px; }
+.pl-cp { display: inline-flex; flex-direction: column; align-items: center; gap: 3px; }
+.pl-cp small { font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 9px; letter-spacing: 1.6px; text-transform: uppercase; color: var(--a-mute); }
 .pl-crow { display: flex; align-items: center; gap: 6px; }
 .pl-rn { width: 18px; font-size: 10.5px; color: var(--a-mute); text-align: right; font-variant-numeric: tabular-nums; }
 .pl-blk { display: inline-flex; gap: 6px; }
@@ -1287,12 +1289,65 @@ html[data-session="in"] .a-sec.a-avail { display: none; }
 .pl-plan li { display: flex; align-items: baseline; gap: 8px; min-width: 0; font-size: 14px; line-height: 1.4; padding: 4px 0; border-bottom: 1px solid var(--a-line); }
 .pl-fn { color: var(--a-ink); overflow-wrap: anywhere; }
 .pl-pulse-full .pl-music, .pl-pulse-full .pl-mood { margin-top: 24px; }
+/* WHO SITS WHERE · for every participant (Owner, 2 Oct 2026): the ceremony row by row, the table side by side */
+.pl-roster { min-width: 0; }
+.pl-seatrows { list-style: none; margin: 0; padding: 0; }
+.pl-rrow { display: grid; grid-template-columns: minmax(0, 1fr); row-gap: 6px; padding: 10px 0; border-bottom: 1px solid var(--a-line); }
+.pl-rk { font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10.5px; letter-spacing: 2px; text-transform: uppercase; color: var(--a-mute); }
+.pl-rs { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 16px; }
+.pl-rs li { display: flex; align-items: baseline; gap: 8px; min-width: 0; font-size: 14px; line-height: 1.4; }
+.pl-rs li.is-me .pl-fn, .pl-rs li.is-me .pl-seatno { color: var(--cherry); }
+.pl-rs .pl-rfree .pl-free b { font-weight: 400; color: var(--a-ink); }
+.pl-rrow.is-front .pl-rs li .pl-seatno { font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10.5px; letter-spacing: 1.6px; text-transform: uppercase; }
+/* WHO STAYS WHERE (Owner, 2 Oct 2026): the journey's stays in order → the property → the room → who shares it */
+.pl-stage + .pl-stage { margin-top: 26px; }
+.pl-prop { padding: 4px 0 0; }
+.pl-prop + .pl-prop { margin-top: 18px; }
+.pl-propn { margin: 0 0 6px; font-family: 'PP Editorial Old', Georgia, serif; font-weight: 200; font-size: 24px; line-height: 1.2; color: var(--ink); overflow-wrap: anywhere; }
+.pl-room { padding: 10px 0; border-top: 1px solid var(--a-line); }
+.pl-roomn { margin: 0 0 8px; font-size: 14px; line-height: 1.45; color: var(--a-ink); overflow-wrap: anywhere; }
+.pl-units { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+.pl-unit { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; min-width: 0; }
+.pl-up { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
+.pl-ava.sm { width: 28px; height: 28px; font-size: 12px; }
+.pl-chip { display: inline-flex; align-items: center; min-height: 22px; padding: 0 9px; border: 1px solid var(--a-line); border-radius: 11px; font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--a-mute); white-space: nowrap; }
+.pl-chip[data-state="sent"] { border-color: var(--a-ink); color: var(--a-ink); }
+.pl-unit .pl-chip { margin-left: auto; }
+/* ONE PERSON: the card opens on the ceremony place, the dinner seat and every stay */
+.pl-cards { grid-template-columns: minmax(0, 1fr); gap: 0; }
+.pl-pp { display: block; border-bottom: 1px solid var(--a-line); }
+.pl-pd summary { display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 6px 0; cursor: pointer; list-style: none; }
+.pl-pd summary::-webkit-details-marker { display: none; }
+.pl-pd summary::after { content: '+'; margin-left: auto; font-size: 18px; line-height: 1; color: var(--a-mute); }
+.pl-pd[open] summary::after { content: '–'; }
+.pl-pr { font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: 1.6px; text-transform: uppercase; color: var(--cherry); }
+.pl-pdl { margin: 0 0 14px 50px; display: grid; grid-template-columns: minmax(0, 1fr); row-gap: 10px; }
+.pl-pdl > div { display: grid; grid-template-columns: 8.5em minmax(0, 1fr); column-gap: 12px; align-items: baseline; }
+.pl-pdl dt { font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10.5px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--a-mute); }
+.pl-pdl dd { margin: 0; font-size: 14px; line-height: 1.5; color: var(--a-ink); min-width: 0; overflow-wrap: anywhere; }
+.pl-stlist { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.pl-st { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; }
+.pl-stl { font-size: 12.5px; color: var(--a-mute); }
+.pl-stp { font-family: 'PP Editorial Old', Georgia, serif; font-weight: 200; font-size: 18px; line-height: 1.25; color: var(--ink); }
+.pl-str { font-size: 14px; line-height: 1.45; }
+.pl-stw { font-size: 13px; color: var(--a-mute); }
+.pl-st .pl-chip { margin-top: 4px; }
 @media (min-width: 768px) {
   .pl-seats { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 40px; }
-  .pl-seats .pl-full { grid-column: 1 / -1; }
+  .pl-seats .pl-full, .pl-seats .pl-roster { grid-column: 1 / -1; }
   .pl-plan { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .pl-rrow { grid-template-columns: 7.5em minmax(0, 1fr); column-gap: 16px; align-items: baseline; }
+  .pl-rs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .pl-rrow.is-side .pl-rs { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .pl-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 32px; }
+  .pl-units { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 24px; }
+}
+@media (min-width: 1200px) {
+  .pl-rs { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .pl-rrow.is-side .pl-rs { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 }
 /* Thai is never tracked: the small labels of the pulse, the circle and the stay keep their size and lose the Latin letter-spacing */
 html[lang="th"] .pl-label, html[lang="th"] .pl-cap, html[lang="th"] .pl-rl, html[lang="th"] .pl-sl, html[lang="th"] .pl-sub,
-html[lang="th"] .pl-yours span, html[lang="th"] .pl-go, html[lang="th"] .pl-more, html[lang="th"] .pl-full summary, html[lang="th"] .pl-couple,
+html[lang="th"] .pl-yours span, html[lang="th"] .pl-go, html[lang="th"] .pl-more, html[lang="th"] .pl-full summary, html[lang="th"] .pl-cp small,
+html[lang="th"] .pl-rk, html[lang="th"] .pl-chip, html[lang="th"] .pl-pr, html[lang="th"] .pl-pdl dt,
 html[lang="th"] .av-cap, html[lang="th"] .av-in .av-eyebrow, html[lang="th"] .av-in .av-gh-h { font-size: 13px; letter-spacing: .2px; text-transform: none; }

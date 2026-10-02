@@ -45,7 +45,7 @@ test('THE PULSE (Worker) · an authenticated read of the joining cohort in the n
   });
   assert.equal((await h.get('/api/pulse')).status, 401, 'signed out: nothing');
   const { status, d } = await h.get('/api/pulse', { 'x-siyl-auth': h.ada });
-  assert.equal(status, 200); assert.equal(d.capacity, 52, 'the whole wedding group, the couple included — never the dinner\'s 50');
+  assert.equal(status, 200); assert.equal(d.capacity, 50, 'FIFTY PEOPLE IN ALL, the couple included (Owner, 2 Oct 2026) — never 52');
   assert.equal(d.joining, 6, 'the couple + Ada, Ben, Cleo, Emil — never Dora (declined) or Zed (cancelled)');
   assert.deepEqual(d.people.slice(0, 2).map((p) => p.id), ['G048', 'G049'], 'the Bride, then the Groom, first');
   assert.deepEqual(d.people.slice(2).map((p) => p.id).sort(), ['G101', 'G102', 'G103', 'G105'], 'then every joining guest');
@@ -80,7 +80,7 @@ test('GUEST RELATIONS · the aggregates of the two answers beside the journeys �
   assert.equal((await h.get('/api/gr/journeys', { 'x-siyl-auth': h.ada })).status, 401, 'a guest is not Guest Relations');
   const { d } = await h.get('/api/gr/journeys', { 'x-gr-token': 'gr-secret' });
   assert.ok(Array.isArray(d.journeys) && d.acknowledgements && d.acknowledgements.unwrittenRules, 'the journeys and the acknowledgement summary stand');
-  const a = d.answers; assert.equal(a.joining, 4); assert.equal(a.capacity, 52);
+  const a = d.answers; assert.equal(a.joining, 4); assert.equal(a.capacity, 50);
   assert.deepEqual(a.music.leaders, ['Latin']);
   assert.deepEqual(a.music.ranking.find((r) => r.genre === 'Latin').guests.map((g) => g.guestId).sort(), ['G101', 'G102'], 'who chose Latin, by guest');
   assert.equal(a.music.ranking.find((r) => r.genre === 'Latin').count, 2); assert.equal(a.music.responses, 2);
@@ -122,23 +122,26 @@ test('YOUR WEDDING CIRCLE · the guest\'s seat, the people around, the pulse —
   const w = timers(page({ auth: PEGGY, modules: PULSE })), P = w.SIYL_PULSE, v = seatsView();
   hold(v, 'C-L-03-02', PEGGY.guestId, 'Peggy', 'yours'); hold(v, 'C-L-03-01', 'G2', 'Ben'); hold(v, 'D-T-07', PEGGY.guestId, 'Peggy', 'yours'); hold(v, 'D-T-06', 'G2', 'Ben');
   w.SIYL_SEATS = { view: () => v, seatOf: (ev) => (ev === 'ceremony' ? 'C-L-03-02' : 'D-T-07') };
-  const data = { ok: true, capacity: 52, joining: 3, people: [{ id: 'G2', name: 'Ben', photo: false, nationality: 'German', joinedAt: '2026-09-19', music: ['Pop'], after: 'party' }, { id: PEGGY.guestId, name: 'Peggy', photo: true, nationality: 'Swiss', joinedAt: '2026-09-18', music: ['Latin'], after: 'pool' }],
+  const data = { ok: true, capacity: 50, joining: 3, people: [{ id: 'G2', name: 'Ben', photo: false, nationality: 'German', joinedAt: '2026-09-19', music: ['Pop'], after: 'party' }, { id: PEGGY.guestId, name: 'Peggy', photo: true, nationality: 'Swiss', joinedAt: '2026-09-18', music: ['Latin'], after: 'pool' }],
     music: { responses: 2, leaders: ['Latin', 'Pop'], ranking: GENRES.map((g) => ({ genre: g, count: g === 'Pop' || g === 'Latin' ? 1 : 0 })) }, after: { responses: 2, pool: 1, party: 1 } };
   w.fetch = () => Promise.resolve({ ok: true, json: () => Promise.resolve(data) });
   return P.load(true).then(() => {
     const h = P.circleHtml({ guestId: PEGGY.guestId }, false);
-    assert.match(h, /id="circle" data-pl-circle/); assert.match(h, /<b>3<\/b><span class="pl-of">\/ 52<\/span>/);
+    assert.match(h, /id="circle" data-pl-circle/); assert.match(h, /<b>3<\/b><span class="pl-of">\/ 50<\/span>/); assert.doesNotMatch(h, /\/ 52/);
     assert.match(h, /<span>Your seat<\/span> <b>B3<\/b>/); assert.match(h, /<span>Your seat<\/span> <b>A7<\/b>/);
     assert.match(h, /Around you[\s\S]*Ben[\s\S]*German/); assert.match(h, /Next to you[\s\S]*data-dir="l"[\s\S]*Ben/); assert.match(h, /Across from you[\s\S]*B7[\s\S]*Not taken yet/);
     assert.match(h, /pl-c is-me/, 'the guest\'s own chair is marked');
     assert.doesNotMatch(h, /data-seat|data-select|data-book|data-hold|<form|<select|type="checkbox"/, 'no booking control is introduced');
-    assert.doesNotMatch(h, /View full seating/, 'a guest does not get the hosts\' plan');
+    /* WHO SITS WHERE IS SHARED (Owner, 2 Oct 2026): every signed-in participant reads the whole plan of both events — read-only */
+    assert.match(h, /data-pl-roster><p class="pl-label">Who sits where<\/p>/, 'a guest gets the whole plan');
+    assert.match(h, /<span class="pl-rk">Row 3<\/span>[\s\S]*?<span class="pl-seatno">A3<\/span> <span class="pl-fn" data-i18n-skip>Ben<\/span>/, 'who sits where, by name');
     assert.match(h, /<span>Current favourite<\/span> · <b>Latin &amp; Pop<\/b>/, 'a tie at the top is a tie');
     /* the hosts: their fixed ceremony place and their own dinner seat are visible — and the whole plan, read-only */
+    v.ceremony.couple = [{ position: 'BRIDE', role: 'Bride', fixed: true, holder: HARUTHAI.guestId, name: 'Haruthai', state: 'yours' }, { position: 'GROOM', role: 'Groom', fixed: true, holder: 'G049', name: 'Suthep', state: 'party' }];
     w.SIYL_SEATS = { view: () => v, seatOf: (ev) => (ev === 'dinner' ? 'D-B-12' : null) };
     const hh = P.circleHtml({ guestId: HARUTHAI.guestId }, true);
-    assert.match(hh, /<span>Your place<\/span> <b>Front centre<\/b>/); assert.match(hh, /pl-couple is-me/); assert.match(hh, /<span>Your seat<\/span> <b>B12<\/b>/);
-    assert.match(hh, /<details class="pl-full" data-pl-full><summary>View full seating<\/summary>/); assert.doesNotMatch(hh, /<form|<select|data-select|data-hold/);
+    assert.match(hh, /<span>Your seat<\/span> <b>Bride<\/b><span>Front centre<\/span>/); assert.match(hh, /data-pl-place="BRIDE"><i class="pl-c is-me"><\/i><small>Bride<\/small>/); assert.match(hh, /<span>Your seat<\/span> <b>B12<\/b>/);
+    assert.match(hh, /data-pl-roster/); assert.doesNotMatch(hh, /<form|<select|data-select|data-hold|pl-couple/);
     /* nothing assigned, nothing open */
     w.SIYL_SEATS = { view: () => ({ ceremony: null, dinner: null }), seatOf: () => null };
     const none = P.circleHtml({ guestId: PEGGY.guestId }, false);
@@ -162,7 +165,7 @@ test('THAI · every new line of the pulse, the circle and the stay has its autho
   const TH = JSON.parse(src('src/i18n-th.json')).exact;
   for (const k of ['The Wedding Pulse', 'What is happening right now.', 'Joining so far', 'See everyone', 'What makes us dance?', 'Current favourite', 'responses so far', 'View all 13', 'After dinner, what’s the mood?',
     'Jump to the pool', 'Go to the party', 'Who’s jumping in?', 'Who’s going to the party?', 'Who chose', 'Your wedding circle', 'Who you share this wedding with.', 'Around you', 'Next to you', 'Across from you',
-    'Not taken yet', 'Not assigned yet', 'View full seating', 'Rooms available', 'Your invitation shows the rooms currently open to you.', 'places left', 'Complimentary alternative', 'Fully allocated', 'Wedding Stay · Vientiane', 'guests'])
+    'Not taken yet', 'Not assigned yet', 'Who sits where', 'Who stays where', 'Sharing with', 'Not selected yet', 'No seat yet', 'Free', 'Side A', 'Side B', 'Rooms available', 'Your invitation shows the rooms currently open to you.', 'places left', 'Complimentary alternative', 'Fully allocated', 'Wedding Stay · Vientiane', 'guests'])
     assert.ok(TH[k], 'Thai for ' + k);
   for (const g of GENRES.filter((x) => !['90s', 'R&B'].includes(x))) assert.ok(TH[g], 'Thai for the genre ' + g);
 });

@@ -20,17 +20,19 @@
    NO FAMILY CHAIR IS INVENTED HERE. The floor plan is configuration, uploaded
    by Guest Relations through the protected route and validated against the
    Owner's binding geometry (override of 2026-09-11):
-     CEREMONY  50 guest seats · LEFT 10 rows × 2 chairs = 20 · RIGHT 10 rows ×
-               3 chairs = 30 · centre aisle · the asymmetry is deliberate ·
-               BRIDE and GROOM two fixed positions at the FRONT CENTRE (Owner,
-               13 Sep 2026): not guest chairs, no seat id, never selectable,
-               never counted as inventory — the couple's ceremony place
+     CEREMONY  FIFTY PEOPLE IN ALL, THE COUPLE INCLUDED (Owner, 2 Oct 2026 — supersedes the 50 guest chairs + 2 uncounted
+               positions of 13 Sep 2026): BRIDE and GROOM, two fixed places at the FRONT CENTRE, held by the couple (resolved by
+               the Worker from the register's roles, never from a name) and never selectable by anyone, + 48 guest chairs. The
+               uploaded grid stays LEFT 10 rows × 2 · RIGHT 10 rows × 3 · centre aisle (50 grid positions); TWO UNHELD grid
+               positions leave the plan at read time (RETIRE_ORDER: the back of the left block first) — an occupied chair is
+               never retired, never moved, never deleted
      DINNER    one long table · 50 guest seats (Owner override, 25 Sep 2026 — supersedes the 48 of
                OQ-03): TOP 25 · BOTTOM 25 — the seats numbered 13 are never on the plan and NOTHING is
                renumbered: A1–A12, A14–A26 · B1–B12, B14–B26, every one bookable (A26 and B26 are ordinary seats)
-   NO CHAIR IS PREASSIGNED TO ANYONE (Owner decisions, 13 Sep 2026): there is
-   no family-seat mechanism and no fixed Bride/Groom position. Every guest —
-   the couple, hosts and family included — holds a chair through this same
+   NO GUEST CHAIR IS PREASSIGNED TO ANYONE (Owner decisions, 13 Sep 2026): there is
+   no family-seat mechanism; the couple's two ceremony places (above) are theirs
+   and nobody else's, and they hold no ordinary ceremony chair. Every guest —
+   hosts and family included — holds a chair through this same
    ledger, in order of booking; the couple book two of the fifty dinner
    chairs themselves, first, before the codes go out; a chair once held is
    unavailable to the next guest. The `family` flag below remains a
@@ -44,15 +46,19 @@
    keeps the operational path). No freeze date is invented: frozen is a flag.
    ========================================================================== */
 
+/* THE WHOLE WEDDING (Owner, 2 Oct 2026): fifty people in all — the Bride and the Groom included. The ceremony is the couple's two
+   places + 48 guest chairs; the dinner is fifty chairs, two of them held by the couple like every other guest's. */
+export const WEDDING_PEOPLE = 50;
 export const RULES = {
-  /* C-L-[ROW]-[SEAT] · C-R-[ROW]-[SEAT] · rows 01–10 · left seats 01–02 · right seats 01–03 */
-  ceremony: { rows: 10, perRow: { L: 2, R: 3 }, guestSeats: 50, fixed: ['BRIDE', 'GROOM'], id: /^C-([LR])-(0[1-9]|10)-(0[1-3])$/ },
+  /* C-L-[ROW]-[SEAT] · C-R-[ROW]-[SEAT] · rows 01–10 · left seats 01–02 · right seats 01–03 — the GRID (50 positions) as uploaded;
+     the plan is the grid minus the two retired positions: 48 guest chairs, and BRIDE + GROOM, the couple's fixed places */
+  ceremony: { rows: 10, perRow: { L: 2, R: 3 }, gridSeats: 50, guestSeats: 48, retire: 2, fixed: ['BRIDE', 'GROOM'], id: /^C-([LR])-(0[1-9]|10)-(0[1-3])$/ },
   /* D-T-01 … D-T-26 · D-B-01 … D-B-26 minus the two 13s · fifty chairs, no fixed position for anyone (Owner, 25 Sep 2026).
      The id pattern still RECOGNISES a 13 so a stored geometry or hold that names one can be read and reported. */
   dinner:   { perSide: 25, guestSeats: 50, totalPeople: 50, lastNumber: 26, retired: { T: [13], B: [13] }, id: /^D-([TB])-(0[1-9]|1[0-9]|2[0-6])$/ },
 };
 export const CAPACITY = {
-  ceremony: { guestSeats: 50, left: 20, right: 30, fixed: 2 },
+  ceremony: { guestSeats: 48, left: 18, right: 30, fixed: 2, couple: 2, totalPeople: 50 },
   dinner: { guestSeats: 50, top: 25, bottom: 25, totalPeople: 50 },
 };
 /* THE DINNER PLAN IS THE CODE'S (Owner, 25 Sep 2026): the fifty chairs of the long table, in the order of their numbers —
@@ -77,6 +83,39 @@ export function isRetiredSeat(seatId) {
   const c = /^C-[LR]-(\d{2})-\d{2}$/.exec(s);
   return !!(c && Number(c[1]) === NEVER_SEAT_NUMBER);
 }
+/* THE TWO RETIRED CEREMONY POSITIONS (Owner, 2 Oct 2026 · 48 guest chairs + the couple = 50): the first two grid positions of
+   RETIRE_ORDER that NOBODY HOLDS leave the plan. Held at the decision: the back of the left block (A10, B10), so both blocks stay
+   whole rectangles; were one of them held, the next unheld position of the order is retired instead. A retired position cannot
+   be held (it is not on the plan), so the choice is stable; an occupied chair is never retired. Positions, never literal ids. */
+export const RETIRE_ORDER = [{ side: 'L', row: 10, seat: 1 }, { side: 'L', row: 10, seat: 2 }, { side: 'R', row: 10, seat: 3 }, { side: 'R', row: 9, seat: 3 },
+  { side: 'R', row: 10, seat: 2 }, { side: 'R', row: 9, seat: 2 }, { side: 'L', row: 9, seat: 1 }, { side: 'L', row: 9, seat: 2 }];
+const two = (n) => String(n).padStart(2, '0');
+export function ceremonyIdOf(p) { return 'C-' + p.side + '-' + two(p.row) + '-' + two(p.seat); }
+/* the grid ids of the stored geometry that leave the plan, given the ceremony's holds */
+export function retiredCeremony(config, holds) {
+  const c = config && config.ceremony; if (!c) return new Set();
+  const grid = new Set(c.rows.flatMap((r) => r.seats.map((s) => s.seatId)));
+  /* the preferred order first; were all of it held, any free grid position — from the back row forward, the outer chairs first —
+     so two positions always leave the plan while two are free. With fewer than two free, nothing occupied is ever retired. */
+  const rest = c.rows.slice().sort((x, y) => (y.row - x.row) || (x.side < y.side ? 1 : -1)).flatMap((r) => r.seats.map((s) => s.seatId).reverse());
+  const order = RETIRE_ORDER.map(ceremonyIdOf).concat(rest);
+  const out = new Set();
+  for (const id of order) {
+    if (out.size >= RULES.ceremony.retire) break;
+    if (grid.has(id) && !(holds && holds[id])) out.add(id);
+  }
+  return out;
+}
+/* THE COUPLE'S PLACES (Owner, 2 Oct 2026): the Worker names the two from the register's roles (h = 1 · r = B / G) on every request
+   it forwards — never a name, never anything a browser sent. { BRIDE: { g, p, n }, GROOM: { g, p, n } } or null. */
+function coupleOf(raw) {
+  let c = null; try { c = JSON.parse(raw || 'null'); } catch (e) { c = null; }
+  if (!c || typeof c !== 'object') return null;
+  const out = {};
+  for (const k of RULES.ceremony.fixed) { const x = c[k]; if (x && typeof x.g === 'string' && x.g) out[k] = { g: x.g, p: typeof x.p === 'string' ? x.p : null, n: String(x.n || '').slice(0, 24) }; }
+  return Object.keys(out).length ? out : null;
+}
+function isCouple(couple, guestId) { return !!(couple && guestId && RULES.ceremony.fixed.some((k) => couple[k] && couple[k].g === guestId)); }
 function retiredLabel(seatId) { const m = RULES.dinner.id.exec(String(seatId || '')); return m ? (m[1] === 'T' ? 'A' : 'B') + Number(m[2]) : ''; }
 export const EVENTS = ['ceremony', 'dinner'];
 const MAX_PER_INVITATION = 6;   /* a party never holds more chairs than people it could have */
@@ -133,9 +172,11 @@ export function validateGeometry(input) {
       }
       if (seen.L.size !== RULES.ceremony.rows) errors.push('ceremony left must have ' + RULES.ceremony.rows + ' rows, has ' + seen.L.size);
       if (seen.R.size !== RULES.ceremony.rows) errors.push('ceremony right must have ' + RULES.ceremony.rows + ' rows, has ' + seen.R.size);
-      if (count.L !== CAPACITY.ceremony.left) errors.push('ceremony left must hold ' + CAPACITY.ceremony.left + ' guest seats, has ' + count.L);
-      if (count.R !== CAPACITY.ceremony.right) errors.push('ceremony right must hold ' + CAPACITY.ceremony.right + ' guest seats, has ' + count.R);
-      if (count.L + count.R !== CAPACITY.ceremony.guestSeats && !errors.length) errors.push('ceremony must hold ' + CAPACITY.ceremony.guestSeats + ' guest seats');
+      /* the upload is the GRID (20 + 30 positions); the plan retires two unheld positions at read time (retiredCeremony) */
+      const gridL = RULES.ceremony.rows * RULES.ceremony.perRow.L, gridR = RULES.ceremony.rows * RULES.ceremony.perRow.R;
+      if (count.L !== gridL) errors.push('ceremony left grid must hold ' + gridL + ' positions, has ' + count.L);
+      if (count.R !== gridR) errors.push('ceremony right grid must hold ' + gridR + ' positions, has ' + count.R);
+      if (count.L + count.R !== RULES.ceremony.gridSeats && !errors.length) errors.push('ceremony grid must hold ' + RULES.ceremony.gridSeats + ' positions');
       /* FAMILY chairs: optional until the Owner supplies their ids — never required, never assumed */
       out.ceremony = { rows: norm.sort((a, b) => a.row - b.row || (a.side < b.side ? -1 : 1)), fixed: RULES.ceremony.fixed.slice() };
     }
@@ -178,12 +219,14 @@ export function validateGeometry(input) {
   return { ok: errors.length === 0, errors, config: out };
 }
 
-/* every seat of an event as a flat list */
-export function seatsOf(config, event) {
+/* every seat of an event as a flat list — the ceremony's read with its holds (the two retired positions are the first unheld
+   ones of RETIRE_ORDER, so a held chair is always on the plan) */
+export function seatsOf(config, event, holds) {
   if (event === 'ceremony') {
     const c = config && config.ceremony;
     if (!c) return [];
-    return c.rows.filter((r) => Number(r.row) !== NEVER_SEAT_NUMBER).flatMap((r) => r.seats.filter((s) => !isRetiredSeat(s.seatId)).map((s, i) => ({ seatId: s.seatId, family: s.family, side: r.side, row: r.row, position: i + 1 })));
+    const gone = retiredCeremony(config, holds || {});
+    return c.rows.filter((r) => Number(r.row) !== NEVER_SEAT_NUMBER).flatMap((r) => r.seats.filter((s) => !isRetiredSeat(s.seatId) && !gone.has(s.seatId)).map((s, i) => ({ seatId: s.seatId, family: s.family, side: r.side, row: r.row, position: i + 1 })));
   }
   const d = config && config.dinner;
   if (!d) return [];
@@ -228,7 +271,7 @@ export class Seating {
    * first name on every held chair for an authenticated guest (Owner, 14 Sep
    * 2026 — a guest may see where the people they know sit); nothing else.
    * `who` is the verified identity, or an invitation id for a plain read. */
-  async view(who) {
+  async view(who, couple) {
     const identity = who && typeof who === 'object' ? who : null;
     const invitationId = identity ? identity.invitationId : (who || '');
     const cfg = await this.config();
@@ -244,7 +287,7 @@ export class Seating {
         retired.push({ event, seatId: r.seatId, label: retiredLabel(r.seatId), yours });
         console.warn('[seating] a hold sits on a retired seat and is kept for Guest Relations', event, r.seatId);
       }
-      const seats = seatsOf(cfg, event).map((s) => {
+      const seats = seatsOf(cfg, event, holds).map((s) => {
         const h = holds[s.seatId];
         let state = 'available';
         if (s.family) state = 'family';
@@ -258,8 +301,19 @@ export class Seating {
         if (h && identity && h.guestId) row.holder = h.guestId;
         return row;
       });
+      /* THE COUPLE'S TWO PLACES ARE PART OF THE ONE PLAN (Owner, 2 Oct 2026): each with its holder — the viewer's own, their
+         party's, or the couple's — and, for an authenticated reader, the first name and the opaque guest id (the portrait key),
+         exactly as every held chair carries them; never selectable, never a seat id */
+      const couplePlaces = RULES.ceremony.fixed.map((position) => {
+        const c = couple && couple[position];
+        const place = { position, role: position === 'BRIDE' ? 'Bride' : 'Groom', fixed: true };
+        if (!c) return place;
+        place.state = identity && identity.guestId === c.g ? 'yours' : (identity && identity.partyId && c.p && identity.partyId === c.p ? 'party' : 'couple');
+        if (identity) { place.holder = c.g; place.name = names[c.g] || c.n || place.role; }
+        return place;
+      });
       out[event] = event === 'ceremony'
-        ? (cfg.ceremony ? { rows: cfg.ceremony.rows.map((r) => ({ side: r.side, row: r.row, seats: r.seats.map((s) => seats.find((x) => x.seatId === s.seatId)) })), fixed: RULES.ceremony.fixed.slice() } : null)
+        ? (cfg.ceremony ? { rows: cfg.ceremony.rows.map((r) => ({ side: r.side, row: r.row, seats: r.seats.map((s) => seats.find((x) => x.seatId === s.seatId)).filter(Boolean) })), fixed: RULES.ceremony.fixed.slice(), couple: couplePlaces, totalPeople: WEDDING_PEOPLE } : null)
         : (cfg.dinner ? { sides: { T: seats.filter((s) => s.side === 'T'), B: seats.filter((s) => s.side === 'B') }, totalPeople: RULES.dinner.totalPeople, poolSide: cfg.dinner.poolSide === 'B' ? 'B' : 'T' } : null);
     }
     if (retired.length) out.retired = retired;
@@ -285,12 +339,13 @@ export class Seating {
     const gr = request.headers.get('x-gr-verified') === 'yes';   /* set only by the Worker after the token check */
     let identity = null;                                          /* set only by the Worker after the bearer check */
     try { identity = JSON.parse(request.headers.get('x-siyl-identity') || 'null'); } catch (e) { identity = null; }
+    const couple = coupleOf(request.headers.get('x-siyl-couple'));   /* set only by the Worker, from the register's roles */
 
     if (identity) await this.learnName(identity);
-    if (op === 'read') return json(await this.view(identity || url.searchParams.get('invitation') || ''));
+    if (op === 'read') return json(await this.view(identity || url.searchParams.get('invitation') || '', couple));
 
     if (op === 'mine') {
-      const v = await this.view(identity || url.searchParams.get('invitation') || '');
+      const v = await this.view(identity || url.searchParams.get('invitation') || '', couple);
       return json({ ok: true, open: v.open, frozen: v.frozen, configured: v.configured, mine: v.mine });
     }
     /* GUEST RELATIONS' OVERVIEW (28 Sep 2026): every invitation's own seats in ONE read — exactly the `mine` of the per-guest read
@@ -300,7 +355,7 @@ export class Seating {
       const cfg = await this.config(), byInvitation = {};
       for (const event of EVENTS) {
         const holds = await this.holds(event);
-        for (const s of seatsOf(cfg, event)) {
+        for (const s of seatsOf(cfg, event, holds)) {
           const h = holds[s.seatId]; if (!h || s.family || !h.invitationId) continue;
           const m = byInvitation[h.invitationId] || (byInvitation[h.invitationId] = { ceremony: {}, dinner: {} });
           (m[event] || (m[event] = {}))[h.guestId] = s.seatId;
@@ -324,23 +379,28 @@ export class Seating {
         const cfg = await this.config();
         if (!cfg.open) return json({ ok: false, error: 'seating is not open' }, 423);
         if (cfg.frozen) return json({ ok: false, error: 'seating is frozen' }, 423);
-        const seat = seatsOf(cfg, event).find((s) => s.seatId === seatId);
+        /* THE COUPLE'S PLACES ARE FIXED (Owner, 2 Oct 2026): the Bride and the Groom hold the two front-centre places and never an
+           ordinary ceremony chair besides — refused here, whatever the page sends; their dinner chair is chosen like everyone's */
+        if (event === 'ceremony' && isCouple(couple, guestId)) return json({ ok: false, error: 'the couple\'s ceremony places are fixed' }, 409);
+        const holds = await this.holds(event);
+        const seat = seatsOf(cfg, event, holds).find((s) => s.seatId === seatId);
         if (!seat) return json({ ok: false, error: 'unknown seat' }, 404);
         if (seat.family) return json({ ok: false, error: 'reserved for family' }, 409);
-        const holds = await this.holds(event);
         const current = holds[seatId];
         if (current && !(current.guestId === guestId)) {
-          return json({ ok: false, error: 'taken', ...(await this.view(identity)) }, 409);
+          return json({ ok: false, error: 'taken', ...(await this.view(identity, couple)) }, 409);
         }
         const previous = await this.holdOf(event, null, guestId);
         if (previous && previous.state === 'allocated') return json({ ok: false, error: 'allocated by Guest Relations' }, 423);
+        /* FIFTY, NEVER MORE (Owner, 2 Oct 2026): a NEW ceremony hold is refused once 48 guest chairs are held — whatever the grid */
+        if (event === 'ceremony' && !previous && seatsOf(cfg, event, holds).filter((x) => holds[x.seatId]).length >= CAPACITY.ceremony.guestSeats) return json({ ok: false, error: 'the ceremony is full' }, 409);
         const held = Object.values(holds).filter((h) => h.invitationId === invitationId && !(previous && h.guestId === guestId)).length;
         if (held >= MAX_PER_INVITATION) return json({ ok: false, error: 'too many seats for one invitation' }, 409);
         /* HOLD THE NEW CHAIR FIRST … */
         await this.storage.put(HOLD + event + ':' + seatId, { invitationId, guestId, partyId: identity.partyId || null, name, at: new Date().toISOString(), state: 'held' });
         /* … AND ONLY THEN LET THE OLD ONE GO */
         if (previous && previous.seatId !== seatId) await this.storage.delete(HOLD + event + ':' + previous.seatId);
-        return json({ ok: true, event, seatId, guestId, ...(await this.view(identity)) });
+        return json({ ok: true, event, seatId, guestId, ...(await this.view(identity, couple)) });
       });
     }
 
@@ -358,7 +418,7 @@ export class Seating {
         const previous = await this.holdOf(event, null, guestId);
         if (previous && previous.state === 'allocated') return json({ ok: false, error: 'allocated by Guest Relations' }, 423);
         if (previous) await this.storage.delete(HOLD + event + ':' + previous.seatId);
-        return json({ ok: true, released: previous ? previous.seatId : null, ...(await this.view(identity)) });
+        return json({ ok: true, released: previous ? previous.seatId : null, ...(await this.view(identity, couple)) });
       });
     }
 
@@ -377,8 +437,9 @@ export class Seating {
         /* a chair that no longer exists cannot stay held — EXCEPT a retired 13: that hold is kept and reported, never dropped */
         const kept = [];
         for (const event of EVENTS) {
-          const ids = new Set(seatsOf(next, event).map((s) => s.seatId));
-          for (const seatId of Object.keys(await this.holds(event))) {
+          const held = await this.holds(event);
+          const ids = new Set(seatsOf(next, event, held).map((s) => s.seatId));
+          for (const seatId of Object.keys(held)) {
             if (ids.has(seatId)) continue;
             if (event === 'dinner' && isRetiredSeat(seatId)) { kept.push({ event, seatId, label: retiredLabel(seatId) }); console.warn('[seating] a hold on a retired seat is kept', event, seatId); continue; }
             await this.storage.delete(HOLD + event + ':' + seatId);
@@ -416,10 +477,11 @@ export class Seating {
           if (previous) await this.storage.delete(HOLD + event + ':' + previous.seatId);
           return json({ ok: true, released: previous ? previous.seatId : null });
         }
-        const seat = seatsOf(cfg, event).find((s) => s.seatId === seatId);
+        if (event === 'ceremony' && isCouple(couple, guestId)) return json({ ok: false, error: 'the couple\'s ceremony places are fixed' }, 409);
+        const holds = await this.holds(event);
+        const seat = seatsOf(cfg, event, holds).find((s) => s.seatId === seatId);
         if (!seat) return json({ ok: false, error: 'unknown seat' }, 404);
         if (seat.family) return json({ ok: false, error: 'reserved for family' }, 409);
-        const holds = await this.holds(event);
         const current = holds[seatId];
         if (current && !(current.invitationId === invitationId && current.guestId === guestId) && !body.force) {
           return json({ ok: false, error: 'taken', by: current }, 409);
@@ -473,7 +535,7 @@ export class Seating {
       const out = { ok: true, open: !!cfg.open, frozen: !!cfg.frozen, updatedAt: cfg.updatedAt || null, capacity: CAPACITY, events: {} };
       for (const event of EVENTS) {
         const holds = await this.holds(event);
-        const seats = seatsOf(cfg, event).map((s) => {
+        const seats = seatsOf(cfg, event, holds).map((s) => {
           const h = holds[s.seatId];
           return { ...s, state: s.family ? 'family' : h ? h.state : 'available', invitationId: h ? h.invitationId : null, guestId: h ? h.guestId : null, partyId: h ? h.partyId || null : null, name: h ? h.name || '' : '', at: h ? h.at : null };
         });
@@ -481,13 +543,15 @@ export class Seating {
           configured: seats.length > 0,
           seats,
           guestSeats: seats.length,
-          capacity: event === 'ceremony' ? { guestSeats: CAPACITY.ceremony.guestSeats, left: CAPACITY.ceremony.left, right: CAPACITY.ceremony.right, fixed: RULES.ceremony.fixed.slice() }
+          capacity: event === 'ceremony' ? { guestSeats: CAPACITY.ceremony.guestSeats, left: CAPACITY.ceremony.left, right: CAPACITY.ceremony.right, fixed: RULES.ceremony.fixed.slice(), couple: CAPACITY.ceremony.couple, totalPeople: CAPACITY.ceremony.totalPeople }
                                         : { guestSeats: CAPACITY.dinner.guestSeats, top: CAPACITY.dinner.top, bottom: CAPACITY.dinner.bottom, totalPeople: CAPACITY.dinner.totalPeople },
           family: seats.filter((s) => s.family).length,
           held: seats.filter((s) => s.state === 'held').length,
           allocated: seats.filter((s) => s.state === 'allocated').length,
           available: seats.filter((s) => s.state === 'available').length,
         };
+        /* the couple's two places, by the register's roles (the Worker's header) — part of the fifty */
+        if (event === 'ceremony') out.events[event].couple = RULES.ceremony.fixed.map((position) => ({ position, guestId: couple && couple[position] ? couple[position].g : null, name: couple && couple[position] ? couple[position].n : '' }));
         const rh = retiredHolds(event, holds).map((r) => ({ seatId: r.seatId, label: retiredLabel(r.seatId), state: r.hold.state, invitationId: r.hold.invitationId, guestId: r.hold.guestId, name: r.hold.name || '', at: r.hold.at }));
         if (rh.length) out.events[event].retired = rh;
       }

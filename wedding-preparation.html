@@ -9,8 +9,8 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 .bag{width:44px;height:44px;display:flex;align-items:center;justify-content:center;position:relative;color:#313131;text-decoration:none}.bag .bgi{display:block}
 .bb{position:absolute;top:1px;right:0;min-width:14px;height:14px;padding:0 3px;background:#313131;color:#F3EEE7;font-size:8.5px;line-height:1;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;display:none;align-items:center;justify-content:center;box-shadow:0 0 0 2px #F3EEE7;border-radius:1px}
 </style>
-<script src="assets/i18n/siyl-i18n.js?v=418cb6c8"></script>
-<link rel="stylesheet" href="assets/aman.css?v=8726da2c"><link rel="stylesheet" href="assets/prep.css?v=0a6eb26a"></head><body>
+<script src="assets/i18n/siyl-i18n.js?v=0fac5941"></script>
+<link rel="stylesheet" href="assets/aman.css?v=061a38ba"><link rel="stylesheet" href="assets/prep.css?v=0a6eb26a"></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="My Bag"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main class="prep-page" id="wedding-preparation">
 <div class="prep-head">
@@ -79,7 +79,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/temple.js?v=a2f797fc"></script>
 <script src="assets/seatlabels.js?v=411e8a27"></script>
 <script src="assets/avatar.js?v=248739ed"></script>
-<script src="assets/seating.js?v=a8578ba3"></script>
+<script src="assets/seating.js?v=b8f38de4"></script>
 <script src="assets/seatpass.js?v=223ee8b2"></script>
 <script src="assets/vendor/qrcode.js?v=18ae399f"></script>
 <script src="assets/confirm.js?v=d1b9a554"></script>
@@ -234,10 +234,12 @@ function paintSeats(){
   var h=wcard(p,id);
   EV.forEach(function(e){
     var ev=e[0],sid=seatOf(ev,id),ok=S.configured(ev),changing=!!(mode&&mode.ev===ev&&mode.kind==='change'),choosing=!!(mode&&mode.ev===ev);
-    /* the hosts: the ceremony place is the fixed front centre — no chair to choose */
+    /* the hosts (Owner, 2 Oct 2026): the couple's place is fixed at the front centre — two of the fifty places of the one plan, drawn
+       like every seat; they see the whole plan and who sits where, read-only (nothing to choose, nothing taken from anyone) */
     if(ev==='ceremony'&&p.hosts){
       h+='<div class="p-card" style="margin-top:var(--s4)" data-seatmap="ceremony" data-hosts="true" data-state="fixed"><p class="t-l1 on">Front centre · '+esc(fixedWords())+'</p><h3 class="t-h1">Vow Ceremony</h3><p class="t-b2">'+e[2]+'</p>'+
-         '<p class="t-b1 measure">In front of the rows — there is no seat to choose. Your dinner seat is chosen below, like everyone else&rsquo;s.</p></div>';return}
+         '<p class="t-b1 measure">Your place is fixed at the front centre of the plan. Below is the whole ceremony — who sits where. Your dinner seat is chosen below, like everyone else&rsquo;s.</p>'+
+         (ok?'<div class="p-seatbox" data-ev="ceremony" data-fixed="true"></div>':'')+'</div>';return}
     /* not attending this event: no seat is needed, and none is asked */
     if(!attending(ev)){
       h+='<div class="p-card" style="margin-top:var(--s4)" data-seatmap="'+ev+'" data-state="'+(T&&T.eventOf(id,ev==='ceremony'?'vows':'dinner')===null?'undecided':'none')+'"><p class="t-l1">'+(T&&T.eventOf(id,ev==='ceremony'?'vows':'dinner')===null?'Please answer The Wedding first':'Not attending')+'</p><h3 class="t-h1">Your '+ev+' seat</h3><p class="t-b2">'+e[2]+'</p>'+
@@ -273,8 +275,9 @@ function paintSeats(){
     h+=open+'</div>'});
   seatbox.innerHTML=h;
   EV.forEach(function(e){var ev=e[0],box=seatbox.querySelector('[data-ev="'+ev+'"]');if(!box)return;
-    var sid=seatOf(ev,id),choosing=!!(!S.frozen()&&(!sid||(mode&&mode.ev===ev&&mode.kind==='change'))&&!(mode&&mode.busy));
-    S.render(box,ev,{guestId:id,selectable:!S.frozen(),choosing:choosing,pending:mode&&mode.ev===ev?mode.pending:null,subjectName:null,partyName:words.partyName,frozen:words.frozen,onSelect:function(seatId){
+    var fixedHere=ev==='ceremony'&&p.hosts;
+    var sid=seatOf(ev,id),choosing=!fixedHere&&!!(!S.frozen()&&(!sid||(mode&&mode.ev===ev&&mode.kind==='change'))&&!(mode&&mode.busy));
+    S.render(box,ev,{guestId:id,selectable:!S.frozen()&&!fixedHere,choosing:choosing,pending:mode&&mode.ev===ev?mode.pending:null,subjectName:null,partyName:words.partyName,frozen:words.frozen,onSelect:function(seatId){
       if(!choosing||(mode&&mode.busy))return;
       if(!mode||mode.ev!==ev)mode={ev:ev,kind:sid?'change':'choose',guestId:id,pending:null,err:null};
       if(mode.pending===seatId){withdrawn=seatId;mode.pending=null}else mode.pending=seatId;

@@ -18,19 +18,19 @@ function seatsView() {
   return { ceremony: { rows: C }, dinner: { sides: { T: side('T'), B: side('B') } } };
 }
 function hold(v, seatId, holder, name, state) { const all = v.ceremony.rows.flatMap((r) => r.seats).concat(v.dinner.sides.T, v.dinner.sides.B); Object.assign(all.find((s) => s.seatId === seatId), { holder, name, state: state || 'taken' }); }
-const DATA = (extra) => ({ ok: true, capacity: 52, joining: 4, couple: 2,
+const DATA = (extra) => ({ ok: true, capacity: 50, joining: 4, couple: 2,
   people: [{ id: 'G048', name: 'Haruthai', photo: true, nationality: 'Thai', role: 'Bride', music: ['Pop'], after: 'pool' }, { id: 'G049', name: 'Suthep', photo: true, nationality: 'Thai, German', role: 'Groom', music: ['Latin'], after: 'party' },
     { id: 'G2', name: 'Ben', photo: false, nationality: 'German', joinedAt: '2026-09-19', music: ['Latin', 'Pop'], after: 'party' }, { id: PEGGY.guestId, name: 'Peggy', photo: false, nationality: 'Swiss', joinedAt: '2026-09-20', music: ['Latin'], after: 'pool' }],
   music: { responses: 4, leaders: ['Latin'], ranking: GENRES.map((g) => ({ genre: g, count: g === 'Latin' ? 3 : g === 'Pop' ? 2 : 0 })) }, after: { responses: 4, pool: 2, party: 2 }, ...(extra || {}) });
 const seated = (w, v) => { w.SIYL_SEATS = { ready: () => true, error: () => null, view: () => v, seatOf: (ev, g) => (g === PEGGY.guestId ? (ev === 'ceremony' ? 'C-L-03-02' : 'D-T-07') : ev === 'dinner' ? 'D-B-11' : null) }; };
 
-test('A SIGNED-IN GUEST · the whole circle: joining n / 52, the people with their nationality, the ceremony seat and who is around, the dinner seat, left · right · across, the thirteen genres, the favourite, pool and party', async () => {
+test('A SIGNED-IN GUEST · the whole circle: joining n / 50, the people with their nationality, the ceremony seat and who is around, the dinner seat, left · right · across, the thirteen genres, the favourite, pool and party', async () => {
   const w = timers(page({ auth: PEGGY, modules: PULSE })), P = w.SIYL_PULSE, v = seatsView();
   hold(v, 'C-L-03-02', PEGGY.guestId, 'Peggy', 'yours'); hold(v, 'C-L-03-01', 'G2', 'Ben'); hold(v, 'D-T-07', PEGGY.guestId, 'Peggy', 'yours'); hold(v, 'D-T-06', 'G2', 'Ben'); hold(v, 'D-B-07', 'G049', 'Suthep');
   seated(w, v); w.fetch = () => Promise.resolve({ ok: true, json: () => Promise.resolve(DATA()) });
   await P.load(true);
   const h = P.circleHtml({ guestId: PEGGY.guestId }, false);
-  assert.match(h, /<b>4<\/b><span class="pl-of">\/ 52<\/span>/); assert.match(h, /Ben<\/span><span class="pl-pc">German/); assert.match(h, /Suthep<\/span><span class="pl-pc">Thai, German/);
+  assert.match(h, /<b>4<\/b><span class="pl-of">\/ 50<\/span>/); assert.match(h, /Ben<\/span><span class="pl-pc">German/); assert.match(h, /Suthep<\/span><span class="pl-pc">Thai, German/);
   assert.match(h, /<span>Your seat<\/span> <b>B3<\/b>/); assert.match(h, /Around you[\s\S]*Ben/);
   assert.match(h, /<span>Your seat<\/span> <b>A7<\/b>/); assert.match(h, /Next to you[\s\S]*data-dir="l"[\s\S]*Ben/); assert.match(h, /Across from you[\s\S]*Suthep/);
   assert.equal((h.match(/class="pl-row/g) || []).length, 13, 'all thirteen genres'); assert.match(h, /Current favourite<\/span> · <b>Latin<\/b>/);
@@ -41,11 +41,14 @@ test('A SIGNED-IN GUEST · the whole circle: joining n / 52, the people with the
 test('THE HOSTS · Front centre, their own dinner seat with its neighbours, and the whole plan read-only', async () => {
   const w = timers(page({ auth: HARUTHAI, modules: PULSE })), P = w.SIYL_PULSE, v = seatsView();
   hold(v, 'D-B-11', 'G049', 'Suthep', 'yours'); hold(v, 'D-B-12', 'G048', 'Haruthai', 'party');
+  v.ceremony.couple = [{ position: 'BRIDE', role: 'Bride', fixed: true, holder: 'G048', name: 'Haruthai', state: 'party' }, { position: 'GROOM', role: 'Groom', fixed: true, holder: 'G049', name: 'Suthep', state: 'yours' }];
   seated(w, v); w.fetch = () => Promise.resolve({ ok: true, json: () => Promise.resolve(DATA()) });
   await P.load(true);
   const h = P.circleHtml({ guestId: 'G049' }, true);
-  assert.match(h, /<span>Your place<\/span> <b>Front centre<\/b>/); assert.match(h, /<span>Your seat<\/span> <b>B11<\/b>/); assert.match(h, /Next to you[\s\S]*Haruthai/);
-  assert.match(h, /View full seating/); assert.doesNotMatch(h, /<form|<select|data-select|data-hold|draggable/);
+  /* THE COUPLE ARE IN THE PLAN (Owner, 2 Oct 2026): Suthep's own place is the Groom's, marked as his, the whole plan beside it */
+  assert.match(h, /<span>Your seat<\/span> <b>Groom<\/b><span>Front centre<\/span>/); assert.match(h, /data-pl-place="GROOM"><i class="pl-c is-me">/); assert.match(h, /data-pl-place="BRIDE"><i class="pl-c is-held">/);
+  assert.match(h, /<span>Your seat<\/span> <b>B11<\/b>/); assert.match(h, /Next to you[\s\S]*Haruthai/);
+  assert.match(h, /data-pl-roster/); assert.doesNotMatch(h, /<form|<select|data-select|data-hold|draggable/);
 });
 
 test('A STALLED READ ENDS · no answer within the timeout is a calm failure with a retry — never an endless "Looking up…"; the retry reads again and draws the circle', async () => {
@@ -57,10 +60,10 @@ test('A STALLED READ ENDS · no answer within the timeout is a calm failure with
   assert.equal(P.failed(), true);
   const f = P.circleHtml({ guestId: PEGGY.guestId }, false);
   assert.match(f, /data-pl-circle-state="unavailable"/); assert.match(f, /We couldn’t load your Wedding Circle just now\./); assert.match(f, /data-pl-retry/);
-  assert.doesNotMatch(f, /Looking up|\b0\b \/ 52/, 'unknown is never shown as zero');
+  assert.doesNotMatch(f, /Looking up|\b0\b \/ 50/, 'unknown is never shown as zero');
   w.fetch = () => Promise.resolve({ ok: true, json: () => Promise.resolve(DATA()) });
   await P.load(true);
-  assert.equal(P.failed(), false); assert.match(P.circleHtml({ guestId: PEGGY.guestId }, false), /<b>4<\/b><span class="pl-of">\/ 52<\/span>/);
+  assert.equal(P.failed(), false); assert.match(P.circleHtml({ guestId: PEGGY.guestId }, false), /<b>4<\/b><span class="pl-of">\/ 50<\/span>/);
 });
 
 test('A REFUSED READ ENDS · a 503 edge page (the platform\'s, not JSON) is the same calm failure; the retry button is wired to read again', async () => {

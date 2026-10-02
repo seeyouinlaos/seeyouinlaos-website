@@ -1,8 +1,8 @@
 {
  "mode": "fast",
- "fingerprint": "e4e047b7a46d82cf",
+ "fingerprint": "a9e89064d3aed460",
  "origin": "local stage",
- "finished": "2026-09-27T09:15:26.410Z",
+ "finished": "2026-10-02T00:15:41.378Z",
  "engines": [
   "chromium",
   "webkit"
@@ -26,7 +26,7 @@
  "unexplained": 0,
  "rootCauses": [],
  "exceptions": {
-  "button, .p-act, .a-cta, .cta, .x-cta, .dcta": 1622,
+  "button, .p-act, .a-cta, .cta, .x-cta, .dcta": 1510,
   ".acar .atrk, .refgal .atrk, .others .oc": 300,
   ".a-duo .a-map": 42,
   "footer.sfoot": 840,

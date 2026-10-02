@@ -82,7 +82,9 @@ test('LABELS · the mapping is a bijection over the ledger, in both directions, 
   assert.equal(L.seatId('dinner', 'A26'), 'D-T-26'); assert.equal(L.seatId('dinner', 'B26'), 'D-B-26');
   for (const bad of ['C-L-00-01', 'C-L-11-01', 'C-L-04-03', 'C-R-04-04', 'D-T-00', 'D-T-27', 'D-X-01', 'X', null]) assert.equal(L.label(bad), null, String(bad));
   /* the same ids drawn by the Worker's rules are the ids the labels know */
-  const drawn = seatsOf(cfg, 'ceremony').map((s) => s.seatId); assert.deepEqual(drawn.sort(), [...CEREMONY].sort());
+  /* the plan is the grid less the two retired, unheld positions (Owner, 2 Oct 2026 · 48 chairs + the couple = 50): A10 and B10 */
+  const drawn = seatsOf(cfg, 'ceremony', {}).map((s) => s.seatId); assert.deepEqual(drawn.sort(), [...CEREMONY].filter((id) => !/^C-L-10-0[12]$/.test(id)).sort());
+  assert.deepEqual(CEREMONY.filter((id) => !drawn.includes(id)).map((id) => L.label(id)).sort(), ['A10', 'B10']);
   const drawnD = seatsOf(cfg, 'dinner').map((s) => s.seatId); assert.deepEqual(drawnD.sort(), [...DINNER].sort());
   /* words: label first, then the place — no ledger id anywhere */
   assert.equal(L.describe('C-R-04-02'), 'Right block · row 4'); assert.equal(L.describe('C-L-02-01'), 'Left block · row 2'); assert.equal(L.describe('D-T-17'), 'Long table · side A · poolside'); assert.equal(L.describe('D-B-03'), 'Long table · side B · facing the pool');   /* TO-01959 · TO-00355: the seat label carries the number, the words carry the side */
