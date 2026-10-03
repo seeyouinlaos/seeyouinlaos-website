@@ -32,6 +32,11 @@ export const GIFTS = Object.freeze([
   E('CON002', 'prewed', 'souphattra-presidential', 'special', 150),
   E('CON001', 'wedstay', 'souphattra-presidential', 'special', 150, { nights: 'both' }),
   E('CON002', 'wedstay', 'souphattra-presidential', 'special', 150, { nights: 'both' }),
+  /* E21 · pre-wedding (25 – 27 February 2027), Heritage Executive · Peggy & Steffie (Owner, 3 Oct 2026): "260 USD for 2 Nights not
+     per Person · both pay total 260" — one room, both guests, both nights: USD 130 each for the two nights (USD 65 per person per
+     night). Their personal rate only: the public pre-wedding Heritage Executive rate is unchanged (assets/rooms-data.js). */
+  E('CON003', 'prewed', 'heritage-executive', 'special', 130),
+  E('CON004', 'prewed', 'heritage-executive', 'special', 130),
 ]);
 
 /* the entries of one person, in the form the guest's own pages read (never the person id) */

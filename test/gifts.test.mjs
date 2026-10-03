@@ -56,7 +56,9 @@ test('THE LIST · one person (the register id, never a name), one window, one ro
     { contactId: 'CON001', window: 'prewed', room: 'souphattra-presidential', kind: 'special', charge: 150 },
     { contactId: 'CON002', window: 'prewed', room: 'souphattra-presidential', kind: 'special', charge: 150 },
     { contactId: 'CON001', window: 'wedstay', room: 'souphattra-presidential', kind: 'special', charge: 150, nights: 'both' },
-    { contactId: 'CON002', window: 'wedstay', room: 'souphattra-presidential', kind: 'special', charge: 150, nights: 'both' }]);
+    { contactId: 'CON002', window: 'wedstay', room: 'souphattra-presidential', kind: 'special', charge: 150, nights: 'both' },
+    { contactId: 'CON003', window: 'prewed', room: 'heritage-executive', kind: 'special', charge: 130 },
+    { contactId: 'CON004', window: 'prewed', room: 'heritage-executive', kind: 'special', charge: 130 }]);
   assert.deepEqual(giftsFor('CON005'), [
     { window: 'prewed', room: 'heritage-executive', kind: 'special', charge: 225 },
     { window: 'wedstay', room: 'heritage-executive', kind: 'gift', charge: 0, by: 'bride-groom' },
@@ -187,4 +189,21 @@ test('THE FIRST VISIT · a gift that arrives after the page is drawn redraws the
   /* …and the stay's own line with them (29 Sep 2026: a first visit drew it before the guest's own rates had arrived) */
   assert.match(src('journeys.html'), /renderRows\(box,box\.getAttribute\('data-picking'\)==='1'\)\}\);paintFromLines\(\);paintAll\(\)\}\);/);
   assert.match(src('room.html'), /document\.addEventListener\('siyl:gifts', function \(\) \{ try \{ if \(sessionStorage\.getItem\('siyl\.gifts\.rebuilt'\)\) return;/);
+});
+
+test('PEGGY & STEFFIE (Owner, 3 Oct 2026 · 002 E21) · one Heritage Executive room before the wedding, both guests, both nights: USD 260 in all — USD 130 each, never per night; the public rate is unchanged', () => {
+  for (const c of ['CON003', 'CON004']) assert.deepEqual(giftsFor(c), [{ window: 'prewed', room: 'heritage-executive', kind: 'special', charge: 130 }], c);
+  let room = 0;
+  for (const gid of ['G001', 'G002']) {
+    const w = page({ auth: { ...PEGGY, guestId: gid }, seed: { 'siyl.gifts': { guestId: gid, gifts: giftsFor(gid === 'G001' ? 'CON003' : 'CON004'), at: Date.now() } } });
+    const q = w.SIYL_PRICE.quote('prewed', 'heritage-executive');
+    assert.equal(q.total, 130, gid + ': USD 130 for the two nights'); assert.equal(q.personal, 'special'); assert.equal(q.hotelTotal, 260, 'the listed rate stays a fact beneath');
+    room += q.total;
+  }
+  assert.equal(room, 260, 'the shared room: USD 260 for both nights');
+  /* the public rate: any other guest, and a signed-out visitor, still pay the listed pre-wedding rate */
+  const other = page({ auth: { ...PEGGY, guestId: 'G777' } }).SIYL_PRICE.quote('prewed', 'heritage-executive');
+  assert.equal(other.total, 260); assert.equal(other.personal, undefined);
+  assert.equal(page({ auth: null }).SIYL_PRICE.quote('prewed', 'heritage-executive').total, 260);
+  assert.equal(page({ auth: null }).SIYL_ROOMS.souphattra.rooms.find((r) => r.slug === 'heritage-executive').rates.prewed, 130, 'USD 130 per person per night, as listed');
 });
