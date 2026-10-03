@@ -50,6 +50,7 @@ export { Seating } from './seating.js';
 export { Rooms } from './rooms.js';
 export { Drafts } from './drafts.js';
 import { identify, owns, loadIndex } from './auth.js';
+import { authIdOf } from '../register/crypto.mjs';   /* the one-way derivation the register's index is keyed by (the guest's own document read) */
 import { MEDIA_SIZES } from './media-sizes.js';
 import { giftsFor, verifiedLines } from './gifts.js';   /* the Bride & Groom's hospitality: one guest's own charge (Owner, 28 Sep 2026) */   /* every film's size, written at build time (src/build-media-sizes.cjs) */
 import { SEED } from './inventory-seed.js';
@@ -132,6 +133,14 @@ export default {
      * retention is the Owner's decision of 21 Sep 2026: kept until 7 April
      * 2027 (thirty days after the journey ends on 8 March), then purged by
      * the Worker's one scheduled trigger — see DOC_RETENTION. */
+    /* THE GUEST'S OWN DOCUMENT (Owner, 3 Oct 2026): the signed-in guest opens the passport or flight document they sent — their
+       own, the current copy, nothing else. Who they are comes from their bearer against the register read fresh; no key, no
+       invitation and no guest id is ever taken from the request. Read only. */
+    if (url.pathname === '/api/document/mine') {
+      if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders(request) });
+      if (request.method !== 'GET') return docJson({ ok: false, error: 'method not allowed' }, 405, request);
+      return handleOwnDocument(request, env, url);
+    }
     if (url.pathname === '/api/document') {
       if (request.method === 'OPTIONS') {
         return new Response(null, { status: 204, headers: corsHeaders(request) });
@@ -505,6 +514,56 @@ async function handleDocument(request, env) {
     201, corsHeaders(request));
 }
 
+/* THE CURRENT COPY (3 Oct 2026 · one rule for the guest and for Guest Relations): of one guest's documents of one kind, the
+   newest key — every listing page walked; keys sort by their ISO receipt time, then by their digest, so the choice is
+   deterministic. A listing that fails throws: the caller fails closed, it never serves a copy it could not prove current. */
+async function currentDocKey(env, prefix) {
+  let newest = null, cursor;
+  do {
+    const l = await env.DOCS.list({ prefix, cursor });
+    for (const o of l.objects || []) if (DOC_KEY.test(o.key) && o.key.startsWith(prefix) && (!newest || o.key > newest)) newest = o.key;
+    cursor = l.truncated ? l.cursor : null;
+  } while (cursor);
+  return newest;
+}
+/* every answer of the guest's own document route is private and never cached — the errors too */
+function docJson(obj, status, request) { const r = json(obj, status, corsHeaders(request)); r.headers.set('cache-control', 'private, no-store'); r.headers.set('x-content-type-options', 'nosniff'); return r; }
+/* THE STRICT IDENTITY (Owner, 3 Oct 2026 · a guest reading their own passport or flight document): the register is read fresh for
+   this request — never a cached copy — so a code withdrawn from the register stops at once. The same derivation src/auth.js uses
+   (bearer → auth id → the index entry); an unreadable register → { unavailable } (the caller fails closed); unknown → null. */
+async function identifyStrict(request, env) {
+  const bearer = (request.headers.get('x-siyl-auth') || '').trim();
+  if (!/^[0-9a-f]{64}$/.test(bearer)) return null;
+  let entries = null;
+  try {
+    const res = await env.ASSETS.fetch(new Request(new URL(request.url).origin + '/register/auth-index.json'));
+    if (!res.ok) return { unavailable: true };
+    const j = await res.json(); entries = j && j.entries && typeof j.entries === 'object' ? j.entries : null;
+  } catch (e) { return { unavailable: true }; }
+  if (!entries) return { unavailable: true };
+  const e = entries[await authIdOf(bearer)];
+  return e && e.i && e.g ? { invitationId: e.i, guestId: e.g, partyId: e.p || null } : null;
+}
+async function handleOwnDocument(request, env, url) {
+  const who = await identifyStrict(request, env);
+  if (who && who.unavailable) return docJson({ ok: false, error: 'try again in a moment', retry: true }, 503, request);
+  if (!who) return docJson({ ok: false, error: 'unauthorised' }, 401, request);
+  const kind = url.searchParams.get('kind') || '';
+  if (kind !== 'passport' && kind !== 'flight') return docJson({ ok: false, error: 'unknown document kind' }, 400, request);
+  if (!env.DOCS) return docJson({ ok: false, error: 'document storage is not enabled yet', enabled: false }, 503, request);
+  if (!/^INV-[A-Za-z0-9_-]{1,32}$/.test(who.invitationId) || !/^[A-Za-z0-9_-]{1,32}$/.test(who.guestId)) return docJson({ ok: false, error: 'unauthorised' }, 401, request);
+  /* the guest's own prefix, built here from the verified identity — a party mate's documents live under their own guest id */
+  const prefix = 'doc/' + who.invitationId + '/' + who.guestId + '/' + kind + '/';
+  let key = null, obj = null;
+  try { key = await currentDocKey(env, prefix); if (key) obj = await env.DOCS.get(key); } catch (e) { return docJson({ ok: false, error: 'document store unavailable', retry: true }, 503, request); }
+  if (!key || !obj) return docJson({ ok: false, error: 'no document' }, 404, request);
+  const cm = obj.customMetadata || {}, type = (obj.httpMetadata && obj.httpMetadata.contentType) || '';
+  const safe = DOC_TYPES.includes(type) ? type : 'application/octet-stream';
+  const name = String(cm.filename || kind).replace(/[^\w.-]+/g, '_').slice(0, 120) || kind;
+  const headers = { 'content-type': safe, 'content-length': String(obj.size), 'content-disposition': 'inline; filename="' + name + '"', 'cache-control': 'private, no-store', 'x-content-type-options': 'nosniff', ...corsHeaders(request) };
+  return new Response(obj.body, { status: 200, headers });
+}
+
 /* the metadata of one invitation's documents: key · kind · guest · filename · type · bytes · received — never the bytes */
 const DOC_KEY = /^doc\/(INV-[A-Za-z0-9_-]{1,32})\/([A-Za-z0-9_-]{1,32})\/(passport|flight)\/[0-9TZ:.-]+-[0-9a-f]{12}$/;
 async function handleGrDocuments(url, env) {
@@ -521,7 +580,9 @@ async function handleGrDocuments(url, env) {
       cursor = l.truncated ? l.cursor : null;
     } while (cursor);
   } catch (e) { return json({ ok: false, error: 'document store unavailable' }, 503); }
-  documents.sort((a, b) => (a.receivedAt < b.receivedAt ? 1 : a.receivedAt > b.receivedAt ? -1 : 0));
+  /* newest first — the receipt time, then the key (the same order the current-copy rule uses), so the copy listed as current is
+     always the one Guest Relations can open, equal timestamps included */
+  documents.sort((a, b) => (a.receivedAt < b.receivedAt ? 1 : a.receivedAt > b.receivedAt ? -1 : a.key < b.key ? 1 : a.key > b.key ? -1 : 0));
   /* only the newest object of each guest and kind is the guest's document; an earlier copy a replacement superseded is never
      shown (PRQ-06-12) — ?all=1 lists every stored object for an audit */
   if (url.searchParams.get('all') !== '1') { const seen = new Set();   /* the list is newest first: the first of each guest and kind is kept */
@@ -537,7 +598,9 @@ async function handleGrDocument(url, env) {
   if (!obj) return json({ ok: false, error: 'no such document' }, 404);
   /* a copy a later replacement superseded is not the guest's document any more (PRQ-06-12) — ?all=1 for an audit */
   if (url.searchParams.get('all') !== '1') {
-    try { const parts = key.split('/'), prefix = parts.slice(0, 4).join('/') + '/'; const l = await env.DOCS.list({ prefix }); if ((l.objects || []).some((o) => o.key !== key && o.key > key)) return json({ ok: false, error: 'superseded by a newer copy' }, 404); } catch (e) { /* the read stands */ }
+    /* the same current-copy rule as the guest's own read: every page walked; unprovable is refused, never served */
+    let current = null; try { current = await currentDocKey(env, key.split('/').slice(0, 4).join('/') + '/'); } catch (e) { return json({ ok: false, error: 'document store unavailable' }, 503); }
+    if (current !== key) return json({ ok: false, error: 'superseded by a newer copy' }, 404);
   }
   const cm = obj.customMetadata || {}, type = (obj.httpMetadata && obj.httpMetadata.contentType) || 'application/octet-stream';
   const name = String(cm.filename || key.split('/').pop() || 'document').replace(/[^\w.-]+/g, '_').slice(0, 120);

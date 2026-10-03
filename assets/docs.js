@@ -8,8 +8,10 @@
    STATE KEYS, NOT WORDS (Window 007 · PRQ-06-11): state() returns a key —
      'none'      nothing has arrived                  → “Not added yet”
      'received'  the file reached our store — a receipt only, nothing more;
-                 a replacement is 'received' too (the server deletes the
-                 earlier copy, PRQ-06-12)             → “Received”
+                 a replacement is 'received' too: the new copy becomes the
+                 current one; the earlier copy stays in the private store,
+                 hidden from the guest and from Guest Relations, until the
+                 retention purge of 7 April 2027 (PRQ-06-12) → “Received”
    and stateWords(key) gives the guest's words. REVIEWED (a person has looked
    at it) is NEVER set by this file: the guest surface only reports a receipt.
 
@@ -17,6 +19,12 @@
    file keeps only the receipt — file name, size, type, digest, timestamp. No
    document byte is ever written to localStorage, to the repository, or to any
    public URL, and there is no public read route for a stored document.
+
+   VIEW (Owner, 3 Oct 2026): the signed-in guest opens their OWN current
+   document — GET /api/document/mine with their bearer; the Worker decides
+   whose it is from the bearer alone. The bytes become a blob in this tab's
+   memory for the viewer and are released after a while, on sign-out, or when
+   another guest signs in on this device; nothing is stored.
    ========================================================================== */
 (function () {
   'use strict';
@@ -50,6 +58,20 @@
     try { return JSON.parse(localStorage.getItem('siyl.auth') || 'null'); } catch (e) { return null; }
   }
 
+  /* every viewer this page opened (its tab, its blob URL, its download in flight): on sign-out or another guest's sign-in, each tab is
+     closed, each download aborted, each URL released — a guest's document never outlives their session on this device */
+  var VIEW_TTL = 5 * 60 * 1000, opened = [], pending = [];
+  function release() {
+    pending.splice(0).forEach(function (p) { try { if (p.ctl) p.ctl.abort(); } catch (e) {} try { if (p.tab) p.tab.close(); } catch (e) {} });
+    opened.splice(0).forEach(function (o) { try { if (o.tab) o.tab.close(); } catch (e) {} try { if (o.url) URL.revokeObjectURL(o.url); } catch (e) {} if (o.timer) clearTimeout(o.timer); });
+  }
+  function sessionChanged(was) { var a = auth(); return !a || a.bearer !== was; }
+  if (typeof document !== 'undefined' && document.addEventListener) {
+    document.addEventListener('siyl:signout', release);
+    document.addEventListener('siyl:auth', release);
+  }
+  if (typeof window !== 'undefined' && window.addEventListener) window.addEventListener('storage', function (e) { if (e && e.key === 'siyl.auth') release(); });
+
   window.SIYL_DOCS = {
     KINDS: KINDS,
     ACCEPT: ACCEPT,
@@ -71,6 +93,61 @@
       return [this.STATE_WORDS.received, r.filename || '', dateWords(r.receivedAt)].filter(Boolean).join(' · ');
     },
     dateWords: function (iso) { return dateWords(iso); },
+    STORED_NOTE: 'Stored privately with Guest Relations · kept until 7 April 2027',
+    /* VIEW is offered only for the signed-in guest's own row, and only when a receipt says a copy exists */
+    canView: function (guestId, kind) { var a = auth(); return !!(a && a.bearer && a.guestId === guestId && this.get(guestId, kind)); },
+    /* call from the click itself: a viewer tab is opened at once (a popup opened later is blocked); the document is fetched with
+       the guest's bearer and shown there. Resolves { ok } · { ok, url } when no tab could open (the page offers the link) ·
+       { ok:false, reason } — 'none' (nothing stored) · 'session' (the guest changed meanwhile) · 'unreachable' */
+    open: function (guestId, kind) {
+      var a = auth();
+      if (!a || !a.bearer || a.guestId !== guestId || (kind !== 'passport' && kind !== 'flight')) return Promise.resolve({ ok: false, reason: 'session' });
+      var bearer = a.bearer, tab = null, ctl = typeof AbortController === 'function' ? new AbortController() : null;
+      try { tab = window.open('', '_blank'); if (tab && tab.document) { tab.document.title = 'Your document'; tab.document.body.textContent = 'Opening your document…'; } } catch (e) { tab = null; }
+      var job = { tab: tab, ctl: ctl }; pending.push(job);
+      var done = function () { var i = pending.indexOf(job); if (i >= 0) pending.splice(i, 1); };
+      var fail = function (reason) { done(); try { if (tab) tab.close(); } catch (e) {} return { ok: false, reason: reason }; };
+      return fetch(API + '/mine?kind=' + encodeURIComponent(kind), { headers: { 'x-siyl-auth': bearer }, cache: 'no-store', signal: ctl ? ctl.signal : undefined })
+        .then(function (r) {
+          if (sessionChanged(bearer)) return fail('session');
+          if (r.status === 404) return fail('none');
+          if (!r.ok) return fail(r.status === 401 ? 'session' : 'unreachable');
+          return r.blob().then(function (b) {
+            if (sessionChanged(bearer)) return fail('session');
+            done();
+            var url = URL.createObjectURL(b), o = { url: url, tab: tab };
+            /* after VIEW_TTL the memory is released, but the tab stays tracked: a later sign-out still closes it */
+            o.timer = setTimeout(function () { try { URL.revokeObjectURL(url); } catch (e) {} o.url = null; o.timer = null; }, VIEW_TTL);
+            opened.push(o);
+            if (tab && !tab.closed) { try { tab.location.href = url; return { ok: true }; } catch (e) { /* the link below */ } }
+            return { ok: true, url: url };
+          });
+        })
+        /* any failure — the request, the body, a sign-out in between — closes the waiting tab and gives the button back */
+        .catch(function () { return fail(sessionChanged(bearer) ? 'session' : 'unreachable'); });
+    },
+    /* the two controls of a received document's row, in one place for every page: View (own row only) and the stored note */
+    viewHtml: function (guestId, kind) {
+      return this.canView(guestId, kind) ? '<button type="button" class="p-link" data-doc-view="' + kind + '" data-doc-for="' + String(guestId).replace(/[^\w-]/g, '') + '">View document</button>' : '';
+    },
+    /* wire every View in a container: the viewer opens on the click; when no tab could open, a link the guest taps instead */
+    wireView: function (root) {
+      var self = this; if (!root || !root.querySelectorAll) return;
+      root.querySelectorAll('[data-doc-view]').forEach(function (b) {
+        if (b.getAttribute('data-wired')) return; b.setAttribute('data-wired', '1');
+        b.addEventListener('click', function () {
+          var kind = b.getAttribute('data-doc-view'), gid = b.getAttribute('data-doc-for'), msg = b.parentNode && b.parentNode.querySelector('[data-doc-msg]');
+          var say = function (t, html) { if (!msg) return; msg.hidden = !t && !html; if (html) msg.innerHTML = html; else msg.textContent = t || ''; };
+          b.disabled = true; say('Opening your document…');
+          self.open(gid, kind).then(function (r) {
+            b.disabled = false;
+            if (r.ok && r.url) { say('', '<a class="p-link" href="' + r.url + '" target="_blank" rel="noopener">Open your document</a>'); return; }
+            if (r.ok) { say(''); return; }
+            say(r.reason === 'none' ? 'We could not find this document. Please add it again.' : r.reason === 'session' ? 'Please sign in again to open your document.' : 'Your document could not be opened just now. Please try again.');
+          });
+        });
+      });
+    },
     has: function (guestId, kind) { return !!this.get(guestId, kind); },
 
     /* what Guest Relations sees, per named guest */

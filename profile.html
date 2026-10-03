@@ -91,7 +91,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 @media(min-width:768px){.pf-people{margin:0;padding-left:0;padding-right:0;flex-wrap:wrap;overflow:visible}.pf-grid{grid-template-columns:repeat(4,1fr)}.pf-stat:nth-child(odd){padding-right:20px}.pf-stat:nth-child(even){padding-left:20px}.pf-stat:nth-child(4n+3){padding-left:20px;border-left:1px solid #DAD9D7}.pf-stat:nth-child(4n+1){border-left:0;padding-left:0}.pf-num-v{font-size:120px}.pf-stat .pf-num-v{font-size:64px}}
 @media(prefers-reduced-motion:reduce){.pf-person{opacity:1;transform:none;transition:none}}
 </style>
-<script src="assets/i18n/siyl-i18n.js?v=0fac5941"></script>
+<script src="assets/i18n/siyl-i18n.js?v=78684d01"></script>
 <link rel="stylesheet" href="assets/aman.css?v=061a38ba"><link rel="stylesheet" href="assets/prep.css?v=0a6eb26a"></head><body class="prep p-in">
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="My Bag"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main class="prep-page" id="profile">
@@ -122,7 +122,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/confirm.js?v=d1b9a554"></script>
 <script src="assets/transport-data.js?v=3391c527"></script>
 <script src="assets/journey.js?v=2941fe09"></script>
-<script src="assets/docs.js?v=8cd51002"></script>
+<script src="assets/docs.js?v=ec768fd9"></script>
 <script src="assets/avatar.js?v=248739ed"></script>
 <script src="assets/stay-media.js?v=5e3c3b23"></script>
 <script src="assets/experiences.js?v=cfba3fc0"></script>
@@ -427,7 +427,11 @@ function docKey(id,kind){if(D.stateKey)return D.stateKey(id,kind);return D.get(i
 function docWords(k){if(D.stateWords)return D.stateWords(k);return k==='received'?'Received':'Not added yet'}
 function documents(me){
   var id=me.guestId,rows='';
-  if(D)D.KINDS.forEach(function(k){var d=D.get(id,k.key),key=docKey(id,k.key);rows+='<p class="t-b2"><span class="t-l1'+(d?' on':'')+'">'+esc(k.label)+'</span> '+(d?esc(docWords(key))+(d.filename?' · '+esc(d.filename):'')+(d.receivedAt?' · '+day(d.receivedAt):''):esc(docWords('none'))+' — you can add it later')+'</p>'});
+  /* RECEIVED, AND YOURS TO OPEN (Owner, 3 Oct 2026): the state, the file, the day — and View for the guest's own copy */
+  var any=false;
+  if(D)D.KINDS.forEach(function(k){var d=D.get(id,k.key),key=docKey(id,k.key);if(d)any=true;rows+='<div class="pf-doc"><p class="t-b2"><span class="t-l1'+(d?' on':'')+'">'+esc(k.label)+'</span> '+(d?'<span>'+esc(docWords(key))+'</span>'+(d.filename?' · <span data-i18n-skip>'+esc(d.filename)+'</span>':'')+(d.receivedAt?' · <span>'+day(d.receivedAt)+'</span>':''):esc(docWords('none'))+' — you can add it later')+'</p>'+
+    (d&&D.viewHtml?'<div class="p-actions">'+D.viewHtml(id,k.key)+'<p class="t-b2" data-doc-msg hidden></p></div>':'')+'</div>'});
+  if(any&&D.STORED_NOTE)rows+='<p class="t-b2 mute" data-doc-stored>'+esc(D.STORED_NOTE)+'</p>';
   /* PUBLICATION OF PHOTOGRAPHS (PRQ-06-17): “Yes” when given, “No” otherwise — no status word beside it */
   var c=D?D.consent(id):null;
   rows+='<p class="t-b2"><span class="t-l1'+(c?' on':'')+'">Publication of photographs</span> '+(c?'Yes':'No')+'</p>';
@@ -462,6 +466,7 @@ function render(){
   if(S&&S.wireRail)S.wireRail(page);
   if(CM&&!out){CM.wire(page);CM.paintPortraits(page)}
   /* YOUR WEDDING CIRCLE (Owner, 27 Sep 2026): read, never written — the people, the two seats, the pulse */
+  if(D&&D.wireView)D.wireView(page);
   var PL=window.SIYL_PULSE;if(PL&&!out){PL.wireCircle(page.querySelector('[data-pl-circle]'),redrawCircle);if(!PL.data()&&!PL.failed())PL.load()}
   if(!out)wirePulseRetry(page.querySelector('[data-pl-circle]'));
   page.querySelectorAll('input[data-c]').forEach(function(i){var save=function(){G.setContact(i.getAttribute('data-c'),i.value.trim())};i.addEventListener('change',function(){var f=i.id;save();render();var n=document.getElementById(f);if(n)try{n.focus({preventScroll:true})}catch(e){}});i.addEventListener('blur',save)});

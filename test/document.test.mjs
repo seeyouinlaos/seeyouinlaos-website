@@ -68,7 +68,10 @@ test('NO GUEST READ ROUTE · GET / HEAD on /api/document 405; the stored key is 
     }
     const worker = src('src/worker.js').replace(/\/\*[\s\S]*?\*\//g, '');
     const guestFacing = worker.slice(0, worker.indexOf('async function handleGrDocuments')).replace(/const DOC_RETENTION[\s\S]*?async function handleGrRetention[\s\S]*?\n\}\n/, '');   /* the retention purge and its Guest Relations report are not guest-facing */
-    assert.doesNotMatch(guestFacing, /DOCS\.(get|list|head)\(/, 'no guest-facing code reads the store');
+    /* THE GUEST'S OWN COPY (Owner, 3 Oct 2026): the one guest read is handleOwnDocument (its prefix from the verified identity,
+       test/document-view.test.mjs) through the shared current-copy rule — no other guest-facing code reads the store */
+    const others = guestFacing.replace(/async function currentDocKey[\s\S]*?\n\}\n/, '').replace(/async function handleOwnDocument[\s\S]*?\n\}\n/, '');
+    assert.doesNotMatch(others, /DOCS\.(get|list|head)\(/, 'no other guest-facing code reads the store');
     assert.doesNotMatch(guestFacing, /DOCS\.delete\(/, 'no request of a guest, and no Guest Relations request, deletes a document — only the retention clock (test/retention.test.mjs)');
   } finally { h.done(); }
 });

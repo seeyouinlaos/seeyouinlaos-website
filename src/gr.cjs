@@ -17,6 +17,10 @@
      GR_TOKEN=… node src/gr.cjs seating-unassign ceremony INV-002 G001
      GR_TOKEN=… node src/gr.cjs seating-rekey holds.json          # migration: relabel holds by guest
      GR_TOKEN=… node src/gr.cjs rooms-plan                        # every allocation unit, who is where
+     GR_TOKEN=… node src/gr.cjs documents [--json]                # every registered guest: Passport · Flight — Received (date) · Missing
+     GR_TOKEN=… node src/gr.cjs documents-open INV-G001 G001 passport|flight
+                                                                  # opens that guest's CURRENT copy from a private temporary file
+     node src/gr.cjs documents-clean                              # removes every temporary copy this tool made
      GR_TOKEN=… node src/gr.cjs rooms-migrate occupants.json      # migration: place guests in units
      GR_TOKEN=… node src/gr.cjs rooms-unassign G001 [--stage wedstay]
      GR_TOKEN=… node src/gr.cjs reset                             # THE CLEAN RESET · 1 the dry run: what would go, nothing written
@@ -47,6 +51,68 @@ async function call(route, method, body) {
   console.log(r.status, JSON.stringify(j, null, 2));
   process.exit(r.ok ? 0 : 1);
 }
+/* ---- THE DOCUMENTS (Owner, 3 Oct 2026): read only, through the existing Guest Relations routes; never a document's content in the
+   overview. A copy opened for viewing is written to a private temporary folder (0700 · 0600 · a generated name, never the
+   uploader's) and removed by the next run after an hour, or at once by documents-clean — so no copy outlives the bucket's purge. */
+const os = require('os');
+const DOC_TMP = 'siyl-doc-', DOC_TMP_TTL = 60 * 60 * 1000;
+async function grGet(route) { const r = await fetch(ORIGIN + route, { headers: { 'x-gr-token': token() }, cache: 'no-store' }); return r; }
+async function grJson(route) { const r = await grGet(route); let j = null; try { j = await r.json(); } catch (e) { j = null; } return { ok: r.ok && !!(j && j.ok), status: r.status, j }; }
+function sweepDocCopies(all) {
+  for (const d of fs.readdirSync(os.tmpdir())) {
+    if (!d.startsWith(DOC_TMP)) continue;
+    const p = path.join(os.tmpdir(), d);
+    try { if (all || Date.now() - fs.statSync(p).mtimeMs > DOC_TMP_TTL) fs.rmSync(p, { recursive: true, force: true }); } catch (e) { /* the next run */ }
+  }
+}
+const day = (iso) => { const d = new Date(iso); return isNaN(d) ? '' : d.toISOString().slice(0, 10); };
+async function documentsOverview(asJson) {
+  sweepDocCopies(false);
+  const ret = await grJson('/api/gr/documents/retention');
+  if (!ret.ok) { console.error('the document store could not be read (' + ret.status + ')'); process.exit(1); }
+  /* the roster: every guest of the register (the auth index — invitation and guest ids only), named from the journeys where known */
+  const roster = new Map();
+  try { for (const e of Object.values(JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'register', 'auth-index.json'), 'utf8')).entries || {})) if (e && e.g && e.i) roster.set(e.g, { guestId: e.g, invitationId: e.i, name: '' }); } catch (e) { console.error('the register index could not be read'); process.exit(1); }
+  const jr = await grJson('/api/gr/journeys');
+  if (jr.ok) for (const x of jr.j.journeys || []) { const r = roster.get(x.guestId); if (r && x.name) r.name = String(x.name).split(/\s+/)[0]; }
+  const docs = {}, unknown = new Set();
+  for (const inv of Object.keys(ret.j.byInvitation || {})) {
+    const d = await grJson('/api/gr/documents?invitation=' + encodeURIComponent(inv));
+    if (!d.ok) { unknown.add(inv); continue; }
+    for (const x of d.j.documents || []) {
+      (docs[x.guestId] = docs[x.guestId] || {})[x.kind] = x.receivedAt;
+      if (!roster.has(x.guestId)) roster.set(x.guestId, { guestId: x.guestId, invitationId: inv, name: '(not in the register)' });
+    }
+  }
+  const state = (g, kind) => unknown.has(g.invitationId) ? 'Unknown — could not be read' : docs[g.guestId] && docs[g.guestId][kind] ? 'Received ' + day(docs[g.guestId][kind]) : 'Missing';
+  const rows = [...roster.values()].sort((a, b) => a.guestId.localeCompare(b.guestId, undefined, { numeric: true })).map((g) => ({ guestId: g.guestId, invitationId: g.invitationId, name: g.name, passport: state(g, 'passport'), flight: state(g, 'flight') }));
+  if (asJson) { console.log(JSON.stringify({ at: new Date().toISOString(), guests: rows.length, rows }, null, 2)); return; }
+  const n = (k) => rows.filter((r) => r[k].startsWith('Received')).length;
+  console.log('DOCUMENTS · ' + rows.length + ' registered guests · Passport received ' + n('passport') + ' · Flight information received ' + n('flight') + (unknown.size ? ' · ' + unknown.size + ' invitation(s) could not be read' : ''));
+  console.log('Guest   Name                Passport              Flight information');
+  for (const r of rows) console.log(r.guestId.padEnd(8) + (r.name || '').slice(0, 18).padEnd(20) + r.passport.padEnd(22) + r.flight + (r.passport.startsWith('Received') || r.flight.startsWith('Received') ? '   → documents-open ' + r.invitationId + ' ' + r.guestId + ' <passport|flight>' : ''));
+}
+async function documentsOpen(inv, gid, kind) {
+  if (!/^INV-[A-Za-z0-9_-]{1,32}$/.test(inv || '') || !/^[A-Za-z0-9_-]{1,32}$/.test(gid || '') || (kind !== 'passport' && kind !== 'flight')) { console.error('usage: documents-open INV-G001 G001 passport|flight'); process.exit(2); }
+  sweepDocCopies(false);
+  const list = await grJson('/api/gr/documents?invitation=' + encodeURIComponent(inv));
+  if (!list.ok) { console.error('the documents could not be read (' + list.status + ')'); process.exit(1); }
+  const cur = (list.j.documents || []).find((d) => d.guestId === gid && d.kind === kind);
+  if (!cur) { console.log('Missing — no ' + kind + ' document for ' + gid); process.exit(0); }
+  const r = await grGet('/api/gr/document?key=' + encodeURIComponent(cur.key));
+  if (!r.ok) { console.error('the document could not be opened (' + r.status + ')'); process.exit(1); }
+  const EXT = { 'image/jpeg': '.jpg', 'image/png': '.png', 'image/heic': '.heic', 'image/heif': '.heif', 'image/webp': '.webp', 'application/pdf': '.pdf' };
+  const ext = EXT[(r.headers.get('content-type') || '').split(';')[0].trim()] || '.bin';
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), DOC_TMP)); fs.chmodSync(dir, 0o700);
+  const file = path.join(dir, gid + '-' + kind + ext);
+  fs.writeFileSync(file, Buffer.from(await r.arrayBuffer()), { mode: 0o600, flag: 'wx' });
+  console.log(gid + ' · ' + kind + ' · received ' + day(cur.receivedAt) + ' — opened from a private temporary copy (removed after an hour, or now: documents-clean)');
+  if (process.platform === 'darwin') require('child_process').spawn('open', [file], { stdio: 'ignore', detached: true }).unref();
+  else console.log(file);
+  /* the copy is deleted after an hour by a detached timer of its own — whether or not this tool runs again */
+  require('child_process').spawn(process.execPath, ['-e', 'setTimeout(() => require("fs").rmSync(process.argv[1], { recursive: true, force: true }), ' + DOC_TMP_TTL + ')', dir], { stdio: 'ignore', detached: true }).unref();
+}
+
 (async () => {
   const actor = flag('actor') || process.env.USER || 'guest-relations';
   switch (cmd) {
@@ -69,6 +135,9 @@ async function call(route, method, body) {
     case 'seating-unassign': return call('/api/seating/unassign', 'POST', { event: args[0], invitationId: args[1], guestId: args[2], actor });
     case 'seating-rekey': return call('/api/seating/rekey', 'POST', { holds: JSON.parse(fs.readFileSync(args[0], 'utf8')), actor });
     case 'rooms-plan': return call('/api/rooms/plan', 'GET');
+    case 'documents': return documentsOverview(args.includes('--json'));
+    case 'documents-open': return documentsOpen(args[0], args[1], args[2]);
+    case 'documents-clean': sweepDocCopies(true); console.log('every temporary document copy removed'); return;
     case 'rooms-migrate': return call('/api/rooms/migrate', 'POST', { occupants: JSON.parse(fs.readFileSync(args[0], 'utf8')), actor, force: args.includes('--force') });
     case 'rooms-unassign': return call('/api/rooms/unassign', 'POST', { guestId: args[0], stage: flag('stage') || '', actor });
     /* THE CLEAN RESET (Owner, 19 Sep 2026): three steps, in this order —
