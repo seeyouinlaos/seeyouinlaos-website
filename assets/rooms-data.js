@@ -80,7 +80,7 @@
        24 – 25 FEB  Special Express No. 25                      100
        25 – 27 FEB  Heritage Grand Premier           162.50 × 2 = 325   (Package C rates, 27 Sep 2026)
        27 FEB – 01 MAR  Heritage Grand Premier          170 × 1 = 170
-       01 MAR       MU9646 Business                             275
+       01 MAR       MU9646 Economy Flexible                     167.50   (Business withdrawn, Owner 4 Oct 2026)
        01 – 04 MAR  Jinri Building Scenic Terrace Tub Double  36.33 × 3 = 109   (the Kunming house replaced, 27 Sep 2026)
        04 MAR       C86 Business                                105
        04 – 06 MAR  (the 270° Snow Mountain Viewing Room — no longer a product, 28 Sep 2026: the stage falls to SIYL_PRICE.premium)

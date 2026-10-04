@@ -238,7 +238,7 @@ test('PRICING · one guest, one price: Sangkhathan USD 15 for this guest only, n
 test('PRICING · the total is one number on every surface: sticky bar, cart, Your Journey, Review & Send, the sent text', () => {
   for (const f of ['cart.html', 'your-journey.html', 'review.html']) assert.match(src(f), /(SIYL_BAG|B)\.total\(\)/, f + ' reads the one total');
   assert.match(src('assets/bag.js'), /B\.money\(B\.total\(\)\)/);
-  assert.match(src('review.html'), /L\.push\('','TOTAL: USD '\+SIYL_BAG\.total\(\)\.toLocaleString\('en-US'\)\);/); assert.match(src('review.html'), /L\.push\('','My total: USD '\+SIYL_BAG\.total\(\)\.toLocaleString\('en-US'\)\+' — nothing paid on the website\.'\)/); /* Window 007: the internal text and the guest's own copy */
+  assert.match(src('review.html'), /L\.push\('','TOTAL: '\+SIYL_BAG\.money\(SIYL_BAG\.total\(\)\)\);/); assert.match(src('review.html'), /L\.push\('','My total: '\+SIYL_BAG\.money\(SIYL_BAG\.total\(\)\)\+' — nothing paid on the website\.'\)/); /* Window 007: the internal text and the guest's own copy */
   assert.doesNotMatch(src('cart.html') + src('review.html') + src('assets/bag.js'), /checkout/i, 'never a checkout');
   const w = page({ auth: PEGGY });
   const B = w.SIYL_BAG, P = w.SIYL_PRICE;

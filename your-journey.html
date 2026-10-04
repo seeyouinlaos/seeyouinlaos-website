@@ -9,7 +9,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 .bag{width:44px;height:44px;display:flex;align-items:center;justify-content:center;position:relative;color:#313131;text-decoration:none}.bag .bgi{display:block}
 .bb{position:absolute;top:1px;right:0;min-width:14px;height:14px;padding:0 3px;background:#313131;color:#F3EEE7;font-size:8.5px;line-height:1;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;display:none;align-items:center;justify-content:center;box-shadow:0 0 0 2px #F3EEE7;border-radius:1px}
 </style>
-<script src="assets/i18n/siyl-i18n.js?v=a2634702"></script>
+<script src="assets/i18n/siyl-i18n.js?v=a88c4a5b"></script>
 <link rel="stylesheet" href="assets/aman.css?v=6fe22a54"><link rel="stylesheet" href="assets/prep.css?v=0a6eb26a"></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="My Bag"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main class="prep-page" id="your-journey">
@@ -35,12 +35,12 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/bag.js?v=f151ee23"></script>
 <script src="assets/shop-menu.js?v=03047fbc"></script>
 <script src="assets/aman.js?v=641d956e"></script>
-<script src="assets/rooms-data.js?v=b82bd495"></script>
-<script src="assets/pricing.js?v=76be7639"></script>
+<script src="assets/rooms-data.js?v=649562f9"></script>
+<script src="assets/pricing.js?v=ee9625e7"></script>
 <script src="assets/stage-graph.js?v=f5f4dc76"></script>
 <script src="assets/questionnaire.js?v=1dc3e01d"></script>
 <script src="assets/guest.js?v=f30d0df8"></script>
-<script src="assets/draft.js?v=a794e2cc"></script>
+<script src="assets/draft.js?v=5965d90d"></script>
 <script src="assets/guest-note.js?v=625f88b5"></script>
 <script src="assets/rules-gate.js?v=d49dabdc"></script>
 <script src="assets/rate-notice.js?v=c13b32c6"></script>
@@ -53,8 +53,8 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/seating.js?v=b8f38de4"></script>
 <script src="assets/seatpass.js?v=223ee8b2"></script>
 <script src="assets/vendor/qrcode.js?v=18ae399f"></script>
-<script src="assets/travelpass.js?v=f1d5d89a"></script>
-<script src="assets/transport-data.js?v=3391c527"></script>
+<script src="assets/travelpass.js?v=7aa24ba0"></script>
+<script src="assets/transport-data.js?v=fe6cb567"></script>
 <script src="assets/journey.js?v=2941fe09"></script>
 <script src="assets/wizard.js?v=f9c66d86"></script>
 <script src="assets/prep-shell.js?v=2d51e568"></script>
@@ -250,11 +250,11 @@ function bkkHtml(){
 /* MU9646 — one flight, two approved fares; the fare column never becomes a strip */
 function flyHtml(){
   if(!P.classesOf)return '';
-  var line=lineOf({ids:['mu9646']}),cur=line?(line.cls||'business'):null,TP=window.SIYL_TRAVELPASS,c0=P.classOf('mu9646',cur||'business');
-  var ticket=TP?TP.card('mu9646',{selected:!!line,cls:cur||'business',price:line?money(c0.price)+' <span class="t-l1">per person</span>':null,
+  var line=lineOf({ids:['mu9646']}),cur=line?(line.cls||'economy-flexible'):null,TP=window.SIYL_TRAVELPASS,c0=P.classOf('mu9646',cur||'economy-flexible');
+  var ticket=TP?TP.card('mu9646',{selected:!!line,cls:cur||'economy-flexible',price:line?money(c0.price)+' <span class="t-l1">per person</span>':null,
       actions:[(line?TP.button('mu9646',true):''),'<a class="p-link mute" href="transport.html?id=mu9646">Details</a>',(line?'<button type="button" class="p-link mute" data-rm="mu9646">Remove</button>':''),'<button type="button" class="p-link mute" data-skip="mu9646">I won’t take this flight</button>'].join('')}):'';
   return '<div id="flysel"><div class="p-product">'+
-    '<span class="p-media" style="background-image:url(assets/images/transport/mu9632-business-1.jpg)" role="img" aria-label="Business Class · China Eastern"></span>'+
+    '<span class="p-media" style="background-image:url(assets/images/transport/mu9632-business-1.jpg)" role="img" aria-label="MU9646 · China Eastern Airlines"></span>'+
     '<div class="p-body">'+
       (line?'<p class="t-l1 on">'+esc(stateWord(line,false))+'</p>':'')+
       '<h3 class="t-h1">MU9646 · Vientiane &rarr; Kunming</h3>'+

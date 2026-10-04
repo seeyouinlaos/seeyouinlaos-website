@@ -302,7 +302,7 @@ test('CHANGE is offered only where a genuine alternative exists', () => {
   assert.equal(P.hasVariants('train'), false);
   assert.equal(P.hasVariants('bkk-stay'), false);  /* one Bangkok address: U Sathorn (the Penthouse and Shama deleted, 24 Sep 2026) */
   assert.equal(P.hasVariants('kempinski'), false);
-  assert.equal(P.hasVariants('mu9646'), true);    /* two approved fares */
+  assert.equal(P.hasVariants('mu9646'), false);   /* one approved fare: Economy Flexible (Business withdrawn, Owner 4 Oct 2026) */
 });
 
 test('Bangkok offers one approved address, one window, one active choice (the Sathorn Penthouse deleted, Edit 6; Shama Yen-Akat deleted, 24 Sep 2026)', () => {
@@ -367,14 +367,15 @@ test('the two approved Full Experience compositions come out of component pricin
   const base = Math.round((100 + 325 + 170 + 109 + P.FLAT.c86.price + 232.62 + 200 + 184.2) * 100) / 100;   /* 1,589 — the train USD 100 since 14 Sep 2026, C86 USD 105, Kunming the Yifangju 002 (USD 109), the pre-wedding Heritage Grand Premier at Package C (USD 162.50 × 2, 27 Sep 2026) */
   assert.equal(base, 1425.82);
   /* the Sathorn Penthouse (255) was deleted (Edit 6, 24 Sep 2026) and Shama Yen-Akat (120) on 24 Sep 2026:
-     U Sathorn is the one Bangkok room, so two compositions remain (one per approved fare) */
+     U Sathorn is the one Bangkok room; MU9646 has one approved fare since 4 Oct 2026 (Business withdrawn, Economy Flexible
+     USD 167.50 — Owner, the Google sheet), so ONE composition remains */
   const bkk = { 'u-sathorn-superior-garden': 203.42 };
-  const fly = { business: 275, 'economy-flexible': 155 };
+  const fly = { 'economy-flexible': 167.5 };
   const want = {
-    'u-sathorn-superior-garden|business': 1904.24,
-    'u-sathorn-superior-garden|economy-flexible': 1784.24,
+    'u-sathorn-superior-garden|economy-flexible': 1796.74,
   };
-  assert.equal(Object.keys(want).length, 2);
+  assert.equal(Object.keys(want).length, 1);
+  assert.deepEqual(P.classesOf('mu9646').map((c) => c.slug), Object.keys(fly), 'every fare is composed, and only those');
   assert.deepEqual(R.sathorn.rooms.map((r) => r.slug), Object.keys(bkk), 'every Bangkok room is composed, and only those');
   Object.keys(bkk).forEach((room) => Object.keys(fly).forEach((cls) => {
     const total = Math.round((base + P.items('bkk-stay', room)[0].price + P.items('mu9646', cls)[0].price) * 100) / 100;
@@ -451,7 +452,7 @@ test('the premium room of a stage is the dearest a guest may take — no room is
 test('Full Experience lines come from the single pricing source, transport included', () => {
   const t = P.items('train')[0];
   assert.equal(t.price, 100); assert.equal(t.name, 'Special Express No. 25');
-  assert.equal(P.items('mu9646')[0].price, 275);
+  assert.equal(P.items('mu9646')[0].price, 167.5, 'Economy Flexible, the one fare (Owner, 4 Oct 2026)');
   assert.equal(P.items('c86')[0].price, 105, 'the current Operations Master (19 Sep 2026)');
   assert.equal(P.items('return')[0].price, 200);
   /* the complete premium journey for one guest, as the bag would sum it */
@@ -462,9 +463,9 @@ test('Full Experience lines come from the single pricing source, transport inclu
      Vientiane windows since 15 Sep 2026); it is simply no longer what Full
      Experience selects */
   /* Bangkok's dearest room is U Sathorn (192) since the Sathorn Penthouse was deleted (Edit 6, 24 Sep 2026) */
-  assert.equal(Math.round(total(all) * 100) / 100, Math.round((203.42 + 100 + 2190 + 750 + 275 + 128.67 + 105 + 268.28 + 200 + 184.2) * 100) / 100);   /* the Presidential at Package C (1,095 × 2) before the wedding, D1 (750) for it · the live 002, 28 Sep 2026 */
-  assert.equal(Math.round(total(all) * 100) / 100, 4404.57);
-  assert.notEqual(Math.round(total(all) * 100) / 100, 1904.24);
+  assert.equal(Math.round(total(all) * 100) / 100, Math.round((203.42 + 100 + 2190 + 750 + 167.5 + 128.67 + 105 + 268.28 + 200 + 184.2) * 100) / 100);   /* the Presidential at Package C (1,095 × 2) before the wedding, D1 (750) for it · the live 002, 28 Sep 2026 */
+  assert.equal(Math.round(total(all) * 100) / 100, 4297.07);   /* MU9646 Economy Flexible USD 167.50 (Owner, 4 Oct 2026) */
+  assert.notEqual(Math.round(total(all) * 100) / 100, 1796.74);
 });
 
 test('Review & Send: the Temple Ceremony is optional, the other three hosted', () => {
@@ -710,7 +711,7 @@ test('Review & Send is five editorial blocks, each with its own way back', () =>
   assert.equal((page.match(/<p class="t-l1 on">Confirmed by Guest Relations<\/p>/g) || []).length >= 1, true, 'Confirmed is only ever Guest Relations\' word');
   /* one guest, never a party headcount */
   assert.doesNotMatch(page, /p\.guests\.forEach|For your party|Total for your party/);
-  assert.match(page, /L\.push\('','TOTAL: USD '\+SIYL_BAG\.total\(\)/); /* B3: the internal text's total line */
+  assert.match(page, /L\.push\('','TOTAL: '\+SIYL_BAG\.money\(SIYL_BAG\.total\(\)\)/); /* B3: the internal text's total line */
   assert.doesNotMatch(page, /Contribution|Beitrag|Eigenanteil/);
 });
 
@@ -844,7 +845,7 @@ test('the ten Owner-preferred rooms and transports (SIYL_PRICE.approved — no p
     train:       {                                             amount: 100 },
     prewed:      { room: 'heritage-grand-premier', rate: 162.5, pay: 2, amount: 325 },
     wedstay:     { room: 'heritage-grand-premier', rate: 170, pay: 1, amount: 170 },
-    mu9646:      {                                             amount: 275 },
+    mu9646:      {                                             amount: 167.5 },   /* Economy Flexible, the one fare (Owner, 4 Oct 2026) */
     kmg:         { room: 'jinri-terrace-double',   rate: 36.33333333, pay: 3, amount: 109 },
     c86:        {                                             amount: 105 },
     ljg:         { room: 'private-soup-view',      rate: 116.31, pay: 2, amount: 232.62 },   /* no preferred Lijiang room since 28 Sep 2026: the premium open room */
@@ -863,10 +864,10 @@ test('the ten Owner-preferred rooms and transports (SIYL_PRICE.approved — no p
     sum += e.amount;
   }
   sum = Math.round(sum * 100) / 100;
-  assert.equal(sum, 1904.24);
-  /* 203.42 + 100 + 325 + 170 + 275 + 109 + 105 + 232.62 + 200 + 184.20 — the live 002 (28 Sep 2026): U Sathorn USD 135.61 the room, Lijiang the
+  assert.equal(sum, 1796.74);
+  /* 203.42 + 100 + 325 + 170 + 167.50 (MU9646 Economy Flexible, Owner 4 Oct 2026) + 109 + 105 + 232.62 + 200 + 184.20 — the live 002 (28 Sep 2026): U Sathorn USD 135.61 the room, Lijiang the
      sheet's three rooms, Hotel Muse Bangkok for the Siam Kempinski */
-  assert.equal(Math.round((203.42 + 100 + 325 + 170 + 275 + 109 + 105 + 232.62 + 200 + 184.2) * 100) / 100, 1904.24);
+  assert.equal(Math.round((203.42 + 100 + 325 + 170 + 167.5 + 109 + 105 + 232.62 + 200 + 184.2) * 100) / 100, 1796.74);
   assert.notEqual(sum, 2056, 'the former U Sathorn, Lijiang and Kempinski figures are not what the sum carries');
   assert.notEqual(sum, 2071, 'the pre-wedding stay at the Wedding Stay\'s rate is not what the sum carries');
   assert.notEqual(sum, 2112, 'the former Kunming hotel is not what the sum carries');
@@ -895,9 +896,9 @@ test('the total is never hard-coded: a sold-out room changes it', () => {
   assert.equal(wed.room, 'heritage-grand-premier');
   assert.equal(wed.price, 170);
   const t = Math.round(total(lines) * 100) / 100;
-  assert.equal(t, Math.round((1904.24 - 325 + 260) * 100) / 100);
-  assert.equal(t, 1839.24);
-  assert.notEqual(t, 1904.24, 'the canonical total must not survive a substitution');
+  assert.equal(t, Math.round((1796.74 - 325 + 260) * 100) / 100);
+  assert.equal(t, 1731.74);
+  assert.notEqual(t, 1796.74, 'the canonical total must not survive a substitution');
 });
 
 test('the approved room is preferred, and the fallback is the nearest, not the dearest', () => {
@@ -982,18 +983,24 @@ test('the Owner-overridden transport facts are the ones on the page', () => {
   assert.match(JSON.stringify(T.mu9646.facts), /18:25/);
   assert.match(JSON.stringify(T.mu9646.facts), /Non-stop · 1 h 35 min/); /* TO-03123 */
   assert.doesNotMatch(JSON.stringify(T.mu9646.facts), /Confirmed with your ticket/);
-  assert.equal(P.FLAT.mu9646.price, 275);
-  /* two approved fares, exactly one active, sharing the product's id */
+  assert.equal(P.FLAT.mu9646.price, 167.5);
+  assert.match(P.FLAT.mu9646.basis, /^USD 167\.50 per person · 1 seat · Economy Flexible$/);
+  /* ONE approved fare (Owner, 4 Oct 2026): Business Class is withdrawn; Economy Flexible is USD 167.50, the Google sheet */
   const cls = P.classesOf('mu9646');
-  assert.equal(cls.length, 2);
-  /* the baggage allowance is the source's, on both fares and in both places */
-  assert.ok(cls[0].notes.includes('2 pieces of checked baggage'), 'Business baggage allowance');
-  assert.ok(cls[1].notes.includes('1 piece of checked baggage'), 'Economy baggage allowance'); /* TO-01429 */
-  assert.match(JSON.stringify(T.mu9646.groups), /Two pieces of checked baggage/);
-  assert.equal(P.items('mu9646')[0].price, 275);
-  assert.equal(P.items('mu9646')[0].cls, 'business');
-  assert.equal(P.items('mu9646', 'economy-flexible')[0].price, 155);
+  assert.equal(cls.length, 1);
+  assert.equal(cls[0].slug, 'economy-flexible');
+  assert.ok(!cls.some((c) => /business/i.test(c.slug + c.short + c.meta + c.basis)), 'no Business fare is offered');
+  /* the baggage allowance is the source's, on the fare and on the page */
+  assert.ok(cls[0].notes.includes('1 piece of checked baggage'), 'Economy baggage allowance'); /* TO-01429 */
+  assert.match(JSON.stringify(T.mu9646.groups), /One piece of checked baggage/);
+  assert.doesNotMatch(JSON.stringify({ ...T.mu9646, gallery: null }), /Business/, 'the flight page no longer offers Business Class (the gallery photographs are the Media Asset workflow\'s)');
+  assert.equal(P.items('mu9646')[0].price, 167.5);
+  assert.equal(P.items('mu9646')[0].cls, 'economy-flexible');
+  assert.equal(P.items('mu9646', 'economy-flexible')[0].price, 167.5);
   assert.equal(P.items('mu9646', 'economy-flexible')[0].id, 'mu9646');
+  /* a line saved with the withdrawn fare resolves to the one fare — never dropped, never Business */
+  assert.equal(P.items('mu9646', 'business')[0].cls, 'economy-flexible');
+  assert.equal(P.items('mu9646', 'business')[0].price, 167.5);
   assert.equal(P.FLAT.train.price, 100);
   assert.equal(P.FLAT['return'].price, 200);
 });
@@ -1103,14 +1110,14 @@ test('the Sangkhathan is a per-guest offering, not an admission', () => {
 test('the Complete trip\'s defaults stay USD 1,904.36 (the live 002, 28 Sep 2026: U Sathorn USD 135.61 the room · Lijiang the sheet\'s three rooms · Hotel Muse Bangkok); one offering makes the journey 1,919.36', () => {
   const c = (n) => Math.round(n * 100) / 100;
   const canonical = STAGES.flatMap((w) => (P.FLAT[w] ? P.items(w) : P.items(w, P.approved(w).slug)));
-  assert.equal(c(total(canonical)), 1904.24, 'the canonical base is unchanged');
+  assert.equal(c(total(canonical)), 1796.74, 'the canonical base: 1,904.24 with MU9646 Economy Flexible USD 167.50 for the withdrawn Business USD 275 (Owner, 4 Oct 2026)');
   const withOffering = [...canonical, { ...P.items('sangkhathan')[0], qty: 1 }];
   assert.equal(withOffering.length, 11, 'the offering is an addition, not a stage');
-  assert.equal(c(total(withOffering)), 1919.24);
+  assert.equal(c(total(withOffering)), 1811.74);
   /* the canonical configuration itself is never redefined */
-  assert.equal(c(total(canonical)), 1904.24);
+  assert.equal(c(total(canonical)), 1796.74);
   const two = [...canonical, { ...P.items('sangkhathan')[0], qty: 2 }];
-  assert.equal(c(total(two)), 1934.24);
+  assert.equal(c(total(two)), 1826.74);
 });
 
 test('the wedding page: four events, the Buddhist morning inside the ceremony', () => {

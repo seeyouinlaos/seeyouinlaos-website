@@ -110,7 +110,7 @@ export function dayWords(iso) {
   catch (e) { return d.toISOString().slice(0, 10); }
 }
 const esc = (t) => String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-const money = (n) => 'USD ' + Number(n || 0).toLocaleString('en-US');
+const money = (n) => { n = Number(n || 0); return 'USD ' + n.toLocaleString('en-US', n % 1 ? { minimumFractionDigits: 2, maximumFractionDigits: 2 } : {}); };   /* cents padded: USD 167.50, never 167.5 */
 
 const PART_WORDS = [['bangkok', 'Bangkok'], ['vientianePreWedding', 'Vientiane · Before the Wedding'], ['vientianeWedding', 'Vientiane · The Wedding'], ['china', 'China']];
 /* a date of birth as nobody can misread it: "4 September 1984 (1984-09-04)" — the stored value itself stays untouched */

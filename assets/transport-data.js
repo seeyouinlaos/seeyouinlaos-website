@@ -111,8 +111,7 @@
       anchor: 'j-mu9646',
       story: 'After the wedding days, the journey turns north: one non-stop ' +
         'flight from Vientiane at 15:50, 1 h 35 min in the air, and we are in ' +
-        'Kunming at 18:25, in time for dinner. You choose your fare: Business ' +
-        'Class or Economy Flexible.',
+        'Kunming at 18:25, in time for dinner. Your fare is Economy Flexible.',
       facts: [
         ['Flight', 'MU9646 · China Eastern Airlines'],
         ['Route', 'Vientiane (VTE) → Kunming (KMG)'],
@@ -121,15 +120,15 @@
         ['Arrival', '18:25 · Kunming (KMG)'],
         ['Duration', 'Non-stop · 1 h 35 min'],
         ['Aircraft', 'Boeing 737-800'],
-        ['Class', 'Business Class or Economy Flexible']
+        ['Class', 'Economy Flexible']
       ],
       groups: [
         ['Your seat', [
           'Times shown are local at each airport']],
         ['On board', [
-          'A meal in Business Class; no meal in Economy Flexible']],
+          'No meal on board']],
         ['Baggage', [
-          'Two pieces of checked baggage in Business Class, one in Economy Flexible',
+          'One piece of checked baggage',
           'Cabin baggage as the airline allows for your fare']],
         ['Fare conditions', [
           'Free rescheduling before departure',
@@ -137,7 +136,7 @@
           'Any change goes through Guest Relations.']]
       ],
       included: [
-        'One seat in the fare you choose, Vientiane to Kunming, non-stop.'
+        'One Economy Flexible seat, Vientiane to Kunming, non-stop.'
       ],
       excluded: [
         'Airport transfers at either end.',
@@ -148,7 +147,7 @@
         'Arrival in Kunming is at 18:25 the same evening, in time for the first night at the Yifangju Designer Courtyard.'
       ],
       good: [
-        'The flight, the times and both fares are the ones we have planned for everyone.',
+        'The flight, the times and the fare are the ones we have planned for everyone.',
         'Guest Relations confirms each seat with you by name.'
       ],
       gallery: [

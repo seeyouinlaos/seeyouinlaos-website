@@ -129,8 +129,8 @@ test('MU9646 and C86 are preserved exactly, with decision-critical benefits only
   assert.match(tp, /to: \{ code: 'KMG', name: 'Kunming', place: '', time: '18:25', date: '1 Mar 2027' \}/, 'TO-01554 (the place "Non-stop" removed) · TO-01545');
   assert.match(yj, /1 March 2027 · non-stop · 1 h 35 min</, 'TO-00606');
   const p = read('assets/pricing.js');
-  assert.match(p, /slug: 'business'[\s\S]{0,120}price: 275/);
-  assert.match(p, /slug: 'economy-flexible'[\s\S]{0,120}price: 155/);
+  assert.doesNotMatch(p, /slug: 'business'/, 'Business Class is withdrawn (Owner, 4 Oct 2026)');
+  assert.match(p, /slug: 'economy-flexible'[\s\S]{0,120}price: 167\.5,/);
   assert.match(p, /'c86':\s*\{ price: 105/);   /* the current Operations Master (release 014, 19 Sep 2026) supersedes the Edit 2 override of 85 */
   assert.match(yj, /dep:\['10:15','Kunming'\],arr:\['13:44','Lijiang'\],dur:'3 h 29 min · direct',cls:'Business Class'/);
   const c86 = yj.slice(yj.indexOf("c86:{"), yj.indexOf("'return':{"));

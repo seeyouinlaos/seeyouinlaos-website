@@ -19,7 +19,7 @@
 (function () {
   'use strict';
   function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
-  function money(n) { return 'USD ' + Number(n).toLocaleString('en-US'); }
+  function money(n) { n = Number(n); return 'USD ' + n.toLocaleString('en-US', n % 1 ? { minimumFractionDigits: 2, maximumFractionDigits: 2 } : {}); }
   function signedIn() { return document.documentElement.getAttribute('data-session') === 'in'; }
   function gated(fn) {
     if (window.SIYL_INVITE) { window.SIYL_INVITE.require(fn); }

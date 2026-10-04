@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>The Journey · See You In Laos</title><script src="assets/i18n/siyl-i18n.js?v=a2634702"></script>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>The Journey · See You In Laos</title><script src="assets/i18n/siyl-i18n.js?v=a88c4a5b"></script>
 <script src="assets/invite-early.js?v=fab5da19"></script><style>
 @font-face{font-family:'PP Editorial Old';src:url('assets/fonts/PPEditorialOld-Ultralight.otf') format('opentype');font-weight:200;font-display:swap}
 *{margin:0;padding:0;box-sizing:border-box}body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;font-weight:300;font-size:14px;line-height:1.6}
@@ -151,15 +151,15 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:26px;margin:40
 <div class="p" id="j-muse" data-vprod="kempinski"><div class="pgal stay" data-stay-gal="hotelMuse" aria-label="Photographs of Hotel Muse Bangkok, Autograph Collection"></div><p class="pw"><b>6 – 8 Mar</b> · Accommodation · Bangkok</p><p class="pn">Hotel Muse Bangkok, Autograph Collection</p><p class="pm">6 – 8 March 2027 · 2 nights: 6 &rarr; 7 and 7 &rarr; 8 March · Langsuan, Bangkok · your cost · breakfast not included</p><p class="pb" data-private data-from="kempinski"></p><p class="vl" data-private>Rooms &amp; suites</p><div class="vars" data-private data-rooms="muse"></div><a class="vw jcta" data-private-cta href="invitation.html?open=1">Open your invitation</a></div>
 </main>
 <script src="assets/bag.js?v=f151ee23"></script>
-<script src="assets/draft.js?v=a794e2cc"></script>
+<script src="assets/draft.js?v=5965d90d"></script>
 <script src="assets/guest-note.js?v=625f88b5"></script>
 <script src="assets/rules-gate.js?v=d49dabdc"></script>
 <script src="assets/rate-notice.js?v=c13b32c6"></script>
 <script src="assets/shop-menu.js?v=03047fbc"></script>
 <script src="assets/aman.js?v=641d956e"></script>
-<script src="assets/rooms-data.js?v=b82bd495"></script>
+<script src="assets/rooms-data.js?v=649562f9"></script>
 <script src="assets/stay-media.js?v=5e3c3b23"></script>
-<script src="assets/pricing.js?v=76be7639"></script>
+<script src="assets/pricing.js?v=ee9625e7"></script>
 <script src="assets/stay-plan.js?v=5227fdc4"></script>
 <script src="assets/rooms.js?v=2f2ff2ba"></script>
 <script src="assets/stay.js?v=878b1e60"></script>
@@ -332,12 +332,12 @@ document.addEventListener('siyl:units',paint);
 paint()});
 
 /* ------------------------------------------------------- HOW WOULD YOU FLY
- * One flight, two approved fares. Exactly one is ever active. */
+ * One flight, one approved fare (Owner, 4 Oct 2026: Economy Flexible). Exactly one is ever active. */
 document.querySelectorAll('.vars[data-classes]').forEach(function(box){
 var id=box.getAttribute('data-classes');
 function paint(){
   var line=(window.SIYL_BAG?SIYL_BAG.get().filter(function(x){return x.id===id})[0]:null);
-  var cur=line?(line.cls||'business'):null;
+  var cur=line?(line.cls||'economy-flexible'):null;
   var all=P.classesOf(id);
   box.innerHTML=all.map(function(c){
     var on=cur===c.slug;

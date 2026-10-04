@@ -18,7 +18,7 @@ test('LEGS: the four transport legs, from the source facts — codes, times, dat
   const tn = T.LEGS.train; assert.equal(tn.kind, 'train'); assert.equal(tn.from.time, '20:25'); assert.equal(tn.to.time, '06:25'); assert.equal(tn.from.date, '24 Feb 2027'); assert.equal(tn.to.date, '25 Feb 2027');
   assert.equal(tn.from.place, 'Krung Thep Aphiwat Central Terminal'); assert.match(tn.cls, /First Class Sleeper/);
   const fl = T.LEGS.mu9646; assert.equal(fl.kind, 'flight'); assert.equal(fl.from.code, 'VTE'); assert.equal(fl.to.code, 'KMG'); assert.equal(fl.from.time, '15:50'); assert.equal(fl.to.time, '18:25');
-  assert.equal(T.classOf('mu9646', 'business'), 'Business Class'); assert.equal(T.classOf('mu9646', 'economy-flexible'), 'Economy Flexible'); assert.equal(T.classOf('mu9646', ''), 'Business Class');
+  assert.equal(T.classOf('mu9646', 'economy-flexible'), 'Economy Flexible'); assert.equal(T.classOf('mu9646', ''), 'Economy Flexible'); assert.equal(T.classOf('mu9646', 'business'), 'Economy Flexible', 'Business is withdrawn (Owner, 4 Oct 2026): never printed on a pass'); assert.deepEqual(Object.keys(fl.classes), ['economy-flexible']);
   const c86 = T.LEGS.c86; assert.equal(c86.kind, 'train'); assert.equal(c86.from.code, 'KMG'); assert.equal(c86.to.code, 'LJG'); assert.equal(c86.from.time, '10:15'); assert.equal(c86.to.time, '13:44'); assert.equal(c86.cls, 'Business Class'); assert.equal(c86.operator, 'China Railway'); assert.equal(c86.duration, '3 h 29 min · direct'); assert.equal(fl.duration, '1 h 35 min · non-stop');
   const rt = T.LEGS['return']; assert.equal(rt.kind, 'flight'); assert.equal(rt.from.code, 'LJG'); assert.equal(rt.to.code, 'BKK'); assert.equal(rt.from.time, '10:00'); assert.equal(rt.to.time, '14:55'); assert.equal(rt.cls, 'Economy Flexible'); assert.equal(rt.duration, '5 h 55 min in all · 2 h 20 min in Kunming'); assert.equal(rt.code, 'MU5922'); assert.match(rt.title, /^MU5922 \+ MU741/); assert.match(rt.to.place, /2 h 20 m/);   /* the Owner-confirmed return flights, 20 Sep 2026 */
   assert.equal(T.isLeg('wedstay'), false); assert.equal(T.isLeg('c86'), true);
@@ -57,16 +57,16 @@ test('THE DOCUMENT: state words Selected / Sent to us / Confirmed by Guest Relat
   assert.equal(T.docFor('train', { guest, state: 'confirmed' }).stateWords, 'Confirmed by Guest Relations');
   assert.equal(T.docFor('train', { guest: null }), null, 'no guest, no pass');
   assert.equal(T.docFor('wedstay', { guest }), null, 'a stay is not a ticket');
-  const eco = T.docFor('mu9646', { guest, cls: 'economy-flexible', price: 155 }); assert.equal(eco.cls, 'Economy Flexible'); assert.equal(eco.price, 155);
+  const eco = T.docFor('mu9646', { guest, cls: 'economy-flexible', price: 167.5 }); assert.equal(eco.cls, 'Economy Flexible'); assert.equal(eco.price, 167.5);
 });
 
 test('THE PDF: a real document with the route, the guest, the class, the reference, the code as rectangles — and honest words', () => {
-  const d = T.docFor('mu9646', { guest, cls: 'business', price: 275, state: 'selected', at: '2026-09-15T10:00:00.000Z' });
+  const d = T.docFor('mu9646', { guest, cls: 'economy-flexible', price: 167.5, state: 'selected', at: '2026-09-15T10:00:00.000Z' });
   const pdf = T.compose(d);
   assert.match(pdf, /^%PDF-1\.4\n/); assert.match(pdf, /%%EOF\n$/); assert.match(pdf, /\/Type \/Catalog/);
   assert.match(pdf, /\(TRAVEL PASS \\267 FLIGHT\)/); assert.match(pdf, /\(YOUR TRAVEL PASS\)/); assert.match(pdf, /\(MU9646 \\267 Vientiane \\226 Kunming\)/, 'the arrow becomes an en dash on paper'); assert.doesNotMatch(pdf, /\?/, 'no character lost to WinAnsi'); assert.match(pdf, /\(VTE\)/); assert.match(pdf, /\(KMG\)/);
-  assert.match(pdf, /\(Peggy Demo\)/); assert.match(pdf, /\(Business Class\)/); assert.match(pdf, new RegExp('\\(' + d.ref + '\\)'));
-  assert.match(pdf, /\(YOUR TOTAL\) Tj[\s\S]*?\(USD 275 per person\)/); assert.match(pdf, /\(SELECTED\)/); assert.match(pdf, /\(FOR YOUR RECORDS\)/, 'TO-01598'); assert.doesNotMatch(pdf, /SHOW TO GUEST RELATIONS/);
+  assert.match(pdf, /\(Peggy Demo\)/); assert.match(pdf, /\(Economy Flexible\)/); assert.match(pdf, new RegExp('\\(' + d.ref + '\\)'));
+  assert.match(pdf, /\(YOUR TOTAL\) Tj[\s\S]*?\(USD 167\.50 per person\)/); assert.match(pdf, /\(SELECTED\)/); assert.match(pdf, /\(FOR YOUR RECORDS\)/, 'TO-01598'); assert.doesNotMatch(pdf, /SHOW TO GUEST RELATIONS/);
   /* a ticket: the frame, the perforation, the stub; nothing clipped */
   assert.match(pdf, /\[3 3\] 0 d /); assert.match(pdf, / c h B/);
   const geo = require('../assets/seatpass.js').writer.within(T.compose.lastPage); assert.equal(geo.ok, true, JSON.stringify(geo.outside.slice(0, 3)));
@@ -118,7 +118,7 @@ test('SURFACES: TICKET = TICKET · CART = CART · REVIEW = REVIEW (Owner, 15 Sep
   const yj = src('your-journey.html'), tr = src('transport.html'), ct = src('cart.html'), rv = src('review.html'), tk = src('tickets.html');
   /* the pass stands where the leg is chosen, on the transport page and on the tickets page */
   for (const f of [yj, tr, tk]) { assert.match(f, /assets\/vendor\/qrcode\.js/); assert.match(f, /assets\/travelpass\.js/); assert.match(f, /assets\/seatpass\.js/); }
-  assert.match(yj, /TP\.card\(seg\.key,\{selected:sel/); assert.match(yj, /TP\.card\('mu9646',\{selected:!!line,cls:cur\|\|'business'/); assert.match(yj, /SIYL_TRAVELPASS\.wire\(box\)/);
+  assert.match(yj, /TP\.card\(seg\.key,\{selected:sel/); assert.match(yj, /TP\.card\('mu9646',\{selected:!!line,cls:cur\|\|'economy-flexible'/); assert.match(yj, /SIYL_TRAVELPASS\.wire\(box\)/);
   assert.match(tr, /<div class="ticket" id="ticket"><\/div>/); assert.match(tr, /function paintTicket\(\)/); assert.match(tr, /assets\/prep\.css/);
   assert.match(tk, /PASS\.card\(doc/); assert.match(tk, /TP\.card\(l,\{selected:true/); assert.match(tk, /Seat tickets/); assert.match(tk, /Travel passes/);
   /* the cart carries no ticket code, no pass strip, no QR — selected items, change/remove/view details, the total */
@@ -142,17 +142,19 @@ test('ONE PRICE SOURCE (Owner, 15 Sep 2026 · Edit 2): a bag line saved at C86 8
   assert.equal(c86.price, 105, 'the cart\'s prominent line price is the authoritative one, not the saved 85');
   assert.equal(c86.meta, '4 March 2027 · Business Class', 'the meta is re-derived as well (no leading zero)');
   assert.match(J.meta(c86).basis, /^USD 105 per person · 1 seat · Business Class$/, 'the descriptive line');
-  assert.equal(B.get().find((x) => x.id === 'mu9646').price, 275, 'every flat line is re-derived, the chosen class kept');
-  assert.equal(B.total(), 100 + 105 + 275, 'the total is the sum of authoritative amounts');
+  assert.equal(B.get().find((x) => x.id === 'mu9646').price, 167.5, 'every flat line is re-derived: the withdrawn Business fare becomes the one fare, Economy Flexible (Owner, 4 Oct 2026)');
+  assert.equal(B.get().find((x) => x.id === 'mu9646').cls, 'economy-flexible');
+  assert.equal(B.total(), 100 + 105 + 167.5, 'the total is the sum of authoritative amounts');
   /* removing C86 takes exactly 105 off; adding it back puts exactly 105 on — from the source, not from any saved amount */
   const before = B.total(); B.remove('c86'); assert.equal(B.total(), before - 105);
   B.put(P.items('c86')[0]); assert.equal(B.total(), before); assert.equal(B.get().find((x) => x.id === 'c86').price, 105);
   /* every surface reads the same line and the same total: no second arithmetic anywhere */
   assert.match(src('cart.html'), /'<p class="p-line-amt">'\+money\(x\.price\|\|0\)\+'<span class="t-l1">'\+\(x\.id==='1872'\|\|x\.id==='tea1872'\?'for the table':x\.personal==='employee'\?'for the room':'per person'\)\+'<\/span><\/p>'/, 'the cart line price is the line, with its basis (PRQ-04-11)');
   assert.match(src('cart.html'), /money\(B\.total\(\)\)/); assert.match(src('assets/bag.js'), /B\.money\(B\.total\(\)\)/, 'the sticky bar');
-  assert.match(src('your-journey.html'), /money\(SIYL_BAG\.total\(\)\)/); assert.match(src('review.html'), /SIYL_BAG\.total\(\)\.toLocaleString/, 'Review & Send');
-  assert.match(src('review.html'), /'TOTAL: USD '\+SIYL_BAG\.total\(\)\.toLocaleString/, 'the sent journey');
-  assert.match(src('review.html'), /' · USD '\+\(x\.price\|\|0\)/, 'the sent lines carry the line amount');
+  assert.match(src('your-journey.html'), /money\(SIYL_BAG\.total\(\)\)/); assert.match(src('review.html'), /SIYL_BAG\.money\(SIYL_BAG\.total\(\)\)/, 'Review & Send');
+  assert.match(src('review.html'), /'TOTAL: '\+SIYL_BAG\.money\(SIYL_BAG\.total\(\)\)/, 'the sent journey');
+  assert.match(src('review.html'), /' · '\+SIYL_BAG\.money\(x\.price\|\|0\)/, 'the sent lines carry the line amount');
+  assert.equal(w.SIYL_BAG.money(167.5), 'USD 167.50', 'cents are always two digits'); assert.equal(w.SIYL_BAG.money(1589), 'USD 1,589');
   assert.match(src('assets/pricing.js'), /\(function repriceFlat\(\) \{/);
   for (const f of ['cart.html', 'your-journey.html', 'review.html', 'assets/bag.js', 'assets/journey.js']) assert.doesNotMatch(src(f), /price\s*[:=]\s*(85|105)\b|\bUSD (85|105)\b/, f + ': no C86 amount of its own');
 });

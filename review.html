@@ -9,7 +9,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 .bag{width:44px;height:44px;display:flex;align-items:center;justify-content:center;position:relative;color:#313131;text-decoration:none}.bag .bgi{display:block}
 .bb{position:absolute;top:1px;right:0;min-width:14px;height:14px;padding:0 3px;background:#313131;color:#F3EEE7;font-size:8.5px;line-height:1;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;display:none;align-items:center;justify-content:center;box-shadow:0 0 0 2px #F3EEE7;border-radius:1px}
 </style>
-<script src="assets/i18n/siyl-i18n.js?v=a2634702"></script>
+<script src="assets/i18n/siyl-i18n.js?v=a88c4a5b"></script>
 <link rel="stylesheet" href="assets/aman.css?v=6fe22a54"><link rel="stylesheet" href="assets/prep.css?v=0a6eb26a"></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="My Bag"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main class="prep-page" id="review">
@@ -68,12 +68,12 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/bag.js?v=f151ee23"></script>
 <script src="assets/shop-menu.js?v=03047fbc"></script>
 <script src="assets/aman.js?v=641d956e"></script>
-<script src="assets/rooms-data.js?v=b82bd495"></script>
-<script src="assets/pricing.js?v=76be7639"></script>
+<script src="assets/rooms-data.js?v=649562f9"></script>
+<script src="assets/pricing.js?v=ee9625e7"></script>
 <script src="assets/stage-graph.js?v=f5f4dc76"></script>
 <script src="assets/questionnaire.js?v=1dc3e01d"></script>
 <script src="assets/guest.js?v=f30d0df8"></script>
-<script src="assets/draft.js?v=a794e2cc"></script>
+<script src="assets/draft.js?v=5965d90d"></script>
 <script src="assets/guest-note.js?v=625f88b5"></script>
 <script src="assets/rules-gate.js?v=d49dabdc"></script>
 <script src="assets/rate-notice.js?v=c13b32c6"></script>
@@ -83,12 +83,12 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/seating.js?v=b8f38de4"></script>
 <script src="assets/seatpass.js?v=223ee8b2"></script>
 <script src="assets/vendor/qrcode.js?v=18ae399f"></script>
-<script src="assets/travelpass.js?v=f1d5d89a"></script>
+<script src="assets/travelpass.js?v=7aa24ba0"></script>
 <script src="assets/temple.js?v=a2f797fc"></script>
 <script src="assets/stay-plan.js?v=5227fdc4"></script>
 <script src="assets/rooms.js?v=2f2ff2ba"></script>
 <script src="assets/stay.js?v=878b1e60"></script>
-<script src="assets/transport-data.js?v=3391c527"></script>
+<script src="assets/transport-data.js?v=fe6cb567"></script>
 <script src="assets/journey.js?v=2941fe09"></script>
 <script src="assets/prep-shell.js?v=2d51e568"></script>
 <script type="module" src="assets/invite.mjs?v=252eac2c"></script>
@@ -255,7 +255,7 @@ function amountHtml(x){
   if(x.interest)return '<p class="p-line-amt"><span class="t-l1">Not in your total</span></p>';
   if(x.complimentary)return '<p class="p-line-amt"><span class="t-l1">Complimentary</span></p>';
   if(x.gift)return '<p class="p-line-amt"><span class="t-l1">Complimentary</span><span class="t-l1">from the Bride &amp; Groom</span></p>';
-  return '<p class="p-line-amt">USD '+(x.price||0).toLocaleString('en-US')+'<span class="t-l1">'+perOf(x)+'</span></p>'}
+  return '<p class="p-line-amt">'+SIYL_BAG.money(x.price||0)+'<span class="t-l1">'+perOf(x)+'</span></p>'}
 function render(){var b=SIYL_BAG.get(),el=document.getElementById('items'),ST=window.SIYL_STAY,P=window.SIYL_PRICE;
 if(!b.length){el.innerHTML='<p class="t-b2">Nothing is in My Bag — USD 0. Your wedding answers and your details are sent as they are.</p>'}
 else{
@@ -275,7 +275,7 @@ return '<div class="p-line"><a class="p-line-img" href="'+href+'" aria-label="Op
 (J&&J.quantityLine(x)?'<p class="t-b2">'+esc(J.quantityLine(x))+'</p>':'')+(!x.interest&&(x.request||!(J&&J.quantityLine(x)))&&m.basis?'<p class="t-b2">'+esc(m.basis)+'</p>':'')+
 (x.note?'<p class="t-l1 on">'+esc(x.note)+(x.noteBy?' · '+esc(x.noteBy):'')+'</p>':'')+
 (x.breakfast?'<p class="t-l1">'+esc(x.breakfast)+'</p>':'')+'</div>'+amountHtml(x)+'</div>'}).join('')}
-document.getElementById('tt').textContent='USD '+SIYL_BAG.total().toLocaleString('en-US');
+document.getElementById('tt').textContent=SIYL_BAG.money(SIYL_BAG.total());
 paintReady();
 SIYL_BAG.badge()}
 
@@ -505,7 +505,7 @@ if(gr){
   L.push('- Food allergies: '+(gr.allergy.answer==='no'?'none':gr.allergy.answer==='yes'?'yes — '+gr.allergy.details:'not answered'));
   L.push('- Photography & film: '+(gr.photo?'acknowledged '+when(gr.photo.at):'not acknowledged'));
   G.PROFILE.forEach(function(q){var v=gr.guests[0].profile[q.key];if(v&&(!Array.isArray(v)||v.length))L.push('- '+(q.label||q.q)+': '+display(v))})}
-L.push('','TOTAL: USD '+SIYL_BAG.total().toLocaleString('en-US'));
+L.push('','TOTAL: '+SIYL_BAG.money(SIYL_BAG.total()));
 L.push('Note: Tak Bat (morning alms-giving) is part of the Temple Ceremony and a personal offering. The Sangkhathan is a separate optional personal offering.');
 return L.join('\n')}
 
@@ -522,7 +522,7 @@ if(!nj){
   var lines=(J?J.sorted(b):b).filter(function(x){return !(J&&J.isWedding(x))});
   if(!lines.length)L.push('· Nothing in My Bag');
   lines.forEach(function(x){var unit=ST&&x.room&&!x.interest&&ST.unitOf?ST.unitOf(x):null,ro=unit&&ST.roomOf?ST.roomOf(x):null;
-    L.push('· '+x.name+(x.meta?' · '+x.meta:'')+(ro&&ro.unit?' · held for me in '+ro.unit:'')+(x.request?' · request — please confirm the table':'')+(x.interest?' · spa interest — paid at the spa':x.complimentary?' · Complimentary':x.gift?' · Complimentary · from the Bride & Groom':' · USD '+(x.price||0).toLocaleString('en-US')+' '+perOf(x)))});
+    L.push('· '+x.name+(x.meta?' · '+x.meta:'')+(ro&&ro.unit?' · held for me in '+ro.unit:'')+(x.request?' · request — please confirm the table':'')+(x.interest?' · spa interest — paid at the spa':x.complimentary?' · Complimentary':x.gift?' · Complimentary · from the Bride & Groom':' · '+SIYL_BAG.money(x.price||0)+' '+perOf(x)))});
   if(J){var wl=J.SEGMENTS.filter(function(g){return J.relevant(g)&&J.state(g)==='waitlisted'}),sk=J.SEGMENTS.filter(function(g){return J.relevant(g)&&J.state(g)==='declined'});
     wl.forEach(function(g){var n=J.waitPosition(g);L.push('On the waiting list: '+g.place+(n?' — number '+n:''))});
     if(sk.length)L.push('Not joining: '+sk.map(function(g){return g.place+' ('+longWhen(g.when)+')'}).join(', '))}
@@ -542,7 +542,7 @@ if(!nj){
   if(G.photoAck())about.push('photography & film acknowledged');
   L.push('','About me: '+about.join(' · '));
   if(Dc){var docs=Dc.forGuest(me.guestId).map(function(d){var k=Dc.stateKey?Dc.stateKey(me.guestId,d.kind):d.state;return d.label.toLowerCase()+(k==='received'?' added':' not added yet')});if(docs.length)L.push('Documents: '+docs.join(', ')+' (optional)')}
-  L.push('','My total: USD '+SIYL_BAG.total().toLocaleString('en-US')+' — nothing paid on the website.')}
+  L.push('','My total: '+SIYL_BAG.money(SIYL_BAG.total())+' — nothing paid on the website.')}
 L.push('','With thanks,',name);
 return 'mailto:'+GR+'?subject='+encodeURIComponent('My trip — '+name)+'&body='+encodeURIComponent(L.join('\n'))}
 

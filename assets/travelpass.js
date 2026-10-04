@@ -36,7 +36,7 @@
       from: { code: 'VTE', name: 'Vientiane', place: 'Terminal 1', time: '15:50', date: '1 Mar 2027' },
       to: { code: 'KMG', name: 'Kunming', place: '', time: '18:25', date: '1 Mar 2027' },
       duration: '1 h 35 min · non-stop', dates: '1 March 2027', route: 'Vientiane → Kunming',
-      cls: 'Business Class', classes: { business: 'Business Class', 'economy-flexible': 'Economy Flexible' } },
+      cls: 'Economy Flexible', classes: { 'economy-flexible': 'Economy Flexible' } },
     c86: { id: 'c86', code: 'C86', kind: 'train', title: 'C86 · Kunming → Lijiang', operator: 'China Railway',
       from: { code: 'KMG', name: 'Kunming', place: 'Kunming Railway Station', time: '10:15', date: '4 Mar 2027' },
       to: { code: 'LJG', name: 'Lijiang', place: 'Lijiang Railway Station', time: '13:44', date: '4 Mar 2027' },
@@ -213,7 +213,7 @@
     p.label(c1, fy, 'Guest'); p.text(c1, fy - 18, doc.guest.fullName, 'F1', W.fit(doc.guest.fullName, 13, 'F1', c2 - c1 - 14, 9));
     p.label(c2, fy, 'Class'); p.text(c2, fy - 18, doc.cls, 'F1', W.fit(doc.cls, 13, 'F1', x + w - c2, 9));
     p.label(c1, fy - 38, 'Date'); p.text(c1, fy - 54, l.dates, 'F1', W.fit(l.dates, 12, 'F1', c2 - c1 - 14, 9));
-    p.label(c2, fy - 38, 'Your total'); p.text(c2, fy - 54, doc.price != null ? 'USD ' + Number(doc.price).toLocaleString('en-US') + ' per person' : 'Amount on request', 'F1', 12);
+    p.label(c2, fy - 38, 'Your total'); p.text(c2, fy - 54, doc.price != null ? 'USD ' + Number(doc.price).toLocaleString('en-US', Number(doc.price) % 1 ? { minimumFractionDigits: 2, maximumFractionDigits: 2 } : {}) + ' per person' : 'Amount on request', 'F1', 12);
     /* the foot of the body */
     var by = g.bottom;
     p.line(x, by + 14, x + w, by + 14);

@@ -581,7 +581,7 @@
     if (G && G.scopeAnswered && G.scopeAnswered()) L.push('WHERE THEY JOIN US: ' + (G.notJoining() ? 'NOT JOINING THIS TRIP' : String(G.scopeWords()).toUpperCase()), '');
     var gr = reg && reg.guestRecord;
     if (gr) L.push('GUEST:', '- Contact: ' + ((gr.contact && gr.contact.email) || 'no email given') + ' · ' + ((gr.contact && gr.contact.phone) || 'no telephone given'));
-    if (!(G && G.notJoining && G.notJoining())) L.push('', 'YOUR COST: USD ' + (reg && reg.totalUsd || 0).toLocaleString('en-US'));
+    if (!(G && G.notJoining && G.notJoining())) L.push('', 'YOUR COST: USD ' + (function (n) { return n.toLocaleString('en-US', n % 1 ? { minimumFractionDigits: 2, maximumFractionDigits: 2 } : {}); })(Number(reg && reg.totalUsd || 0)));
     L.push('Sent via My Trip · ' + dateWords(new Date().toISOString()));
     return L.join('\n');
   }

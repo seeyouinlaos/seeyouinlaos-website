@@ -26,21 +26,16 @@
 
   /* per-person amounts for the legs that are not priced by night */
   /* ---------------------------------------------------------------- CLASSES
-   * One flight, two approved fares. Business is the preferred default and the
-   * one the Full Experience selects; Economy Flexible is the alternative, and
-   * it saves the guest exactly the difference between the two. */
+   * One flight, ONE approved fare (Owner, 4 Oct 2026): Business Class is withdrawn and Economy Flexible is USD 167.50 per
+   * person, as the Google sheet states. A Bag line saved with the withdrawn fare is re-derived on load (repriceFlat below) as
+   * Economy Flexible at USD 167.50 — the guest's flight stays in their journey, never dropped. The fare stays a class (cls on
+   * the line), so a travel pass and the fare card keep reading the chosen fare. */
   var CLASSES = {
     'mu9646': [
-      { slug: 'business', name: 'MU9646 · Vientiane → Kunming', short: 'Business Class',
-        meta: '1 March 2027 · Business Class', price: 275, preferred: true,
-        img: 'assets/images/transport/mu9632-business-1.jpg',
-        basis: 'USD 275 per person · 1 seat · Business Class',
-        notes: ['2 pieces of checked baggage', 'A meal on board', 'Free rescheduling before departure',
-                'Refund possible before departure, under conditions'] },
       { slug: 'economy-flexible', name: 'MU9646 · Vientiane → Kunming', short: 'Economy Flexible',
-        meta: '1 March 2027 · Economy Flexible', price: 155,
+        meta: '1 March 2027 · Economy Flexible', price: 167.5, preferred: true,
         img: 'assets/images/transport/mu9632-business-1.jpg',
-        basis: 'USD 155 per person · 1 seat · Economy Flexible',
+        basis: 'USD 167.50 per person · 1 seat · Economy Flexible',
         notes: ['1 piece of checked baggage', 'No meal on board', 'Free rescheduling before departure',
                 'Refund possible before departure, under conditions'] }
     ]
@@ -50,9 +45,9 @@
     'train':  { price: 100, cat: 'Transportation', name: 'Special Express No. 25',
                 meta: '24 – 25 February 2027 · First Class Sleeper', img: 'assets/images/transport/train-no25-srt-train.jpg',
                 basis: 'USD 100 per person · a First Class Sleeper berth and the van across the border to Vientiane' },
-    'mu9646': { price: 275, cat: 'Transportation', name: 'MU9646 · Vientiane → Kunming',
-                meta: '1 March 2027 · Business Class', img: 'assets/images/transport/mu9632-business-1.jpg',
-                basis: 'USD 275 per person · 1 seat · Business Class' },
+    'mu9646': { price: 167.5, cat: 'Transportation', name: 'MU9646 · Vientiane → Kunming',
+                meta: '1 March 2027 · Economy Flexible', img: 'assets/images/transport/mu9632-business-1.jpg',
+                basis: 'USD 167.50 per person · 1 seat · Economy Flexible' },
     /* C86 · USD 105 per person — the CURRENT Operations Master (Overview, Accommodation and Rooming, Budget "Approve by
      * Suthep, 18.09.2026") wins over the earlier website override of 85 (Owner instruction, 19 Sep 2026: the current master
      * is the source of truth for every price) */
@@ -482,7 +477,7 @@
     },
     /* the display word of a line's category ("Travel" for the key 'Transportation') */
     catWords: function (cat) { return CAT_WORDS[cat] || cat || ''; },
-    /* the lowest fare of a classed product (MU9646 → 155): "From USD 155 per person" before a fare is chosen */
+    /* the lowest fare of a classed product (MU9646 → 167.50): "From USD 167.50 per person" before a fare is chosen */
     fromPrice: function (id) {
       var list = CLASSES[id] || []; if (!list.length) return FLAT[id] ? FLAT[id].price : null;
       return list.reduce(function (m, c) { return c.price < m ? c.price : m; }, list[0].price);
