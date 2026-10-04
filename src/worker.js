@@ -741,7 +741,17 @@ async function storedDraft(env, invitationId, strict) {
 }
 /* NO FIXED ARRANGEMENT (Owner, 19 Sep 2026): nothing is stripped from a draft — every Bag line is the guest's own selection */
 const totalOf = (list) => (Array.isArray(list) ? list : []).reduce((t, x) => t + (Number(x && x.price) || 0) * (Number(x && x.qty) || 1), 0);
+/* ONE PARSE PER DRAFT (incident, 4 Oct 2026 · /api/gr/journeys over the 10 ms CPU limit): a draft's `keys` object is an immutable
+   snapshot — a fresh object for every read of the store, replaced (never edited) by every write, and every derived form
+   (replacedAs · beforeCorrection · withoutGifts) builds new keys. So its parsed content is kept beside it, by identity, in the
+   isolate: the same snapshot is never parsed twice, a different snapshot is never confused with it, nothing outlives the snapshot
+   (a WeakMap), and the content is read only by every caller (contentOf / selectionOf copy before they change anything). */
+const DRAFT_CONTENT = new WeakMap(), RAW_GUEST = new WeakMap();
 function draftContent(keys) {
+  if (keys && typeof keys === 'object') { const hit = DRAFT_CONTENT.get(keys); if (hit) return hit; const out = parseDraftContent(keys); DRAFT_CONTENT.set(keys, out); return out; }
+  return parseDraftContent(keys);
+}
+function parseDraftContent(keys) {
   const out = {};
   for (const k of ['siyl.guest', 'siyl.bag', 'siyl.temple', 'siyl.docs', 'siyl.skip', 'siyl.skip.by']) {
     let v = null; try { v = JSON.parse(keys && keys[k] || 'null'); } catch (e) { v = keys && keys[k] || null; }
@@ -901,7 +911,8 @@ function replacedAs(d, rooms, dir) {
    room is fingerprinted as its successor, so a record never keeps a half-migrated form */
 async function canonicalV3(fps, rooms, seats) {
   const alt = replacedAs(fps.d, rooms, 'canonical');
-  return alt ? (await fingerprintsOf(alt.d, alt.rooms, seats)).v3 : fps.v3;
+  if (alt) return (await fingerprintsOf(alt.d, alt.rooms, seats, ['v3'])).v3;
+  return fps.v3 !== undefined ? fps.v3 : (await fingerprintsOf(fps.d, rooms, seats, ['v3'])).v3;   /* a legacy comparison did not need v3 */
 }
 /* v1: the historical fingerprint (every stored record carries it) · v2: the content fingerprint · v3: the selection fingerprint */
 async function journeyFingerprints(env, who, draft) {
@@ -911,12 +922,20 @@ async function journeyFingerprints(env, who, draft) {
 }
 /* the same three fingerprints from a draft and the guest's engine views already in hand (Guest Relations' overview reads the
    engines once for everyone — 28 Sep 2026) */
-async function fingerprintsOf(d, rooms, seats) {
+/* `which` (incident, 4 Oct 2026): only the fingerprints a caller compares are computed — the same inputs, the same hashes; the default
+   is all three (registration and every other caller unchanged) */
+async function fingerprintsOf(d, rooms, seats, which) {
+  const want = which || ['v1', 'v2', 'v3'];
   /* the fingerprint is the guest's OWN journey: a waiting-list position moves when others leave the line — not a change of theirs */
   const own = rooms ? Object.fromEntries(Object.entries(rooms).map(([k, v]) => [k, v && v.waitlisted ? { stage: v.stage, waitlisted: true, size: v.size } : v])) : rooms;
   const content = draftContent(d && d.keys);
-  const [v1, v2, v3] = await Promise.all([sha256Hex(JSON.stringify({ draft: content, rooms: own, seats })), sha256Hex(JSON.stringify(contentOf({ draft: content, rooms: own, seats }))), sha256Hex(JSON.stringify(selectionOf({ draft: content, rooms: own, seats })))]);
-  return { v1, v2, v3, d };
+  const out = { d };
+  await Promise.all([
+    want.includes('v1') ? sha256Hex(JSON.stringify({ draft: content, rooms: own, seats })).then((h) => { out.v1 = h; }) : null,
+    want.includes('v2') ? sha256Hex(JSON.stringify(contentOf({ draft: content, rooms: own, seats }))).then((h) => { out.v2 = h; }) : null,
+    want.includes('v3') ? sha256Hex(JSON.stringify(selectionOf({ draft: content, rooms: own, seats }))).then((h) => { out.v3 = h; }) : null,
+  ]);
+  return out;
 }
 /* A CONFIRMATION STANDS for the version Guest Relations confirmed (OQ-27 · PRQ-01-05 / 02-04 / 04-04): a confirmation that names
    its version stands while that version is the latest sent; an older confirmation (no version recorded) stands while nothing was
@@ -948,7 +967,9 @@ async function submissionFor(env, who, draft, pre) {
   if (pre) conf = pre.conf || null; else { try { conf = JSON.parse(await env.REG_KV.get('conf:' + who.invitationId) || 'null'); } catch (e) { conf = null; } }
   let R0, S0;
   if (pre) { R0 = pre.rooms; S0 = pre.seats; } else { [R0, S0] = await Promise.all([engineRooms(env, who), engineSeats(env, who)]); }
-  const fpsOf = (dd, rr) => fingerprintsOf(dd, rr === undefined ? R0 : rr, S0);
+  /* the one fingerprint this record is compared by (incident, 4 Oct 2026): the selection, else the content, else the historical one */
+  const need = [record.selectionFingerprint ? 'v3' : record.contentFingerprint ? 'v2' : 'v1'];
+  const fpsOf = (dd, rr) => fingerprintsOf(dd, rr === undefined ? R0 : rr, S0, need);
   const fps = await fpsOf(pre ? draft : (draft === undefined ? await storedDraft(env, who.invitationId) : draft));
   /* THE HOTEL MUSE REPLACEMENT (28 Sep 2026) is the website's, not the guest's: a trip sent naming the Siam Kempinski's room
      (or sent since, while this device still named it) is the same trip — the draft and the engine view in the other form */
@@ -1278,8 +1299,14 @@ async function handleGrJourneys(request, env) {
   return json({ ok: true, at: new Date().toISOString(), acknowledgements: acknowledgementSummary(entries, out), answers, journeys: out });
 }
 /* the guest's two acknowledgements, each on its own — read from the guest's own draft record (never the trip content) */
+function rawGuest(keys) {
+  if (!keys || typeof keys !== 'object') return null;
+  if (RAW_GUEST.has(keys)) return RAW_GUEST.get(keys);
+  let g = null; try { g = JSON.parse(keys['siyl.guest'] || 'null'); } catch (e) { g = null; }
+  RAW_GUEST.set(keys, g); return g;
+}
 function ackOf(d, field) {
-  let g = null; try { g = JSON.parse((d && d.keys && d.keys['siyl.guest']) || 'null'); } catch (e) { g = null; }
+  const g = rawGuest(d && d.keys);   /* the raw guest record (draftContent drops note / rules) — parsed once for both acknowledgements */
   const n = g && g[field]; return n && n.acknowledged === true ? { acknowledged: true, at: n.at || null, textVersion: n.textVersion || null } : null;
 }
 /* whether this guest acknowledged the note from the Guest Relations Manager */

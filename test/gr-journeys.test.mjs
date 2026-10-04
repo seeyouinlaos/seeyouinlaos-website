@@ -86,3 +86,16 @@ test('NOTHING PRIVATE ADDED · no bearer, no token, no code in the overview', as
   for (const p of W.people.slice(0, 40)) assert.ok(!txt.includes(p.bearer), 'no bearer');
   assert.ok(!txt.includes('gr-secret')); assert.ok(!/scale-guest-\d+/.test(txt), 'no invitation code');
 });
+
+test('THE CPU INCIDENT (4 Oct 2026) · only the fingerprint a record is compared by is computed — the same hashes; a draft is parsed once per snapshot; a missing draft is no error', async () => {
+  const src = (await import('node:fs')).readFileSync(new URL('../src/worker.js', import.meta.url), 'utf8');
+  assert.match(src, /const need = \[record\.selectionFingerprint \? 'v3' : record\.contentFingerprint \? 'v2' : 'v1'\];/);
+  assert.match(src, /async function fingerprintsOf\(d, rooms, seats, which\) \{\n  const want = which \|\| \['v1', 'v2', 'v3'\];/, 'every other caller still gets all three');
+  assert.match(src, /return fps\.v3 !== undefined \? fps\.v3 : \(await fingerprintsOf\(fps\.d, rooms, seats, \['v3'\]\)\)\.v3;/, 'the write-back computes v3 when a legacy comparison did not');
+  assert.match(src, /if \(keys && typeof keys === 'object'\) \{ const hit = DRAFT_CONTENT\.get\(keys\);/, 'only a real draft snapshot is cached');
+  /* the overview answers exactly as before: every guest, the same statuses */
+  W.reset();
+  const r = await W.journeys(); assert.equal(r.status, 200);
+  const st = {}; for (const j of r.d.journeys) st[j.status] = (st[j.status] || 0) + 1;
+  assert.ok(st.sent >= 1 && st.draft >= 1, JSON.stringify(st));
+});
