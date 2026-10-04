@@ -48,6 +48,7 @@ module.exports = {
   narrowMedia: [
     { sel: '.a-duo .a-map', align: 'center', why: 'Owner, 22 Sep 2026: the venue map is shown whole at its own drawing ratio (838 × 980); where the column is taller than the screen allows it is centred on the wall' },
     { sel: '.x-clip .am', minWidth: 900, why: 'the experience film belongs to its 760 px reading column, on the wall\'s left axis' },
+    { sel: '.av-gh .av-gh-img', why: 'Owner, 4 Oct 2026: the complimentary stay\'s photograph belongs to the availability object\'s own reading column (--av-col 460 / 520 px) on the wall\'s left axis — the object is an instrument, never a full-wall hero' },
     { sel: '.prep-head .p-media', minWidth: 900, why: 'the private journey reads on ONE 860 px column on the wall\'s left axis (prep.css · one column); the step\'s photograph belongs to it' }
   ],
 

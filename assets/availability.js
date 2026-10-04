@@ -28,6 +28,15 @@
    NOTHING IS TYPED TWICE. The count is the room engine's; the days, both ends
    of the window and the share of it already run are the one stay plan's.
 
+   THE COMPLIMENTARY STAY FIRST (Owner, 4 Oct 2026 — supersedes "the Wedding
+   Stay first" of 27 Sep): guests overlooked the free house as a small ring
+   beneath the hotel. It is now its own card, BEFORE the Wedding Stay: the
+   house's own photograph (its assigned main image), COMPLIMENTARY STAY, the
+   free places left (the engine's live count), the dates and nights (the one
+   stay plan), "Hosted by Haruthai & Suthep · USD 0", and one call — CLAIM YOUR
+   COMPLIMENTARY PLACE — into the existing flow, offered only where the existing
+   rules let this guest take a place. Then the Wedding Stay, as before.
+
    THE ONE ACCENT is Cherry #74070E — the wordmark's own full stop: the ring's
    arc, the calendar line, the dot, its single ripple. Used with restraint.
    ========================================================================== */
@@ -67,7 +76,10 @@
     if (!c || !c.max) c = null;
     var w = P.planningWindow(new Date());
     if (!c) return { stay: stay, gh: false, elapsed: w.progress, startWords: w.startWords, endWords: w.endWords, phase: w.phase, days: w.days, deadlineWords: P.COMPLIMENTARY.deadlineWords, railWords: P.railWords ? P.railWords(new Date()) : w.words, closed: !w.open, full: false, mine: false, max: 0, remaining: 0, taken: 0 };
+    var g = U && U.guestHouse ? U.guestHouse() : null;
     return { stay: stay, gh: true,
+      /* may THIS guest take a place, by the existing rules (the engine's own canTake: open, not theirs already, fits the party) */
+      canTake: !!(g && g.canTake),
       max: c.max, remaining: c.remaining, taken: Math.max(0, c.max - c.remaining),
       /* THE LINE IS CALENDAR TIME, never the allocation — the ring already says what is left */
       elapsed: w.progress,
@@ -94,7 +106,7 @@
   /* the foot: the time signal, never merged with the count — the closing itself is said once, in the stay bar (L-01) */
   function footnote(f) {
     if (f.closed) return 'Every other stay can still be chosen.';
-    return 'Until ' + String(f.deadlineWords || '').replace(/\s+\d{4}$/, '') + ', or until the ' + num(f.max) + ' places are taken.';
+    return 'Available until ' + String(f.deadlineWords || '') + ' or until all ' + num(f.max) + ' places are taken.';
   }
   /* the action follows the guest: a guest already inside their journey is never sent back through the invitation */
   function action() {
@@ -106,31 +118,42 @@
   /* the far end of the calendar line, short enough to sit beside it: "30 November 2026" → "30 Nov" */
   function endLabel(words) { var m = /^(\d{1,2})\s+([A-Za-z]{3})/.exec(String(words || '')); return m ? m[1] + ' ' + m[2] : String(words || ''); }
 
-  /* the Guest House line, beneath the Wedding Stay and never above it: its own places, its own words (Owner, 27 Sep 2026) */
-  function ghState(f) { if (f.mine) return 'One of the places is yours'; if (f.full || f.remaining <= 0) return 'Fully allocated'; return 'Complimentary alternative'; }
-  function html(f) {
-    var a = action(), p = Math.min(1, Math.max(0, f.elapsed)), st = f.stay;
-    var rooms = st ? '<div class="av-stay" data-av-rooms="' + st.available + '" data-av-rooms-total="' + st.total + '">' +
-        '<p class="av-rooms" role="img" aria-label="' + esc(st.available + ' / ' + st.total) + '"><b>' + st.available + '</b>' + (st.total ? '<span class="av-of">/ ' + st.total + '</span>' : '') + '</p>' +
-        '<p class="av-cap">' + (st.available > 0 ? 'Rooms available' : 'Sold out') + '</p>' +
-      '</div><p class="t-b2 av-where">Souphattra Heritage · 27 February – 1 March</p>' : '';
-    var arc = f.max ? f.remaining / f.max : 0;
-    var gh = f.gh ? '<div class="av-gh" data-av-gh="' + f.remaining + '/' + f.max + '">' +
-        '<div class="av-ring" role="img" aria-label="' + esc(f.remaining + ' of ' + f.max + ' places left at the Guest House') + '">' +
-          '<svg viewBox="0 0 60 60" aria-hidden="true" focusable="false">' +
-            '<circle class="av-track" cx="30" cy="30" r="' + R + '"></circle>' +
-            '<circle class="av-arc" cx="30" cy="30" r="' + R + '" stroke-dasharray="' + C.toFixed(2) + '" stroke-dashoffset="' + (C * (1 - arc)).toFixed(2) + '" style="--av-c:' + C.toFixed(2) + ';--av-o:' + (C * (1 - arc)).toFixed(2) + '"></circle>' +
-          '</svg></div>' +
-        '<div class="av-gh-words"><p class="t-l1 av-gh-h">Guest House complimentary</p>' +
-          '<p class="av-gh-count"><b>' + f.remaining + '</b><s>/</s><b>' + f.max + '</b> <span>places left</span></p>' +
-          '<p class="t-b2 av-gh-sub">' + esc(ghState(f)) + '</p></div>' +
-      '</div>' : '';
-    return '' +
-      '<div class="av-in">' +
-        '<p class="t-l1 av-eyebrow">Wedding Stay · Vientiane</p>' +
-        rooms +
-        (st ? '<p class="t-b2 av-say">Your invitation shows the rooms currently open to you.</p>' : '') +
-        gh +
+  /* ---- THE COMPLIMENTARY STAY (Owner, 4 Oct 2026) ----------------------------------------------------------------------------- */
+  /* the house's assigned main image — the accommodation card's, the Bag's, the first photograph of its gallery (rooms-data) */
+  var GH_IMG = 'assets/images/guesthouse/guesthouse-01.jpg';
+  /* the count, in one sentence the dictionary can translate whole: "2 free places left" · "1 free place left" (the engine's number) */
+  function freeWords(n) { return n === 1 ? '1 free place left' : n + ' free places left'; }
+  /* the state when no place can be claimed: said plainly, from the engine's own numbers — never a typed capacity */
+  function ghState(f) {
+    if (f.mine) return 'One of the places is yours';
+    if (f.full || f.remaining <= 0) return 'All ' + num(f.max) + ' places are taken.';
+    if (f.closed) return 'Closed on ' + f.deadlineWords + ' — new places can no longer be taken.';
+    return '';
+  }
+  /* the one call of the card: CLAIM only where the existing rules let this guest take a place (signed out: the invitation first —
+     the claim itself always needs it); a guest who holds one sees it; otherwise the house, never a claim */
+  function ghAction(f) {
+    if (f.mine) return { href: 'journeys.html#j-guesthouse', words: 'See your place', claim: false };
+    if (f.closed || f.full || f.remaining <= 0) return { href: 'accommodation.html#residence', words: 'See the Guest House', claim: false };
+    /* the existing flows only: signed in, the Guest House's own "Take a place" (journeys.html#j-guesthouse — the engine decides),
+       offered only where the existing canTake allows it; signed out, the existing sign-in first (on journeys.html the house's claim
+       controls are private, so a signed-out visitor would find no way on there) */
+    if (!signedIn()) return { href: 'invitation.html?open=1', words: 'Claim your complimentary place', claim: true };
+    if (f.canTake) return { href: 'journeys.html#j-guesthouse', words: 'Claim your complimentary place', claim: true };
+    return { href: 'accommodation.html#residence', words: 'See the Guest House', claim: false };
+  }
+  function ghCard(f) {
+    var P = plan(), C = (P && P.COMPLIMENTARY) || {}, a = ghAction(f), state = ghState(f), p = Math.min(1, Math.max(0, f.elapsed));
+    var nights = C.nights ? C.nights + (C.nights === 1 ? ' night' : ' nights') : '';
+    return '<article class="av-gh" data-av-gh="' + f.remaining + '/' + f.max + '" data-av-claim="' + (a.claim ? '1' : '0') + '">' +
+      '<img class="av-gh-img" src="' + GH_IMG + '" width="1600" height="1200" alt="The living and dining room of the Guest House in downtown Vientiane" loading="lazy" decoding="async">' +
+      '<div class="av-gh-body">' +
+        '<p class="t-l1 av-gh-eyebrow">Complimentary stay</p>' +
+        (state ? '<p class="av-gh-free is-state">' + esc(state) + '</p>' : '<p class="av-gh-free" data-av-free="' + f.remaining + '">' + esc(freeWords(f.remaining)) + '</p>') +
+        '<p class="t-b2 av-gh-where" data-i18n-parts><span>Guest House</span> · <span>' + esc(C.dates || '') + '</span></p>' +
+        (nights ? '<p class="t-b2 av-gh-nights">' + esc(nights) + '</p>' : '') +
+        '<p class="t-b2 av-gh-host" data-i18n-parts><span>Hosted by Haruthai &amp; Suthep</span> · <strong class="av-gh-price">USD 0</strong></p>' +
+        '<p class="av-act"><a class="av-cta' + (a.claim ? ' av-claim' : '') + '" href="' + esc(a.href) + '" data-av-gh-cta>' + esc(a.words) + ' <span aria-hidden="true">&rarr;</span></a></p>' +
         '<div class="av-line">' +
           '<span class="t-l1 av-end">Now</span>' +
           '<span class="av-rail" role="img" aria-label="' + esc(f.railWords) + '">' +
@@ -138,11 +161,25 @@
             '<i class="av-dot" style="--av-p:' + p.toFixed(4) + '"><b></b></i></span>' +
           '<span class="t-l1 av-end">' + esc(endLabel(f.endWords)) + '</span>' +
         '</div>' +
-        '<p class="av-act">' +
-          '<a class="av-cta" href="' + esc(a.href) + '" data-av-cta>' + esc(a.words) + ' <span aria-hidden="true">&rarr;</span></a>' +
-          (f.gh ? '<a class="av-explore" href="accommodation.html#residence" data-av-explore>See the Guest House <span aria-hidden="true">&rarr;</span></a>' : '') +
-        '</p>' +
-        (f.gh ? '<p class="t-b2 av-foot">' + esc(footnote(f)) + '</p>' : '') +
+        '<p class="t-b2 av-foot">' + esc(footnote(f)) + '</p>' +
+      '</div></article>';
+  }
+  function html(f) {
+    var a = action(), st = f.stay;
+    var rooms = st ? '<div class="av-stay" data-av-rooms="' + st.available + '" data-av-rooms-total="' + st.total + '">' +
+        '<p class="av-rooms" role="img" aria-label="' + esc(st.available + ' / ' + st.total) + '"><b>' + st.available + '</b>' + (st.total ? '<span class="av-of">/ ' + st.total + '</span>' : '') + '</p>' +
+        '<p class="av-cap">' + (st.available > 0 ? 'Rooms available' : 'Sold out') + '</p>' +
+      '</div><p class="t-b2 av-where">Souphattra Heritage · 27 February – 1 March</p>' : '';
+    /* the free stay first, then the Wedding Stay — each with its own call */
+    return '' +
+      '<div class="av-in">' +
+        (f.gh ? ghCard(f) : '') +
+        (st ? '<div class="av-ws">' +
+          '<p class="t-l1 av-eyebrow">Wedding Stay · Vientiane</p>' +
+          rooms +
+          '<p class="t-b2 av-say">Your invitation shows the rooms currently open to you.</p>' +
+          '<p class="av-act"><a class="av-cta" href="' + esc(a.href) + '" data-av-cta>' + esc(a.words) + ' <span aria-hidden="true">&rarr;</span></a></p>' +
+        '</div>' : '') +
       '</div>';
   }
 
@@ -189,6 +226,6 @@
     var today = new Date().getDate();
     setInterval(function () { var d = new Date().getDate(); if (d !== today) { today = d; all(); } }, 60000);
   }
-  window.SIYL_AVAILABILITY = { render: render, wire: wire, facts: facts, stayRooms: stayRooms, ghState: ghState, headline: headline, footnote: footnote, action: action };
+  window.SIYL_AVAILABILITY = { render: render, wire: wire, facts: facts, stayRooms: stayRooms, ghState: ghState, ghAction: ghAction, freeWords: freeWords, headline: headline, footnote: footnote, action: action };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire); else wire();
 })();

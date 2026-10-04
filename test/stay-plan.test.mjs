@@ -148,7 +148,7 @@ test('THE SURFACES · the front page counts the days and follows the guest; My P
      carries the live count, the property and the one action — in that order, with one call to action between them. */
   assert.match(idx, /<section class="a-sec a-staybar" aria-label="Accommodation planning" data-stay-bar><\/section>/);
   /* THE WEDDING STAY FIRST (Owner, 27 Sep 2026): the object now leads with the Wedding Stay's rooms, the Guest House beneath it */
-  assert.match(idx, /<section class="a-sec a-avail" aria-label="Wedding Stay · rooms available" data-availability><\/section>/);
+  assert.match(idx, /<section class="a-sec a-avail" aria-label="Complimentary stay and Wedding Stay · places available" data-availability><\/section>/);
   assert.ok(idx.indexOf('data-stay-bar') < idx.indexOf('data-availability'), 'planning and its closing date first, the object after it');
   assert.match(idx, /<script src="assets\/stay-plan\.js(\?v=[0-9a-f]{8})?"><\/script>/);
   assert.match(idx, /<script src="assets\/stay-bar\.js(\?v=[0-9a-f]{8})?"><\/script>/);

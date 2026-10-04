@@ -38,6 +38,7 @@ function object(opts = {}) {
   const w = page({ auth: opts.auth === undefined ? null : opts.auth, modules: MODS });
   w.SIYL_UNITS = {
     complimentary: () => (opts.engine === null ? null : Object.assign({ max: 4, remaining: 4, mine: false }, opts.engine)),
+    guestHouse: () => (opts.engine === null ? null : { canTake: opts.canTake !== false }),
     mine: () => opts.mine || null,
   };
   return w;
@@ -52,14 +53,12 @@ test('THE COUNT · the ring is the engine\'s answer, never a number written into
   assert.match(AV, /P\.planningWindow\(new Date\(\)\)/, 'the days and the window come from the one stay plan');
 });
 
-test('THE WEDDING STAY LEADS (Owner, 27 Sep 2026) · the rooms of the Wedding Stay first and large, from the engine; the Guest House beneath, its ring small, its count on one line', () => {
-  assert.ok(RENDERED.indexOf('<p class="av-rooms"') > 0 && RENDERED.indexOf('<p class="av-rooms"') < RENDERED.indexOf('<div class="av-gh"'), 'the Wedding Stay before the Guest House');
+test('THE COMPLIMENTARY STAY FIRST (Owner, 4 Oct 2026 — supersedes the Wedding Stay first of 27 Sep) · the free house is its own card before the Wedding Stay; the Wedding Stay rooms follow, from the engine', () => {
+  assert.ok(RENDERED.indexOf('ghCard(f)') > 0 && RENDERED.indexOf('ghCard(f)') < RENDERED.indexOf('av-eyebrow">Wedding Stay · Vientiane'), 'the complimentary stay before the Wedding Stay');
   assert.match(RENDERED, /'<p class="t-l1 av-eyebrow">Wedding Stay · Vientiane<\/p>'/);
-  assert.match(RENDERED, /<p class="av-gh-count"><b>' \+ f\.remaining \+ '<\/b><s>\/<\/s><b>' \+ f\.max \+ '<\/b> <span>places left<\/span><\/p>/, 'the Guest House count on one line, its own words');
   /* the instrument is small: the ring never grows past 82px, whatever the screen offers — and beneath the Wedding Stay it is smaller still */
   const rings = [...BLOCK.matchAll(/--av-ring:\s*(\d+)px/g)].map((m) => +m[1]);
   assert.ok(rings.length >= 2 && Math.max(...rings) <= 82, 'the ring is an instrument, not the hero of the page — ' + rings.join(' · '));
-  assert.match(CSS, /\.av-gh \.av-ring \{ width: 44px; height: 44px; \}/);
   /* the count: the engine's rooms, a ROOM count (empty rooms), of the physical rooms it knows — the Guest House never inside it */
   const w = object(); const sum = (e, n) => ({ emptyRooms: e, sourceRooms: n, remainingRooms: e });
   w.SIYL_UNITS.view = () => ({ summary: { 'wedstay/heritage': sum(2, 5), 'wedstay/heritage-executive': sum(9, 13), 'wedstay/heritage-grand-premier': sum(0, 3), 'wedstay/noble-courtyard': sum(1, 1), 'wedstay/grand-majestic': sum(2, 2), 'wedstay/souphattra-majestic': sum(0, 1), 'wedstay/souphattra-presidential': sum(1, 1), 'guesthouse/guest-house': { sourceRooms: 1, emptyRooms: 0, sourcePlaces: 4 }, 'prewed/heritage': sum(5, 5) } });
@@ -127,13 +126,13 @@ test('THE HOUSE IS THE PROJECT\'S OWN · "Guest House complimentary", and the in
   assert.doesNotMatch(RENDERED, /Private Residence/i, 'the object never renders the invented label');
   assert.doesNotMatch(src('assets/i18n/siyl-i18n.js'), /Private Residence/, 'and the dictionary no longer carries it');
   assert.doesNotMatch(INDEX, /Private Residence/, 'nor the page that holds the object');
-  /* the Guest House line (Owner, 27 Sep 2026): its own words, never the Wedding Stay's */
-  assert.match(RENDERED, /<p class="t-l1 av-gh-h">Guest House complimentary<\/p>/, 'the canonical name');
-  const A = object().SIYL_AVATAR || object().SIYL_AVAILABILITY;
-  assert.equal(A.ghState({ remaining: 0, max: 4, full: true }), 'Fully allocated');
-  assert.equal(A.ghState({ remaining: 2, max: 4 }), 'Complimentary alternative');
+  /* the card's own words (Owner, 4 Oct 2026): the weak "Complimentary alternative" is gone */
+  const A = object().SIYL_AVAILABILITY;
+  assert.equal(A.ghState({ remaining: 0, max: 4, full: true }), 'All four places are taken.');
+  assert.equal(A.ghState({ remaining: 2, max: 4 }), '', 'an open house says its free places, not a state');
+  assert.doesNotMatch(AV, /Complimentary alternative/);
   assert.match(RENDERED, /Souphattra Heritage · 27 February – 1 March/, 'the Wedding Stay names its house and its nights');
-  assert.match(RENDERED, /See the Guest House/, 'the property link names the canonical house');
+  assert.match(AV, /'See the Guest House'/, 'the property link names the canonical house');
   /* and the booking engine's own naming is untouched */
   assert.match(src('src/stay-plan.js'), /name: 'Guest House complimentary'/);
 });
@@ -149,7 +148,7 @@ test('THE WORDS · one sentence per state, and never the language of a sale', ()
   assert.equal(A.headline({ max: 4, remaining: 2, taken: 2, full: false, mine: true }).replace('\n', ' '), 'One of the four is yours.', 'PRQ-03-06: the guest\'s own place is never counted as gone');
   assert.equal(head(0), 'Every place has gone.');
   /* TO-00735 / TO-00731: the day count lives in the stay bar alone; the foot states the rule, and after the closing what remains */
-  for (const [phase, days] of [['open', 68], ['open', 1], ['last-day', 0]]) assert.equal(A.footnote({ closed: false, phase, days, max: 4, deadlineWords: '30 November 2026' }), 'Until 30 November, or until the four places are taken.');
+  for (const [phase, days] of [['open', 68], ['open', 1], ['last-day', 0]]) assert.equal(A.footnote({ closed: false, phase, days, max: 4, deadlineWords: '30 November 2026' }), 'Available until 30 November 2026 or until all four places are taken.');
   assert.equal(A.footnote({ closed: true, phase: 'closed', days: 0, max: 4, deadlineWords: '30 November 2026' }), 'Every other stay can still be chosen.');
   for (const w of ['Hurry', 'Almost gone', 'Book now', 'Last chance', 'Only', 'Don\'t miss', 'Act now']) {
     assert.doesNotMatch(AV, new RegExp('[\'">]\\s*' + w, 'i'), w + ' is not this site\'s language');
@@ -162,9 +161,9 @@ test('THE ACTION · one call, and it follows the guest: the guest inside their j
   assert.deepEqual(plain(object({ auth: PEGGY }).SIYL_AVAILABILITY.action()), { href: 'your-journey.html#stays', words: 'Continue your trip' });
   assert.deepEqual(plain(object({ auth: PEGGY, mine: { key: 'guesthouse/guest-house', label: 'A' } }).SIYL_AVAILABILITY.action()),
     { href: 'profile.html#your-stay', words: 'Your stay' });
-  assert.equal((AV.match(/class="av-cta"/g) || []).length, 1, 'exactly one call to action');
-  assert.match(RENDERED, /class="av-explore" href="accommodation\.html#residence"/, 'and one quiet link to the house');
-  assert.match(BLOCK, /\.av-explore \{[\s\S]{0,300}border-bottom: 1px solid transparent/, 'the property link is a link, never a second button');
+  /* one call for each stay: the complimentary card's own, and the Wedding Stay's */
+  assert.equal((RENDERED.match(/data-av-gh-cta/g) || []).length + (AV.slice(AV.indexOf('function ghCard'), AV.indexOf('function html(f)')).match(/data-av-gh-cta/g) || []).length, 1, 'one call in the card');
+  assert.equal((RENDERED.match(/data-av-cta>/g) || []).length, 1, 'one call for the Wedding Stay');
 });
 
 test('THE ONE ACCENT · Cherry #74070E draws the ring, the calendar line, the dot and its single ripple — and nothing else', () => {
@@ -198,4 +197,57 @@ test('THE TWO SIGNALS · the front page keeps both, unmerged, in the Owner\'s or
   assert.equal((INDEX.match(/data-availability/g) || []).length, 1);
   assert.equal((INDEX.match(/data-stay-bar/g) || []).length, 1);
   assert.match(RENDERED, /Your invitation shows the rooms currently open to you\./); /* the Owner's sentence, 27 Sep 2026 */
+});
+
+test('THE COMPLIMENTARY CARD (Owner, 4 Oct 2026) · the house\'s own photograph, COMPLIMENTARY STAY, the engine\'s free places, the dates and nights from the stay plan, USD 0, one claim — offered only where the existing rules allow', async () => {
+  const A = object().SIYL_AVAILABILITY;
+  /* the count is the engine's, in words: 1 · 2 · 3 */
+  assert.equal(A.freeWords(1), '1 free place left'); assert.equal(A.freeWords(2), '2 free places left'); assert.equal(A.freeWords(3), '3 free places left');
+  const html = (o) => { const w = object(o); const h = { attrs: {}, innerHTML: '', setAttribute(k, v) { this.attrs[k] = v; }, getAttribute(k) { return this.attrs[k] || null; } }; h.attrs['data-av-played'] = '1'; w.SIYL_AVAILABILITY.render(h); return h.innerHTML; };
+  const two = html({ auth: PEGGY, engine: { remaining: 2 } });
+  assert.match(two, /<img class="av-gh-img" src="assets\/images\/guesthouse\/guesthouse-01\.jpg" width="1600" height="1200" alt="The living and dining room of the Guest House in downtown Vientiane"/, 'the house\'s assigned main image');
+  assert.match(two, /av-gh-eyebrow">Complimentary stay<\/p><p class="av-gh-free" data-av-free="2">2 free places left<\/p>/);
+  assert.match(two, /<span>Guest House<\/span> · <span>27 February – 1 March 2027<\/span>[\s\S]*>2 nights<\/p>/, 'dates and nights from the stay plan');
+  assert.match(two, /data-i18n-parts><span>Hosted by Haruthai &amp; Suthep<\/span> · <strong class="av-gh-price">USD 0<\/strong>/);
+  assert.match(two, /<a class="av-cta av-claim" href="journeys\.html#j-guesthouse" data-av-gh-cta>Claim your complimentary place <span aria-hidden="true">&rarr;<\/span><\/a>/, 'the existing take-a-place flow');
+  assert.match(two, /Available until 30 November 2026 or until all four places are taken\./);
+  /* both blocks, in the Owner's order, each with its own call — the engine answering both inventories */
+  const both = (() => { const w = object({ auth: PEGGY, engine: { remaining: 2 } }); const sum = (e, n) => ({ emptyRooms: e, sourceRooms: n, remainingRooms: e });
+    w.SIYL_UNITS.view = () => ({ summary: { 'wedstay/heritage': sum(2, 5), 'wedstay/heritage-executive': sum(8, 21) } });
+    const h = { attrs: { 'data-av-played': '1' }, innerHTML: '', setAttribute(k, v) { this.attrs[k] = v; }, getAttribute(k) { return this.attrs[k] || null; } }; w.SIYL_AVAILABILITY.render(h); return h.innerHTML; })();
+  assert.ok(both.indexOf('class="av-gh"') >= 0 && both.indexOf('class="av-gh"') < both.indexOf('Wedding Stay · Vientiane'), 'the free stay before the Wedding Stay');
+  assert.match(both, /<p class="av-rooms" role="img" aria-label="10 \/ 26"><b>10<\/b><span class="av-of">\/ 26<\/span><\/p>/, 'the Wedding Stay count untouched');
+  assert.match(both, /data-av-gh-cta>Claim your complimentary place[\s\S]*data-av-cta>Continue your trip/, 'each block its own call');
+  assert.match(html({ auth: PEGGY, engine: { remaining: 1 } }), /data-av-free="1">1 free place left</);
+  /* who may claim is the existing rule: signed out → the invitation first; a guest the engine says cannot take → no claim */
+  assert.match(html({ auth: null, engine: { remaining: 2 } }), /href="invitation\.html\?open=1" data-av-gh-cta>Claim your complimentary place/, 'signed out: the existing sign-in first — the house\'s claim controls are private');
+  const no = html({ auth: PEGGY, engine: { remaining: 2 }, canTake: false });
+  assert.doesNotMatch(no, /Claim your complimentary place/); assert.match(no, /data-av-claim="0"[\s\S]*See the Guest House/);
+  const mine = html({ auth: PEGGY, engine: { remaining: 1, mine: true } });
+  assert.doesNotMatch(mine, /Claim your/); assert.match(mine, /One of the places is yours[\s\S]*See your place/);
+  const full = html({ auth: PEGGY, engine: { remaining: 0, max: 4 } });
+  assert.doesNotMatch(full, /Claim your|free places left/); assert.match(full, /All four places are taken\./);
+  const six = html({ auth: PEGGY, engine: { remaining: 0, max: 6 } }); assert.match(six, /All six places are taken\./, 'the capacity is the engine\'s, never typed');
+  /* the old ring and its words are gone; nothing here writes */
+  assert.doesNotMatch(AV, /av-gh-count|Complimentary alternative/);
+  assert.doesNotMatch(AV.replace(/\/\*[\s\S]*?\*\//g, ''), /method:\s*'(POST|PUT|DELETE)'|\.join\(|localStorage\.setItem/);
+  /* the section's name says both; Thai for every new line */
+  assert.match(INDEX, /aria-label="Complimentary stay and Wedding Stay · places available" data-availability/);
+  const core = (await import('../src/i18n-core.js')).default, T = core.translator(JSON.parse(src('src/i18n-th.json')));
+  for (const en of ['Complimentary stay', '2 free places left', '1 free place left', 'Claim your complimentary place', 'See your place', 'Available until 30 November 2026 or until all four places are taken.', 'All four places are taken.', 'The living and dining room of the Guest House in downtown Vientiane', 'Complimentary stay and Wedding Stay · places available', 'Hosted by Haruthai & Suthep', '2 nights'])
+    assert.ok(/[\u0E00-\u0E7F]/.test(T.tr(en)), 'Thai for ' + en);
+});
+
+test('THE CLAIM AND THE CALENDAR · open, the last day, closed, and closed with a place already held — the date frozen, never today\'s', () => {
+  const RealDate = Date;
+  const at = (iso, o) => { const w = object(o); const fixed = new RealDate(iso); w.Date = class extends RealDate { constructor(...a) { super(...(a.length ? a : [fixed])); } static now() { return fixed.getTime(); } };
+    const h = { attrs: { 'data-av-played': '1' }, innerHTML: '', setAttribute(k, v) { this.attrs[k] = v; }, getAttribute(k) { return this.attrs[k] || null; } }; w.SIYL_AVAILABILITY.render(h); return h.innerHTML; };
+  const open = at('2026-10-04T12:00:00', { auth: PEGGY, engine: { remaining: 2 } });
+  assert.match(open, /Claim your complimentary place/); assert.match(open, /Available until 30 November 2026/);
+  const last = at('2026-11-30T12:00:00', { auth: PEGGY, engine: { remaining: 2 } });
+  assert.match(last, /Claim your complimentary place/, 'the last day still claims');
+  const closed = at('2026-12-01T12:00:00', { auth: PEGGY, engine: { remaining: 2 } });
+  assert.doesNotMatch(closed, /Claim your/); assert.match(closed, /Closed on 30 November 2026 — new places can no longer be taken\./); assert.match(closed, /Every other stay can still be chosen\./);
+  const kept = at('2026-12-01T12:00:00', { auth: PEGGY, engine: { remaining: 1, mine: true } });
+  assert.doesNotMatch(kept, /Claim your/); assert.match(kept, /One of the places is yours[\s\S]*See your place/);
 });

@@ -1,8 +1,8 @@
 {
  "mode": "full",
- "fingerprint": "a9e89064d3aed460",
+ "fingerprint": "4cd0237218ff00c5",
  "origin": "local stage",
- "finished": "2026-10-02T01:45:01.071Z",
+ "finished": "2026-10-04T00:59:03.683Z",
  "engines": [
   "chromium",
   "webkit"
@@ -31,6 +31,7 @@
  "rootCauses": [],
  "exceptions": {
   "button, .p-act, .a-cta, .cta, .x-cta, .dcta": 51218,
+  ".av-gh .av-gh-img": 1688,
   ".acar .atrk, .refgal .atrk, .others .oc": 7246,
   ".a-duo .a-map": 976,
   "footer.sfoot": 22896,
