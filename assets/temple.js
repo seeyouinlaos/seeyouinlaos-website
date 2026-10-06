@@ -275,7 +275,8 @@
         undecided: rows.filter(function (r) { return r.temple === 'Not decided'; }).length,
         sangkhathanUndecided: rows.filter(function (r) { return r.sangkhathanState === 'Decision required'; }).length,
         offerings: n,
-        offeringsUsd: n * 15,
+        /* the offering's amount as it is charged — the server's (Codex final review, 5 Oct 2026); none while it has not answered */
+        offeringsUsd: n === 0 ? 0 : (function () { var p = window.SIYL_PRICE && SIYL_PRICE.flatPrice ? SIYL_PRICE.flatPrice('sangkhathan') : null; return p == null ? null : n * p; })(),
         offeringNames: away ? [] : this.offeringGuests().map(function (g) { return g.preferredName || g.fullName; })
       };
     }

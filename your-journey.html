@@ -32,20 +32,21 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 </section>
 <div id="foot"></div>
 </main>
-<script src="assets/bag.js?v=f151ee23"></script>
+<script src="assets/bag.js?v=0e7cb86f"></script>
 <script src="assets/shop-menu.js?v=03047fbc"></script>
 <script src="assets/aman.js?v=641d956e"></script>
 <script src="assets/rooms-data.js?v=649562f9"></script>
-<script src="assets/pricing.js?v=ee9625e7"></script>
+<script src="assets/billing-client.js?v=421fbc48"></script>
+<script src="assets/pricing.js?v=e0a4e0cd"></script>
 <script src="assets/stage-graph.js?v=f5f4dc76"></script>
 <script src="assets/questionnaire.js?v=1dc3e01d"></script>
 <script src="assets/guest.js?v=f30d0df8"></script>
-<script src="assets/draft.js?v=5965d90d"></script>
+<script src="assets/draft.js?v=711f98ae"></script>
 <script src="assets/guest-note.js?v=625f88b5"></script>
 <script src="assets/rules-gate.js?v=d49dabdc"></script>
 <script src="assets/rate-notice.js?v=c13b32c6"></script>
 <script src="assets/confirm.js?v=d1b9a554"></script>
-<script src="assets/temple.js?v=a2f797fc"></script>
+<script src="assets/temple.js?v=116ed8bf"></script>
 <script src="assets/stay-plan.js?v=5227fdc4"></script>
 <script src="assets/rooms.js?v=2f2ff2ba"></script>
 <script src="assets/stay.js?v=878b1e60"></script>
@@ -55,7 +56,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/vendor/qrcode.js?v=18ae399f"></script>
 <script src="assets/travelpass.js?v=7aa24ba0"></script>
 <script src="assets/transport-data.js?v=fe6cb567"></script>
-<script src="assets/journey.js?v=2941fe09"></script>
+<script src="assets/journey.js?v=46dd07ea"></script>
 <script src="assets/wizard.js?v=f9c66d86"></script>
 <script src="assets/prep-shell.js?v=2d51e568"></script>
 <script type="module" src="assets/invite.mjs?v=252eac2c"></script>
@@ -126,7 +127,9 @@ function actions(list){return '<div class="p-actions">'+list.join('')+'</div>'}
 function transportCard(seg,line){
   var t=TC[seg.key],f=P.FLAT[seg.key],sel=!!line,TP=window.SIYL_TRAVELPASS;
   /* the ticket (Owner, 15 Sep 2026): the route, the times, the class, the guest, the pass and its code */
-  var ticket=TP?TP.card(seg.key,{selected:sel,price:money(f.price)+' <span class="t-l1">'+t.basis+'</span>',
+  /* the amount really charged — the server's for a leg it prices; while it has not answered, said so (Codex final review, 5 Oct 2026) */
+  var amt=line?P.lineAmount(line):P.flatMoney(seg.key);
+  var ticket=TP?TP.card(seg.key,{selected:sel,price:amt+' <span class="t-l1">'+t.basis+'</span>',
       actions:(sel?[TP.button(seg.key,true),'<a class="p-link mute" href="transport.html?id='+seg.key+'">Details</a>','<button type="button" class="p-link mute" data-rm="'+seg.key+'">Remove</button>']
                  :['<button type="button" class="p-act" data-choose-flat="'+seg.key+'">'+t.select+'</button>','<a class="p-link mute" href="transport.html?id='+seg.key+'">Details</a>']).concat(mandatory(seg)?[]:['<button type="button" class="p-link mute" data-skip="'+seg.key+'">'+declineWords(seg)+'</button>']).join('')}):'';
   return '<div class="p-sum'+(sel?' on':'')+'">'+
@@ -136,7 +139,7 @@ function transportCard(seg,line){
       '<h3 class="t-h1">'+esc(f.name)+'</h3>'+
       (t.lede?'<p class="t-b1 measure">'+t.lede+'</p>':'')+
       '<ul class="p-list">'+t.ben.map(function(b){return '<li class="t-b2">'+b+'</li>'}).join('')+'</ul>'+
-      '<p class="p-price">'+money(f.price)+'<span class="t-l1">'+t.basis+' · your cost</span></p>'+
+      '<p class="p-price">'+esc(amt)+'<span class="t-l1">'+t.basis+' · your cost</span></p>'+
       '</div>'+
     '<div class="p-sum-ticket">'+ticket+'</div></div>'}
 
@@ -175,7 +178,7 @@ function staySummary(seg,x){
       (incl?'<p class="t-b2"><b>'+esc(incl)+'</b></p>':'')+
       (tracked?(held&&unit?occupancyHtml(win,x.room,unit)
                           :'<p class="t-l1 open" data-unit-line>Next, choose your room below — you will see who is already in each one.</p>'):'')+
-      '<p class="p-price">'+(x.complimentary||x.gift?'Complimentary':money((x.price||0)))+'<span class="t-l1">'+esc(basis)+'</span></p>'+
+      '<p class="p-price">'+(x.complimentary||x.gift?'Complimentary':x.price==null?esc(P.lineAmount(x)):money(x.price))+'<span class="t-l1">'+esc(basis)+'</span></p>'+
       (bk?'<p class="t-b2" data-booking="'+esc(bk.method)+'">'+esc(bk.words)+(bk.url?' <a class="p-link" href="'+esc(bk.url)+'" target="_blank" rel="noopener noreferrer" data-booking-link>Book with the hotel</a>':'')+'</p>':'')+
       actions(['<a class="p-link" href="'+detailHref(x)+'">Details</a>',
                '<a class="p-link" href="journeys.html?change='+seg.key+'#'+seg.anchor+'">Change</a>',
@@ -224,7 +227,7 @@ function bkkHtml(){
       '<h3 class="t-h1">'+esc(r.property||stay.name)+'</h3>'+
       '<p class="t-b2">'+esc(r.card||r.name)+'</p>'+
       '<p class="t-b2">21 – 24 February · 3 nights<br>'+esc(r.breakfast||stay.breakfast)+'</p>'+
-      '<p class="p-price">'+P.money(q.total)+' <span class="t-l1">per person · your cost</span></p>'+
+      '<p class="p-price">'+(q.total!=null?P.money(q.total)+' <span class="t-l1">per person · your cost</span>':esc(q.onRequest?'Amount on request':P.pendingWords()))+'</p>'+
       (av?'<p class="t-l1'+(U.soldOut&&U.soldOut(win,r.slug)?' open':'')+'">'+esc(av)+'</p>':'')+
       (on?'<span class="p-act quiet is-current" aria-current="true">'+esc(onWord)+'</span>'
          :(U&&U.ready()&&U.ctaWords(win,r.slug))?'<span class="p-act quiet is-current" aria-disabled="true">'+esc(U.ctaWords(win,r.slug))+'</span>'
@@ -251,7 +254,7 @@ function bkkHtml(){
 function flyHtml(){
   if(!P.classesOf)return '';
   var line=lineOf({ids:['mu9646']}),cur=line?(line.cls||'economy-flexible'):null,TP=window.SIYL_TRAVELPASS,c0=P.classOf('mu9646',cur||'economy-flexible');
-  var ticket=TP?TP.card('mu9646',{selected:!!line,cls:cur||'economy-flexible',price:line?money(c0.price)+' <span class="t-l1">per person</span>':null,
+  var ticket=TP?TP.card('mu9646',{selected:!!line,cls:cur||'economy-flexible',price:line?P.lineAmount(line)+' <span class="t-l1">per person</span>':null,
       actions:[(line?TP.button('mu9646',true):''),'<a class="p-link mute" href="transport.html?id=mu9646">Details</a>',(line?'<button type="button" class="p-link mute" data-rm="mu9646">Remove</button>':''),'<button type="button" class="p-link mute" data-skip="mu9646">I won’t take this flight</button>'].join('')}):'';
   return '<div id="flysel"><div class="p-product">'+
     '<span class="p-media" style="background-image:url(assets/images/transport/mu9632-business-1.jpg)" role="img" aria-label="MU9646 · China Eastern Airlines"></span>'+
@@ -272,7 +275,7 @@ function flyHtml(){
       return '<article class="p-card p-fare'+(on?' on':'')+'">'+
         (top?'<p class="t-l1'+(on?' on':'')+'">'+esc(top)+'</p>':'')+(on&&cmp?'<p class="t-l1">'+esc(cmp)+'</p>':'')+
         '<h4 class="t-h1">'+c.short+'</h4>'+
-        '<p class="p-price">'+P.money(c.price)+'<span class="t-l1">per person · your cost</span></p>'+
+        '<p class="p-price">'+esc(P.flatMoney('mu9646',c.slug))+'<span class="t-l1">per person · your cost</span></p>'+
         '<ul class="p-list">'+c.notes.map(function(n){return '<li class="t-b2">'+n+'</li>'}).join('')+'</ul>'+
         (on?'<span class="p-act quiet is-current" aria-current="true">&#10003; Selected</span>'
            :'<button type="button" class="p-act" data-cls="'+c.slug+'">'+(line?'Change to this fare':'Select this fare')+'</button>')+
@@ -290,7 +293,7 @@ function weddingHtml(){
     '<p class="t-l1">Hosted by Haruthai &amp; Suthep</p>'+
     '<ul class="p-list">'+T.EVENTS.map(function(e){return '<li class="t-b2"><b>'+e.label+'</b> · '+e.when+' · '+e.place+'</li>'}).join('')+'</ul>'+
     '<p class="t-b2 measure-w">Coffee &amp; Cake, the Vow Ceremony and the Wedding Dinner are hosted by Haruthai &amp; Suthep, drinks at dinner included; later in the evening, drinks are your own. Giving at the temple is personal, and your own.'+(G&&G.party()&&G.party().sangkhathan==='ELIGIBLE'?' The Sangkhathan offering, USD 15 per person, is yours to choose in The Wedding.':'')+'</p>';
-  if(me){h+='<div class="p-group"><div class="p-kv"><div><p class="t-b1"><b>'+esc(G.nameOf())+'</b></p><p class="t-b2">Your answers for the wedding day'+(T.offeringOf(me.guestId)?' · Sangkhathan offering '+money(usd||15):'')+'</p></div>'+
+  if(me){h+='<div class="p-group"><div class="p-kv"><div><p class="t-b1"><b>'+esc(G.nameOf())+'</b></p><p class="t-b2">Your answers for the wedding day'+(T.offeringOf(me.guestId)?' · Sangkhathan offering '+(usd?money(usd):P.flatMoney('sangkhathan')):'')+'</p></div>'+
      '<p class="t-l1'+(missing.length?' open':' on')+'">'+(missing.length?missing.length+' still to answer':'All answered')+'</p></div></div>'}
   h+=actions([allDone?'<a class="p-link mute" href="wedding.html">See your wedding answers</a>':'<a class="p-link" href="wedding.html">Answer in The Wedding</a>']);
   return h+'</div></section>'}
@@ -357,6 +360,8 @@ function replyWords(r){
   if(!r||r.ok)return '';
   if(r.error==='unreachable')return 'Your reply could not be sent just now — please check your connection and try again.';
   if(r.error==='not saved')return 'Your reply is not saved yet — please try again in a moment.';
+  if(r.error==='prices pending')return r.message||'Prices are still being confirmed — please try again in a moment.';
+  if(r.error==='prices changed')return r.message||'Some prices have been updated — please review your trip before sending.';
   if(r.error==='email required')return r.message||'Please add your email address in Your Invitation, then send your reply.';
   return 'Your reply could not be sent just now — please try again in a moment.'}
 /* WHAT A CHANGE WOULD RELEASE (Owner, 21 Sep 2026): before a scope is taken away, the guest's OWN resources that would leave
@@ -397,7 +402,7 @@ function extraLine(x){
     '<h3 class="t-h2"><a href="'+href+'">'+esc(x.name)+'</a></h3><p class="t-b2">'+esc(x.meta||'')+'</p>'+
     (m.basis?'<p class="t-b2">'+esc(m.basis)+'</p>':'')+
     actions(['<a class="p-link mute" href="'+href+'">Details</a>','<button type="button" class="p-link mute" data-rm="'+(P?P.windowOf(x.id):x.id)+'">Remove</button>'])+'</div>'+
-    (x.interest?'<p class="p-line-amt"><span class="t-l1">Not in your total</span></p>':x.gift?'<p class="p-line-amt"><span class="t-l1">Complimentary</span><span class="t-l1">from the Bride &amp; Groom</span></p>':'<p class="p-line-amt">'+money(x.price||0)+'</p>')+'</div>'}
+    (x.interest?'<p class="p-line-amt"><span class="t-l1">Not in your total</span></p>':x.gift?'<p class="p-line-amt"><span class="t-l1">Complimentary</span><span class="t-l1">from the Bride &amp; Groom</span></p>':x.price==null?'<p class="p-line-amt"><span class="t-l1">'+esc(P.lineAmount(x))+'</span></p>':'<p class="p-line-amt">'+money(x.price)+'</p>')+'</div>'}
 
 function render(){
   var b=SIYL_BAG.get(),box=document.getElementById('chrono'),h='',G=window.SIYL_GUEST;
@@ -410,7 +415,7 @@ function render(){
   var extras=b.filter(function(x){return J.order(x)===99||x.id==='1872'||x.request||x.exp}).filter(function(x){return !J.isWedding(x)&&!J.SEGMENTS.some(function(s){return s.ids.indexOf(x.id)>=0})});
   var ex=document.getElementById('extras');ex.hidden=!extras.length;
   document.getElementById('extra-lines').innerHTML=extras.map(extraLine).join('');
-  document.getElementById('tt').textContent=money(SIYL_BAG.total());
+  document.getElementById('tt').textContent=SIYL_BAG.totalWords();
   /* a guest who is not joining has no "Your total" section (RW-02-012 · PRQ-02-03) */
   var costs=document.getElementById('costs');if(costs)costs.hidden=!!(G&&G.me()&&G.notJoining&&G.notJoining());
   var cn=document.getElementById('costnote');if(cn)cn.textContent=costNote();

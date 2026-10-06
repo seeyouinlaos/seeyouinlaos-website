@@ -62,6 +62,11 @@ export function page(opts = {}) {
     matchMedia: (q) => ({ matches: !!opts.reducedMotion && /prefers-reduced-motion: reduce/.test(q), addEventListener() {}, addListener() {} }),
     fetch: opts.fetch || (() => Promise.reject(new Error('no network in tests'))),
   };
+  /* this tab's sessionStorage, when a test asks for one (Map-backed, shared across pages of one "tab" by passing the same Map) */
+  if (opts.session) {
+    const ss = opts.session;
+    sb.sessionStorage = { getItem: (k) => (ss.has(k) ? ss.get(k) : null), setItem: (k, v) => ss.set(k, String(v)), removeItem: (k) => ss.delete(k), _store: ss };
+  }
   sb.window = sb; sb.globalThis = sb;
   /* the invitation gate as the page sees it: an authenticated guest passes at once */
   sb.SIYL_INVITE = { require: (fn) => { const a = JSON.parse(sb.localStorage.getItem('siyl.auth') || 'null'); if (a && a.guestId && a.bearer) fn(a); else sb.__gateOpened = (sb.__gateOpened || 0) + 1; }, stale: () => false, leave: () => {}, open: () => {}, close: () => {}, bearer: () => { const a = JSON.parse(sb.localStorage.getItem('siyl.auth') || 'null'); return (a && a.bearer) || ''; } };
@@ -70,6 +75,12 @@ export function page(opts = {}) {
   if (opts.seed) Object.entries(opts.seed).forEach(([k, v]) => sb.localStorage.setItem(k, typeof v === 'string' ? v : JSON.stringify(v)));
   /* THE QUESTIONNAIRE (22 Sep 2026): guest.js reads its schema from the generated copy — loaded first wherever guest.js is asked for */
   const mods = (opts.modules || CORE).slice(); if (mods.includes('assets/guest.js') && !mods.includes('assets/questionnaire.js')) mods.splice(mods.indexOf('assets/guest.js'), 0, 'assets/questionnaire.js');
+  /* THE SERVER'S AMOUNTS (Owner, 4 Oct 2026 · Codex final review, 5 Oct 2026): every page that prices loads the billing client
+     before assets/pricing.js; here the test stand-in for the server catalogue takes its place (test/billing-stub.js) — answered
+     at once unless the test asks for 'pending' or 'failed' (opts.billing), with per-key answers of its own (opts.quotes). A test
+     that loads the real client (assets/billing-client.js) gets it as listed. */
+  sb.__billing = { state: opts.billing || 'ready', quotes: opts.quotes || {} };
+  if (mods.includes('assets/pricing.js') && !mods.includes('assets/billing-client.js') && !mods.includes('test/billing-stub.js')) mods.splice(mods.indexOf('assets/pricing.js'), 0, 'test/billing-stub.js');
   for (const f of mods) vm.runInContext(src(f), sb, { filename: f });
   sb.events = listeners;
   return sb;

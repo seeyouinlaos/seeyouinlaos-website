@@ -17,9 +17,19 @@
     { "name": "INVENTORY", "class": "Inventory" },
     { "name": "SEATING", "class": "Seating" },
     { "name": "ROOMS", "class": "Rooms" },
-    { "name": "DRAFTS", "class": "Drafts" }
+    { "name": "DRAFTS", "class": "Drafts" },
+    { "name": "BILLING_LEDGER", "class": "BillingLedger", "added": "2026-10-04 · OWNER-INFRA-CHANGE: H&S Guest Settlement v2.2 FINAL", "scope": "Settlement_ID allocation, settlement drafts, revision lifecycle, immutable issued snapshots, Bill_To_Holder_ID overrides, drift state, Activation Gate approval record — never guest payments, which stay canonical in Google 008_Payment_Journal" }
   ],
-  "migrations": ["v1:Inventory", "v2:Seating", "v3:Rooms", "v4:Drafts"],
+  "migrations": ["v1:Inventory", "v2:Seating", "v3:Rooms", "v4:Drafts", "v5:BillingLedger"],
+  "google": {
+    "_": "GUEST SETTLEMENT FINANCIAL SOURCE (Owner, 4 Oct 2026 · OWNER-INFRA-CHANGE: H&S Guest Settlement v2.2 FINAL). Server-side only; the credential never reaches the browser, a static asset, a log or a response.",
+    "spreadsheetId": "1wDqdKBZT54HR5kfsKWfWhxp9aaeEk-mELyeiuC4obME",
+    "secret": "GOOGLE_SERVICE_ACCOUNT_JSON",
+    "scope": "https://www.googleapis.com/auth/spreadsheets",
+    "tabs": ["002_Accommodation_Details", "008_Payment_Journal", "009_Special_Rates", "010_Booking_Evidence_Index", "011_Billing_Config"],
+    "writePath": "008_Payment_Journal: the financial payload of a Payment_ID row is appended once and never altered; the four verification columns (Record_Status, Verified_By, Verified_At, Reject_Reason) are written exactly once by BILLING_ADMIN, REPORTED to VERIFIED or REJECTED only. No website-side fallback journal exists — a failed write fails visibly (Owner clarification, 5 Oct 2026).",
+    "fx": "011_Billing_Config is the only FX source: exactly one applicable ACTIVE value per Config_Key, frozen into the immutable Revision Snapshot. No hardcoded or configurable fallback rate exists anywhere in the Worker."
+  },
   "auth": {
     "authority": "register/auth-index.json read through the ASSETS binding; the bearer is verified by src/auth.js",
     "files": {

@@ -20,27 +20,28 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 </div>
 <div id="page"></div>
 </main>
-<script src="assets/bag.js?v=f151ee23"></script>
+<script src="assets/bag.js?v=0e7cb86f"></script>
 <script src="assets/shop-menu.js?v=03047fbc"></script>
 <script src="assets/aman.js?v=641d956e"></script>
 <script src="assets/rooms-data.js?v=649562f9"></script>
-<script src="assets/pricing.js?v=ee9625e7"></script>
+<script src="assets/billing-client.js?v=421fbc48"></script>
+<script src="assets/pricing.js?v=e0a4e0cd"></script>
 <script src="assets/stage-graph.js?v=f5f4dc76"></script>
 <script src="assets/questionnaire.js?v=1dc3e01d"></script>
 <script src="assets/guest.js?v=f30d0df8"></script>
-<script src="assets/draft.js?v=5965d90d"></script>
+<script src="assets/draft.js?v=711f98ae"></script>
 <script src="assets/guest-note.js?v=625f88b5"></script>
 <script src="assets/rules-gate.js?v=d49dabdc"></script>
 <script src="assets/rate-notice.js?v=c13b32c6"></script>
 <script src="assets/confirm.js?v=d1b9a554"></script>
-<script src="assets/temple.js?v=a2f797fc"></script>
+<script src="assets/temple.js?v=116ed8bf"></script>
 <script src="assets/seatlabels.js?v=411e8a27"></script>
 <script src="assets/seating.js?v=b8f38de4"></script>
 <script src="assets/seatpass.js?v=223ee8b2"></script>
 <script src="assets/vendor/qrcode.js?v=18ae399f"></script>
 <script src="assets/travelpass.js?v=7aa24ba0"></script>
 <script src="assets/transport-data.js?v=fe6cb567"></script>
-<script src="assets/journey.js?v=2941fe09"></script>
+<script src="assets/journey.js?v=46dd07ea"></script>
 <script type="module" src="assets/invite.mjs?v=252eac2c"></script>
 <script>
 /* ============================================================================
@@ -90,7 +91,7 @@ function render(){
   h+='</section>';
   /* the journey: a travel pass for every leg in the bag */
   var legs=TP.ORDER.filter(function(l){return B.get().some(function(x){return x.id===l&&(!J||!scoped||J.lineRelevant(x))})}),passes='';
-  legs.forEach(function(l){var line=B.get().filter(function(x){return x.id===l})[0];passes+=TP.card(l,{selected:true,price:B.money(line.price)+' <span class="t-l1">per person</span>',actions:TP.button(l,true)+'<a class="p-link mute" href="your-journey.html#s-'+l+'">Change</a>'})});
+  legs.forEach(function(l){var line=B.get().filter(function(x){return x.id===l})[0];passes+=TP.card(l,{selected:true,price:(line.price==null&&window.SIYL_PRICE&&SIYL_PRICE.lineAmount?SIYL_PRICE.lineAmount(line):B.money(line.price))+' <span class="t-l1">per person</span>',actions:TP.button(l,true)+'<a class="p-link mute" href="your-journey.html#s-'+l+'">Change</a>'})});
   h+='<section class="prep-sec"><p class="t-l1">Your trip · 21 February – 8 March 2027</p><h2 class="t-h2">Travel passes</h2>';
   if(passes)h+='<div class="p-tickets">'+passes+'</div>';
   else h+='<div class="p-card flat"><p class="t-b1 measure">No travel is in your trip yet. A travel pass appears here for each journey you choose.</p><div class="p-actions"><a class="p-link" href="your-journey.html">Open My Trip</a></div></div>';

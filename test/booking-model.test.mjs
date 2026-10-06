@@ -42,8 +42,10 @@ test('B/C/D · stage D, 1 SOUPHATTRA HERITAGE: every category from The Heritage 
   for (const [slug, rate] of Object.entries(RATES)) {
     const q = P.quote('wedstay', slug);
     assert.equal(q.rate, rate, slug + ' rate'); assert.equal(q.nights, 2); assert.equal(q.pay, 1); assert.equal(q.hosted, 1);
-    assert.equal(q.total, rate, slug + ': the total for two nights is one nightly rate'); assert.notEqual(q.total, rate * 2, 'never charged twice');
     assert.equal(q.contribution, 'First night your cost, USD ' + rate + ' per person · second night complimentary, hosted by Haruthai & Suthep'); /* TO-01467 */
+    /* THE PRESIDENTIAL IS NAMED-RATE ONLY (Owner, 5 Oct 2026 · 002 Rate_Status DRAFT): the server gives a guest without a Named Special Rate no amount for it — "Amount on request", never a public price; the couple's own rate is theirs alone (below) */
+    if (slug === 'souphattra-presidential') { assert.equal(q.total, null, slug + ': no public amount'); assert.equal(q.onRequest, true, slug); assert.equal(q.pending, false, slug); continue; }
+    assert.equal(q.total, rate, slug + ': the total for two nights is one nightly rate'); assert.notEqual(q.total, rate * 2, 'never charged twice');
   }
   assert.equal(P.quote('wedstay', 'heritage').total, 145); assert.equal(P.quote('wedstay', 'heritage-executive').total, 155);
   assert.equal(P.quote('prewed', 'heritage-executive').total, 260, 'the Pre-Wedding Stay charges both nights at Package C (130 × 2) — the rule is the wedding window\'s alone');

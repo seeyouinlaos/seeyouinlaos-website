@@ -49,6 +49,12 @@ export { Inventory } from './inventory.js';
 export { Seating } from './seating.js';
 export { Rooms } from './rooms.js';
 export { Drafts } from './drafts.js';
+/* THE BILLING LEDGER (Owner, 4 Oct 2026 · OWNER-INFRA-CHANGE: H&S Guest Settlement v2.2 FINAL):
+   the website side of the Guest Settlement. Guest payments stay canonical in Google
+   008_Payment_Journal; this actor holds settlements, revisions and the immutable snapshots. */
+export { BillingLedger } from './billing-ledger.js';
+import { handleBilling } from './billing-routes.js';
+import { confirmationStands } from './confirmation.js';
 import { identify, owns, loadIndex } from './auth.js';
 import { authIdOf } from '../register/crypto.mjs';   /* the one-way derivation the register's index is keyed by (the guest's own document read) */
 import { MEDIA_SIZES } from './media-sizes.js';
@@ -82,6 +88,18 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     lastOrigin = url.origin;
+
+    /* THE GUEST SETTLEMENT (Freeze v2.2 FINAL). Everything under /api/billing/ is
+     * authenticated: a guest reaches only their own Holder, the administration routes
+     * resolve server-side to Haruthai and Suthep. The Owner's canonical payment write
+     * path, POST /api/payments/report, is the same handler under its documented name. */
+    if (url.pathname === '/api/billing' || url.pathname.startsWith('/api/billing/')) {
+      return handleBilling(request, env, url, corsHeaders(request));
+    }
+    if (url.pathname === '/api/payments/report') {
+      const u = new URL(request.url); u.pathname = '/api/billing/payment/report';
+      return handleBilling(request, env, u, corsHeaders(request));
+    }
 
     /* THE RETIRED CATEGORY LEDGER: replaced by the room occupancy engine */
     if (url.pathname === '/api/inventory' || url.pathname.startsWith('/api/inventory/')) {
@@ -940,13 +958,7 @@ async function fingerprintsOf(d, rooms, seats, which) {
 /* A CONFIRMATION STANDS for the version Guest Relations confirmed (OQ-27 · PRQ-01-05 / 02-04 / 04-04): a confirmation that names
    its version stands while that version is the latest sent; an older confirmation (no version recorded) stands while nothing was
    sent after it */
-function confirmationStands(conf, record) {
-  if (!conf || !conf.confirmedAt) return false;
-  if (!record || !record.submissionId) return true;   /* nothing sent to compare with: the confirmation as stored */
-  if (conf.version != null) return Number(conf.version) === Number(record.version || 1);
-  const last = record.lastSentAt || record.submittedAt || '';
-  return !last || String(conf.confirmedAt) >= String(last);
-}
+/* confirmationStands — the one rule, shared with the Guest Settlement (src/confirmation.js) */
 function submissionStateOf(record, hasUnsentChanges, conf) {
   if (!record || !record.submissionId) return { submissionStatus: 'draft', submissionId: null, submittedAt: null, lastSentAt: null, version: 0, hasUnsentChanges: false, declined: false, sentSelections: null, confirmed: false, confirmedAt: null, confirmedVersion: null, lapsed: false };
   const reg = record.registration && typeof record.registration === 'object' ? record.registration : {};

@@ -150,8 +150,8 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:26px;margin:40
 <div class="p" id="j-return"><div class="pgal" data-gal="[[&quot;assets/images/transport/mu5924-economy-cabin-1.jpg&quot;,&quot;Economy Class · China Eastern&quot;],[&quot;assets/images/transport/mu5924-economy-cabin-2.jpg&quot;,&quot;Economy Class seats&quot;],[&quot;assets/images/transport/mu5924-economy-cabin-3.jpg&quot;,&quot;Economy Class cabin&quot;],[&quot;assets/images/transport/mu5924-economy-meal.jpg&quot;,&quot;On board&quot;],[&quot;assets/images/transport/mu5924-economy-ife.jpg&quot;,&quot;Seatback entertainment&quot;]]"></div></a><p class="pw"><b>6 Mar</b> · Travel · Lijiang &rarr; Bangkok</p><p class="pn">MU5922 + MU741 · Lijiang → Bangkok</p><p class="pm">6 March · 10:00 → 14:55 · via Kunming · Economy Flexible</p><p class="pp" data-private>USD 200 per person</p><button class="add" data-private data-add='{"id":"return","name":"MU5922 + MU741 · Lijiang → Bangkok","meta":"6 March 2027 · Economy Flexible","price":200,"img":"assets/images/transport/mu5924-economy-cabin-1.jpg"}'>Add to My Bag</button><br><a class="vw" data-cta-swap href="transport.html?id=return">Details</a></div>
 <div class="p" id="j-muse" data-vprod="kempinski"><div class="pgal stay" data-stay-gal="hotelMuse" aria-label="Photographs of Hotel Muse Bangkok, Autograph Collection"></div><p class="pw"><b>6 – 8 Mar</b> · Accommodation · Bangkok</p><p class="pn">Hotel Muse Bangkok, Autograph Collection</p><p class="pm">6 – 8 March 2027 · 2 nights: 6 &rarr; 7 and 7 &rarr; 8 March · Langsuan, Bangkok · your cost · breakfast not included</p><p class="pb" data-private data-from="kempinski"></p><p class="vl" data-private>Rooms &amp; suites</p><div class="vars" data-private data-rooms="muse"></div><a class="vw jcta" data-private-cta href="invitation.html?open=1">Open your invitation</a></div>
 </main>
-<script src="assets/bag.js?v=f151ee23"></script>
-<script src="assets/draft.js?v=5965d90d"></script>
+<script src="assets/bag.js?v=0e7cb86f"></script>
+<script src="assets/draft.js?v=711f98ae"></script>
 <script src="assets/guest-note.js?v=625f88b5"></script>
 <script src="assets/rules-gate.js?v=d49dabdc"></script>
 <script src="assets/rate-notice.js?v=c13b32c6"></script>
@@ -159,12 +159,13 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:26px;margin:40
 <script src="assets/aman.js?v=641d956e"></script>
 <script src="assets/rooms-data.js?v=649562f9"></script>
 <script src="assets/stay-media.js?v=5e3c3b23"></script>
-<script src="assets/pricing.js?v=ee9625e7"></script>
+<script src="assets/billing-client.js?v=421fbc48"></script>
+<script src="assets/pricing.js?v=e0a4e0cd"></script>
 <script src="assets/stay-plan.js?v=5227fdc4"></script>
 <script src="assets/rooms.js?v=2f2ff2ba"></script>
 <script src="assets/stay.js?v=878b1e60"></script>
 <script src="assets/stage-graph.js?v=f5f4dc76"></script>
-<script src="assets/journey.js?v=2941fe09"></script>
+<script src="assets/journey.js?v=46dd07ea"></script>
 <script src="assets/wizard.js?v=f9c66d86"></script>
 <script type="module" src="assets/invite.mjs?v=252eac2c"></script>
 <script>
@@ -215,6 +216,9 @@ if (SIGNED_IN) (function () {
  * Every amount below is produced by SIYL_PRICE (assets/pricing.js) from the
  * approved per-person/per-night rate and the number of nights in the window. */
 var P = window.SIYL_PRICE, U = window.SIYL_UNITS, ST = window.SIYL_STAY;
+/* AN AMOUNT, OR WHY THERE IS NONE (Codex final review, 5 Oct 2026): the server's amount; while it has not answered, "Price
+   pending" ("Price unavailable" when it could not) — never a zero amount for an amount nobody has given */
+function vp(q,per){return q&&q.total!=null?'<span class="vp">'+P.money(q.total)+'<span class="vper"> '+per+'</span></span>':'<span class="vp vpend">'+(q&&q.onRequest?'On request':(P.pendingWords?P.pendingWords():'Price pending'))+'</span>'}
 var VSTAY = { 'bkk-stay': 'sathorn', prewed: 'souphattra', wedstay: 'souphattra', kmg: 'kunming', ljg: 'lijiang', kempinski: 'muse' };
 /* which window does this room list belong to */
 function boxWin(box){var p=box.closest('.p');return p?p.getAttribute('data-vprod'):null}
@@ -242,10 +246,10 @@ if(q&&r.rate!=null&&q.gift){
 }else if(q&&r.rate!=null&&q.personal){
   /* A PERSONAL RATE (Owner, 28 Sep 2026 · src/gifts.js): this guest's own charge for the window — the stated total, per person or
      (an employee rate) for the whole room; the listed rate stays beneath as a fact */
-  right='<span class="vp">'+P.money(q.total)+'<span class="vper"> '+q.per+'</span></span>';
+  right=vp(q,q.per);
   sub = q.personalWords; sub2 = q.personal==='employee' ? q.nightly : (q.nightly ? 'The listed rate: '+q.nightly : '');
 }else if(q&&r.rate!=null){
-  right='<span class="vp">'+P.money(q.total)+'<span class="vper"> per person</span></span>';
+  right=vp(q,'per person');
   /* the hosted night is said once, in the stay's own sentence above the rows (TO-01290) */
   sub = q.hosted>0 ? '' : P.money(q.rate)+' per person per night';
 }else{right='<span class="vr" style="margin:0">On request</span>'}
@@ -290,7 +294,7 @@ function paint(){
       '<span class="vbody"><a class="vname" href="'+href+'">'+r.name+'</a>'+
       '<span class="vn">'+P.money(q.rate)+' per person per night</span>'+
       (on?(unit?'<span class="vsel">'+unit+'</span>':''):av?'<span class="vav'+((U.scarce(win,r.slug)||U.soldOut(win,r.slug))?' low':'')+'">'+av+'</span>':'')+'</span>'+
-      '<span class="vp">'+P.money(q.total)+'<span class="vper"> per person</span></span>'+
+      (q.total!=null?'<span class="vp">'+P.money(q.total)+'<span class="vper"> per person</span></span>':vp(q,'per person'))+
       '<span class="vact">'+(on?'<span class="add vsbtn sel" aria-current="true">&#10003; <span>'+(held?'Held for you':'Selected')+'</span></span>'
         :gone?'<button type="button" class="add vsbtn" disabled aria-disabled="true">'+(U.ctaWords(win,r.slug)||'Sold out')+'</button>'
         :'<button type="button" class="add vsbtn" data-choose="'+r.slug+'">Select</button>')+
@@ -309,7 +313,7 @@ function paint(){
       '<p class="pcroom">'+(r.card||r.name)+'</p>'+
       '<p class="pcfacts">'+r.facts.slice(0,2).map(function(f){return f[1]}).join(' · ')+' · '+
         (r.breakfast||stay.breakfast)+'</p>'+
-      '<p class="pcprice">'+P.money(q.total)+' <span>per person · '+q.nightsLine+'</span></p>'+
+      '<p class="pcprice">'+(q.total!=null?P.money(q.total)+' <span>per person · '+q.nightsLine+'</span>':(P.pendingWords?P.pendingWords():'Price pending')+' <span>'+q.nightsLine+'</span>')+'</p>'+
       '<p class="pcrate">'+P.money(q.rate)+' per person per night</p>'+
       (av?'<p class="pcav vav'+((U.scarce(win,r.slug)||U.soldOut(win,r.slug))?' low':'')+'">'+av+'</p>':'')+
       (on?'<span class="pcgo on" aria-current="true">&#10003; '+(ST.held(chosen)?'Held for you':'Selected')+'</span>'
@@ -351,7 +355,7 @@ function paint(){
     return '<div class="var vcls'+(on?' picked':'')+'" data-fare="'+c.slug+'">'+
       '<span class="vtx"><span class="vcn">'+c.short+'</span>'+
       '<span class="vn">'+c.notes.join(' · ')+'</span></span>'+
-      '<span class="vfr"><span class="vp">'+P.money(c.price)+'<span class="vper"> per person</span></span>'+
+      '<span class="vfr">'+vp({total:P.flatPrice?P.flatPrice(id,c.slug):c.price},'per person')+
       (cmp?'<span class="vcs">'+cmp+'</span>':'')+'</span>'+
       '<span class="vact">'+(on?'<span class="add sel" aria-current="true">&#10003; Selected</span>':'<button type="button" class="add" data-cls="'+c.slug+'">'+(cur?'Change to this fare':'Select this fare')+'</button>')+
       '<a class="vdet" href="transport.html?id='+id+'">Details</a></span>'+

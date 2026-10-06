@@ -171,7 +171,8 @@
         var c = x.cls && P.classOf ? P.classOf(x.id, x.cls) : null;
         /* a house with several menus (the Highlights, 20 Sep 2026): the basis of the menu the guest chose */
         var mn = x.menu && P.menuOf ? P.menuOf(x.id, x.menu) : null;
-        return { cat: f.cat, basis: (c && c.basis) || (mn && mn.basis) || f.basis, unit: f.unit || 'guest' };
+        /* …with the amount really charged — the server's for a product it prices (Codex final review, 5 Oct 2026) */
+        return { cat: f.cat, basis: P.lineBasis ? P.lineBasis(x) : ((c && c.basis) || (mn && mn.basis) || f.basis), unit: f.unit || 'guest' };
       }
       var at = P.locate(x.id);
       if (at) return { cat: 'Accommodation', basis: P.lineBasis(x), unit: 'guest' };

@@ -159,7 +159,9 @@ const shop = () => {
   const localStorage = { getItem: (k) => (store.has(k) ? store.get(k) : null), setItem: (k, v) => store.set(k, String(v)), removeItem: (k) => store.delete(k) };
   const document = { addEventListener() {}, dispatchEvent() {}, querySelectorAll: () => [], getElementById: () => null, querySelector: () => null, createElement: () => ({ style: {}, classList: { add() {}, toggle() {} }, querySelector: () => ({}) }), head: { appendChild() {} }, body: { appendChild() {}, classList: { add() {}, remove() {}, toggle() {} } } };
   const window = { document, localStorage, addEventListener() {}, CustomEvent: class {} };
-  for (const f of ['assets/rooms-data.js', 'assets/pricing.js', 'assets/bag.js', 'assets/journey.js']) {
+  /* the server's amounts through the test stand-in for its catalogue (Owner, 4 Oct 2026); Sühring is not in it, so its menus keep the catalogue's own prices */
+  window.__billing = { state: 'ready', quotes: {}, anyone: true };
+  for (const f of ['assets/rooms-data.js', 'test/billing-stub.js', 'assets/pricing.js', 'assets/bag.js', 'assets/journey.js']) {
     new Function('window', 'document', 'localStorage', 'CustomEvent', 'SIYL_BAG', 'SIYL_PRICE', 'SIYL_ROOMS', 'SIYL_STOCK', src(f))(window, document, localStorage, class {}, window.SIYL_BAG, window.SIYL_PRICE, window.SIYL_ROOMS, undefined);
   }
   window.SIYL_BAG.badge = () => {};

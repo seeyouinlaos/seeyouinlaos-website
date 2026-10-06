@@ -51,7 +51,8 @@ test('THE FOURTEEN PAIRS · the data, the quote and the Details words of every c
        their pre-wedding figure is never quoted, never a Bag line */
     if (r.notIn && r.notIn.includes(win)) { assert.equal(P.offeredIn(win, r), false, win + '/' + slug + ' not offered'); assert.equal(P.items(win, slug).length, 0, 'never a Bag line'); assert.equal(P.known({ id: win, room: slug }), false); continue; }
     const q = P.quote(win, slug);
-    assert.equal(q.rate, pp); assert.equal(q.roomRate, room); assert.equal(q.total, win === 'prewed' ? pp * 2 : pp);
+    /* THE PRESIDENTIAL IS NAMED-RATE ONLY (Owner, 5 Oct 2026 · 002 Rate_Status DRAFT): the server gives a guest without a Named Special Rate no amount for it — "Amount on request", never a public price; the couple's own rate is theirs alone (below) */
+    assert.equal(q.rate, pp); assert.equal(q.roomRate, room); assert.equal(q.total, slug === 'souphattra-presidential' ? null : win === 'prewed' ? pp * 2 : pp);
     assert.equal(q.roomNightly, P.money(room) + ' per room per night');
     const line = P.items(win, slug)[0]; assert.equal(line.rate, pp); assert.equal(line.price, q.total, 'the Bag line carries the period\'s amount');
     if (win === 'wedstay') assert.match(q.contribution, /second night complimentary, hosted by Haruthai & Suthep$/);

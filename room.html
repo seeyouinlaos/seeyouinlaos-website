@@ -99,19 +99,20 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:24px;margin:44
 <link rel="stylesheet" href="assets/desktop.css?v=798e226c"><link rel="stylesheet" href="assets/aman.css?v=6fe22a54"></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="My Bag"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main id="m"></main>
-<script src="assets/bag.js?v=f151ee23"></script>
-<script src="assets/draft.js?v=5965d90d"></script>
+<script src="assets/bag.js?v=0e7cb86f"></script>
+<script src="assets/draft.js?v=711f98ae"></script>
 <script src="assets/guest-note.js?v=625f88b5"></script>
 <script src="assets/rules-gate.js?v=d49dabdc"></script>
 <script src="assets/rate-notice.js?v=c13b32c6"></script>
 <script src="assets/shop-menu.js?v=03047fbc"></script>
 <script src="assets/aman.js?v=641d956e"></script>
 <script src="assets/rooms-data.js?v=649562f9"></script>
-<script src="assets/pricing.js?v=ee9625e7"></script>
+<script src="assets/billing-client.js?v=421fbc48"></script>
+<script src="assets/pricing.js?v=e0a4e0cd"></script>
 <script src="assets/stay-plan.js?v=5227fdc4"></script>
 <script src="assets/rooms.js?v=2f2ff2ba"></script>
 <script src="assets/stay.js?v=878b1e60"></script>
-<script src="assets/journey.js?v=2941fe09"></script>
+<script src="assets/journey.js?v=46dd07ea"></script>
 <script src="assets/wizard.js?v=f9c66d86"></script>
 <script type="module" src="assets/invite.mjs?v=252eac2c"></script>
 <script>
@@ -146,6 +147,8 @@ function priceLine(r) {
   if (qq && qq.gift) return '<span class="op">' + qq.amount + '</span> <span class="oe">' + esc(qq.giftBy) + '</span>';
   if (qq && qq.personal) return '<span class="op">' + qq.amount + '</span> <span class="oe">' + esc(qq.per) + ' · ' + esc(qq.personalWords) + '</span>';
   if (qq && qq.total != null) return '<span class="op">' + qq.amount + '</span> <span class="oe">per person · ' + esc(qq.nightsLine) + '</span>';
+  /* no amount from the server yet — said, never a local figure in its place (Codex final review, 5 Oct 2026) */
+  if (qq && qq.pending) return '<span class="op">' + esc(P.pendingWords()) + '</span> <span class="oe">' + esc(qq.nightsLine) + '</span>';
   return '<span class="op">' + P.money(P.rateOf(W0.id, r)) + '</span> <span class="oe">per person per night</span>';
 }
 
@@ -154,7 +157,9 @@ function priceLine(r) {
  * "2 nights · 25 – 27 February 2027" (Window 007 · TO-01330) */
 function amountBlock(q) {
   /* the Bride & Groom's gift (Owner, 28 Sep 2026): the amount names who gives it; the hotel rate stays below as a fact */
-  var b = '<p class="price">' + q.amount + ' <span class="pu">' + (q.gift ? esc(q.giftBy) : q.personal ? esc(q.per) : 'per person') + '</span></p>';
+  var b = q.total == null
+    ? '<p class="price">' + esc(q.pending ? P.pendingWords() : 'Amount on request') + '</p>'
+    : '<p class="price">' + q.amount + ' <span class="pu">' + (q.gift ? esc(q.giftBy) : q.personal ? esc(q.per) : 'per person') + '</span></p>';
   b += '<p class="per">' + esc(q.nightsLine) + ' · ' + esc(q.dates) + '</p>';
   if (q.nightsCovered) b += '<p class="nn">' + esc(q.nightsCovered) + '</p>';
   if (q.contribution) b += '<p class="nn">' + esc(q.contribution) + '</p>';
@@ -208,7 +213,7 @@ stay.windows.forEach(function (w, wi) {
     /* NO PRE-RESERVED ROOMS (Owner, 15 Sep 2026): every room is chosen like any other, available until booked.
      * ONE presentation for every window: the amount, exactly what it covers,
      * and the exact nights it covers. The nights are never left implicit. */
-    h += amountBlock(q) + bookingHtml;
+    h += '<div data-amt-win="' + w.id + '">' + amountBlock(q) + '</div>' + bookingHtml;
     /* the hosted night is said once, by the amount block's own line (Window 007 · TO-00820) — no second note here */
     if ((room.breakfast || stay.breakfast)) h += '<p class="bf">' + esc((room.breakfast || stay.breakfast)) + '</p>';
     h += '<p class="av" data-av="' + w.id + '" hidden></p>';
@@ -281,7 +286,7 @@ if (others.length) {
     h += '<a class="occard" href="room.html?stay=' + stayKey + '&room=' + r.slug + '">' + img +
       '<div class="ot"><p class="oe">' + esc(r.cat) + '</p><p class="on">' + esc(r.name) + '</p>' +
       '<p class="od">' + esc(r.desc) + '</p>' +
-      '<p>' + priceLine(r) + '</p>' +
+      '<p data-pl="' + r.slug + '">' + priceLine(r) + '</p>' +
       '<p class="oe" data-oav="' + r.slug + '"></p></div></a>';
   });
   h += '</div>';
@@ -452,6 +457,11 @@ document.querySelectorAll('[data-chg]').forEach(function (b) {
   });
 });
 document.addEventListener('siyl:bag', paint);
+/* THE SERVER'S AMOUNTS ARRIVED (or could not): the amounts on this page are drawn again from them (Codex final review, 5 Oct 2026) */
+document.addEventListener('siyl:prices', function () {
+  document.querySelectorAll('[data-amt-win]').forEach(function (el) { el.innerHTML = amountBlock(P.quote(el.getAttribute('data-amt-win'), room.slug)); });
+  document.querySelectorAll('[data-pl]').forEach(function (el) { var r = stay.rooms.filter(function (x) { return x.slug === el.getAttribute('data-pl'); })[0]; if (r) el.innerHTML = priceLine(r); });
+});
 /* the Bride & Groom's gift arrived after this page was built (the first visit): built once more, once per tab (Owner, 28 Sep 2026) */
 document.addEventListener('siyl:gifts', function () { try { if (sessionStorage.getItem('siyl.gifts.rebuilt')) return; sessionStorage.setItem('siyl.gifts.rebuilt', '1'); } catch (e) { return; } location.reload(); });
 document.addEventListener('siyl:units', paint);

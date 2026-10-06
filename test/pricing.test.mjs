@@ -12,6 +12,10 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const sandbox = { window: {}, document: { addEventListener() {} }, localStorage: null };
 sandbox.window.document = sandbox.document;
 new Function('window', 'document', readFileSync(join(ROOT, 'assets/rooms-data.js'), 'utf8'))(sandbox.window, sandbox.document);
+/* THE AMOUNTS ARE THE SERVER'S (Owner, 4 Oct 2026): the test stand-in for the server catalogue answers in its place — the 002
+   standard amounts, which are this formula's numbers (test/billing-stub.js); no session is needed for the catalogue here */
+sandbox.window.__billing = { state: 'ready', quotes: {}, anyone: true };
+new Function('window', 'document', readFileSync(join(ROOT, 'test/billing-stub.js'), 'utf8'))(sandbox.window, sandbox.document);
 new Function('window', 'document', readFileSync(join(ROOT, 'assets/pricing.js'), 'utf8'))(sandbox.window, sandbox.document);
 new Function('window', 'document', readFileSync(join(ROOT, 'assets/transport-data.js'), 'utf8'))(sandbox.window, sandbox.document);
 const P = sandbox.window.SIYL_PRICE;
@@ -75,14 +79,16 @@ test('Vientiane · ALL FOURTEEN SOUPHATTRA PAIRS: Package C (25 – 27 Feb) and 
     assert.equal(q.nights, 2);
     /* 002 · G21 / H21 / I21 (28 Sep 2026): three suites are not offered before the wedding — the rate is kept, no line is made */
     if (win === 'prewed' && !P.offeredIn(win, R.souphattra.rooms.find((r) => r.slug === slug))) { assert.deepEqual(P.items(win, slug), [], tag + ' is not offered'); assert.ok(['noble-courtyard', 'grand-majestic', 'souphattra-majestic'].includes(slug), tag); continue; }
-    if (win === 'prewed') { assert.equal(q.pay, 2, 'the pre-wedding window has no hosted night'); assert.equal(q.total, pp * 2, tag + ' = rate × 2 nights'); assert.equal(total(pick(win, slug)), pp * 2); }
+    /* THE PRESIDENTIAL IS NAMED-RATE ONLY (Owner, 5 Oct 2026 · 002 Rate_Status DRAFT): the server gives a guest without a Named Special Rate no amount for it — "Amount on request", never a public price; the couple's own rate is theirs alone (below) */
+    if (slug === 'souphattra-presidential') { assert.equal(q.pay, win === 'prewed' ? 2 : 1); assert.equal(q.total, null, tag + ' has no public amount'); assert.equal(q.onRequest, true, tag); assert.equal(total(pick(win, slug)), 0, tag + ' adds nothing to a total'); assert.equal(pick(win, slug)[0].priceOnRequest, true, tag); }
+    else if (win === 'prewed') { assert.equal(q.pay, 2, 'the pre-wedding window has no hosted night'); assert.equal(q.total, pp * 2, tag + ' = rate × 2 nights'); assert.equal(total(pick(win, slug)), pp * 2); }
     else { assert.equal(q.pay, 1, 'the second wedding night is hosted'); assert.equal(q.hosted, 1); assert.equal(q.total, pp, tag + ' = one payable night'); assert.equal(total(pick(win, slug)), pp); }
     assert.equal(q.nightly, P.money(pp) + ' per person per night'); assert.equal(q.roomNightly, P.money(room) + ' per room per night');
   }
   /* the fault itself: the pre-wedding stay never carries a D1 rate */
   for (const slug of Object.keys(SOUPHATTRA.prewed)) assert.notEqual(P.quote('prewed', slug).rate, SOUPHATTRA.wedstay[slug][0], slug + ': Package C is not D1');
   assert.equal(P.money(112.5), 'USD 112.50'); assert.equal(P.money(1095), 'USD 1,095'); assert.equal(P.money(2190), 'USD 2,190'); assert.equal(P.quote('prewed', 'heritage').nightly, 'USD 112.50 per person per night');
-  assert.equal(P.quote('prewed', 'heritage').total, 225); assert.equal(P.quote('prewed', 'souphattra-presidential').total, 2190);
+  assert.equal(P.quote('prewed', 'heritage').total, 225); assert.equal(P.quote('prewed', 'souphattra-presidential').total, null, 'the Presidential is named-rate only (Owner, 5 Oct 2026): no public amount'); assert.equal(P.quote('prewed', 'souphattra-presidential').rate * 2, 2190, 'its listed rate stays a fact');
   assert.equal(P.quote('wedstay', 'noble-courtyard').total, 195); assert.equal(P.quote('wedstay', 'souphattra-majestic').total, 200);
   /* the rooms keep the Operations Master's order in both periods */
   assert.deepEqual(R.souphattra.rooms.map((r) => r.slug), Object.keys(SOUPHATTRA.prewed));
@@ -214,7 +220,7 @@ test('D2 · the Guest House complimentary is a USD 0 line of the wedding window,
 test('THE PACKAGES ARE GONE (Owner, 21 Sep 2026): no package data, no package order, no package word in the pricing, the journey or the pages; the Wedding Stay prices one night of two in every Souphattra category', () => {
   assert.equal(sandbox.window.SIYL_PACKAGES, undefined); assert.equal(sandbox.window.SIYL_PACKAGE_ORDER, undefined);
   for (const f of ['assets/pricing.js', 'assets/journey.js', 'assets/guest.js', 'your-journey.html', 'review.html', 'profile.html', 'cart.html']) assert.doesNotMatch(stripComments(readFileSync(join(ROOT, f), 'utf8')), /SIYL_PACKAGES|packagePlan|packages-data|Complete trip|Essential trip/, f);
-  for (const slug of R.souphattra.rooms.map((r) => r.slug)) { const q = P.quote('wedstay', slug); assert.equal(q.pay, 1); assert.equal(q.total, q.rate, slug + ': one nightly rate for the two wedding nights'); }
+  for (const slug of R.souphattra.rooms.map((r) => r.slug)) { const q = P.quote('wedstay', slug); assert.equal(q.pay, 1); assert.equal(q.total, slug === 'souphattra-presidential' ? null : q.rate, slug + ': one nightly rate for the two wedding nights (the Presidential: named-rate only, no public amount)'); }
   assert.equal(P.quote('wedstay', 'heritage').total, 145, 'the default, The Heritage'); assert.equal(R.souphattra.rooms[0].slug, 'heritage');
 });
 test('D · the Wedding Stay is ONE payable item, never two complimentary rows', () => {
@@ -463,8 +469,10 @@ test('Full Experience lines come from the single pricing source, transport inclu
      Vientiane windows since 15 Sep 2026); it is simply no longer what Full
      Experience selects */
   /* Bangkok's dearest room is U Sathorn (192) since the Sathorn Penthouse was deleted (Edit 6, 24 Sep 2026) */
-  assert.equal(Math.round(total(all) * 100) / 100, Math.round((203.42 + 100 + 2190 + 750 + 167.5 + 128.67 + 105 + 268.28 + 200 + 184.2) * 100) / 100);   /* the Presidential at Package C (1,095 × 2) before the wedding, D1 (750) for it · the live 002, 28 Sep 2026 */
-  assert.equal(Math.round(total(all) * 100) / 100, 4297.07);   /* MU9646 Economy Flexible USD 167.50 (Owner, 4 Oct 2026) */
+  /* THE PRESIDENTIAL IS NAMED-RATE ONLY (Owner, 5 Oct 2026 · 002 Rate_Status DRAFT): the server gives a guest without a Named Special Rate no amount for it — "Amount on request", never a public price; the couple's own rate is theirs alone (below) */
+  assert.deepEqual(all.filter((x) => x.priceOnRequest).map((x) => x.id + '/' + x.room), ['prewed/souphattra-presidential', 'wedstay/souphattra-presidential'], 'the premium rooms of Vientiane carry no public amount');
+  assert.equal(Math.round(total(all) * 100) / 100, Math.round((203.42 + 100 + 167.5 + 128.67 + 105 + 268.28 + 200 + 184.2) * 100) / 100);   /* the Presidential at Package C and D1 add nothing · the live 002, 28 Sep 2026 */
+  assert.equal(Math.round(total(all) * 100) / 100, 1357.07);   /* MU9646 Economy Flexible USD 167.50 (Owner, 4 Oct 2026) */
   assert.notEqual(Math.round(total(all) * 100) / 100, 1796.74);
 });
 
@@ -711,7 +719,7 @@ test('Review & Send is five editorial blocks, each with its own way back', () =>
   assert.equal((page.match(/<p class="t-l1 on">Confirmed by Guest Relations<\/p>/g) || []).length >= 1, true, 'Confirmed is only ever Guest Relations\' word');
   /* one guest, never a party headcount */
   assert.doesNotMatch(page, /p\.guests\.forEach|For your party|Total for your party/);
-  assert.match(page, /L\.push\('','TOTAL: '\+SIYL_BAG\.money\(SIYL_BAG\.total\(\)\)/); /* B3: the internal text's total line */
+  assert.match(page, /L\.push\('','TOTAL: '\+SIYL_BAG\.totalWords\(\)\)/); /* B3: the internal text's total line */
   assert.doesNotMatch(page, /Contribution|Beitrag|Eigenanteil/);
 });
 
@@ -1181,9 +1189,14 @@ test('the retired imagery and the pool-side dinner narrative are gone', () => {
 test('PRESIDENTIAL · USD 1,095 per person per night before the wedding (USD 2,190 for the two nights · USD 2,190 the room) — USD 750 for the Wedding Stay (USD 1,500 the room)', () => {
   const pre = P.quote('prewed', 'souphattra-presidential'), wed = P.quote('wedstay', 'souphattra-presidential');
   assert.equal(pre.rate, 1095); assert.equal(pre.nightly, 'USD 1,095 per person per night'); assert.equal(pre.roomNightly, 'USD 2,190 per room per night');
-  assert.equal(pre.amount, 'USD 2,190'); assert.equal(pre.total, 2190);
   assert.equal(wed.roomNightly, 'USD 1,500 per room per night');
-  assert.equal(wed.amount, 'USD 750'); assert.equal(wed.total, 750);
+  /* THE PRESIDENTIAL IS NAMED-RATE ONLY (Owner, 5 Oct 2026 · 002 Rate_Status DRAFT): the server gives a guest without a Named Special Rate no amount for it — "Amount on request", never a public price; the couple's own rate is theirs alone (below) */
+  assert.equal(pre.total, null); assert.equal(pre.amount, ''); assert.equal(pre.onRequest, true); assert.match(pre.basis, /^Amount on request · 2 nights/);
+  assert.equal(wed.total, null); assert.equal(wed.onRequest, true);
+  /* a Named Special Rate that names the guest is the server's amount, said as the guest's own rate */
+  sandbox.window.__billing.quotes['prewed/souphattra-presidential'] = { total: 150, block: 'A', rateSource: 'SPECIAL_RATE', hosted: false };
+  try { const own = P.quote('prewed', 'souphattra-presidential'); assert.equal(own.total, 150); assert.equal(own.amount, 'USD 150'); assert.equal(own.personal, 'special'); assert.equal(own.hotelTotal, 2190, 'the listed rate stays a fact'); }
+  finally { delete sandbox.window.__billing.quotes['prewed/souphattra-presidential']; }
 });
 
 /* THE MY BAG BASIS (TO-01311 · TO-01312 · TO-01313): amount → for whom → how long, the nights named once, the nightly rate

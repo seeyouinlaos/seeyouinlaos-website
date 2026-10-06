@@ -47,6 +47,15 @@ if(f){f.qty=Math.max(1,f.qty+d);this.set(b)}},
  * at the designated hotel, and `lines()` existed only to carry it. With the self-service extension gone the guest's own
  * lines ARE the bag, and the total is their sum: one list again, nothing derived, nothing added. */
 total:function(){return this.get().reduce(function(t,x){return t+(x.price||0)*x.qty},0)},
+/* AN AMOUNT STILL TO COME (Codex final review, 5 Oct 2026): `total()` sums the amounts the lines have; `pricePending()` says
+ * whether a selected line has none yet from the server (every surface then says so instead of a total that leaves it out);
+ * `pending()` is what Review & Send asks — that, or this page has not had the server's answer for lines it prices */
+pricePending:function(){var P=window.SIYL_PRICE;return this.get().some(function(x){return P&&P.linePending?P.linePending(x):!!(x&&x.pricePending)})},
+pending:function(){var P=window.SIYL_PRICE,b=this.get();if(this.pricePending())return true;return !!(P&&P.awaitingQuotes&&P.awaitingQuotes(b))},
+/* A LINE WITHOUT AN AMOUNT IS NEVER A SILENT ZERO (Codex round 2): a selected line the server answered with no amount ("Amount on
+ * request") is named beside the total, never folded into it as USD 0; every surface prints totalWords() */
+onRequest:function(){return this.get().some(function(x){return !!(x&&!x.interest&&!x.complimentary&&x.priceOnRequest&&(x.price==null||!isFinite(Number(x.price))))})},
+totalWords:function(){var P=window.SIYL_PRICE;if(this.pricePending()&&P&&P.pendingWords)return P.pendingWords();var m=this.money(this.total());return this.onRequest()?m+' + amount on request':m},
 /* display-only: thumbnails for bag lines persisted before the transport imagery existed */
 THUMBS:{train:'assets/images/transport/train-no25-srt-train.jpg',mu9632:'assets/images/transport/mu9632-business-1.jpg',c642:'assets/images/transport/c642-train-snow-mountain.jpg','return':'assets/images/transport/mu5924-economy-cabin-1.jpg'},
 thumb:function(x){return x.img||this.THUMBS[x.id]||''},
@@ -98,7 +107,7 @@ el.querySelectorAll('[data-nav]').forEach(function(a){var k=a.getAttribute('data
   if(k==='top')a.addEventListener('click',function(){window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})})});
 function topShow(){var t=el.querySelector('.jb-top');if(t)t.classList.toggle('show',window.scrollY>innerHeight)}
 window.addEventListener('scroll',topShow,{passive:true});
-function sync(){var n=B.authed()?B.get().length:0,t=el.querySelector('.jb-t'),v=B.money(B.total());
+function sync(){var n=B.authed()?B.get().length:0,t=el.querySelector('.jb-t'),v=B.totalWords();
 if(t.textContent!==v){t.classList.add('tick');t.textContent=v;setTimeout(function(){t.classList.remove('tick')},200)}
 var view=el.querySelector('[data-bag-view]');view.setAttribute('href',dest());if(here==='cart'){view.hidden=true}
 /* the bar stands whenever a guest is signed in — an empty bag is a real state (USD 0), and the account access must not vanish with it */

@@ -224,8 +224,11 @@ test('PRICING · one guest, one price: Sangkhathan USD 15 for this guest only, n
   assert.equal(P.FLAT.train.price, 100); assert.match(P.FLAT.train.basis, /USD 100 per person/);
   /* the Souphattra Presidential in its two periods (the Operations Master, 27 Sep 2026): Package C USD 1,095 per person per night — USD 2,190 for the 2 nights; the Wedding Stay (D1) USD 750, its first night only */
   { const pre = P.quote('prewed', 'souphattra-presidential'), wed = P.quote('wedstay', 'souphattra-presidential');
-    assert.equal(pre.rate, 1095); assert.equal(pre.total, 2190); assert.equal(pre.amount, 'USD 2,190'); assert.equal(pre.nightly, 'USD 1,095 per person per night');
-    assert.equal(wed.rate, 750); assert.equal(wed.pay, 1); assert.equal(wed.hosted, 1); assert.equal(wed.total, 750); }
+    assert.equal(pre.rate, 1095); assert.equal(pre.nightly, 'USD 1,095 per person per night');
+    assert.equal(wed.rate, 750); assert.equal(wed.pay, 1); assert.equal(wed.hosted, 1);
+    /* THE PRESIDENTIAL IS NAMED-RATE ONLY (Owner, 5 Oct 2026 · 002 Rate_Status DRAFT): the server gives a guest without a Named Special Rate no amount for it — "Amount on request", never a public price; the couple's own rate is theirs alone (below) */
+    assert.equal(pre.total, null); assert.equal(pre.amount, ''); assert.equal(pre.onRequest, true); assert.match(pre.basis, /^Amount on request · 2 nights/);
+    assert.equal(wed.total, null); assert.equal(wed.onRequest, true); }
   assert.equal(P.FLAT.suhring.price, 294); assert.equal(P.FLAT.baanphraya.price, 114); assert.equal(P.FLAT.cannubi.price, 165); assert.equal(P.FLAT.sangkhathan.price, 15);
   P.items('train').forEach((it) => { it.qty = 1; B.put(it); });
   assert.equal(B.total(), 100);
@@ -236,9 +239,11 @@ test('PRICING · one guest, one price: Sangkhathan USD 15 for this guest only, n
 });
 
 test('PRICING · the total is one number on every surface: sticky bar, cart, Your Journey, Review & Send, the sent text', () => {
-  for (const f of ['cart.html', 'your-journey.html', 'review.html']) assert.match(src(f), /(SIYL_BAG|B)\.total\(\)/, f + ' reads the one total');
-  assert.match(src('assets/bag.js'), /B\.money\(B\.total\(\)\)/);
-  assert.match(src('review.html'), /L\.push\('','TOTAL: '\+SIYL_BAG\.money\(SIYL_BAG\.total\(\)\)\);/); assert.match(src('review.html'), /L\.push\('','My total: '\+SIYL_BAG\.money\(SIYL_BAG\.total\(\)\)\+' — nothing paid on the website\.'\)/); /* Window 007: the internal text and the guest's own copy */
+  for (const f of ['cart.html', 'your-journey.html', 'review.html']) assert.match(src(f), /(SIYL_BAG|B)\.totalWords\(\)/, f + ' reads the one total');
+  /* totalWords() is the one total's words: it is built on total() and adds no arithmetic of its own (Codex round 2) */
+  assert.match(src('assets/bag.js'), /totalWords:function\(\)\{[^}]*this\.money\(this\.total\(\)\)/);
+  assert.match(src('assets/bag.js'), /v=B\.totalWords\(\)/);
+  assert.match(src('review.html'), /L\.push\('','TOTAL: '\+SIYL_BAG\.totalWords\(\)\);/); assert.match(src('review.html'), /L\.push\('','My total: '\+SIYL_BAG\.totalWords\(\)\+' — nothing paid on the website\.'\)/); /* Window 007: the internal text and the guest's own copy */
   assert.doesNotMatch(src('cart.html') + src('review.html') + src('assets/bag.js'), /checkout/i, 'never a checkout');
   const w = page({ auth: PEGGY });
   const B = w.SIYL_BAG, P = w.SIYL_PRICE;

@@ -150,12 +150,15 @@ test('ONE PRICE SOURCE (Owner, 15 Sep 2026 · Edit 2): a bag line saved at C86 8
   B.put(P.items('c86')[0]); assert.equal(B.total(), before); assert.equal(B.get().find((x) => x.id === 'c86').price, 105);
   /* every surface reads the same line and the same total: no second arithmetic anywhere */
   assert.match(src('cart.html'), /'<p class="p-line-amt">'\+money\(x\.price\|\|0\)\+'<span class="t-l1">'\+\(x\.id==='1872'\|\|x\.id==='tea1872'\?'for the table':x\.personal==='employee'\?'for the room':'per person'\)\+'<\/span><\/p>'/, 'the cart line price is the line, with its basis (PRQ-04-11)');
-  assert.match(src('cart.html'), /money\(B\.total\(\)\)/); assert.match(src('assets/bag.js'), /B\.money\(B\.total\(\)\)/, 'the sticky bar');
-  assert.match(src('your-journey.html'), /money\(SIYL_BAG\.total\(\)\)/); assert.match(src('review.html'), /SIYL_BAG\.money\(SIYL_BAG\.total\(\)\)/, 'Review & Send');
-  assert.match(src('review.html'), /'TOTAL: '\+SIYL_BAG\.money\(SIYL_BAG\.total\(\)\)/, 'the sent journey');
+  /* the one total, through its one set of words (totalWords is built on total() — Codex round 2) */
+  assert.match(src('cart.html'), /B\.totalWords\(\)/); assert.match(src('assets/bag.js'), /v=B\.totalWords\(\)/, 'the sticky bar');
+  assert.match(src('assets/bag.js'), /totalWords:function\(\)\{[^}]*this\.money\(this\.total\(\)\)/, 'no second arithmetic');
+  assert.match(src('your-journey.html'), /SIYL_BAG\.totalWords\(\)/); assert.match(src('review.html'), /SIYL_BAG\.totalWords\(\)/, 'Review & Send');
+  assert.match(src('review.html'), /'TOTAL: '\+SIYL_BAG\.totalWords\(\)/, 'the sent journey');
   assert.match(src('review.html'), /' · '\+SIYL_BAG\.money\(x\.price\|\|0\)/, 'the sent lines carry the line amount');
   assert.equal(w.SIYL_BAG.money(167.5), 'USD 167.50', 'cents are always two digits'); assert.equal(w.SIYL_BAG.money(1589), 'USD 1,589');
-  assert.match(src('assets/pricing.js'), /\(function repriceFlat\(\) \{/);
+  /* re-derived on load — and again when the server's amounts arrive (Codex final review, 5 Oct 2026) */
+  assert.match(src('assets/pricing.js'), /function repriceFlat\(\) \{/); assert.match(src('assets/pricing.js'), /\n  repriceFlat\(\);\n/); assert.match(src('assets/pricing.js'), /document\.addEventListener\('siyl:billing-ready', onPrices\)/);
   for (const f of ['cart.html', 'your-journey.html', 'review.html', 'assets/bag.js', 'assets/journey.js']) assert.doesNotMatch(src(f), /price\s*[:=]\s*(85|105)\b|\bUSD (85|105)\b/, f + ': no C86 amount of its own');
 });
 

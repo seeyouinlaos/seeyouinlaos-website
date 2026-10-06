@@ -183,6 +183,10 @@
     try { var a = auth(), s = JSON.parse(localStorage.getItem('siyl.party') || 'null'); return s && a && s.guestId === a.guestId ? s.travel : null; } catch (e) { return null; }
   }
   var D = window.SIYL_DRAFT = {
+    /* the words of a send refused because a selected line has no amount from the server yet */
+    PRICES_PENDING: 'Prices are still being confirmed — please try again in a moment.',
+    /* the words of a send refused because the server's current source prices a line differently */
+    PRICES_CHANGED: 'Some prices have been updated — please review your trip before sending.',
     /* the places a booking of this stay stage takes (null: not known yet — the invitation's party is used) */
     partyNeed: function (stage) { var tr = travelNow(); var n = tr && tr.need ? Number(tr.need[stage]) : NaN; return n >= 1 ? n : null; },
     /* a member of the party by their current answer: 'joining' | 'not-joining' | 'unanswered' (null: not known) */
@@ -419,9 +423,29 @@
       if (sendingNow) return sendingNow;
       opts = opts || {};
       var a = auth(); if (!signedIn()) return Promise.resolve({ ok: false, error: 'unauthorised' });
+      /* NO PARTIAL TOTAL IS EVER SENT (Codex final review, 5 Oct 2026): while the server has not given every selected line
+         its amount on this page, the trip is not sent — the guest is asked to try again in a moment */
+      var Bg = window.SIYL_BAG;
+      if (Bg && typeof Bg.pending === 'function' && Bg.pending()) return Promise.resolve({ ok: false, error: 'prices pending', message: D.PRICES_PENDING });
       var s = session();
       announce();
-      sendingNow = D.flush('send').then(function (fl) {
+      /* THE SERVER CHECKS THE AMOUNTS FIRST (Owner, 6 Oct 2026). What this page shows may come from a copy held for a few
+         minutes; nothing is sent on it. The lines are priced again by the server from its FRESH source for this guest —
+         no answer, or any difference, and the trip is not sent (a difference re-prices the Bag at once). A trip with no
+         line to price (a decline, an empty Bag) has nothing to check. */
+      var lines = Bg && typeof Bg.get === 'function' ? Bg.get() : [];
+      var toCheck = lines.some(function (x) { return x && !x.interest; });
+      var Bill = window.SIYL_BILLING;
+      var checked = !toCheck ? Promise.resolve({ ok: true, valid: true })
+        : (Bill && typeof Bill.validate === 'function' ? Bill.validate(lines) : Promise.resolve({ ok: false, error: 'unavailable' }));
+      sendingNow = checked.then(function (v) {
+        if (!same(s)) return { ok: false, error: 'session changed' };
+        if (!v || v.ok !== true) return { ok: false, error: 'prices pending', message: D.PRICES_PENDING };
+        if (v.valid !== true) return { ok: false, error: 'prices changed', message: D.PRICES_CHANGED, mismatches: v.mismatches || [] };
+        if (Bg && typeof Bg.pending === 'function' && Bg.pending()) return { ok: false, error: 'prices pending', message: D.PRICES_PENDING };
+        return D.flush('send');
+      }).then(function (fl) {
+        if (fl && fl.ok === false && (fl.error === 'prices pending' || fl.error === 'prices changed' || fl.error === 'session changed')) return fl;
         if (!fl || !fl.ok) return { ok: false, error: 'not saved' };
         if (!same(s)) return { ok: false, error: 'session changed' };
         var reg = opts.registration || registrationNow(), text = opts.text || textOf(reg);
@@ -590,7 +614,8 @@
   function flushForms() { try { var el = document.activeElement; if (el && /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) { el.dispatchEvent(new Event('change', { bubbles: true })); el.blur(); } } catch (e) {} }
 
   /* wiring */
-  ['siyl:guest', 'siyl:bag', 'siyl:temple', 'siyl:docs'].forEach(function (ev) { document.addEventListener(ev, function () { D.touch(); }); });
+  /* a redraw-only event (the server's prices arrived and no line changed — assets/pricing.js) is not an edit: nothing to save */
+  ['siyl:guest', 'siyl:bag', 'siyl:temple', 'siyl:docs'].forEach(function (ev) { document.addEventListener(ev, function (e) { if (e && e.detail && e.detail.repaintOnly) return; D.touch(); }); });
   function pullOnce() { var a = auth(); if (!signedIn()) return; if (pulled === a.invitationId) return; pulled = a.invitationId; D.pull(); }
   document.addEventListener('siyl:auth', pullOnce); document.addEventListener('siyl:invite-ready', pullOnce);
   document.addEventListener('siyl:signout', function () { sessionChanged(); pulled = ''; state.notice = null; state.lost = null; state.submission = null; state.phase = 'idle'; state.offline = false; try { localStorage.removeItem(META); localStorage.removeItem(BASE); localStorage.removeItem(DEVICE_SENT); sessionStorage.removeItem(NOTICE); } catch (e) {} });

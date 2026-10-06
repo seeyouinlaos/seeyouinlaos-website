@@ -115,7 +115,9 @@ test('C · D · ANY OTHER GUEST — the party mate included — pays the D1 rate
     const q = w.SIYL_PRICE.quote('wedstay', 'heritage'); assert.equal(q.total, 145, gid); assert.equal(q.gift, undefined, gid);
     const st = plain(w.SIYL_BAG.get()).find((x) => x.id === 'wedstay'); assert.equal(st.price, 145, gid); assert.equal(st.gift, undefined, gid);
   }
-  const out = page({ auth: null }); assert.equal(out.SIYL_PRICE.quote('wedstay', 'heritage').total, 145, 'signed out');
+  /* SIGNED OUT (Codex final review, 5 Oct 2026): the server's catalogue answers a signed-in guest only — a visitor sees no amount ("Price unavailable"), and never anyone's arrangement */
+  const out = page({ auth: null }), oq = out.SIYL_PRICE.quote('wedstay', 'heritage');
+  assert.equal(oq.total, null, 'signed out'); assert.equal(oq.gift, undefined, 'signed out'); assert.match(oq.basis, /^Price unavailable/, 'signed out');
 });
 
 test('THE WORKER · GET /api/gifts answers the signed-in guest with their own gift only — the party mate and every other guest with none; signed out 401; nothing is written', async () => {
@@ -204,6 +206,7 @@ test('PEGGY & STEFFIE (Owner, 3 Oct 2026 · 002 E21) · one Heritage Executive r
   /* the public rate: any other guest, and a signed-out visitor, still pay the listed pre-wedding rate */
   const other = page({ auth: { ...PEGGY, guestId: 'G777' } }).SIYL_PRICE.quote('prewed', 'heritage-executive');
   assert.equal(other.total, 260); assert.equal(other.personal, undefined);
-  assert.equal(page({ auth: null }).SIYL_PRICE.quote('prewed', 'heritage-executive').total, 260);
+  /* SIGNED OUT (Codex final review, 5 Oct 2026): the server's catalogue answers a signed-in guest only — a visitor sees no amount ("Price unavailable"), and never anyone's arrangement */
+  { const oq = page({ auth: null }).SIYL_PRICE.quote('prewed', 'heritage-executive'); assert.equal(oq.total, null); assert.equal(oq.personal, undefined); }
   assert.equal(page({ auth: null }).SIYL_ROOMS.souphattra.rooms.find((r) => r.slug === 'heritage-executive').rates.prewed, 130, 'USD 130 per person per night, as listed');
 });

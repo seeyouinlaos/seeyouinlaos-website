@@ -101,15 +101,16 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;margin:44
 <link rel="stylesheet" href="assets/desktop.css?v=798e226c"><link rel="stylesheet" href="assets/aman.css?v=6fe22a54"></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="My Bag"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main id="m"></main>
-<script src="assets/bag.js?v=f151ee23"></script>
+<script src="assets/bag.js?v=0e7cb86f"></script>
 <script src="assets/shop-menu.js?v=03047fbc"></script>
 <script src="assets/aman.js?v=641d956e"></script>
 <script src="assets/rooms-data.js?v=649562f9"></script>
-<script src="assets/pricing.js?v=ee9625e7"></script>
+<script src="assets/billing-client.js?v=421fbc48"></script>
+<script src="assets/pricing.js?v=e0a4e0cd"></script>
 <script src="assets/stage-graph.js?v=f5f4dc76"></script>
 <script src="assets/questionnaire.js?v=1dc3e01d"></script>
 <script src="assets/guest.js?v=f30d0df8"></script>
-<script src="assets/draft.js?v=5965d90d"></script>
+<script src="assets/draft.js?v=711f98ae"></script>
 <script src="assets/guest-note.js?v=625f88b5"></script>
 <script src="assets/rules-gate.js?v=d49dabdc"></script>
 <script src="assets/rate-notice.js?v=c13b32c6"></script>
@@ -119,7 +120,7 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;margin:44
 <script src="assets/vendor/qrcode.js?v=18ae399f"></script>
 <script src="assets/travelpass.js?v=7aa24ba0"></script>
 <script src="assets/transport-data.js?v=fe6cb567"></script>
-<script src="assets/journey.js?v=2941fe09"></script>
+<script src="assets/journey.js?v=46dd07ea"></script>
 <script src="assets/wizard.js?v=f9c66d86"></script>
 <script type="module" src="assets/invite.mjs?v=252eac2c"></script>
 <script>
@@ -214,8 +215,10 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;margin:44
   function fared(k) { return P.classesOf(k).length > 0; }
   function priceWords(k) {
     var l = lineOf(k);
-    if (fared(k) && !l) return 'From ' + P.money(P.fromPrice(k));
-    return P.money(l && l.price != null ? l.price : P.FLAT[k].price);
+    /* the amount really charged — the server's for a leg it prices; while it has not answered, said so (never USD 0) */
+    if (fared(k) && !l) { var fp = P.fromPrice(k); return fp == null ? P.pendingWords() : 'From ' + P.money(fp); }
+    if (l) return l.price != null ? P.money(l.price) : P.lineAmount(l);
+    return P.flatMoney(k);
   }
   others.forEach(function (k) {
     var o = window.SIYL_TRANSPORT[k];
@@ -234,7 +237,7 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;margin:44
   h += '<h2>' + esc(T.name) + '</h2><p class="eyebrow" style="margin:0">' + esc(T.place) + '</p>';
   h += '<div class="win"><p class="wl">' + esc(T.cat) + '</p><p class="wd">' + esc(T.dates) + '</p>';
   h += '<p class="price"><span id="price">' + priceWords(id) + '</span> <span class="pu">per person</span></p>';
-  h += '<p class="per" id="per">' + esc(F.basis) + '</p>';
+  h += '<p class="per" id="per">' + esc(P.flatBasis ? P.flatBasis(id) : F.basis) + '</p>';
   /* the travel pass (Owner, 15 Sep 2026): the leg as a ticket, live with the guest's selection */
   h += '<div class="ticket" id="ticket"></div>';
   h += '<button class="cta" id="add">Add to My Bag</button>';
@@ -292,8 +295,8 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;margin:44
     if (fared(id) && !line) { tk.innerHTML = ''; tk.hidden = true; return; }
     tk.hidden = false;
     var cls = line ? line.cls : (P.classesOf(id).length ? P.classOf(id).slug : '');
-    var price = line ? line.price : (P.classesOf(id).length ? P.classOf(id, cls).price : F.price);
-    tk.innerHTML = TP.card(id, { selected: !!line, cls: cls, price: P.money(price) + ' <span class="t-l1">per person</span>', actions: line ? TP.button(id, true) : '' });
+    var price = line ? P.lineAmount(line) : P.flatMoney(id, cls);
+    tk.innerHTML = TP.card(id, { selected: !!line, cls: cls, price: price + ' <span class="t-l1">per person</span>', actions: line ? TP.button(id, true) : '' });
     TP.wire(tk);
   }
   function paintFare() {
@@ -301,8 +304,8 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;margin:44
     var per = document.getElementById('per'), l = lineOf(id);
     if (fared(id)) {
       per.textContent = l ? P.terms(P.classOf(id, l.cls).basis)
-        : P.classesOf(id).slice().sort(function (a, b) { return a.price - b.price; }).map(function (c) { return c.short + ' ' + P.money(c.price); }).join(' · ');
-    }
+        : P.classesOf(id).slice().sort(function (a, b) { return a.price - b.price; }).map(function (c) { return c.short + ' ' + P.flatMoney(id, c.slug); }).join(' · ');
+    } else per.textContent = P.flatBasis(id);
     document.querySelectorAll('[data-leg-price]').forEach(function (el) { el.textContent = priceWords(el.getAttribute('data-leg-price')); });
   }
   function paintAdd() {

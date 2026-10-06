@@ -25,19 +25,20 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 </div>
 <div id="page"></div>
 </main>
-<script src="assets/bag.js?v=f151ee23"></script>
+<script src="assets/bag.js?v=0e7cb86f"></script>
 <script src="assets/shop-menu.js?v=03047fbc"></script>
 <script src="assets/aman.js?v=641d956e"></script>
 <script src="assets/rooms-data.js?v=649562f9"></script>
-<script src="assets/pricing.js?v=ee9625e7"></script>
+<script src="assets/billing-client.js?v=421fbc48"></script>
+<script src="assets/pricing.js?v=e0a4e0cd"></script>
 <script src="assets/stage-graph.js?v=f5f4dc76"></script>
 <script src="assets/questionnaire.js?v=1dc3e01d"></script>
 <script src="assets/guest.js?v=f30d0df8"></script>
-<script src="assets/draft.js?v=5965d90d"></script>
+<script src="assets/draft.js?v=711f98ae"></script>
 <script src="assets/guest-note.js?v=625f88b5"></script>
 <script src="assets/rules-gate.js?v=d49dabdc"></script>
 <script src="assets/rate-notice.js?v=c13b32c6"></script>
-<script src="assets/temple.js?v=a2f797fc"></script>
+<script src="assets/temple.js?v=116ed8bf"></script>
 <script src="assets/stay-plan.js?v=5227fdc4"></script>
 <script src="assets/rooms.js?v=2f2ff2ba"></script>
 <script src="assets/stay.js?v=878b1e60"></script>
@@ -45,7 +46,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/seating.js?v=b8f38de4"></script>
 <script src="assets/confirm.js?v=d1b9a554"></script>
 <script src="assets/transport-data.js?v=fe6cb567"></script>
-<script src="assets/journey.js?v=2941fe09"></script>
+<script src="assets/journey.js?v=46dd07ea"></script>
 <script type="module" src="assets/invite.mjs?v=252eac2c"></script>
 <script>
 /* ============================================================================
@@ -125,6 +126,8 @@ function amount(x){
   /* the Bride & Groom's gift (Owner, 28 Sep 2026): nothing to pay, and who gives it */
   if(x.gift)return '<p class="p-line-amt"><span class="t-l1">Complimentary</span><span class="t-l1">from the Bride &amp; Groom</span></p>';
   /* a personal employee rate is the whole room, paid by this guest alone (Owner, 28 Sep 2026 · src/gifts.js) */
+  /* no amount from the server yet: the line says so — never USD 0 (Codex final review, 5 Oct 2026) */
+  if(x.price==null)return '<p class="p-line-amt"><span class="t-l1">'+esc(P&&P.lineAmount?P.lineAmount(x):'Price pending')+'</span></p>';
   return '<p class="p-line-amt">'+money(x.price||0)+'<span class="t-l1">'+(x.id==='1872'||x.id==='tea1872'?'for the table':x.personal==='employee'?'for the room':'per person')+'</span></p>'}
 /* THE BOOKING METHOD of a stay line (Owner, 28 Sep 2026 · 002 "Note for Guest"): booked by the guest (the hotel's own link, in a new
    tab — following it books nothing here and the line stays as it is) or by the Bride & Groom (charged within 14 days after booking) */
@@ -179,7 +182,7 @@ function render(){
     var lines=b.filter(function(x){return group(x)===gname});if(!lines.length)return;
     h+='<section class="prep-sec cart-group"><p class="t-l1">'+esc(GROUP_WORDS[gname])+'</p>'+lines.map(item).join('')+'</section>'});
   var ready=G.readiness(),first=ready.first;
-  h+='<section class="prep-sec"><div class="p-card cart-sum"><div class="p-total"><span class="t-l1">Your total</span><b id="tt">'+money(B.total())+'</b></div>'+
+  h+='<section class="prep-sec"><div class="p-card cart-sum"><div class="p-total"><span class="t-l1">Your total</span><b id="tt">'+esc(B.totalWords())+'</b></div>'+
      '<p class="t-b2 measure-w">Nothing is paid on this website.</p>'+
      (ready.ok?'<div class="p-actions" style="margin-top:var(--s4)"><a class="p-act" href="review.html">Review &amp; Send</a></div>'
        :'<div class="p-card flat" style="margin-top:var(--s4)"><p class="t-l1 open">Before you send</p>'+

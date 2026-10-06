@@ -26,7 +26,17 @@
   // OWNER-INFRA-CHANGE (1 Oct 2026): the sender is the Brevo-authenticated domain address guest.relations@seeyouinlaos.com (DKIM
   // brevo1/brevo2 · DMARC on seeyouinlaos.com) — a real address, forwarded by Cloudflare Email Routing to the Guest Relations inbox; it
   // replaced suthep.hrg@gmail.com, which Brevo had to rewrite to an unreceivable @brevosend.com address. Rollback: set it back.
-  "vars": { "MAIL_FROM": "guest.relations@seeyouinlaos.com" },
+  /* THE GUEST SETTLEMENT SOURCE (Owner, 4 Oct 2026 · OWNER-INFRA-CHANGE: H&S Guest Settlement v2.2 FINAL):
+     the H&S_Wedding_Operations_Master spreadsheet id is CONFIGURATION, not a secret — it names the
+     workbook, it does not open it. The credential that opens it is the Worker secret
+     GOOGLE_SERVICE_ACCOUNT_JSON (`wrangler secret put GOOGLE_SERVICE_ACCOUNT_JSON`), which never
+     reaches browser code, a static asset, a log line or a response body. Google remains the
+     financial source of truth: 002 structured item metadata, 008_Payment_Journal (append-only and
+     canonical for guest payments), 009_Special_Rates, 010_Booking_Evidence_Index. */
+  "vars": {
+    "MAIL_FROM": "guest.relations@seeyouinlaos.com",
+    "SHEETS_ID": "1wDqdKBZT54HR5kfsKWfWhxp9aaeEk-mELyeiuC4obME"
+  },
 
   /* THE DOCUMENT STORE (Owner, 21 Sep 2026 · OWNER-INFRA-CHANGE): ONE private R2
      bucket bound as DOCS — passports and flight documents, written by the guest
@@ -62,14 +72,23 @@
          invitation — the revision comparison and the write are one serialised
          step, so a stale device or an overlapping autosave can never overwrite
          a removal. KV keeps a mirror for Guest Relations' listing. */
-      { "name": "DRAFTS", "class_name": "Drafts" }
+      { "name": "DRAFTS", "class_name": "Drafts" },
+      /* THE BILLING LEDGER (Owner, 4 Oct 2026 · OWNER-INFRA-CHANGE: H&S Guest Settlement v2.2
+         FINAL): ONE actor holds the website side of the Guest Settlement — Settlement_ID
+         allocation, drafts, the revision lifecycle, the IMMUTABLE issued snapshots, the
+         Bill_To_Holder_ID overrides, the drift state and the Activation Gate approval record.
+         Serialised like the inventory ledger, because issuing a revision is a read-then-write that
+         must never interleave. It is NOT the payment journal: guest payments are appended to
+         Google 008_Payment_Journal, which stays canonical, with no website-side fallback. */
+      { "name": "BILLING_LEDGER", "class_name": "BillingLedger" }
     ]
   },
   "migrations": [
     { "tag": "v1", "new_sqlite_classes": ["Inventory"] },
     { "tag": "v2", "new_sqlite_classes": ["Seating"] },
     { "tag": "v3", "new_sqlite_classes": ["Rooms"] },
-    { "tag": "v4", "new_sqlite_classes": ["Drafts"] }
+    { "tag": "v4", "new_sqlite_classes": ["Drafts"] },
+    { "tag": "v5", "new_sqlite_classes": ["BillingLedger"] }
   ],
 
   "observability": { "enabled": true }

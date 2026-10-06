@@ -1,5 +1,22 @@
 /* ============================================================================
-   SEE YOU IN LAOS — THE SINGLE CALCULATION SOURCE.
+   SEE YOU IN LAOS — THE CATALOGUE AND ITS WORDS.
+
+   THIS FILE NO LONGER CALCULATES AN AUTHORITATIVE AMOUNT (Owner, 4 Oct 2026).
+   Every payable figure now comes from the one server-side Billing Engine, which
+   reads the approved Google source, applies the Named Special Rates and the
+   hosted-night rules, and hands the finished amount to the browser through
+   assets/billing-client.js (window.SIYL_BILLING). What stays here is the
+   catalogue — names, rooms, windows, images, notes — and the formatting.
+
+   `quote()` therefore asks SIYL_BILLING for the amount and returns null when
+   the server has not answered. Nothing in this file multiplies a rate by a
+   number of nights any more; a surface that finds no amount shows none, rather
+   than a number the browser invented.
+
+   The historical note below records what the rule WAS, because the wording on
+   the pages still has to match it. It is documentation, not arithmetic.
+   ---------------------------------------------------------------------------
+   PREVIOUSLY — THE SINGLE CALCULATION SOURCE.
 
    Every amount on every surface is produced here and nowhere else:
    the product page, Add to Your Journey, the Journey Bag, Your Journey,
@@ -96,7 +113,9 @@
   /* a rate with cents is written to the cent (the Yifangju 002: USD 36.33 per person per night) — never three decimals */
   /* an amount with cents is written with both digits (USD 112.50 · USD 36.33) — never three, never one */
   function cents(n) { return Math.round(Number(n) * 100 + 1e-7) / 100; }   /* a half cent rounds up (67.805 → 67.81), never a float artefact down */
-  function money(n) { n = cents(n); return 'USD ' + n.toLocaleString('en-US', n % 1 ? { minimumFractionDigits: 2, maximumFractionDigits: 2 } : {}); }
+  /* AN UNKNOWN AMOUNT IS NEVER "USD 0" (Codex final review, 5 Oct 2026): null, an empty value or a non-number formats as
+     nothing — the surface says why there is no amount (pendingWords) instead of printing a zero the guest would read as free */
+  function money(n) { if (n == null || n === '' || !isFinite(Number(n))) return ''; n = cents(n); return 'USD ' + n.toLocaleString('en-US', n % 1 ? { minimumFractionDigits: 2, maximumFractionDigits: 2 } : {}); }
   /* THE BRIDE & GROOM'S HOSPITALITY (Owner, 28 Sep 2026 · src/gifts.js): a stay may be the couple's gift to one guest — that
    * guest's charge for that one room of that one stay is USD 0, said as "Complimentary · from the Bride & Groom". The hotel's
    * rate never changes; another room of the same stay is priced as usual. The Worker says which (GET /api/gifts, the guest's own
@@ -181,6 +200,56 @@
     return found;
   }
 
+  /* THE ONE AUTHORITATIVE SOURCE OF AN AMOUNT (Owner, 4 Oct 2026): the server
+   * Billing Engine, delivered by assets/billing-client.js. No fallback, no
+   * local arithmetic: when it has not answered, there is no amount. */
+  function authoritative(windowId, slug) {
+    var B = window.SIYL_BILLING;
+    if (!B || !B.ready()) return null;
+    return (slug ? B.quoteOf(windowId, slug) : B.quoteFor(windowId)) || null;
+  }
+  function billingReady() { var B = window.SIYL_BILLING; return !!(B && B.ready && B.ready()); }
+  function billingFailed() { var B = window.SIYL_BILLING; return !billingReady() && (!B || !!(B.failed && B.failed())); }
+  /* WHAT THE SERVER SAYS ABOUT ONE PRODUCT (Codex final review, 5 Oct 2026). The server catalogue answers per website
+   * product key (002 · Site_Product_Key), for this guest:
+   *   'amount'  — an H&S amount: the standard rate, this guest's Named Special Rate, a hosted 0, or no amount (review)
+   *   'self'    — block B: the guest books / pays this themselves; H&S charges nothing and the server states no figure, so
+   *               the catalogue's own figure stays the informational amount the guest pays the provider
+   *   'none'    — the server catalogue does not contain this product: it is not part of the Guest Settlement, and the
+   *               catalogue's own figure is its price
+   *   'pending' — the server has not answered yet · 'failed' — it could not answer (or nobody is signed in)
+   * Until the server has answered nothing can be known — not even whether a product is in its catalogue — so every
+   * amount is pending: never a local number standing in for the server's. */
+  function serverAnswer(windowId, slug) {
+    if (!billingReady()) return { state: billingFailed() ? 'failed' : 'pending', quote: null };
+    var q = authoritative(windowId, slug);
+    if (!q) return { state: 'none', quote: null };
+    if (q.block === 'B') return { state: 'self', quote: q };
+    return { state: 'amount', quote: q };
+  }
+  /* the words where there is no amount yet (never "USD 0") */
+  function pendingWords() { return billingFailed() ? 'Price unavailable' : 'Price pending'; }
+  /* a flat product's amount (the train, a flight class, a menu, the Sangkhathan …): the server's for a key it prices, the
+     catalogue's for a key it does not price, nothing while it has not answered */
+  function flatAmount(id, localPrice) {
+    var a = serverAnswer(id, null);
+    if (a.state === 'amount') {
+      var t = a.quote.total == null || !isFinite(Number(a.quote.total)) ? null : cents(a.quote.total);
+      return { price: t, pending: false, onRequest: t == null, quote: a.quote, state: a.state };
+    }
+    if (a.state === 'self' || a.state === 'none') return { price: localPrice == null ? null : localPrice, pending: false, onRequest: localPrice == null, quote: a.quote, state: a.state };
+    return { price: null, pending: true, onRequest: false, quote: null, state: a.state };
+  }
+  /* a flat product's basis words with the amount that is really charged ("USD 100 per person · …" → the server's amount,
+     or "Price pending · …" while there is none) */
+  function amountTerms(basis) { return String(basis || '').replace(/^USD [\d,]+(?:\.\d+)? (per person|for the table)( · )?/, ''); }
+  function flatBasis(id, basis, localPrice) {
+    var a = flatAmount(id, localPrice), rest = amountTerms(basis), per = (/^USD [\d,]+(?:\.\d+)? (per person|for the table)/.exec(String(basis || '')) || [])[1] || '';
+    if (a.price == null) return (a.pending ? pendingWords() : 'Amount on request') + (rest ? ' · ' + rest : '');
+    if (localPrice != null && a.price === cents(localPrice)) return basis;
+    return money(a.price) + (per ? ' ' + per : '') + (rest ? ' · ' + rest : '');
+  }
+
   window.SIYL_PRICE = {
     FLAT: FLAT,
     money: money,
@@ -195,7 +264,12 @@
     /* THE quote for one selectable line — the only place rate × nights happens */
     quote: function (windowId, slug) {
       var f = FLAT[windowId];
-      if (f) return { flat: true, cat: f.cat, unit: f.unit || 'guest', total: f.price, basis: f.basis };
+      if (f) {
+        var fa = flatAmount(windowId, f.price);
+        return { flat: true, cat: f.cat, unit: f.unit || 'guest', basis: flatBasis(windowId, f.basis, f.price),
+                 total: fa.price, rateSource: fa.quote ? fa.quote.rateSource : null,
+                 hosted: !!(fa.quote && fa.quote.hosted), pending: fa.pending, onRequest: fa.onRequest, priceState: fa.state };
+      }
       var at = locate(windowId);
       if (!at) return null;
       var room = roomOf(at.stay, slug) || at.stay.rooms[0];
@@ -204,6 +278,14 @@
        * only ever smaller than `nights` where a night is hosted. */
       var pay = at.win.pay || nights;
       var rate = rateOf(at.win.id, room), roomRate = roomRateOf(at.win.id, room);
+      /* THE AMOUNT (Owner, 4 Oct 2026 · Codex final review, 5 Oct 2026): the server's for a stay it prices — the standard
+       * rate, this guest's Named Special Rate, a hosted 0 — and nothing while it has not answered. The catalogue's own
+       * figure (rate × the nights the guest pays) is used only where the server states none: a stay the guest books and
+       * pays themselves (block B), or one the server catalogue does not contain. */
+      var sa = serverAnswer(at.win.id, room && room.slug);
+      var listed = rate == null ? null : cents(rate * pay);
+      var sq = sa.quote, serverTotal = sq && sq.total != null && isFinite(Number(sq.total)) ? cents(sq.total) : null;
+      var total = sa.state === 'amount' ? serverTotal : (sa.state === 'self' || sa.state === 'none') ? listed : null;
       var q = {
         cat: 'Accommodation',
         unit: 'guest',
@@ -222,8 +304,12 @@
         breakfast: (room && room.breakfast) || at.stay.breakfast || '',
         note: at.win.note || '',
         noteBy: at.win.noteBy || '',
-        /* rounded to the cent: a rate of thirds still makes its exact amount (USD 36.33333333 × 3 = USD 109) */
-        total: rate == null ? null : cents(rate * pay)
+        /* null means "no amount": not answered yet (pending), could not be answered (unavailable), or no rate (on request) */
+        total: total,
+        rateSource: sq ? sq.rateSource || null : null,
+        priceState: sa.state,
+        pending: sa.state === 'pending' || sa.state === 'failed',
+        onRequest: (sa.state === 'amount' && serverTotal == null) || ((sa.state === 'self' || sa.state === 'none') && listed == null)
       };
       q.nightly = rate == null ? '' : money(rate) + ' per person per night';
       q.roomNightly = roomRate == null ? '' : money(roomRate) + ' per room per night';
@@ -240,11 +326,24 @@
         : (rate == null ? '' : q.nightly + ' × ' + q.nightsLine);
       q.hostedBasis = q.hosted > 0 ? 'per person · first night your cost · second night complimentary, hosted by Haruthai & Suthep' : '';
       /* TO-01311–01313: the amount, what it covers, the exact nights, and the rate per night */
-      q.basis = rate == null ? 'Amount on request' : q.amount + ' per person · ' + q.nightsLine + (q.nightsCovered ? ': ' + q.nightsCovered : '') + (q.nightly ? ' · ' + q.nightly : '');
-      /* the Bride & Groom's gift to this guest for this room: the guest's charge is nothing; the hotel's rate stays a fact */
-      var gift = rate == null ? null : giftFor(at.win.id, room && room.slug);
+      q.basis = rate == null ? 'Amount on request'
+        : q.total == null ? (q.pending ? pendingWords() : 'Amount on request') + ' · ' + q.nightsLine + (q.nightsCovered ? ': ' + q.nightsCovered : '') + (q.nightly ? ' · ' + q.nightly : '')
+        : q.amount + ' per person · ' + q.nightsLine + (q.nightsCovered ? ': ' + q.nightsCovered : '') + (q.nightly ? ' · ' + q.nightly : '');
+      /* THE GUEST'S OWN ARRANGEMENT. Where the server prices the stay, it alone says whether this guest has one: a Named
+       * Special Rate (rateSource SPECIAL_RATE) of USD 0 is the Bride & Groom's gift, any other is the guest's own rate — its
+       * amount is the server's, and the browser's gift list (/api/gifts) only names its kind (an employee rate is the whole
+       * room). A local gift never changes a server amount (Codex final review, 5 Oct 2026). Where the server states no figure
+       * (block B, or a stay outside its catalogue) the catalogue's figure and the guest's own entry stand, as before. */
+      var local = rate == null ? null : giftFor(at.win.id, room && room.slug);
+      var gift = null;
+      if (sa.state === 'amount') {
+        if (sq.rateSource === 'SPECIAL_RATE' && q.total != null) {
+          gift = q.total === 0 ? { kind: 'gift', by: (local && local.by) || 'bride-groom' }
+            : { kind: local && local.kind && local.kind !== 'gift' ? local.kind : 'special', per: local && local.per, charge: q.total };
+        }
+      } else if (sa.state === 'self' || sa.state === 'none') gift = local;
       if (gift && (gift.kind || 'gift') === 'gift') {
-        q.gift = gift.by || 'bride-groom'; q.hotelTotal = q.total; q.total = 0;
+        q.gift = gift.by || 'bride-groom'; q.hotelTotal = listed; q.total = 0;
         q.amount = GIFT_WORDS.title; q.giftBy = GIFT_WORDS.by; q.giftWords = GIFT_WORDS.line;
         q.contribution = q.nightly + ' · the hotel rate, not charged to you';
         q.hostedBasis = GIFT_WORDS.by;
@@ -253,7 +352,7 @@
         /* A PERSONAL RATE (Owner, 28 Sep 2026 · 002 "Special Rate and Special Payment Terms"): this guest's own charge for the whole
            window — the stated total, never a rate per night; an employee rate is the whole room, paid by this guest alone */
         var room2 = gift.per === 'room';
-        q.personal = gift.kind; q.hotelTotal = q.total; q.total = cents(gift.charge);
+        q.personal = gift.kind; q.hotelTotal = listed; q.total = cents(gift.charge);
         q.amount = money(q.total); q.per = room2 ? 'for the room' : 'per person';
         q.personalWords = gift.kind === 'employee' ? 'Your employee rate · the whole room, paid by you' : 'Your special rate';
         /* AN EMPLOYEE RATE IS ITS OWN POOL (002 · W, Owner 29 Sep 2026): the room's own rate per night — never the standard pool's
@@ -285,14 +384,18 @@
     },
 
     items: function (windowId, slug) {
+      /* THE AMOUNT ON A LINE (Codex final review, 5 Oct 2026): the server's for a product it prices, the catalogue's only
+         where the server states none, and — while it has not answered — no amount at all: `price: null` with
+         `pricePending`. A pending amount never changes what the line IS: a priced selection stays a selection. */
+      function priced(line, a) { line.price = a.price; if (a.pending) line.pricePending = true; else if (a.onRequest) line.priceOnRequest = true; return line; }
       var c = CLASSES[windowId] ? this.classOf(windowId, slug) : null;
-      if (c) return [{ id: windowId, name: c.name, meta: c.meta, price: c.price,
-                       img: c.img, cls: c.slug }];
+      if (c) return [priced({ id: windowId, name: c.name, meta: c.meta, price: null,
+                       img: c.img, cls: c.slug }, flatAmount(windowId, c.price))];
       var f = FLAT[windowId];
       /* a house with several menus (Sühring): the chosen menu's own price and name travel on the line — one line per house */
       /* the menu is named in the line as "Erlebnis, the shorter sequence" (TO-01447; the menu's own name stays as it is) */
-      if (f && f.name && f.menus) { var m = this.menuOf(windowId, slug); return [{ id: windowId, name: f.name, meta: f.meta + ' · ' + String(m.name).replace(' · ', ', '), price: m.price, img: f.img, menu: m.slug }]; }
-      if (f && f.name) return [{ id: windowId, name: f.name, meta: f.meta, price: f.price, img: f.img }];
+      if (f && f.name && f.menus) { var m = this.menuOf(windowId, slug); return [priced({ id: windowId, name: f.name, meta: f.meta + ' · ' + String(m.name).replace(' · ', ', '), price: null, img: f.img, menu: m.slug }, flatAmount(windowId, m.price))]; }
+      if (f && f.name) return [priced({ id: windowId, name: f.name, meta: f.meta, price: null, img: f.img }, flatAmount(windowId, f.price))];
       var at = locate(windowId);
       if (!at) return [];
       /* a room asked for by name that the website no longer offers yields no line — never another room's (Owner, 24 Sep 2026) */
@@ -305,7 +408,9 @@
        * the journey line carries the property the guest actually chose */
       var bagName = (room && room.property) || at.win.bagName;
       var q = this.quote(at.win.id, room.slug);
-      if (room.interest || q.total == null) {
+      /* an interest, or a room the catalogue lists without any rate (the Guest House complimentary) — exactly as before; a
+         room WITH a rate whose amount the server has not given yet is a priced selection below, its price pending */
+      if (room.interest || q.rate == null) {
         var complimentary = at.key === 'guesthouse';
         return [{ id: at.win.id, name: bagName, meta: at.win.dates + ' · ' + (room.status || room.name),
                   interest: !complimentary, complimentary: complimentary,
@@ -316,6 +421,8 @@
       return [{
         id: at.win.id, name: bagName, meta: at.win.dates + ' · ' + room.name,
         price: q.total, stay: at.key, room: room.slug,
+        pricePending: q.total == null && q.pending ? true : undefined,
+        priceOnRequest: q.total == null && !q.pending ? true : undefined,
         gift: q.gift || undefined, personal: q.personal || undefined,
         rate: q.rate, nights: q.nights, pay: q.pay,
         nightsList: q.nightsList, windowFixed: q.windowFixed,
@@ -423,12 +530,12 @@
 
     /* display for one bag line — reads the line, never recalculates it */
     lineBasis: function (x) {
-      /* a classed product (MU9646) reads the CHOSEN fare's basis, never the default class's */
-      if (CLASSES[x.id]) { var c = this.classOf(x.id, x.cls); if (c) return c.basis; }
+      /* a classed product (MU9646) reads the CHOSEN fare's basis, never the default class's — with the amount really charged */
+      if (CLASSES[x.id]) { var c = this.classOf(x.id, x.cls); if (c) return flatBasis(x.id, c.basis, c.price); }
       var mn = FLAT[x.id] && FLAT[x.id].menus && x.menu ? this.menuOf(x.id, x.menu) : null;
-      if (mn) return mn.basis;
-      var f = FLAT[ALIAS[x.id] || x.id];
-      if (f) return f.basis;
+      if (mn) return flatBasis(x.id, mn.basis, mn.price);
+      var fid = ALIAS[x.id] || x.id, f = FLAT[fid];
+      if (f) return flatBasis(fid, f.basis, f.price);
       if (x.interest) return 'Interest · Guest Relations confirms your time · paid at the spa';
       /* a hosted line carries its own COMPLIMENTARY note — it must never also
        * read "Amount on request", which would suggest the price is unknown */
@@ -440,9 +547,40 @@
       }
       if (x.rate != null && x.nights) {
         return money(x.rate) + ' per person per night · ' + x.nights + (x.nights === 1 ? ' night' : ' nights') +
-               ' · ' + money(x.price) + ' per person';
+               ' · ' + (x.price != null ? money(x.price) : this.lineAmount(x)) + ' per person';
       }
-      return x.price != null ? money(x.price) + ' per person' : '';
+      return x.price != null ? money(x.price) + ' per person' : (x.pricePending || x.priceOnRequest ? this.lineAmount(x) : '');
+    },
+    /* THE AMOUNT OF ONE BAG LINE, as every surface prints it (Codex final review, 5 Oct 2026): the line's own amount; a
+       line without one says why — "Price pending" while the server has not answered, "Price unavailable" when it could not,
+       "Amount on request" when there is no rate — and never "USD 0". `perQty` multiplies by the line's quantity. */
+    lineAmount: function (x, perQty) {
+      if (!x) return '';
+      if (x.price == null || !isFinite(Number(x.price))) return x.priceOnRequest && !x.pricePending ? 'Amount on request' : pendingWords();
+      return money(perQty ? Number(x.price) * (x.qty || 1) : x.price);
+    },
+    /* is this line's amount still to come from the server */
+    linePending: function (x) { return !!(x && !x.interest && !x.complimentary && (x.pricePending || x.price == null) && !x.priceOnRequest); },
+    pendingWords: function () { return pendingWords(); },
+    /* the amount of a flat product (and of one class or menu of it) as it is charged now, or null while there is none */
+    flatPrice: function (id, slug) {
+      var c = CLASSES[id] ? this.classOf(id, slug) : null, f = FLAT[id], m = f && f.menus ? this.menuOf(id, slug) : null;
+      var local = c ? c.price : m ? m.price : f ? f.price : null;
+      return flatAmount(id, local).price;
+    },
+    /* the basis words of a flat product with the amount really charged */
+    flatBasis: function (id, slug) {
+      var c = CLASSES[id] ? this.classOf(id, slug) : null, f = FLAT[id], m = f && f.menus ? this.menuOf(id, slug) : null;
+      var src = c || m || f; if (!src) return '';
+      return flatBasis(id, src.basis, src.price);
+    },
+    /* the amount of a flat product as words: "USD 100" · "Price pending" · "Price unavailable" */
+    flatMoney: function (id, slug) { var p = this.flatPrice(id, slug); return p == null ? pendingWords() : money(p); },
+    /* has this page's server answer arrived — Review & Send waits for it whenever the Bag holds a line it prices */
+    billingReady: function () { return billingReady(); },
+    awaitingQuotes: function (lines) {
+      if (billingReady()) return false;
+      return (Array.isArray(lines) ? lines : []).some(function (x) { return x && !x.interest && !x.complimentary; });
     },
 
     /* ---- the catalogue (PRQ-LEAD-01 · W7-026) -------------------------------------------------------------------
@@ -473,14 +611,16 @@
     amountWords: function (x) {
       if (!x) return '';
       if (x.interest) return 'Not in your total';
-      return x.price != null ? money(x.price) : '';
+      if (x.complimentary && x.price == null) return '';
+      return this.lineAmount(x);
     },
     /* the display word of a line's category ("Travel" for the key 'Transportation') */
     catWords: function (cat) { return CAT_WORDS[cat] || cat || ''; },
     /* the lowest fare of a classed product (MU9646 → 167.50): "From USD 167.50 per person" before a fare is chosen */
     fromPrice: function (id) {
-      var list = CLASSES[id] || []; if (!list.length) return FLAT[id] ? FLAT[id].price : null;
-      return list.reduce(function (m, c) { return c.price < m ? c.price : m; }, list[0].price);
+      var list = CLASSES[id] || []; if (!list.length) return FLAT[id] ? flatAmount(id, FLAT[id].price).price : null;
+      var low = list.reduce(function (m, c) { return c.price < m ? c.price : m; }, list[0].price);
+      return flatAmount(id, low).price;
     },
     /* the basis WITHOUT its leading amount — the Highlight sheet prints the amount once (PRQ-07a-05) */
     terms: function (basis) { return String(basis || '').replace(/^USD [\d,]+ (per person|for the table)( · )?/, ''); },
@@ -493,7 +633,8 @@
       var self = this, open = at.stay.rooms.filter(function (r) { return r.rate != null && !r.interest && !(r.notIn && r.notIn.indexOf(at.win.id) >= 0); });
       if (!open.length) return '';
       var low = open.reduce(function (m, r) { return rateOf(at.win.id, r) < rateOf(at.win.id, m) ? r : m; }, open[0]);
-      var q = self.quote(at.win.id, low.slug); if (!q || q.total == null) return '';
+      var q = self.quote(at.win.id, low.slug); if (!q) return '';
+      if (q.total == null) return q.pending ? pendingWords() : '';
       /* an employee rate (002 · W) is the guest's own room: its own amount and its own rate per room — never the standard pool's */
       if (q.personal === 'employee') return money(q.total) + ' ' + q.per + ' · ' + q.nightly;
       /* any other personal charge or gift is the guest's alone: the stay's own line stays the hotel's listing */
@@ -515,7 +656,7 @@
    * authoritative amounts. The guest's own flags (qty, request, exp, by) and
    * the chosen class are kept. Runs before the accommodation repricing, with
    * or without the room data on the page. */
-  (function repriceFlat() {
+  function repriceFlat() {
     var B = window.SIYL_BAG;
     if (!B) return;
     var bag = B.get(), changed = false;
@@ -524,18 +665,29 @@
       if (!FLAT[x.id] && !CLASSES[x.id]) return x;
       /* a house with several menus (the Highlights, 20 Sep 2026): the menu the guest chose is re-priced as that menu */
       var fresh = window.SIYL_PRICE.items(x.id, x.menu || x.cls)[0];
-      if (!fresh || fresh.price == null) return x;
-      var same = x.price === fresh.price && x.name === fresh.name && x.meta === fresh.meta && (x.cls || null) === (fresh.cls || null) && (x.menu || null) === (fresh.menu || null);
+      if (!fresh) return x;
+      /* THE SERVER ANSWERED "NO AMOUNT" (Codex round 2): an earlier amount never survives it — the line says "Amount on
+         request". While the server has NOT answered (pending / unavailable) the line keeps what it has and the send waits. */
+      if (fresh.price == null) {
+        if (!fresh.priceOnRequest || (x.price == null && x.priceOnRequest && !x.pricePending)) return x;
+        changed = true;
+        var r0 = {}; Object.keys(x).forEach(function (k) { r0[k] = x[k]; });
+        r0.price = null; r0.priceOnRequest = true; delete r0.pricePending;
+        return r0;
+      }
+      var same = x.price === fresh.price && !x.pricePending && !x.priceOnRequest && x.name === fresh.name && x.meta === fresh.meta && (x.cls || null) === (fresh.cls || null) && (x.menu || null) === (fresh.menu || null);
       if (same) return x;
       changed = true;
       var out = {}; Object.keys(x).forEach(function (k) { out[k] = x[k]; });
       out.name = fresh.name; out.meta = fresh.meta; out.price = fresh.price; out.img = fresh.img || x.img;
+      delete out.pricePending; delete out.priceOnRequest;
       if (fresh.cls) out.cls = fresh.cls; else delete out.cls;
       if (fresh.menu) out.menu = fresh.menu; else delete out.menu;
       return out;
     });
     if (changed) B.set(next);
-  })();
+  }
+  repriceFlat();
   /* A bag saved before the Vientiane price basis was verified against the
    * source holds the pre-wedding window at one night instead of two. Every
    * accommodation line is re-quoted from the data above, so a returning guest
@@ -562,7 +714,15 @@
       var at = locate(x.id);
       if (at && !roomOf(at.stay, x.room)) { changed = true; return null; }
       var fresh = window.SIYL_PRICE.items(x.id, x.room)[0];
-      if (!fresh || fresh.price == null) return x;
+      if (!fresh) return x;
+      /* the server answered "no amount" for this stay: the earlier amount goes, the line says so (Codex round 2) */
+      if (fresh.price == null) {
+        if (!fresh.priceOnRequest || (x.price == null && x.priceOnRequest && !x.pricePending)) return x;
+        changed = true;
+        var r1 = {}; for (var rk in x) r1[rk] = x[rk];
+        r1.price = null; r1.priceOnRequest = true; delete r1.pricePending;
+        return r1;
+      }
       if (x.price === fresh.price && x.pay === fresh.pay && x.name === fresh.name && (x.gift || null) === (fresh.gift || null) && (x.personal || null) === (fresh.personal || null) && !('fixed' in x)) return x;
       changed = true;
       fresh.qty = x.qty || 1;           /* the guest's own choice is preserved */
@@ -573,6 +733,17 @@
     if (changed) B.set(next);
   }
   repriceAccommodation();
+  /* THE SERVER'S ANSWER ARRIVES — OR CANNOT (Codex final review, 5 Oct 2026). Every Bag line it prices takes its amount
+     through the Bag's own write path (a real change is saved like any other), and every surface redraws: a pending line
+     gets its amount, a price card its figure, an unanswered one its "Price unavailable". The redraw-only event carries
+     `repaintOnly`, so nothing is saved when no line changed. */
+  function onPrices() {
+    repriceFlat(); repriceAccommodation();
+    try { document.dispatchEvent(new CustomEvent('siyl:prices')); document.dispatchEvent(new CustomEvent('siyl:bag', { detail: { repaintOnly: true } })); } catch (e) { /* nothing listens */ }
+  }
+  document.addEventListener('siyl:billing-ready', onPrices);
+  document.addEventListener('siyl:billing-failed', onPrices);
+  document.addEventListener('siyl:billing-cleared', onPrices);
   /* THE GIFTS OF THIS GUEST, from the Worker (at most every ten minutes, and at once for another guest on this browser); a change
      re-prices the Bag and every surface redraws from it. A failed read keeps what this browser last knew. */
   (function refreshGifts() {

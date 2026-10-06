@@ -110,7 +110,8 @@ test('ONE LOGICAL JOURNEY · the first send sets the reference; a change afterwa
 test('CLIENT · the draft module: autosave on every change, pull on sign-in, Save My Progress reads back before SAVED, Continue flushes, the shell mounts the control on every step, every private page loads it, Review & Send flushes before the send', () => {
   const d = src('assets/draft.js'), sh = src('assets/prep-shell.js'), rv = src('review.html');
   assert.match(d, /var KEYS = \['siyl\.guest', 'siyl\.bag', 'siyl\.temple', 'siyl\.docs', 'siyl\.sent', 'siyl\.skip', 'siyl\.skip\.by'\];/);
-  assert.match(d, /\['siyl:guest', 'siyl:bag', 'siyl:temple', 'siyl:docs'\]\.forEach\(function \(ev\) \{ document\.addEventListener\(ev, function \(\) \{ D\.touch\(\); \}\); \}\);/, 'autosave');
+  /* every change saves; a redraw-only event (the server's prices arrived, no line changed — Codex final review, 5 Oct 2026) is not a change */
+  assert.match(d, /\['siyl:guest', 'siyl:bag', 'siyl:temple', 'siyl:docs'\]\.forEach\(function \(ev\) \{ document\.addEventListener\(ev, function \(e\) \{ if \(e && e\.detail && e\.detail\.repaintOnly\) return; D\.touch\(\); \}\); \}\);/, 'autosave');
   assert.match(d, /document\.addEventListener\('siyl:auth', pullOnce\)/); assert.match(d, /if \(reason === 'save'\) \{/); assert.match(d, /the saved copy differs/);
   assert.match(d, /closest\('\[data-continue\]'\)/); assert.match(d, />Save my progress</, 'TO-01412'); assert.match(d, /'Saving…'/);
   /* TO-01408: the failure says why, offline or not */
@@ -122,7 +123,7 @@ test('CLIENT · the draft module: autosave on every change, pull on sign-in, Sav
   assert.match(sh, /SIYL_DRAFT\.mount\(bar\.querySelector\('\[data-prep-save\]'\)\)/);
   for (const f of ['about-you.html', 'cart.html', 'invitation.html', 'review.html', 'tickets.html', 'transport.html', 'wedding-preparation.html', 'wedding.html', 'your-journey.html', 'room.html', 'journeys.html']) assert.match(src(f), /assets\/draft\.js/, f + ' loads the draft module');
   /* Review & Send sends through the one path, SIYL_DRAFT.send, which flushes first and sends nothing it could not save */
-  assert.match(d, /sendingNow = D\.flush\('send'\)\.then\(function \(fl\) \{\n\s*if \(!fl \|\| !fl\.ok\) return \{ ok: false, error: 'not saved' \};/);
+  assert.match(d, /sendingNow = checked\.then\(function \(v\) \{[\s\S]{0,700}?return D\.flush\('send'\);\n\s*\}\)\.then\(function \(fl\) \{\n[^\n]*\n\s*if \(!fl \|\| !fl\.ok\) return \{ ok: false, error: 'not saved' \};/);
   assert.match(rv, /var p=nj&&d\.sendReply\?d\.sendReply\(\):d\.send\(\{registration:d\.registration\?d\.registration\(\):null,text:buildText\(auth\)\}\);/);
 });
 

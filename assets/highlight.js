@@ -19,7 +19,8 @@
 (function () {
   'use strict';
   function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
-  function money(n) { n = Number(n); return 'USD ' + n.toLocaleString('en-US', n % 1 ? { minimumFractionDigits: 2, maximumFractionDigits: 2 } : {}); }
+  /* an amount nobody has given yet is said as such — never "USD 0" (Codex final review, 5 Oct 2026) */
+  function money(n) { if (n == null || n === '' || !isFinite(Number(n))) { var P = window.SIYL_PRICE; return P && P.pendingWords ? P.pendingWords() : 'Price pending'; } n = Number(n); return 'USD ' + n.toLocaleString('en-US', n % 1 ? { minimumFractionDigits: 2, maximumFractionDigits: 2 } : {}); }
   function signedIn() { return document.documentElement.getAttribute('data-session') === 'in'; }
   function gated(fn) {
     if (window.SIYL_INVITE) { window.SIYL_INVITE.require(fn); }
@@ -109,10 +110,12 @@
     html: function (x) {
       var P = window.SIYL_PRICE, s = x.select, menus = P && P.menusOf ? P.menusOf(s.id) : [];
       var meal = (x.roles || []).indexOf('dinner') >= 0 ? 'Dinner' : (x.roles || []).indexOf('breakfast') >= 0 ? 'Breakfast' : 'Lunch';
-      var from = menus.length ? Math.min.apply(null, menus.map(function (m) { return m.price; })) : (P && P.FLAT[s.id] ? P.FLAT[s.id].price : 0);
+      /* the amounts as they are charged (assets/pricing.js · flatPrice): none while the server has not answered */
+      var all = menus.length ? menus.map(function (m) { return P.flatPrice ? P.flatPrice(s.id, m.slug) : m.price; }) : [P && P.FLAT[s.id] ? (P.flatPrice ? P.flatPrice(s.id) : P.FLAT[s.id].price) : null];
+      var from = all.some(function (v) { return v == null; }) ? null : Math.min.apply(null, all);
       return '<section class="x-sel hl" id="sel" data-highlight="' + esc(x.id) + '"><p class="a-eyebrow">Your table</p>' +
         '<h2>' + meal + ' at ' + esc(x.name) + (x.practical && x.practical.when ? ' <span class="a-eyebrow" style="display:block;margin-top:6px">' + esc(x.practical.when) + '</span>' : '') + '</h2>' +
-        '<p class="price" data-private>' + (menus.length > 1 ? 'From ' : '') + money(from) + ' <span class="a-eyebrow" style="display:inline">' + esc(s.unit === 'table' ? 'for the table' : 'per person') + '</span></p>' +
+        '<p class="price" data-private>' + (menus.length > 1 && from != null ? 'From ' : '') + money(from) + (from == null ? '' : ' <span class="a-eyebrow" style="display:inline">' + esc(s.unit === 'table' ? 'for the table' : 'per person') + '</span>') + '</p>' +
         '<p>Optional — a request, not a reservation: Guest Relations asks the restaurant for your table and confirms it with you.</p>' +
         '<div id="selbox" data-private></div>' +
         '<p class="x-way" data-private-cta><a class="a-link" data-private-cta href="invitation.html?open=1">Open your invitation</a></p></section>';

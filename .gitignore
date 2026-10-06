@@ -40,3 +40,6 @@ docs/acceptance/2026-09-24-window-007/out/*.pdf
 
 # the layout QA agent's diagnostic artifacts (reports, annotated screenshots) — local QA evidence, never committed
 qa-artifacts/
+
+# approved payment QR assets — never committed (public repo), never served
+src/payment-qr/

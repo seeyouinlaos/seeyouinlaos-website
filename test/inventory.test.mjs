@@ -235,7 +235,9 @@ const shop = () => {
                     localStorage: { getItem: () => null, setItem() {} } };
   sandbox.window.document = sandbox.document;
   sandbox.window.localStorage = sandbox.localStorage;
-  for (const f of ['assets/rooms-data.js', 'assets/pricing.js', 'assets/journey.js']) {
+  /* the server's amounts, through the test stand-in for its catalogue (no session needed here) */
+  sandbox.window.__billing = { state: 'ready', quotes: {}, anyone: true };
+  for (const f of ['assets/rooms-data.js', 'test/billing-stub.js', 'assets/pricing.js', 'assets/journey.js']) {
     new Function('window', 'document', 'localStorage', readFileSync(join(ROOT, f), 'utf8'))
       (sandbox.window, sandbox.document, sandbox.localStorage);
   }

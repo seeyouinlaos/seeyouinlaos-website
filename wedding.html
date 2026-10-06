@@ -21,22 +21,23 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <div id="page"></div>
 <div id="foot"></div>
 </main>
-<script src="assets/bag.js?v=f151ee23"></script>
+<script src="assets/bag.js?v=0e7cb86f"></script>
 <script src="assets/shop-menu.js?v=03047fbc"></script>
 <script src="assets/aman.js?v=641d956e"></script>
 <script src="assets/rooms-data.js?v=649562f9"></script>
-<script src="assets/pricing.js?v=ee9625e7"></script>
+<script src="assets/billing-client.js?v=421fbc48"></script>
+<script src="assets/pricing.js?v=e0a4e0cd"></script>
 <script src="assets/stage-graph.js?v=f5f4dc76"></script>
 <script src="assets/questionnaire.js?v=1dc3e01d"></script>
 <script src="assets/guest.js?v=f30d0df8"></script>
-<script src="assets/draft.js?v=5965d90d"></script>
+<script src="assets/draft.js?v=711f98ae"></script>
 <script src="assets/guest-note.js?v=625f88b5"></script>
 <script src="assets/rules-gate.js?v=d49dabdc"></script>
 <script src="assets/rate-notice.js?v=c13b32c6"></script>
-<script src="assets/temple.js?v=a2f797fc"></script>
+<script src="assets/temple.js?v=116ed8bf"></script>
 <script src="assets/stay-plan.js?v=5227fdc4"></script>
 <script src="assets/rooms.js?v=2f2ff2ba"></script>
-<script src="assets/journey.js?v=2941fe09"></script>
+<script src="assets/journey.js?v=46dd07ea"></script>
 <script src="assets/confirm.js?v=d1b9a554"></script>
 <script src="assets/seatlabels.js?v=411e8a27"></script>
 <script src="assets/seating.js?v=b8f38de4"></script>
@@ -145,15 +146,15 @@ function sangSection(p,me){
       '<p class="p-more"><button type="button" class="p-link mute" data-more="sang">More about Sangkhathan</button></p></div>'}
   h+='<h3 class="t-h1">Would you like a Sangkhathan prepared in your name?</h3>';
   var can=T.canOffer(id),off=T.offeringOf_(id);
-  h+='<p class="t-b1 measure">You present it yourself at the Temple Ceremony · '+PR.money(15)+', at your own cost.</p>';
+  h+='<p class="t-b1 measure">You present it yourself at the Temple Ceremony · '+PR.flatMoney('sangkhathan')+', at your own cost.</p>';
   h+='<p class="p-more"><button type="button" class="p-link" data-more="sang">More about Sangkhathan</button></p>';
   if(can){
     h+='<div class="p-selrow" style="margin-top:16px">'+
-      '<button type="button" class="p-sel" aria-pressed="'+(off==='yes')+'" data-off="yes">Yes, please prepare one for me<span class="p-sel-r">'+PR.money(15)+'</span></button>'+
+      '<button type="button" class="p-sel" aria-pressed="'+(off==='yes')+'" data-off="yes">Yes, please prepare one for me<span class="p-sel-r">'+PR.flatMoney('sangkhathan')+'</span></button>'+
       '<button type="button" class="p-sel" aria-pressed="'+(off==='no')+'" data-off="no">No, thank you</button>'+
       '</div>'+
       (off===null?'<p class="t-l1 open">Required</p>'
-        :off==='yes'?'<p class="t-l1 on">Selected · '+PR.money(15)+' · in My Bag</p>'
+        :off==='yes'?'<p class="t-l1 on">Selected · '+PR.flatMoney('sangkhathan')+' · in My Bag</p>'
         :'<p class="t-l1 on">You chose not to make this offering</p>')}
   else{
     h+='<p class="t-b2 measure" style="margin-top:12px">Available once you have chosen to attend the Temple Ceremony.</p>'}
