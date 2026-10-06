@@ -391,6 +391,33 @@ test('ROUTE /mine · a guest without a settlement sees no payment position — n
   });
 });
 
+test('ROUTE /mine?view=statement · before a statement is issued the ledger alone answers: no Google read, no draft figure', async () => {
+  const { env, led } = routeEnv();
+  await call(led, 'settlement', { holderId: 'INV-T1', create: true, by: 'test' });
+  await withSheets(book(), async (log) => {
+    const r = await hit(env, GUEST, 'mine?view=statement');
+    assert.equal(r.status, 200, JSON.stringify(r.j));
+    assert.deepEqual(r.j, { ok: true, issued: false, Settlement_ID: null, revision: null });
+    assert.equal(log.length, 0, 'the Google quota is not spent on a statement that does not exist');
+  });
+});
+
+test('ROUTE /mine?view=statement · an issued statement: its own number, issue and due date, total and frozen FX', async () => {
+  const { led } = await issuable();
+  const { env } = routeEnv({ BILLING_LEDGER: { idFromName: () => 'billing', get: () => ({ fetch: (req) => led.fetch(req) }) } });
+  assert.equal((await call(led, 'revision-issue', issueBody())).j.ok, true);
+  await withSheets(book(), async () => {
+    const r = await hit(env, GUEST, 'mine?view=statement');
+    assert.equal(r.status, 200, JSON.stringify(r.j));
+    assert.equal(r.j.issued, true); assert.equal(r.j.revision, 1); assert.ok(r.j.Settlement_ID);
+    assert.equal(r.j.issueDate, '2026-10-05'); assert.ok(r.j.dueDate);
+    assert.equal(typeof r.j.issuedTotal, 'number');
+    assert.equal(r.j.fx.source, 'ISSUED_REVISION'); assert.equal(r.j.fx.FX_USD_EUR, 0.89);
+    assert.equal(r.j.pdf, '/api/billing/pdf?rev=1');
+    assert.equal(r.j.paymentPreference.destination.method, 'PAYPAL_EUR');
+  });
+});
+
 test('ROUTE payment/report · without an approved rate nothing is appended — the immutable row would carry no accounting amount', async () => {
   const { env, led } = routeEnv();
   await call(led, 'settlement', { holderId: 'INV-T1', create: true, by: 'test' });

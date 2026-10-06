@@ -9,7 +9,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 .bag{width:44px;height:44px;display:flex;align-items:center;justify-content:center;position:relative;color:#313131;text-decoration:none}.bag .bgi{display:block}
 .bb{position:absolute;top:1px;right:0;min-width:14px;height:14px;padding:0 3px;background:#313131;color:#F3EEE7;font-size:8.5px;line-height:1;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;display:none;align-items:center;justify-content:center;box-shadow:0 0 0 2px #F3EEE7;border-radius:1px}
 </style>
-<script src="assets/i18n/siyl-i18n.js?v=a88c4a5b"></script>
+<script src="assets/i18n/siyl-i18n.js?v=ceb6bfec"></script>
 <link rel="stylesheet" href="assets/aman.css?v=6fe22a54"><link rel="stylesheet" href="assets/prep.css?v=0a6eb26a"></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="My Bag"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main class="prep-page" id="review">
@@ -51,7 +51,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 
 <section class="p-block" id="b5">
 <div class="p-block-h"><h2>Your total</h2><a class="p-link mute" href="cart.html">Change</a></div>
-<p class="t-b2 measure-w">Nothing is paid on this website. No deposit is required. Once your arrangements are confirmed, Guest Relations sends you an invoice with bank transfer or PayPal details; payment is due within seven days.</p>
+<p class="t-b2 measure-w">Nothing is paid on this website. No deposit is required. Once your arrangements are confirmed and your statement is issued, it appears in My Profile, with its due date and how to pay. It is settled within 21 days after it is issued.</p>
 <div class="p-total"><span class="t-l1">Your total</span><b id="tt">USD 0</b></div>
 </section>
 
@@ -382,7 +382,7 @@ if(w.key==='sent'){
   var lapsed=!!(C&&C.lapsed&&C.lapsed());
   h='<div class="p-card"><h2 class="t-h1">You have changed your trip</h2><p class="t-b1 measure">'+(lapsed?'You changed your trip after Guest Relations confirmed it. Send the update, and Guest Relations will confirm it with you again.':'We have what you sent on '+esc(w.date)+'. Send the update when you are ready — it replaces what you sent before.')+'</p></div>';
 }else if(w.key==='confirmed'){
-  h='<div class="p-card"><h2 class="t-h1">Your trip is confirmed</h2><p class="t-b1 measure">Guest Relations confirmed your arrangements on '+esc(w.date)+'. No deposit is required. Guest Relations sends you an invoice with bank transfer or PayPal details; payment is due within seven days.</p>'+
+  h='<div class="p-card"><h2 class="t-h1">Your trip is confirmed</h2><p class="t-b1 measure">Guest Relations confirmed your arrangements on '+esc(w.date)+'. No deposit is required. Once Guest Relations issues your statement, it appears in My Profile, with its due date and how to pay. It is settled within 21 days after it is issued.</p>'+
     '<p class="t-b2 measure">If anything changes, change it in My Trip and send us the update — Guest Relations will confirm it with you again.</p>'+
     (elsewhere?'<p class="t-b2 measure">Your confirmed trip was sent from another device, so it is not shown here. Guest Relations will gladly send you the details — just write to them. The sections below may differ from what Guest Relations confirmed.</p>':'')+
     smallPrint()+backLink()+'</div>';

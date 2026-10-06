@@ -280,6 +280,13 @@ async function calculateHolder(env, identity, holderId, src, asOf, origin) {
 
 async function guestSettlement(env, identity, url, cors) {
   const holderId = clean(identity.invitationId);
+  /* MY PROFILE'S STATEMENT asks first whether a statement exists at all
+     (Owner, 6 Oct 2026). Until one is issued the ledger alone answers: no
+     Google read, no draft figure — a draft is not a statement. */
+  if (url.searchParams.get('view') === 'statement') {
+    const held = await holderState(env, holderId);
+    if (!held.issuedRevision) return jsonRes({ ok: true, issued: false, Settlement_ID: null, revision: null }, 200, cors);
+  }
   const asOf = evaluationDay(url.searchParams.get('asOf'));
   const src = await loadSource(env, asOf);
   const { state, result, unmapped, confirmation } = await calculateHolder(env, identity, holderId, src, asOf);
@@ -307,6 +314,7 @@ async function guestSettlement(env, identity, url, cors) {
   const channel = pref.channel;
   return jsonRes({
     ok: true,
+    issued: !!issued,
     Settlement_ID: settlementId || null,
     revision: issued ? issued.Revision : null,
     state: state ? state.state : null,
@@ -327,6 +335,8 @@ async function guestSettlement(env, identity, url, cors) {
     fx: { source: fxSource, revision: issued ? issued.Revision : null,
       FX_USD_THB: fx.FX_USD_THB, FX_USD_EUR: fx.FX_USD_EUR, gaps: fx.gaps },
     dueDate,
+    /* the issue date of the current statement, from its own frozen snapshot */
+    issueDate: issued ? issued.Issue_Date || null : null,
     wording: 'settled within 21 days after your statement is issued',
     pdf: issued ? '/api/billing/pdf?rev=' + issued.Revision : null,
   }, 200, cors);

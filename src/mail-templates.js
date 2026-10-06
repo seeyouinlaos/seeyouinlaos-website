@@ -306,7 +306,7 @@ function journeySections(M, forOwner) {
 /* ---- THE GUEST EMAIL ----
    A COPY OF WHAT WAS SENT, never a confirmation (glossary): three voices — a guest's trip (first send or an update), a guest
    who is not joining (the reply, PRQ-04-09) and the hosts' own plan (PRQ-04-10). */
-const PAYMENT = 'Nothing is paid on the website. No deposit is required. Once your arrangements are confirmed, Guest Relations sends you an invoice with bank transfer or PayPal details; payment is due within seven days.';
+const PAYMENT = 'Nothing is paid on the website. No deposit is required. Once your arrangements are confirmed and your statement is issued, it appears in My Profile, with its due date and how to pay. It is settled within 21 days after it is issued.';
 const TAK_BAT = 'Tak Bat, the morning alms-giving, is your own personal offering and is not part of your total.';
 const PRIVACY = 'Sign in with your own invitation code — for your privacy, we never send codes by email.';
 function guestVoice(M) {

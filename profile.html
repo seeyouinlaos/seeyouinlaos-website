@@ -91,7 +91,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 @media(min-width:768px){.pf-people{margin:0;padding-left:0;padding-right:0;flex-wrap:wrap;overflow:visible}.pf-grid{grid-template-columns:repeat(4,1fr)}.pf-stat:nth-child(odd){padding-right:20px}.pf-stat:nth-child(even){padding-left:20px}.pf-stat:nth-child(4n+3){padding-left:20px;border-left:1px solid #DAD9D7}.pf-stat:nth-child(4n+1){border-left:0;padding-left:0}.pf-num-v{font-size:120px}.pf-stat .pf-num-v{font-size:64px}}
 @media(prefers-reduced-motion:reduce){.pf-person{opacity:1;transform:none;transition:none}}
 </style>
-<script src="assets/i18n/siyl-i18n.js?v=a88c4a5b"></script>
+<script src="assets/i18n/siyl-i18n.js?v=ceb6bfec"></script>
 <link rel="stylesheet" href="assets/aman.css?v=6fe22a54"><link rel="stylesheet" href="assets/prep.css?v=0a6eb26a"></head><body class="prep p-in">
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="My Bag"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
 <main class="prep-page" id="profile">
@@ -106,6 +106,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/aman.js?v=641d956e"></script>
 <script src="assets/rooms-data.js?v=649562f9"></script>
 <script src="assets/billing-client.js?v=421fbc48"></script>
+<script src="assets/statement.js?v=ee446e73"></script>
 <script src="assets/pricing.js?v=e0a4e0cd"></script>
 <script src="assets/stage-graph.js?v=f5f4dc76"></script>
 <script src="assets/questionnaire.js?v=1dc3e01d"></script>
@@ -144,7 +145,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
    My Bag stays the one cart: nothing here adds, removes or re-totals a line.
    ========================================================================== */
 (function(){
-var G=window.SIYL_GUEST,B=window.SIYL_BAG,J=window.SIYL_JOURNEY,P=window.SIYL_PRICE,ST=window.SIYL_STAY,U=window.SIYL_UNITS,S=window.SIYL_SEATS,C=window.SIYL_CONFIRM,D=window.SIYL_DOCS,DR=window.SIYL_DRAFT,T=window.SIYL_TEMPLE,AV=window.SIYL_AVATAR,page=document.getElementById('page');
+var G=window.SIYL_GUEST,B=window.SIYL_BAG,J=window.SIYL_JOURNEY,P=window.SIYL_PRICE,ST=window.SIYL_STAY,U=window.SIYL_UNITS,S=window.SIYL_SEATS,C=window.SIYL_CONFIRM,D=window.SIYL_DOCS,DR=window.SIYL_DRAFT,T=window.SIYL_TEMPLE,AV=window.SIYL_AVATAR,SM=window.SIYL_STATEMENT,page=document.getElementById('page');
 if(!G||!page)return;
 function esc(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 function gated(fn){if(window.SIYL_INVITE){SIYL_INVITE.require(fn)}
@@ -394,7 +395,7 @@ function status(p){
   }
   else if(key==='confirmed'){
     label='<p class="t-l1 on">'+esc(w?w.line:'Confirmed by Guest Relations')+'</p>';title='Your trip is confirmed';
-    body='If your plans change, make the change in My Trip and send us the update.</p><p class="t-b2 measure">No deposit is required. Once your arrangements are confirmed, Guest Relations sends you an invoice with bank transfer or PayPal details; payment is due within seven days.';
+    body='If your plans change, make the change in My Trip and send us the update.</p><p class="t-b2 measure">No deposit is required. Once Guest Relations issues your statement, it appears below under Your statement, with its due date and how to pay. It is settled within 21 days after it is issued.';
     acts='<a class="p-link" href="review.html">Open Review &amp; Send</a>'}
   else if(key==='changed'){
     label='<p class="t-l1 open">Changes not sent yet</p>';
@@ -463,7 +464,10 @@ function render(){
   var CM=window.SIYL_COMMUNITY;
   /* A DECLINE (PRQ-01-04): a guest not joining this trip reads the identity, the contact and the reply — nothing of a trip they are not taking */
   var out=G.notJoining&&G.notJoining();
-  page.innerHTML=out?identity(me,p)+contact()+status(p):identity(me,p)+contact()+(CM?CM.countdownHtml():'')+circle(me,p)+(CM?CM.numbersHtml():'')+status(p)+yourStay(me)+arrangements(me)+wedding(me,p)+tickets(me,p)+about(me)+documents(me);
+  /* YOUR STATEMENT (Owner, 6 Oct 2026): the guest's own issued statement, right after the trip status — read-only but for the method, I have paid and the download */
+  quiet=!!out;var stm=SM?SM.html({quiet:quiet}):'';
+  page.innerHTML=out?identity(me,p)+contact()+status(p)+stm:identity(me,p)+contact()+(CM?CM.countdownHtml():'')+circle(me,p)+(CM?CM.numbersHtml():'')+status(p)+stm+yourStay(me)+arrangements(me)+wedding(me,p)+tickets(me,p)+about(me)+documents(me);
+  if(SM){SM.wire(page);if(SM.state()==='idle')SM.load()}
   if(S&&S.wireRail)S.wireRail(page);
   if(CM&&!out){CM.wire(page);CM.paintPortraits(page)}
   /* YOUR WEDDING CIRCLE (Owner, 27 Sep 2026): read, never written — the people, the two seats, the pulse */
@@ -480,6 +484,10 @@ function render(){
   B.badge();
 }
 ['siyl:bag','siyl:guest','siyl:seats','siyl:units','siyl:confirm','siyl:draft','siyl:docs','siyl:temple','siyl:invite-ready'].forEach(function(ev){document.addEventListener(ev,render)});
+/* the statement arrives or changes: only its own section is redrawn — an amount being typed elsewhere is never wiped;
+   signed out (here or in another tab): the drawn statement is removed at once */
+var quiet=false;
+document.addEventListener('siyl:statement',function(){if(!SM)return;var old=document.getElementById('statement');var t=document.createElement('div');t.innerHTML=G.me()?SM.html({quiet:quiet}):'';var fresh=t.firstElementChild;if(!old){if(fresh)render();return}if(!fresh){old.remove();return}old.replaceWith(fresh);SM.wire(fresh)});
 /* the community arrives or changes: only its own section is redrawn — a "Photo saved" note or a field being typed elsewhere on the page is never wiped */
 document.addEventListener('siyl:community',function(){var CM=window.SIYL_COMMUNITY,old=document.getElementById('community'),me=G.me();if(!CM||!old||!me)return;var t=document.createElement('div');t.innerHTML=CM.communityHtml(CM.data(),me);var fresh=t.firstElementChild;if(!fresh)return;old.replaceWith(fresh);CM.wire(fresh);CM.paintPortraits(fresh)});
 document.addEventListener('siyl:auth',function(){render();if(S)S.load(true);if(U)U.load(true);if(C)C.load(true);if(AV)AV.load(true).then(paintAvatar);if(window.SIYL_PULSE)SIYL_PULSE.load(true)});
