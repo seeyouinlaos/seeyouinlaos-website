@@ -159,11 +159,6 @@ export async function loadConfirmedBookings({ env, identity, holderId, items, ge
     throw new SourceDataError('REGISTRATION_PERSON_MISMATCH', 'the confirmed registration of ' + holder + ' names another guest than the invitation');
   }
 
-  const index = itemIndexBySiteKey(items);
-  const gen = generations || {};
-  const billTo = overrides || {};
-  const selections = canonicalLines(Array.isArray(reg.selections) ? reg.selections : []);
-
   /* the ROOMS actor is asked only when a confirmed room line carries no unit */
   let held = null;
   const unitFor = async (siteKey) => {
@@ -177,13 +172,32 @@ export async function loadConfirmedBookings({ env, identity, holderId, items, ge
     return held[siteKey] || '';
   };
 
-  for (const l of selections) {
+  out.push(...await bookingsOfSelections({ holderId: holder, personId: person, selections: reg.selections, items, generations, overrides,
+    unitOf: unitFor, source: 'CONFIRMED_REGISTRATION', version }));
+  return stamp(CONFIRMATION.CONFIRMED, { version, confirmedAt: clean(conf && conf.confirmedAt) || null });
+}
+
+/**
+ * THE ONE MAPPING from selected lines to engine rows (Freeze · A, B, E) — the Confirmed Booking above, and the admin
+ * console's Booked value (src/billing/booked.js, display only) both use it, so the two can never price a line
+ * differently. An interest is never a booking; a product without an 002 Item_ID stays a row with Item_ID null, so the
+ * engine names it for review instead of dropping it. `unitOf(siteKey)` (optional) names the room unit of a room line
+ * that carries none — the Confirmed Booking asks the ROOMS actor; one person's Booked value needs no unit (a unit only
+ * groups several persons sharing one room), so it passes none.
+ */
+export async function bookingsOfSelections({ holderId, personId, selections, items, generations, overrides, unitOf, source, version }) {
+  const holder = clean(holderId), person = clean(personId);
+  const index = itemIndexBySiteKey(items);
+  const gen = generations || {};
+  const billTo = overrides || {};
+  const out = [];
+  for (const l of canonicalLines(Array.isArray(selections) ? selections : [])) {
     if (!l || typeof l !== 'object') continue;
     if (l.interest) continue;                     /* an interest is not a booking */
     const siteKey = siteKeyOfSelection(l);
     if (!siteKey) continue;
     const itemId = index[siteKey] || null;
-    const label = l.room ? (clean(l.unit) || await unitFor(siteKey)) : '';
+    const label = l.room ? (clean(l.unit) || (unitOf ? await unitOf(siteKey) : '')) : '';
     const g = Number(gen[[holder, person, itemId].join('|')]) || 1;
     out.push({
       Booking_ID: itemId ? bookingIdOf(holder, person, itemId, g) : null,
@@ -195,14 +209,14 @@ export async function loadConfirmedBookings({ env, identity, holderId, items, ge
       State: BOOKING_STATE.CONFIRMED,
       Nights: nightsOf(items, itemId),
       Quantity: Number(l.qty) > 0 ? Number(l.qty) : 1,
-      /* Freeze · E — a sent selection is the guest's own choice */
+      /* Freeze · E — a selected line is the guest's own choice */
       Selected: true,
       Site_Product_Key: siteKey,
-      source: 'CONFIRMED_REGISTRATION',
-      confirmedVersion: version,
+      source: source || 'CONFIRMED_REGISTRATION',
+      confirmedVersion: version ?? null,
     });
   }
-  return stamp(CONFIRMATION.CONFIRMED, { version, confirmedAt: clean(conf && conf.confirmedAt) || null });
+  return out;
 }
 
 /**

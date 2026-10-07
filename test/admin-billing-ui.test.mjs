@@ -64,9 +64,13 @@ const HOLDERS = Array.from({ length: 23 }, (_, i) => ({
   method: { channel: i === 2 ? null : 'PAYPAL_EUR', currency: 'EUR', determined: i !== 2 }, drift: { count: 0, blocking: 0 },
 }));
 const OVERVIEW = { ok: true, asOf: '2026-10-07', audience: 'GROOM', chunk: 10, gate: { approved: true }, holders: HOLDERS };
+const BOOKED = { 'INV-T1': { source: 'CURRENT_SELECTION', total: 390, selected: 2, lines: 2, onRequest: 0, unmapped: [] },
+  'INV-T2': { source: 'CURRENT_SELECTION', total: 1248, selected: 3, lines: 3, onRequest: 1, unmapped: [] },
+  'INV-T4': { source: 'SENT_VERSION', total: 510, selected: 2, lines: 2, onRequest: 0, unmapped: [] } };
 const statusAnswer = (url) => {
   const ids = decodeURIComponent(url.split('ids=')[1]).split(',');
-  return res(200, { ok: true, rows: ids.map((id) => ({ Holder_ID: id, confirmation: { state: id === 'INV-T2' ? 'CONFIRMED' : 'NONE' },
+  return res(200, { ok: true, rows: ids.map((id) => ({ Holder_ID: id, confirmation: { state: id === 'INV-T2' ? 'CONFIRMED' : id === 'INV-T4' ? 'UNCONFIRMED' : 'NONE' },
+    booked: BOOKED[id] || { source: 'NONE', total: 0, selected: 0, lines: 0, onRequest: 0, unmapped: [] },
     draft: id === 'INV-T2' ? { total: 245, lines: 1, manualReview: id === 'INV-T2' ? 1 : 0, unmapped: [] } : null })) });
 };
 const HOLDER = (over) => ({
@@ -108,11 +112,63 @@ test('ADMIN UI · the list: overview first, then Guest Relations\' status ten at
   assert.match(h, /Not issued <span class="ab-n">22<\/span>/); assert.match(h, /Issued <span class="ab-n">1<\/span>/);
   assert.match(h, /Outstanding <span class="ab-n">1<\/span>/);
   assert.match(h, /Manual review <span class="ab-n">2<\/span>/, 'a draft line under review and a method to state');
-  assert.match(h, /USD 245\.00 · draft/, 'a draft total is marked as such');
+  assert.match(h, /Booked <span class="ab-n">3<\/span>/);
   /* filters and search change only what is shown */
   el(root, 'data-ab-filter', 'review').onclick(); await tick();
   assert.match(root.innerHTML, /Guest 2/); assert.match(root.innerHTML, /Guest 3/); assert.doesNotMatch(root.innerHTML, /Guest 4</);
   assert.ok(A.state().filter === 'review');
+});
+
+test('BOOKED VALUE · the list shows what each guest has selected now — beside, never in place of, the statement figures', async () => {
+  const { root } = load({ 'admin/overview': OVERVIEW, 'admin/status': statusAnswer });
+  await tick(30);
+  const h = root.innerHTML;
+  assert.match(h, /<th class="num">Booked value<\/th>/); assert.match(h, /<th class="num">Statement total<\/th>/);
+  assert.doesNotMatch(h, /<th class="num">Total<\/th>/, 'no bare "Total" that could mean either');
+  assert.doesNotMatch(h, /· draft/, 'the statement total never shows anything but an issued statement');
+  const row = (id) => h.split('data-ab-open="' + id + '"')[1].split('</tr>')[0];
+  /* not sent, nothing issued: a booked value, and dashes for every statement figure */
+  const t2 = row('INV-T2');
+  assert.match(t2, /data-l="Booked value" class="num"><span data-i18n-skip><b>USD 1,248\.00<\/b><\/span><br><span class="ab-mute">current selection<\/span><br><span class="ab-mute">\+ 1 on request/);
+  for (const col of ['Statement total', 'Paid', 'Outstanding']) assert.match(t2, new RegExp('data-l="' + col + '" class="num"><span class="ab-mute">—</span>'), col);
+  /* sent, not confirmed: the value as sent */
+  assert.match(row('INV-T4'), /USD 510\.00<\/b><\/span><br><span class="ab-mute">as sent/);
+  /* no selection */
+  assert.match(row('INV-T5'), /Nothing selected/);
+  /* an issued statement: the booked value and the statement total, each its own */
+  const t1 = row('INV-T1');
+  assert.match(t1, /data-l="Booked value" class="num"><span data-i18n-skip><b>USD 390\.00/); assert.match(t1, /data-l="Statement total" class="num"><span data-i18n-skip>USD 390\.00/);
+  assert.match(h, /<b>Booked value<\/b> — what the guest has selected now/);
+});
+
+test('BOOKED VALUE · a status request that failed shows "not readable", never an endless "…"', async () => {
+  const { root } = load({ 'admin/overview': OVERVIEW, 'admin/status': res(503, { ok: false, error: 'down' }) });
+  await tick(60);
+  const t2 = root.innerHTML.split('data-ab-open="INV-T2"')[1].split('</tr>')[0];
+  assert.match(t2, /data-l="Booked value" class="num"><span class="ab-chip open">not readable<\/span>/);
+});
+
+test('BOOKED VALUE · the guest view shows the lines behind it, and Issue stays disabled until Guest Relations confirms', async () => {
+  const unconfirmed = HOLDER({
+    confirmation: { state: 'UNCONFIRMED', version: 1 },
+    booked: { source: 'CURRENT_SELECTION', updatedAt: '2026-10-06T09:00:00Z', total: 1248, selected: 2, lines: 2, onRequest: 0, unmapped: [],
+      items: [{ person: 'Guest 2', Item_ID: 'T-STAY', Billing_Category: 'GUEST_SETTLEMENT_REQUIRED', rate: 145, payableNights: 2, quantity: 1, amount: 290, block: 'A' },
+        { person: 'Guest 2', Item_ID: 'T-JOURNEY', Billing_Category: 'GUEST_SETTLEMENT_REQUIRED', rate: 958, payableNights: 1, quantity: 1, amount: 958, block: 'A' }],
+      blockB: [], sent: { version: 1, lastSentAt: '2026-10-05T09:00:00Z', total: 290, differs: true } },
+    preview: { ...HOLDER().preview, total: 0, lines: [], issuable: false, proposalHash: null, reasons: ['BOOKING_NOT_CONFIRMED: UNCONFIRMED — Guest Relations confirms the sent trip first'] },
+  });
+  const { root } = load({ 'admin/overview': OVERVIEW, 'admin/status': statusAnswer, 'admin/holder': unconfirmed }, { hash: '#holder=INV-T2' });
+  await tick(30);
+  const h = root.innerHTML;
+  assert.match(h, /Booked value · the current selection, not a statement/);
+  assert.match(h, /<h3 class="t-h1" data-i18n-skip>USD 1,248\.00<\/h3>/);
+  assert.match(h, /T-JOURNEY/); assert.match(h, /USD 958\.00/);
+  assert.match(h, /is worth <b data-i18n-skip>USD 290\.00<\/b> — the guest has changed the selection since/);
+  assert.match(h, /does not make the guest issuable/);
+  assert.match(h, /Statement total<\/span> <span>—/);
+  el(root, 'data-ab-act', 'preview').onclick(); await tick();
+  assert.equal(el(root, 'data-ab-act', 'issue').disabled, true, 'a booked value never makes a guest issuable');
+  assert.match(root.innerHTML, /Statement preview · what Issue would freeze now/);
 });
 
 test('ADMIN UI · a guest: Issue only after Preview AND an explicit tick, confirming the previewed statement', async () => {
@@ -129,7 +185,7 @@ test('ADMIN UI · a guest: Issue only after Preview AND an explicit tick, confir
   assert.match(root.innerHTML, /Open the preview first\./);
   assert.match(root.innerHTML, /Payments · 008, append-only/); assert.match(root.innerHTML, /No statement is issued for this guest yet\./);
   el(root, 'data-ab-act', 'preview').onclick(); await tick();
-  assert.match(root.innerHTML, /Preview · the Billing Engine/); assert.match(root.innerHTML, /USD 245\.00/); assert.match(root.innerHTML, /T-STAY/);
+  assert.match(root.innerHTML, /Statement preview · what Issue would freeze now/); assert.match(root.innerHTML, /USD 245\.00/); assert.match(root.innerHTML, /T-STAY/);
   assert.equal(issueBtn().disabled, false);
   issueBtn().onclick(); await tick();
   assert.match(root.innerHTML, /Issue statement · final/);

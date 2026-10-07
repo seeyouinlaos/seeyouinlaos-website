@@ -80,6 +80,9 @@ const ITEMS = {
     Standard_Rate: 145, Currency: 'USD', Site_Product_Key: 'wedstay/heritage', 'Number of Nights': 2 },
   'T-TRAIN': { Item_ID: 'T-TRAIN', Billing_Category: 'GUEST_SETTLEMENT_REQUIRED', Rate_Status: 'ACTIVE', Rate_Basis: 'PER_PERSON',
     Standard_Rate: 100, Currency: 'USD', Site_Product_Key: 'train', 'Number of Nights': 1 },
+  /* the same price as the train: a swap between the two changes the selection, not its value */
+  'T-BUS': { Item_ID: 'T-BUS', Billing_Category: 'GUEST_SETTLEMENT_REQUIRED', Rate_Status: 'ACTIVE', Rate_Basis: 'PER_PERSON',
+    Standard_Rate: 100, Currency: 'USD', Site_Product_Key: 'bus', 'Number of Nights': 1 },
 };
 function book(extraJournal) {
   const labels = ['Item_ID', 'Billing_Category', 'Rate_Status', 'Effective_From', 'Effective_To', 'Rate_Basis', 'Standard_Rate', 'Quota',
@@ -134,7 +137,17 @@ const INDEX = {
 const SENT = { submissionId: 'SYL-T1-1', version: 1, lastSentAt: '2026-10-01T10:00:00Z',
   registration: { guestId: 'GT1', selections: [{ id: 'wedstay', room: 'heritage', unit: 'A', qty: 1 }, { id: 'train', qty: 1 }] } };
 
-function world({ store, journal } = {}) {
+/* the invitations' Drafts actors: { INV: draft | 'FAIL' } — a saved trip holds its bag as a JSON string, as the site stores it */
+function draftsActor(drafts, calls) {
+  return { idFromName: (n) => n, get: (id) => ({ fetch: async (req) => {
+    const body = await req.json(); calls && calls.push(body.invitationId);
+    const d = drafts[body.invitationId];
+    if (d === 'FAIL') return Response.json({ ok: false, error: 'draft could not be read', retry: true }, { status: 503 });
+    return Response.json({ ok: true, draft: d || null });
+  } }) };
+}
+const savedTrip = (bag, updatedAt) => ({ invitationId: 'x', guestId: 'x', updatedAt: updatedAt || '2026-10-06T09:00:00Z', keys: { 'siyl.bag': JSON.stringify(bag) } });
+function world({ store, journal, drafts } = {}) {
   clearCatalogueCache();
   const st = doState(); const led = new BillingLedger(st);
   const docs = r2();
@@ -148,11 +161,13 @@ function world({ store, journal } = {}) {
     }),
     DOCS: docs,
   };
+  const draftCalls = [];
+  if (drafts) env.DRAFTS = draftsActor(drafts, draftCalls);
   const workbook = book(journal);
   const log = [];
   const sent = [];
   const deps = { sendMail: async (...a) => { sent.push(a); return deps.answer ? deps.answer(a) : { provider: 'brevo', accepted: true, id: 'msg-' + sent.length, status: 201, error: null, outcome: 'SENT' }; } };
-  return { st, led, env, docs, workbook, log, sent, deps };
+  return { st, led, env, docs, workbook, log, sent, deps, draftCalls };
 }
 async function approveGate(st) {
   await st.storage.put('gate', { approved: true, issueAndPublishEnabled: true, approval: { approvedBy: 'suthep', approvedAt: '2026-10-05T10:00:00Z' } });
@@ -201,7 +216,7 @@ test('ADMIN · the overview lists every invitation from ONE Sheets batch (006 + 
   const t2 = r.j.holders.find((h) => h.Holder_ID === 'INV-T2');
   assert.equal(t2.method.determined, false, 'no nationality in 006: the method is a BILLING_ADMIN\'s to state, never guessed');
   assert.equal(r.j.holders.find((h) => h.Holder_ID === 'INV-G049').billingAdmin, true);
-  assert.equal(r.j.chunk, 8);
+  assert.equal(r.j.chunk, 6);
 });
 
 test('ADMIN · status in chunks of at most ten: Guest Relations\' confirmation and the draft, per holder', async () => {
@@ -211,7 +226,7 @@ test('ADMIN · status in chunks of at most ten: Guest Relations\' confirmation a
   const t1 = r.j.rows.find((x) => x.Holder_ID === 'INV-T1'), t2 = r.j.rows.find((x) => x.Holder_ID === 'INV-T2');
   assert.equal(t1.confirmation.state, 'CONFIRMED'); assert.equal(t1.draft.total, 390); assert.equal(t1.draft.lines, 2); assert.equal(t1.draft.manualReview, 0);
   assert.equal(t2.confirmation.state, 'NONE'); assert.equal(t2.draft, null);
-  const many = Array.from({ length: 9 }, (_, i) => 'INV-X' + i).join(',');
+  const many = Array.from({ length: 7 }, (_, i) => 'INV-X' + i).join(',');
   assert.equal((await hit(W, GROOM, 'admin/status?ids=' + many)).status, 400);
   assert.equal((await hit(W, GROOM, 'admin/status?ids=nonsense')).status, 400);
 });
@@ -237,7 +252,7 @@ test('ADMIN · preview → issue: only the very statement previewed is issued; a
   /* the trip moves after the preview: the same hash no longer issues */
   const W2 = world(); await approveGate(W2.st);
   const h2 = await hit(W2, GROOM, 'admin/holder?holder=INV-T1');
-  W2.workbook['002_Accommodation_Details'] = book()['002_Accommodation_Details'].map((row) => (row[0] === 'Standard_Rate' ? ['Standard_Rate', 150, 100] : row));
+  W2.workbook['002_Accommodation_Details'] = book()['002_Accommodation_Details'].map((row) => (row[0] === 'Standard_Rate' ? ['Standard_Rate', 150, 100, 100] : row));
   const moved = await hit(W2, GROOM, 'issue', { holderId: 'INV-T1', expectedProposal: h2.j.preview.proposalHash });
   assert.equal(moved.status, 409); assert.deepEqual(moved.j.reasons, ['PREVIEW_CHANGED']);
 
@@ -441,4 +456,102 @@ test('REVIEW · every reported payment\'s decision in ONE ledger read; an unusab
     'contact:INV-T1': { email: 'not an address' } } });
   const g = await hit(W2, GROOM, 'admin/holder?holder=INV-T1');
   assert.equal(g.j.guest.email, null, 'the guest corrects the address; the old one is not used'); assert.equal(g.j.guest.emailSource, 'CONTACT_INVALID');
+});
+
+/* ---- BOOKED VALUE (Owner, 7 Oct 2026) ---- */
+const BAG_FULL = [{ id: 'wedstay', room: 'heritage', qty: 1 }, { id: 'train', qty: 1 }, { id: 'spa', interest: true }];
+const statusOf = (r, id) => r.j.rows.find((x) => x.Holder_ID === id);
+
+test('BOOKED VALUE · not sent: the guest\'s current selection, priced by the engine — no statement, no confirmation needed', async () => {
+  const W = world({ store: {}, drafts: { 'INV-T1': savedTrip([...BAG_FULL, { id: 'mystery-product', qty: 1 }]) } });
+  const r = await hit(W, GROOM, 'admin/status?ids=INV-T1');
+  const t1 = statusOf(r, 'INV-T1');
+  assert.equal(t1.confirmation.state, 'NONE'); assert.equal(t1.draft, null, 'nothing confirmed, nothing in the statement draft');
+  assert.equal(t1.booked.source, 'CURRENT_SELECTION');
+  assert.equal(t1.booked.total, 390, 'room 2 × 145 + train 100 — the interest is not a booking');
+  assert.equal(t1.booked.onRequest, 1); assert.deepEqual(t1.booked.unmapped, ['mystery-product'], 'a product without an 002 item is named, never priced at zero');
+  const h = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+  assert.equal(h.j.booked.total, 390); assert.equal(h.j.booked.items.length, 3);
+  assert.deepEqual(h.j.booked.items.map((l) => [l.Item_ID, l.amount]), [['T-STAY', 290], ['T-TRAIN', 100], [null, null]]);
+  assert.equal(h.j.booked.items[0].person, 'Testa Example');
+  assert.equal(h.j.booked.sent, null);
+  assert.equal(h.j.preview.issuable, false, 'a booked value never makes a guest issuable');
+  assert.match(h.j.preview.reasons.join(' '), /BOOKING_NOT_CONFIRMED: NONE/);
+});
+
+test('BOOKED VALUE · sent, not confirmed: the current selection, and the version sent beside it when they differ', async () => {
+  const W = world({ store: { 'reg:INV-T1': SENT }, drafts: { 'INV-T1': savedTrip([{ id: 'train', qty: 1 }]) } });
+  const r = await hit(W, GROOM, 'admin/status?ids=INV-T1');
+  const t1 = statusOf(r, 'INV-T1');
+  assert.equal(t1.confirmation.state, 'UNCONFIRMED'); assert.equal(t1.booked.total, 100);
+  const h = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+  assert.equal(h.j.booked.source, 'CURRENT_SELECTION'); assert.equal(h.j.booked.total, 100);
+  assert.deepEqual([h.j.booked.sent.version, h.j.booked.sent.total, h.j.booked.sent.differs], [1, 390, true]);
+  assert.equal(h.j.issued, null); assert.equal(h.j.preview.issuable, false);
+  /* the saved trip gone: the version sent is what was booked */
+  const W2 = world({ store: { 'reg:INV-T1': SENT }, drafts: {} });
+  const t = statusOf(await hit(W2, GROOM, 'admin/status?ids=INV-T1'), 'INV-T1');
+  assert.equal(t.booked.source, 'SENT_VERSION'); assert.equal(t.booked.total, 390);
+});
+
+test('BOOKED VALUE · no bookings: "nothing selected", not a zero statement; an unreadable selection is named, never zero', async () => {
+  const W = world({ store: {}, drafts: { 'INV-T2': savedTrip([]), 'INV-T1': 'FAIL' } });
+  const r = await hit(W, GROOM, 'admin/status?ids=INV-T1,INV-T2,INV-G049');
+  const t2 = statusOf(r, 'INV-T2'), g = statusOf(r, 'INV-G049'), t1 = statusOf(r, 'INV-T1');
+  assert.deepEqual([t2.booked.source, t2.booked.total, t2.booked.selected], ['CURRENT_SELECTION', 0, 0]);
+  assert.deepEqual([g.booked.source, g.booked.total], ['NONE', 0]);
+  assert.match(t1.booked.error, /not readable/); assert.equal(t1.confirmation.state, 'NONE', 'the rest of the row stands');
+});
+
+test('BOOKED VALUE · an issued statement: the booked value and the statement total stay two different figures', async () => {
+  const W = world({ drafts: { 'INV-T1': savedTrip(BAG_FULL) } }); await approveGate(W.st);
+  const h = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+  assert.equal((await hit(W, GROOM, 'issue', { holderId: 'INV-T1', expectedProposal: h.j.preview.proposalHash })).status, 200);
+  /* the guest drops the room afterwards: the booked value follows the selection, the statement stays as issued */
+  W.env.DRAFTS = draftsActor({ 'INV-T1': savedTrip([{ id: 'train', qty: 1 }]) });
+  const v = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+  assert.equal(v.j.booked.total, 100); assert.equal(v.j.issued.total, 390); assert.equal(v.j.payment.balance, 390);
+  const o = await hit(W, GROOM, 'admin/overview');
+  assert.equal(o.j.holders.find((x) => x.Holder_ID === 'INV-T1').settlement.issuedTotal, 390);
+});
+
+test('BOOKED VALUE · display only and bounded: nothing is written, one Drafts read per guest, at most six guests a request', async () => {
+  const W = world({ store: {}, drafts: { 'INV-T1': savedTrip(BAG_FULL), 'INV-T2': savedTrip([{ id: 'train', qty: 2 }]) } });
+  const before = [...W.st._map.keys()].sort();
+  const r = await hit(W, GROOM, 'admin/status?ids=INV-T1,INV-T2,INV-G049');
+  assert.equal(statusOf(r, 'INV-T2').booked.total, 200);
+  await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+  assert.deepEqual([...W.st._map.keys()].sort(), before, 'the ledger holds exactly what it held');
+  assert.equal(W.log.filter((x) => x[0] === 'append' || x[0] === 'update').length, 0, 'nothing written to Google');
+  assert.deepEqual(W.draftCalls.slice(0, 3), ['INV-T1', 'INV-T2', 'INV-G049'], 'one Drafts read per guest in the chunk');
+  const seven = ['INV-T1', 'INV-T2', 'INV-G049', 'INV-X1', 'INV-X2', 'INV-X3', 'INV-X4'].join(',');
+  assert.equal((await hit(W, GROOM, 'admin/status?ids=' + seven)).status, 400, 'at most six a request');
+  assert.equal((await hit(W, GROOM, 'admin/overview')).j.chunk, 6);
+});
+
+/* ---- independent review of the Booked value (7 Oct 2026) ---- */
+test('BOOKED VALUE · priced only for the one person of the register — never on a guessed or missing person', async () => {
+  const W = world({ store: {}, drafts: { 'INV-T1': savedTrip(BAG_FULL), 'INV-X9': savedTrip(BAG_FULL) } });
+  const r = await hit(W, GROOM, 'admin/status?ids=INV-T1,INV-X9');
+  assert.equal(statusOf(r, 'INV-T1').booked.total, 390);
+  const x9 = statusOf(r, 'INV-X9');
+  assert.match(x9.error, /^HOLDER_PERSON/); assert.match(x9.booked.error, /^HOLDER_PERSON/);
+  assert.ok(!W.draftCalls.includes('INV-X9'), 'an id outside the register wakes no actor');
+  /* the register not readable (empty index): nothing is priced as "nobody" */
+  const was = INDEX.a; delete INDEX.a;
+  try {
+    const r2 = await hit(W, GROOM, 'admin/status?ids=INV-T1');
+    assert.match(statusOf(r2, 'INV-T1').booked.error, /^HOLDER_PERSON/);
+  } finally { INDEX.a = was; }
+});
+
+test('BOOKED VALUE · a changed selection is a change even at the same price; the same selection in another order is not', async () => {
+  const W = world({ store: { 'reg:INV-T1': { ...SENT, registration: { guestId: 'GT1', selections: [{ id: 'train', qty: 1 }, { id: 'wedstay', room: 'heritage', qty: 1 }] } } },
+    drafts: { 'INV-T1': savedTrip([{ id: 'wedstay', room: 'heritage', qty: 1 }, { id: 'bus', qty: 1 }]) } });
+  const h = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+  assert.equal(h.j.booked.total, 390); assert.equal(h.j.booked.sent.total, 390);
+  assert.equal(h.j.booked.sent.differs, true, 'the train became a bus: not "as it stands"');
+  const W2 = world({ store: { 'reg:INV-T1': { ...SENT, registration: { guestId: 'GT1', selections: [{ id: 'train', qty: 1 }, { id: 'wedstay', room: 'heritage', qty: 1 }] } } },
+    drafts: { 'INV-T1': savedTrip([{ id: 'wedstay', room: 'heritage', qty: 1 }, { id: 'train', qty: 1 }, { id: 'spa', interest: true }]) } });
+  assert.equal((await hit(W2, GROOM, 'admin/holder?holder=INV-T1')).j.booked.sent.differs, false);
 });

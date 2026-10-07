@@ -50,7 +50,7 @@
   var METHOD = { PAYPAL_EUR: 'PayPal (EUR)', SEPA_EUR: 'Bank transfer — SEPA (EUR)', PROMPTPAY_THB: 'PromptPay (THB)' };
   var CONF = { CONFIRMED: ['Confirmed', 'on'], UNCONFIRMED: ['Sent, not confirmed', 'open'], LAPSED: ['Changed since confirmed', 'open'], NONE: ['Not sent', ''] };
   var PAY = { UNPAID: 'Not paid', PARTIAL: 'Partly paid', PAID: 'Paid', OVERPAID: 'Overpaid', NOTHING_DUE: 'Nothing due' };
-  var FILTERS = [['all', 'All'], ['notIssued', 'Not issued'], ['issued', 'Issued'], ['outstanding', 'Outstanding'], ['paid', 'Paid'], ['overdue', 'Overdue'], ['review', 'Manual review']];
+  var FILTERS = [['all', 'All'], ['booked', 'Booked'], ['notIssued', 'Not issued'], ['issued', 'Issued'], ['outstanding', 'Outstanding'], ['paid', 'Paid'], ['overdue', 'Overdue'], ['review', 'Manual review']];
 
   /* ------------------------------------------------------------- the state */
   var S = {
@@ -160,7 +160,8 @@
     return out;
   }
   function matches(h, f) {
-    var s = h.settlement, p = h.payment;
+    var s = h.settlement, p = h.payment, st = S.status[h.Holder_ID];
+    if (f === 'booked') return !!(st && st.booked && !st.booked.error && st.booked.selected > 0);
     if (f === 'notIssued') return !(s && s.issuedRevision);
     if (f === 'issued') return !!(s && s.issuedRevision);
     if (f === 'outstanding') return !!(p && (p.status === 'UNPAID' || p.status === 'PARTIAL'));
@@ -186,11 +187,21 @@
     if (s && s.latestRevision) return 'Draft V' + s.latestRevision;
     return 'Not issued';
   }
+  /* STATEMENT TOTAL — the issued, immutable statement only; nothing else is ever shown here */
   function totalCell(h) {
-    var s = h.settlement, st = S.status[h.Holder_ID];
+    var s = h.settlement;
     if (s && s.issuedRevision) return '<span data-i18n-skip>' + esc(usd(s.issuedTotal)) + '</span>';
-    if (st && st.draft) return '<span class="ab-mute" data-i18n-skip title="current draft, not issued">' + esc(usd(st.draft.total)) + ' · draft</span>';
     return '<span class="ab-mute">—</span>';
+  }
+  /* BOOKED VALUE — what the guest has selected now, priced by the engine now; never a statement */
+  var BOOKED_FROM = { CURRENT_SELECTION: 'current selection', SENT_VERSION: 'as sent' };
+  function bookedCell(h) {
+    var st = S.status[h.Holder_ID], b = st && st.booked;
+    if (!b) return st && st.error ? '<span class="ab-chip open">not readable</span>' : '<span class="ab-mute">…</span>';
+    if (b.error) return '<span class="ab-chip open">not readable</span>';
+    if (b.source === 'NONE' || !b.selected) return '<span class="ab-mute">Nothing selected</span>';
+    return '<span data-i18n-skip><b>' + esc(usd(b.total)) + '</b></span><br><span class="ab-mute">' + esc(BOOKED_FROM[b.source] || '') + '</span>' +
+      (b.onRequest ? '<br><span class="ab-mute">+ ' + b.onRequest + ' on request</span>' : '');
   }
   function methodWords(h) {
     var m = h.method || {};
@@ -203,22 +214,22 @@
     var shown = rows.filter(function (h) { return matches(h, S.filter) && searchHit(h, S.q); });
     var done = S.checked >= rows.length;
     var chips = FILTERS.map(function (f) {
-      var partial = (f[0] === 'review' && !done);
+      var partial = ((f[0] === 'review' || f[0] === 'booked') && !done);
       return '<button type="button" class="ab-filter' + (S.filter === f[0] ? ' on' : '') + '" data-ab-filter="' + f[0] + '" aria-pressed="' + (S.filter === f[0]) + '">' +
         esc(f[1]) + ' <span class="ab-n">' + counts[f[0]] + (partial ? '+' : '') + '</span></button>';
     }).join('');
     var progress = done ? '' : '<p class="t-b2 ab-progress" role="status">Checking Guest Relations\' confirmations and drafts · ' + S.checked + ' / ' + rows.length + '</p>';
-    var head = '<tr><th>Guest</th><th>Guest Relations</th><th>Statement</th><th>Issued</th><th>Due</th><th class="num">Total</th><th class="num">Paid</th><th class="num">Outstanding</th><th>Method</th><th>Review</th></tr>';
+    var head = '<tr><th>Guest</th><th>Guest Relations</th><th class="num">Booked value</th><th>Statement</th><th>Issued · due</th><th class="num">Statement total</th><th class="num">Paid</th><th class="num">Outstanding</th><th>Method</th><th>Review</th></tr>';
     var body = shown.map(function (h) {
       var s = h.settlement || {}, p = h.payment, rv = review(h);
       var out = p ? (p.overdue ? '<span class="ab-chip open">Overdue</span> ' : '') + '<span data-i18n-skip>' + esc(usd(Math.max(0, Number(p.balance) || 0))) + '</span>' : '<span class="ab-mute">—</span>';
       return '<tr data-ab-open="' + esc(h.Holder_ID) + '" tabindex="0">' +
         '<td data-l="Guest"><span class="ab-name">' + esc(h.name ? h.name.full : '(no 006 name)') + '</span><span class="ab-id">' + esc(h.Holder_ID) + (h.billingAdmin ? ' · admin' : '') + '</span></td>' +
         '<td data-l="Guest Relations">' + confChip(S.status[h.Holder_ID]) + '</td>' +
+        '<td data-l="Booked value" class="num">' + bookedCell(h) + '</td>' +
         '<td data-l="Statement">' + esc(stmtWords(h)) + (p ? '<br><span class="ab-mute">' + esc(PAY[p.status] || p.status || '') + (p.pendingCount ? ' · ' + p.pendingCount + ' reported' : '') + '</span>' : '') + '</td>' +
-        '<td data-l="Issued">' + esc(day(s.issueDate)) + '</td>' +
-        '<td data-l="Due">' + esc(day(s.dueDate)) + '</td>' +
-        '<td data-l="Total" class="num">' + totalCell(h) + '</td>' +
+        '<td data-l="Issued · due">' + (s.issueDate ? esc(day(s.issueDate)) + '<br><span class="ab-mute">due ' + esc(day(s.dueDate)) + '</span>' : '<span class="ab-mute">—</span>') + '</td>' +
+        '<td data-l="Statement total" class="num">' + totalCell(h) + '</td>' +
         '<td data-l="Paid" class="num">' + (p ? '<span data-i18n-skip>' + esc(usd(p.ist)) + '</span>' : '<span class="ab-mute">—</span>') + '</td>' +
         '<td data-l="Outstanding" class="num">' + out + '</td>' +
         '<td data-l="Method">' + methodWords(h) + '</td>' +
@@ -229,7 +240,9 @@
       '<div class="ab-filters" role="group" aria-label="Filter">' + chips + '</div></div>' + progress +
       (shown.length ? '<div class="ab-table-wrap"><table class="ab-table"><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>'
         : '<p class="t-b1 ab-empty">No guest matches this filter.</p>') +
-      '<p class="t-b2 ab-foot">' + rows.length + ' invitations of the register · totals in USD from the issued revision (a draft total is marked "draft") · as of ' + esc(day(o.asOf)) + '</p></section>';
+      '<p class="t-b2 ab-foot">' + rows.length + ' invitations of the register · as of ' + esc(day(o.asOf)) + '<br>' +
+      '<b>Booked value</b> — what the guest has selected now, priced by the Billing Engine now; it is not a statement and does not make anyone issuable. ' +
+      '<b>Statement total</b>, <b>Paid</b> and <b>Outstanding</b> — the issued, immutable statement only. All in USD.</p></section>';
   }
 
   /* -------------------------------------------------------- the guest view */
@@ -275,14 +288,37 @@
       kv('Guest Relations', '<span class="ab-chip ' + c[1] + '">' + esc(c[0]) + '</span>' + (conf.confirmedAt ? ' <span class="ab-mute">' + esc(day(conf.confirmedAt)) + '</span>' : '')) +
       kv('E-mail', emailLine) +
       kv('Payment method', H.method && H.method.channel ? esc(METHOD[H.method.channel] || H.method.channel) + (H.method.locked ? ' · fixed' : '') : '<span class="ab-chip open">To state: ' + esc(H.method && H.method.reason || 'undetermined') + '</span>') +
+      kv('Booked value', !H.booked ? '—' : H.booked.error ? '<span class="ab-chip open">not readable</span>'
+        : (H.booked.source === 'NONE' || !H.booked.selected) ? 'Nothing selected'
+        : '<b data-i18n-skip>' + esc(usd(H.booked.total)) + '</b>' + (H.booked.onRequest ? ' <span class="ab-mute">+ ' + esc(H.booked.onRequest) + ' on request</span>' : '') +
+          ' <span class="ab-mute">· ' + esc(BOOKED_FROM[H.booked.source] || '') + ', not a statement</span>') +
       kv('Statement', iss ? esc(iss.Settlement_ID + ' · version ' + iss.revision + ' · issued ' + day(iss.issueDate) + ' · due ' + day(iss.dueDate)) : 'Not issued') +
+      kv('Statement total', iss ? '<b data-i18n-skip>' + esc(usd(iss.total)) + '</b>' : '—') +
       '</div>' + actions + (S.msg ? '<p class="t-b1 ab-msg" role="status">' + S.msg + '</p>' : '') + '</div>';
-    return head + panelView() + paymentsView() + mailView();
+    return head + bookedView() + panelView() + paymentsView() + mailView();
+  }
+  /* BOOKED VALUE in full — the lines behind the amount; separate from the statement and from whether it may be issued */
+  function bookedView() {
+    var b = S.holder.booked;
+    if (!b) return '';
+    if (b.error) return '<section class="p-card ab-panel" aria-label="Booked value"><p class="t-l1">Booked value</p><p class="t-b1 ab-err">The current selection cannot be read just now: ' + esc(b.error) + '</p></section>';
+    var src = b.source === 'CURRENT_SELECTION' ? 'The guest\'s current selection' + (b.updatedAt ? ', saved ' + when(b.updatedAt) : '')
+      : b.source === 'SENT_VERSION' ? 'The version the guest sent' + (b.updatedAt ? ' on ' + when(b.updatedAt) : '') : 'Nothing selected';
+    var sent = b.sent ? '<p class="t-b2">' + (b.sent.differs
+      ? 'The version sent to Guest Relations (V' + esc(b.sent.version) + ', ' + esc(when(b.sent.lastSentAt)) + ') is worth <b data-i18n-skip>' + esc(usd(b.sent.total)) + '</b> — the guest has changed the selection since.'
+      : 'Sent to Guest Relations as it stands (V' + esc(b.sent.version) + ', ' + esc(when(b.sent.lastSentAt)) + ').') + '</p>' : '';
+    return '<section class="p-card ab-panel" aria-label="Booked value"><p class="t-l1">Booked value · ' + esc(b.source === 'SENT_VERSION' ? 'the version sent' : 'the current selection') + ', not a statement</p>' +
+      '<h3 class="t-h1" data-i18n-skip>' + esc(b.source === 'NONE' || !b.selected ? 'Nothing selected' : usd(b.total)) + '</h3>' +
+      (b.onRequest ? '<p class="t-b2 ab-why">+ ' + esc(b.onRequest) + ' selected line' + (b.onRequest > 1 ? 's' : '') + ' without an amount yet (on request / to review): ' + esc((b.reviewReasons || []).join(', ')) + '</p>' : '') +
+      '<p class="t-b2">' + esc(src) + ' — priced by the Billing Engine on today\'s source. It is not a statement, nothing is stored or issued from it, and it does not make the guest issuable: a statement needs Guest Relations\' confirmation.</p>' + sent +
+      (b.items && b.items.length ? linesTable(b.items, true) : '') +
+      (b.blockB && b.blockB.length ? '<p class="t-l1">Block B · settled with the provider, never in the booked value</p>' + linesTable(b.blockB, false) : '') +
+      (b.unmapped && b.unmapped.length ? '<p class="t-b2 ab-why">Selected products without an 002 item: ' + esc(b.unmapped.join(', ')) + '</p>' : '') + '</section>';
   }
   function previewView() {
     var H = S.holder, pv = H.preview || {};
     var reasons = (pv.reasons || []).map(function (r) { return '<li>' + esc(r) + '</li>'; }).join('');
-    return '<section class="p-card ab-panel" aria-label="Preview"><p class="t-l1">Preview · the Billing Engine, on the current source · nothing is issued</p>' +
+    return '<section class="p-card ab-panel" aria-label="Statement preview"><p class="t-l1">Statement preview · what Issue would freeze now: the trip Guest Relations confirmed · nothing is issued</p>' +
       '<h3 class="t-h1">' + esc(usd(pv.total)) + '</h3>' +
       '<div class="ab-grid2">' + kv('Issue date if issued now', esc(day(pv.issueDate))) + kv('Due date', esc(day(pv.dueDate))) +
       kv('In the payment currency', pv.inCurrency ? '<span data-i18n-skip>' + esc(money(pv.inCurrency.currency, pv.inCurrency.amount)) + '</span> <span class="ab-mute">at ' + esc(pv.inCurrency.rate) + '</span>' : '—') +

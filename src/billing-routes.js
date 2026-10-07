@@ -32,6 +32,7 @@ import {
   PAYMENT_JOURNAL_COLUMNS, loadGuestNationalities, nationalityOf, prefetchTabs, SOURCE_TAB_KEYS, loadGuestRegister,
 } from './billing/source.js';
 import { SNAPSHOT_COMPARISON } from './billing-ledger.js';
+import { loadBookedSelection, priceSelection, BOOKED_SOURCE } from './billing/booked.js';
 import { composeStatementMail } from './mail-templates.js';
 import { pricingSource, catalogueKey } from './billing/catalogue-cache.js';
 import { effectivePreference, routeFor, destinationOf, firstVerifiedPayment, isChannel, PREFERENCE_SOURCE } from './billing/preference.js';
@@ -42,6 +43,7 @@ import {
   paymentStatus, isDuplicateSuspect, nextRevisionState,
 } from './billing/settlement.js';
 import { loadConfirmedBookings, unmappedProducts, siteKeyOfSelection } from './billing/bookings.js';
+import { canonicalLines } from './legacy-keys.js';
 import { renderSettlementPdf } from './billing/pdf.js';
 import { buildRevenueOverview } from './billing/revenue.js';
 import { detectDrift, blockingOf, monitoringSignals, proposeRevisionDraft, reconciliationReport } from './billing/reconciliation.js';
@@ -1015,8 +1017,9 @@ async function gateRead(env, identity, url, cors) {
    Sheets batch (006 + 008) and ONE ledger listing — and what needs a per-guest engine run (Guest Relations'
    confirmation, the draft total, manual review) comes in chunks of at most ten, asked one after another. */
 
-/* ≤ 8 holders a request: one ledger read and two KV reads each (+ a ROOMS call at most) stay far inside 50 */
-const ADMIN_STATUS_CHUNK = 8;
+/* ≤ 6 holders a request (Booked value, 7 Oct 2026): per holder one ledger read, one Drafts read, the registration and
+   confirmation reads (+ a ROOMS call at most) — far inside the 50 a request may make, whatever the guest count */
+const ADMIN_STATUS_CHUNK = 6;
 const INVITATION_RE = /^INV-[A-Z0-9-]+$/;
 const EMAIL_RE = /^[^\s@<>()",;:]+@[^\s@<>()",;:]+\.[A-Za-z]{2,}$/;
 const goodEmail = (v) => { const e = clean(v).toLowerCase(); return e.length <= 254 && EMAIL_RE.test(e) ? e : ''; };
@@ -1075,6 +1078,33 @@ function peopleOf(entries, register, lines) {
     if (ids.has(g) && !out[g]) { const n = nameOf(register, e.c); if (n) out[g] = n.full; }
   }
   return out;
+}
+
+/* a selection as what it books — product key and quantity, interests aside — to tell whether two versions differ at all */
+const selectionSignature = (sels) => JSON.stringify((canonicalLines(Array.isArray(sels) ? sels : []) || [])
+  .filter((l) => l && typeof l === 'object' && !l.interest).map((l) => [siteKeyOfSelection(l), Number(l.qty) > 0 ? Number(l.qty) : 1]).sort());
+const pricedTotal = (r) => fromCents((r.blockA || []).reduce((t, l) => t + (Number.isFinite(l.amountCents) ? l.amountCents : 0), 0));
+/* BOOKED VALUE (Owner, 7 Oct 2026) — what the guest has selected now, priced by the engine now. DISPLAY ONLY: never a
+   billing source, never stored, never issued (src/billing/booked.js). `detail` adds the lines and the sent version. */
+async function bookedOf(env, holderId, personId, src, asOf, detail, people) {
+  const sel = await loadBookedSelection({ env, holderId, withSent: !!detail });
+  const empty = { source: sel.source, updatedAt: sel.updatedAt, total: 0, selected: 0, lines: 0, onRequest: 0, unmapped: [] };
+  if (sel.source === BOOKED_SOURCE.NONE) return detail ? { ...empty, items: [], blockB: [], sent: null } : empty;
+  const r = await priceSelection({ holderId, personId, selections: sel.selections, items: src.items, specialRates: src.specialRates, asOf, source: sel.source });
+  const unmapped = r.unmapped || [];
+  /* the engine's own sum of its Block A amounts (engine.calculate); a statement withholds it while a line needs review,
+     the booked value shows it and names those lines beside it ("+ n on request") — never as zero */
+  const out = { source: sel.source, updatedAt: sel.updatedAt, total: pricedTotal(r), complete: r.manualReview.length === 0,
+    selected: r.lines.length, lines: (r.blockA || []).length, onRequest: r.manualReview.length, unmapped };
+  if (!detail) return out;
+  let sent = null;
+  if (sel.sent && sel.source === BOOKED_SOURCE.CURRENT) {
+    const s = await priceSelection({ holderId, personId, selections: sel.sent.selections, items: src.items, specialRates: src.specialRates, asOf, source: BOOKED_SOURCE.SENT });
+    sent = { version: sel.sent.version, lastSentAt: sel.sent.lastSentAt, total: pricedTotal(s), onRequest: s.manualReview.length,
+      differs: selectionSignature(sel.sent.selections) !== selectionSignature(sel.selections) };
+  } else if (sel.sent) sent = { version: sel.sent.version, lastSentAt: sel.sent.lastSentAt, total: pricedTotal(r), onRequest: r.manualReview.length, differs: false };
+  return { ...out, items: r.lines.map((l) => lineView(l, people)), blockB: (r.blockB || []).map((l) => lineView(l, people)),
+    reviewReasons: r.manualReview.map((l) => l.reviewReason).filter(Boolean), sent };
 }
 
 /** GET admin/overview — every holder of the register, cheap. */
@@ -1138,11 +1168,23 @@ async function adminStatus(env, identity, url, cors) {
   if (src.stale) {
     return jsonRes({ ok: false, stale: true, retry: true, error: 'the financial source is unavailable just now; nothing is judged on old figures' }, 503, cors);
   }
+  /* the person whose rates apply, resolved as the statement path resolves it (holderIdentity): exactly one register entry */
+  const inRegister = new Map(holdersOfIndex(await loadIndex(env, url.origin, false)).map((h) => [h.Holder_ID, h]));
   const rows = [];
   for (const id of ids) {
+    const who = inRegister.get(id);
+    if (!who || who.ambiguous || !who.guestId) {
+      rows.push({ Holder_ID: id, error: 'HOLDER_PERSON: ' + id + ' is not one person of the register (or the register is not readable just now)',
+        booked: { error: 'HOLDER_PERSON: no single person of the register' } });
+      continue;
+    }
+    /* the Booked value stands apart: a selection that cannot be read is named on its own, never as zero */
+    let booked;
+    try { booked = await bookedOf(env, id, who.guestId, src, asOf, false); }
+    catch (e) { booked = { error: clean(e && e.message).slice(0, 200) || 'not readable' }; }
     try {
       const { state, result, unmapped, confirmation } = await calculateHolder(env, { invitationId: id, guestId: null }, id, src, asOf, url.origin);
-      rows.push({
+      rows.push({ booked,
         Holder_ID: id,
         confirmation: { state: confirmation.state || 'NONE', version: confirmation.version ?? null, confirmedAt: confirmation.confirmedAt || null },
         draft: confirmation.state === 'CONFIRMED' ? {
@@ -1152,7 +1194,7 @@ async function adminStatus(env, identity, url, cors) {
         Settlement_ID: state.Settlement_ID || null,
       });
     } catch (e) {
-      rows.push({ Holder_ID: id, error: clean(e && e.message).slice(0, 200) || 'not readable' });
+      rows.push({ Holder_ID: id, booked, error: clean(e && e.message).slice(0, 200) || 'not readable' });
     }
   }
   return jsonRes({ ok: true, asOf, source: { at: new Date(src.at).toISOString(), cached: src.cached }, rows }, 200, cors);
@@ -1203,6 +1245,12 @@ async function adminHolder(env, identity, url, cors) {
   const pay = paymentStatus({ sollCents: issued ? issued.Total_Payable_Cents : null, journalRows: src.journalRows,
     settlementId: sid, today: asOf, dueDate: issued ? issued.Due_Date : null });
   const mail = issued ? await ledgerCall(env, 'statement-mail', { settlementId: sid, revision: issued.Revision, action: 'read' }) : null;
+  let booked;
+  if (!entry.guestId) booked = { error: 'HOLDER_PERSON: the register names no person for ' + holderId };
+  else try {
+    const bookedPeople = { ...people, ...peopleOf(entries, src.register, [{ Person_ID: entry.guestId }]) };
+    booked = await bookedOf(env, holderId, entry.guestId, src, asOf, true, bookedPeople);
+  } catch (e) { booked = { error: clean(e && e.message).slice(0, 300) || 'not readable' }; }
   const r = a ? a.current.result : null;
   const issuedFx = issued ? freezeFx({ FX_USD_THB: issued.FX_USD_THB, FX_USD_EUR: issued.FX_USD_EUR }) : null;
 
@@ -1211,6 +1259,7 @@ async function adminHolder(env, identity, url, cors) {
     guest: { name, guestId: entry.guestId, hosts: entry.hosts,
       contactName: recipient.contact ? [clean(recipient.contact.firstName), clean(recipient.contact.lastName)].filter(Boolean).join(' ') || null : null,
       email: recipient.email, emailSource: recipient.source },
+    booked,
     confirmation: a ? a.confirmation : { state: 'UNREADABLE' },
     method: a ? { channel: a.pref.channel || null, currency: a.pref.currency || null, determined: !!a.pref.determined,
       source: a.pref.source || null, reason: a.pref.reason || null, locked: !!a.pref.locked,

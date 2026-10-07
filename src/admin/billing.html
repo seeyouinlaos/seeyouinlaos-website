@@ -10,7 +10,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 .hd{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 20px;border-bottom:1px solid #DAD9D7;background:#F3EEE7}
 .bd{font-family:'PP Editorial Old',serif;font-weight:200;font-size:19px;color:#313131;text-decoration:none}.bd .dot{color:#8A5A55}
 .hd .ab-title{font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:#6B6964}
-.ab-main{max-width:1280px;margin:0 auto;padding:24px 20px 64px}
+.ab-main{max-width:1600px;margin:0 auto;padding:24px 28px 64px}
 .ab-main>h1{font-family:'PP Editorial Old',serif;font-weight:200;font-size:32px;line-height:1.12;margin-bottom:4px}
 .ab-main>.ab-sub{color:#6B6964;margin-bottom:20px}
 /* the operating grammar: dense, legible, every state named in words */
@@ -30,12 +30,13 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 .ab-table-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid #DAD9D7;background:#FCFAF6}
 .ab-table{width:100%;border-collapse:collapse;font-size:13px}
 .ab-table th{position:sticky;top:0;background:#F7F3EC;text-align:left;font-weight:400;font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:#6B6964;padding:10px 12px;border-bottom:1px solid #DAD9D7;white-space:nowrap}
-.ab-table td{padding:10px 12px;border-bottom:1px solid #EDEBE7;vertical-align:top}
+.ab-table td{padding:10px 10px;border-bottom:1px solid #EDEBE7;vertical-align:top}
+.ab-table th{padding-left:10px;padding-right:10px}
 .ab-table .num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 .ab-table tbody tr[data-ab-open]{cursor:pointer}
 .ab-table tbody tr[data-ab-open]:hover,.ab-table tbody tr[data-ab-open]:focus{background:#F3EEE7;outline:0}
 .ab-name{display:block;color:#313131;font-weight:400}
-.ab-table td[data-l="Guest"]{min-width:170px}.ab-table td[data-l="Issued"],.ab-table td[data-l="Due"],.ab-table td[data-l="Reported"]{white-space:nowrap}.ab-id{display:block;font-size:11.5px;color:#6B6964}
+.ab-table td[data-l="Guest"]{min-width:170px}.ab-table td[data-l="Issued · due"],.ab-table td[data-l="Reported"],.ab-table td[data-l="Method"]{white-space:nowrap}.ab-id{display:block;font-size:11.5px;color:#6B6964}
 .ab-mute{color:#6B6964}
 .ab-chip{display:inline-block;font-size:11px;line-height:1.4;padding:2px 8px;border:1px solid #DAD9D7;background:#fff;color:#313131;white-space:normal}
 .ab-chip.on{border-color:#2F5D3A;color:#2F5D3A}.ab-chip.open{border-color:#74070E;color:#74070E}
@@ -93,5 +94,5 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <header class="hd"><a class="bd" href="/">see you in laos<span class="dot">.</span></a><span class="ab-title">Guest Settlement · H&amp;S</span></header>
 <main class="ab-main"><h1>Guest Settlement</h1><p class="t-b2 ab-sub">Statements, payments and revenue — for Haruthai and Suthep. Nothing here happens without your confirmation.</p>
 <div id="admin" aria-live="polite"></div></main>
-<script src="assets/admin-billing.js?v=0dab3634"></script>
+<script src="assets/admin-billing.js?v=c92e1f32"></script>
 </body></html>
