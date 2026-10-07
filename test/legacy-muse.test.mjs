@@ -93,10 +93,10 @@ test('THE BAG · a saved Kempinski line loads as the Jatu Room line — still se
   const w = page({ auth: PEGGY, seed: { 'siyl.bag': JSON.stringify([{ id: 'train', price: 100, qty: 1 }, kemLine({ unit: 'A', unitName: 'Room A' })]) } });
   const bag = plain(w.SIYL_BAG.get()), k = bag.filter((x) => x.id === 'kempinski');
   assert.equal(k.length, 1, 'no duplicate');
-  assert.deepEqual([k[0].room, k[0].stay, k[0].name, k[0].meta, k[0].price, k[0].unit], ['jatu-room', 'muse', 'Hotel Muse Bangkok, Autograph Collection', '6 – 8 March 2027 · Jatu Room', 184.2, 'A']);
+  assert.deepEqual([k[0].room, k[0].stay, k[0].name, k[0].meta, k[0].price, k[0].unit], ['jatu-room', 'muse', 'Hotel Muse Bangkok, Autograph Collection', '6 – 8 March 2027 · Jatu Room', 81.71, 'A']);
   assert.doesNotMatch(JSON.stringify(bag), /Kempinski|deluxe-balcony|kempinski-01/);
   assert.equal(w.SIYL_PRICE.known({ id: 'kempinski', room: 'deluxe-balcony-king' }), true, 'the former room is known — never dropped as withdrawn');
-  assert.equal(w.SIYL_BAG.total(), 284.2);
+  assert.equal(Math.round(w.SIYL_BAG.total() * 100) / 100, 181.71);
   const J = w.SIYL_JOURNEY; const seg = J.SEGMENTS.find((s) => s.key === 'kempinski'); assert.equal(J.state(seg), 'selected');
 });
 
@@ -109,8 +109,8 @@ test('A PERSONAL RATE THROUGH THE ALIAS · an entitled guest\'s Kempinski line i
   /* her partner and every other guest — even on the same browser — the ordinary Hotel Muse rate */
   for (const gid of ['T006', 'g-peggy']) {
     const o = page({ auth: { ...PEGGY, guestId: gid }, seed: { 'siyl.gifts': { guestId: 'T003', gifts, at: Date.now() }, 'siyl.bag': JSON.stringify([kemLine({ personal: 'employee', price: 232 })]) } });
-    const x = plain(o.SIYL_BAG.get())[0]; assert.equal(x.price, 184.2, gid); assert.equal(x.personal, undefined, gid);
-    assert.equal(o.SIYL_PRICE.quote('kempinski', 'jatu-room').total, 184.2);
+    const x = plain(o.SIYL_BAG.get())[0]; assert.equal(x.price, 81.71, gid); assert.equal(x.personal, undefined, gid);
+    assert.equal(o.SIYL_PRICE.quote('kempinski', 'jatu-room').total, 81.71);
   }
 });
 
@@ -122,7 +122,7 @@ test('THE EMAILS AND THE SENT TRIP · a record that names the former room reads 
   const all = JSON.stringify(g) + JSON.stringify(o);
   assert.doesNotMatch(all, /Kempinski|Deluxe Balcony/);
   assert.match(all, /Hotel Muse Bangkok, Autograph Collection/); assert.match(all, /Jatu Room/);
-  assert.match(all, /284\.20|284\.2\b/, 'the total from the lines: USD 100 + USD 184.20');
+  assert.match(all, /181\.71/, 'the total from the lines: USD 100 + USD 81.71');
   assert.doesNotMatch(all, /USD 480\b|USD 380\b/);
   /* the pure mappers: only the room, the stay and the view's naming change, the key order is kept */
   const legacyForm = lineAs(canonicalLine(kemLine()), 'legacy'); assert.equal(legacyForm.room, 'deluxe-balcony-king'); assert.equal(legacyForm.stay, 'kempinski');

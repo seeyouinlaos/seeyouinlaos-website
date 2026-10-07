@@ -153,6 +153,8 @@ function normaliseHolders(holders) {
       label: clean(h.label || h.Label || h.Display_Name) || null,
       bookings: asArray(h.bookings || h.Bookings),
       drifts: asArray(h.drifts || h.Drifts),
+      /* the ledger holds no settlement for this holder at all (a confirmed trip before its first statement) */
+      noSettlementRecord: h.noSettlementRecord === true,
     });
   }
   out.sort((a, b) => byText(clean(a.Holder_ID), clean(b.Holder_ID)));
@@ -365,9 +367,16 @@ export function buildRevenueOverview(input) {
      * the same Settlement_ID would count the same revision and the same
      * journal rows twice, so only the first claim feeds the portfolio. */
     let firstClaim = false;
-    if (!settlementId) {
+    /* NOT ISSUED YET (closeout, 7 Oct 2026): a confirmed trip before its first statement has no Settlement_ID, and nothing can
+     * be paid against it — its issued, cash, outstanding, overdue and refund figures are a fact, zero. Only a journal row that
+     * names this holder without a settlement is a real gap. */
+    const notIssued = !settlementId && h.noSettlementRecord;
+    const orphanRows = settlementId ? 0 : journal.filter((r) => r && clean(r.Holder_ID) === holderId && !clean(r.Settlement_ID)).length;
+    if (!settlementId && (orphanRows || !notIssued)) {
       notes.push('SETTLEMENT_ID_MISSING');
       integrity.holdersWithoutSettlementId.push(holderId);
+    } else if (!settlementId) {
+      notes.push('NOT_ISSUED');
     } else if (knownSettlements.has(settlementId)) {
       notes.push('DUPLICATE_SETTLEMENT_ID');
       if (integrity.duplicateSettlementIds.indexOf(settlementId) < 0) {
@@ -420,7 +429,12 @@ export function buildRevenueOverview(input) {
 
     let outstandingCents = null, overdueCents = null, refundCents = null;
 
-    if (!settlementId) {
+    if (notIssued && !orphanRows) {
+      /* nothing issued, nothing paid: zero is the figure, not a gap */
+      outstandingCents = 0; overdueCents = 0; refundCents = 0;
+      add(acc.issued, key, 0); add(acc.cash, key, 0);
+      add(acc.outstanding, key, 0); add(acc.overdue, key, 0); add(acc.refund, key, 0);
+    } else if (!settlementId) {
       const why = 'no Settlement_ID, so neither a revision nor a journal row can be attributed';
       gap(acc.issued, holderId, why);
       gap(acc.cash, holderId, why);
@@ -512,7 +526,7 @@ export function buildRevenueOverview(input) {
       Phase: h.Phase,
       confirmed: money(confirmedCents),
       issued: money(firstClaim ? issued.cents : null),
-      cashCollected: money(position ? position.istCents : null),
+      cashCollected: money(position ? position.istCents : (notIssued && !orphanRows ? 0 : null)),
       outstanding: money(outstandingCents),
       overdue: money(overdueCents),
       refundDue: money(refundCents),

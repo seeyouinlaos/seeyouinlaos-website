@@ -139,7 +139,7 @@ test('STATEMENT · SEPA_EUR: the bank transfer shows the configured IBAN and acc
   const h = S.html();
   assert.match(h, /<h3 class="t-h2">Bank transfer \(SEPA\)<\/h3>/);
   assert.match(h, /IBAN<\/span> <span data-i18n-skip[^>]*>XX00 TEST 0000 0000 0000 0001<\/span>/);
-  assert.match(h, /Account name<\/span> <span data-i18n-skip>Test Recipient/);
+  assert.match(h, /Account holder<\/span> <span data-i18n-skip>Test Recipient/);
   mount(w); await tick();
   assert.equal(calls.filter((c) => c.url.startsWith('/api/billing/qr')).length, 0);
   /* a SEPA destination without its configured account is never shown half */
@@ -310,6 +310,28 @@ test('STATEMENT · no administration on My Profile: only the guest routes, never
   assert.match(profile, /<script src="assets\/statement\.js\?v=[0-9a-f]{8}"><\/script>/);
   assert.match(profile, /status\(p\)\+stm\+yourStay\(me\)/, 'right after the trip status');
   assert.doesNotMatch(profile, /api\/billing\/(issue|holders|gate|payment\/verify)/);
+});
+
+test('CLOSEOUT (Owner, 7 Oct 2026) · no seven- or fourteen-day payment wording anywhere a guest reads — the registration system, the pages, the scripts, the e-mails, the Thai; the SEPA account holder is the full name', async () => {
+  const { readdirSync } = await import('node:fs');
+  const files = ['register/data.mjs', 'register/app.mjs', 'register/logic.mjs', 'register/index.html', 'src/mail-templates.js', 'src/billing/pdf.js',
+    ...readdirSync(new URL('../', import.meta.url)).filter((f) => f.endsWith('.html')),
+    ...readdirSync(new URL('../assets/', import.meta.url)).filter((f) => f.endsWith('.js')).map((f) => 'assets/' + f)];
+  const code = (t) => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  for (const f of files) {
+    const t = code(src(f));
+    assert.doesNotMatch(t, /seven days|within 7 days|7-day|14 days after booking|charged within 14/i, f);
+  }
+  assert.match(src('register/data.mjs'), /payment: 'Nothing is paid on this website\. No deposit is required\. Once your arrangements are confirmed and your statement is issued, it appears in My Profile, with its due date and how to pay\. It is settled within 21 days after it is issued\.'/);
+  const th = JSON.parse(src('src/i18n-th.json'));
+  assert.doesNotMatch(JSON.stringify(th), /14 days after booking|seven days/);
+  for (const k of ['Will be booked by the bride & groom. It is settled within 21 days after your statement is issued.', 'Account holder',
+    'Nothing is paid on this website. No deposit is required. Once your arrangements are confirmed and your statement is issued, it appears in My Profile, with its due date and how to pay. It is settled within 21 days after it is issued.']) assert.ok(th.exact[k], 'Thai for ' + k);
+  const { destinationOf, CHANNEL_DESTINATION } = await import('../src/billing/preference.js');
+  assert.equal(CHANNEL_DESTINATION.SEPA_EUR.recipient, 'Suthep Thongantang');
+  assert.equal(destinationOf('SEPA_EUR', { BILLING_SEPA_IBAN: 'XX00TEST0000000000000001' }).recipient, 'Suthep Thongantang');
+  assert.match(src('assets/statement.js'), /row\('Account holder', '<span data-i18n-skip>' \+ esc\(dest\.recipient\)/);
+  assert.equal(CHANNEL_DESTINATION.PAYPAL_EUR.recipient, 'Suthep', 'PayPal unchanged'); assert.equal(CHANNEL_DESTINATION.PROMPTPAY_THB.recipient, 'Haruthai', 'PromptPay unchanged');
 });
 
 test('WORDING · the obsolete seven-day invoice is gone; the statement is settled within 21 days after it is issued', () => {

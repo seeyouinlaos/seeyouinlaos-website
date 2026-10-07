@@ -892,6 +892,9 @@ test('QUOTA · no guest\'s amounts reach another: both priced from the one held 
     assert.equal(named.j.quotes['wedstay/suite'].total, 150); assert.equal(named.j.quotes['wedstay/suite'].rateSource, 'SPECIAL_RATE');
     assert.equal(other.j.quotes['wedstay/suite'].total, null, 'the named rate is GT1\'s alone');
     assert.match(other.j.quotes['wedstay/suite'].manualReview, /no approved special rate names this person/);
+    assert.equal(other.j.quotes['wedstay/suite'].listRate, null, 'a DRAFT item without a public rate lists none (the Presidential\'s closed handling)');
+    assert.equal(other.j.quotes['wedstay/heritage'].listRate, 145, 'an ACTIVE per-person-per-night item lists 002\'s rate');
+    assert.equal(other.j.quotes.train.listRate, null, 'a per-person item is no nightly rate');
     assert.equal(other.j.source.cached, true); assert.equal(log.filter((x) => x[0] === 'batchGet').length, 1);
     /* and back again: GT1 still gets GT1's own */
     assert.equal((await hit(env, GUEST, 'catalogue')).j.quotes['wedstay/suite'].total, 150);

@@ -131,7 +131,7 @@
   /* A STAY H&S ALREADY PAID FOR THE GUEST (Owner, Edit 10 · 7 Oct 2026): the server marks it (paidByHS, from a 009 row);
      its amount is what the guest repays through the statement — never "your special rate" beside a listed one */
   var PREPAID_WORDS = 'Already paid for you by Haruthai · you repay Haruthai & Suthep through your statement';
-  var BOOKING_WORDS = { prepaid: PREPAID_WORDS + '.', self: 'Guest will book by themselves.', 'bride-groom': 'Will be booked by the bride & groom and charged within 14 days after booking.' };
+  var BOOKING_WORDS = { prepaid: PREPAID_WORDS + '.', self: 'Guest will book by themselves.', 'bride-groom': 'Will be booked by the bride & groom. It is settled within 21 days after your statement is issued.' };
   /* no leading zero in a date: "06 – 08 March 2027" → "6 – 8 March 2027" */
   function unpad(t) { return String(t == null ? '' : t).replace(/(^|[^\d])0(\d)(?!\d)/g, '$1$2'); }
   var MONTH_RE = /\s+(January|February|March|April|May|June|July|August|September|October|November|December)$/;
@@ -187,15 +187,42 @@
   /* THE RATE OF A WINDOW (Owner, 27 Sep 2026 · the Souphattra correction): a room priced per period carries rates[window]; the
    * pre-wedding stay (Package C) and the Wedding Stay (D1) are two periods of the same rooms and never share a rate. A room with
    * one rate has it in every window. */
-  function rateOf(windowId, room) {
-    if (!room) return null;
+  /* GOOGLE → ENGINE → WEBSITE (closeout, 7 Oct 2026): once the server has answered, a stay's listed rate is 002's own
+     (listRate, at 002's precision) — the catalogue's figure below is only what the page shows before that answer */
+  var asking = false;   /* a catalogue that prices by asking this module back is answered from the catalogue, never in a loop */
+  function serverRate(windowId, room) {
+    if (!room || asking || !billingReady()) return null;
+    asking = true;
+    try {
+      var q = authoritative(windowId, room.slug), v = q && q.listRate != null ? Number(q.listRate) : NaN;
+      return isFinite(v) && v > 0 ? v : null;
+    } finally { asking = false; }
+  }
+  function catalogueRate(windowId, room) {
     if (room.rates && room.rates[windowId] != null) return room.rates[windowId];
     return room.rate != null ? room.rate : null;
+  }
+  function rateOf(windowId, room) {
+    if (!room) return null;
+    var s = serverRate(windowId, room);
+    return s != null ? s : catalogueRate(windowId, room);
   }
   function roomRateOf(windowId, room) {
     if (!room) return null;
     /* only a room priced per period states its room rate (the Souphattra); no other page changes */
-    return room.roomRates && room.roomRates[windowId] != null ? room.roomRates[windowId] : null;
+    var local = room.roomRates && room.roomRates[windowId] != null ? room.roomRates[windowId] : null;
+    if (local == null) return null;
+    /* the room the catalogue sleeps, at 002's own per-person rate */
+    var s = serverRate(windowId, room), c = catalogueRate(windowId, room);
+    return s != null && c ? Math.round(local / c * s * 1e8) / 1e8 : local;
+  }
+  /* THE ORDER OF ROOMS (closeout, 7 Oct 2026): rooms are ranked by what the ROOM costs a night — the per-person rate × the
+     persons the catalogue says it sleeps — so a single room and a double are compared as rooms, never one person's share
+     against a whole room. The order is the one the site has always shown; only the figures follow 002. */
+  function rankRate(windowId, room) {
+    var per = rateOf(windowId, room), c = catalogueRate(windowId, room);
+    var whole = room.roomRates && room.roomRates[windowId] != null ? room.roomRates[windowId] : (room.roomRate != null ? room.roomRate : null);
+    return per == null || whole == null || !c ? per : whole / c * per;
   }
   function roomOf(stay, slug) {
     var found = null;
@@ -486,7 +513,7 @@
         ? open.filter(function (r) { return available(r.slug); })
         : open;
       if (!free.length) return null;      /* the whole stage is sold out */
-      return free.reduce(function (m, r) { return rateOf(windowId, r) > rateOf(windowId, m) ? r : m; }, free[0]);
+      return free.reduce(function (m, r) { return rankRate(windowId, r) > rankRate(windowId, m) ? r : m; }, free[0]);
     },
 
     /* THE FULL EXPERIENCE CHOICE for one accommodation stage.
@@ -512,7 +539,7 @@
       for (var i = 0; i < free.length; i++) if (free[i].slug === wish) return free[i];
       /* the approved room is gone — the nearest rate, cheaper side first */
       return free.reduce(function (best, r) {
-        var fr = rateOf(windowId, first), br = rateOf(windowId, best), rr = rateOf(windowId, r);
+        var fr = rankRate(windowId, first), br = rankRate(windowId, best), rr = rankRate(windowId, r);
         var db = Math.abs(br - fr), dr = Math.abs(rr - fr);
         if (dr < db) return r;
         if (dr === db) return rr < br ? r : best;
@@ -531,7 +558,7 @@
         ? open.filter(function (r) { return available(r.slug); })
         : open;
       if (!free.length) return null;
-      return free.reduce(function (m, r) { return rateOf(windowId, r) < rateOf(windowId, m) ? r : m; }, free[0]);
+      return free.reduce(function (m, r) { return rankRate(windowId, r) < rankRate(windowId, m) ? r : m; }, free[0]);
     },
 
     /* does this product have a genuine alternative to change to? */
@@ -620,7 +647,7 @@
       return !!r && !(r.notIn && r.notIn.indexOf(at.win.id) >= 0);
     },
     /* THE BOOKING METHOD of a window (002 · "Note for Guest", 28 Sep 2026): 'self' — the guest books the hotel themselves (the
-       sheet's link, when it gives one); 'bride-groom' — booked by the Bride & Groom and charged within 14 days after booking */
+       sheet's link, when it gives one); 'bride-groom' — booked by the Bride & Groom, settled within 21 days after the statement is issued */
     /* `slug`: the room the caller shows. Without it, the room of this window in the guest's bag — else any room of the window.
        A stay the server marks as already paid by H&S for this guest (paidByHS · Edit 10) answers 'prepaid': no hotel link. */
     bookingOf: function (windowId, slug) {
@@ -751,7 +778,8 @@
         if (fresh.personal) r1.personal = fresh.personal; else delete r1.personal;   /* who paid, even without an amount (Edit 10) */
         return r1;
       }
-      if (x.price === fresh.price && x.pay === fresh.pay && x.name === fresh.name && (x.gift || null) === (fresh.gift || null) && (x.personal || null) === (fresh.personal || null) && !('fixed' in x)) return x;
+      /* the rate too (closeout): a line keeps no per-night figure the server no longer states */
+      if (x.price === fresh.price && x.rate === fresh.rate && x.pay === fresh.pay && x.name === fresh.name && (x.gift || null) === (fresh.gift || null) && (x.personal || null) === (fresh.personal || null) && !('fixed' in x)) return x;
       changed = true;
       fresh.qty = x.qty || 1;           /* the guest's own choice is preserved */
       if (x.unit) { fresh.unit = x.unit; if (x.unitName) fresh.unitName = x.unitName; }   /* …and the unit the engine holds for them */

@@ -15,8 +15,8 @@ const call = async (rooms, op, body, as) => { const r = await rooms.fetch(new Re
 const ROOMS = [
   /* the live 002 (28 Sep 2026): N 39.12 · O 36.33 (two rooms, O24) · P 42.89 per person per night */
   { key: 'kmg/elegant-residence', slug: 'elegant-residence', name: '001 · Elegant Residence Double Bed Room', places: 1, rooms: 1, rate: 39.12, roomRate: 39.12, pp3: 117.36, room3: 117.36 },
-  { key: 'kmg/jinri-terrace-double', slug: 'jinri-terrace-double', name: '002 · Jinri Building Scenic Terrace Tub Double', places: 2, rooms: 2, rate: 36.33333333, roomRate: 72.66666667, pp3: 109, room3: 218 },
-  { key: 'kmg/jinri-family-suite', slug: 'jinri-family-suite', name: '003 · Jinri Terrace Tub Family Suite', places: 2, rooms: 1, rate: 42.89, roomRate: 85.78, pp3: 128.67, room3: 257.34 }
+  { key: 'kmg/jinri-terrace-double', slug: 'jinri-terrace-double', name: '002 · Jinri Building Scenic Terrace Tub Double', places: 2, rooms: 2, rate: 18.16666667, roomRate: 36.33333333, pp3: 54.5, room3: 109 },
+  { key: 'kmg/jinri-family-suite', slug: 'jinri-family-suite', name: '003 · Jinri Terrace Tub Family Suite', places: 2, rooms: 1, rate: 21.445, roomRate: 42.89, pp3: 64.34, room3: 128.68 }   /* each share rounded once: 2 × 64.34 */
 ];
 
 test('THE INVENTORY · Package F is exactly three room types — one, two (the live 002, 28 Sep 2026) and one rooms — sleeping 1 · 2 · 2; no key of the former hotel is left', () => {
@@ -28,7 +28,7 @@ test('THE INVENTORY · Package F is exactly three room types — one, two (the l
   for (const old of ['left-bank', 'penang', 'family-suite', 'seine', 'smart-family', 'solarium', 'standard-single', 'junting', 'mid-century', 'milano', 'italian', 'light-french']) assert.equal(SEED['kmg/' + old], undefined, old + ' is retired');
 });
 
-test('THE PRICES · the sheet\'s per-person rate per night, three nights, to the cent: 117.36 · 109 · 128.67 per person, the room 117.36 · 218 · 257.34; USD 36.33 is written, never 36.333', () => {
+test('THE PRICES · the live 002 (7 Oct 2026) per-person rate per night, three nights, to the cent: 117.36 · 54.50 · 64.34 per person, the room 117.36 · 109 · 128.68; USD 18.17 is written, never 18.167', () => {
   const w = page({ auth: PEGGY }); const P = w.SIYL_PRICE, K = w.SIYL_ROOMS.kunming;
   assert.equal(K.name, 'Yifangju Designer Courtyard · Kunming'); assert.equal(K.place, 'Jinma Biji Archway · Kunming Old Street'); assert.equal(K.breakfast, 'Breakfast included');
   assert.deepEqual(plain(K.windows.map((x) => [x.id, x.dates, x.n])), [['kmg', '1 – 4 March 2027', 3]]);
@@ -42,7 +42,7 @@ test('THE PRICES · the sheet\'s per-person rate per night, three nights, to the
     assert.equal(room.facts.find((f) => f[0] === 'Occupancy')[1], r.places === 1 ? '1 adult' : '2 adults');
   }
   assert.equal(P.money(36.33333333), 'USD 36.33'); assert.equal(P.money(72.66666667), 'USD 72.67'); assert.equal(P.money(109), 'USD 109');
-  assert.match(P.quote('kmg', 'jinri-terrace-double').basis, /^USD 109 per person · 3 nights: .+ · USD 36\.33 per person per night$/);
+  assert.match(P.quote('kmg', 'jinri-terrace-double').basis, /^USD 54\.50 per person · 3 nights: .+ · USD 18\.17 per person per night$/);
 });
 
 test('THE PHOTOGRAPHS · seven per room, each room only its own folder, the Owner\'s WebP on disk bit for bit, nothing of the former hotel', () => {
@@ -115,9 +115,9 @@ test('THE BOOKING (the shipped client on the shipped engine) · the Yifangju roo
   const r = await ST.select('kmg', 'jinri-terrace-double', null, 1);
   assert.equal(r.ok, true);
   const line = plain(B.get()).find((x) => x.id === 'kmg');
-  assert.equal(line.room, 'jinri-terrace-double'); assert.equal(line.price, 109); assert.equal(line.name, 'Yifangju Designer Courtyard · Kunming');
+  assert.equal(line.room, 'jinri-terrace-double'); assert.equal(line.price, 54.5); assert.equal(line.name, 'Yifangju Designer Courtyard · Kunming');
   assert.match(line.meta, /1 – 4 March 2027 · 002 · Jinri Building Scenic Terrace Tub Double/);
-  assert.equal(B.total(), 109);
+  assert.equal(B.total(), 54.5);
 });
 
 /* PROPERTY MEDIA ≠ ROOM MEDIA (Owner, 28 Sep 2026): the six property photographs (Owner Drive 026) stand for the HOUSE — the house

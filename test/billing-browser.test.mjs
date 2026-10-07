@@ -126,7 +126,7 @@ test('THE SERVER\'S AMOUNT WINS · a product it prices takes its amount on the l
   assert.equal(q.total, 999, 'the server\'s standard amount'); assert.equal(q.gift, undefined, 'a gift this browser once held never changes a server amount');
   assert.equal(P.items('wedstay', 'heritage')[0].price, 999);
   /* block B — the guest books / pays it themselves: the server states no figure, the catalogue's is the informational amount */
-  assert.equal(P.quote('kmg', 'jinri-terrace-double').total, 109); assert.equal(P.items('mu9646')[0].price, 167.5);
+  assert.equal(P.quote('kmg', 'jinri-terrace-double').total, 54.5); assert.equal(P.items('mu9646')[0].price, 167.5);
   /* a product outside the server's catalogue keeps the catalogue's own price */
   assert.equal(P.items('suhring')[0].price, 294);
 });

@@ -137,7 +137,7 @@ test('THE PAGES · her Hotel Muse row: USD 232 for the room, USD 116 per room pe
   await o.SIYL_UNITS.load(true);
   assert.equal(o.SIYL_UNITS.units('kempinski', 'jatu-room').length, 3);
   assert.equal(o.SIYL_UNITS.label('kempinski', 'jatu-room'), '3 of 3 rooms left');
-  assert.equal(o.SIYL_PRICE.fromLine('kempinski'), 'USD 184.20 per person · USD 92.10 per person per night');
-  const oq = o.SIYL_PRICE.quote('kempinski', 'jatu-room'); assert.equal(oq.total, 184.2); assert.equal(oq.nightly, 'USD 92.10 per person per night');
+  assert.equal(o.SIYL_PRICE.fromLine('kempinski'), 'USD 81.71 per person · USD 40.85 per person per night');
+  const oq = o.SIYL_PRICE.quote('kempinski', 'jatu-room'); assert.equal(oq.total, 81.71); assert.equal(oq.nightly, 'USD 40.85 per person per night');
   assert.doesNotMatch(o.SIYL_STAY.unitsHtml('kempinski', 'jatu-room', { need: 1 }), /Your own room|116|232/);
 });

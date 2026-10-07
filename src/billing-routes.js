@@ -147,6 +147,22 @@ async function readDrifts(env, holderId) {
 async function holderState(env, holderId) {
   const reply = await ledgerCall(env, 'read', { holderId });
   const v = reply && reply.ok === true && reply.holder && typeof reply.holder === 'object' ? reply.holder : null;
+  return stateOfView(v, holderId);
+}
+
+/** Many holders' states in ONE ledger request (the Revenue Overview) — the same checks as holderState, holder by holder. */
+async function holderStates(env, holderIds) {
+  const ids = [...new Set((holderIds || []).map(clean).filter(Boolean))];
+  const out = new Map();
+  if (!ids.length) return out;
+  const reply = await ledgerCall(env, 'read-many', { holderIds: ids });
+  const views = reply && reply.ok === true && Array.isArray(reply.holders) ? reply.holders : null;
+  if (!views || views.length !== ids.length) throw new LedgerContractError('the billing ledger returned no holder views');
+  ids.forEach((id, i) => out.set(id, stateOfView(views[i] && typeof views[i] === 'object' ? views[i] : null, id)));
+  return out;
+}
+
+function stateOfView(v, holderId) {
   if (!v || clean(v.Holder_ID) !== clean(holderId)) {
     throw new LedgerContractError('the billing ledger returned no holder view for ' + holderId);
   }
@@ -280,9 +296,10 @@ const preferenceView = (pref, issued, env) => ({
 
 /** The engine result for one Holder — the ONE calculation path (Freeze · V). `assume` is the admin console's what-if
     only (loadConfirmedBookings): never passed on an issue. */
-async function calculateHolder(env, identity, holderId, src, asOf, origin, assume) {
+async function calculateHolder(env, identity, holderId, src, asOf, origin, assume, known) {
   if (!clean(identity && identity.guestId)) identity = await holderIdentity(env, origin, holderId);
-  const state = await holderState(env, holderId);
+  /* `known`: the holder's state already read in a batch (the Revenue Overview) — never a second ledger request */
+  const state = known || await holderState(env, holderId);
   const bookings = await loadConfirmedBookings({
     env, identity, holderId, items: src.items,
     generations: (state && state.generations) || {},
@@ -474,9 +491,20 @@ function quoteOfItem(itemId, item, src, holderId, personId, asOf) {
     block: line ? line.block : null,
     hosted: !!(line && line.hosted),
     manualReview: line && line.review ? line.reviewReason : null,
+    /* 002's own Standard_Rate per person per night, at 002's precision (closeout, 7 Oct 2026): the figure the website lists
+       beside a stay — a hotel the guest pays directly included — so the website never keeps a rate of its own */
+    listRate: listRateOf(item),
     /* already paid by H&S for this guest (a 009 Billing_Category): the guest repays it — the item's own category */
     paidByHS: line && line.categoryOverride ? line.categoryOverride.from || null : null,
   };
+}
+function listRateOf(item) {
+  /* the website labels it "per person per night" and multiplies it by the nights: nothing else is sent */
+  if (!item || clean(item.Rate_Basis) !== 'PER_PERSON_PER_NIGHT' || clean(item.Rate_Status) !== 'ACTIVE') return null;
+  const raw = item.Standard_Rate;
+  if (raw == null || clean(raw) === '') return null;
+  const v = typeof raw === 'number' ? raw : Number(String(raw).replace(/[, ]/g, ''));
+  return Number.isFinite(v) && v > 0 ? v : null;
 }
 const keysOfItem = (item) => clean(item && item.Site_Product_Key).split(/[,|]/).map(clean).filter(Boolean);
 
@@ -933,15 +961,34 @@ async function adminIssue(env, identity, request, cors) {
   }, 200, cors);
 }
 
+/**
+ * THE REVENUE OVERVIEW (Freeze · U · closeout, Owner, 7 Oct 2026). Its population is every holder it has something to say
+ * about: a settlement in the ledger (issued, paid, outstanding, overdue, refund due), a Guest Relations / BILLING_ADMIN
+ * confirmation on record (Confirmed Revenue — issued or not yet), and any drift record (Drift Exposure, which now receives the
+ * ledger's drift entries). A guest who has confirmed nothing and holds no statement contributes to no figure, so the accounting
+ * definitions are not stretched to list them. One ledger request reads every state; one listing reads the confirmations.
+ */
 async function adminRevenue(env, identity, url, cors) {
   const asOf = evaluationDay(url.searchParams.get('asOf'));
   const src = await loadSource(env, asOf);
-  const list = { holders: await readHolders(env) };
-  const holders = [];
-  for (const h of (list && list.holders) || []) {
-    const id = clean(h.Holder_ID);
-    const { state, bookings } = await calculateHolder(env, { invitationId: id, guestId: null }, id, src, asOf, url.origin);
-    holders.push({ Holder_ID: id, Settlement_ID: state.Settlement_ID, bookings, settlement: state });
+  const [ledgerHolders, driftRecords, confirmed] = await Promise.all([readHolders(env), readDriftRecords(env), confirmationHolders(env)]);
+  const drifts = new Map(driftRecords.map((r) => [clean(r.Holder_ID), Array.isArray(r.drifts) ? r.drifts : []]));
+  const withSettlement = ledgerHolders.map((h) => clean(h.Holder_ID));
+  const withDrift = [...drifts].filter(([, d]) => d.length).map(([h]) => h);
+  const ids = [...new Set([...withSettlement, ...confirmed, ...withDrift])].filter(Boolean).sort();
+  const states = await holderStates(env, ids);
+  const holders = [], unresolved = [];
+  for (const id of ids) {
+    /* one holder that cannot be read (a removed invitation, an ambiguous person) is named as a gap — it never takes the
+       whole overview down, and its figures are never guessed (review, 7 Oct 2026) */
+    try {
+      const { state, bookings } = await calculateHolder(env, { invitationId: id, guestId: null }, id, src, asOf, url.origin, undefined, states.get(id));
+      holders.push({ Holder_ID: id, Settlement_ID: state.Settlement_ID, bookings, settlement: state, drifts: drifts.get(id) || [],
+        noSettlementRecord: !state.settlement });
+    } catch (e) {
+      if (e instanceof LedgerContractError || e instanceof GoogleSheetsUnavailable) throw e;
+      unresolved.push({ Holder_ID: id, reason: clean(e && e.message).slice(0, 200) || 'not readable' });
+    }
   }
   /* Freeze · U — the overview reuses the engine; it owns no formula. */
   const overview = buildRevenueOverview({
@@ -950,7 +997,40 @@ async function adminRevenue(env, identity, url, cors) {
     issuedRevisions: holders.map((h) => h.settlement && h.settlement.issuedRevision).filter(Boolean),
     asOf,
   });
-  return jsonRes({ ok: true, ...overview }, 200, cors);
+  /* an unread holder leaves every figure it could belong to incomplete, named — the computable part stays offered as partial */
+  for (const u of unresolved) for (const k of ['confirmedRevenue', 'issuedRevenue', 'cashCollected', 'outstanding', 'overdue', 'refundDue', 'driftExposure']) {
+    const kpi = overview[k]; if (!kpi || typeof kpi !== 'object') continue;
+    if (kpi.complete !== false) { kpi.partial = { cents: kpi.cents, amount: kpi.amount, display: kpi.display }; kpi.cents = null; kpi.amount = null; kpi.display = null; kpi.complete = false; kpi.review = 'MANUAL_REVIEW_REQUIRED'; }
+    kpi.gaps = [...(kpi.gaps || []), { Holder_ID: u.Holder_ID, reason: 'not readable: ' + u.reason }];
+  }
+  if (unresolved.length) overview.incompleteKpis = [...new Set([...(overview.incompleteKpis || []), 'confirmedRevenue', 'issuedRevenue', 'cashCollected', 'outstanding', 'overdue', 'refundDue', 'driftExposure'])];
+  return jsonRes({ ok: true, ...overview, unresolved,
+    population: { holders: ids.length, withSettlement: withSettlement.length, withConfirmation: confirmed.length, withDrift: withDrift.length } }, 200, cors);
+}
+
+/** The ledger's drift records, holder by holder ({ Holder_ID, drifts }). */
+async function readDriftRecords(env) {
+  const reply = await ledgerCall(env, 'drift-read', null);
+  if (!reply || reply.ok !== true || !Array.isArray(reply.drifts)) throw new LedgerContractError('no drift listing');
+  return reply.drifts.filter((r) => r && typeof r === 'object' && clean(r.Holder_ID));
+}
+
+/** Every invitation with a confirmation record — one listing of the store (withdrawn ones price to nothing). */
+async function confirmationHolders(env) {
+  const kv = env.REG_KV;
+  if (!kv || typeof kv.list !== 'function') return [];
+  const out = [];
+  let cursor;
+  do {
+    const page = await kv.list({ prefix: 'conf:', ...(cursor ? { cursor } : {}) });
+    for (const k of (page && page.keys) || []) {
+      /* a withdrawn confirmation (metadata confirmedAt null) prices to nothing and is not counted */
+      if (k && k.metadata && Object.prototype.hasOwnProperty.call(k.metadata, 'confirmedAt') && !k.metadata.confirmedAt) continue;
+      const id = clean(k && k.name).slice('conf:'.length); if (id) out.push(id);
+    }
+    cursor = page && !page.list_complete && page.cursor ? page.cursor : null;
+  } while (cursor);
+  return out;
 }
 
 async function adminReconcile(env, identity, request, cors) {

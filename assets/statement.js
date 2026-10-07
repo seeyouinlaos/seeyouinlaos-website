@@ -167,7 +167,7 @@
       if (!dest.complete || !dest.iban) return '<p class="t-b2 measure">The bank details cannot be shown just now. Please choose PayPal, or ask Guest Relations.</p>';
       var iban = String(dest.iban).replace(/\s+/g, '').replace(/(.{4})/g, '$1 ').trim();
       return '<p class="t-b2 measure">Transfer the amount to pay by SEPA bank transfer, and add your reference to the transfer.</p>' +
-        '<div class="pf-rows">' + row('Account name', '<span data-i18n-skip>' + esc(dest.recipient) + '</span>') +
+        '<div class="pf-rows">' + row('Account holder', '<span data-i18n-skip>' + esc(dest.recipient) + '</span>') +
         /* on its own line, never broken, one tap selects it whole */
         '<p class="t-b2"><span class="t-l1">IBAN</span> <span data-i18n-skip style="display:block;white-space:nowrap;user-select:all;-webkit-user-select:all">' + esc(iban) + '</span></p>' + ref + '</div>';
     }

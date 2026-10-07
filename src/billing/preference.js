@@ -58,7 +58,8 @@ export const PAYMENT_ROUTE = Object.freeze({
  */
 export const CHANNEL_DESTINATION = Object.freeze({
   PAYPAL_EUR: Object.freeze({ recipient: 'Suthep', currency: 'EUR' }),
-  SEPA_EUR: Object.freeze({ recipient: 'Suthep', currency: 'EUR', accountFrom: 'BILLING_SEPA_IBAN' }),
+  /* the account holder's full name (Owner, 7 Oct 2026 · closeout) — the SEPA beneficiary as the bank knows it */
+  SEPA_EUR: Object.freeze({ recipient: 'Suthep Thongantang', currency: 'EUR', accountFrom: 'BILLING_SEPA_IBAN' }),
   PROMPTPAY_THB: Object.freeze({ recipient: 'Haruthai', currency: 'THB' }),
 });
 

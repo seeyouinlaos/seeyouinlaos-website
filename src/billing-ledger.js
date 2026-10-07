@@ -118,7 +118,7 @@ const CLAIM_STALE_MS = 10 * 60 * 1000;
    still reach Google when another decision is allowed. */
 const WRITE_MARGIN_MS = 3 * 60 * 1000;
 
-const OPS = ['read', 'settlement', 'draft', 'revision-create', 'revision-state',
+const OPS = ['read', 'read-many', 'settlement', 'draft', 'revision-create', 'revision-state',
   'revision-issue', 'override-set', 'gate-read', 'gate-approve', 'drift-set',
   'drift-read', 'holders', 'payment-preference', 'payment-decision', 'statement-mail'];
 /* a send whose Worker never reported back is never taken over silently: after this long it counts as UNCERTAIN */
@@ -336,6 +336,23 @@ export class BillingLedger {
         issueAndPublishEnabled: !!(gate && gate.issueAndPublishEnabled),
         journal: '008_Payment_Journal in Google is canonical; this ledger holds no payments',
       });
+    }
+
+    /* THE REVENUE OVERVIEW'S ONE CALL (closeout, 7 Oct 2026): the same holder views as 'read', for many holders at once, so
+       an overview over the whole operation costs one request to this ledger instead of one per holder. Read only. */
+    if (op === 'read-many') {
+      const ids = Array.isArray(body.holderIds) ? [...new Set(body.holderIds.map(clean).filter(Boolean))] : [];
+      if (ids.length > 500) return json({ ok: false, error: 'at most 500 holders per call' }, 400);
+      const holders = [];
+      for (const h of ids) {
+        const s = await this.settlementOf(h);
+        const issued = s && s.issuedRevision ? await this.revisionOf(s.Settlement_ID, s.issuedRevision) : null;
+        /* exactly what the Worker's stateOfView reads — nothing more crosses this call */
+        holders.push({ Holder_ID: h, Settlement_ID: s ? s.Settlement_ID : null,
+          state: s ? s.Settlement_State : SETTLEMENT_STATE.NOT_CREATED, settlement: s || null, issued: issued || null,
+          paymentPreference: (await this.storage.get(PAYPREF + h)) || null });
+      }
+      return json({ ok: true, holders });
     }
 
     /* ------------------------------------------------- settlement (Freeze · I) */

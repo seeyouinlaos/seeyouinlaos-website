@@ -540,7 +540,7 @@
     }).join('');
     var counts = R.counts || {};
     return '<section class="ab-sec" aria-label="Revenue"><div class="ab-kpis">' + cards + '</div>' +
-      '<p class="t-b2 ab-foot">' + esc(counts.settlements || 0) + ' settlements · ' + esc(counts.issuedRevisions || 0) + ' issued revisions · ' + esc(counts.holdersUnderReview || 0) + ' under review · as of ' + esc(day(R.asOf)) + ' · engine ' + esc(R.engineVersion || '') + '</p>' +
+      '<p class="t-b2 ab-foot">' + (R.population ? esc(R.population.holders) + ' holders with a statement, a confirmation or a drift record · ' : '') + esc(counts.settlements || 0) + ' settlements · ' + esc(counts.issuedRevisions || 0) + ' issued revisions · ' + esc(counts.holdersUnderReview || 0) + ' under review · as of ' + esc(day(R.asOf)) + ' · engine ' + esc(R.engineVersion || '') + '</p>' +
       '<div class="p-card ab-panel"><p class="t-l1">Quota utilisation</p>' + (q ? '<div class="ab-table-wrap"><table class="ab-table"><thead><tr><th>Item</th><th>Unit</th><th class="num">Quota</th><th class="num">Used</th><th class="num">Remaining</th><th class="num">Utilisation</th></tr></thead><tbody>' + q + '</tbody></table></div>' : '<p class="t-b2">No quota is in use yet.</p>') + '</div></section>';
   }
 

@@ -81,11 +81,11 @@
        25 – 27 FEB  Heritage Grand Premier           162.50 × 2 = 325   (Package C rates, 27 Sep 2026)
        27 FEB – 01 MAR  Heritage Grand Premier          170 × 1 = 170
        01 MAR       MU9646 Economy Flexible                     167.50   (Business withdrawn, Owner 4 Oct 2026)
-       01 – 04 MAR  Jinri Building Scenic Terrace Tub Double  36.33 × 3 = 109   (the Kunming house replaced, 27 Sep 2026)
+       01 – 04 MAR  Jinri Building Scenic Terrace Tub Double  18.17 × 3 = 54.50   (002 of 7 Oct 2026; the room 109)
        04 MAR       C86 Business                                105
        04 – 06 MAR  (the 270° Snow Mountain Viewing Room — no longer a product, 28 Sep 2026: the stage falls to SIYL_PRICE.premium)
        06 MAR       MU5922 + MU741 Economy flexible             200
-       06 – 08 MAR  Hotel Muse Bangkok · Jatu Room     92.10 × 2 = 184.20   (the Siam Kempinski is gone, 28 Sep 2026)
+       06 – 08 MAR  Hotel Muse Bangkok · Jatu Room     40.85 × 2 = 81.71   (002 of 7 Oct 2026; the room 163.41)
 
      The total is NEVER written down. It is the sum of whatever the engine
      actually selects, so that when the shared ledger says a preferred room is
@@ -278,7 +278,7 @@
        Yifangju Designer Courtyard in Kunming's Old Street is the stay of 1 – 4 March — exactly the three rooms of the current
        Accommodation_Details, each one room, each with its own photographs (Owner Drive 800, one folder per room). The rate is
        the sheet's "Price per Person" per night; the per-person amount for the three nights is rate × 3, rounded to the cent in
-       assets/pricing.js alone (002: USD 36.33333333 × 3 = USD 109 per person · USD 218 the room). The rooms keep the Owner's
+       assets/pricing.js alone (002 of 7 Oct 2026: USD 18.16666667 × 3 = USD 54.50 per person · USD 109 the room). The rooms keep the Owner's
        numbered order. */
     kunming: {
       name: 'Yifangju Designer Courtyard · Kunming',
@@ -322,7 +322,7 @@
           facts: [['Size', '60 – 62 sq.m.'], ['Bed', '1 king bed (1.81 m)'], ['Occupancy', '2 adults'], ['Location', '3rd floor'], ['In the room', 'A private terrace · views over the Jinri Building courtyard · a bathtub'], ['Family', 'Extra beds and cribs are not available']],
           story: 'The Jinri Building Scenic Terrace Tub Double Bed Suite: a private terrace above the old street, views over the Jinri Building courtyard, and a bathtub to end the day in.',
           amenities: ['Air conditioning', 'Audio equipment', 'Bathtub', 'Coffee table', 'Daily housekeeping', 'Desk', 'Free Wi-Fi', 'Garden and courtyard view', 'Hair dryer', 'Landmark view', 'LCD TV', 'Non-smoking rooms', 'Private bathroom', 'Refrigerator', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa', 'Terrace', 'Wardrobe'],
-          rate: 36.33333333, roomRate: 72.66666667 },
+          rate: 18.16666667, roomRate: 36.33333333 },   /* 002 · USD 109 the room, 3 nights · USD 54.50 per person (7 Oct 2026) */
         { slug: 'jinri-family-suite', name: '003 · Jinri Terrace Tub Family Suite', cat: 'Family suite · 71 – 74 sq.m.',
           desc: '71 – 74 sq.m. · 1 king bed and 1 double bed · a terrace and a bathtub · 3rd floor',
           gallery: [
@@ -336,7 +336,7 @@
           facts: [['Size', '71 – 74 sq.m.'], ['Bed', '1 king bed (1.81 m) and 1 double bed (1.35 m)'], ['Occupancy', '2 adults'], ['Location', '3rd floor'], ['In the room', 'Courtyard views on two sides · a premium bath'], ['Family', 'Extra beds and cribs are not available']],
           story: 'The Jinri Terrace Tub Family Suite: a king bed and a double bed, a terrace with the courtyard on two sides, and a bathroom with a freestanding tub and two basins.',
           amenities: ['Air conditioning', 'Audio equipment', 'Coffee table', 'Daily housekeeping', 'Desk', 'Free Wi-Fi', 'Garden and courtyard view', 'Hair dryer', 'Landmark view', 'LCD TV', 'Non-smoking', 'Private bathroom', 'Refrigerator', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa', 'Terrace', 'Wardrobe'],
-          rate: 42.89, roomRate: 85.78 }   /* 002 · P27 USD 257.34 the room, 3 nights (28 Sep 2026) */
+          rate: 21.445, roomRate: 42.89 }   /* 002 · USD 128.67 the room, 3 nights · USD 64.335 per person (7 Oct 2026) */
       ]
     },
 
@@ -378,22 +378,22 @@
           facts: [['Size', '88 sq.m.'], ['Bed', '1 king bed (2 m)'], ['Occupancy', '2 Adults'], ['Location', '2nd floor']],
           story: 'A nine-metre ultra-wide window, a five-metre private hot-spring pool and a snow-viewing fireplace — 88 sq.m. on the second floor.',
           amenities: ['Air conditioning', 'Air purifier', 'Audio equipment', 'Bathrobe', 'Bathtub or shower', 'Butler service', 'Coffee maker and teapot', 'Electric kettle', 'Fireplace', 'Free Wi-Fi', 'Heating', 'Iron and ironing board', 'Minibar', 'Private hot-spring pool', 'Projector', 'Safe in the room', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa'],
-          rate: 116.31, roomRate: 232.62 },   /* 002 · T25 / T26, T27 USD 465.24 the room for the two nights (Owner, 1 Oct 2026) */
+          rate: 58.155, roomRate: 116.31 },   /* 002 · USD 232.62 the room for the two nights · USD 116.31 per person (7 Oct 2026) */
         { slug: 'view-suite-270', name: '270° Snow Mountain View Suite', cat: 'Snow mountain suite',
           desc: '70 sq.m. · 1 king bed · 3rd floor',
           gallery: [],   /* no authoritative room-media source exists for this room (Owner, 1 Oct 2026): no room photography is shown */
           facts: [['Size', '70 sq.m.'], ['Bed', '1 king bed (2 m)'], ['Occupancy', '2 Adults'], ['Location', '3rd floor']],
           story: 'Two hundred and seventy degrees of mountain from the third floor, with a snow-view terrace, a private hot-spring pool and a fireplace.',
           amenities: ['Air conditioning', 'Air purifier', 'Audio equipment', 'Balcony', 'Bathrobe', 'Bathtub or shower', 'Butler service', 'Coffee maker and teapot', 'Electric kettle', 'Fireplace', 'Free Wi-Fi', 'Hair dryer', 'Heating', 'Iron and ironing board', 'Minibar', 'Private hot-spring pool', 'Projector', 'Refrigerator', 'Safe in the room', 'Slippers', 'Smart door lock', 'Smart room controls', 'Smart toilet', 'Sofa', 'Terrace'],
-          rate: 108.435, roomRate: 216.87 }   /* no reservation (Owner, 15 Sep 2026): available until booked */,
+          rate: 54.2175, roomRate: 108.435 }   /* 002 · USD 216.87 the room, 2 nights (7 Oct 2026) · no reservation (Owner, 15 Sep 2026): available until booked */,
       ]
     },
 
     /* HOTEL MUSE BANGKOK, AUTOGRAPH COLLECTION (Owner, 28 Sep 2026 · 002_Accommodation_Details V / W · Package J): the closing
        Bangkok stay of 6 – 8 March. The Siam Kempinski is no longer part of the journey — its record, its stock and its photographs
        are gone; a Bag line naming its room leaves the Bag on load and the stage asks for a choice again (nothing is remapped).
-       ONE product, the Jatu Room: V is its rate for every guest (V27 USD 368.40 the room for two nights · V26 USD 184.20 the room
-       per night · V25 USD 92.10 per person per night); W is the same room at one guest's personal employee rate, resolved on the
+       ONE product, the Jatu Room: V is its rate for every guest (002 of 7 Oct 2026: USD 163.41 the room for two nights · USD 81.705
+       the room per night · USD 40.8525 per person per night); W is the same room at one guest's personal employee rate, resolved on the
        server for that guest alone (src/gifts.js) — never a second product. Breakfast is not included. GUEST_SELF_BOOKING: guests
        book the hotel themselves (V31 · the hotel's own page); the window keeps its internal id `kempinski` so no stored answer
        changes. Photography: the hotel (Drive 030 · seven frames) and the Jatu Room (Drive 801 · Jatu Room) apart. */
@@ -425,7 +425,7 @@
             ['Bathroom', ['Private bathroom', 'Bathtub and shower', 'Bathrobes and slippers', 'Hair dryer', 'Toiletries', 'Hot water (24 hours)']],
             ['Food & drink', ['Coffee maker and teapot', 'Tea bags', 'Electric kettle', 'Bottled water and soft drinks — free']],
             ['The hotel', ['Outdoor swimming pool', 'Sauna', 'Gym', 'Three restaurants', 'Bar and pool bar', 'Room service', 'Concierge', 'Free private parking']]],
-          amenities: null, rate: 92.1, roomRate: 184.2 }
+          amenities: null, rate: 40.8525, roomRate: 81.705 }   /* 002 · USD 163.41 the room, 2 nights (7 Oct 2026) */
       ]
     }
   };

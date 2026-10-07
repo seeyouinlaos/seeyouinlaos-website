@@ -429,7 +429,8 @@ export const COPY = {
   priceNote2: 'Breakfast is included on both mornings. A limited number of complimentary alternative stays are also available.',
   /*   keeps "Haruthai & Suthep" unbreakable on every viewport (owner hard rule) */
   hostedNight: 'Your second hotel night is complimentary — part of the hospitality of your hosts.',
-  payment: 'No deposit is required. Once your arrangements are confirmed, you will receive an invoice with bank transfer or PayPal instructions. Payment is due within seven days.',
+  /* the approved rule (Owner, 7 Oct 2026 · closeout): settled within 21 days after the statement is issued — never seven days */
+  payment: 'Nothing is paid on this website. No deposit is required. Once your arrangements are confirmed and your statement is issued, it appears in My Profile, with its due date and how to pay. It is settled within 21 days after it is issued.',
   requestNote: 'This is a registration request. Guest Relations will confirm your arrangements separately.',
   sharedHome: 'Souphattra Heritage Vientiane sits at the heart of our wedding stay: shared mornings, shared arrivals, and the rhythm of the weekend centred around one quiet place. Choose the stay that feels right for you.',
 };

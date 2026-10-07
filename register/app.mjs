@@ -2720,7 +2720,7 @@ function renderCost() {
     (S.stay.mode === 'oneNight'
       ? '<p class="note" style="margin-top:16px">Your one-night wedding stay: 28 FEB – 01 MAR 2027, breakfast included. The amount shown is the approved amount for your room category.</p>'
       : '<p class="note" style="margin-top:16px">' + esc(COPY.priceNote + ' Haruthai\u00A0&\u00A0Suthep.') + '</p>') +
-    '<p class="note">' + esc(COPY.payment) + ' One person may settle the invoice for everyone travelling with them.</p>';
+    '<p class="note">' + esc(COPY.payment) + ' One person may settle for everyone travelling with them.</p>';
 
   box.querySelectorAll('[data-bag-inc]').forEach((b) => b.addEventListener('click', () => {
     const k = b.getAttribute('data-bag-inc');

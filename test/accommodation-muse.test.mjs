@@ -25,14 +25,14 @@ test('CON005 · Heritage Executive before the wedding USD 225 for the two nights
 test('CON010 · the same two Souphattra rates, and nothing at Hotel Muse — the employee rate is CON005\'s alone', () => {
   const P = as('T007', 'CON010').SIYL_PRICE;
   assert.equal(P.quote('prewed', 'heritage-executive').total, 225); assert.equal(P.quote('wedstay', 'heritage-executive').total, 0);
-  const muse = P.quote('kempinski', 'jatu-room'); assert.equal(muse.total, 184.2); assert.equal(muse.personal, undefined);
+  const muse = P.quote('kempinski', 'jatu-room'); assert.equal(muse.total, 81.71); assert.equal(muse.personal, undefined);
 });
 
 test('EVERYONE ELSE — CON005\'s party mate included — the hotel\'s rates, never a personal one; the list names no one', () => {
   for (const [gid, cid] of [['T006', 'CON006'], ['g-peggy', 'CON999']]) {
     const P = as(gid, cid).SIYL_PRICE;
     assert.equal(P.quote('prewed', 'heritage-executive').total, 260, gid); assert.equal(P.quote('wedstay', 'heritage-executive').total, 155, gid);
-    assert.equal(P.quote('kempinski', 'jatu-room').total, 184.2, gid); assert.equal(P.quote('bkk-stay', 'u-sathorn-superior-garden').total, 203.42, gid);
+    assert.equal(P.quote('kempinski', 'jatu-room').total, 81.71, gid); assert.equal(P.quote('bkk-stay', 'u-sathorn-superior-garden').total, 203.42, gid);
   }
   assert.deepEqual(giftsFor('CON006'), []);
   for (const g of GIFTS) assert.match(g.contactId, /^CON\d{3}$/);
@@ -54,7 +54,7 @@ test('THE BOOKING METHOD (002 · "Note for Guest") · self-booking stays name th
   const w = page({ auth: PEGGY }); const P = w.SIYL_PRICE;
   /* Edit 10: a stay H&S already paid for the guest says so (only where the server marks it) */
   assert.deepEqual(plain(P.BOOKING_WORDS), { prepaid: 'Already paid for you by Haruthai · you repay Haruthai & Suthep through your statement.',
-    self: 'Guest will book by themselves.', 'bride-groom': 'Will be booked by the bride & groom and charged within 14 days after booking.' });
+    self: 'Guest will book by themselves.', 'bride-groom': 'Will be booked by the bride & groom. It is settled within 21 days after your statement is issued.' });
   assert.deepEqual(plain(BOOKING_WORDS), plain(P.BOOKING_WORDS), 'the emails and the pages say the same');
   const b = (win) => plain(P.bookingOf(win));
   assert.equal(b('bkk-stay').method, 'self'); assert.match(b('bkk-stay').url, /^https:\/\/www\.trip\.com\/hotels\/detail\/\?.*hotelId=1530783.*checkIn=2027-02-21&checkOut=2027-02-24/);
@@ -69,15 +69,15 @@ test('THE BOOKING METHOD (002 · "Note for Guest") · self-booking stays name th
     const t = src(f); assert.match(t, /target="_blank" rel="noopener noreferrer"|a\.target='_blank';a\.rel='noopener noreferrer'/, f); assert.match(t, /Book with the hotel/, f);
   }
   assert.equal(P.quote('kempinski', 'jatu-room').bookingWords, 'Guest will book by themselves.');
-  assert.equal(P.quote('prewed', 'heritage').bookingWords, 'Will be booked by the bride & groom and charged within 14 days after booking.');
+  assert.equal(P.quote('prewed', 'heritage').bookingWords, 'Will be booked by the bride & groom. It is settled within 21 days after your statement is issued.');
 });
 
 test('HOTEL MUSE BANGKOK · ONE product, the Jatu Room, 6 – 8 March 2027, two nights, breakfast not included, USD 92.10 per person per night (the room USD 184.20)', () => {
   const w = page({ auth: PEGGY }); const M = w.SIYL_ROOMS.muse, P = w.SIYL_PRICE;
   assert.equal(M.name, 'Hotel Muse Bangkok, Autograph Collection'); assert.equal(M.breakfast, 'Breakfast not included');
   assert.deepEqual(plain(M.windows.map((x) => [x.id, x.dates, x.n])), [['kempinski', '6 – 8 March 2027', 2]]);
-  assert.deepEqual(plain(M.rooms.map((r) => [r.slug, r.name, r.rate, r.roomRate])), [['jatu-room', 'Jatu Room', 92.1, 184.2]]);
-  const q = P.quote('kempinski', 'jatu-room'); assert.equal(q.total, 184.2); assert.equal(q.nights, 2);
+  assert.deepEqual(plain(M.rooms.map((r) => [r.slug, r.name, r.rate, r.roomRate])), [['jatu-room', 'Jatu Room', 40.8525, 81.705]]);
+  const q = P.quote('kempinski', 'jatu-room'); assert.equal(q.total, 81.71); assert.equal(q.nights, 2);
   assert.equal(w.SIYL_ROOMS.kempinski, undefined);
 });
 

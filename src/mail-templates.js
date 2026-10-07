@@ -57,7 +57,7 @@ const STAGE_OF_STAY = { 'bkk-stay': 'bkk-stay', prewed: 'prewed', wedstay: 'weds
 const BOOKING_OF = { 'bkk-stay': 'self', prewed: 'bride-groom', wedstay: 'bride-groom', guesthouse: 'bride-groom', kmg: 'self', ljg: 'self', kempinski: 'self' };
 /* a stay H&S already paid for the guest (Edit 10): the server's mark on the sent line (worker.js · markPaidByHS) */
 const PREPAID_WORDS = 'Already paid for you by Haruthai · you repay Haruthai & Suthep through your statement';
-export const BOOKING_WORDS = { prepaid: PREPAID_WORDS + '.', self: 'Guest will book by themselves.', 'bride-groom': 'Will be booked by the bride & groom and charged within 14 days after booking.' };
+export const BOOKING_WORDS = { prepaid: PREPAID_WORDS + '.', self: 'Guest will book by themselves.', 'bride-groom': 'Will be booked by the bride & groom. It is settled within 21 days after your statement is issued.' };
 /* DATE ORDER (PRQ-04-11): the Guest House (27 February – 1 March) stands between the Pre-Wedding Stay and the Wedding Stay */
 const ORDER_OF = Object.assign({}, ...STAGES.map((id, i) => ({ [id]: i })), { guesthouse: STAGES.indexOf('wedstay') - 0.5 });
 const EVENTS = [

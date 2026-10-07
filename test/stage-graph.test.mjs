@@ -148,7 +148,7 @@ test('T · former Complete: every real selection preserved; no package metadata 
   const w = page({ auth: PEGGY, seed: { 'siyl.guest': JSON.stringify({ scope: { bangkok: true, vientiane: true, china: true, none: false, at: '2026-09-19T10:00:00.000Z', by: 'g-peggy' }, guests: {} }), 'siyl.bag': JSON.stringify(bag), 'siyl.package': JSON.stringify({ kind: 'complete', sig: 'x' }) } });
   const G = w.SIYL_GUEST, J = w.SIYL_JOURNEY;
   assert.equal(G.joinsAll(), true); assert.equal(J.relevantSegments().length, 10); deq(J.SEGMENTS.map((s) => J.state(s)), Array(10).fill('selected'));
-  deq(w.SIYL_BAG.get().map((x) => x.id), bag.map((x) => x.id), 'all ten lines as they were'); assert.equal(Math.round(w.SIYL_BAG.total() * 100) / 100, 1796.74, 'each line at its window\'s current rate — MU9646 saved as Business USD 275 is now the one fare, Economy Flexible USD 167.50 (Owner, 4 Oct 2026)');
+  deq(w.SIYL_BAG.get().map((x) => x.id), bag.map((x) => x.id), 'all ten lines as they were'); assert.equal(Math.round(w.SIYL_BAG.total() * 100) / 100, 1523.44, 'each line at its window\'s current rate — MU9646 saved as Business USD 275 is now the one fare, Economy Flexible USD 167.50 (Owner, 4 Oct 2026)');
   /* a room the live 002 no longer offers (the former Lijiang categories · 28 Sep 2026) is a retired key, as Kunming's was: its line
      leaves the Bag and its stage asks again. The Siam Kempinski's room is different — it was REPLACED (Owner, 28 Sep 2026 ·
      src/legacy-keys.js): its line is the Jatu Room of Hotel Muse Bangkok, still selected, the guest's unit kept, nothing asked */
@@ -157,7 +157,7 @@ test('T · former Complete: every real selection preserved; no package metadata 
   deq(w2.SIYL_BAG.get().map((x) => x.id), bag.map((x) => x.id).filter((id) => id !== 'ljg'));
   deq(w2.SIYL_JOURNEY.SEGMENTS.filter((s) => w2.SIYL_JOURNEY.state(s) !== 'selected').map((s) => [s.key, w2.SIYL_JOURNEY.state(s)]), [['ljg', 'open']]);
   const k = w2.SIYL_BAG.get().find((x) => x.id === 'kempinski');
-  deq([k.room, k.stay, k.name, k.price, k.unit], ['jatu-room', 'muse', 'Hotel Muse Bangkok, Autograph Collection', 184.2, 'A']);
+  deq([k.room, k.stay, k.name, k.price, k.unit], ['jatu-room', 'muse', 'Hotel Muse Bangkok, Autograph Collection', 81.71, 'A']);
 });
 
 /* ───────────────────────────── THE PAGE ───────────────────────────── */

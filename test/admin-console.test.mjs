@@ -48,6 +48,10 @@ const { composeStatementMail } = await import('../src/mail-templates.js');
 const { clearCatalogueCache } = await import('../src/billing/catalogue-cache.js');
 
 /* ------------------------------------------------------------ the doubles */
+const call = async (led, op, body) => {
+  const r = await led.fetch(new Request('https://billing/api/billing-ledger/' + op, { method: 'POST', body: JSON.stringify(body || {}) }));
+  return { status: r.status, j: await r.json() };
+};
 function doState() {
   const map = new Map();
   let turn = Promise.resolve(), inside = false;
@@ -599,6 +603,7 @@ test('PAID BY H&S · the hotel is payable in the admin preview; PRICE REQUIRED b
   const q = Object.values(quote.j.quotes || quote.j.items || quote.j).flat().find((x) => x && x.Item_ID === 'T-SELF');
   assert.ok(q, JSON.stringify(quote.j).slice(0, 300)); assert.notEqual(q.block, 'B'); assert.equal(q.total, null); assert.match(q.manualReview, /^PRICE REQUIRED/);
   assert.equal(q.paidByHS, 'GUEST_SELF_PAYMENT', 'the guest\'s trip is told it is already paid (Edit 10)');
+  assert.equal(q.listRate, 18.16666667, 'the website lists 002\'s own rate, at 002\'s precision (closeout)');
   assert.equal(hotel.paidNote, 'Booked and paid by Haruthai · reimbursed to Haruthai & Suthep', 'the console shows the 009 row\'s own words');
 
   /* the price paid is entered in 009: payable at it — never at the catalogue's 18.17 */
@@ -670,6 +675,57 @@ test('PAID BY H&S · at sending, the server marks the paid stay and gives it the
     const out = await markPaidByHS(W.env, { invitationId: 'INV-T1', guestId: 'GT1' }, [{ id: 'selfstay', stay: 'x', qty: 1, price: 54.5 }], new Set(['selfstay']));
     assert.deepEqual([out[0].paidByHS, out[0].price], [true, null]);
   } finally { globalThis.fetch = was; }
+});
+
+/* CLOSEOUT (7 Oct 2026) — the Revenue Overview's population: every holder with a statement, a confirmation or a drift record */
+test('REVENUE · a confirmed trip counts in Confirmed Revenue before any statement exists; a drift record reaches Drift Exposure; every state in ONE ledger request', async () => {
+  const W = world();
+  W.workbook['008_Payment_Journal'] = [W.workbook['008_Payment_Journal'][0]];   /* no payment anywhere yet */
+  const store = { 'reg:INV-T1': SENT, 'conf:INV-T1': { confirmedAt: '2026-10-02T09:00:00Z', version: 1 } };
+  const base = kv(store);
+  W.env.REG_KV = { get: base.get, list: async ({ prefix }) => ({ keys: Object.keys(store).filter((k) => k.startsWith(prefix)).map((name) => ({ name })), list_complete: true }) };
+  /* the ledger, counted */
+  const ops = [];
+  const real = W.env.BILLING_LEDGER.get();
+  W.env.BILLING_LEDGER = { idFromName: () => 'billing', get: () => ({ fetch: (req) => { ops.push(new URL(req.url).pathname.split('/').pop()); return real.fetch(req); } }) };
+  let r = await hit(W, GROOM, 'revenue');
+  assert.equal(r.status, 200, JSON.stringify(r.j));
+  assert.deepEqual(r.j.population, { holders: 1, withSettlement: 0, withConfirmation: 1, withDrift: 0 }, 'no settlement yet, and still counted');
+  assert.equal(r.j.confirmedRevenue.cents, 39000, 'the confirmed trip, USD 390 — before any statement');
+  for (const k of ['issuedRevenue', 'cashCollected', 'outstanding', 'overdue', 'refundDue']) { assert.equal(r.j[k].cents, 0, k + ': not issued yet is zero, not a gap'); assert.equal(r.j[k].complete, true, k); }
+  assert.equal(ops.filter((o) => o === 'read').length, 0, 'never one ledger read per holder');
+  assert.equal(ops.filter((o) => o === 'read-many').length, 1);
+  /* an unresolved blocking drift on that holder is now part of the overview */
+  await call(W.led, 'drift-set', { holderId: 'INV-T1', drifts: [{ code: 'RATE_DRIFT', detail: 'synthetic' }] });
+  r = await hit(W, GROOM, 'revenue');
+  assert.equal(r.j.population.withDrift, 1);
+  assert.equal(r.j.driftExposure.cents, 39000, 'the confirmed payable under a blocking drift');
+  assert.equal(r.j.counts.holdersWithBlockingDrift, 1);
+  /* a guest whose trip nobody confirmed and who holds no statement is in no figure, so not in the population */
+  store['reg:INV-T2'] = { ...SENT, submissionId: 'SYL-T2-1', registration: { guestId: 'GT2', selections: SENT.registration.selections } };
+  r = await hit(W, GROOM, 'revenue');
+  assert.equal(r.j.population.holders, 1);
+  /* a guest gets nothing of it */
+  assert.equal((await hit(W, GUEST, 'revenue')).status, 403);
+  /* a confirmation record for an invitation the register no longer resolves: a named gap, never a 503 (review, 7 Oct 2026) */
+  store['conf:INV-GONE'] = { confirmedAt: '2026-10-02T09:00:00Z', version: 1 };
+  r = await hit(W, GROOM, 'revenue');
+  assert.equal(r.status, 200, JSON.stringify(r.j).slice(0, 300));
+  assert.deepEqual(r.j.unresolved.map((u) => u.Holder_ID), ['INV-GONE']);
+  assert.equal(r.j.confirmedRevenue.complete, false); assert.match(JSON.stringify(r.j.confirmedRevenue.gaps), /INV-GONE/);
+  assert.equal(r.j.confirmedRevenue.partial.cents, 39000, 'the computable part is still offered, marked partial');
+  delete store['conf:INV-GONE'];
+  /* a withdrawn confirmation (metadata confirmedAt null) is not population */
+  const meta = { 'conf:INV-T2': { confirmedAt: null } };
+  store['conf:INV-T2'] = { confirmedAt: null, version: null };
+  W.env.REG_KV.list = async ({ prefix }) => ({ keys: Object.keys(store).filter((k) => k.startsWith(prefix)).map((name) => ({ name, metadata: meta[name] || { confirmedAt: '2026-10-02T09:00:00Z' } })), list_complete: true });
+  r = await hit(W, GROOM, 'revenue');
+  assert.equal(r.j.population.withConfirmation, 1, 'the withdrawn one is not counted');
+  delete store['conf:INV-T2'];
+  /* a journal row that names a holder without any settlement is still a gap — the money cannot be placed */
+  W.workbook['008_Payment_Journal'].push(['PAY-ORPHAN-1', '', 'INV-T1', '', 'PAYMENT', 'PAYPAL_EUR', 89, 'EUR', 100, 'INV-T1', '2026-10-06T10:00:00Z', '', '', '', '', 'REPORTED', '', 'FALSE']);
+  r = await hit(W, GROOM, 'revenue');
+  assert.equal(r.j.cashCollected.complete, false); assert.match(JSON.stringify(r.j.cashCollected.gaps), /no Settlement_ID/);
 });
 
 /* ================================================================ CONFIRM BOOKING (Owner, 7 Oct 2026)

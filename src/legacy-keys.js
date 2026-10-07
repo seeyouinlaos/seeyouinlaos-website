@@ -19,7 +19,7 @@ export const LEGACY_SEED = Object.freeze({ 'kempinski/deluxe-balcony-king': Obje
 
 /* a Bag line's window + room: the former stay key and room slug, and what they are now */
 const LINES = Object.freeze({ kempinski: Object.freeze({ room: 'deluxe-balcony-king', stay: 'kempinski', toRoom: 'jatu-room', toStay: 'muse',
-  name: 'Hotel Muse Bangkok, Autograph Collection', meta: '6 – 8 March 2027 · Jatu Room', rate: 92.1, pay: 2, breakfast: 'Breakfast not included' }) });
+  name: 'Hotel Muse Bangkok, Autograph Collection', meta: '6 – 8 March 2027 · Jatu Room', rate: 40.8525, pay: 2, breakfast: 'Breakfast not included' }) });
 
 export const canonicalKey = (key) => LEGACY_ROOM_KEYS[key] || key;
 export const isLegacyKey = (key) => Object.prototype.hasOwnProperty.call(LEGACY_ROOM_KEYS, key);

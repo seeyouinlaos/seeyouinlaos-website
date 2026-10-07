@@ -899,9 +899,12 @@ const SOUPHATTRA_NOW = {
 };
 /* THE LIVE 002 CORRECTION (28 Sep 2026) — only to recognise a trip sent before it without a selection fingerprint: [now, before]
    per person per night of every room whose rate the Operations Master corrected. Never an amount the website shows or charges. */
-const RATES_0928 = { 'bkk-stay': { 'u-sathorn-superior-garden': [67.805, 64] }, kmg: { 'elegant-residence': [39.12, 42], 'jinri-family-suite': [42.89, 43] },
-  ljg: { 'private-soup-view': [116.31, 116.37, 125],   /* T25 USD 116.31 (Owner, 1 Oct 2026) · 116.37 (28 Sep) · 125 */
-   'view-suite-270': [108.435, 120], 'snow-mountain-viewing': [134.14, 75] } };   /* R27 USD 268.28 (Owner, 1 Oct 2026) */
+const RATES_0928 = { 'bkk-stay': { 'u-sathorn-superior-garden': [67.805, 64] },
+  /* the live 002 of 7 Oct 2026 first (closeout: per person = half the room), then every former rate */
+  kmg: { 'elegant-residence': [39.12, 42], 'jinri-terrace-double': [18.16666667, 36.33333333], 'jinri-family-suite': [21.445, 42.89, 43] },
+  ljg: { 'private-soup-view': [58.155, 116.31, 116.37, 125],   /* 7 Oct · T25 USD 116.31 (Owner, 1 Oct 2026) · 116.37 (28 Sep) · 125 */
+   'view-suite-270': [54.2175, 108.435, 120], 'snow-mountain-viewing': [134.14, 75] },   /* R27 USD 268.28 (Owner, 1 Oct 2026) */
+  kempinski: { 'jatu-room': [40.8525, 92.1] } };
 /* the draft as it read before the correction: a corrected Souphattra line back at its former rate — nothing else is touched */
 /* `k` picks the former rate of a room that has had more than one ([now, former 1, former 2 …]): each is tried in turn */
 function beforeCorrection(d, k = 1) {
@@ -911,7 +914,9 @@ function beforeCorrection(d, k = 1) {
   let changed = false;
   const back = bag.map((l) => {
     const r28 = l && RATES_0928[l.id] && RATES_0928[l.id][l.room];
-    if (r28 && r28.includes(l.rate)) { const to = r28[Math.min(k, r28.length - 1)]; if (to === l.rate) return l; changed = true; const pay = Number(l.pay) || 1; return { ...l, rate: to, price: Math.round(to * pay * 100) / 100 }; }
+    /* a rate the server states at the sheet's own precision (18.166666666666668) is the same rate as 18.16666667 */
+    const at = r28 ? r28.findIndex((v) => Math.abs(v - Number(l.rate)) < 1e-6) : -1;
+    if (at >= 0) { const to = r28[Math.min(k, r28.length - 1)]; if (Math.abs(to - Number(l.rate)) < 1e-6) return l; changed = true; const pay = Number(l.pay) || 1; return { ...l, rate: to, price: Math.round(to * pay * 100) / 100 }; }
     const now = l && SOUPHATTRA_NOW[l.id] && SOUPHATTRA_NOW[l.id][l.room], was = l && SOUPHATTRA_BEFORE[l.room];
     if (now == null || was == null || l.rate !== now || now === was) return l;
     changed = true; const pay = Number(l.pay) || (l.id === 'prewed' ? 2 : 1);
@@ -1012,7 +1017,7 @@ async function submissionFor(env, who, draft, pre) {
     if (unsent) for (const f2 of await otherForms()) if (!legacy(f2)) { unsent = false; break; }
     /* THE SOUPHATTRA CORRECTION (27 Sep 2026) is the website's, not the guest's: a trip sent before it still reads as sent when
        the only difference is the corrected rate */
-    for (let k = 1; unsent && k <= 2; k++) { const back = beforeCorrection(fps.d, k); if (back) { const f2 = await fpsOf(back); if (!legacy(f2)) unsent = false; } }
+    for (let k = 1; unsent && k <= 3; k++) { const back = beforeCorrection(fps.d, k); if (back) { const f2 = await fpsOf(back); if (!legacy(f2)) unsent = false; } }
     /* THE BRIDE & GROOM'S GIFT (28 Sep 2026) is theirs, not the guest's: the same trip with the gift taken back reads as sent */
     if (unsent) { const back = withoutGifts(fps.d); if (back) { const f2 = await fpsOf(back); if (!legacy(f2)) unsent = false; } }
     /* the first time a sent trip is read unchanged, its selection fingerprint is kept with it — from then on only a selection counts */
