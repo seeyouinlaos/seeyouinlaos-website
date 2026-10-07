@@ -566,6 +566,61 @@ test('BOOKED VALUE · a line settled with the provider (Block B) is listed once,
   assert.equal(h.j.booked.total, 100);
 });
 
+/* ================================================================ A HOTEL H&S BOOKED AND PAID (Owner, 7 Oct 2026)
+   A stay the guest would pay the hotel for, which Haruthai booked and paid for them: a 009 row naming the person with
+   Billing_Category GUEST_SETTLEMENT_REQUIRED makes it payable to H&S at the price paid (engine 2.3). */
+test('PAID BY H&S · the hotel is payable in the admin preview; PRICE REQUIRED blocks the issue; with the price paid it is in the total, the issued statement, the PDF and the outstanding amount', async () => {
+  const sent = { ...SENT, registration: { guestId: 'GT1', selections: [...SENT.registration.selections, { id: 'selfstay', qty: 1 }] } };
+  const W = world({ store: { 'reg:INV-T1': sent, 'conf:INV-T1': { confirmedAt: '2026-10-02T09:00:00Z', version: 1 },
+    'contact:INV-T1': { email: 'Tess.Example@Example.invalid', firstName: 'Tess' } } });
+  await approveGate(W.st);
+  W.workbook['002_Accommodation_Details'] = book()['002_Accommodation_Details'].map((row, i) => (i === 0 ? row : [...row, ({ Item_ID: 'T-SELF', Billing_Category: 'GUEST_SELF_PAYMENT', Rate_Status: 'ACTIVE',
+    Rate_Basis: 'PER_PERSON_PER_NIGHT', Standard_Rate: '18.16666667', Currency: 'USD', Site_Product_Key: 'selfstay', 'Number of Nights': 2 })[row[0]] ?? '']));
+  const rates = (price) => [['Holder_ID', 'Person_ID', 'Item_ID', 'Rate_Per_Person_Night', 'Nights_Rule', 'Rate_Status', 'Effective_From', 'Effective_To', 'Approved_By', 'Note', 'Billing_Category'],
+    ['', 'GT9', 'T-STAY', 75, 'ALL', 'ACTIVE', '', '', 'Suthep', 'synthetic', ''],
+    ['INV-T1', 'GT1', 'T-SELF', price, 'ALL', 'ACTIVE', '', '', 'Haruthai & Suthep', 'Booked and paid by Haruthai · reimbursed to Haruthai & Suthep', 'GUEST_SETTLEMENT_REQUIRED']];
+
+  /* before the price paid is known: the line is there, payable, and asks for its price — nothing can be issued */
+  W.workbook['009_Special_Rates'] = rates('');
+  const asked = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+  assert.equal(asked.status, 200, JSON.stringify(asked.j));
+  const hotel = asked.j.preview.lines.find((l) => l.Item_ID === 'T-SELF');
+  assert.ok(hotel, 'the hotel is among the payable lines, not the guest\'s own');
+  assert.equal(hotel.paidByHS, 'GUEST_SELF_PAYMENT'); assert.equal(hotel.amount, null);
+  assert.match(hotel.review, /^PRICE REQUIRED/);
+  assert.deepEqual(asked.j.preview.blockB, [], 'nothing left among the guest\'s own arrangements');
+  assert.equal(asked.j.preview.total, null); assert.equal(asked.j.preview.issuable, false);
+  assert.match(asked.j.preview.reasons.join(' '), /MANUAL_REVIEW/);
+  const refused = await hit(W, GROOM, 'issue', { holderId: 'INV-T1' });
+  assert.equal(refused.status, 409);
+  assert.equal([...W.st._map.keys()].filter((k) => k.startsWith('revision:')).length, 0, 'no revision without the price');
+  /* the guest's own quote says the same: an H&S amount still to come, never "pay the hotel" */
+  const quote = await hit(W, GUEST, 'catalogue');
+  const q = Object.values(quote.j.quotes || quote.j.items || quote.j).flat().find((x) => x && x.Item_ID === 'T-SELF');
+  assert.ok(q, JSON.stringify(quote.j).slice(0, 300)); assert.notEqual(q.block, 'B'); assert.equal(q.total, null); assert.match(q.manualReview, /^PRICE REQUIRED/);
+
+  /* the price paid is entered in 009: payable at it — never at the catalogue's 18.17 */
+  W.workbook['009_Special_Rates'] = rates('20');
+  const priced = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+  const line = priced.j.preview.lines.find((l) => l.Item_ID === 'T-SELF');
+  assert.equal(line.amount, 40); assert.equal(line.block, 'A'); assert.equal(line.Billing_Category, 'GUEST_SETTLEMENT_REQUIRED'); assert.equal(line.review, null);
+  assert.equal(priced.j.preview.total, 430, '390 as before + the hotel, 2 nights × USD 20');
+  assert.equal(priced.j.preview.issuable, true, JSON.stringify(priced.j.preview.reasons));
+  const ok = await hit(W, GROOM, 'issue', { holderId: 'INV-T1', expectedProposal: priced.j.preview.proposalHash });
+  assert.equal(ok.status, 200, JSON.stringify(ok.j)); assert.equal(ok.j.totalPayable, 430);
+
+  const after = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+  assert.equal(after.j.issued.total, 430);
+  assert.ok(after.j.issued.lines.some((l) => l.Item_ID === 'T-SELF' && l.amount === 40 && l.block === 'A'), 'the issued statement carries the hotel');
+  assert.equal(after.j.payment.soll, 430); assert.equal(after.j.payment.balance, 430, 'outstanding until paid');
+  const pdf = await hit(W, GROOM, 'pdf?holder=INV-T1&rev=1');
+  const text = Buffer.from(pdf.bytes).toString('latin1');
+  for (const s of ['(T-SELF)', '(USD 40.00)', '(USD 430.00)', '(named special rate)']) assert.ok(text.includes(s), s + ' in the PDF');
+  assert.ok(/Booked and paid by Haruthai/.test(text), 'the PDF says why');
+  assert.ok(!text.includes('(Your own arrangements)'), 'no own-arrangements section: the hotel is payable');
+  assert.equal(W.sent.length, 0, 'nothing e-mailed');
+});
+
 /* ================================================================ CONFIRM BOOKING (Owner, 7 Oct 2026)
    Haruthai and Suthep confirm a SENT, not yet confirmed booking from the console — the exact submitted version, the
    same `conf:<inv>` record Guest Relations' endpoint writes (src/confirmation.js), never the saved trip. */

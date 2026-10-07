@@ -30,7 +30,7 @@ export async function resolve(specifier, context, next) {
 const { handleBilling } = await import('../src/billing-routes.js');
 const { BillingLedger } = await import('../src/billing-ledger.js');
 const { calculate, computeLine, ENGINE_VERSION } = await import('../src/billing/engine.js');
-const { paymentPosition, journalPosition, paymentStatus } = await import('../src/billing/settlement.js');
+const { paymentPosition, journalPosition, paymentStatus, buildSnapshot } = await import('../src/billing/settlement.js');
 const { detectDrift } = await import('../src/billing/reconciliation.js');
 const { loadConfirmedBookings, CONFIRMATION } = await import('../src/billing/bookings.js');
 const { REFERENCE_CASES } = await import('../src/billing/activation-gate.js');
@@ -105,6 +105,135 @@ test('ENGINE · a charge is rounded once: 109 / 3 per night × 3 nights = USD 10
     Standard_Rate: '36.33333333', Currency: 'USD' } };
   const l = computeLine(booking({ Item_ID: 'T-K', Nights: 3 }), { items, specialRates: [], asOf: '2026-10-05' });
   assert.equal(l.amountCents, 10900);
+});
+
+/* ===================================== a booking H&S paid for the guest (Owner, 7 Oct 2026) */
+const PROVIDER_ITEMS = {
+  ...ITEMS,
+  /* a stay the guest normally pays the hotel for, and a flight the guest books — both settled with the provider */
+  'T-HOTEL': { Item_ID: 'T-HOTEL', Billing_Category: 'GUEST_SELF_PAYMENT', Rate_Status: 'ACTIVE', Rate_Basis: 'PER_PERSON_PER_NIGHT',
+    Standard_Rate: '18.16666667', Currency: 'USD' },
+  'T-LODGE': { Item_ID: 'T-LODGE', Billing_Category: 'GUEST_SELF_PAYMENT', Rate_Status: 'ACTIVE', Rate_Basis: 'PER_PERSON_PER_NIGHT',
+    Standard_Rate: '58.155', Currency: 'USD' },
+  'T-FLIGHT': { Item_ID: 'T-FLIGHT', Billing_Category: 'GUEST_SELF_BOOKING', Rate_Status: 'ACTIVE', Rate_Basis: 'PER_PERSON', Standard_Rate: 200, Currency: 'USD' },
+  'T-DINNER': { Item_ID: 'T-DINNER', Billing_Category: 'HOSTED_NO_GUEST_CHARGE', Rate_Status: 'ACTIVE', Rate_Basis: 'PER_PERSON', Standard_Rate: 60, Currency: 'USD' },
+  'T-OUT': { Item_ID: 'T-OUT', Billing_Category: 'EXCLUDE_FROM_GUEST_SETTLEMENT', Rate_Status: 'ACTIVE', Rate_Basis: 'PER_PERSON', Standard_Rate: 10, Currency: 'USD' },
+};
+const paidByHS = (o) => ({ Person_ID: 'GT1', Holder_ID: 'INV-T1', Rate_Status: 'ACTIVE', Nights_Rule: 'ALL', Approved_By: 'Haruthai & Suthep',
+  Billing_Category: 'GUEST_SETTLEMENT_REQUIRED', Note: 'Booked and paid by Haruthai · reimbursed to Haruthai & Suthep', ...o });
+const pctx = (specialRates) => ({ items: PROVIDER_ITEMS, specialRates, asOf: '2026-10-07' });
+
+test('ENGINE 2.3 · a stay H&S booked and paid for the guest is PAYABLE — Block A, at the price paid, in the total; the party mate and every other line unchanged', () => {
+  const rows = [paidByHS({ Item_ID: 'T-HOTEL', Rate_Per_Person_Night: '18.16666667' }), paidByHS({ Item_ID: 'T-LODGE', Rate_Per_Person_Night: '58.155' })];
+  const hotel = computeLine(booking({ Item_ID: 'T-HOTEL', Nights: 3 }), pctx(rows));
+  assert.equal(hotel.block, 'A'); assert.equal(hotel.Billing_Category, 'GUEST_SETTLEMENT_REQUIRED');
+  assert.deepEqual(hotel.categoryOverride, { from: 'GUEST_SELF_PAYMENT' });
+  assert.equal(hotel.rateSource, 'SPECIAL_RATE'); assert.equal(hotel.payableNights, 3);
+  assert.equal(hotel.amountCents, 5450, '18.16666667 × 3 nights = USD 54.50, rounded once');
+  assert.equal(hotel.specialRateRef, 'Booked and paid by Haruthai · reimbursed to Haruthai & Suthep', 'the PDF says why');
+  assert.equal(hotel.review, null);
+
+  const r = calculate([booking({ Item_ID: 'T-TRAIN' }), booking({ Item_ID: 'T-HOTEL', Nights: 3 }), booking({ Item_ID: 'T-LODGE', Nights: 2 }),
+    booking({ Item_ID: 'T-FLIGHT' })], pctx(rows));
+  assert.equal(r.totalPayableCents, 10000 + 5450 + 11631, 'the train, the Kunming stay, the Lijiang stay — the flight stays the guest\'s own');
+  assert.deepEqual(r.blockA.map((l) => l.Item_ID), ['T-TRAIN', 'T-HOTEL', 'T-LODGE']);
+  assert.deepEqual(r.blockB.map((l) => l.Item_ID), ['T-FLIGHT']);
+
+  /* the same hotel for the party mate, whom no row names: still the guest's own, USD 0 */
+  const mate = computeLine(booking({ Item_ID: 'T-HOTEL', Person_ID: 'GT2', Nights: 3 }), pctx(rows));
+  assert.equal(mate.block, 'B'); assert.equal(mate.amountCents, 0); assert.equal(mate.Billing_Category, 'GUEST_SELF_PAYMENT');
+  /* the same person and another self-payment line no row names: unchanged */
+  assert.equal(computeLine(booking({ Item_ID: 'T-FLIGHT' }), pctx(rows)).block, 'B');
+  assert.equal(ENGINE_VERSION, 'billing-engine/2.3.0');
+});
+
+test('ENGINE 2.3 · without the price paid the line asks for it: PRICE REQUIRED, MANUAL REVIEW, no total — never the catalogue figure', () => {
+  const rows = [paidByHS({ Item_ID: 'T-HOTEL' }), paidByHS({ Item_ID: 'T-LODGE', Rate_Per_Person_Night: '58.155' })];
+  const hotel = computeLine(booking({ Item_ID: 'T-HOTEL', Nights: 3 }), pctx(rows));
+  assert.equal(hotel.amountCents, null, 'the 002 rate (18.17) is never used in its place');
+  assert.equal(hotel.review, 'MANUAL_REVIEW_REQUIRED');
+  assert.match(hotel.reviewReason, /^PRICE REQUIRED — the price H&S paid for this booking is not in 009/);
+  const r = calculate([booking({ Item_ID: 'T-HOTEL', Nights: 3 }), booking({ Item_ID: 'T-LODGE', Nights: 2 })], pctx(rows));
+  assert.equal(r.totalPayableCents, null, 'a statement with a price missing states no total');
+  assert.equal(r.manualReview.length, 1);
+  assert.equal(r.blockA.map((l) => l.Item_ID).join(), 'T-LODGE');
+});
+
+test('ENGINE 2.3 · only an approved row naming the person may do it; another value, a Holder-only row, a hosted or excluded item go to review; a row without the column stays informational', () => {
+  const hotel = booking({ Item_ID: 'T-HOTEL', Nights: 3 });
+  /* the informational self-payment rows that already exist (Package J): no Billing_Category, nothing payable */
+  const informational = computeLine(hotel, pctx([{ Item_ID: 'T-HOTEL', Person_ID: 'GT1', Rate_Status: 'ACTIVE', Rate_Per_Person_Night: 92.1, Nights_Rule: 2, Approved_By: 'Haruthai & Suthep' }]));
+  assert.equal(informational.block, 'B'); assert.equal(informational.amountCents, 0);
+  /* a row that says "paid by H&S" but does not count yet never lets the hotel fall back to the guest's own: review */
+  for (const o of [{ Approved_By: '' }, { Rate_Status: 'DRAFT' }, { Effective_To: '2026-09-30' }]) {
+    const l = computeLine(hotel, pctx([paidByHS({ Item_ID: 'T-HOTEL', Rate_Per_Person_Night: 20, ...o })]));
+    assert.equal(l.amountCents, null, JSON.stringify(o)); assert.match(l.reviewReason, /not ACTIVE, approved and in date/);
+  }
+  assert.equal(computeLine(hotel, pctx([paidByHS({ Item_ID: 'T-HOTEL', Rate_Per_Person_Night: 20, Rate_Status: 'RETIRED' })])).block, 'B', 'a RETIRED row is a withdrawal');
+  const holderOnly = computeLine(hotel, pctx([paidByHS({ Item_ID: 'T-HOTEL', Person_ID: '', Rate_Per_Person_Night: 20 })]));
+  assert.equal(holderOnly.amountCents, null); assert.match(holderOnly.reviewReason, /must name the person/);
+  const other = computeLine(hotel, pctx([paidByHS({ Item_ID: 'T-HOTEL', Rate_Per_Person_Night: 20, Billing_Category: 'GUEST_SELF_BOOKING' })]));
+  assert.equal(other.amountCents, null); assert.match(other.reviewReason, /not one the engine applies/);
+  const hosted = computeLine(booking({ Item_ID: 'T-DINNER' }), pctx([paidByHS({ Item_ID: 'T-DINNER', Rate_Per_Person_Night: 60 })]));
+  assert.equal(hosted.amountCents, null); assert.match(hosted.reviewReason, /HOSTED_NO_GUEST_CHARGE item payable/);
+  const excluded = computeLine(booking({ Item_ID: 'T-OUT' }), pctx([paidByHS({ Item_ID: 'T-OUT', Rate_Per_Person_Night: 10 })]));
+  assert.equal(excluded.amountCents, null); assert.match(excluded.reviewReason, /EXCLUDE_FROM_GUEST_SETTLEMENT item payable/);
+  /* a self-booked flight H&S paid is payable the same way */
+  const flight = computeLine(booking({ Item_ID: 'T-FLIGHT', Nights: 1 }), pctx([paidByHS({ Item_ID: 'T-FLIGHT', Rate_Per_Person_Night: 210, Nights_Rule: '1' })]));
+  assert.equal(flight.block, 'A'); assert.equal(flight.amountCents, 21000); assert.deepEqual(flight.categoryOverride, { from: 'GUEST_SELF_BOOKING' });
+});
+
+test('ENGINE 2.3 · the row prices one person in USD: a whole-room basis, another currency and a price of USD 0 or less go to review', () => {
+  const items = { ...PROVIDER_ITEMS,
+    'T-ROOM': { ...PROVIDER_ITEMS['T-HOTEL'], Item_ID: 'T-ROOM', Rate_Basis: 'PER_ROOM' },
+    'T-BAHT': { ...PROVIDER_ITEMS['T-HOTEL'], Item_ID: 'T-BAHT', Currency: 'THB' } };
+  const at = (itemId, rate) => computeLine(booking({ Item_ID: itemId, Nights: 3 }), { items, specialRates: [paidByHS({ Item_ID: itemId, Rate_Per_Person_Night: rate })], asOf: '2026-10-07' });
+  assert.match(at('T-ROOM', 50).reviewReason, /PER_ROOM item payable/);
+  assert.match(at('T-BAHT', 3500).reviewReason, /THB item payable/);
+  for (const rate of ['0', '-100']) { const l = at('T-HOTEL', rate); assert.equal(l.amountCents, null); assert.match(l.reviewReason, /^PRICE REQUIRED — a price H&S paid must be above USD 0/); }
+  /* the Owner's figures: USD 109.00 for three nights, USD 232.62 for two — per person */
+  assert.equal(at('T-HOTEL', '36.33333333').amountCents, 10900);
+  assert.equal(computeLine(booking({ Item_ID: 'T-LODGE', Nights: 2 }), pctx([paidByHS({ Item_ID: 'T-LODGE', Rate_Per_Person_Night: '116.31' })])).amountCents, 23262);
+});
+
+test('SNAPSHOT 2.3 · an issued line keeps why it is payable (Category_Override_From); other lines carry nothing new', () => {
+  const rows = [paidByHS({ Item_ID: 'T-HOTEL', Rate_Per_Person_Night: '36.33333333' })];
+  const result = calculate([booking({ Item_ID: 'T-TRAIN' }), booking({ Item_ID: 'T-HOTEL', Nights: 3 })], pctx(rows));
+  const snap = buildSnapshot({ settlementId: 'S-1', revision: 1, holderId: 'INV-T1', result, items: PROVIDER_ITEMS, specialRates: rows,
+    fx: { FX_USD_THB: 33.68, FX_USD_EUR: 0.89 }, issueDate: '2026-10-07', sourceHash: 'x' });
+  const hotel = snap.lines.find((l) => l.Item_ID === 'T-HOTEL'), train = snap.lines.find((l) => l.Item_ID === 'T-TRAIN');
+  assert.equal(hotel.Category_Override_From, 'GUEST_SELF_PAYMENT'); assert.equal(hotel.Billing_Category, 'GUEST_SETTLEMENT_REQUIRED');
+  assert.equal('Category_Override_From' in train, false);
+  assert.equal(snap.Special_Rate_Reference[0].Billing_Category, 'GUEST_SETTLEMENT_REQUIRED');
+  assert.equal(snap.Total_Payable_Cents, 10000 + 10900);
+});
+
+test('DRIFT (review, 7 Oct 2026) · another guest\'s 009 row moving never flags this statement; its own row still does', () => {
+  const mine = { Holder_ID: 'INV-T1', Person_ID: 'GT1', Item_ID: 'T-STAY', Rate_Per_Person_Night: 75, Nights_Rule: 'ALL', Rate_Status: 'ACTIVE', Approved_By: 'Suthep' };
+  const theirs = { Holder_ID: 'INV-T9', Person_ID: 'GT9', Item_ID: 'T-HOTEL', Rate_Per_Person_Night: 92.1, Nights_Rule: '2', Rate_Status: 'ACTIVE', Approved_By: 'Suthep' };
+  const snapshot = { Settlement_ID: 'S-1', Holder_ID: 'INV-T1', Person_IDs: ['GT1'], Item_IDs: ['T-STAY'], Standard_Rate_Reference: {},
+    Special_Rate_Reference: [mine, theirs], lines: [], Total_Payable_Cents: 15000, Block_A_Total_Cents: 15000 };
+  const special = (rates) => detectDrift({ snapshot, items: PROVIDER_ITEMS, specialRates: rates, asOf: '2026-10-07' }).filter((d) => d.code === 'SPECIAL_RATE_MISMATCH');
+  assert.equal(special([mine, theirs]).length, 0);
+  assert.equal(special([mine, { ...theirs, Billing_Category: 'GUEST_SETTLEMENT_REQUIRED', Rate_Per_Person_Night: 100 }]).length, 0, 'their row gained a category and a price');
+  assert.equal(special([mine]).length, 0, 'their row was deleted');
+  assert.equal(special([{ ...mine, Rate_Per_Person_Night: 80 }, theirs]).length, 1, 'my own row moved');
+  assert.equal(special([theirs]).length, 1, 'my own row is gone');
+});
+
+test('DRIFT 2.3 · the snapshot keeps the row\'s Billing_Category; a change after issue is a SPECIAL_RATE_MISMATCH; a row without it is read as before', () => {
+  const row = paidByHS({ Item_ID: 'T-HOTEL', Rate_Per_Person_Night: '18.16666667' });
+  const snap = (rows) => ({ Settlement_ID: 'S-1', Holder_ID: 'INV-T1', Person_IDs: ['GT1'], Item_IDs: ['T-HOTEL'], Standard_Rate_Reference: {},
+    Special_Rate_Reference: rows, lines: [], Total_Payable_Cents: 5450, Block_A_Total_Cents: 5450 });
+  const special = (ds) => ds.filter((d) => d.code === 'SPECIAL_RATE_MISMATCH');
+  const ref = { Holder_ID: 'INV-T1', Person_ID: 'GT1', Item_ID: 'T-HOTEL', Rate_Per_Person_Night: '18.16666667', Nights_Rule: 'ALL', Rate_Status: 'ACTIVE', Approved_By: 'Haruthai & Suthep', Billing_Category: 'GUEST_SETTLEMENT_REQUIRED' };
+  assert.equal(special(detectDrift({ snapshot: snap([ref]), items: PROVIDER_ITEMS, specialRates: [row], asOf: '2026-10-07' })).length, 0, 'unchanged');
+  const dropped = { ...row }; delete dropped.Billing_Category;
+  const moved = special(detectDrift({ snapshot: snap([ref]), items: PROVIDER_ITEMS, specialRates: [dropped], asOf: '2026-10-07' }));
+  assert.equal(moved.length, 1); assert.match(moved[0].detail || moved[0].message || JSON.stringify(moved[0]), /Billing_Category moved from GUEST_SETTLEMENT_REQUIRED to \(none\)/);
+  /* a snapshot issued before 2.3 carries no Billing_Category, and its rows carry none now: no drift */
+  const { Billing_Category: _x, ...old } = ref;
+  assert.equal(special(detectDrift({ snapshot: snap([old]), items: PROVIDER_ITEMS, specialRates: [dropped], asOf: '2026-10-07' })).length, 0);
 });
 
 /* ============================================================ settlement */

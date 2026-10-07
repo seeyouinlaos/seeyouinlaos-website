@@ -450,6 +450,8 @@ export async function loadItems(env, cfg) {
 export const SPECIAL_RATE_FIELDS = Object.freeze([
   'Holder_ID', 'Person_ID', 'Item_ID', 'Rate_Per_Person_Night', 'Nights_Rule',
   'Rate_Status', 'Effective_From', 'Effective_To', 'Approved_By', 'Note',
+  /* optional (Owner, 7 Oct 2026): GUEST_SETTLEMENT_REQUIRED makes a booking H&S paid for this person payable (engine.js) */
+  'Billing_Category',
 ]);
 
 /**

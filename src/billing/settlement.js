@@ -249,6 +249,8 @@ export function buildSnapshot({
       modifiers: l.modifiers, amountCents: l.amountCents, block: l.block,
       Change_Cutoff: l.Change_Cutoff, Cancellation_Cutoff: l.Cancellation_Cutoff,
       Currency: l.currency, specialRateRef: l.specialRateRef || null,
+      /* payable because H&S booked and paid it: the item's own category (engine.js · PAYABLE_BY_ROW) */
+      ...(l.categoryOverride ? { Category_Override_From: l.categoryOverride.from || null } : {}),
     })),
     Standard_Rate_Reference: itemRateReference(items),
     Special_Rate_Reference: specialRateReference(specialRates),
@@ -287,6 +289,8 @@ function specialRateReference(specialRates) {
     Holder_ID: r.Holder_ID ?? null, Person_ID: r.Person_ID ?? null, Item_ID: r.Item_ID ?? null,
     Rate_Per_Person_Night: r.Rate_Per_Person_Night ?? null, Nights_Rule: r.Nights_Rule ?? null,
     Rate_Status: r.Rate_Status ?? null, Approved_By: r.Approved_By ?? null,
+    /* why a provider-settled item is payable on this statement: H&S booked and paid it (engine.js · PAYABLE_BY_ROW) */
+    ...(r.Billing_Category != null && String(r.Billing_Category).trim() ? { Billing_Category: String(r.Billing_Category).trim() } : {}),
   }));
 }
 

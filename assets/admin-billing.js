@@ -268,7 +268,8 @@
     return '<div class="ab-table-wrap"><table class="ab-table ab-lines"><thead><tr><th>Person</th><th>Item</th><th>Category</th><th class="num">Nights</th><th class="num">Qty</th><th class="num">Rate</th><th class="num">Amount</th><th>Block</th>' + (withReview ? '<th>Review</th>' : '') + '</tr></thead><tbody>' +
       lines.map(function (l) {
         return '<tr><td data-l="Person">' + esc(l.person || l.Person_ID || '—') + '</td><td data-l="Item"><span data-i18n-skip>' + esc(l.Item_ID || '—') + '</span>' + (l.Room_Unit_ID ? '<br><span class="ab-mute">' + esc(l.Room_Unit_ID) + '</span>' : '') + '</td>' +
-          '<td data-l="Category">' + esc(l.Billing_Category || '—') + (l.hosted ? ' · hosted' : '') + '</td>' +
+          '<td data-l="Category">' + esc(l.Billing_Category || '—') + (l.hosted ? ' · hosted' : '') +
+            (l.paidByHS ? '<br><span class="ab-mute">booked and paid by H&amp;S · the guest reimburses (item: ' + esc(l.paidByHS) + ')</span>' : '') + '</td>' +
           '<td data-l="Nights" class="num">' + esc(l.payableNights != null ? l.payableNights : (l.nights != null ? l.nights : '—')) + '</td>' +
           '<td data-l="Qty" class="num">' + esc(l.quantity != null ? l.quantity : '—') + '</td>' +
           '<td data-l="Rate" class="num"><span data-i18n-skip>' + esc(l.rate != null ? usd(l.rate) : '—') + '</span></td>' +

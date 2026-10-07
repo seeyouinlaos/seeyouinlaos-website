@@ -1080,6 +1080,8 @@ const lineView = (l, people) => ({
   amount: l.amountCents == null ? null : fromCents(l.amountCents), block: l.block || null,
   hosted: !!l.hosted, review: l.review ? (l.reviewReason || 'MANUAL_REVIEW_REQUIRED') : null,
   Room_Unit_ID: l.Room_Unit_ID || null, Booking_ID: l.Booking_ID || null,
+  /* payable because H&S booked and paid it for the guest (a 009 Billing_Category): the item's own category */
+  paidByHS: l.categoryOverride ? l.categoryOverride.from || null : (l.Category_Override_From || null),
 });
 /* the names of the persons on a set of lines, from the index (guestId → 006 ID) and the register */
 function peopleOf(entries, register, lines) {

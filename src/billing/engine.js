@@ -32,8 +32,19 @@ import {
   toCents, fromCents, itemMetadataGaps, itemIsActiveOn,
 } from './model.js';
 
-/* 2.2.1 (5 Oct 2026): approved, person-scoped, unambiguous named rates only; a charge rounded once */
-export const ENGINE_VERSION = 'billing-engine/2.2.1';
+/* 2.2.1 (5 Oct 2026): approved, person-scoped, unambiguous named rates only; a charge rounded once
+   2.3.0 (7 Oct 2026): a booking H&S booked and paid for a guest is payable — named by a person-scoped 009 row */
+export const ENGINE_VERSION = 'billing-engine/2.3.0';
+
+/* THE BOOKING H&S PAID FOR THE GUEST (Owner, 7 Oct 2026). Where Haruthai & Suthep booked and paid a provider on a
+   guest's behalf — an item the guest would otherwise settle with the provider — the guest reimburses H&S, so the line
+   is payable to H&S whatever the item's own category says. Only an approved, ACTIVE 009 row that names the PERSON can
+   say so, by Billing_Category GUEST_SETTLEMENT_REQUIRED; a row without that column stays exactly what it was (the
+   informational self-payment rows included). The charge is the row's Rate_Per_Person_Night — the price actually paid —
+   and never the catalogue's: without it the line asks for the price and the statement cannot be issued. */
+const PAYABLE_BY_ROW = BILLING_CATEGORY.GUEST_SETTLEMENT_REQUIRED;
+const PROVIDER_SETTLED = [BILLING_CATEGORY.GUEST_SELF_PAYMENT, BILLING_CATEGORY.GUEST_SELF_BOOKING];
+export const PRICE_REQUIRED = 'PRICE REQUIRED';
 
 const clean = (v) => String(v == null ? '' : v).trim();
 const isLive = (s) => s === BOOKING_STATE.CONFIRMED || s === BOOKING_STATE.FULFILLED;
@@ -111,6 +122,13 @@ function chargeCents(rate, units) {
   const u = Number(units);
   if (!Number.isFinite(r) || !Number.isFinite(u)) return null;
   return Math.round(r * u * 100);
+}
+
+/** A 009 row that marks this person's booking as paid by H&S without counting as engine input yet. */
+function pendingPaidByHS(specialRates, holderId, personId, itemId) {
+  return (Array.isArray(specialRates) ? specialRates : []).some((r) => r && clean(r.Billing_Category) &&
+    clean(r.Item_ID) === itemId && clean(r.Person_ID) === personId && (!clean(r.Holder_ID) || clean(r.Holder_ID) === holderId) &&
+    clean(r.Rate_Status) !== RATE_STATUS.RETIRED);
 }
 
 /* --------------------------------------------------------------- one line */
@@ -214,6 +232,47 @@ export function computeLine(booking, ctx) {
   line.Cancellation_Cutoff = clean(item.Cancellation_Cutoff) || null;
   line.currency = clean(item.Currency) || ACCOUNTING_CURRENCY;
 
+  /* --- priority 1: a booking H&S paid for this person (see PAYABLE_BY_ROW) - */
+  const rowCategory = special ? clean(special.Billing_Category) : '';
+  /* a row that says so but does not count yet (DRAFT, unapproved, out of its dates) never lets the line fall back to
+     the guest's own arrangement: the statement waits for it. A RETIRED row is a withdrawal and is read as none. */
+  if (!rowCategory && pendingPaidByHS(specialRates, holderId, personId, itemId)) {
+    line.review = MANUAL_REVIEW_REQUIRED;
+    line.reviewReason = 'a 009 row marks this booking as paid by H&S but is not ACTIVE, approved and in date';
+    return line;
+  }
+  if (rowCategory) {
+    if (rowCategory !== PAYABLE_BY_ROW) {
+      line.review = MANUAL_REVIEW_REQUIRED;
+      line.reviewReason = '009 Billing_Category ' + rowCategory + ' is not one the engine applies (only ' + PAYABLE_BY_ROW + ')';
+      return line;
+    }
+    if (!match.personScoped) {
+      line.review = MANUAL_REVIEW_REQUIRED;
+      line.reviewReason = 'a 009 Billing_Category must name the person it makes payable, not only the holder';
+      return line;
+    }
+    if (line.Billing_Category !== PAYABLE_BY_ROW && !PROVIDER_SETTLED.includes(line.Billing_Category)) {
+      line.review = MANUAL_REVIEW_REQUIRED;
+      line.reviewReason = '009 makes a ' + (line.Billing_Category || 'category-less') + ' item payable — only an item the guest settles with the provider can become one';
+      return line;
+    }
+    /* the row prices ONE person in the accounting currency: a whole-item basis or another currency is not its to decide */
+    const basis = clean(item.Rate_Basis);
+    if (basis !== RATE_BASIS.PER_PERSON_PER_NIGHT && basis !== RATE_BASIS.PER_PERSON) {
+      line.review = MANUAL_REVIEW_REQUIRED;
+      line.reviewReason = '009 makes a ' + (basis || 'basis-less') + ' item payable — a price per person cannot carry a whole-item charge';
+      return line;
+    }
+    if (line.currency !== ACCOUNTING_CURRENCY) {
+      line.review = MANUAL_REVIEW_REQUIRED;
+      line.reviewReason = '009 makes a ' + line.currency + ' item payable — the price paid is stated in ' + ACCOUNTING_CURRENCY + ' only';
+      return line;
+    }
+    if (line.Billing_Category !== PAYABLE_BY_ROW) line.categoryOverride = { from: line.Billing_Category };
+    line.Billing_Category = PAYABLE_BY_ROW;
+  }
+
   /* --- priority 1a: the category excludes the item outright -------------- */
   if (line.Billing_Category === BILLING_CATEGORY.EXCLUDE_FROM_GUEST_SETTLEMENT) {
     line.rateSource = 'EXCLUDED'; line.amountCents = 0; line.block = null;
@@ -288,7 +347,14 @@ export function computeLine(booking, ctx) {
     const rateCents = toCents(special.Rate_Per_Person_Night);
     if (rateCents == null) {
       line.review = MANUAL_REVIEW_REQUIRED;
-      line.reviewReason = 'special rate has no Rate_Per_Person_Night';
+      line.reviewReason = rowCategory
+        ? PRICE_REQUIRED + ' — the price H&S paid for this booking is not in 009 (Rate_Per_Person_Night) yet'
+        : 'special rate has no Rate_Per_Person_Night';
+      return line;
+    }
+    if (rowCategory && rateCents <= 0) {
+      line.review = MANUAL_REVIEW_REQUIRED;
+      line.reviewReason = PRICE_REQUIRED + ' — a price H&S paid must be above USD 0 (009 states ' + special.Rate_Per_Person_Night + ')';
       return line;
     }
     const rule = clean(special.Nights_Rule);

@@ -307,8 +307,21 @@ function checkSpecialRates(c, snapshot, liveRates, on) {
   const live = new Map();
   for (const r of liveRates) live.set(specialRateKey(r), r);
   const wasKeys = new Set(refRows.map(specialRateKey));
+  /* only a row that can price THIS statement is compared: its holder or one of its persons, and one of its items. The
+     snapshot keeps the whole tab, but another guest's row moving changes nothing here (review, 7 Oct 2026) — a drift on
+     it would block this settlement with a revision that could never differ (NO_CHANGE). */
+  const persons = new Set((snapshot.Person_IDs || []).map(clean).filter(Boolean));
+  const itemIds = new Set((snapshot.Item_IDs || []).map(clean).filter(Boolean));
+  const holder = clean(snapshot.Holder_ID);
+  const touches = (r) => {
+    const touchesHolder = clean(r.Holder_ID) && clean(r.Holder_ID) === holder;
+    const touchesPerson = clean(r.Person_ID) && persons.has(clean(r.Person_ID));
+    if (!touchesHolder && !touchesPerson) return false;
+    return !(itemIds.size && clean(r.Item_ID) && !itemIds.has(clean(r.Item_ID)));
+  };
 
   for (const was of refRows) {
+    if (!touches(was)) continue;
     const key = specialRateKey(was);
     const now = live.get(key);
     const label = 'special rate ' + key;
@@ -329,12 +342,14 @@ function checkSpecialRates(c, snapshot, liveRates, on) {
     const wasStatus = clean(was.Rate_Status), nowStatus = clean(now.Rate_Status);
     if (wasStatus !== nowStatus) {
       c.add(CODE.SPECIAL_RATE_MISMATCH, label + ' was ' + (wasStatus || '(none)') + ' at issue and is ' + (nowStatus || '(none)') + ' now', key + '·status');
+      continue;
+    }
+    /* whether the row made a booking H&S paid payable (engine.js · PAYABLE_BY_ROW) */
+    const wasCat = clean(was.Billing_Category), nowCat = clean(now.Billing_Category);
+    if (wasCat !== nowCat) {
+      c.add(CODE.SPECIAL_RATE_MISMATCH, label + ' Billing_Category moved from ' + (wasCat || '(none)') + ' to ' + (nowCat || '(none)'), key + '·category');
     }
   }
-
-  const persons = new Set((snapshot.Person_IDs || []).map(clean).filter(Boolean));
-  const itemIds = new Set((snapshot.Item_IDs || []).map(clean).filter(Boolean));
-  const holder = clean(snapshot.Holder_ID);
 
   for (const [key, now] of live) {
     if (wasKeys.has(key)) continue;
@@ -344,10 +359,7 @@ function checkSpecialRates(c, snapshot, liveRates, on) {
       if (from && on < from) continue;
       if (to && on > to) continue;
     }
-    const touchesHolder = clean(now.Holder_ID) && clean(now.Holder_ID) === holder;
-    const touchesPerson = clean(now.Person_ID) && persons.has(clean(now.Person_ID));
-    if (!touchesHolder && !touchesPerson) continue;
-    if (itemIds.size && clean(now.Item_ID) && !itemIds.has(clean(now.Item_ID))) continue;
+    if (!touches(now)) continue;
     c.add(CODE.SPECIAL_RATE_MISMATCH, 'an ACTIVE special rate ' + key + ' appeared in 009_Special_Rates after this revision was issued', key + '·new');
   }
 }
