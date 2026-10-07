@@ -555,3 +555,13 @@ test('BOOKED VALUE · a changed selection is a change even at the same price; th
     drafts: { 'INV-T1': savedTrip([{ id: 'wedstay', room: 'heritage', qty: 1 }, { id: 'train', qty: 1 }, { id: 'spa', interest: true }]) } });
   assert.equal((await hit(W2, GROOM, 'admin/holder?holder=INV-T1')).j.booked.sent.differs, false);
 });
+
+test('BOOKED VALUE · a line settled with the provider (Block B) is listed once, in its own table — never among the payable lines', async () => {
+  const W = world({ store: {}, drafts: { 'INV-T1': savedTrip([{ id: 'train', qty: 1 }, { id: 'selfstay', qty: 1 }]) } });
+  W.workbook['002_Accommodation_Details'] = book()['002_Accommodation_Details'].map((row, i) => (i === 0 ? row : [...row, ({ Item_ID: 'T-SELF', Billing_Category: 'GUEST_SELF_PAYMENT', Rate_Status: 'ACTIVE',
+    Rate_Basis: 'PER_PERSON_PER_NIGHT', Currency: 'USD', Site_Product_Key: 'selfstay', 'Number of Nights': 2 })[row[0]] ?? '']));
+  const h = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+  assert.deepEqual(h.j.booked.items.map((l) => l.Item_ID), ['T-TRAIN']);
+  assert.deepEqual(h.j.booked.blockB.map((l) => l.Item_ID), ['T-SELF']);
+  assert.equal(h.j.booked.total, 100);
+});

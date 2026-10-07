@@ -1103,7 +1103,8 @@ async function bookedOf(env, holderId, personId, src, asOf, detail, people) {
     sent = { version: sel.sent.version, lastSentAt: sel.sent.lastSentAt, total: pricedTotal(s), onRequest: s.manualReview.length,
       differs: selectionSignature(sel.sent.selections) !== selectionSignature(sel.selections) };
   } else if (sel.sent) sent = { version: sel.sent.version, lastSentAt: sel.sent.lastSentAt, total: pricedTotal(r), onRequest: r.manualReview.length, differs: false };
-  return { ...out, items: r.lines.map((l) => lineView(l, people)), blockB: (r.blockB || []).map((l) => lineView(l, people)),
+  /* the engine's lines include Block B: the table above the Block B table shows the rest — payable and to review */
+  return { ...out, items: r.lines.filter((l) => l.block !== 'B').map((l) => lineView(l, people)), blockB: (r.blockB || []).map((l) => lineView(l, people)),
     reviewReasons: r.manualReview.map((l) => l.reviewReason).filter(Boolean), sent };
 }
 
@@ -1270,7 +1271,7 @@ async function adminHolder(env, identity, url, cors) {
         Due_Date: x.Due_Date, total: x.Total_Payable_Cents == null ? null : fromCents(x.Total_Payable_Cents), issuedAt: x.issuedAt,
         issuedBy: x.issuedBy, supersededAt: x.supersededAt })) },
     preview: !a ? { error: previewError, issuable: false, reasons: ['PREVIEW_UNAVAILABLE: ' + previewError], proposalHash: null, lines: [], blockB: [] } : {
-      total: r.totalPayable, hostedValue: fromCents(r.hostedValueCents), lines: r.lines.map((l) => lineView(l, people)),
+      total: r.totalPayable, hostedValue: fromCents(r.hostedValueCents), lines: r.lines.filter((l) => l.block !== 'B').map((l) => lineView(l, people)),
       blockB: (r.blockB || []).map((l) => lineView(l, people)), manualReview: r.manualReview.map((l) => l.reviewReason).filter(Boolean),
       unmapped: a.current.unmapped, issueDate: a.proposal ? a.proposal.Issue_Date : asOf, dueDate: a.proposal ? a.proposal.Due_Date : null,
       fx: { FX_USD_THB: a.fx.FX_USD_THB, FX_USD_EUR: a.fx.FX_USD_EUR, gaps: a.fx.gaps || [] },
