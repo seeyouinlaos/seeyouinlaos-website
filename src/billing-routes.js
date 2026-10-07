@@ -32,6 +32,7 @@ import {
   PAYMENT_JOURNAL_COLUMNS, loadGuestNationalities, nationalityOf, prefetchTabs, SOURCE_TAB_KEYS, loadGuestRegister,
 } from './billing/source.js';
 import { SNAPSHOT_COMPARISON } from './billing-ledger.js';
+import { confirmationStands, writeConfirmation, CONFIRMATION_ROLE } from './confirmation.js';
 import { loadBookedSelection, priceSelection, BOOKED_SOURCE } from './billing/booked.js';
 import { composeStatementMail } from './mail-templates.js';
 import { pricingSource, catalogueKey } from './billing/catalogue-cache.js';
@@ -277,14 +278,16 @@ const preferenceView = (pref, issued, env) => ({
   issuedRecipient: issued ? issued.Payment_Recipient || null : null,
 });
 
-/** The engine result for one Holder — the ONE calculation path (Freeze · V). */
-async function calculateHolder(env, identity, holderId, src, asOf, origin) {
+/** The engine result for one Holder — the ONE calculation path (Freeze · V). `assume` is the admin console's what-if
+    only (loadConfirmedBookings): never passed on an issue. */
+async function calculateHolder(env, identity, holderId, src, asOf, origin, assume) {
   if (!clean(identity && identity.guestId)) identity = await holderIdentity(env, origin, holderId);
   const state = await holderState(env, holderId);
   const bookings = await loadConfirmedBookings({
     env, identity, holderId, items: src.items,
     generations: (state && state.generations) || {},
     overrides: (state && state.overrides) || {},
+    ...(assume ? { assume } : {}),
   });
   const result = calculate(bookings, { items: src.items, specialRates: src.specialRates, asOf: evaluationDay(asOf) });
   return { state, bookings, result, unmapped: unmappedProducts(bookings),
@@ -341,8 +344,8 @@ async function guestSettlement(env, identity, url, cors) {
     hostedValue: fromCents(result.hostedValueCents),
     manualReview: result.manualReview.map((l) => l.reviewReason),
     unmappedProducts: unmapped,
-    /* the figures stand only on the trip Guest Relations confirmed (Freeze · A) */
-    bookingConfirmation: confirmation,
+    /* the figures stand only on the trip Guest Relations confirmed (Freeze · A) — the state, never who confirmed it */
+    bookingConfirmation: confirmation ? { state: confirmation.state, version: confirmation.version ?? null, confirmedAt: confirmation.confirmedAt || null } : confirmation,
     payment: pay,
     Payment_Preference: channel,
     paymentPreference: preferenceView(pref, issued, env),
@@ -689,6 +692,13 @@ async function sha256Hex(text) {
   return [...new Uint8Array(d)].map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
+/* why a statement waits for the booking — said to the BILLING_ADMINs, who can confirm it themselves (Owner, 7 Oct 2026) */
+const CONFIRMATION_WORDS = Object.freeze({
+  NONE: 'the guest has not submitted this trip yet',
+  UNCONFIRMED: 'waiting for confirmation — Haruthai or Suthep can confirm this submitted booking (Confirm booking)',
+  LAPSED: 'the guest sent a newer version after the confirmation — Haruthai or Suthep can confirm the new submitted booking (Confirm booking)',
+});
+
 /**
  * WHAT AN ISSUE WOULD DO, NOW — read-only (Owner, 7 Oct 2026 · admin console · Codex plan review).
  *
@@ -704,12 +714,15 @@ async function sha256Hex(text) {
  * console confirms this very hash: what was previewed is what is issued.
  */
 async function assessIssue(env, holderId, src, asOf, origin, opts) {
+  const o = opts || {};
+  /* THE WHAT-IF of the confirmation dialog (admin/confirm GET): the sent version as if confirmed — never issued from */
+  const assume = Number.isInteger(o.assumeConfirmedVersion) ? { version: o.assumeConfirmedVersion } : null;
   const fx = freezeFx(resolveFx(src.configRows, asOf));
   const sourceGaps = sourceGapsOf(src);
   const state = await holderState(env, holderId);
   const pref = await preferenceOf(env, origin, holderId, state, src, src.nationalities || undefined);
   const destination = pref.channel ? destinationOf(pref.channel, env) : null;
-  const current = await calculateHolder(env, { invitationId: holderId, guestId: null }, holderId, src, asOf, origin);
+  const current = await calculateHolder(env, { invitationId: holderId, guestId: null }, holderId, src, asOf, origin, assume);
   const inputs = gateInputs(src, asOf);
   const gateCheck = { caseResults: inputs.caseResults, siteKeyDuplicates: inputs.siteKeyDuplicates, nightsGaps: inputs.nightsGaps };
   const currentDrifts = detectDrift({
@@ -734,12 +747,11 @@ async function assessIssue(env, holderId, src, asOf, origin, opts) {
   if (!pref.determined) reasons.push('PAYMENT_PREFERENCE_UNDETERMINED: ' + pref.reason + ' — a BILLING_ADMIN states the method first');
   else if (!destination || !destination.complete) reasons.push('PAYMENT_DESTINATION_INCOMPLETE: ' + pref.channel + ' has no configured account');
   const confirmation = current.confirmation || { state: 'NONE' };
-  if (confirmation.state !== 'CONFIRMED') reasons.push('BOOKING_NOT_CONFIRMED: ' + (confirmation.state || 'NONE') + ' — Guest Relations confirms the sent trip first');
+  if (confirmation.state !== 'CONFIRMED') reasons.push('BOOKING_NOT_CONFIRMED: ' + (confirmation.state || 'NONE') + ' — ' + (CONFIRMATION_WORDS[confirmation.state] || CONFIRMATION_WORDS.NONE));
   if (!verdict.allowed) reasons.push(...verdict.reasons);
   if (gateNow && !gateNow.approved) reasons.push(...gateNow.open.map((o) => 'GATE_NOW: ' + o));
 
   const hash = await sourceHash({ items: src.items, specialRates: src.specialRates });
-  const o = opts || {};
   const proposal = pref.channel ? buildSnapshot({
     settlementId: null, revision: null, holderId, result: current.result,
     items: src.items, specialRates: src.specialRates, fx, issueDate: asOf, dueDateOverride: clean(o.dueDateOverride),
@@ -755,7 +767,7 @@ async function assessIssue(env, holderId, src, asOf, origin, opts) {
   }
   /* the hash binds the statement AND the settlement it was previewed on: after any issue or new revision it no longer
      matches, so one preview issues at most once */
-  const proposalHash = proposal
+  const proposalHash = proposal && !confirmation.assumed
     ? await sha256Hex(stableJson({ proposal: { ...proposal, calculated_at: null }, confirmedVersion: confirmation.version ?? null,
       settlement: { id: state.Settlement_ID || null, latestRevision: Number(state.latestRevision) || 0, issuedRevision: issuedNow ? issuedNow.Revision : null } }))
     : null;
@@ -822,7 +834,7 @@ async function adminIssue(env, identity, request, cors) {
   if (!current.confirmation || current.confirmation.state !== 'CONFIRMED') {
     return jsonRes({ ok: false, error: 'Issue & Publish is blocked',
       reasons: ['BOOKING_NOT_CONFIRMED: ' + ((current.confirmation && current.confirmation.state) || 'NONE') +
-        ' — Guest Relations confirms the sent trip first'] }, 409, cors);
+        ' — ' + (CONFIRMATION_WORDS[current.confirmation && current.confirmation.state] || CONFIRMATION_WORDS.NONE)] }, 409, cors);
   }
   /* WHAT WAS PREVIEWED IS WHAT IS ISSUED (Owner, 7 Oct 2026): the console names the statement it showed */
   const expected = clean(body.expectedProposal);
@@ -1254,13 +1266,24 @@ async function adminHolder(env, identity, url, cors) {
   } catch (e) { booked = { error: clean(e && e.message).slice(0, 300) || 'not readable' }; }
   const r = a ? a.current.result : null;
   const issuedFx = issued ? freezeFx({ FX_USD_THB: issued.FX_USD_THB, FX_USD_EUR: issued.FX_USD_EUR }) : null;
+  /* THE SUBMITTED BOOKING and its confirmation — what Confirm booking stands on; unreadable is said, never "not sent" */
+  let submission;
+  try {
+    if (!entry.guestId) throw new SourceDataError('HOLDER_PERSON', 'the register names no person for ' + holderId);
+    const sub = await submittedOf(env, holderId, entry.guestId, false);
+    const st = await standingOf(env, holderId, sub);
+    submission = { submitted: sub.submitted, version: sub.submitted ? sub.version : null, sentAt: sub.submitted ? sub.sentAt : null, ...st.view };
+  } catch (e) {
+    if (e instanceof LedgerContractError) throw e;
+    submission = { state: 'UNREADABLE', submitted: null, error: clean(e && e.message).slice(0, 300) || 'not readable' };
+  }
 
   return jsonRes({
     ok: true, asOf, Holder_ID: holderId,
     guest: { name, guestId: entry.guestId, hosts: entry.hosts,
       contactName: recipient.contact ? [clean(recipient.contact.firstName), clean(recipient.contact.lastName)].filter(Boolean).join(' ') || null : null,
       email: recipient.email, emailSource: recipient.source },
-    booked,
+    booked, submission,
     confirmation: a ? a.confirmation : { state: 'UNREADABLE' },
     method: a ? { channel: a.pref.channel || null, currency: a.pref.currency || null, determined: !!a.pref.determined,
       source: a.pref.source || null, reason: a.pref.reason || null, locked: !!a.pref.locked,
@@ -1293,6 +1316,175 @@ async function adminHolder(env, identity, url, cors) {
     payments,
     mail: mail && mail.ok === true ? { attempts: mail.attempts || [], open: mail.open || null } : (issued ? { unreadable: true } : null),
   }, 200, cors);
+}
+
+/* ------------------------------------------------ CONFIRM BOOKING (Owner, 7 Oct 2026) */
+
+/**
+ * THE SUBMITTED BOOKING of one invitation, as a confirmation reads it: `reg:<inv>`, the version the guest SENT — never
+ * the saved trip. It fails closed: a record that cannot be read, carries no readable booking, names no person or
+ * another person than the register holds for this invitation is an error, never "nothing sent" and never confirmable.
+ * `digest` (withDigest) names the exact submission: its reference, version, time and the lines exactly as stored.
+ */
+async function submittedOf(env, holderId, personId, withDigest) {
+  if (!env.REG_KV) throw new SourceDataError('REGISTRATION_UNAVAILABLE', 'the registration store is not bound');
+  const raw = await env.REG_KV.get('reg:' + holderId);
+  if (raw == null || raw === '') return { submitted: false };
+  let rec;
+  try { rec = JSON.parse(raw); } catch (e) { rec = undefined; }
+  if (!rec || typeof rec !== 'object') throw new SourceDataError('SENT_UNREADABLE', 'the submitted booking of ' + holderId + ' is not readable');
+  if (!clean(rec.submissionId)) return { submitted: false };
+  const reg = rec.registration;
+  if (!reg || typeof reg !== 'object' || (reg.selections != null && !Array.isArray(reg.selections))) {
+    throw new SourceDataError('SENT_UNREADABLE', 'the submitted booking of ' + holderId + ' carries no readable selection');
+  }
+  const version = Number(rec.version || 1);
+  if (!Number.isInteger(version) || version < 1) throw new SourceDataError('SENT_UNREADABLE', 'the submitted booking of ' + holderId + ' names no usable version');
+  const person = clean(reg.guestId);
+  if (!person) throw new SourceDataError('SENT_NO_PERSON', 'the submitted booking of ' + holderId + ' names no guest');
+  if (person !== clean(personId)) throw new SourceDataError('SENT_PERSON_MISMATCH', 'the submitted booking of ' + holderId + ' names another guest than the register');
+  const selections = Array.isArray(reg.selections) ? reg.selections : [];
+  const out = { submitted: true, record: rec, submissionId: clean(rec.submissionId), version, sentAt: clean(rec.lastSentAt || rec.submittedAt) || null, selections };
+  if (withDigest) out.digest = await sha256Hex(stableJson({ submissionId: out.submissionId, version, sentAt: out.sentAt, selections }));
+  return out;
+}
+
+/** The stored confirmation (`conf:<inv>`) beside the submission, by the one rule (src/confirmation.js). Unreadable fails closed. */
+async function standingOf(env, holderId, sub) {
+  const raw = await env.REG_KV.get('conf:' + holderId);
+  let conf = null;
+  if (raw != null && raw !== '') {
+    try { conf = JSON.parse(raw); } catch (e) { conf = undefined; }
+    if (!conf || typeof conf !== 'object') throw new SourceDataError('CONFIRMATION_UNREADABLE', 'the confirmation record of ' + holderId + ' is not readable');
+  }
+  const state = !sub.submitted ? 'NONE' : confirmationStands(conf, sub.record) ? 'CONFIRMED' : conf && conf.confirmedAt ? 'LAPSED' : 'UNCONFIRMED';
+  return { conf, raw: raw == null || raw === '' ? null : raw, state, view: { state,
+    confirmedVersion: conf && conf.confirmedAt && conf.version != null ? Number(conf.version) : null,
+    confirmedAt: (conf && conf.confirmedAt) || null, confirmedBy: clean(conf && conf.actor) || null,
+    role: clean(conf && conf.role) || null, source: clean(conf && conf.source) || null } };
+}
+
+/* the guest's current saved trip against the submission — only to say whether it moved; it is never what is confirmed */
+async function currentAgainst(env, holderId, sub) {
+  try {
+    const sel = await loadBookedSelection({ env, holderId, withSent: false });
+    if (sel.source !== BOOKED_SOURCE.CURRENT) return { readable: true, changed: false, sel: null };
+    return { readable: true, changed: selectionSignature(sel.selections) !== selectionSignature(sub.selections), sel };
+  } catch (e) {
+    return { readable: false, changed: null, error: clean(e && e.message).slice(0, 200) || 'not readable', sel: null };
+  }
+}
+
+/** GET admin/confirm?holder=INV — what the confirmation dialog shows. Reads only; nothing is confirmed here. */
+async function adminConfirmGet(env, identity, url, cors) {
+  const holderId = clean(url.searchParams.get('holder'));
+  if (!INVITATION_RE.test(holderId)) return jsonRes({ ok: false, error: 'holder required' }, 400, cors);
+  const asOf = evaluationDay(url.searchParams.get('asOf'));
+  const entry = holdersOfIndex(await loadIndex(env, url.origin, false)).find((h) => h.Holder_ID === holderId);
+  if (!entry || entry.ambiguous || !entry.guestId) return jsonRes({ ok: false, error: holderId + ' is not one person of the register' }, 404, cors);
+  let sub, standing;
+  try {
+    sub = await submittedOf(env, holderId, entry.guestId, true);
+    standing = await standingOf(env, holderId, sub);
+  } catch (e) {
+    if (e instanceof SourceDataError) return jsonRes({ ok: false, canConfirm: false, error: e.message + '; nothing can be confirmed', reasons: [e.code] }, 409, cors);
+    throw e;
+  }
+  const src = await loadSource(env, asOf, { register: true });
+  const name = nameOf(src.register, entry.contactId);
+  if (!sub.submitted) {
+    return jsonRes({ ok: true, Holder_ID: holderId, name, submitted: false, state: 'NONE', canConfirm: false,
+      why: 'The guest has not submitted this trip yet.' }, 200, cors);
+  }
+  /* the submitted version, priced by the engine on today's source exactly as the Booked value prices a selection */
+  const priced = await priceSelection({ holderId, personId: entry.guestId, selections: sub.selections, items: src.items,
+    specialRates: src.specialRates, asOf, source: BOOKED_SOURCE.SENT });
+  const cur = await currentAgainst(env, holderId, sub);
+  let current = { readable: cur.readable, changed: cur.changed, error: cur.error || null };
+  if (cur.changed) {
+    const c = await priceSelection({ holderId, personId: entry.guestId, selections: cur.sel.selections, items: src.items,
+      specialRates: src.specialRates, asOf, source: BOOKED_SOURCE.CURRENT });
+    current = { ...current, updatedAt: cur.sel.updatedAt, total: pricedTotal(c), onRequest: c.manualReview.length };
+  }
+  /* WHAT ISSUE WOULD SAY once exactly this version is confirmed — the same assessment as Preview, with the
+     confirmation assumed; it returns no proposal hash, so nothing can ever be issued from it */
+  let afterConfirm = null;
+  if (standing.state !== 'CONFIRMED') {
+    try {
+      const a = await assessIssue(env, holderId, src, asOf, url.origin, { assumeConfirmedVersion: sub.version });
+      afterConfirm = { assumedVersion: sub.version, issuable: a.allowed, reasons: a.reasons, total: a.current.result.totalPayable,
+        dueDate: a.proposal ? a.proposal.Due_Date : null };
+    } catch (e) {
+      if (e instanceof LedgerContractError) throw e;
+      afterConfirm = { assumedVersion: sub.version, issuable: false, error: clean(e && e.message).slice(0, 300) || 'the statement could not be calculated' };
+    }
+  }
+  return jsonRes({ ok: true, Holder_ID: holderId, asOf, name, guestId: entry.guestId, submitted: true,
+    state: standing.state, canConfirm: standing.state === 'UNCONFIRMED' || standing.state === 'LAPSED',
+    confirmation: standing.view,
+    snapshot: { submissionId: sub.submissionId, version: sub.version, sentAt: sub.sentAt, digest: sub.digest },
+    sent: { total: pricedTotal(priced), complete: priced.manualReview.length === 0, payableLines: (priced.blockA || []).length,
+      onRequest: priced.manualReview.length, selected: priced.lines.filter((l) => l.block !== 'B').length,
+      providerSettled: (priced.blockB || []).length, unmapped: priced.unmapped || [] },
+    current, afterConfirm }, 200, cors);
+}
+
+/**
+ * POST admin/confirm { holderId, expected: { submissionId, version, digest }, acknowledgeChange } — a BILLING_ADMIN
+ * confirms the SUBMITTED booking the dialog showed, as Guest Relations would: the same record (src/confirmation.js ·
+ * writeConfirmation), naming who (the audit label), in which capacity (BILLING_ADMIN) and from where (admin-billing).
+ * Everything is read again here: nothing sent → NOT_SENT; another version sent since → SENT_CHANGED; unreadable or not
+ * this invitation's person → refused (fail closed); a current selection that moved since the submission (or cannot
+ * be read) must be acknowledged; the version already confirmed → nothing written (idempotent). Never issues, never
+ * e-mails; an issued statement is never touched.
+ */
+async function adminConfirmPost(env, identity, request, url, cors) {
+  const body = await request.json().catch(() => null);
+  const holderId = clean(body && body.holderId);
+  if (!INVITATION_RE.test(holderId)) return jsonRes({ ok: false, error: 'holderId required' }, 400, cors);
+  const exp = body && body.expected && typeof body.expected === 'object' ? body.expected : null;
+  if (!exp || !clean(exp.submissionId) || !Number.isInteger(Number(exp.version)) || !/^[0-9a-f]{64}$/.test(clean(exp.digest))) {
+    return jsonRes({ ok: false, error: 'the submitted version the dialog showed is required (expected)' }, 400, cors);
+  }
+  const entry = holdersOfIndex(await loadIndex(env, url.origin, false)).find((h) => h.Holder_ID === holderId);
+  if (!entry || entry.ambiguous || !entry.guestId) return jsonRes({ ok: false, error: holderId + ' is not one person of the register' }, 404, cors);
+  let sub, standing;
+  try {
+    sub = await submittedOf(env, holderId, entry.guestId, true);
+    standing = await standingOf(env, holderId, sub);
+  } catch (e) {
+    if (e instanceof SourceDataError) return jsonRes({ ok: false, error: e.message + '; nothing was confirmed', reasons: [e.code] }, 409, cors);
+    throw e;
+  }
+  if (!sub.submitted) return jsonRes({ ok: false, error: 'The guest has not submitted this trip yet; nothing was confirmed.', reasons: ['NOT_SENT'] }, 409, cors);
+  if (sub.submissionId !== clean(exp.submissionId) || sub.version !== Number(exp.version) || sub.digest !== clean(exp.digest)) {
+    return jsonRes({ ok: false, error: 'The guest has sent another version since this dialog was opened; nothing was confirmed.', reasons: ['SENT_CHANGED'],
+      snapshot: { submissionId: sub.submissionId, version: sub.version, sentAt: sub.sentAt } }, 409, cors);
+  }
+  if (standing.state === 'CONFIRMED') return jsonRes({ ok: true, Holder_ID: holderId, unchanged: true, confirmation: standing.view }, 200, cors);
+  const cur = await currentAgainst(env, holderId, sub);
+  if (cur.changed !== false && body.acknowledgeChange !== true) {
+    return jsonRes({ ok: false, error: cur.changed ? 'The current selection has changed since submission: confirm that you confirm the submitted version.'
+      : 'The current selection cannot be read: confirm that you confirm the submitted version.', reasons: ['ACKNOWLEDGE_CHANGE'], changed: cur.changed }, 409, cors);
+  }
+  /* the record as it stands right before the write: a Guest Relations change since it was read is never overwritten
+     blind (KV has no compare-and-swap; this narrows the window to the write itself) */
+  const again = await env.REG_KV.get('conf:' + holderId);
+  if ((again == null || again === '' ? null : again) !== standing.raw) {
+    return jsonRes({ ok: false, error: 'The confirmation record changed meanwhile; nothing was confirmed — open the dialog again.', reasons: ['CONFIRMATION_CHANGED'] }, 409, cors);
+  }
+  const by = adminLabel(identity);
+  const w = await writeConfirmation(env.REG_KV, {
+    invitationId: holderId, action: 'confirm', actor: by, role: CONFIRMATION_ROLE.BILLING_ADMIN, source: 'admin-billing',
+    note: 'Confirm booking from the admin console' + (cur.changed ? ' · the current selection differed from the submitted version (acknowledged)'
+      : cur.changed === null ? ' · the current selection could not be read (acknowledged)' : ''),
+    record: sub.record, current: standing.conf,
+    extra: { digest: sub.digest, acknowledgedChange: cur.changed !== false },
+  });
+  const c = w.conf;
+  return jsonRes({ ok: true, Holder_ID: holderId, unchanged: !!w.unchanged, acknowledgedChange: cur.changed !== false,
+    confirmation: { state: 'CONFIRMED', confirmedVersion: c.version != null ? Number(c.version) : null, confirmedAt: c.confirmedAt,
+      confirmedBy: clean(c.actor) || null, role: clean(c.role) || null, source: clean(c.source) || null } }, 200, cors);
 }
 
 /* what the send dialog shows, and what the send checks again: the CURRENT issued revision and the e-mail resolved NOW */
@@ -1501,6 +1693,9 @@ export async function handleBilling(request, env, url, cors, deps) {
       case 'admin/holder': return await adminHolder(env, identity, url, cors);
       case 'admin/send':
         return request.method === 'POST' ? await adminSendPost(env, identity, request, url, cors, deps) : await adminSendGet(env, identity, url, cors);
+      /* Confirm booking: a BILLING_ADMIN confirms the submitted booking, as Guest Relations would (Owner, 7 Oct 2026) */
+      case 'admin/confirm':
+        return request.method === 'POST' ? await adminConfirmPost(env, identity, request, url, cors) : await adminConfirmGet(env, identity, url, cors);
       case 'issue': return await adminIssue(env, identity, request, cors);
       case 'revenue': return await adminRevenue(env, identity, url, cors);
       case 'reconcile': return await adminReconcile(env, identity, request, cors);

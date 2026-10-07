@@ -565,3 +565,250 @@ test('BOOKED VALUE · a line settled with the provider (Block B) is listed once,
   assert.deepEqual(h.j.booked.blockB.map((l) => l.Item_ID), ['T-SELF']);
   assert.equal(h.j.booked.total, 100);
 });
+
+/* ================================================================ CONFIRM BOOKING (Owner, 7 Oct 2026)
+   Haruthai and Suthep confirm a SENT, not yet confirmed booking from the console — the exact submitted version, the
+   same `conf:<inv>` record Guest Relations' endpoint writes (src/confirmation.js), never the saved trip. */
+const { confirmationStands, writeConfirmation } = await import('../src/confirmation.js');
+const HARUTHAI = { invitationId: 'INV-G048', guestId: 'G048', hosts: true };
+/* a registration store that can be written, recording every write */
+function writableKv(o, writes) {
+  return { get: async (k, type) => { const v = o[k]; if (v === undefined) return null; const t = typeof v === 'string' ? v : JSON.stringify(v); return type === 'json' ? JSON.parse(t) : t; },
+    put: async (k, v) => { writes.push(k); o[k] = v; } };
+}
+function confirmWorld(store, opts = {}) {
+  const W = world({ store, drafts: opts.drafts });
+  W.store = store; W.writes = [];
+  W.env.REG_KV = writableKv(store, W.writes);
+  return W;
+}
+const sentOnly = () => ({ 'reg:INV-T1': structuredClone(SENT), 'contact:INV-T1': { email: 'Tess.Example@Example.invalid', firstName: 'Tess' } });
+const expectedOf = (ctx) => ({ submissionId: ctx.snapshot.submissionId, version: ctx.snapshot.version, digest: ctx.snapshot.digest });
+
+test('CONFIRM BOOKING · Suthep confirms a SENT, unconfirmed booking: the exact submitted version, the record Guest Relations writes — and Issue unlocks', async () => {
+  const W = confirmWorld(sentOnly()); await approveGate(W.st);
+  const before = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+  assert.equal(before.j.submission.state, 'UNCONFIRMED'); assert.equal(before.j.submission.version, 1);
+  assert.equal(before.j.preview.issuable, false);
+  assert.match(before.j.preview.reasons.join(' '), /BOOKING_NOT_CONFIRMED: UNCONFIRMED — waiting for confirmation — Haruthai or Suthep can confirm this submitted booking/);
+  assert.doesNotMatch(before.j.preview.reasons.join(' '), /Guest Relations confirms the sent trip first/, 'the dead end is gone');
+
+  const ctx = await hit(W, GROOM, 'admin/confirm?holder=INV-T1');
+  assert.equal(ctx.status, 200, JSON.stringify(ctx.j));
+  assert.equal(ctx.j.canConfirm, true); assert.equal(ctx.j.state, 'UNCONFIRMED'); assert.equal(ctx.j.name.full, 'Testa Example');
+  assert.deepEqual([ctx.j.snapshot.submissionId, ctx.j.snapshot.version, ctx.j.snapshot.sentAt], ['SYL-T1-1', 1, '2026-10-01T10:00:00Z']);
+  assert.match(ctx.j.snapshot.digest, /^[0-9a-f]{64}$/);
+  assert.deepEqual([ctx.j.sent.total, ctx.j.sent.payableLines, ctx.j.sent.onRequest], [390, 2, 0]);
+  assert.equal(ctx.j.current.changed, false);
+  assert.deepEqual([ctx.j.afterConfirm.issuable, ctx.j.afterConfirm.total], [true, 390], 'after confirmation Issue would be available');
+  assert.ok(!JSON.stringify(ctx.j).includes('proposalHash'), 'the what-if carries no hash: nothing can be issued from it');
+  assert.equal(W.writes.length, 0, 'opening the dialog writes nothing');
+
+  const t0 = Date.now();
+  const r = await hit(W, GROOM, 'admin/confirm', { holderId: 'INV-T1', expected: expectedOf(ctx.j) });
+  assert.equal(r.status, 200, JSON.stringify(r.j));
+  assert.deepEqual([r.j.confirmation.state, r.j.confirmation.confirmedVersion, r.j.confirmation.confirmedBy, r.j.confirmation.role, r.j.confirmation.source],
+    ['CONFIRMED', 1, 'GROOM', 'BILLING_ADMIN', 'admin-billing']);
+  assert.deepEqual(W.writes, ['conf:INV-T1'], 'one write: the confirmation record, nothing else');
+  const conf = JSON.parse(W.store['conf:INV-T1']);
+  assert.deepEqual([conf.version, conf.actor, conf.role, conf.source, conf.submissionId, conf.digest, conf.sentAt],
+    [1, 'GROOM', 'BILLING_ADMIN', 'admin-billing', 'SYL-T1-1', ctx.j.snapshot.digest, '2026-10-01T10:00:00Z']);
+  assert.ok(Date.parse(conf.confirmedAt) >= t0 - 1000 && Date.parse(conf.confirmedAt) <= Date.now() + 1000, 'the time of the confirmation');
+  assert.deepEqual(conf.history.map((x) => [x.action, x.actor, x.role, x.source, x.version]), [['confirm', 'GROOM', 'BILLING_ADMIN', 'admin-billing', 1]]);
+  /* the very record Guest Relations' endpoint writes — the console adds only its submission fingerprint and the acknowledgement */
+  const gr = await writeConfirmation(writableKv({}, []), { invitationId: 'INV-T1', action: 'confirm', actor: 'guest-relations', role: 'GUEST_RELATIONS', source: 'gr-endpoint', note: '', record: SENT, current: null });
+  assert.deepEqual(Object.keys(conf).filter((x) => !['digest', 'acknowledgedChange'].includes(x)).sort(), Object.keys(gr.conf).sort());
+  assert.equal(confirmationStands(conf, W.store['reg:INV-T1']), true, 'the one rule the guest pages and billing read counts it');
+
+  const after = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+  assert.equal(after.j.confirmation.state, 'CONFIRMED'); assert.equal(after.j.confirmation.confirmedBy, 'GROOM');
+  assert.deepEqual([after.j.submission.state, after.j.submission.confirmedBy, after.j.submission.role], ['CONFIRMED', 'GROOM', 'BILLING_ADMIN']);
+  assert.equal(after.j.preview.issuable, true, JSON.stringify(after.j.preview.reasons));
+  const st = statusOf(await hit(W, GROOM, 'admin/status?ids=INV-T1'), 'INV-T1');
+  assert.equal(st.confirmation.state, 'CONFIRMED', 'the list reads it as confirmed');
+  const issued = await hit(W, GROOM, 'issue', { holderId: 'INV-T1', expectedProposal: after.j.preview.proposalHash });
+  assert.equal(issued.status, 200, JSON.stringify(issued.j)); assert.equal(issued.j.totalPayable, 390);
+  assert.equal(W.sent.length, 0, 'confirming and issuing never e-mail');
+});
+
+test('CONFIRM BOOKING · Haruthai confirms too; a second confirmation of the same version is idempotent and writes nothing', async () => {
+  const W = confirmWorld(sentOnly());
+  const ctx = await hit(W, HARUTHAI, 'admin/confirm?holder=INV-T1');
+  const r = await hit(W, HARUTHAI, 'admin/confirm', { holderId: 'INV-T1', expected: expectedOf(ctx.j) });
+  assert.equal(r.status, 200, JSON.stringify(r.j)); assert.equal(r.j.confirmation.confirmedBy, 'BRIDE'); assert.equal(r.j.unchanged, false);
+  const firstAt = JSON.parse(W.store['conf:INV-T1']).confirmedAt;
+  const again = await hit(W, HARUTHAI, 'admin/confirm', { holderId: 'INV-T1', expected: expectedOf(ctx.j) });
+  const bySuthep = await hit(W, GROOM, 'admin/confirm', { holderId: 'INV-T1', expected: expectedOf(ctx.j) });
+  for (const x of [again, bySuthep]) { assert.equal(x.status, 200); assert.equal(x.j.unchanged, true); assert.equal(x.j.confirmation.confirmedBy, 'BRIDE'); }
+  assert.equal(W.writes.length, 1, 'one record, written once');
+  assert.equal(JSON.parse(W.store['conf:INV-T1']).confirmedAt, firstAt);
+  const shown = await hit(W, GROOM, 'admin/confirm?holder=INV-T1');
+  assert.deepEqual([shown.j.state, shown.j.canConfirm, shown.j.afterConfirm], ['CONFIRMED', false, null]);
+});
+
+test('CONFIRM BOOKING · an ordinary guest gets 403 on the dialog and on the confirmation — nothing read, nothing written', async () => {
+  const W = confirmWorld(sentOnly());
+  const ctx = await hit(W, GROOM, 'admin/confirm?holder=INV-T1');
+  W.log.length = 0;
+  for (const [who, p, body] of [[GUEST, 'admin/confirm?holder=INV-T1'], [GUEST, 'admin/confirm', { holderId: 'INV-T1', expected: expectedOf(ctx.j) }],
+    [{ ...GROOM, hosts: false }, 'admin/confirm', { holderId: 'INV-T1', expected: expectedOf(ctx.j) }],
+    [{ invitationId: 'INV-G049', guestId: 'G048', hosts: true }, 'admin/confirm', { holderId: 'INV-T1', expected: expectedOf(ctx.j) }]]) {
+    const r = await hit(W, who, p, body);
+    assert.equal(r.status, 403, p); assert.ok(!r.j.snapshot && !r.j.confirmation && !r.j.sent, 'no booking facts');
+  }
+  assert.equal(W.writes.length, 0); assert.equal(W.log.length, 0, 'nothing read from Google for a refused request');
+  assert.equal(W.store['conf:INV-T1'], undefined);
+});
+
+test('CONFIRM BOOKING · NOT SENT: nothing to confirm — the dialog says so, a confirmation is refused and nothing is fabricated', async () => {
+  const W = confirmWorld({ 'contact:INV-T1': { email: 'tess@example.invalid' } }, { drafts: { 'INV-T1': savedTrip(BAG_FULL) } });
+  await approveGate(W.st);
+  const h = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+  assert.equal(h.j.submission.state, 'NONE'); assert.equal(h.j.submission.submitted, false);
+  assert.equal(h.j.booked.total, 390, 'the booked value is still shown');
+  assert.match(h.j.preview.reasons.join(' '), /BOOKING_NOT_CONFIRMED: NONE — the guest has not submitted this trip yet/);
+  const ctx = await hit(W, GROOM, 'admin/confirm?holder=INV-T1');
+  assert.deepEqual([ctx.status, ctx.j.submitted, ctx.j.canConfirm, ctx.j.why], [200, false, false, 'The guest has not submitted this trip yet.']);
+  const r = await hit(W, GROOM, 'admin/confirm', { holderId: 'INV-T1', expected: { submissionId: 'SYL-T1-1', version: 1, digest: 'a'.repeat(64) } });
+  assert.equal(r.status, 409); assert.deepEqual(r.j.reasons, ['NOT_SENT']);
+  assert.equal((await hit(W, GROOM, 'admin/confirm', { holderId: 'INV-T1' })).status, 400, 'no confirmation without the submitted version it confirms');
+  assert.equal(W.writes.length, 0); assert.equal(W.store['conf:INV-T1'], undefined);
+});
+
+test('CONFIRM BOOKING · a corrupt, foreign or moved submitted snapshot fails closed — nothing is confirmed', async () => {
+  const cases = [
+    ['{not json', 'SENT_UNREADABLE'],
+    [{ ...SENT, registration: { guestId: 'GT1', selections: 'everything' } }, 'SENT_UNREADABLE'],
+    [{ ...SENT, registration: 'x' }, 'SENT_UNREADABLE'],
+    [{ ...SENT, version: 'two' }, 'SENT_UNREADABLE'],
+    [{ ...SENT, registration: { selections: SENT.registration.selections } }, 'SENT_NO_PERSON'],
+    [{ ...SENT, registration: { ...SENT.registration, guestId: 'GT2' } }, 'SENT_PERSON_MISMATCH'],
+  ];
+  for (const [reg, code] of cases) {
+    const W = confirmWorld({ 'reg:INV-T1': reg });
+    const ctx = await hit(W, GROOM, 'admin/confirm?holder=INV-T1');
+    assert.equal(ctx.status, 409, code); assert.deepEqual(ctx.j.reasons, [code]); assert.equal(ctx.j.canConfirm, false);
+    const r = await hit(W, GROOM, 'admin/confirm', { holderId: 'INV-T1', expected: { submissionId: 'SYL-T1-1', version: 1, digest: 'a'.repeat(64) } });
+    assert.equal(r.status, 409, code); assert.deepEqual(r.j.reasons, [code]);
+    const h = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+    assert.equal(h.j.submission.state, 'UNREADABLE', code); assert.match(h.j.submission.error, /submitted booking/);
+    assert.equal(W.writes.length, 0, code);
+  }
+  /* an unreadable confirmation record is never overwritten blind */
+  const Wc = confirmWorld({ ...sentOnly(), 'conf:INV-T1': '{broken' });
+  assert.deepEqual((await hit(Wc, GROOM, 'admin/confirm?holder=INV-T1')).j.reasons, ['CONFIRMATION_UNREADABLE']);
+  assert.equal(Wc.writes.length, 0);
+  /* the guest sends again after the dialog was opened: the dialog's version is no longer the submitted one */
+  const W = confirmWorld(sentOnly());
+  const ctx = await hit(W, GROOM, 'admin/confirm?holder=INV-T1');
+  W.store['reg:INV-T1'] = { ...SENT, version: 2, lastSentAt: '2026-10-07T08:00:00Z', registration: { guestId: 'GT1', selections: [{ id: 'train', qty: 1 }] } };
+  const moved = await hit(W, GROOM, 'admin/confirm', { holderId: 'INV-T1', expected: expectedOf(ctx.j) });
+  assert.equal(moved.status, 409); assert.deepEqual(moved.j.reasons, ['SENT_CHANGED']); assert.equal(moved.j.snapshot.version, 2);
+  const forged = await hit(W, GROOM, 'admin/confirm', { holderId: 'INV-T1', expected: { ...expectedOf(ctx.j), version: 2 } });
+  assert.deepEqual(forged.j.reasons, ['SENT_CHANGED'], 'the version alone is not enough: the exact lines must match');
+  assert.equal(W.writes.length, 0);
+});
+
+test('CONFIRM BOOKING · a current selection changed since submission: shown beside the sent value, acknowledged — and never billed instead of the submitted version', async () => {
+  const current = [{ id: 'wedstay', room: 'heritage', qty: 1 }, { id: 'train', qty: 1 }, { id: 'bus', qty: 1 }];
+  const W = confirmWorld(sentOnly(), { drafts: { 'INV-T1': savedTrip(current) } }); await approveGate(W.st);
+  const ctx = await hit(W, GROOM, 'admin/confirm?holder=INV-T1');
+  assert.deepEqual([ctx.j.current.changed, ctx.j.current.total, ctx.j.sent.total], [true, 490, 390]);
+  assert.equal(ctx.j.afterConfirm.total, 390, 'what Issue would freeze is the submitted version');
+  const plain = await hit(W, GROOM, 'admin/confirm', { holderId: 'INV-T1', expected: expectedOf(ctx.j) });
+  assert.equal(plain.status, 409); assert.deepEqual(plain.j.reasons, ['ACKNOWLEDGE_CHANGE']); assert.equal(W.writes.length, 0);
+  const ok = await hit(W, GROOM, 'admin/confirm', { holderId: 'INV-T1', expected: expectedOf(ctx.j), acknowledgeChange: true });
+  assert.equal(ok.status, 200, JSON.stringify(ok.j)); assert.equal(ok.j.acknowledgedChange, true);
+  const conf = JSON.parse(W.store['conf:INV-T1']);
+  assert.equal(conf.version, 1); assert.equal(conf.acknowledgedChange, true); assert.match(conf.note, /differed from the submitted version \(acknowledged\)/);
+  const h = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+  assert.equal(h.j.booked.total, 490, 'the booked value stays the current selection');
+  assert.equal(h.j.preview.total, 390); assert.deepEqual(h.j.preview.lines.map((l) => l.Item_ID).sort(), ['T-STAY', 'T-TRAIN'], 'the bus the guest has not sent is not billed');
+  const issued = await hit(W, GROOM, 'issue', { holderId: 'INV-T1', expectedProposal: h.j.preview.proposalHash });
+  assert.equal(issued.j.totalPayable, 390);
+  assert.deepEqual(W.store['reg:INV-T1'], SENT, 'the submitted booking itself is never rewritten');
+  /* a saved trip that cannot be read counts as a possible change: it must be acknowledged too */
+  const Wf = confirmWorld(sentOnly(), { drafts: { 'INV-T1': 'FAIL' } });
+  const cf = await hit(Wf, GROOM, 'admin/confirm?holder=INV-T1');
+  assert.equal(cf.j.current.changed, null); assert.equal(cf.j.canConfirm, true);
+  assert.deepEqual((await hit(Wf, GROOM, 'admin/confirm', { holderId: 'INV-T1', expected: expectedOf(cf.j) })).j.reasons, ['ACKNOWLEDGE_CHANGE']);
+  assert.equal((await hit(Wf, GROOM, 'admin/confirm', { holderId: 'INV-T1', expected: expectedOf(cf.j), acknowledgeChange: true })).status, 200);
+});
+
+test('CONFIRM BOOKING · a newer submission after a confirmation: waiting again, and the console confirms the new version', async () => {
+  const store = { ...sentOnly(), 'reg:INV-T1': { ...SENT, version: 2, lastSentAt: '2026-10-06T10:00:00Z' },
+    'conf:INV-T1': JSON.stringify({ invitationId: 'INV-T1', confirmedAt: '2026-10-02T09:00:00Z', version: 1, actor: 'guest-relations', source: 'gr-endpoint', history: [{ action: 'confirm', at: '2026-10-02T09:00:00Z', actor: 'guest-relations', version: 1 }] }) };
+  const W = confirmWorld(store);
+  const h = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+  assert.deepEqual([h.j.submission.state, h.j.submission.version, h.j.submission.confirmedVersion], ['LAPSED', 2, 1]);
+  assert.match(h.j.preview.reasons.join(' '), /BOOKING_NOT_CONFIRMED: LAPSED — the guest sent a newer version/);
+  const ctx = await hit(W, GROOM, 'admin/confirm?holder=INV-T1');
+  assert.equal(ctx.j.canConfirm, true); assert.equal(ctx.j.snapshot.version, 2);
+  assert.equal((await hit(W, GROOM, 'admin/confirm', { holderId: 'INV-T1', expected: expectedOf(ctx.j) })).status, 200);
+  const conf = JSON.parse(W.store['conf:INV-T1']);
+  assert.equal(conf.version, 2);
+  assert.deepEqual(conf.history.map((x) => [x.actor, x.version]), [['guest-relations', 1], ['GROOM', 2]], 'the history keeps both, in order');
+});
+
+test('CONFIRM BOOKING · after confirmation Issue unlocks only when every other check passes — the dialog names what still waits', async () => {
+  const W = confirmWorld(sentOnly());   /* the Activation Gate is not approved here */
+  const ctx = await hit(W, GROOM, 'admin/confirm?holder=INV-T1');
+  assert.equal(ctx.j.afterConfirm.issuable, false);
+  assert.ok(ctx.j.afterConfirm.reasons.length > 0);
+  assert.ok(!ctx.j.afterConfirm.reasons.some((r) => /BOOKING_NOT_CONFIRMED/.test(r)), 'the booking is no longer what waits');
+  await hit(W, GROOM, 'admin/confirm', { holderId: 'INV-T1', expected: expectedOf(ctx.j) });
+  const h = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+  assert.equal(h.j.confirmation.state, 'CONFIRMED'); assert.equal(h.j.preview.issuable, false, 'confirmed is not issuable while the gate is closed');
+  assert.equal((await hit(W, GROOM, 'issue', { holderId: 'INV-T1' })).status, 409);
+});
+
+test('CONFIRM BOOKING · ONE record: Guest Relations\' endpoint and the console write the same conf:<inv>, by the same rule', async () => {
+  const store = {}, writes = [];
+  const k = writableKv(store, writes);
+  const rec = { submissionId: 'SYL-X', version: 3, lastSentAt: '2026-10-05T10:00:00Z' };
+  const gr = await writeConfirmation(k, { invitationId: 'INV-X', action: 'confirm', actor: 'guest-relations', role: 'GUEST_RELATIONS', source: 'gr-endpoint', note: '', record: rec, current: null });
+  const admin = await writeConfirmation(k, { invitationId: 'INV-X', action: 'confirm', actor: 'GROOM', role: 'BILLING_ADMIN', source: 'admin-billing', note: '', record: rec, current: gr.conf });
+  assert.equal(admin.unchanged, true, 'already confirmed by Guest Relations: the console writes nothing');
+  const after = { ...rec, version: 4 };
+  const second = await writeConfirmation(k, { invitationId: 'INV-X', action: 'confirm', actor: 'GROOM', role: 'BILLING_ADMIN', source: 'admin-billing', note: '', record: after, current: gr.conf });
+  assert.deepEqual(Object.keys(second.conf).filter((x) => x !== 'history').sort(), Object.keys(gr.conf).filter((x) => x !== 'history').sort(), 'the same fields');
+  assert.equal(confirmationStands(second.conf, after), true); assert.equal(confirmationStands(gr.conf, after), false);
+  assert.deepEqual(writes, ['conf:INV-X', 'conf:INV-X']);
+});
+
+test('CONFIRM BOOKING · the guest sees that the booking is confirmed — never who confirmed it', async () => {
+  const W = confirmWorld(sentOnly());
+  const ctx = await hit(W, GROOM, 'admin/confirm?holder=INV-T1');
+  await hit(W, GROOM, 'admin/confirm', { holderId: 'INV-T1', expected: expectedOf(ctx.j) });
+  const mine = await hit(W, GUEST, 'mine');
+  assert.equal(mine.status, 200, JSON.stringify(mine.j));
+  assert.deepEqual(Object.keys(mine.j.bookingConfirmation).sort(), ['confirmedAt', 'state', 'version']);
+  assert.equal(mine.j.bookingConfirmation.state, 'CONFIRMED');
+  assert.doesNotMatch(JSON.stringify(mine.j), /GROOM|BILLING_ADMIN|admin-billing/);
+});
+
+test('CONFIRM BOOKING · a confirmation names its journey: after a reset, a new first send is never "confirmed" by the old record', async () => {
+  const store = { ...sentOnly(), 'reg:INV-T1': { ...SENT, submissionId: 'SYL-T1-NEW', lastSentAt: '2026-10-07T09:00:00Z' },
+    'conf:INV-T1': JSON.stringify({ invitationId: 'INV-T1', confirmedAt: '2026-10-02T09:00:00Z', version: 1, submissionId: 'SYL-T1-1', actor: 'GROOM', role: 'BILLING_ADMIN', source: 'admin-billing', history: [] }) };
+  const W = confirmWorld(store); await approveGate(W.st);
+  const h = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+  assert.notEqual(h.j.confirmation.state, 'CONFIRMED'); assert.equal(h.j.preview.issuable, false);
+  assert.equal(h.j.submission.state, 'LAPSED');
+  assert.equal(confirmationStands(JSON.parse(store['conf:INV-T1']), store['reg:INV-T1']), false);
+  assert.equal(confirmationStands(JSON.parse(store['conf:INV-T1']), SENT), true, 'the journey it confirmed still is');
+});
+
+test('CONFIRM BOOKING · a confirmation record that changed between the read and the write is never overwritten blind', async () => {
+  const store = sentOnly(), writes = [];
+  const W = confirmWorld(store);
+  const ctx = await hit(W, GROOM, 'admin/confirm?holder=INV-T1');
+  let confReads = 0;
+  const base = writableKv(store, writes);
+  W.env.REG_KV = { put: base.put, get: async (k, t) => {
+    if (k === 'conf:INV-T1' && ++confReads === 2) store[k] = JSON.stringify({ invitationId: 'INV-T1', confirmedAt: null, version: null, actor: 'guest-relations', history: [{ action: 'unconfirm' }] });
+    return base.get(k, t);
+  } };
+  const r = await hit(W, GROOM, 'admin/confirm', { holderId: 'INV-T1', expected: expectedOf(ctx.j) });
+  assert.equal(r.status, 409); assert.deepEqual(r.j.reasons, ['CONFIRMATION_CHANGED']);
+  assert.equal(writes.length, 0);
+});

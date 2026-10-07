@@ -135,8 +135,13 @@ export const CONFIRMATION = Object.freeze({
  * carries the Room_Unit_ID that groups the persons sharing one physical room.
  * The returned array carries `confirmation` (not enumerable): the state above,
  * so a caller can refuse to issue a statement nobody confirmed.
+ *
+ * `assume` ({ version }) — THE ADMIN CONSOLE'S WHAT-IF only (billing-routes.js · admin/confirm GET): the bookings of
+ * the sent version as they WOULD stand once that very version is confirmed, so the confirmation dialog can say
+ * whether Issue would then be available. Only the version sent now is assumed; the stamp says `assumed`, and the
+ * caller never issues from it (no proposal hash leaves an assumed assessment).
  */
-export async function loadConfirmedBookings({ env, identity, holderId, items, generations, overrides }) {
+export async function loadConfirmedBookings({ env, identity, holderId, items, generations, overrides, assume }) {
   const holder = clean(holderId) || clean(identity && identity.invitationId);
   const out = [];
   const stamp = (state, extra) => Object.defineProperty(out, 'confirmation',
@@ -147,7 +152,8 @@ export async function loadConfirmedBookings({ env, identity, holderId, items, ge
   if (!rec || !rec.submissionId) return stamp(CONFIRMATION.NONE);
   const conf = await confirmationRecord(env, holder);
   const version = Number(rec.version || 1);
-  if (!confirmationStands(conf, rec)) {
+  const assumed = !!(assume && Number(assume.version) === version) && !confirmationStands(conf, rec);
+  if (!assumed && !confirmationStands(conf, rec)) {
     return stamp(conf && conf.confirmedAt ? CONFIRMATION.LAPSED : CONFIRMATION.UNCONFIRMED, { version });
   }
 
@@ -174,7 +180,10 @@ export async function loadConfirmedBookings({ env, identity, holderId, items, ge
 
   out.push(...await bookingsOfSelections({ holderId: holder, personId: person, selections: reg.selections, items, generations, overrides,
     unitOf: unitFor, source: 'CONFIRMED_REGISTRATION', version }));
-  return stamp(CONFIRMATION.CONFIRMED, { version, confirmedAt: clean(conf && conf.confirmedAt) || null });
+  if (assumed) return stamp(CONFIRMATION.CONFIRMED, { version, confirmedAt: null, assumed: true });
+  return stamp(CONFIRMATION.CONFIRMED, { version, confirmedAt: clean(conf && conf.confirmedAt) || null,
+    /* who confirmed, in which capacity, from where (src/confirmation.js) — Guest Relations or a BILLING_ADMIN, the same record */
+    confirmedBy: clean(conf && conf.actor) || null, role: clean(conf && conf.role) || null, source: clean(conf && conf.source) || null });
 }
 
 /**

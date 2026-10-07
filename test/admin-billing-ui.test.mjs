@@ -305,3 +305,169 @@ test('REVIEW · a lost answer to Issue or Send is never "nothing happened": the 
   assert.match(s.root.innerHTML, /It may have reached the guest/);
   assert.equal(s.calls.filter((c) => c.method === 'POST').length, 1);
 });
+
+/* ================================================================ CONFIRM BOOKING (Owner, 7 Oct 2026) */
+const SUBMITTED = { submitted: true, state: 'UNCONFIRMED', version: 2, sentAt: '2026-10-05T09:30:00Z', confirmedVersion: null, confirmedAt: null, confirmedBy: null, role: null, source: null };
+const WAITING_HOLDER = (over) => HOLDER({ confirmation: { state: 'UNCONFIRMED', version: 2 }, submission: SUBMITTED,
+  preview: { ...HOLDER().preview, issuable: false, proposalHash: null, reasons: ['BOOKING_NOT_CONFIRMED: UNCONFIRMED — waiting for confirmation — Haruthai or Suthep can confirm this submitted booking (Confirm booking)'] }, ...(over || {}) });
+const CONFIRMED_HOLDER = HOLDER({ confirmation: { state: 'CONFIRMED', version: 2, confirmedAt: '2026-10-07T10:00:00Z', confirmedBy: 'GROOM' },
+  submission: { ...SUBMITTED, state: 'CONFIRMED', confirmedVersion: 2, confirmedAt: '2026-10-07T10:00:00Z', confirmedBy: 'GROOM', role: 'BILLING_ADMIN', source: 'admin-billing' } });
+const CTX = (over) => ({ ok: true, Holder_ID: 'INV-T2', name: { full: 'Guest 2' }, submitted: true, state: 'UNCONFIRMED', canConfirm: true,
+  confirmation: { state: 'UNCONFIRMED' }, snapshot: { submissionId: 'SYL-T2-1', version: 2, sentAt: '2026-10-05T09:30:00Z', digest: 'd'.repeat(64) },
+  sent: { total: 1248, payableLines: 3, onRequest: 0, selected: 3, providerSettled: 1, complete: true, unmapped: [] },
+  current: { readable: true, changed: false }, afterConfirm: { assumedVersion: 2, issuable: true, reasons: [], total: 1248, dueDate: '2026-10-28' }, ...(over || {}) });
+const isPost = (init) => (init && init.method) === 'POST';
+
+test('CONFIRM BOOKING UI · sent, not confirmed: Confirm booking is offered with the waiting wording; the dialog shows the exact submitted version; after it, Issue is available', async () => {
+  let confirmed = false;
+  const { root, calls } = load({ 'admin/overview': OVERVIEW, 'admin/status': statusAnswer,
+    'admin/holder': () => res(200, confirmed ? CONFIRMED_HOLDER : WAITING_HOLDER()),
+    'admin/confirm': (url, init) => {
+      if (!isPost(init)) return res(200, CTX());
+      confirmed = true;
+      return res(200, { ok: true, Holder_ID: 'INV-T2', unchanged: false, confirmation: { state: 'CONFIRMED', confirmedVersion: 2, confirmedAt: '2026-10-07T10:00:00Z', confirmedBy: 'GROOM', role: 'BILLING_ADMIN', source: 'admin-billing' } });
+    } }, { hash: '#holder=INV-T2' });
+  await tick(30);
+  let h = root.innerHTML;
+  assert.deepEqual([...h.matchAll(/data-ab-act="([a-z]+)"/g)].map((m) => m[1]), ['preview', 'confirm', 'issue', 'view', 'download', 'send'],
+    'Preview → Confirm booking → Issue → View → Download → Send');
+  assert.equal(el(root, 'data-ab-act', 'confirm').disabled, false);
+  assert.match(h, /Waiting for confirmation — Haruthai or Suthep can confirm this submitted booking\./);
+  assert.doesNotMatch(h, /Guest Relations confirms the sent trip first/);
+  assert.match(h, /<span class="ab-chip open">Waiting for confirmation<\/span> <span class="ab-mute">version 2 sent 5 Oct, 09:30 UTC/);
+  assert.equal(el(root, 'data-ab-act', 'issue').disabled, true);
+
+  el(root, 'data-ab-act', 'confirm').onclick(); await tick(10);
+  h = root.innerHTML;
+  assert.match(h, /Confirm booking · the submitted version/);
+  assert.match(h, /Guest<\/span> <span><b>Guest 2<\/b>/);
+  assert.match(h, /Submitted<\/span> <span>version 2 · sent 5 Oct, 09:30 UTC/);
+  assert.match(h, /Submitted booking value<\/span> <span><b data-i18n-skip>USD 1,248\.00<\/b>/);
+  assert.match(h, /Payable lines<\/span> <span>3 <span class="ab-mute">· 1 settled with the provider/);
+  assert.match(h, /This confirms exactly the version the guest submitted — version 2, sent 5 Oct, 09:30 UTC — and nothing else\. It counts as Guest Relations' confirmation for billing\. Nothing is issued and nothing is e-mailed\./);
+  assert.match(h, /After confirmation, Issue statement becomes available: the statement preview would be <b data-i18n-skip>USD 1,248\.00<\/b>, due 28 Oct 2026/);
+  assert.doesNotMatch(h, /data-ab-confirm-ack/, 'nothing changed since the submission: no acknowledgement asked');
+  assert.equal(el(root, 'data-ab-confirm-go').disabled, true, 'the tick comes first');
+  assert.equal(calls.filter((c) => c.method === 'POST').length, 0, 'opening the dialog only reads');
+  const box = el(root, 'data-ab-confirm-check'); box.checked = true; box.onchange(); await tick();
+  el(root, 'data-ab-confirm-go').onclick(); await tick(20);
+  const post = calls.filter((c) => c.method === 'POST');
+  assert.equal(post.length, 1); assert.equal(post[0].url, '/api/billing/admin/confirm');
+  assert.deepEqual(post[0].body, { holderId: 'INV-T2', expected: { submissionId: 'SYL-T2-1', version: 2, digest: 'd'.repeat(64) }, acknowledgeChange: false });
+  h = root.innerHTML;
+  assert.match(h, /Confirmed: Guest 2's submitted booking, version 2, by Suthep, 7 Oct, 10:00 UTC\. Issue statement is available from Preview once every other check passes\. Nothing was issued or e-mailed\./);
+  assert.match(h, /<span class="ab-chip on">Confirmed<\/span> <span class="ab-mute">version 2 · 7 Oct 2026 · by Suthep/);
+  assert.equal(el(root, 'data-ab-act', 'confirm').disabled, true);
+  assert.match(h, /Confirmed · version 2 · 7 Oct 2026 · by Suthep\./);
+  assert.match(h, /Statement preview · what Issue would freeze now: the confirmed submitted booking/, 'the guest is read again, the preview open');
+  assert.equal(el(root, 'data-ab-act', 'issue').disabled, false, 'ISSUE STATEMENT is available now');
+  assert.equal(calls.filter((c) => c.url.startsWith('/api/billing/admin/holder')).length, 2, 'read again from the server, never patched');
+});
+
+test('CONFIRM BOOKING UI · not sent: Confirm booking stays disabled — "The guest has not submitted this trip yet." — and nothing is asked', async () => {
+  const notSent = HOLDER({ confirmation: { state: 'NONE' }, submission: { submitted: false, state: 'NONE', version: null, sentAt: null },
+    preview: { ...HOLDER().preview, issuable: false, proposalHash: null, reasons: ['BOOKING_NOT_CONFIRMED: NONE — the guest has not submitted this trip yet'] },
+    booked: { source: 'CURRENT_SELECTION', total: 1248, selected: 2, lines: 2, onRequest: 0, unmapped: [], items: [], blockB: [], sent: null } });
+  const { root, calls } = load({ 'admin/overview': OVERVIEW, 'admin/status': statusAnswer, 'admin/holder': notSent }, { hash: '#holder=INV-T2' });
+  await tick(30);
+  assert.equal(el(root, 'data-ab-act', 'confirm').disabled, true);
+  const slot = root.innerHTML.split('data-ab-act="confirm"')[1].split('</div>')[0];
+  assert.match(slot, /The guest has not submitted this trip yet\./);
+  assert.match(root.innerHTML, /<span class="ab-chip ">Not sent<\/span>/);
+  assert.match(root.innerHTML, /Booked value<\/span> <span><b data-i18n-skip>USD 1,248\.00<\/b>/, 'the booked value is still shown');
+  el(root, 'data-ab-act', 'preview').onclick(); await tick();
+  assert.match(root.innerHTML, /<li>The guest has not submitted this trip yet\. <span class="ab-mute" data-i18n-skip>BOOKING_NOT_CONFIRMED: NONE<\/span><\/li>/);
+  assert.equal(calls.filter((c) => c.url.indexOf('admin/confirm') >= 0).length, 0);
+});
+
+test('CONFIRM BOOKING UI · CURRENT SELECTION HAS CHANGED SINCE SUBMISSION: sent value vs current booked value, and its own acknowledgement before anything is confirmed', async () => {
+  const { root, calls } = load({ 'admin/overview': OVERVIEW, 'admin/status': statusAnswer, 'admin/holder': WAITING_HOLDER(),
+    'admin/confirm': (url, init) => (isPost(init) ? res(200, { ok: true, confirmation: { state: 'CONFIRMED', confirmedVersion: 2, confirmedAt: '2026-10-07T10:00:00Z', confirmedBy: 'BRIDE', role: 'BILLING_ADMIN' } })
+      : res(200, CTX({ current: { readable: true, changed: true, total: 1310, onRequest: 1, updatedAt: '2026-10-06T08:00:00Z' } }))) }, { hash: '#holder=INV-T2' });
+  await tick(30);
+  el(root, 'data-ab-act', 'confirm').onclick(); await tick(10);
+  const h = root.innerHTML;
+  assert.match(h, /<div class="ab-warn" role="note"><p class="t-l1">Current selection has changed since submission<\/p>/);
+  assert.match(h, /Submitted · version 2<\/span> <span><b data-i18n-skip>USD 1,248\.00<\/b>/);
+  assert.match(h, /Current selection · Booked value<\/span> <span><b data-i18n-skip>USD 1,310\.00<\/b> <span class="ab-mute">\+ 1 on request/);
+  assert.match(h, /You confirm the submitted version 2 only\. The newer selection is not confirmed and is never billed until the guest sends it and it is confirmed\./);
+  const check = el(root, 'data-ab-confirm-check'); check.checked = true; check.onchange(); await tick();
+  assert.equal(el(root, 'data-ab-confirm-go').disabled, true, 'the difference must be acknowledged too');
+  const ack = el(root, 'data-ab-confirm-ack'); ack.checked = true; ack.onchange(); await tick();
+  assert.match(root.innerHTML, /I confirm the submitted version 2, not the current selection\./);
+  assert.equal(el(root, 'data-ab-confirm-go').disabled, false);
+  el(root, 'data-ab-confirm-go').onclick(); await tick(20);
+  const post = calls.filter((c) => c.method === 'POST');
+  assert.equal(post.length, 1); assert.equal(post[0].body.acknowledgeChange, true);
+  assert.deepEqual(post[0].body.expected, { submissionId: 'SYL-T2-1', version: 2, digest: 'd'.repeat(64) }, 'the submitted version — never the newer selection');
+  assert.match(root.innerHTML, /by Haruthai/);
+});
+
+test('CONFIRM BOOKING UI · a lost answer re-reads the guest and offers nothing blind; another version sent meanwhile re-reads the dialog', async () => {
+  let reads = 0;
+  const lost = load({ 'admin/overview': OVERVIEW, 'admin/status': statusAnswer,
+    'admin/holder': () => { reads++; return res(200, WAITING_HOLDER()); },
+    'admin/confirm': (url, init) => (isPost(init) ? res(502, null) : res(200, CTX())) }, { hash: '#holder=INV-T2' });
+  await tick(30);
+  el(lost.root, 'data-ab-act', 'confirm').onclick(); await tick(10);
+  const b = el(lost.root, 'data-ab-confirm-check'); b.checked = true; b.onchange(); await tick();
+  el(lost.root, 'data-ab-confirm-go').onclick(); await tick(20);
+  assert.match(lost.root.innerHTML, /The answer to the confirmation was lost\. The guest is read again/);
+  assert.equal(reads, 2); assert.doesNotMatch(lost.root.innerHTML, /data-ab-confirm-go/, 'no second confirmation from the same dialog');
+
+  let gets = 0;
+  const moved = load({ 'admin/overview': OVERVIEW, 'admin/status': statusAnswer, 'admin/holder': WAITING_HOLDER(),
+    'admin/confirm': (url, init) => {
+      if (isPost(init)) return res(409, { ok: false, error: 'The guest has sent another version since this dialog was opened; nothing was confirmed.', reasons: ['SENT_CHANGED'] });
+      gets++; return res(200, gets > 1 ? CTX({ snapshot: { submissionId: 'SYL-T2-1', version: 3, sentAt: '2026-10-07T09:00:00Z', digest: 'e'.repeat(64) } }) : CTX());
+    } }, { hash: '#holder=INV-T2' });
+  await tick(30);
+  el(moved.root, 'data-ab-act', 'confirm').onclick(); await tick(10);
+  const c = el(moved.root, 'data-ab-confirm-check'); c.checked = true; c.onchange(); await tick();
+  el(moved.root, 'data-ab-confirm-go').onclick(); await tick(20);
+  assert.equal(gets, 2, 'the dialog is read again');
+  assert.match(moved.root.innerHTML, /The guest sent another version meanwhile\. Nothing was confirmed/);
+  assert.match(moved.root.innerHTML, /version 3 · sent 7 Oct, 09:00 UTC/);
+  assert.equal(el(moved.root, 'data-ab-confirm-go').disabled, true, 'the new version needs its own tick');
+});
+
+test('CONFIRM BOOKING UI · the list says who waits for confirmation, and "To confirm" finds them', async () => {
+  const { root } = load({ 'admin/overview': OVERVIEW, 'admin/status': statusAnswer });
+  await tick(30);
+  const h = root.innerHTML;
+  assert.match(h.split('data-ab-open="INV-T4"')[1].split('</tr>')[0], /<span class="ab-chip open">Waiting for confirmation<\/span>/);
+  assert.match(h, /To confirm <span class="ab-n">1<\/span>/);
+  el(root, 'data-ab-filter', 'toConfirm').onclick(); await tick();
+  assert.match(root.innerHTML, /INV-T4/); assert.doesNotMatch(root.innerHTML, /data-ab-open="INV-T2"/);
+});
+
+test('CONFIRM BOOKING UI · the guest edits the trip while the dialog is open: the dialog is read again and the difference can be acknowledged', async () => {
+  let gets = 0, posts = [];
+  const { root } = load({ 'admin/overview': OVERVIEW, 'admin/status': statusAnswer, 'admin/holder': WAITING_HOLDER(),
+    'admin/confirm': (url, init) => {
+      if (isPost(init)) { posts.push(JSON.parse(init.body)); return posts.length === 1 ? res(409, { ok: false, error: 'The current selection has changed since submission', reasons: ['ACKNOWLEDGE_CHANGE'], changed: true })
+        : res(200, { ok: true, confirmation: { state: 'CONFIRMED', confirmedVersion: 2, confirmedAt: '2026-10-07T10:00:00Z', confirmedBy: 'GROOM', role: 'BILLING_ADMIN' } }); }
+      gets++; return res(200, gets > 1 ? CTX({ current: { readable: true, changed: true, total: 1310, onRequest: 0 } }) : CTX());
+    } }, { hash: '#holder=INV-T2' });
+  await tick(30);
+  el(root, 'data-ab-act', 'confirm').onclick(); await tick(10);
+  const c = el(root, 'data-ab-confirm-check'); c.checked = true; c.onchange(); await tick();
+  el(root, 'data-ab-confirm-go').onclick(); await tick(20);
+  assert.equal(gets, 2, 'read again, never stuck on an acknowledgement it cannot give');
+  assert.match(root.innerHTML, /current selection changed while this dialog was open\. Nothing was confirmed/);
+  assert.match(root.innerHTML, /Current selection has changed since submission/);
+  const c2 = el(root, 'data-ab-confirm-check'); c2.checked = true; c2.onchange(); await tick();
+  const a2 = el(root, 'data-ab-confirm-ack'); a2.checked = true; a2.onchange(); await tick();
+  el(root, 'data-ab-confirm-go').onclick(); await tick(20);
+  assert.deepEqual(posts.map((p) => p.acknowledgeChange), [false, true]);
+  assert.match(root.innerHTML, /by Suthep/);
+});
+
+test('CONFIRM BOOKING UI · "by Haruthai / Suthep" only for a BILLING_ADMIN\'s confirmation — a Guest Relations actor is never read as a name', () => {
+  const { A } = load({ 'admin/overview': OVERVIEW, 'admin/status': statusAnswer, 'admin/holder': HOLDER({
+    submission: { ...SUBMITTED, state: 'CONFIRMED', confirmedVersion: 2, confirmedAt: '2026-10-07T10:00:00Z', confirmedBy: 'GROOM', role: 'GUEST_RELATIONS', source: 'gr-endpoint' } }) }, { hash: '#holder=INV-T2' });
+  return tick(30).then(() => {
+    const h = A.page();
+    assert.match(h, /version 2 · 7 Oct 2026 · by Guest Relations/); assert.doesNotMatch(h, /by Suthep/);
+  });
+});

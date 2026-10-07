@@ -8,10 +8,14 @@
    every amount, total, due date and status is the server's (the Billing Engine,
    the ledger, Google 002/008) — this page arranges and asks.
 
-   NOTHING HAPPENS BY ITSELF. Opening the page or a guest only reads. Issuing a
-   statement, sending it, verifying or rejecting a payment each need their own
-   explicit confirmation on this page; none is ever triggered by a load.
+   NOTHING HAPPENS BY ITSELF. Opening the page or a guest only reads. Confirming
+   a booking, issuing a statement, sending it, verifying or rejecting a payment
+   each need their own explicit confirmation on this page; none is ever
+   triggered by a load.
      · PREVIEW — the canonical engine's lines and total, before anything is issued
+     · CONFIRM BOOKING — the version the guest SUBMITTED (never the saved trip),
+                 as Guest Relations would confirm it: name, sent time, value and
+                 lines shown first; a selection changed since must be acknowledged
      · ISSUE   — only when the server says it may, confirming the very statement
                  previewed (its proposal hash); immutable once issued
      · VIEW    — the exact issued revision
@@ -48,16 +52,28 @@
   }
 
   var METHOD = { PAYPAL_EUR: 'PayPal (EUR)', SEPA_EUR: 'Bank transfer — SEPA (EUR)', PROMPTPAY_THB: 'PromptPay (THB)' };
-  var CONF = { CONFIRMED: ['Confirmed', 'on'], UNCONFIRMED: ['Sent, not confirmed', 'open'], LAPSED: ['Changed since confirmed', 'open'], NONE: ['Not sent', ''] };
+  var CONF = { CONFIRMED: ['Confirmed', 'on'], UNCONFIRMED: ['Waiting for confirmation', 'open'], LAPSED: ['Sent again · waiting for confirmation', 'open'],
+    NONE: ['Not sent', ''], UNREADABLE: ['Not readable', 'open'] };
+  /* who confirmed: the audit label of a BILLING_ADMIN, else Guest Relations */
+  var WHO = { BRIDE: 'Haruthai', GROOM: 'Suthep' };
+  function confirmedBy(c) { return c && c.role === 'BILLING_ADMIN' && WHO[c.confirmedBy] ? WHO[c.confirmedBy] : 'Guest Relations'; }
+  var WAITING = 'Waiting for confirmation — Haruthai or Suthep can confirm this submitted booking.';
+  var NOT_SUBMITTED = 'The guest has not submitted this trip yet.';
+  /* the server's reason, in the console's words where it is about the booking */
+  function reasonWords(r) {
+    if (/^BOOKING_NOT_CONFIRMED: (UNCONFIRMED|LAPSED)/.test(r || '')) return WAITING;
+    if (/^BOOKING_NOT_CONFIRMED: NONE/.test(r || '')) return NOT_SUBMITTED;
+    return r;
+  }
   var PAY = { UNPAID: 'Not paid', PARTIAL: 'Partly paid', PAID: 'Paid', OVERPAID: 'Overpaid', NOTHING_DUE: 'Nothing due' };
-  var FILTERS = [['all', 'All'], ['booked', 'Booked'], ['notIssued', 'Not issued'], ['issued', 'Issued'], ['outstanding', 'Outstanding'], ['paid', 'Paid'], ['overdue', 'Overdue'], ['review', 'Manual review']];
+  var FILTERS = [['all', 'All'], ['booked', 'Booked'], ['toConfirm', 'To confirm'], ['notIssued', 'Not issued'], ['issued', 'Issued'], ['outstanding', 'Outstanding'], ['paid', 'Paid'], ['overdue', 'Overdue'], ['review', 'Manual review']];
 
   /* ------------------------------------------------------------- the state */
   var S = {
     phase: 'idle', error: '', overview: null, status: {}, checked: 0, checking: false, statusError: '',
     filter: 'all', q: '', route: { view: 'guests', id: null },
     holder: null, holderPhase: 'idle', holderError: '', panel: null,
-    issue: null, send: null, pay: null, msg: '', download: '',
+    issue: null, send: null, pay: null, confirm: null, msg: '', download: '',
     revenue: null, revenuePhase: 'idle', revenueError: '',
   };
   var root = null;
@@ -85,7 +101,7 @@
   function go(hash) { if (location.hash === hash || !hashEvents) { location.hash = hash; onRoute(); } else location.hash = hash; }
   function onRoute() {
     S.route = readRoute();
-    S.panel = null; S.issue = null; S.send = null; S.pay = null; S.msg = ''; S.download = '';
+    S.panel = null; S.issue = null; S.send = null; S.pay = null; S.confirm = null; S.msg = ''; S.download = '';
     if (S.route.view === 'holder') loadHolder(S.route.id);
     else if (S.route.view === 'revenue' && S.revenuePhase === 'idle') loadRevenue();
     draw();
@@ -162,6 +178,7 @@
   function matches(h, f) {
     var s = h.settlement, p = h.payment, st = S.status[h.Holder_ID];
     if (f === 'booked') return !!(st && st.booked && !st.booked.error && st.booked.selected > 0);
+    if (f === 'toConfirm') return !!(st && st.confirmation && (st.confirmation.state === 'UNCONFIRMED' || st.confirmation.state === 'LAPSED'));
     if (f === 'notIssued') return !(s && s.issuedRevision);
     if (f === 'issued') return !!(s && s.issuedRevision);
     if (f === 'outstanding') return !!(p && (p.status === 'UNPAID' || p.status === 'PARTIAL'));
@@ -214,11 +231,11 @@
     var shown = rows.filter(function (h) { return matches(h, S.filter) && searchHit(h, S.q); });
     var done = S.checked >= rows.length;
     var chips = FILTERS.map(function (f) {
-      var partial = ((f[0] === 'review' || f[0] === 'booked') && !done);
+      var partial = ((f[0] === 'review' || f[0] === 'booked' || f[0] === 'toConfirm') && !done);
       return '<button type="button" class="ab-filter' + (S.filter === f[0] ? ' on' : '') + '" data-ab-filter="' + f[0] + '" aria-pressed="' + (S.filter === f[0]) + '">' +
         esc(f[1]) + ' <span class="ab-n">' + counts[f[0]] + (partial ? '+' : '') + '</span></button>';
     }).join('');
-    var progress = done ? '' : '<p class="t-b2 ab-progress" role="status">Checking Guest Relations\' confirmations and drafts · ' + S.checked + ' / ' + rows.length + '</p>';
+    var progress = done ? '' : '<p class="t-b2 ab-progress" role="status">Checking confirmations and booked values · ' + S.checked + ' / ' + rows.length + '</p>';
     var head = '<tr><th>Guest</th><th>Guest Relations</th><th class="num">Booked value</th><th>Statement</th><th>Issued · due</th><th class="num">Statement total</th><th class="num">Paid</th><th class="num">Outstanding</th><th>Method</th><th>Review</th></tr>';
     var body = shown.map(function (h) {
       var s = h.settlement || {}, p = h.payment, rv = review(h);
@@ -266,16 +283,20 @@
       (why ? '<p class="t-b2 ab-why">' + esc(why) + '</p>' : '') + '</div>';
   }
   function holderView() {
-    if (S.holderPhase === 'loading' || S.holderPhase === 'idle') return '<p class="t-b2 ab-progress" role="status">Reading this guest: the trip Guest Relations confirmed, the engine\'s preview, the statement and the payments…</p>';
+    if (S.holderPhase === 'loading' || S.holderPhase === 'idle') return '<p class="t-b2 ab-progress" role="status">Reading this guest: the submitted booking and its confirmation, the engine\'s preview, the statement and the payments…</p>';
     if (S.holderPhase === 'error') return '<div class="p-card"><p class="t-b1">' + esc(S.holderError) + '</p><div class="p-actions"><button type="button" class="p-link" data-ab-reload>Try again</button></div></div>';
     var H = S.holder, g = H.guest || {}, pv = H.preview || {}, iss = H.issued, conf = H.confirmation || {};
-    var c = CONF[conf.state] || [conf.state || '—', ''];
+    /* the submitted booking and its confirmation, as the server read them for Confirm booking */
+    var sub = H.submission || { state: conf.state, confirmedAt: conf.confirmedAt, confirmedVersion: conf.version };
+    var c = CONF[sub.state] || [sub.state || '—', ''];
+    var canConfirm = !!H.submission && (sub.state === 'UNCONFIRMED' || sub.state === 'LAPSED');
     var name = g.name ? g.name.full : (g.contactName || '(no 006 name)');
     var emailLine = g.email ? '<span data-i18n-skip>' + esc(g.email) + '</span> <span class="ab-mute">· ' + esc(g.emailSource === 'CONTACT' ? 'contact on file' : 'from the trip they sent') + '</span>' : '<span class="ab-chip open">Email unavailable</span>';
     var sendWhy = !iss ? 'Only an issued statement can be sent.' : !g.email ? 'Email unavailable — the guest has no reliable e-mail on file.' : '';
-    var issueWhy = pv.issuable ? (S.panel === 'preview' ? '' : 'Open the preview first.') : (pv.reasons && pv.reasons.length ? pv.reasons[0] : 'Not issuable.');
+    var issueWhy = pv.issuable ? (S.panel === 'preview' ? '' : 'Open the preview first.') : (pv.reasons && pv.reasons.length ? reasonWords(pv.reasons[0]) : 'Not issuable.');
     var actions = '<div class="ab-actions">' +
       act('preview', 'Preview', true, '', S.panel !== 'preview') +
+      act('confirm', 'Confirm booking', canConfirm && S.panel !== 'confirm', confirmWhy(sub), canConfirm && S.panel !== 'confirm') +
       act('issue', iss ? 'Issue new revision' : 'Issue statement', !!pv.issuable && S.panel === 'preview', issueWhy, S.panel === 'preview') +
       act('view', 'View statement', !!iss, iss ? '' : 'Not issued yet.') +
       act('download', 'Download PDF', !!iss, iss ? '' : 'Not issued yet.') +
@@ -285,7 +306,9 @@
       '<h2 class="t-d1 ab-h">' + esc(name) + '</h2>' +
       '<div class="ab-grid2">' +
       kv('Holder', '<span data-i18n-skip>' + esc(H.Holder_ID) + '</span> · ' + esc(g.guestId || '') + (g.hosts ? ' · host' : '')) +
-      kv('Guest Relations', '<span class="ab-chip ' + c[1] + '">' + esc(c[0]) + '</span>' + (conf.confirmedAt ? ' <span class="ab-mute">' + esc(day(conf.confirmedAt)) + '</span>' : '')) +
+      kv('Guest Relations', '<span class="ab-chip ' + c[1] + '">' + esc(c[0]) + '</span>' +
+        (sub.state === 'CONFIRMED' && sub.confirmedAt ? ' <span class="ab-mute">' + (sub.confirmedVersion ? 'version ' + esc(sub.confirmedVersion) + ' · ' : '') + esc(day(sub.confirmedAt)) + (H.submission ? ' · by ' + esc(confirmedBy(sub)) : '') + '</span>'
+          : sub.submitted && sub.sentAt ? ' <span class="ab-mute">version ' + esc(sub.version) + ' sent ' + esc(when(sub.sentAt)) + '</span>' : '')) +
       kv('E-mail', emailLine) +
       kv('Payment method', H.method && H.method.channel ? esc(METHOD[H.method.channel] || H.method.channel) + (H.method.locked ? ' · fixed' : '') : '<span class="ab-chip open">To state: ' + esc(H.method && H.method.reason || 'undetermined') + '</span>') +
       kv('Booked value', !H.booked ? '—' : H.booked.error ? '<span class="ab-chip open">not readable</span>'
@@ -295,7 +318,17 @@
       kv('Statement', iss ? esc(iss.Settlement_ID + ' · version ' + iss.revision + ' · issued ' + day(iss.issueDate) + ' · due ' + day(iss.dueDate)) : 'Not issued') +
       kv('Statement total', iss ? '<b data-i18n-skip>' + esc(usd(iss.total)) + '</b>' : '—') +
       '</div>' + actions + (S.msg ? '<p class="t-b1 ab-msg" role="status">' + S.msg + '</p>' : '') + '</div>';
-    return head + bookedView() + panelView() + paymentsView() + mailView();
+    /* an open panel (preview, confirm, issue, view, send) sits right under the actions that opened it */
+    return head + panelView() + bookedView() + paymentsView() + mailView();
+  }
+  /* why Confirm booking is (not) offered — said to the BILLING_ADMINs, who confirm themselves */
+  function confirmWhy(sub) {
+    if (sub.state === 'UNCONFIRMED') return WAITING;
+    if (sub.state === 'LAPSED') return 'The guest sent version ' + (sub.version || '?') + ' after the confirmation. ' + WAITING;
+    if (sub.state === 'CONFIRMED') return 'Confirmed' + (sub.confirmedVersion ? ' · version ' + sub.confirmedVersion : '') + (sub.confirmedAt ? ' · ' + day(sub.confirmedAt) : '') + (S.holder && S.holder.submission ? ' · by ' + confirmedBy(sub) : '') + '.';
+    if (sub.state === 'NONE') return NOT_SUBMITTED;
+    if (sub.state === 'UNREADABLE') return 'The submitted booking cannot be read — nothing can be confirmed' + (sub.error ? ': ' + sub.error : '.');
+    return '';
   }
   /* BOOKED VALUE in full — the lines behind the amount; separate from the statement and from whether it may be issued */
   function bookedView() {
@@ -305,20 +338,20 @@
     var src = b.source === 'CURRENT_SELECTION' ? 'The guest\'s current selection' + (b.updatedAt ? ', saved ' + when(b.updatedAt) : '')
       : b.source === 'SENT_VERSION' ? 'The version the guest sent' + (b.updatedAt ? ' on ' + when(b.updatedAt) : '') : 'Nothing selected';
     var sent = b.sent ? '<p class="t-b2">' + (b.sent.differs
-      ? 'The version sent to Guest Relations (V' + esc(b.sent.version) + ', ' + esc(when(b.sent.lastSentAt)) + ') is worth <b data-i18n-skip>' + esc(usd(b.sent.total)) + '</b> — the guest has changed the selection since.'
-      : 'Sent to Guest Relations as it stands (V' + esc(b.sent.version) + ', ' + esc(when(b.sent.lastSentAt)) + ').') + '</p>' : '';
+      ? 'The submitted version (V' + esc(b.sent.version) + ', ' + esc(when(b.sent.lastSentAt)) + ') is worth <b data-i18n-skip>' + esc(usd(b.sent.total)) + '</b> — the guest has changed the selection since.'
+      : 'Submitted as it stands (V' + esc(b.sent.version) + ', ' + esc(when(b.sent.lastSentAt)) + ').') + '</p>' : '';
     return '<section class="p-card ab-panel" aria-label="Booked value"><p class="t-l1">Booked value · ' + esc(b.source === 'SENT_VERSION' ? 'the version sent' : 'the current selection') + ', not a statement</p>' +
       '<h3 class="t-h1" data-i18n-skip>' + esc(b.source === 'NONE' || !b.selected ? 'Nothing selected' : usd(b.total)) + '</h3>' +
       (b.onRequest ? '<p class="t-b2 ab-why">+ ' + esc(b.onRequest) + ' selected line' + (b.onRequest > 1 ? 's' : '') + ' without an amount yet (on request / to review): ' + esc((b.reviewReasons || []).join(', ')) + '</p>' : '') +
-      '<p class="t-b2">' + esc(src) + ' — priced by the Billing Engine on today\'s source. It is not a statement, nothing is stored or issued from it, and it does not make the guest issuable: a statement needs Guest Relations\' confirmation.</p>' + sent +
+      '<p class="t-b2">' + esc(src) + ' — priced by the Billing Engine on today\'s source. It is not a statement, nothing is stored or issued from it, and it does not make the guest issuable: a statement is built only from the submitted booking, once it is confirmed.</p>' + sent +
       (b.items && b.items.length ? linesTable(b.items, true) : '') +
       (b.blockB && b.blockB.length ? '<p class="t-l1">Block B · settled with the provider, never in the booked value</p>' + linesTable(b.blockB, false) : '') +
       (b.unmapped && b.unmapped.length ? '<p class="t-b2 ab-why">Selected products without an 002 item: ' + esc(b.unmapped.join(', ')) + '</p>' : '') + '</section>';
   }
   function previewView() {
     var H = S.holder, pv = H.preview || {};
-    var reasons = (pv.reasons || []).map(function (r) { return '<li>' + esc(r) + '</li>'; }).join('');
-    return '<section class="p-card ab-panel" aria-label="Statement preview"><p class="t-l1">Statement preview · what Issue would freeze now: the trip Guest Relations confirmed · nothing is issued</p>' +
+    var reasons = (pv.reasons || []).map(function (r) { var w = reasonWords(r); return '<li>' + esc(w) + (w !== r ? ' <span class="ab-mute" data-i18n-skip>' + esc(String(r).split(' — ')[0]) + '</span>' : '') + '</li>'; }).join('');
+    return '<section class="p-card ab-panel" aria-label="Statement preview"><p class="t-l1">Statement preview · what Issue would freeze now: the confirmed submitted booking · nothing is issued</p>' +
       '<h3 class="t-h1">' + esc(usd(pv.total)) + '</h3>' +
       '<div class="ab-grid2">' + kv('Issue date if issued now', esc(day(pv.issueDate))) + kv('Due date', esc(day(pv.dueDate))) +
       kv('In the payment currency', pv.inCurrency ? '<span data-i18n-skip>' + esc(money(pv.inCurrency.currency, pv.inCurrency.amount)) + '</span> <span class="ab-mute">at ' + esc(pv.inCurrency.rate) + '</span>' : '—') +
@@ -358,6 +391,42 @@
         return '<li>V' + esc(r.Revision) + ' · ' + esc(r.Revision_State) + (r.total != null ? ' · ' + esc(usd(r.total)) : '') + (r.issuedAt ? ' · issued ' + esc(when(r.issuedAt)) + (r.issuedBy ? ' by ' + esc(r.issuedBy) : '') : '') + '</li>';
       }).join('') + '</ul>' : '') + '</section>';
   }
+  /* CONFIRM BOOKING — the submitted version, shown in full before anything is confirmed */
+  function confirmPanel() {
+    var C = S.confirm || {}, H = S.holder, g = H.guest || {};
+    if (C.phase === 'loading') return '<section class="p-card ab-panel"><p class="t-b2" role="status">Reading the submitted booking…</p></section>';
+    if (C.phase === 'error') return '<section class="p-card ab-panel ab-confirm" aria-label="Confirm booking"><p class="t-l1 open">Confirm booking</p><p class="t-b1 ab-err">' + esc(C.error) + '</p>' +
+      '<div class="p-actions"><button type="button" class="p-link mute" data-ab-close>Close</button></div></section>';
+    if (C.done) return '<section class="p-card ab-panel ab-confirm" aria-label="Booking confirmed"><p class="t-l1 on">Booking confirmed</p><p class="t-b1">' + esc(C.done) + '</p></section>';
+    var x = C.ctx || {};
+    var name = (x.name && x.name.full) || (g.name && g.name.full) || H.Holder_ID;
+    if (!x.submitted) return '<section class="p-card ab-panel ab-confirm" aria-label="Confirm booking"><p class="t-l1">Confirm booking</p><p class="t-b1">' + esc(NOT_SUBMITTED) + '</p><p class="t-b2">Nothing can be confirmed until they send it. The Booked value above is their current selection.</p></section>';
+    if (!x.canConfirm) return '<section class="p-card ab-panel ab-confirm" aria-label="Confirm booking"><p class="t-l1 on">Confirmed</p><p class="t-b1">' + esc(confirmWhy(Object.assign({ state: x.state }, x.confirmation || {}))) + '</p></section>';
+    var snap = x.snapshot || {}, sent = x.sent || {}, cur = x.current || {}, after = x.afterConfirm;
+    var v = 'version ' + snap.version;
+    var needAck = cur.changed !== false;
+    var changed = cur.changed
+      ? '<div class="ab-warn" role="note"><p class="t-l1">Current selection has changed since submission</p><div class="ab-grid2">' +
+        kv('Submitted · ' + v, '<b data-i18n-skip>' + esc(usd(sent.total)) + '</b>' + (sent.onRequest ? ' <span class="ab-mute">+ ' + esc(sent.onRequest) + ' on request</span>' : '')) +
+        kv('Current selection · Booked value', '<b data-i18n-skip>' + esc(usd(cur.total)) + '</b>' + (cur.onRequest ? ' <span class="ab-mute">+ ' + esc(cur.onRequest) + ' on request</span>' : '') + (cur.updatedAt ? ' <span class="ab-mute">· saved ' + esc(when(cur.updatedAt)) + '</span>' : '')) + '</div>' +
+        '<p class="t-b2">You confirm the submitted ' + esc(v) + ' only. The newer selection is not confirmed and is never billed until the guest sends it and it is confirmed.</p></div>'
+      : cur.changed === null ? '<div class="ab-warn" role="note"><p class="t-l1">The current selection cannot be read just now</p><p class="t-b2">It may differ from the submitted version. You confirm the submitted ' + esc(v) + ' only.</p></div>' : '';
+    var next = !after ? '' : after.error ? '<p class="t-b2 ab-why">After confirmation: the statement cannot be calculated just now — ' + esc(after.error) + '</p>'
+      : after.issuable ? '<p class="t-b2 ab-ok">After confirmation, Issue statement becomes available: the statement preview would be <b data-i18n-skip>' + esc(usd(after.total)) + '</b>' + (after.dueDate ? ', due ' + esc(day(after.dueDate)) : '') + '. Nothing is issued until you issue it.</p>'
+      : '<p class="t-b2">After confirmation, Issue statement still waits for:</p><ul class="t-b2 ab-reasons">' + (after.reasons || []).map(function (r) { return '<li>' + esc(reasonWords(r)) + '</li>'; }).join('') + '</ul>';
+    var ok = C.checked && (!needAck || C.ack) && !C.busy;
+    return '<section class="p-card ab-panel ab-confirm" aria-label="Confirm booking"><p class="t-l1 open">Confirm booking · the submitted version</p>' +
+      '<div class="ab-grid2">' + kv('Guest', '<b>' + esc(name) + '</b>') + kv('Submitted', esc(v) + ' · sent ' + esc(when(snap.sentAt))) +
+      kv('Submitted booking value', '<b data-i18n-skip>' + esc(usd(sent.total)) + '</b>' + (sent.onRequest ? ' <span class="ab-mute">+ ' + esc(sent.onRequest) + ' on request</span>' : '')) +
+      kv('Payable lines', esc(sent.payableLines != null ? sent.payableLines : '—') + (sent.providerSettled ? ' <span class="ab-mute">· ' + esc(sent.providerSettled) + ' settled with the provider</span>' : '')) + '</div>' +
+      '<p class="t-b1">This confirms exactly the version the guest submitted — ' + esc(v) + ', sent ' + esc(when(snap.sentAt)) + ' — and nothing else. It counts as Guest Relations\' confirmation for billing. Nothing is issued and nothing is e-mailed.</p>' +
+      changed + next +
+      (needAck ? '<label class="p-check t-b2"><input type="checkbox" data-ab-confirm-ack' + (C.ack ? ' checked' : '') + (C.busy ? ' disabled' : '') + '><span>I confirm the submitted ' + esc(v) + ', not the current selection.</span></label>' : '') +
+      '<label class="p-check t-b2"><input type="checkbox" data-ab-confirm-check' + (C.checked ? ' checked' : '') + (C.busy ? ' disabled' : '') + '><span>I have checked the submitted booking and confirm it.</span></label>' +
+      '<div class="p-actions"><button type="button" class="p-act" data-ab-confirm-go' + (ok ? '' : ' disabled') + '>' + (C.busy ? 'Confirming…' : 'Confirm booking now') + '</button>' +
+      '<button type="button" class="p-link mute" data-ab-close' + (C.busy ? ' disabled' : '') + '>Cancel</button></div>' +
+      (C.error ? '<p class="t-b1 ab-err" role="alert">' + esc(C.error) + '</p>' : '') + '</section>';
+  }
   function sendPanel() {
     var D = S.send || {};
     if (D.phase === 'loading') return '<section class="p-card ab-panel"><p class="t-b2" role="status">Reading the recipient and the statement…</p></section>';
@@ -387,6 +456,7 @@
       (D.error ? '<p class="t-b1 ab-err" role="alert">' + esc(D.error) + '</p>' : '') + '</section>';
   }
   function panelView() {
+    if (S.panel === 'confirm') return confirmPanel();
     if (S.panel === 'preview') return previewView() + (S.issue ? issuePanel() : '');
     if (S.panel === 'view') return viewPanel();
     if (S.panel === 'send') return sendPanel();
@@ -535,6 +605,51 @@
       if ((x.j.reasons || []).indexOf('PREVIEW_CHANGED') >= 0) refreshAfterWrite(H.Holder_ID, 'preview');
     });
   }
+  function openConfirm() {
+    var H = S.holder; if (!H) return;
+    S.panel = 'confirm'; S.issue = null; S.send = null; S.confirm = { phase: 'loading', checked: false, ack: false }; draw();
+    api('admin/confirm?holder=' + encodeURIComponent(H.Holder_ID)).then(function (x) {
+      if (!S.confirm || S.panel !== 'confirm') return;
+      if (!x.ok) { S.confirm.phase = 'error'; S.confirm.error = x.j.error || 'The submitted booking could not be read.'; draw(); return; }
+      S.confirm.phase = 'ready'; S.confirm.ctx = x.j; draw();
+    });
+  }
+  function confirmNow() {
+    var C = S.confirm, x = C && C.ctx, H = S.holder; if (!C || !x || !x.snapshot || C.busy || !C.checked) return;
+    C.busy = true; C.error = ''; draw();
+    var snap = x.snapshot;
+    api('admin/confirm', { method: 'POST', body: { holderId: H.Holder_ID, expected: { submissionId: snap.submissionId, version: snap.version, digest: snap.digest }, acknowledgeChange: !!C.ack } }).then(function (r) {
+      C.busy = false;
+      if (r.ok) {
+        var cf = r.j.confirmation || {};
+        C.done = (r.j.unchanged ? 'Already confirmed: ' : 'Confirmed: ') + ((x.name && x.name.full) || H.Holder_ID) + '\'s submitted booking, version ' + (cf.confirmedVersion || snap.version) + ', by ' + confirmedBy(cf) + ', ' + when(cf.confirmedAt) +
+          '. Issue statement is available from Preview once every other check passes. Nothing was issued or e-mailed.';
+        S.msg = esc(C.done);
+        refreshAfterWrite(H.Holder_ID, 'preview').then(function () {
+          var s2 = S.holder && S.holder.submission;
+          if (s2 && s2.state !== 'CONFIRMED') { S.msg = esc(C.done + ' The status can take up to a minute to show here — read the guest again if it does not.'); draw(); }
+        });
+        return;
+      }
+      /* no answer, or a server failure: it may have been saved — the guest is read again, nothing is offered blind */
+      if (r.status === 0 || r.status >= 500) {
+        S.confirm = null; S.panel = null;
+        S.msg = esc('The answer to the confirmation was lost. The guest is read again — check the Guest Relations status before confirming again.');
+        refreshAfterWrite(H.Holder_ID, null);
+        return;
+      }
+      var why = r.j.reasons || [];
+      if (why.indexOf('SENT_CHANGED') >= 0) { S.msg = esc('The guest sent another version meanwhile. Nothing was confirmed — the submitted booking is read again.'); openConfirm(); return; }
+      /* the guest changed the saved trip (or it became unreadable) while the dialog was open: read again, so the difference is shown and can be acknowledged */
+      if (why.indexOf('ACKNOWLEDGE_CHANGE') >= 0 || why.indexOf('CONFIRMATION_CHANGED') >= 0) {
+        S.msg = esc(why.indexOf('ACKNOWLEDGE_CHANGE') >= 0 ? 'The guest\'s current selection changed while this dialog was open. Nothing was confirmed — the submitted booking is read again.'
+          : 'The confirmation record changed meanwhile. Nothing was confirmed — the submitted booking is read again.');
+        openConfirm(); return;
+      }
+      C.error = 'Nothing was confirmed: ' + (r.j.error || 'refused');
+      draw();
+    });
+  }
   function openSend() {
     var H = S.holder; if (!H) return;
     S.panel = 'send'; S.send = { phase: 'loading', checked: false, again: false, sendKey: key() }; draw();
@@ -591,15 +706,15 @@
   /* after a write, the guest is read again from the server — the page never patches figures itself */
   function refreshAfterWrite(id, panel) {
     var keepMsg = S.msg, keepPay = S.pay && S.pay.msg ? { msg: S.pay.msg } : null, keepSend = S.send, keepIssue = S.issue;
-    loadHolder(id).then(function () {
+    /* the list's figures for this guest are stale too: read again on the way back */
+    S.overviewStale = true;
+    return loadHolder(id).then(function () {
       S.msg = keepMsg; if (keepPay) S.pay = keepPay;
       if (panel === 'view') { S.panel = 'view'; S.issue = null; }
       else if (panel === 'preview') { S.panel = 'preview'; S.issue = keepIssue && !keepIssue.done ? { checked: false, error: keepIssue.error } : null; }
       else if (panel === 'send') { S.panel = 'send'; S.send = keepSend; }
       draw();
     });
-    /* the list's figures for this guest are stale too: read again on the way back */
-    S.overviewStale = true;
   }
 
   /* ---------------------------------------------------------------- wiring */
@@ -618,14 +733,18 @@
     on('[data-ab-act]', 'click', function (el) {
       var a = el.getAttribute('data-ab-act');
       S.msg = '';
-      if (a === 'preview') { S.panel = 'preview'; S.issue = null; S.send = null; }
+      if (a === 'preview') { S.panel = 'preview'; S.issue = null; S.send = null; S.confirm = null; }
+      else if (a === 'confirm') { openConfirm(); return; }
       else if (a === 'issue') { if (S.panel === 'preview') S.issue = { checked: false }; }
-      else if (a === 'view') { S.panel = 'view'; S.issue = null; S.send = null; }
+      else if (a === 'view') { S.panel = 'view'; S.issue = null; S.send = null; S.confirm = null; }
       else if (a === 'download') { download(); return; }
       else if (a === 'send') { openSend(); return; }
       draw();
     });
-    on('[data-ab-close]', 'click', function () { S.issue = null; if (S.panel === 'send') { S.panel = null; S.send = null; } draw(); });
+    on('[data-ab-close]', 'click', function () { S.issue = null; if (S.panel === 'send' || S.panel === 'confirm') { S.panel = null; S.send = null; S.confirm = null; } draw(); });
+    on('[data-ab-confirm-check]', 'change', function (el) { if (S.confirm) { S.confirm.checked = !!el.checked; draw(); } });
+    on('[data-ab-confirm-ack]', 'change', function (el) { if (S.confirm) { S.confirm.ack = !!el.checked; draw(); } });
+    on('[data-ab-confirm-go]', 'click', function () { confirmNow(); });
     on('[data-ab-issue-check]', 'change', function (el) { if (S.issue) { S.issue.checked = !!el.checked; draw(); } });
     on('[data-ab-issue-go]', 'click', function () { issueNow(); });
     on('[data-ab-send-check]', 'change', function (el) { if (S.send) { S.send.checked = !!el.checked; draw(); } });

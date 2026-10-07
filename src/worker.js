@@ -56,7 +56,7 @@ export { BillingLedger } from './billing-ledger.js';
 import { handleBilling } from './billing-routes.js';
 /* THE H&S ADMIN CONSOLE (Owner, 7 Oct 2026): the page, generated from src/admin/billing.html (src/build-admin-page.cjs) */
 import ADMIN_PAGE from './admin-page.js';
-import { confirmationStands } from './confirmation.js';
+import { confirmationStands, writeConfirmation, CONFIRMATION_ROLE } from './confirmation.js';
 import { identify, owns, loadIndex } from './auth.js';
 import { authIdOf } from '../register/crypto.mjs';   /* the one-way derivation the register's index is keyed by (the guest's own document read) */
 import { MEDIA_SIZES } from './media-sizes.js';
@@ -1828,30 +1828,20 @@ async function handleConfirm(request, env) {
   const note = String(body && body.note || '').slice(0, 400);
   if (!INV_RE.test(invitationId)) return json({ ok: false, error: 'invalid invitation' }, 400);
   if (!env.REG_KV) return json({ ok: false, error: 'store unavailable' }, 503);
-  const key = 'conf:' + invitationId;
-  const now = new Date().toISOString();
-  const current = (await env.REG_KV.get(key, 'json')) || { invitationId, confirmedAt: null, history: [] };
+  const current = await env.REG_KV.get('conf:' + invitationId, 'json');
   /* GUEST RELATIONS CONFIRMS A SENT VERSION (OQ-27 · PRQ-04-04): the confirmation records which version of the trip it confirms,
-     so a later send lapses it; confirming again after an update confirms the new version */
+     so a later send lapses it; confirming again after an update confirms the new version. The one write (src/confirmation.js)
+     is shared with Haruthai and Suthep's Confirm booking in the admin console: one record, one history. */
   let record = null; try { record = JSON.parse(await env.REG_KV.get('reg:' + invitationId) || 'null'); } catch (e) { record = null; }
   const version = record && record.submissionId ? (record.version || 1) : null;
-  const sentAt = record ? (record.lastSentAt || record.submittedAt || null) : null;
-  /* idempotent: confirming the version already confirmed changes nothing */
-  if (action === 'confirm' && current.confirmedAt && confirmationStands(current, record)) {
-    return json({ ok: true, invitationId, confirmedAt: current.confirmedAt, version: current.version != null ? current.version : version, unchanged: true }, 200);
+  /* idempotent: confirming the version already confirmed (or withdrawing nothing) changes nothing */
+  const w = await writeConfirmation(env.REG_KV, { invitationId, action, actor, role: CONFIRMATION_ROLE.GUEST_RELATIONS, source: 'gr-endpoint', note, record, current });
+  if (w.unchanged) {
+    return action === 'confirm'
+      ? json({ ok: true, invitationId, confirmedAt: w.conf.confirmedAt, version: w.conf.version != null ? w.conf.version : version, unchanged: true }, 200)
+      : json({ ok: true, invitationId, confirmedAt: null, unchanged: true }, 200);
   }
-  if (action === 'unconfirm' && !current.confirmedAt) {
-    return json({ ok: true, invitationId, confirmedAt: null, unchanged: true }, 200);
-  }
-  const next = {
-    invitationId,
-    confirmedAt: action === 'confirm' ? now : null,
-    version: action === 'confirm' ? version : null, sentAt: action === 'confirm' ? sentAt : null,
-    actor, source: 'gr-endpoint', note,
-    history: (current.history || []).concat([{ action, at: now, actor, note, version: action === 'confirm' ? version : null }]).slice(-20),
-  };
-  await env.REG_KV.put(key, JSON.stringify(next), { metadata: { invitationId, confirmedAt: next.confirmedAt, version: next.version } });
-  return json({ ok: true, invitationId, confirmedAt: next.confirmedAt, version: next.version, actor, at: now }, 200);
+  return json({ ok: true, invitationId, confirmedAt: w.conf.confirmedAt, version: w.conf.version, actor, at: w.at }, 200);
 }
 
 function json(obj, status, extra) {
