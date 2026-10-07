@@ -127,6 +127,7 @@ test('ADMIN UI · a guest: Issue only after Preview AND an explicit tick, confir
   const issueBtn = () => el(root, 'data-ab-act', 'issue');
   assert.equal(issueBtn().disabled, true, 'no issue before the preview is open');
   assert.match(root.innerHTML, /Open the preview first\./);
+  assert.match(root.innerHTML, /Payments · 008, append-only/); assert.match(root.innerHTML, /No statement is issued for this guest yet\./);
   el(root, 'data-ab-act', 'preview').onclick(); await tick();
   assert.match(root.innerHTML, /Preview · the Billing Engine/); assert.match(root.innerHTML, /USD 245\.00/); assert.match(root.innerHTML, /T-STAY/);
   assert.equal(issueBtn().disabled, false);

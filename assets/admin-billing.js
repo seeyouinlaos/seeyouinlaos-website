@@ -358,7 +358,11 @@
   }
   function paymentsView() {
     var H = S.holder, pays = H.payments || [], p = H.payment;
-    if (!H.issued && !pays.length) return '';
+    /* the payment administration is always there: before a statement exists it says what will appear */
+    if (!H.issued && !pays.length) {
+      return '<section class="p-card ab-panel" aria-label="Payments"><p class="t-l1">Payments · 008, append-only</p>' +
+        '<p class="t-b2">No statement is issued for this guest yet. Once it is, the payments the guest reports appear here to verify or reject; a correction is always a new REFUND or ADJUSTMENT row in 008, never an edit.</p></section>';
+    }
     var P = S.pay || {};
     var rows = pays.map(function (r) {
       var reported = r.Record_Status === 'REPORTED', d = r.decision || null;
