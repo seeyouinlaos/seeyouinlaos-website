@@ -1,7 +1,7 @@
 /* THE SOUPHATTRA RATE CORRECTION — see below */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { bearerOf, authIdOf } from '../register/crypto.mjs';
 import { src, doState, page, PEGGY } from './sandbox.mjs';
 import { complete } from './complete.mjs';
@@ -60,24 +60,24 @@ test('THE FOURTEEN PAIRS · the data, the quote and the Details words of every c
   assert.equal(P.money(112.5), 'USD 112.50'); assert.equal(P.money(162.5), 'USD 162.50'); assert.equal(P.money(247.5), 'USD 247.50');
 });
 
-test('THE NOTICE · once per browser (a versioned key), never a server write, no checkbox, the one button to the Souphattra pre-wedding rates; Thai authored', () => {
-  const js = readFileSync(new URL('../assets/rate-notice.js', import.meta.url), 'utf8');
-  assert.match(js, /var VERSION = 'souphattra-rate-correction-2026-09-27';/); assert.match(js, /var KEY = 'siyl\.notice\.' \+ VERSION;/);
-  assert.doesNotMatch(js.replace(/\/\*[\s\S]*?\*\//g, ''), /fetch\(|XMLHttpRequest|sendBeacon|SIYL_DRAFT\.(touch|flush|push)|type="checkbox"/, 'no request, no draft write, no checkbox');
-  assert.match(js, /var TARGET = 'journeys\.html#j-prewed';/);
-  for (const t of ['An important update about Souphattra Heritage', 'We recently identified incorrect rates in our system for Souphattra Heritage stays from 25–27 February 2027.', 'The rates have now been corrected, and the prices currently shown on the website are the correct rates.', 'If you reviewed or planned your stay earlier, please take a moment to check the updated prices before continuing.', 'Your existing room selection has not been changed.', 'We apologise for the confusion and thank you for your understanding.', 'View corrected rates', 'Rate correction']) {
-    assert.ok(js.includes(t), t); assert.ok(JSON.parse(readFileSync(new URL('../src/i18n-th.json', import.meta.url), 'utf8')).exact[t], 'Thai: ' + t);
+test('THE RATE NOTICE IS GONE (Owner, 7 Oct 2026) · no popup, no script on any page, no trigger, no overlay, no state, no text — the rates themselves unchanged', () => {
+  const ROOTDIR = new URL('../', import.meta.url);
+  assert.equal(existsSync(new URL('assets/rate-notice.js', ROOTDIR)), false, 'the script is deleted');
+  const pages = readdirSync(ROOTDIR).filter((f) => f.endsWith('.html'));
+  assert.ok(pages.length > 20);
+  for (const f of pages) {
+    const html = readFileSync(new URL(f, ROOTDIR), 'utf8');
+    assert.doesNotMatch(html, /rate-notice|SIYL_RATE_NOTICE|siyl-rate|data-rate-go|data-rate-notice|siyl\.notice\./, f);
   }
-  const th = JSON.parse(readFileSync(new URL('../src/i18n-th.json', import.meta.url), 'utf8')).exact;
-  assert.doesNotMatch(Object.entries(th).filter(([k]) => /Souphattra Heritage stays from 25–27/.test(k)).map(([, v]) => v).join(''), /โรงแรม.*ผิดพลาด/, 'the error is ours, never the hotel\'s');
-  for (const f of ['journeys.html', 'your-journey.html', 'room.html', 'cart.html', 'review.html', 'profile.html']) assert.match(readFileSync(new URL('../' + f, import.meta.url), 'utf8'), /<script src="assets\/rate-notice\.js\?v=[0-9a-f]+"><\/script>/, f);
-});
-
-test('THE NOTICE (the shipped page) · shown to a signed-in guest once the draft is read; the button remembers it in this browser and opens the pre-wedding rates; a second visit shows nothing', async () => {
-  const w = page({ auth: PEGGY, modules: ['assets/rate-notice.js'] });
-  const N = w.SIYL_RATE_NOTICE; assert.ok(N);
-  assert.equal(N.concerned({ scope: { none: true } }), false); assert.equal(N.concerned({ scope: { vientiane: false, bangkok: true } }), false); assert.equal(N.concerned({}), true); assert.equal(N.concerned({ scope: { vientiane: true } }), true);
-  assert.match(N.html(), /data-rate-go/); assert.doesNotMatch(N.html(), /checkbox/);
+  for (const f of readdirSync(new URL('assets/', ROOTDIR)).filter((x) => x.endsWith('.js'))) {
+    assert.doesNotMatch(readFileSync(new URL('assets/' + f, ROOTDIR), 'utf8'), /SIYL_RATE_NOTICE|siyl-rate-open|data-rate-go|souphattra-rate-correction/, 'assets/' + f);
+  }
+  const th = JSON.parse(readFileSync(new URL('src/i18n-th.json', ROOTDIR), 'utf8')).exact;
+  for (const t of ['Rate correction', 'An important update about Souphattra Heritage', 'View corrected rates', 'Your existing room selection has not been changed.',
+    'We apologise for the confusion and thank you for your understanding.']) assert.equal(th[t], undefined, 'no orphaned Thai: ' + t);
+  /* a page loads with no overlay and nothing that opens one */
+  const w = page({ auth: PEGGY });
+  assert.equal(w.SIYL_RATE_NOTICE, undefined);
 });
 
 async function send(h, keys) {
