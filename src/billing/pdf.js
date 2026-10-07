@@ -48,6 +48,19 @@
    Snapshot carries Hosted_Value_Cents for the Revenue Overview (Freeze · U),
    and putting a price tag on a gift is not what a hosted line is for. Hosted
    rows appear, marked as hosted and carrying their own zero.
+
+   THE LINES (layout 1.1, Owner, 7 Oct 2026). A rule marks structure, never a
+   table row: one under the masthead, one under each section heading, one above
+   the total payable, one over the footer (and one under the "continued" line
+   of a further page). Rows are separated by white space on a fixed baseline
+   grid, so no rule can sit in a line of text — 1.0 drew a hairline 4pt over
+   the next row's baseline, through its capitals, and a second one 8pt over the
+   total's rule. Every label, key and agreed-rate note wraps in full inside its
+   column (a product key breaks after a hyphen) instead of being cut short.
+   Layout only: not one figure, word or line selection changed. A PDF already
+   stored for an issued Revision is never rendered again (billing-routes.js ·
+   issuedPdf reads the write-once object), so it keeps the bytes it was issued
+   with; its /Producer names the writer version that made it.
    ========================================================================== */
 
 import {
@@ -67,7 +80,10 @@ const MARGIN = 56;          /* the type area, ~2cm on A4 */
 const CONTENT_BOTTOM = 96;  /* nothing but the footer lives below this line */
 const INK = 0;              /* black */
 const SOFT = 0.42;          /* the grey of labels and notes */
-const HAIR = 0.78;          /* the grey of a row separator */
+const HAIR = 0.78;          /* the grey of the footer and "continued" rules */
+const LEAD = 10.5;          /* the baseline grid inside a table row */
+const ROW_PITCH = 19.5;     /* a row's last baseline to the next row's first: white space, not a rule, parts the rows */
+const ROW_LINES_MAX = 24;   /* a cell wraps in full; this bound only keeps one row shorter than a page */
 
 const REG = 'F1', BOLD = 'F2', MONO = 'F3';
 
@@ -170,8 +186,19 @@ function fitText(value, font, size, maxWidth) {
   return textWidth(s, font, size) <= maxWidth ? s : ellipsise(s, font, size, maxWidth);
 }
 
-/** Word wrap inside a column. A word too long for the column is cut rather
- *  than allowed to run past the page box. */
+/** Where a word too long for the column is broken: after its last hyphen
+ *  (slash, underscore) that still fits, so a product key breaks between its
+ *  parts ("D1-SOUPHATTRA-" / "PRESIDENTIAL"); a word with no such place, or
+ *  only one near its start, is broken at the last letter that fits. */
+function breakPoint(word, font, size, maxWidth) {
+  let cut = word.length;
+  while (cut > 1 && textWidth(word.slice(0, cut), font, size) > maxWidth) cut--;
+  for (let i = cut; i >= Math.max(2, cut / 3); i--) if ('-/_'.includes(word[i - 1])) return i;
+  return cut;
+}
+
+/** Word wrap inside a column. A word too long for the column is broken over
+ *  lines rather than allowed to run past the page box. */
 function wrapText(value, font, size, maxWidth, maxLines) {
   const out = [];
   let cur = '';
@@ -180,8 +207,7 @@ function wrapText(value, font, size, maxWidth, maxLines) {
     if (cur) { out.push(cur); cur = ''; }
     let rest = word;
     while (textWidth(rest, font, size) > maxWidth && rest.length > 1) {
-      let cut = rest.length;
-      while (cut > 1 && textWidth(rest.slice(0, cut), font, size) > maxWidth) cut--;
+      const cut = breakPoint(rest, font, size, maxWidth);
       out.push(rest.slice(0, cut));
       rest = rest.slice(cut);
     }
@@ -248,8 +274,9 @@ function columnsOf(page) {
   const w = right - left;
   return {
     left, right, width: w,
-    person: left, wPerson: w * 0.215,
-    item: left + w * 0.225, wItem: w * 0.29,
+    /* the item column is the widest: it carries the product key and the agreed-rate note */
+    person: left, wPerson: w * 0.19,
+    item: left + w * 0.20, wItem: w * 0.315,
     basis: left + w * 0.525, wBasis: w * 0.20,
     units: left + w * 0.735, wUnits: w * 0.14,
     amountRight: right,
@@ -429,13 +456,24 @@ function masthead(doc, snapshot) {
   doc.y -= 12;
 }
 
-function sectionHeading(doc, heading) {
+/* A section heading carries the section's one rule; the column labels under it
+ * need none of their own. `below` is what has to follow it on the same page
+ * (its intro, column labels and first row), so a heading never stands alone at
+ * the foot of a page. */
+const HEADING_DEPTH = 24;
+function sectionHeading(doc, heading, below) {
   const c = doc.col;
-  ensure(doc, 56);
+  ensure(doc, HEADING_DEPTH + (below || 0));
   drawText(doc, c.left, doc.y, heading, BOLD, 12);
-  doc.y -= 7;
-  drawRule(doc, doc.y, c.left, c.right, 0.6, INK);
-  doc.y -= 15;
+  doc.y -= 8;
+  drawRule(doc, doc.y, c.left, c.right, 0.5, INK);
+  doc.y -= 16;
+}
+
+/** The height a table row takes on the grid: its lines, then the white space
+ *  that parts it from the next row. */
+function rowHeight(lines) {
+  return (lines - 1) * LEAD + ROW_PITCH;
 }
 
 /* --------------------------------------------------------------- block A */
@@ -447,47 +485,56 @@ function blockAHead(doc) {
   drawText(doc, c.basis, doc.y, 'BASIS', REG, 7, SOFT);
   drawText(doc, c.units, doc.y, 'NIGHTS / QTY', REG, 7, SOFT);
   drawRight(doc, c.amountRight, doc.y, 'AMOUNT', REG, 7, SOFT);
-  doc.y -= 5;
-  drawRule(doc, doc.y, c.left, c.right, 0.4, HAIR);
-  doc.y -= 13;
+  doc.y -= HEAD_DEPTH;
+}
+const HEAD_DEPTH = 16;
+
+/** One Block A row, measured: every cell wrapped in full, and its height on the grid. */
+function blockACells(c, line, o) {
+  const person = wrapText(labelFor(o.persons, line.Person_ID, 'not stated'), REG, 8.5, c.wPerson - 6, ROW_LINES_MAX);
+  const item = wrapText(labelFor(o.items, line.Item_ID, 'not stated'), REG, 8.5, c.wItem - 6, ROW_LINES_MAX);
+  const basis = wrapText(basisOf(line), REG, 8, c.wBasis - 6, ROW_LINES_MAX);
+  const units = wrapText(unitsOf(line), REG, 8, c.wUnits - 6, ROW_LINES_MAX);
+  const rate = wrapText(rateOf(line), MONO, 7.5, c.wBasis - 6, ROW_LINES_MAX);
+  const agreed = clean(line.rateSource) === 'SPECIAL_RATE' ? clean(line.specialRateRef) : '';
+  /* the rate was decided by name (Freeze · F), so the line says which
+   * agreement it came from instead of looking like a standard price */
+  const agreedNote = agreed ? wrapText(agreed, REG, 7.5, c.wItem - 6, ROW_LINES_MAX) : [];
+  const named = agreed ? wrapText(SPECIAL_RATE_NOTE, REG, 7.5, c.wBasis - 6) : [];
+  const lines = Math.max(1, person.length, item.length + agreedNote.length, basis.length + rate.length + named.length, units.length);
+  return { person, item, agreedNote, basis, rate, named, units, height: rowHeight(lines) };
 }
 
-function blockARow(doc, line, o) {
+/** One Block A row. `keep` is room held below it on the same page, so the
+ *  last row never leaves the total to stand alone at the top of the next. */
+function blockARow(doc, line, o, keep) {
   const c = doc.col;
-  const lead = 10.5;
-  const person = wrapText(labelFor(o.persons, line.Person_ID, 'not stated'), REG, 8.5, c.wPerson - 6, 2);
-  const item = wrapText(labelFor(o.items, line.Item_ID, 'not stated'), REG, 8.5, c.wItem - 6, 3);
-  const basis = wrapText(basisOf(line), REG, 8, c.wBasis - 6, 2);
-  const units = wrapText(unitsOf(line), REG, 8, c.wUnits - 6, 2);
-  const rate = rateOf(line);
-  const agreed = clean(line.rateSource) === 'SPECIAL_RATE' ? clean(line.specialRateRef) : '';
+  const { person, item, agreedNote, basis, rate, named, units, height } = blockACells(c, line, o);
   const amount = amountOf(line);
-
-  const basisExtra = (rate ? 1 : 0) + (agreed ? 1 : 0);
-  const rows = Math.max(1, person.length, item.length + (agreed ? 1 : 0), basis.length + basisExtra, units.length);
-  const height = rows * lead + 7;
-  ensure(doc, height, blockAHead);
+  ensure(doc, height + (keep || 0), blockAHead);
 
   const top = doc.y;
-  person.forEach((t, i) => drawText(doc, c.person, top - i * lead, t, REG, 8.5));
-  item.forEach((t, i) => drawText(doc, c.item, top - i * lead, t, REG, 8.5));
-  basis.forEach((t, i) => drawText(doc, c.basis, top - i * lead, t, REG, 8, SOFT));
-  let sub = basis.length;
-  if (rate) drawText(doc, c.basis, top - (sub++) * lead, fitText(rate, MONO, 7.5, c.wBasis - 6), MONO, 7.5, SOFT);
-  if (agreed) {
-    /* the rate was decided by name (Freeze · F), so the line says which
-     * agreement it came from instead of looking like a standard price */
-    drawText(doc, c.basis, top - (sub++) * lead, fitText(SPECIAL_RATE_NOTE, REG, 7.5, c.wBasis - 6), REG, 7.5, SOFT);
-    drawText(doc, c.item, top - item.length * lead, fitText(agreed, REG, 7.5, c.wItem - 6), REG, 7.5, SOFT);
-  }
-  units.forEach((t, i) => drawText(doc, c.units, top - i * lead, t, REG, 8, SOFT));
+  const at = (i) => top - i * LEAD;
+  person.forEach((t, i) => drawText(doc, c.person, at(i), t, REG, 8.5));
+  item.forEach((t, i) => drawText(doc, c.item, at(i), t, REG, 8.5));
+  agreedNote.forEach((t, i) => drawText(doc, c.item, at(item.length + i), t, REG, 7.5, SOFT));
+  basis.forEach((t, i) => drawText(doc, c.basis, at(i), t, REG, 8, SOFT));
+  rate.forEach((t, i) => drawText(doc, c.basis, at(basis.length + i), t, MONO, 7.5, SOFT));
+  named.forEach((t, i) => drawText(doc, c.basis, at(basis.length + rate.length + i), t, REG, 7.5, SOFT));
+  units.forEach((t, i) => drawText(doc, c.units, at(i), t, REG, 8, SOFT));
 
   /* a refused amount is marked, never filled in with a plausible number */
   if (amount == null) drawRight(doc, c.amountRight, top, 'REVIEW', BOLD, 7.5);
   else drawRight(doc, c.amountRight, top, amount, MONO, 8);
 
   doc.y = top - height;
-  drawRule(doc, doc.y + 4, c.left, c.right, 0.3, 0.88);
+}
+
+/** Room the totals take under the row grid's next baseline. */
+function totalsDepth(snapshot) {
+  const blockA = snapshot.Block_A_Total_Cents;
+  const total = snapshot.Total_Payable_Cents;
+  return Number.isFinite(blockA) && Number.isFinite(total) && blockA !== total ? 30 : 15;
 }
 
 function blockATotals(doc, snapshot) {
@@ -495,11 +542,14 @@ function blockATotals(doc, snapshot) {
   const blockA = snapshot.Block_A_Total_Cents;
   const total = snapshot.Total_Payable_Cents;
   const twoFigures = Number.isFinite(blockA) && Number.isFinite(total) && blockA !== total;
-  ensure(doc, twoFigures ? 54 : 36);
 
-  doc.y -= 4;
-  drawRule(doc, doc.y, c.left, c.right, 0.8, INK);
-  doc.y -= 15;
+  /* the rows leave doc.y on the baseline a further row would take; the total's
+   * rule sits in that white space, clear of the last row's descenders and of
+   * the total's capitals. It is the one rule of the total: none under it. */
+  const fresh = ensure(doc, totalsDepth(snapshot));
+  const ruleY = fresh ? doc.y : doc.y + 8;
+  drawRule(doc, ruleY, c.left, c.right, 0.8, INK);
+  doc.y = ruleY - 17;
 
   if (twoFigures) {
     /* the two figures should be the same number; if the Snapshot carries two,
@@ -512,19 +562,19 @@ function blockATotals(doc, snapshot) {
   drawText(doc, c.person, doc.y, 'Total payable to Haruthai & Suthep', BOLD, 10.5);
   if (Number.isFinite(total)) drawRight(doc, c.amountRight, doc.y, formatUSD(total), BOLD, 10.5);
   else drawRight(doc, c.amountRight, doc.y, REVIEW_HEADING, BOLD, 10.5);
-  doc.y -= 8;
-  drawRule(doc, doc.y, c.left, c.right, 0.5, INK);
-  doc.y -= 22;
+  doc.y -= 30;
 }
 
 function blockASection(doc, lines, snapshot, o) {
-  sectionHeading(doc, BLOCK_A_HEADING);
+  const first = lines.length ? blockACells(doc.col, lines[0], o).height : rowHeight(1);
+  sectionHeading(doc, BLOCK_A_HEADING, HEAD_DEPTH + first + (lines.length > 1 ? 0 : totalsDepth(snapshot)));
   blockAHead(doc);
   if (!lines.length) {
+    ensure(doc, rowHeight(1) + totalsDepth(snapshot), blockAHead);
     drawText(doc, doc.col.person, doc.y, 'No items are payable to Haruthai & Suthep on this statement.', REG, 8.5, SOFT);
-    doc.y -= 16;
+    doc.y -= rowHeight(1);
   }
-  for (const line of lines) blockARow(doc, line, o);
+  lines.forEach((line, i) => blockARow(doc, line, o, i === lines.length - 1 ? totalsDepth(snapshot) : 0));
   blockATotals(doc, snapshot);
 }
 
@@ -537,35 +587,43 @@ function blockBHead(doc) {
   drawText(doc, c.person, doc.y, 'PERSON', REG, 7, SOFT);
   drawText(doc, c.item, doc.y, 'ITEM', REG, 7, SOFT);
   drawText(doc, c.basis, doc.y, 'HOW IT WORKS', REG, 7, SOFT);
-  doc.y -= 5;
-  drawRule(doc, doc.y, c.left, c.right, 0.4, HAIR);
-  doc.y -= 13;
+  doc.y -= HEAD_DEPTH;
+}
+
+function blockBCells(c, line, o) {
+  const person = wrapText(labelFor(o.persons, line.Person_ID, 'not stated'), REG, 8.5, c.wPerson - 6, ROW_LINES_MAX);
+  const item = wrapText(labelFor(o.items, line.Item_ID, 'not stated'), REG, 8.5, c.wItem - 6, ROW_LINES_MAX);
+  const note = wrapText(basisOf(line), REG, 8, c.wNote - 6, ROW_LINES_MAX);
+  return { person, item, note, height: rowHeight(Math.max(1, person.length, item.length, note.length)) };
+}
+
+/* a Block B item the Snapshot names without a line of its own */
+function namedCells(c, itemId, o) {
+  const item = wrapText(labelFor(o.items, itemId, 'not stated'), REG, 8.5, c.wItem - 6, ROW_LINES_MAX);
+  return { item, height: rowHeight(Math.max(1, item.length)) };
 }
 
 function blockBRow(doc, line, o) {
   const c = doc.col;
-  const lead = 10.5;
-  const person = wrapText(labelFor(o.persons, line.Person_ID, 'not stated'), REG, 8.5, c.wPerson - 6, 2);
-  const item = wrapText(labelFor(o.items, line.Item_ID, 'not stated'), REG, 8.5, c.wItem - 6, 3);
-  const note = wrapText(basisOf(line), REG, 8, c.wNote - 6, 2);
-  const rows = Math.max(1, person.length, item.length, note.length);
-  const height = rows * lead + 7;
+  const { person, item, note, height } = blockBCells(c, line, o);
   ensure(doc, height, blockBHead);
 
   const top = doc.y;
-  person.forEach((t, i) => drawText(doc, c.person, top - i * lead, t, REG, 8.5));
-  item.forEach((t, i) => drawText(doc, c.item, top - i * lead, t, REG, 8.5));
-  note.forEach((t, i) => drawText(doc, c.basis, top - i * lead, t, REG, 8, SOFT));
+  person.forEach((t, i) => drawText(doc, c.person, top - i * LEAD, t, REG, 8.5));
+  item.forEach((t, i) => drawText(doc, c.item, top - i * LEAD, t, REG, 8.5));
+  note.forEach((t, i) => drawText(doc, c.basis, top - i * LEAD, t, REG, 8, SOFT));
   doc.y = top - height;
-  drawRule(doc, doc.y + 4, c.left, c.right, 0.3, 0.88);
 }
 
 function blockBSection(doc, lines, snapshot, o) {
   const informational = Array.isArray(snapshot.Block_B_Informational) ? snapshot.Block_B_Informational : [];
   if (!lines.length && !informational.length) return;
 
-  sectionHeading(doc, BLOCK_B_HEADING);
-  drawParagraph(doc, doc.col.left, BLOCK_B_INTRO, doc.col.width, REG, 8.3, 10.5, SOFT);
+  const c = doc.col;
+  const intro = wrapText(BLOCK_B_INTRO, REG, 8.3, c.width).length * 10.5 + 8;
+  const first = lines.length ? blockBCells(c, lines[0], o).height : namedCells(c, informational[0], o).height;
+  sectionHeading(doc, BLOCK_B_HEADING, intro + HEAD_DEPTH + first);
+  drawParagraph(doc, c.left, BLOCK_B_INTRO, c.width, REG, 8.3, 10.5, SOFT);
   doc.y -= 8;
   blockBHead(doc);
 
@@ -574,12 +632,13 @@ function blockBSection(doc, lines, snapshot, o) {
   } else {
     /* the Snapshot named the items but carries no line for them */
     for (const itemId of informational) {
-      ensure(doc, 16, blockBHead);
-      drawText(doc, doc.col.item, doc.y, fitText(labelFor(o.items, itemId, 'not stated'), REG, 8.5, doc.col.wItem - 6), REG, 8.5);
-      doc.y -= 16;
+      const { item, height } = namedCells(c, itemId, o);
+      ensure(doc, height, blockBHead);
+      item.forEach((t, i) => drawText(doc, doc.col.item, doc.y - i * LEAD, t, REG, 8.5));
+      doc.y -= height;
     }
   }
-  doc.y -= 14;
+  doc.y -= 12;
 }
 
 /* ------------------------------------------------------- FX, notes, review */
@@ -592,7 +651,8 @@ function fxSection(doc, snapshot) {
   if (snapshot.FX_USD_EUR != null && Number.isFinite(eur)) rows.push('1 ' + ACCOUNTING_CURRENCY + ' = ' + eur + ' EUR');
   if (!rows.length) return;
 
-  ensure(doc, 30 + rows.length * 12);
+  /* the heading, its rates and its sentence stay together on one page */
+  ensure(doc, 13 + rows.length * 12 + 2 + wrapText(FX_BODY, REG, 8, c.width).length * 10);
   drawText(doc, c.left, doc.y, FX_HEADING, BOLD, 9);
   doc.y -= 13;
   for (const row of rows) {
@@ -658,7 +718,7 @@ function footers(doc) {
 
 /* ------------------------------------------------------------ the PDF file */
 
-export const PDF_WRITER_VERSION = 'guest-settlement-pdf/1.0';
+export const PDF_WRITER_VERSION = 'guest-settlement-pdf/1.1';
 
 /* FNV-1a over the document body, four times from four offsets, which gives the
  * 32 hex digits the trailer /ID wants. It is a fingerprint of this document
@@ -758,7 +818,8 @@ function assemble(doc, meta) {
  *
  * Returns the PDF as a Uint8Array. The same Snapshot and the same opts always
  * produce the same bytes, so an archived Revision can be re-derived and
- * compared byte for byte.
+ * compared byte for byte — by the writer version its /Producer names
+ * (PDF_WRITER_VERSION; a layout change is a new version).
  */
 export function renderSettlementPdf(snapshot, opts) {
   if (!snapshot || typeof snapshot !== 'object') {
