@@ -191,6 +191,8 @@
       /* a personal rate (28 Sep 2026): the guest's own stated total — an employee rate is the whole room */
       if (x.personal === 'employee') return (P && P.money ? P.money(x.price) : 'USD ' + x.price) + ' for the room · your employee rate';
       if (x.personal === 'special') return (P && P.money ? P.money(x.price) : 'USD ' + x.price) + ' per person · your special rate';
+      /* a stay H&S already paid for the guest (Edit 10): repaid through the statement */
+      if (x.personal === 'prepaid') return (P && P.money ? P.money(x.price) : 'USD ' + x.price) + ' per person · already paid for you by Haruthai · you repay Haruthai & Suthep through your statement';
       if (m.unit === 'experience') return q === 1 ? 'For two guests' : 'For ' + (q * 2) + ' guests';
       var amt = P && P.money ? P.money(x.price) : 'USD ' + String(x.price).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
       return amt + ' per person · your cost';

@@ -45,14 +45,16 @@ test('THE SERVER ENFORCES IT · a sent line keeps a personal charge only for its
   const pre = { id: 'prewed', stay: 'souphattra', room: 'heritage-executive', rate: 130, pay: 2, price: 0, personal: 'special', qty: 1 };
   assert.equal(verifiedLines([pre], giftsFor('CON010'))[0].price, 225); assert.equal(verifiedLines([pre], giftsFor('CON006'))[0].price, 260);
   /* who pays is never a change of the guest's selection */
-  assert.match(src('src/worker.js'), /const DERIVED_LINE_KEYS = new Set\(\[[^\]]*'gift', 'personal'\]\)/);
+  assert.match(src('src/worker.js'), /const DERIVED_LINE_KEYS = new Set\(\[[^\]]*'gift', 'personal', 'paidByHS', 'prepaidUnverified'\]\)/);
   /* the list is served to its holder only */
   assert.match(src('src/worker.js'), /giftsFor\(person && person\.contactId\)/);
 });
 
 test('THE BOOKING METHOD (002 · "Note for Guest") · self-booking stays name the guest and open the hotel\'s own page in a new tab; the Souphattra stays are booked by the Bride & Groom', () => {
   const w = page({ auth: PEGGY }); const P = w.SIYL_PRICE;
-  assert.deepEqual(plain(P.BOOKING_WORDS), { self: 'Guest will book by themselves.', 'bride-groom': 'Will be booked by the bride & groom and charged within 14 days after booking.' });
+  /* Edit 10: a stay H&S already paid for the guest says so (only where the server marks it) */
+  assert.deepEqual(plain(P.BOOKING_WORDS), { prepaid: 'Already paid for you by Haruthai · you repay Haruthai & Suthep through your statement.',
+    self: 'Guest will book by themselves.', 'bride-groom': 'Will be booked by the bride & groom and charged within 14 days after booking.' });
   assert.deepEqual(plain(BOOKING_WORDS), plain(P.BOOKING_WORDS), 'the emails and the pages say the same');
   const b = (win) => plain(P.bookingOf(win));
   assert.equal(b('bkk-stay').method, 'self'); assert.match(b('bkk-stay').url, /^https:\/\/www\.trip\.com\/hotels\/detail\/\?.*hotelId=1530783.*checkIn=2027-02-21&checkOut=2027-02-24/);

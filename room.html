@@ -94,7 +94,7 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:24px;margin:44
 .backrow{text-align:center;margin-top:34px}
 @media (min-width:600px) and (max-width:767px){.buy{margin-left:var(--a-gut);margin-right:var(--a-gut)}.plane{margin-left:var(--a-gut);margin-right:var(--a-gut);padding-left:0;padding-right:0;box-shadow:0 0 0 100vmax #FFFFFF;clip-path:inset(0 -100vmax)}.oc{margin-left:var(--a-gut);margin-right:var(--a-gut);padding-left:0;padding-right:0;scroll-padding-left:0}.ed .ph{width:auto;margin-left:var(--a-gut);margin-right:var(--a-gut)}}   /* the small tablet: the panels and the rail inside the wall (Owner, 24 Sep 2026) */
 .backrow a{font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:#313131;text-decoration:none;border-bottom:1px solid #313131;padding:8px 0 3px;display:inline-block;min-height:44px}
-</style><script src="assets/i18n/siyl-i18n.js?v=ceb6bfec"></script>
+</style><script src="assets/i18n/siyl-i18n.js?v=ab8e3400"></script>
 <link rel="stylesheet" href="assets/prep.css?v=0a6eb26a">
 <link rel="stylesheet" href="assets/desktop.css?v=798e226c"><link rel="stylesheet" href="assets/aman.css?v=6fe22a54"></head><body>
 <header class="hd"><button class="hb" aria-label="Menu"><i></i><i></i><i></i></button><div class="bd">see you in laos<span class="dot">.</span></div><a class="bag" href="cart.html" aria-label="My Bag"><svg class="bgi" viewBox="0 0 26 26" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.1 10.1h15.8a.9.9 0 0 1 .9 1l-.95 10.6a1.6 1.6 0 0 1-1.6 1.45H6.75a1.6 1.6 0 0 1-1.6-1.45L4.2 11.1a.9.9 0 0 1 .9-1z"/><path d="M8 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M13.4 10.1V8.3a2.5 2.5 0 0 1 5 0v1.8"/><path d="M5.6 14.2h14.8"/><path d="M12.2 13.2h1.6a.5.5 0 0 1 .5.5v1.6a.5.5 0 0 1-.5.5h-1.6a.5.5 0 0 1-.5-.5v-1.6a.5.5 0 0 1 .5-.5z"/></svg><span class="bb" data-bag-badge></span></a></header>
@@ -108,11 +108,11 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:24px;margin:44
 <script src="assets/aman.js?v=641d956e"></script>
 <script src="assets/rooms-data.js?v=649562f9"></script>
 <script src="assets/billing-client.js?v=421fbc48"></script>
-<script src="assets/pricing.js?v=e0a4e0cd"></script>
+<script src="assets/pricing.js?v=8ced00d1"></script>
 <script src="assets/stay-plan.js?v=5227fdc4"></script>
 <script src="assets/rooms.js?v=2f2ff2ba"></script>
 <script src="assets/stay.js?v=878b1e60"></script>
-<script src="assets/journey.js?v=46dd07ea"></script>
+<script src="assets/journey.js?v=a24d35db"></script>
 <script src="assets/wizard.js?v=f9c66d86"></script>
 <script type="module" src="assets/invite.mjs?v=252eac2c"></script>
 <script>
@@ -192,7 +192,8 @@ stay.windows.forEach(function (w, wi) {
   h += '<div class="win"><p class="wl">' + esc(w.label) + '</p><p class="wd">' + esc(w.dates) + '</p><p class="wn">' + esc(w.nights) + '</p>';
   /* THE BOOKING METHOD (Owner, 28 Sep 2026 · 002 "Note for Guest"): who books this stay — the guest (with the hotel's own link, in a
      new tab: following it books nothing here) or the Bride & Groom */
-  var bk = P.bookingOf ? P.bookingOf(w.id) : null;
+  /* a stay H&S already paid: its amount line says so already (Edit 10) — no second line */
+  var bk = q && q.personal === 'prepaid' && q.total != null ? null : (P.bookingOf ? P.bookingOf(w.id, room.slug) : null);
   var bookingHtml = bk ? '<p class="nn" data-booking="' + esc(bk.method) + '">' + esc(bk.words) + (bk.url ? ' <a class="p-link" href="' + esc(bk.url) + '" target="_blank" rel="noopener noreferrer" data-booking-link>Book with the hotel</a>' : '') + '</p>' : '';
   if (P.offeredIn && !P.offeredIn(w.id, room)) {
     /* 002 · G21 / H21 / I21: this suite is not offered before the wedding */

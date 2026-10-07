@@ -128,7 +128,10 @@
   /* the guest's own entry for this room of this window: a gift (nothing to pay), a special rate (the stated total for the window,
    * per person) or an employee rate (the whole room, paid by this guest alone) — src/gifts.js */
   function giftFor(windowId, slug) { var g = giftsNow(); for (var i = 0; i < g.length; i++) if (g[i] && g[i].window === windowId && g[i].room === slug) return g[i]; return null; }
-  var BOOKING_WORDS = { self: 'Guest will book by themselves.', 'bride-groom': 'Will be booked by the bride & groom and charged within 14 days after booking.' };
+  /* A STAY H&S ALREADY PAID FOR THE GUEST (Owner, Edit 10 · 7 Oct 2026): the server marks it (paidByHS, from a 009 row);
+     its amount is what the guest repays through the statement — never "your special rate" beside a listed one */
+  var PREPAID_WORDS = 'Already paid for you by Haruthai · you repay Haruthai & Suthep through your statement';
+  var BOOKING_WORDS = { prepaid: PREPAID_WORDS + '.', self: 'Guest will book by themselves.', 'bride-groom': 'Will be booked by the bride & groom and charged within 14 days after booking.' };
   /* no leading zero in a date: "06 – 08 March 2027" → "6 – 8 March 2027" */
   function unpad(t) { return String(t == null ? '' : t).replace(/(^|[^\d])0(\d)(?!\d)/g, '$1$2'); }
   var MONTH_RE = /\s+(January|February|March|April|May|June|July|August|September|October|November|December)$/;
@@ -226,6 +229,15 @@
     if (!q) return { state: 'none', quote: null };
     if (q.block === 'B') return { state: 'self', quote: q };
     return { state: 'amount', quote: q };
+  }
+  /* A STAY H&S ALREADY PAID FOR THIS GUEST (Edit 10): the server's mark on the room shown, else on the room of this window in the
+     bag, else on any room of the window. Nothing is known before the server has answered. */
+  function prepaidIn(at, slug) {
+    if (!billingReady() || !at) return false;
+    var s = slug;
+    if (!s) { var B = window.SIYL_BAG, line = B && B.get ? B.get().filter(function (x) { return x && x.id === at.win.id; })[0] : null; if (line && line.room) s = line.room; }
+    var slugs = s ? [s] : (at.stay.rooms || []).map(function (r) { return r.slug; });
+    return slugs.some(function (x) { var q = authoritative(at.win.id, x); return !!(q && q.paidByHS); });
   }
   /* the words where there is no amount yet (never "USD 0") */
   function pendingWords() { return billingFailed() ? 'Price unavailable' : 'Price pending'; }
@@ -338,10 +350,13 @@
       var gift = null;
       if (sa.state === 'amount') {
         if (sq.rateSource === 'SPECIAL_RATE' && q.total != null) {
-          gift = q.total === 0 ? { kind: 'gift', by: (local && local.by) || 'bride-groom' }
+          gift = sq.paidByHS ? { kind: 'prepaid', charge: q.total }
+            : q.total === 0 ? { kind: 'gift', by: (local && local.by) || 'bride-groom' }
             : { kind: local && local.kind && local.kind !== 'gift' ? local.kind : 'special', per: local && local.per, charge: q.total };
         }
       } else if (sa.state === 'self' || sa.state === 'none') gift = local;
+      /* a stay H&S already paid whose price 009 still asks for: no amount yet, but the line already says who paid (Edit 10) */
+      if (!gift && sa.state === 'amount' && sq && sq.paidByHS) q.personal = 'prepaid';
       if (gift && (gift.kind || 'gift') === 'gift') {
         q.gift = gift.by || 'bride-groom'; q.hotelTotal = listed; q.total = 0;
         q.amount = GIFT_WORDS.title; q.giftBy = GIFT_WORDS.by; q.giftWords = GIFT_WORDS.line;
@@ -354,16 +369,21 @@
         var room2 = gift.per === 'room';
         q.personal = gift.kind; q.hotelTotal = listed; q.total = cents(gift.charge);
         q.amount = money(q.total); q.per = room2 ? 'for the room' : 'per person';
-        q.personalWords = gift.kind === 'employee' ? 'Your employee rate · the whole room, paid by you' : 'Your special rate';
+        q.personalWords = gift.kind === 'employee' ? 'Your employee rate · the whole room, paid by you'
+          : gift.kind === 'prepaid' ? PREPAID_WORDS : 'Your special rate';
         /* AN EMPLOYEE RATE IS ITS OWN POOL (002 · W, Owner 29 Sep 2026): the room's own rate per night — never the standard pool's
            per-person rate (column V) beside it, no "listed rate"; the room is the guest's alone */
         if (room2) { q.nightly = money(cents(gift.charge / (pay || nights || 1))) + ' per room per night'; q.roomNightly = ''; }
-        q.contribution = q.personalWords + ' · ' + q.nightsLine + (q.nightly ? (room2 ? ' · ' : ' · the listed rate: ') + q.nightly : '');
+        /* a stay H&S already paid is no discount on a listed rate: no listed rate beside it, no room rate under it */
+        if (gift.kind === 'prepaid') q.roomNightly = '';
+        q.contribution = q.personalWords + ' · ' + q.nightsLine + (q.nightly && gift.kind !== 'prepaid' ? (room2 ? ' · ' : ' · the listed rate: ') + q.nightly : '');
         q.hostedBasis = q.per + ' · ' + q.personalWords.charAt(0).toLowerCase() + q.personalWords.slice(1) + ' · ' + q.nightsLine;
         q.basis = q.amount + ' ' + q.per + ' · ' + q.personalWords.charAt(0).toLowerCase() + q.personalWords.slice(1) + ' · ' + q.nightsLine + (q.nightsCovered ? ': ' + q.nightsCovered : '');
       }
       /* THE BOOKING METHOD (002 · "Note for Guest"): who books this stay */
       q.booking = at.win.booking || ''; q.bookingUrl = at.win.bookingUrl || ''; q.bookingWords = BOOKING_WORDS[q.booking] || '';
+      /* a stay H&S already paid for this guest is not the guest's to book: no hotel link, the words say who paid */
+      if (sq && sq.paidByHS) { q.booking = 'prepaid'; q.bookingUrl = ''; q.bookingWords = BOOKING_WORDS.prepaid; }
       return q;
     },
 
@@ -601,8 +621,15 @@
     },
     /* THE BOOKING METHOD of a window (002 · "Note for Guest", 28 Sep 2026): 'self' — the guest books the hotel themselves (the
        sheet's link, when it gives one); 'bride-groom' — booked by the Bride & Groom and charged within 14 days after booking */
-    bookingOf: function (windowId) { var at = locate(windowId); var w = at && at.win; if (!w || !w.booking) return null; return { method: w.booking, url: w.bookingUrl || '', words: BOOKING_WORDS[w.booking] || '' }; },
+    /* `slug`: the room the caller shows. Without it, the room of this window in the guest's bag — else any room of the window.
+       A stay the server marks as already paid by H&S for this guest (paidByHS · Edit 10) answers 'prepaid': no hotel link. */
+    bookingOf: function (windowId, slug) {
+      var at = locate(windowId); var w = at && at.win; if (!w || !w.booking) return null;
+      if (prepaidIn(at, slug)) return { method: 'prepaid', url: '', words: BOOKING_WORDS.prepaid };
+      return { method: w.booking, url: w.bookingUrl || '', words: BOOKING_WORDS[w.booking] || '' };
+    },
     BOOKING_WORDS: BOOKING_WORDS,
+    PREPAID_WORDS: PREPAID_WORDS,
     offeredIn: function (windowId, room) { return !(room && room.notIn && room.notIn.indexOf(windowId) >= 0); },
     canonical: function (id) { return ALIAS[id] || id; },
     canonicalRoom: canonicalRoom,
@@ -717,10 +744,11 @@
       if (!fresh) return x;
       /* the server answered "no amount" for this stay: the earlier amount goes, the line says so (Codex round 2) */
       if (fresh.price == null) {
-        if (!fresh.priceOnRequest || (x.price == null && x.priceOnRequest && !x.pricePending)) return x;
+        if (!fresh.priceOnRequest || (x.price == null && x.priceOnRequest && !x.pricePending && (x.personal || null) === (fresh.personal || null))) return x;
         changed = true;
         var r1 = {}; for (var rk in x) r1[rk] = x[rk];
         r1.price = null; r1.priceOnRequest = true; delete r1.pricePending;
+        if (fresh.personal) r1.personal = fresh.personal; else delete r1.personal;   /* who paid, even without an amount (Edit 10) */
         return r1;
       }
       if (x.price === fresh.price && x.pay === fresh.pay && x.name === fresh.name && (x.gift || null) === (fresh.gift || null) && (x.personal || null) === (fresh.personal || null) && !('fixed' in x)) return x;

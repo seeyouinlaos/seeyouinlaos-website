@@ -350,11 +350,14 @@ export function computeLine(booking, ctx) {
       line.reviewReason = rowCategory
         ? PRICE_REQUIRED + ' — the price H&S paid for this booking is not in 009 (Rate_Per_Person_Night) yet'
         : 'special rate has no Rate_Per_Person_Night';
+      /* the row's own words (who paid, what the guest repays) stay with a line whose price is still asked for */
+      if (rowCategory) line.specialRateRef = clean(special.Note) || clean(special.Approved_By) || 'named special rate';
       return line;
     }
     if (rowCategory && rateCents <= 0) {
       line.review = MANUAL_REVIEW_REQUIRED;
       line.reviewReason = PRICE_REQUIRED + ' — a price H&S paid must be above USD 0 (009 states ' + special.Rate_Per_Person_Night + ')';
+      line.specialRateRef = clean(special.Note) || clean(special.Approved_By) || 'named special rate';
       return line;
     }
     const rule = clean(special.Nights_Rule);

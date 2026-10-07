@@ -53,7 +53,8 @@ export { Drafts } from './drafts.js';
    the website side of the Guest Settlement. Guest payments stay canonical in Google
    008_Payment_Journal; this actor holds settlements, revisions and the immutable snapshots. */
 export { BillingLedger } from './billing-ledger.js';
-import { handleBilling } from './billing-routes.js';
+import { handleBilling, paidByHSOf } from './billing-routes.js';
+import { siteKeyOfSelection } from './billing/bookings.js';
 /* THE H&S ADMIN CONSOLE (Owner, 7 Oct 2026): the page, generated from src/admin/billing.html (src/build-admin-page.cjs) */
 import ADMIN_PAGE from './admin-page.js';
 import { confirmationStands, writeConfirmation, CONFIRMATION_ROLE } from './confirmation.js';
@@ -685,7 +686,10 @@ async function handleRegister(request, env) {
   if (registration && Array.isArray(registration.selections)) {
     const person = await personOf(env, new URL(request.url).origin, who);
     /* a line of the former Kempinski room is written as its successor (only the canonical key is ever written) */
-    registration.selections = verifiedLines(canonicalLines(registration.selections), giftsFor(person && person.contactId));
+    const canon = canonicalLines(registration.selections);
+    const claimedPrepaid = new Set((canon || []).filter((l) => l && l.personal === 'prepaid').map((l) => siteKeyOfSelection(l)));
+    registration.selections = verifiedLines(canon, giftsFor(person && person.contactId));
+    registration.selections = await markPaidByHS(env, who, registration.selections, claimedPrepaid);
   }
   /* THE ONE VALIDATOR (Owner, 21 Sep 2026 · the global My Trip rebuild): the same graph the pages read decides here whether the
      trip is complete — every relevant stage answered (a hold or a waiting-list place the engine persists, a chosen transport,
@@ -879,7 +883,7 @@ function contentOf(v) {
    room, class, menu, quantity and unit — never what the website charges for it. An amount the website corrects (a rate, a line's
    price, its wording and frame) is derived from the selection, so a host-side correction never reads as a change of the guest's. */
 /* `gift` (Owner, 28 Sep 2026 · src/gifts.js): who pays is the Bride & Groom's decision, never a change of the guest's selection */
-const DERIVED_LINE_KEYS = new Set(['price', 'rate', 'roomRate', 'pay', 'nightsList', 'windowFixed', 'note', 'noteBy', 'breakfast', 'img', 'name', 'meta', 'basis', 'unitName', 'gift', 'personal']);   /* `personal` (28 Sep 2026): a personal rate is who pays, not what was chosen */
+const DERIVED_LINE_KEYS = new Set(['price', 'rate', 'roomRate', 'pay', 'nightsList', 'windowFixed', 'note', 'noteBy', 'breakfast', 'img', 'name', 'meta', 'basis', 'unitName', 'gift', 'personal', 'paidByHS', 'prepaidUnverified']);   /* `personal` (28 Sep 2026): a personal rate is who pays, not what was chosen */
 function selectionOf(content) {
   const c = contentOf(content);
   const bag = c && c.draft && Array.isArray(c.draft['siyl.bag']) ? c.draft['siyl.bag'] : null;
@@ -1513,6 +1517,30 @@ function guestNameOf(record) {
   return (gr && gr.source && gr.source.fullName) || (gr && gr.name) || (g && (g.fullName || g.name)) || record && record.guestId || r.guestId || 'Guest';
 }
 /* the guest's rooms as the engine persists them: { stage: { key, label, name } } — read server-side under the guest's own identity */
+/* A STAY H&S ALREADY PAID FOR THE GUEST (Edit 10, Owner, 7 Oct 2026): the server marks a sent stay line `paidByHS` from the
+   Billing Engine (009) and gives it the engine's amount (null while 009 still asks for the price) — the e-mails and Guest
+   Relations then say "already paid by Haruthai", never "book it yourself". A device's own mark is dropped and never trusted.
+   Only a trip whose device names such a stay is asked about (every other sending reads nothing more), and the answer is waited
+   for at most PAID_CHECK_MS: if the source cannot be read in time, the line the device called prepaid carries
+   `prepaidUnverified` and the e-mails say neither — the sending itself never fails or waits longer on Google. */
+const PAID_CHECK_MS = 1500;
+export async function markPaidByHS(env, who, lines, claimed, waitMs) {   /* exported for its test */
+  if (!Array.isArray(lines)) return lines;
+  const bare = lines.map((l) => { if (!l || typeof l !== 'object') return l; const { paidByHS, prepaidUnverified, ...rest } = l; return rest; });
+  if (!claimed || !claimed.size) return bare;
+  let paid, timer;
+  try {
+    const limit = new Promise((_, no) => { timer = setTimeout(() => no(new Error('paid check timed out')), waitMs || PAID_CHECK_MS); });
+    paid = await Promise.race([paidByHSOf(env, who && who.invitationId, who && who.guestId, bare.filter((l) => l && l.stay)), limit]);
+  } catch (e) {
+    return bare.map((l) => (l && l.stay && claimed.has(siteKeyOfSelection(l)) ? { ...l, prepaidUnverified: true } : l));
+  } finally { clearTimeout(timer); }
+  return bare.map((l) => {
+    const p = l && l.stay ? paid.get(siteKeyOfSelection(l)) : null;
+    return p ? { ...l, paidByHS: true, price: p.total != null ? p.total : null } : l;
+  });
+}
+
 async function engineRooms(env, who) {
   if (!env.ROOMS || !who) return null;
   try {

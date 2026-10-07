@@ -131,7 +131,7 @@ test('THE PAGES · her Hotel Muse row: USD 232 for the room, USD 116 per room pe
   const lines = plain(w.SIYL_BAG.get()).filter((x) => x.id === 'kempinski');
   assert.equal(lines.length, 1, 'one Hotel Muse line'); assert.deepEqual([lines[0].room, lines[0].price, lines[0].personal], ['jatu-room', 232, 'employee']);
   assert.equal(w.SIYL_BAG.total(), 232);
-  assert.match(src('journeys.html'), /sub2 = q\.personal==='employee' \? q\.nightly : \(q\.nightly \? 'The listed rate: '\+q\.nightly : ''\);/);
+  assert.match(src('journeys.html'), /sub2 = q\.personal==='employee' \? q\.nightly : q\.personal==='prepaid' \? '' : \(q\.nightly \? 'The listed rate: '\+q\.nightly : ''\);/);
   /* an ordinary guest: the standard pool, the standard rate, never her room or her rate */
   const o = page({ auth: { ...PEGGY, guestId: 'T020', invitationId: 'INV-T020', partyId: 'INV-P20' }, fetch: await roomsFetch(rooms, OTHER) });
   await o.SIYL_UNITS.load(true);

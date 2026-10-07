@@ -474,6 +474,8 @@ function quoteOfItem(itemId, item, src, holderId, personId, asOf) {
     block: line ? line.block : null,
     hosted: !!(line && line.hosted),
     manualReview: line && line.review ? line.reviewReason : null,
+    /* already paid by H&S for this guest (a 009 Billing_Category): the guest repays it — the item's own category */
+    paidByHS: line && line.categoryOverride ? line.categoryOverride.from || null : null,
   };
 }
 const keysOfItem = (item) => clean(item && item.Site_Product_Key).split(/[,|]/).map(clean).filter(Boolean);
@@ -481,6 +483,28 @@ const keysOfItem = (item) => clean(item && item.Site_Product_Key).split(/[,|]/).
 /** The shared pricing source — held about a minute (catalogue-cache.js) unless `fresh`. */
 function pricing(env, asOf, fresh) {
   return pricingSource(catalogueKey(env.SHEETS_ID, asOf), () => loadSource(env, asOf), { fresh: !!fresh });
+}
+
+/**
+ * THE SUBMITTED TRIP'S STAYS H&S ALREADY PAID (Edit 10, Owner, 7 Oct 2026). Which of these lines the engine prices, for this
+ * very person, as a booking Haruthai & Suthep already paid (a 009 Billing_Category) — from the same shared pricing source the
+ * catalogue reads. The trip e-mails and Guest Relations' record say "already paid" only for a line the server knows this way; a
+ * device's claim counts for nothing. Returns Map(site product key → { total }). Throws when the source cannot be read.
+ */
+export async function paidByHSOf(env, holderId, personId, lines, asOf) {
+  const out = new Map();
+  if (!env.SHEETS_ID || !Array.isArray(lines) || !lines.length) return out;
+  const day = evaluationDay(asOf);
+  const src = await pricing(env, day, false);
+  const { index } = siteProductKeyIndex(src.items);
+  for (const l of lines) {
+    const key = siteKeyOfSelection(l);
+    const itemId = key && index[key];
+    if (!itemId) continue;
+    const q = quoteOfItem(itemId, src.items[itemId], src, clean(holderId), clean(personId), day);
+    if (q.paidByHS) out.set(key, { total: q.total });
+  }
+  return out;
 }
 
 async function catalogueQuotes(env, identity, url, cors) {
@@ -1082,6 +1106,8 @@ const lineView = (l, people) => ({
   Room_Unit_ID: l.Room_Unit_ID || null, Booking_ID: l.Booking_ID || null,
   /* payable because H&S booked and paid it for the guest (a 009 Billing_Category): the item's own category */
   paidByHS: l.categoryOverride ? l.categoryOverride.from || null : (l.Category_Override_From || null),
+  /* the 009 row's own words for such a line (printed on the PDF too): who paid, what the guest repays */
+  paidNote: (l.categoryOverride || l.Category_Override_From) ? (l.specialRateRef || null) : null,
 });
 /* the names of the persons on a set of lines, from the index (guestId → 006 ID) and the register */
 function peopleOf(entries, register, lines) {

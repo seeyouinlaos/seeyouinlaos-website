@@ -598,6 +598,8 @@ test('PAID BY H&S · the hotel is payable in the admin preview; PRICE REQUIRED b
   const quote = await hit(W, GUEST, 'catalogue');
   const q = Object.values(quote.j.quotes || quote.j.items || quote.j).flat().find((x) => x && x.Item_ID === 'T-SELF');
   assert.ok(q, JSON.stringify(quote.j).slice(0, 300)); assert.notEqual(q.block, 'B'); assert.equal(q.total, null); assert.match(q.manualReview, /^PRICE REQUIRED/);
+  assert.equal(q.paidByHS, 'GUEST_SELF_PAYMENT', 'the guest\'s trip is told it is already paid (Edit 10)');
+  assert.equal(hotel.paidNote, 'Booked and paid by Haruthai · reimbursed to Haruthai & Suthep', 'the console shows the 009 row\'s own words');
 
   /* the price paid is entered in 009: payable at it — never at the catalogue's 18.17 */
   W.workbook['009_Special_Rates'] = rates('20');
@@ -619,6 +621,55 @@ test('PAID BY H&S · the hotel is payable in the admin preview; PRICE REQUIRED b
   assert.ok(/Booked and paid by Haruthai/.test(text), 'the PDF says why');
   assert.ok(!text.includes('(Your own arrangements)'), 'no own-arrangements section: the hotel is payable');
   assert.equal(W.sent.length, 0, 'nothing e-mailed');
+});
+
+/* EDIT 10 — the sent trip's stays H&S already paid are marked by the SERVER (the engine on the shared source), never the device */
+test('PAID BY H&S · at sending, the server marks the paid stay and gives it the engine\'s amount; a device\'s mark alone counts for nothing; no source → "unverified"', async () => {
+  const { paidByHSOf } = await import('../src/billing-routes.js');
+  const { markPaidByHS } = await import('../src/worker.js');
+  const W = world();
+  W.workbook['002_Accommodation_Details'] = book()['002_Accommodation_Details'].map((row, i) => (i === 0 ? row : [...row, ({ Item_ID: 'T-SELF', Billing_Category: 'GUEST_SELF_PAYMENT', Rate_Status: 'ACTIVE',
+    Rate_Basis: 'PER_PERSON_PER_NIGHT', Standard_Rate: '18.16666667', Currency: 'USD', Site_Product_Key: 'selfstay', 'Number of Nights': 3 })[row[0]] ?? '']));
+  W.workbook['009_Special_Rates'] = [['Holder_ID', 'Person_ID', 'Item_ID', 'Rate_Per_Person_Night', 'Nights_Rule', 'Rate_Status', 'Effective_From', 'Effective_To', 'Approved_By', 'Note', 'Billing_Category'],
+    ['', 'GT9', 'T-STAY', 75, 'ALL', 'ACTIVE', '', '', 'Suthep', 'synthetic', ''],
+    ['INV-T1', 'GT1', 'T-SELF', '18.16666667', '3', 'ACTIVE', '', '', 'Haruthai & Suthep', 'Haruthai has already paid this hotel booking for you.', 'GUEST_SETTLEMENT_REQUIRED']];
+  const was = globalThis.fetch; globalThis.fetch = sheetsFetch(W.workbook, W.log);
+  try {
+    const stay = { id: 'selfstay', stay: 'x', qty: 1, price: 99, rate: 33, pay: 3 };
+    const paid = await paidByHSOf(W.env, 'INV-T1', 'GT1', [stay, { id: 'train', qty: 1 }]);
+    assert.deepEqual([...paid.entries()], [['selfstay', { total: 54.5 }]], 'the hotel, at the engine\'s USD 54.50 — the train is no such stay');
+    assert.equal((await paidByHSOf(W.env, 'INV-T2', 'GT2', [stay])).size, 0, 'the party mate the row does not name');
+    const out = await markPaidByHS(W.env, { invitationId: 'INV-T1', guestId: 'GT1' }, [{ ...stay, paidByHS: true }, { id: 'train', qty: 1, paidByHS: true }], new Set(['selfstay', 'train']));
+    assert.deepEqual([out[0].paidByHS, out[0].price, out[1].paidByHS], [true, 54.5, undefined], 'the device\'s mark on the train is dropped');
+    /* a trip whose device names no paid stay is never asked about: nothing read, every line as sent (a device mark dropped) */
+    const reads = W.log.length;
+    const none = await markPaidByHS(W.env, { invitationId: 'INV-T1', guestId: 'GT1' }, [{ ...stay, paidByHS: true }], new Set());
+    assert.deepEqual([none[0].paidByHS, none[0].price, W.log.length], [undefined, 99, reads]);
+    const other = await markPaidByHS(W.env, { invitationId: 'INV-T2', guestId: 'GT2' }, [{ ...stay, paidByHS: true }], new Set(['selfstay']));
+    assert.equal(other[0].paidByHS, undefined, 'claimed by the device, not by the server: no mark');
+  } finally { globalThis.fetch = was; }
+  /* Google unreachable: the sending goes on; a stay the device called prepaid says neither */
+  clearCatalogueCache();
+  globalThis.fetch = async () => { throw new Error('offline'); };
+  try {
+    const out = await markPaidByHS(W.env, { invitationId: 'INV-T1', guestId: 'GT1' }, [{ id: 'selfstay', stay: 'x', qty: 1 }, { id: 'ljg', stay: 'y', room: 'z', qty: 1 }], new Set(['selfstay']));
+    assert.deepEqual([out[0].prepaidUnverified, out[0].paidByHS, out[1].prepaidUnverified], [true, undefined, undefined]);
+  } finally { globalThis.fetch = was; }
+  /* Google hangs: the sending waits no longer than the limit, and says neither */
+  clearCatalogueCache();
+  globalThis.fetch = () => new Promise(() => {});
+  try {
+    const t0 = Date.now();
+    const out = await markPaidByHS(W.env, { invitationId: 'INV-T1', guestId: 'GT1' }, [{ id: 'selfstay', stay: 'x', qty: 1 }], new Set(['selfstay']), 50);
+    assert.ok(Date.now() - t0 < 1000); assert.equal(out[0].prepaidUnverified, true);
+  } finally { globalThis.fetch = was; clearCatalogueCache(); }
+  /* a stay whose price paid is still asked for: marked, with no amount (the e-mail says "price to follow") */
+  W.workbook['009_Special_Rates'][2][3] = '';
+  globalThis.fetch = sheetsFetch(W.workbook, W.log);
+  try {
+    const out = await markPaidByHS(W.env, { invitationId: 'INV-T1', guestId: 'GT1' }, [{ id: 'selfstay', stay: 'x', qty: 1, price: 54.5 }], new Set(['selfstay']));
+    assert.deepEqual([out[0].paidByHS, out[0].price], [true, null]);
+  } finally { globalThis.fetch = was; }
 });
 
 /* ================================================================ CONFIRM BOOKING (Owner, 7 Oct 2026)

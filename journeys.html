@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>The Journey · See You In Laos</title><script src="assets/i18n/siyl-i18n.js?v=ceb6bfec"></script>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>The Journey · See You In Laos</title><script src="assets/i18n/siyl-i18n.js?v=ab8e3400"></script>
 <script src="assets/invite-early.js?v=fab5da19"></script><style>
 @font-face{font-family:'PP Editorial Old';src:url('assets/fonts/PPEditorialOld-Ultralight.otf') format('opentype');font-weight:200;font-display:swap}
 *{margin:0;padding:0;box-sizing:border-box}body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;font-weight:300;font-size:14px;line-height:1.6}
@@ -160,12 +160,12 @@ h2{font-family:'PP Editorial Old',serif;font-weight:200;font-size:26px;margin:40
 <script src="assets/rooms-data.js?v=649562f9"></script>
 <script src="assets/stay-media.js?v=5e3c3b23"></script>
 <script src="assets/billing-client.js?v=421fbc48"></script>
-<script src="assets/pricing.js?v=e0a4e0cd"></script>
+<script src="assets/pricing.js?v=8ced00d1"></script>
 <script src="assets/stay-plan.js?v=5227fdc4"></script>
 <script src="assets/rooms.js?v=2f2ff2ba"></script>
 <script src="assets/stay.js?v=878b1e60"></script>
 <script src="assets/stage-graph.js?v=f5f4dc76"></script>
-<script src="assets/journey.js?v=46dd07ea"></script>
+<script src="assets/journey.js?v=a24d35db"></script>
 <script src="assets/wizard.js?v=f9c66d86"></script>
 <script type="module" src="assets/invite.mjs?v=252eac2c"></script>
 <script>
@@ -247,7 +247,7 @@ if(q&&r.rate!=null&&q.gift){
   /* A PERSONAL RATE (Owner, 28 Sep 2026 · src/gifts.js): this guest's own charge for the window — the stated total, per person or
      (an employee rate) for the whole room; the listed rate stays beneath as a fact */
   right=vp(q,q.per);
-  sub = q.personalWords; sub2 = q.personal==='employee' ? q.nightly : (q.nightly ? 'The listed rate: '+q.nightly : '');
+  sub = q.personalWords; sub2 = q.personal==='employee' ? q.nightly : q.personal==='prepaid' ? '' : (q.nightly ? 'The listed rate: '+q.nightly : '');
 }else if(q&&r.rate!=null){
   right=vp(q,'per person');
   /* the hosted night is said once, in the stay's own sentence above the rows (TO-01290) */
@@ -371,13 +371,18 @@ paint()});
 /* THE BOOKING METHOD (Owner, 28 Sep 2026 · 002 "Note for Guest"): every stay says who books it — the guest themselves (with the
    sheet's link to the hotel, opened in a new tab: nothing on this website is booked by following it) or the Bride & Groom (charged
    within 14 days after booking) */
-document.querySelectorAll('.p[data-vprod]').forEach(function(sec){
-  var b=P.bookingOf?P.bookingOf(sec.getAttribute('data-vprod')):null;if(!b||sec.querySelector('[data-booking]'))return;
-  var p=document.createElement('p');p.className='pb';p.setAttribute('data-booking',b.method);
+/* drawn again when this guest's own prices or bag arrive (Edit 10): a stay H&S already paid says so, never a hotel link */
+function paintBooking(){document.querySelectorAll('.p[data-vprod]').forEach(function(sec){
+  var old=sec.querySelector('.pb[data-booking]');
+  var b=P.bookingOf?P.bookingOf(sec.getAttribute('data-vprod')):null;
+  if(old&&b&&old.getAttribute('data-booking')===b.method&&old.getAttribute('data-words')===b.words&&(old.getAttribute('data-url')||'')===(b.url||''))return;
+  if(old&&old.parentNode)old.parentNode.removeChild(old);if(!b)return;
+  var p=document.createElement('p');p.className='pb';p.setAttribute('data-booking',b.method);p.setAttribute('data-words',b.words);p.setAttribute('data-url',b.url||'');
   p.appendChild(document.createTextNode(b.words));
   if(b.url){p.appendChild(document.createTextNode(' '));var a=document.createElement('a');a.className='p-link';a.href=b.url;a.target='_blank';a.rel='noopener noreferrer';a.setAttribute('data-booking-link','');a.textContent='Book with the hotel';p.appendChild(a)}
   var at=sec.querySelector('.pm');if(at&&at.nextSibling)sec.insertBefore(p,at.nextSibling);else sec.appendChild(p);
-});
+});}
+paintBooking();['siyl:prices','siyl:billing-ready','siyl:bag'].forEach(function(t){document.addEventListener(t,paintBooking)});
 /* "from" line on each accommodation card — the lowest available per-person total */
 /* the stay's own line — drawn again when this guest's own rates arrive (an employee rate is her own room's line, 29 Sep 2026) */
 function paintFromLines(){document.querySelectorAll('.pb[data-from]').forEach(function(el){
