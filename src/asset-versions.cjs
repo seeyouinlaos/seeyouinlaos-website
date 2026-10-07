@@ -19,7 +19,9 @@ const path = require('path');
 const crypto = require('crypto');
 const ROOT = path.join(__dirname, '..');
 const CHECK = process.argv.includes('--check');
-const PAGES = fs.readdirSync(ROOT).filter((f) => /\.html$/.test(f));
+/* the root pages, and the admin console (src/admin/billing.html · Owner, 7 Oct 2026): the Worker serves it at /admin/billing,
+   it names its assets from <base href="/"> */
+const PAGES = fs.readdirSync(ROOT).filter((f) => /\.html$/.test(f)).concat(['src/admin/billing.html']);
 const RE = /((?:href|src)=")(assets\/[A-Za-z0-9_./-]+\.(?:css|js|mjs))(?:\?v=[0-9a-f]{8})?(")/g;
 const hashes = {};
 const hashOf = (rel) => { if (!hashes[rel]) { const f = path.join(ROOT, rel); if (!fs.existsSync(f)) return null; hashes[rel] = crypto.createHash('sha256').update(fs.readFileSync(f)).digest('hex').slice(0, 8); } return hashes[rel]; };
@@ -31,5 +33,7 @@ for (const page of PAGES) {
 }
 /* the films' sizes for the byte-range route travel with every build of the references (src/build-media-sizes.cjs) */
 if (!CHECK) require('./build-media-sizes.cjs');
+/* the admin console's page travels into the Worker (src/admin-page.js) with every build of its references */
+if (!CHECK) require('./build-admin-page.cjs');
 if (CHECK) { console.log(stale ? 'ASSET VERSIONS: ' + stale + ' page(s) reference a stale asset — run node src/asset-versions.cjs' : 'ASSET VERSIONS: every reference carries the current hash (' + stamped + ' references, ' + PAGES.length + ' pages)'); process.exit(stale ? 1 : 0); }
 console.log('asset versions: ' + stamped + ' references on ' + PAGES.length + ' pages · ' + files + ' page(s) rewritten');

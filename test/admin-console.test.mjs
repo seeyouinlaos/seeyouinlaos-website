@@ -1,0 +1,444 @@
+/* ============================================================================
+   THE H&S ADMIN CONSOLE · its server side (Owner, 7 Oct 2026).
+
+   The shipped billing routes and the BillingLedger actor, with Google replaced at
+   the fetch boundary by an in-memory workbook of SYNTHETIC data and the mail
+   transport by a recorder. No real guest, rate, account or address.
+     · a guest never reaches an admin route (403, and nothing is read)
+     · the overview lists every invitation from ONE Sheets batch + ONE ledger read
+     · status comes in chunks of at most ten
+     · preview → issue binds the exact previewed statement (PREVIEW_CHANGED)
+     · view / PDF / send: the issued revision; the e-mail only on an explicit act,
+       once per confirmation key, never again by accident
+   The Activation Gate's reference cases name real 002 items, which this synthetic
+   workbook does not carry: for the routes only, runReferenceCases answers "all
+   match"; every other gate condition is the real evaluation, in the ledger too.
+   ========================================================================== */
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import crypto from 'node:crypto';
+import { register } from 'node:module';
+import { pathToFileURL } from 'node:url';
+import path from 'node:path';
+
+const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+const GATE_URL = pathToFileURL(path.join(ROOT, 'src/billing/activation-gate.js')).href;
+const AUTH_STUB = 'data:text/javascript,' + encodeURIComponent(`
+export async function identify() { return globalThis.__billingIdentity || null; }
+export async function loadIndex() { return globalThis.__billingIndex || {}; }
+export function owns() { return true; }
+export async function authIdOf() { return null; }
+export function displayName(v) { return String(v || ''); }`);
+const GATE_STUB = 'data:text/javascript,' + encodeURIComponent(`
+export * from ${JSON.stringify(GATE_URL)};
+import { REFERENCE_CASES } from ${JSON.stringify(GATE_URL)};
+export function runReferenceCases() { return REFERENCE_CASES.map((c) => ({ id: c.id, who: c.who, item: c.item, matches: true, manualReview: [] })); }`);
+register('data:text/javascript,' + encodeURIComponent(`
+export async function resolve(specifier, context, next) {
+  const fromRoutes = context.parentURL && context.parentURL.endsWith('/src/billing-routes.js');
+  if (fromRoutes && specifier === './auth.js') return { url: ${JSON.stringify(AUTH_STUB)}, shortCircuit: true };
+  if (fromRoutes && specifier === './billing/activation-gate.js') return { url: ${JSON.stringify(GATE_STUB)}, shortCircuit: true };
+  return next(specifier, context);
+}`));
+
+const { handleBilling } = await import('../src/billing-routes.js');
+const { BillingLedger } = await import('../src/billing-ledger.js');
+const { PAYMENT_JOURNAL_COLUMNS } = await import('../src/billing/source.js');
+const { composeStatementMail } = await import('../src/mail-templates.js');
+const { clearCatalogueCache } = await import('../src/billing/catalogue-cache.js');
+
+/* ------------------------------------------------------------ the doubles */
+function doState() {
+  const map = new Map();
+  let turn = Promise.resolve(), inside = false;
+  return {
+    storage: {
+      get: async (k) => (map.has(k) ? structuredClone(map.get(k)) : undefined),
+      put: async (k, v) => { map.set(k, structuredClone(v)); },
+      delete: async (k) => map.delete(k),
+      list: async ({ prefix = '' } = {}) => new Map([...map].filter(([k]) => k.startsWith(prefix)).map(([k, v]) => [k, structuredClone(v)])),
+    },
+    blockConcurrencyWhile: (fn) => {
+      if (inside) return Promise.resolve().then(fn);
+      const next = turn.then(() => { inside = true; return fn(); }).finally(() => { inside = false; });
+      turn = next.then(() => undefined, () => undefined);
+      return next;
+    },
+    _map: map,
+  };
+}
+const kv = (o) => ({ get: async (k) => (o[k] === undefined ? null : (typeof o[k] === 'string' ? o[k] : JSON.stringify(o[k]))) });
+function r2() {
+  const map = new Map(); let puts = 0;
+  return { _puts: () => puts, put: async (k, v) => { puts++; map.set(k, new Uint8Array(v)); },
+    get: async (k) => { if (!map.has(k)) return null; const b = map.get(k); return { body: b, arrayBuffer: async () => b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength) }; } };
+}
+
+const SHEET = '1adminconsolesheet';
+const ITEMS = {
+  'T-STAY': { Item_ID: 'T-STAY', Billing_Category: 'GUEST_SETTLEMENT_REQUIRED', Rate_Status: 'ACTIVE', Rate_Basis: 'PER_PERSON_PER_NIGHT',
+    Standard_Rate: 145, Currency: 'USD', Site_Product_Key: 'wedstay/heritage', 'Number of Nights': 2 },
+  'T-TRAIN': { Item_ID: 'T-TRAIN', Billing_Category: 'GUEST_SETTLEMENT_REQUIRED', Rate_Status: 'ACTIVE', Rate_Basis: 'PER_PERSON',
+    Standard_Rate: 100, Currency: 'USD', Site_Product_Key: 'train', 'Number of Nights': 1 },
+};
+function book(extraJournal) {
+  const labels = ['Item_ID', 'Billing_Category', 'Rate_Status', 'Effective_From', 'Effective_To', 'Rate_Basis', 'Standard_Rate', 'Quota',
+    'Quota_Unit', 'Max_Pax', 'Change_Cutoff', 'Cancellation_Cutoff', 'Currency', 'Site_Product_Key', 'Number of Nights', 'Modifiers'];
+  const cols = Object.values(ITEMS);
+  return {
+    '002_Accommodation_Details': [['002 · synthetic'], ...labels.map((l) => [l, ...cols.map((it) => (it[l] == null ? '' : it[l]))])],
+    '008_Payment_Journal': [[...PAYMENT_JOURNAL_COLUMNS],
+      ['PAY-OTHER-1', 'S-OTHER', 'INV-T9', 'V1', 'PAYMENT', 'PAYPAL_EUR', 89, 'EUR', 100, 'INV-T9', '2026-10-03T10:00:00Z', '', '', 'BRIDE', '2026-10-03T12:00:00Z', 'VERIFIED', '', 'FALSE'],
+      ...(extraJournal || [])],
+    /* one approved, person-scoped rate for somebody else (Activation Gate condition 3 needs an ACTIVE approved 009) */
+    '009_Special_Rates': [['Holder_ID', 'Person_ID', 'Item_ID', 'Rate_Per_Person_Night', 'Nights_Rule', 'Rate_Status', 'Effective_From', 'Effective_To', 'Approved_By', 'Note'],
+      ['', 'GT9', 'T-STAY', 75, 'ALL', 'ACTIVE', '', '', 'Suthep', 'synthetic']],
+    '010_Booking_Evidence_Index': [['Booking_ID', 'Settlement_ID', 'Holder_ID', 'Evidence_Status']],
+    '011_Billing_Config': [['Config_Key', 'Value', 'Effective_From', 'Effective_To', 'Status', 'Approved_By', 'Approved_At', 'Note'],
+      ['FX_USD_THB', '33.68', '2026-01-01', '', 'ACTIVE', 'Suthep', '2026-10-05T19:20:14Z', 'synthetic'],
+      ['FX_USD_EUR', '0.89', '2026-01-01', '', 'ACTIVE', 'Suthep', '2026-10-05T19:20:14Z', 'synthetic']],
+    '006_Guestlist': [['ID', 'Firstname', 'Surname', 'Nickname', 'Nationality'],
+      ['CON-T1', 'Testa', 'Example', 'Tess', 'German'], ['CON-T2', 'Probe', 'Sample', '', ''], ['CON-G049', 'Groom', 'Synthetic', '', 'German']],
+  };
+}
+function sheetsFetch(workbook, log) {
+  const res = (status, body) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
+  return async (url, init = {}) => {
+    const u = String(url);
+    if (u.startsWith('https://oauth2.googleapis.com/token')) return res(200, { access_token: 'synthetic', expires_in: 3600, token_type: 'Bearer' });
+    if (/\/values:batchGet\?/.test(u)) {
+      const ranges = [...new URL(u).searchParams.getAll('ranges')];
+      log.push(['batchGet', ranges.map((r) => r.split('!')[0].replace(/^'|'$/g, ''))]);
+      return res(200, { valueRanges: ranges.map((range) => ({ range, values: workbook[range.split('!')[0].replace(/^'|'$/g, '').replace(/''/g, "'")] || [] })) });
+    }
+    const m = u.match(/\/values\/([^?]+)\?/);
+    if (!m) return res(404, { error: { message: 'unknown' } });
+    let range = decodeURIComponent(m[1]);
+    const append = range.endsWith(':append'); if (append) range = range.slice(0, -':append'.length);
+    const tab = range.split('!')[0].replace(/^'|'$/g, '').replace(/''/g, "'");
+    if (append) { const row = JSON.parse(init.body).values[0]; workbook[tab].push(row); log.push(['append', tab]); return res(200, { updates: {} }); }
+    if ((init.method || 'GET') === 'PUT') { log.push(['update', tab]); return res(200, {}); }
+    log.push(['get', tab]);
+    return res(200, { values: workbook[tab] || [] });
+  };
+}
+const { privateKey } = crypto.generateKeyPairSync('rsa', { modulusLength: 2048, privateKeyEncoding: { type: 'pkcs8', format: 'pem' }, publicKeyEncoding: { type: 'spki', format: 'pem' } });
+
+const GROOM = { invitationId: 'INV-G049', guestId: 'G049', hosts: true };
+const GUEST = { invitationId: 'INV-T1', guestId: 'GT1' };
+const INDEX = {
+  a: { i: 'INV-T1', g: 'GT1', c: 'CON-T1' },
+  b: { i: 'INV-T2', g: 'GT2', c: 'CON-T2' },
+  g: { i: 'INV-G049', g: 'G049', c: 'CON-G049', h: 1 },
+};
+const SENT = { submissionId: 'SYL-T1-1', version: 1, lastSentAt: '2026-10-01T10:00:00Z',
+  registration: { guestId: 'GT1', selections: [{ id: 'wedstay', room: 'heritage', unit: 'A', qty: 1 }, { id: 'train', qty: 1 }] } };
+
+function world({ store, journal } = {}) {
+  clearCatalogueCache();
+  const st = doState(); const led = new BillingLedger(st);
+  const docs = r2();
+  const env = {
+    SHEETS_ID: SHEET,
+    GOOGLE_SERVICE_ACCOUNT_JSON: JSON.stringify({ client_email: 'synthetic@test.invalid', private_key: privateKey, private_key_id: 'admin' }),
+    BILLING_LEDGER: { idFromName: () => 'billing', get: () => ({ fetch: (req) => led.fetch(req) }) },
+    REG_KV: kv(store || {
+      'reg:INV-T1': SENT, 'conf:INV-T1': { confirmedAt: '2026-10-02T09:00:00Z', version: 1 },
+      'contact:INV-T1': { email: 'Tess.Example@Example.invalid', firstName: 'Tess' },
+    }),
+    DOCS: docs,
+  };
+  const workbook = book(journal);
+  const log = [];
+  const sent = [];
+  const deps = { sendMail: async (...a) => { sent.push(a); return deps.answer ? deps.answer(a) : { provider: 'brevo', accepted: true, id: 'msg-' + sent.length, status: 201, error: null, outcome: 'SENT' }; } };
+  return { st, led, env, docs, workbook, log, sent, deps };
+}
+async function approveGate(st) {
+  await st.storage.put('gate', { approved: true, issueAndPublishEnabled: true, approval: { approvedBy: 'suthep', approvedAt: '2026-10-05T10:00:00Z' } });
+}
+async function hit(W, identity, pathq, body, method) {
+  globalThis.__billingIdentity = identity;
+  globalThis.__billingIndex = INDEX;
+  const url = new URL('https://stage.invalid/api/billing/' + pathq);
+  const req = new Request(url, body ? { method: method || 'POST', body: JSON.stringify(body), headers: { 'content-type': 'application/json' } } : {});
+  const was = globalThis.fetch;
+  globalThis.fetch = sheetsFetch(W.workbook, W.log);
+  try {
+    const r = await handleBilling(req, W.env, url, {}, W.deps);
+    const type = r.headers.get('content-type') || '';
+    return { status: r.status, type, j: /json/.test(type) ? await r.json().catch(() => null) : null, bytes: /pdf/.test(type) ? new Uint8Array(await r.arrayBuffer()) : null };
+  } finally { globalThis.fetch = was; }
+}
+
+/* ================================================================ tests */
+
+test('ADMIN · a guest reaches no admin route: 403, nothing read, no admin data', async () => {
+  const W = world();
+  for (const [p, body] of [['admin/overview'], ['admin/status?ids=INV-T1'], ['admin/holder?holder=INV-T1'], ['admin/send?holder=INV-T1'],
+    ['admin/send', { holderId: 'INV-T1', revision: 1, email: 'x@y.invalid', sendKey: 'k'.repeat(32) }], ['revenue'], ['holders'],
+    ['issue', { holderId: 'INV-T1' }], ['payment/verify', { Payment_ID: 'PAY-OTHER-1' }]]) {
+    const r = await hit(W, GUEST, p, body);
+    assert.equal(r.status, 403, p);
+    assert.ok(!r.j.holders && !r.j.guest && !r.j.preview, p + ' carries no admin data');
+  }
+  assert.equal(W.log.length, 0, 'nothing was read from Google for a refused request');
+  assert.equal(W.sent.length, 0);
+  const anon = await hit(W, null, 'admin/overview');
+  assert.equal(anon.status, 401);
+});
+
+test('ADMIN · the overview lists every invitation from ONE Sheets batch (006 + 008) and the ledger — names, method, nothing issued', async () => {
+  const W = world();
+  const r = await hit(W, GROOM, 'admin/overview');
+  assert.equal(r.status, 200, JSON.stringify(r.j));
+  assert.deepEqual(W.log, [['batchGet', ['006_Guestlist', '008_Payment_Journal']]], 'one read request, two tabs');
+  assert.equal(r.j.holders.length, 3);
+  const t1 = r.j.holders.find((h) => h.Holder_ID === 'INV-T1');
+  assert.equal(t1.name.full, 'Testa Example'); assert.equal(t1.name.nick, 'Tess');
+  assert.equal(t1.method.channel, 'PAYPAL_EUR'); assert.equal(t1.method.currency, 'EUR'); assert.equal(t1.method.determined, true);
+  assert.equal(t1.settlement, null); assert.equal(t1.payment, null);
+  const t2 = r.j.holders.find((h) => h.Holder_ID === 'INV-T2');
+  assert.equal(t2.method.determined, false, 'no nationality in 006: the method is a BILLING_ADMIN\'s to state, never guessed');
+  assert.equal(r.j.holders.find((h) => h.Holder_ID === 'INV-G049').billingAdmin, true);
+  assert.equal(r.j.chunk, 8);
+});
+
+test('ADMIN · status in chunks of at most ten: Guest Relations\' confirmation and the draft, per holder', async () => {
+  const W = world();
+  const r = await hit(W, GROOM, 'admin/status?ids=INV-T1,INV-T2');
+  assert.equal(r.status, 200, JSON.stringify(r.j));
+  const t1 = r.j.rows.find((x) => x.Holder_ID === 'INV-T1'), t2 = r.j.rows.find((x) => x.Holder_ID === 'INV-T2');
+  assert.equal(t1.confirmation.state, 'CONFIRMED'); assert.equal(t1.draft.total, 390); assert.equal(t1.draft.lines, 2); assert.equal(t1.draft.manualReview, 0);
+  assert.equal(t2.confirmation.state, 'NONE'); assert.equal(t2.draft, null);
+  const many = Array.from({ length: 9 }, (_, i) => 'INV-X' + i).join(',');
+  assert.equal((await hit(W, GROOM, 'admin/status?ids=' + many)).status, 400);
+  assert.equal((await hit(W, GROOM, 'admin/status?ids=nonsense')).status, 400);
+});
+
+test('ADMIN · preview → issue: only the very statement previewed is issued; a changed one is refused and nothing is created', async () => {
+  const W = world(); await approveGate(W.st);
+  const h = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+  assert.equal(h.status, 200, JSON.stringify(h.j));
+  assert.equal(h.j.guest.name.full, 'Testa Example');
+  assert.equal(h.j.guest.email, 'tess.example@example.invalid'); assert.equal(h.j.guest.emailSource, 'CONTACT');
+  assert.equal(h.j.confirmation.state, 'CONFIRMED');
+  assert.equal(h.j.preview.total, 390); assert.equal(h.j.preview.lines.length, 2);
+  assert.equal(h.j.preview.lines[0].person, 'Testa Example', 'the person is named from the register');
+  assert.equal(h.j.preview.issuable, true, JSON.stringify(h.j.preview.reasons));
+  assert.match(h.j.preview.proposalHash, /^[0-9a-f]{64}$/);
+  assert.equal(h.j.issued, null);
+
+  const wrong = await hit(W, GROOM, 'issue', { holderId: 'INV-T1', expectedProposal: 'f'.repeat(64) });
+  assert.equal(wrong.status, 409); assert.deepEqual(wrong.j.reasons, ['PREVIEW_CHANGED']);
+  const none = await hit(W, GROOM, 'admin/overview');
+  assert.equal(none.j.holders.find((x) => x.Holder_ID === 'INV-T1').settlement, null, 'a refused issue leaves no settlement and no revision');
+
+  /* the trip moves after the preview: the same hash no longer issues */
+  const W2 = world(); await approveGate(W2.st);
+  const h2 = await hit(W2, GROOM, 'admin/holder?holder=INV-T1');
+  W2.workbook['002_Accommodation_Details'] = book()['002_Accommodation_Details'].map((row) => (row[0] === 'Standard_Rate' ? ['Standard_Rate', 150, 100] : row));
+  const moved = await hit(W2, GROOM, 'issue', { holderId: 'INV-T1', expectedProposal: h2.j.preview.proposalHash });
+  assert.equal(moved.status, 409); assert.deepEqual(moved.j.reasons, ['PREVIEW_CHANGED']);
+
+  const ok = await hit(W, GROOM, 'issue', { holderId: 'INV-T1', expectedProposal: h.j.preview.proposalHash });
+  assert.equal(ok.status, 200, JSON.stringify(ok.j));
+  assert.equal(ok.j.totalPayable, 390); assert.equal(ok.j.revision, 1); assert.equal(ok.j.Payment_Preference, 'PAYPAL_EUR');
+  assert.equal(W.sent.length, 0, 'issuing never sends an e-mail');
+});
+
+test('ADMIN · issue is refused before anything is created when Guest Relations has not confirmed the trip', async () => {
+  const W = world({ store: { 'reg:INV-T1': SENT } }); await approveGate(W.st);
+  const h = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+  assert.equal(h.j.preview.issuable, false);
+  assert.match(h.j.preview.reasons.join(' '), /BOOKING_NOT_CONFIRMED: UNCONFIRMED/);
+  assert.equal(h.j.preview.proposalHash, null, 'nothing to confirm');
+  const r = await hit(W, GROOM, 'issue', { holderId: 'INV-T1' });
+  assert.equal(r.status, 409);
+  assert.equal([...W.st._map.keys()].filter((k) => k.startsWith('settlement:') || k.startsWith('revision:')).length, 0);
+});
+
+test('ADMIN · view, PDF and the overview after issue: the immutable revision, its own dates and method', async () => {
+  const W = world(); await approveGate(W.st);
+  const h = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+  const ok = await hit(W, GROOM, 'issue', { holderId: 'INV-T1', expectedProposal: h.j.preview.proposalHash });
+  assert.equal(ok.status, 200, JSON.stringify(ok.j));
+  const v = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+  assert.equal(v.j.issued.revision, 1); assert.equal(v.j.issued.total, 390); assert.equal(v.j.issued.method, 'PAYPAL_EUR');
+  assert.equal(v.j.issued.fx.FX_USD_EUR, 0.89); assert.equal(v.j.issued.inCurrency.amount, 347.1);
+  assert.equal(v.j.issued.lines.length, 2);
+  assert.equal(v.j.payment.status, 'UNPAID'); assert.equal(v.j.payment.balance, 390);
+  const o = await hit(W, GROOM, 'admin/overview');
+  const row = o.j.holders.find((x) => x.Holder_ID === 'INV-T1');
+  assert.equal(row.settlement.issuedRevision, 1); assert.equal(row.settlement.issuedTotal, 390);
+  assert.ok(row.settlement.issueDate); assert.ok(row.settlement.dueDate);
+  assert.equal(row.method.source, 'ISSUED_REVISION'); assert.equal(row.payment.status, 'UNPAID');
+  const pdf = await hit(W, GROOM, 'pdf?holder=INV-T1&rev=1');
+  assert.equal(pdf.status, 200); assert.match(pdf.type, /application\/pdf/);
+  assert.equal(String.fromCharCode(...pdf.bytes.slice(0, 5)), '%PDF-');
+  await hit(W, GROOM, 'pdf?holder=INV-T1&rev=1');
+  assert.equal(W.docs._puts(), 1, 'rendered once, kept write-once');
+  /* a guest's `holder` is ignored: INV-T1 gets its own statement, INV-T2 (nothing issued) gets nothing of INV-T1's */
+  const own = await hit(W, GUEST, 'pdf?holder=INV-T9&rev=1');
+  assert.equal(own.status, 200); assert.deepEqual(own.bytes, pdf.bytes);
+  const other = await hit(W, { invitationId: 'INV-T2', guestId: 'GT2' }, 'pdf?holder=INV-T1&rev=1');
+  assert.equal(other.status, 404, 'never another guest\'s document');
+});
+
+test('ADMIN · send: the dialog\'s facts, the PDF attached, once per confirmation — never twice by accident', async () => {
+  const W = world(); await approveGate(W.st);
+  const before = await hit(W, GROOM, 'admin/send?holder=INV-T1');
+  assert.equal(before.j.issued, false);
+  const h = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+  await hit(W, GROOM, 'issue', { holderId: 'INV-T1', expectedProposal: h.j.preview.proposalHash });
+  const g = await hit(W, GROOM, 'admin/send?holder=INV-T1');
+  assert.equal(g.status, 200, JSON.stringify(g.j));
+  assert.equal(g.j.recipientName, 'Testa Example'); assert.equal(g.j.email, 'tess.example@example.invalid');
+  assert.equal(g.j.totalPayable, 390); assert.ok(g.j.dueDate); assert.ok(g.j.Settlement_ID); assert.equal(g.j.revision, 1);
+  const k1 = crypto.randomBytes(16).toString('hex');
+
+  const changed = await hit(W, GROOM, 'admin/send', { holderId: 'INV-T1', revision: 1, email: 'someone@else.invalid', sendKey: k1 });
+  assert.equal(changed.status, 409); assert.deepEqual(changed.j.reasons, ['EMAIL_CHANGED']);
+  const oldRev = await hit(W, GROOM, 'admin/send', { holderId: 'INV-T1', revision: 2, email: g.j.email, sendKey: k1 });
+  assert.deepEqual(oldRev.j.reasons, ['NOT_CURRENT_REVISION']);
+  assert.equal(W.sent.length, 0);
+
+  const s1 = await hit(W, GROOM, 'admin/send', { holderId: 'INV-T1', revision: 1, email: g.j.email, sendKey: k1 });
+  assert.equal(s1.status, 200, JSON.stringify(s1.j)); assert.equal(s1.j.outcome, 'SENT');
+  assert.equal(W.sent.length, 1);
+  const [, to, toName, subject, text, html, files] = W.sent[0];
+  assert.equal(to, 'tess.example@example.invalid'); assert.equal(toName, 'Testa Example');
+  assert.match(subject, /Your statement/); assert.match(text, /My Profile → Your statement/); assert.match(html, /profile#statement/);
+  assert.equal(files.length, 1); assert.match(files[0].name, /^Statement-.*-V1\.pdf$/);
+  assert.equal(Buffer.from(files[0].content, 'base64').subarray(0, 5).toString(), '%PDF-', 'the issued PDF, attached');
+  assert.doesNotMatch(text + html, /\/api\/billing\/pdf|bearer|IBAN/i, 'no PDF link, no bearer, no bank account in the mail');
+
+  const replay = await hit(W, GROOM, 'admin/send', { holderId: 'INV-T1', revision: 1, email: g.j.email, sendKey: k1 });
+  assert.equal(replay.j.replay, true); assert.equal(W.sent.length, 1, 'the same confirmation never sends twice');
+  const k2 = crypto.randomBytes(16).toString('hex');
+  const second = await hit(W, GROOM, 'admin/send', { holderId: 'INV-T1', revision: 1, email: g.j.email, sendKey: k2 });
+  assert.equal(second.status, 409); assert.deepEqual(second.j.reasons, ['ALREADY_SENT']); assert.equal(W.sent.length, 1);
+  const again = await hit(W, GROOM, 'admin/send', { holderId: 'INV-T1', revision: 1, email: g.j.email, sendKey: k2, again: true });
+  assert.equal(again.j.outcome, 'SENT'); assert.equal(W.sent.length, 2, 'a deliberate second send, confirmed as such');
+  const log = await hit(W, GROOM, 'admin/send?holder=INV-T1');
+  assert.deepEqual(log.j.attempts.map((a) => a.outcome), ['SENT', 'SENT']);
+});
+
+test('ADMIN · an uncertain or refused delivery is recorded as such: uncertain blocks a plain resend, a refusal does not', async () => {
+  const W = world(); await approveGate(W.st);
+  const h = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+  await hit(W, GROOM, 'issue', { holderId: 'INV-T1', expectedProposal: h.j.preview.proposalHash });
+  const email = 'tess.example@example.invalid';
+  W.deps.answer = () => ({ provider: 'brevo', accepted: false, id: null, status: 400, error: 'invalid', outcome: 'REJECTED' });
+  const rej = await hit(W, GROOM, 'admin/send', { holderId: 'INV-T1', revision: 1, email, sendKey: crypto.randomBytes(16).toString('hex') });
+  assert.equal(rej.j.outcome, 'REJECTED');
+  W.deps.answer = () => ({ provider: 'brevo', accepted: false, id: null, status: 0, error: 'network', outcome: 'UNCERTAIN' });
+  const unc = await hit(W, GROOM, 'admin/send', { holderId: 'INV-T1', revision: 1, email, sendKey: crypto.randomBytes(16).toString('hex') });
+  assert.equal(unc.j.outcome, 'UNCERTAIN', 'a refusal did not block this send');
+  W.deps.answer = null;
+  const blocked = await hit(W, GROOM, 'admin/send', { holderId: 'INV-T1', revision: 1, email, sendKey: crypto.randomBytes(16).toString('hex') });
+  assert.deepEqual(blocked.j.reasons, ['ALREADY_SENT'], 'it may have reached the guest');
+  /* a claim whose Worker never reported back becomes UNCERTAIN after five minutes */
+  const key = [...W.st._map.keys()].find((k) => k.startsWith('stmtmail:'));
+  const rec = await W.st.storage.get(key);
+  rec.attempts = []; rec.claim = { sendKey: 'z'.repeat(32), token: 't', at: '2026-01-01T00:00:00Z', by: 'GROOM', to: email };
+  await W.st.storage.put(key, rec);
+  const after = await hit(W, GROOM, 'admin/send', { holderId: 'INV-T1', revision: 1, email, sendKey: crypto.randomBytes(16).toString('hex') });
+  assert.deepEqual(after.j.reasons, ['ALREADY_SENT']);
+  assert.equal((await W.st.storage.get(key)).attempts[0].outcome, 'UNCERTAIN');
+});
+
+test('ADMIN · "Email unavailable": no contact and no sent-trip address — nothing is guessed and nothing is sent', async () => {
+  const W = world({ store: { 'reg:INV-T1': SENT, 'conf:INV-T1': { confirmedAt: '2026-10-02T09:00:00Z', version: 1 } } }); await approveGate(W.st);
+  const h = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+  assert.equal(h.j.guest.email, null);
+  await hit(W, GROOM, 'issue', { holderId: 'INV-T1', expectedProposal: h.j.preview.proposalHash });
+  const g = await hit(W, GROOM, 'admin/send?holder=INV-T1');
+  assert.equal(g.j.email, null);
+  const r = await hit(W, GROOM, 'admin/send', { holderId: 'INV-T1', revision: 1, email: '', sendKey: crypto.randomBytes(16).toString('hex') });
+  assert.equal(r.status, 409); assert.deepEqual(r.j.reasons, ['EMAIL_UNAVAILABLE']); assert.equal(W.sent.length, 0);
+  /* and without a mail transport nothing is attempted */
+  const noDeps = { ...W, deps: null };
+  const n = await hit(noDeps, GROOM, 'admin/send', { holderId: 'INV-T1', revision: 1, email: 'a@b.invalid', sendKey: crypto.randomBytes(16).toString('hex') });
+  assert.equal(n.status, 503);
+});
+
+test('ADMIN · payments: the holder\'s own 008 rows only, with the decision state; verify goes through the existing protections', async () => {
+  const W = world(); await approveGate(W.st);
+  const h = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+  const ok = await hit(W, GROOM, 'issue', { holderId: 'INV-T1', expectedProposal: h.j.preview.proposalHash });
+  const sid = ok.j.Settlement_ID;
+  W.workbook['008_Payment_Journal'].push(['PAY-' + sid + '-1', sid, 'INV-T1', 'V1', 'PAYMENT', 'PAYPAL_EUR', 100, 'EUR', 112.36, 'INV-T1', '2026-10-06T10:00:00Z', 'PP-1', '', '', '', 'REPORTED', '', 'FALSE']);
+  const v = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+  assert.deepEqual(v.j.payments.map((p) => p.Payment_ID), ['PAY-' + sid + '-1'], 'never another settlement\'s rows');
+  assert.equal(v.j.payments[0].Record_Status, 'REPORTED'); assert.equal(v.j.payments[0].decision, null);
+  assert.equal(v.j.payment.pendingCount, 1); assert.equal(v.j.payment.ist, 0);
+  const verify = await hit(W, GROOM, 'payment/verify', { Payment_ID: 'PAY-' + sid + '-1' });
+  assert.equal(verify.status, 200, JSON.stringify(verify.j));
+  assert.ok(W.log.some((x) => x[0] === 'update'), 'the decision was written to 008');
+});
+
+test('ADMIN · the statement e-mail: the issued figures, My Profile → Your statement, no code, no bearer, no account number', () => {
+  const m = composeStatementMail({ firstName: 'Tess', settlementId: 'S-TEST-0001', revision: 2, totalPayable: 1234.5, issueDate: '2026-10-07',
+    dueDate: '2026-10-28', inCurrency: { currency: 'EUR', amount: 1098.71 }, method: 'PayPal (EUR)', profileUrl: 'https://stage.invalid/profile#statement' });
+  assert.match(m.subject, /S-TEST-0001/);
+  for (const t of [m.text, m.html]) {
+    assert.match(t, /S-TEST-0001/); assert.match(t, /USD 1,234\.50/); assert.match(t, /EUR 1,098\.71/); assert.match(t, /21 days after it is issued/);
+    assert.doesNotMatch(t, /IBAN|bearer|invitation code is|\/api\//i);
+  }
+  assert.match(m.text, /My Profile → Your statement: https:\/\/stage\.invalid\/profile#statement/);
+});
+
+/* ---- independent review (7 Oct 2026) ---- */
+test('REVIEW · one preview issues at most once: a replay and a concurrent second issue are refused; an unchanged re-issue is not offered', async () => {
+  const W = world(); await approveGate(W.st);
+  const h = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+  const hash = h.j.preview.proposalHash;
+  const [x, y] = await Promise.all([
+    hit(W, GROOM, 'issue', { holderId: 'INV-T1', expectedProposal: hash }),
+    hit(W, GROOM, 'issue', { holderId: 'INV-T1', expectedProposal: hash }),
+  ]);
+  assert.deepEqual([x.status, y.status].sort(), [200, 409], JSON.stringify([x.j, y.j]));
+  const lost = x.status === 409 ? x : y;
+  assert.deepEqual(lost.j.reasons, ['PREVIEW_CHANGED']);
+  const replay = await hit(W, GROOM, 'issue', { holderId: 'INV-T1', expectedProposal: hash });
+  assert.equal(replay.status, 409); assert.deepEqual(replay.j.reasons, ['PREVIEW_CHANGED']);
+  const revs = [...W.st._map.keys()].filter((k) => k.startsWith('revision:'));
+  assert.equal(revs.length, 1, 'exactly one revision exists');
+  const after = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+  assert.equal(after.j.preview.issuable, false);
+  assert.match(after.j.preview.reasons.join(' '), /NO_CHANGE: revision 1 already holds exactly this statement/);
+  const again = await hit(W, GROOM, 'issue', { holderId: 'INV-T1', expectedProposal: after.j.preview.proposalHash || 'x' });
+  assert.equal(again.status, 409);
+});
+
+test('REVIEW · the issued statement stays visible when the current trip cannot be calculated; the preview says why', async () => {
+  const W = world(); await approveGate(W.st);
+  const h = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+  assert.equal((await hit(W, GROOM, 'issue', { holderId: 'INV-T1', expectedProposal: h.j.preview.proposalHash })).status, 200);
+  /* the stored registration now names another person: the engine refuses to calculate, the statement stands */
+  W.env.REG_KV = kv({ 'reg:INV-T1': { ...SENT, registration: { ...SENT.registration, guestId: 'GT-OTHER' } }, 'conf:INV-T1': { confirmedAt: '2026-10-02T09:00:00Z', version: 1 },
+    'contact:INV-T1': { email: 'tess.example@example.invalid' } });
+  const v = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+  assert.equal(v.status, 200, JSON.stringify(v.j));
+  assert.equal(v.j.issued.revision, 1); assert.equal(v.j.payment.status, 'UNPAID');
+  assert.equal(v.j.preview.issuable, false); assert.match(v.j.preview.reasons[0], /^PREVIEW_UNAVAILABLE: /);
+});
+
+test('REVIEW · every reported payment\'s decision in ONE ledger read; an unusable contact address is never replaced by an older one', async () => {
+  const W = world(); await approveGate(W.st);
+  const h = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+  const sid = (await hit(W, GROOM, 'issue', { holderId: 'INV-T1', expectedProposal: h.j.preview.proposalHash })).j.Settlement_ID;
+  for (let i = 0; i < 40; i++) W.workbook['008_Payment_Journal'].push(['PAY-' + sid + '-R' + i, sid, 'INV-T1', 'V1', 'PAYMENT', 'PAYPAL_EUR', 1, 'EUR', 1.12, 'INV-T1', '2026-10-06T10:00:00Z', '', '', '', '', 'REPORTED', '', 'FALSE']);
+  let ledgerCalls = 0; const real = W.led.fetch.bind(W.led);
+  W.env.BILLING_LEDGER = { idFromName: () => 'billing', get: () => ({ fetch: (req) => { ledgerCalls++; return real(req); } }) };
+  const v = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+  assert.equal(v.status, 200); assert.equal(v.j.payments.length, 40);
+  assert.ok(v.j.payments.every((p) => p.decision === null));
+  assert.ok(ledgerCalls < 15, 'forty reported payments do not mean forty ledger reads (' + ledgerCalls + ')');
+
+  const W2 = world({ store: { 'reg:INV-T1': { ...SENT, recipient: { email: 'old.address@example.invalid' } }, 'conf:INV-T1': { confirmedAt: '2026-10-02T09:00:00Z', version: 1 },
+    'contact:INV-T1': { email: 'not an address' } } });
+  const g = await hit(W2, GROOM, 'admin/holder?holder=INV-T1');
+  assert.equal(g.j.guest.email, null, 'the guest corrects the address; the old one is not used'); assert.equal(g.j.guest.emailSource, 'CONTACT_INVALID');
+});

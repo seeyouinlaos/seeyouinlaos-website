@@ -320,6 +320,36 @@ function guestVoice(M) {
     intro: 'Your trip has reached us, exactly as you sent it — below is your copy. Khun Ket and Khun Paddy of Guest Relations will look through it and confirm each arrangement with you personally; until they do, nothing is booked. If anything changes, simply change it in My Trip and send us the update.' };
 }
 export function composeGuestMail(record) { return localiseGuestMail(composeGuestMailEn(record), record); }
+
+/* ---- THE STATEMENT EMAIL (Owner, 7 Oct 2026 · admin console) ----
+   Sent only when a BILLING_ADMIN sends an issued statement. The figures are the issued revision's own (its total, its due
+   date, the amount at its own frozen rate); the PDF travels as an attachment, never as a link. It points to My Profile →
+   Your statement, where the guest sees how to pay. No code, no bearer, no bank account number in the body. */
+export function composeStatementMail(m) {
+  const d = m || {};
+  const subject = 'Your statement — See You In Laos (' + d.settlementId + ')';
+  const owed = d.inCurrency && d.inCurrency.amount != null
+    ? d.inCurrency.currency + ' ' + Number(d.inCurrency.amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '';
+  const total = 'USD ' + Number(d.totalPayable || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const rows = [kvRow('Statement', d.settlementId + ' · version ' + d.revision), kvRow('Issued', dayWords(d.issueDate)), kvRow('Total', total),
+    owed ? kvRow('In ' + d.inCurrency.currency, owed, 'at this statement\'s own rate') : '', kvRow('Due by', dayWords(d.dueDate)),
+    d.method ? kvRow('Payment method', d.method) : ''].filter(Boolean);
+  const intro = 'Your statement for the wedding journey is ready. It is attached to this email, and you will always find it in My Profile, under Your statement — together with how to pay.';
+  const rule21 = 'It is settled within 21 days after it is issued, by the due date above. Once you have paid, tell us with "I have paid" in My Profile; Guest Relations then verifies the payment.';
+  const inner = '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td>' +
+    h1('Your statement') + para('Dear ' + esc(d.firstName || 'guest') + ',') + para(esc(intro)) + '</td></tr>' + gap(10) +
+    '<tr><td>' + kvTable(rows) + '</td></tr>' + gap(14) + rule() +
+    '<tr><td style="padding:22px 0 0;">' + small(esc(rule21)) + '</td></tr>' +
+    '<tr><td style="padding:24px 0 10px;">' + button(d.profileUrl || SITE + '/profile#statement', 'Open Your statement') + '</td></tr>' +
+    '<tr><td>' + small(esc(PRIVACY)) + small('With love,<br>Haruthai &amp; Suthep') +
+    small('Guest Relations — Khun Ket &amp; Khun Paddy · <a href="mailto:' + GR_EMAIL + '" style="color:' + INK + ';text-decoration:none;">' + GR_EMAIL + '</a>') + '</td></tr></table>';
+  const T = ['SEE YOU IN LAOS — YOUR STATEMENT', '', 'Dear ' + (d.firstName || 'guest') + ',', '', intro, '',
+    'Statement: ' + d.settlementId + ' · version ' + d.revision, 'Issued: ' + dayWords(d.issueDate), 'Total: ' + total,
+    owed ? 'In ' + d.inCurrency.currency + ': ' + owed + ' (at this statement\'s own rate)' : '', 'Due by: ' + dayWords(d.dueDate),
+    d.method ? 'Payment method: ' + d.method : '', '', rule21, '', 'My Profile → Your statement: ' + (d.profileUrl || SITE + '/profile#statement'), '',
+    PRIVACY, '', 'With love,', 'Haruthai & Suthep', '', 'Guest Relations — Khun Ket & Khun Paddy · ' + GR_EMAIL];
+  return { subject, text: T.join('\n').replace(/\n{3,}/g, '\n\n'), html: shell(subject, inner, 'Your statement') };
+}
 function composeGuestMailEn(record) {
   const M = journeyModel(record);
   const V = guestVoice(M), reply = V.kind === 'reply', hostsMail = V.kind === 'hosts';

@@ -29,8 +29,10 @@ import {
   loadItems, loadSpecialRates, loadEvidenceIndex, loadPaymentJournal,
   appendPaymentJournalRow, loadBillingConfig, resolveFx, updatePaymentVerification,
   siteProductKeyIndex, nightsGaps, nightsOfItem, sourceHash, SourceDataError,
-  PAYMENT_JOURNAL_COLUMNS, loadGuestNationalities, nationalityOf, prefetchTabs, SOURCE_TAB_KEYS,
+  PAYMENT_JOURNAL_COLUMNS, loadGuestNationalities, nationalityOf, prefetchTabs, SOURCE_TAB_KEYS, loadGuestRegister,
 } from './billing/source.js';
+import { SNAPSHOT_COMPARISON } from './billing-ledger.js';
+import { composeStatementMail } from './mail-templates.js';
 import { pricingSource, catalogueKey } from './billing/catalogue-cache.js';
 import { effectivePreference, routeFor, destinationOf, firstVerifiedPayment, isChannel, PREFERENCE_SOURCE } from './billing/preference.js';
 import { GoogleSheetsUnavailable } from './google-sheets.js';
@@ -176,13 +178,15 @@ async function holderState(env, holderId) {
 
 /** Load everything the engine needs for one calculation, once — for ONE evaluation day,
     so 002's item versions are told apart by the same day the engine prices on. */
-async function loadSource(env, asOf) {
+async function loadSource(env, asOf, opts) {
   /* ONE read request for the five tabs (values:batchGet · Owner, 6 Oct 2026). The
      prefetched grids serve these five loaders only and never leave this function:
      `cfg` below is the plain configuration, so every later read — above all the
      check before a payment decision is written — goes to Google again (round 7). */
   const base = { ...cfgOf(env), asOf: evaluationDay(asOf) };
-  const pre = await prefetchTabs(env, base, SOURCE_TAB_KEYS);
+  /* the admin console's guest view reads the 006 register in the SAME batch request (names, nationality) */
+  const withRegister = !!(opts && opts.register);
+  const pre = await prefetchTabs(env, base, withRegister ? [...SOURCE_TAB_KEYS, 'guestlist'] : SOURCE_TAB_KEYS);
   const [items, specialRates, evidenceRows, journalRows, configRows] = await Promise.all([
     loadItems(env, pre), loadSpecialRates(env, pre), loadEvidenceIndex(env, pre),
     loadPaymentJournal(env, pre), loadBillingConfig(env, pre),
@@ -190,11 +194,20 @@ async function loadSource(env, asOf) {
   const cfg = base;
   /* the two integration checks the Owner made gate conditions (5 Oct 2026) */
   const { duplicates } = siteProductKeyIndex(items);
+  const register = withRegister ? await loadGuestRegister(env, pre) : null;
   return {
     cfg, items, specialRates, evidenceRows, journalRows, configRows,
     siteKeyDuplicates: duplicates,
     nightsGaps: nightsGaps(items),
+    ...(register ? { register, nationalities: nationalitiesOf(register) } : {}),
   };
+}
+
+/* the 006 register as the payment route reads it: one Nationality per ID, an ID on two rows ambiguous */
+function nationalitiesOf(register) {
+  const out = {};
+  for (const [id, r] of Object.entries(register || {})) out[id] = r && r.ambiguous ? { ambiguous: true } : clean(r && r.nationality);
+  return out;
 }
 
 /** The gaps that block an issue, named rather than filled. */
@@ -573,34 +586,37 @@ function pdfKey(settlementId, revision) {
   return 'settlements/' + settlementId + '/V' + revision + '.pdf';
 }
 
+/* THE ISSUED PDF, as its write-once R2 object: rendered ONCE from the immutable snapshot on its first read and never
+   re-rendered after that. The download (servePdf) and the statement email (admin/send) read this same object. */
+async function issuedPdf(env, holderId, askedRevision) {
+  const state = await holderState(env, holderId);
+  const settlementId = state.Settlement_ID;
+  if (!settlementId) return { status: 404, error: 'no settlement' };
+  const rev = Number(askedRevision) || (state.issuedRevision && state.issuedRevision.Revision);
+  if (!rev) return { status: 404, error: 'no issued revision' };
+  if (!env.DOCS) return { status: 503, error: 'document store unavailable' };
+  const key = pdfKey(settlementId, rev);
+  let obj = await env.DOCS.get(key);
+  if (!obj) {
+    const view = await ledgerCall(env, 'read', { holderId, revision: rev });
+    const one = view && view.ok === true && view.holder ? view.holder.revision : null;
+    const snapshot = one && one.snapshot && Number(one.snapshot.Revision) === rev ? one.snapshot : null;
+    if (!snapshot) return { status: 404, error: 'no snapshot for that revision' };
+    const bytes = renderSettlementPdf(snapshot, {});
+    await env.DOCS.put(key, bytes, { httpMetadata: { contentType: 'application/pdf' } });
+    obj = await env.DOCS.get(key);
+    if (!obj) return { status: 503, error: 'the statement could not be stored' };
+  }
+  return { obj, settlementId, revision: rev };
+}
+
 async function servePdf(env, identity, url, cors) {
   const admin = isBillingAdmin(identity);
   const askedHolder = clean(url.searchParams.get('holder'));
   const holderId = admin && askedHolder ? askedHolder : clean(identity.invitationId);
-
-  const state = await holderState(env, holderId);
-  const settlementId = state.Settlement_ID;
-  if (!settlementId) return jsonRes({ ok: false, error: 'no settlement' }, 404, cors);
-
-  const rev = Number(url.searchParams.get('rev')) || (state.issuedRevision && state.issuedRevision.Revision);
-  if (!rev) return jsonRes({ ok: false, error: 'no issued revision' }, 404, cors);
-
-  const key = pdfKey(settlementId, rev);
-  if (!env.DOCS) return jsonRes({ ok: false, error: 'document store unavailable' }, 503, cors);
-
-  let obj = await env.DOCS.get(key);
-  if (!obj) {
-    /* First read of an issued revision renders it ONCE from the immutable
-     * snapshot and stores it write-once; it is never re-rendered after that. */
-    const view = await ledgerCall(env, 'read', { holderId, revision: rev });
-    const one = view && view.ok === true && view.holder ? view.holder.revision : null;
-    const snapshot = one && one.snapshot && Number(one.snapshot.Revision) === rev ? one.snapshot : null;
-    if (!snapshot) return jsonRes({ ok: false, error: 'no snapshot for that revision' }, 404, cors);
-    const bytes = renderSettlementPdf(snapshot, {});
-    await env.DOCS.put(key, bytes, { httpMetadata: { contentType: 'application/pdf' } });
-    obj = await env.DOCS.get(key);
-  }
-  return new Response(obj.body, {
+  const pdf = await issuedPdf(env, holderId, url.searchParams.get('rev'));
+  if (!pdf.obj) return jsonRes({ ok: false, error: pdf.error }, pdf.status || 404, cors);
+  return new Response(pdf.obj.body, {
     headers: { 'content-type': 'application/pdf', 'cache-control': 'private, no-store', ...(cors || {}) },
   });
 }
@@ -663,6 +679,109 @@ function resultFingerprint(result) {
  *     issued. The same canIssue decision is asked first, so a blocked issue
  *     leaves no revision behind; the ledger asks it again before it writes.
  */
+/* a value as canonical JSON — object keys sorted at every depth — so two equal proposals hash equally */
+const stableJson = (v) => JSON.stringify(v, (k, x) => (x && typeof x === 'object' && !Array.isArray(x)
+  ? Object.keys(x).sort().reduce((o, kk) => { o[kk] = x[kk]; return o; }, {}) : x));
+async function sha256Hex(text) {
+  const d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(String(text)));
+  return [...new Uint8Array(d)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+/**
+ * WHAT AN ISSUE WOULD DO, NOW — read-only (Owner, 7 Oct 2026 · admin console · Codex plan review).
+ *
+ * ONE assessment for the console's Preview and for Issue & Publish, so the two can never judge differently. It
+ * assembles exactly what adminIssue hands the ledger — FX for the day, the source gaps, the gate re-check inputs,
+ * the drift on the current source — and judges it the way the ledger's revision-issue will: the stored entries that
+ * compare with an OLDER snapshot do not block, the gate is evaluated again on these inputs (condition 5 stays the
+ * stored human approval), canIssue decides. Nothing is written.
+ *
+ * `proposalHash` binds the WHOLE statement this issue would freeze — the snapshot built by the same buildSnapshot the
+ * ledger uses (every line field, the rate references, FX, the payment method, the issue and due date, the source hash),
+ * less the ids the ledger allocates, plus the confirmed version of the trip. Issue refuses PREVIEW_CHANGED unless the
+ * console confirms this very hash: what was previewed is what is issued.
+ */
+async function assessIssue(env, holderId, src, asOf, origin, opts) {
+  const fx = freezeFx(resolveFx(src.configRows, asOf));
+  const sourceGaps = sourceGapsOf(src);
+  const state = await holderState(env, holderId);
+  const pref = await preferenceOf(env, origin, holderId, state, src, src.nationalities || undefined);
+  const destination = pref.channel ? destinationOf(pref.channel, env) : null;
+  const current = await calculateHolder(env, { invitationId: holderId, guestId: null }, holderId, src, asOf, origin);
+  const inputs = gateInputs(src, asOf);
+  const gateCheck = { caseResults: inputs.caseResults, siteKeyDuplicates: inputs.siteKeyDuplicates, nightsGaps: inputs.nightsGaps };
+  const currentDrifts = detectDrift({
+    snapshot: null, result: current.result,
+    items: src.items, specialRates: src.specialRates, bookings: current.bookings,
+    evidenceRows: src.evidenceRows, journalRows: src.journalRows, cartLines: [], asOf, holderId,
+    settlementId: current.state.Settlement_ID || null,
+  }).map((d) => ({ code: d.code, detail: d.detail || d.message || '' }));
+  /* the ledger's own drift treatment (billing-ledger.js · revision-issue) */
+  const drifts = [...(await readDrifts(env, holderId)).filter((d) => !SNAPSHOT_COMPARISON.includes(clean(d && d.code))),
+    ...currentDrifts.map((d) => ({ code: clean(d.code), resolved: false, detail: clean(d.detail).slice(0, 300) }))];
+  const gate = await readGate(env);
+  const gateNow = gate.approved ? evaluateGate({
+    caseResults: gateCheck.caseResults, drifts, specialRates: src.specialRates, items: src.items,
+    approval: gate.record && gate.record.approval, fx,
+    siteKeyDuplicates: gateCheck.siteKeyDuplicates, nightsGaps: gateCheck.nightsGaps,
+  }) : null;
+  const gateApproved = gate.approved && !!gateNow && gateNow.approved === true;
+  const verdict = canIssue({ result: current.result, drifts, activationGateApproved: gateApproved, fx, sourceGaps });
+
+  const reasons = [];
+  if (!pref.determined) reasons.push('PAYMENT_PREFERENCE_UNDETERMINED: ' + pref.reason + ' — a BILLING_ADMIN states the method first');
+  else if (!destination || !destination.complete) reasons.push('PAYMENT_DESTINATION_INCOMPLETE: ' + pref.channel + ' has no configured account');
+  const confirmation = current.confirmation || { state: 'NONE' };
+  if (confirmation.state !== 'CONFIRMED') reasons.push('BOOKING_NOT_CONFIRMED: ' + (confirmation.state || 'NONE') + ' — Guest Relations confirms the sent trip first');
+  if (!verdict.allowed) reasons.push(...verdict.reasons);
+  if (gateNow && !gateNow.approved) reasons.push(...gateNow.open.map((o) => 'GATE_NOW: ' + o));
+
+  const hash = await sourceHash({ items: src.items, specialRates: src.specialRates });
+  const o = opts || {};
+  const proposal = pref.channel ? buildSnapshot({
+    settlementId: null, revision: null, holderId, result: current.result,
+    items: src.items, specialRates: src.specialRates, fx, issueDate: asOf, dueDateOverride: clean(o.dueDateOverride),
+    evidenceStatus: clean(o.evidenceStatus), sourceHash: hash, calculatedAt: null, paymentPreference: pref.channel,
+  }) : null;
+  /* NOTHING NEW, NOTHING ISSUED (review, 7 Oct 2026): a revision whose substance is exactly the issued one's would only
+     supersede it with itself — and be e-mailed as a new statement */
+  const issuedNow = state.issuedRevision || null;
+  const substance = (x) => (x ? stableJson({ lines: x.lines, total: x.Total_Payable_Cents, method: x.Payment_Preference,
+    fx: [x.FX_USD_THB, x.FX_USD_EUR], blockB: x.Block_B_Informational, hosted: x.Hosted_Value_Cents }) : null);
+  if (issuedNow && proposal && substance(proposal) === substance(issuedNow)) {
+    reasons.push('NO_CHANGE: revision ' + issuedNow.Revision + ' already holds exactly this statement');
+  }
+  /* the hash binds the statement AND the settlement it was previewed on: after any issue or new revision it no longer
+     matches, so one preview issues at most once */
+  const proposalHash = proposal
+    ? await sha256Hex(stableJson({ proposal: { ...proposal, calculated_at: null }, confirmedVersion: confirmation.version ?? null,
+      settlement: { id: state.Settlement_ID || null, latestRevision: Number(state.latestRevision) || 0, issuedRevision: issuedNow ? issuedNow.Revision : null } }))
+    : null;
+  return {
+    asOf, fx, sourceGaps, state, pref, destination, current, confirmation, gateCheck, currentDrifts, drifts,
+    gate: { stored: gate.approved, now: gateNow ? { approved: gateNow.approved, open: gateNow.open || [] } : null },
+    allowed: reasons.length === 0, reasons, proposal, proposalHash, sourceHash: hash,
+  };
+}
+
+/**
+ * Issue & Publish (Freeze · I, R, AB) — ONE contract, ONE issuer.
+ *
+ * This route only assembles the authoritative inputs from Google; the ledger
+ * (revision-issue) takes the decision and builds and freezes the snapshot
+ * itself, from the revision's own stored engine result and the exact FX pair
+ * it was handed and checked. No snapshot is ever built here.
+ *
+ *   · body.revision given — that stored READY_FOR_REVIEW revision is issued as
+ *     it stands (an issued one is refused as immutable by the ledger);
+ *   · otherwise — the Settlement is allocated if needed, a revision is created
+ *     from the engine's result for `asOf`, readied by this BILLING_ADMIN and
+ *     issued. The same assessment the console previewed is asked first
+ *     (assessIssue), so a blocked issue leaves no revision behind; the ledger
+ *     asks again before it writes.
+ *   · body.expectedProposal (the console always sends it) — the hash of the
+ *     previewed statement; anything else is refused PREVIEW_CHANGED.
+ */
 async function adminIssue(env, identity, request, cors) {
   const body = await request.json().catch(() => null);
   const holderId = clean(body && body.holderId);
@@ -678,34 +797,23 @@ async function adminIssue(env, identity, request, cors) {
     return jsonRes({ ok: false, error: 'revision must be a positive integer' }, 400, cors);
   }
   const by = adminLabel(identity);
-
   const src = await loadSource(env, asOf);
-  /* FX is resolved for the issue day before anything else, and this very pair
-   * is the one the ledger checks and freezes (Owner · 4) */
-  const fx = freezeFx(resolveFx(src.configRows, asOf));
-  const sourceGaps = sourceGapsOf(src);
+  const origin = new URL(request.url).origin;
+  const a = await assessIssue(env, holderId, src, asOf, origin, { dueDateOverride: body.dueDateOverride, evidenceStatus: body.evidenceStatus });
+  const { fx, sourceGaps, pref, current, gateCheck, currentDrifts } = a;
   let revision = asked;
   let settlementId = null;
-  const origin = new URL(request.url).origin;
 
   /* the payment method the statement will be issued with: stored, or the
      register's nationality default — never guessed (Owner, 5 Oct 2026) */
-  const pref = await preferenceOf(env, origin, holderId, await holderState(env, holderId), src);
   if (!pref.determined) {
     return jsonRes({ ok: false, error: 'Issue & Publish is blocked',
       reasons: ['PAYMENT_PREFERENCE_UNDETERMINED: ' + pref.reason + ' — a BILLING_ADMIN states the method first'] }, 409, cors);
   }
-  const destination = destinationOf(pref.channel, env);
-  if (!destination || !destination.complete) {
+  if (!a.destination || !a.destination.complete) {
     return jsonRes({ ok: false, error: 'Issue & Publish is blocked',
       reasons: ['PAYMENT_DESTINATION_INCOMPLETE: ' + pref.channel + ' has no configured account'] }, 409, cors);
   }
-
-  /* THE CURRENT SOURCE DECIDES (Codex final review, 5 Oct 2026): the gate
-     conditions are re-judged on this issue's inputs and this Holder's drift is
-     detected now — 010 evidence included — never only read from an older store */
-  const gateCheck = (({ caseResults, siteKeyDuplicates, nightsGaps }) => ({ caseResults, siteKeyDuplicates, nightsGaps }))(gateInputs(src, asOf));
-  const current = await calculateHolder(env, { invitationId: holderId, guestId: null }, holderId, src, asOf, origin);
   /* NOTHING CONFIRMED, NOTHING ISSUED (Freeze · A): the statement stands on the
      version of the trip Guest Relations confirmed — never on a hold the guest
      has not sent, or on a sent change nobody has confirmed yet */
@@ -714,35 +822,32 @@ async function adminIssue(env, identity, request, cors) {
       reasons: ['BOOKING_NOT_CONFIRMED: ' + ((current.confirmation && current.confirmation.state) || 'NONE') +
         ' — Guest Relations confirms the sent trip first'] }, 409, cors);
   }
-  /* judged against the revision ABOUT TO BE ISSUED — the current engine
-     result — not against an older issued snapshot it supersedes: quota, 010
-     evidence and the journal on today's source */
-  const currentDrifts = detectDrift({
-    snapshot: null, result: current.result,
-    items: src.items, specialRates: src.specialRates, bookings: current.bookings,
-    evidenceRows: src.evidenceRows, journalRows: src.journalRows, cartLines: [], asOf, holderId,
-    settlementId: current.state.Settlement_ID || null,
-  }).map((d) => ({ code: d.code, detail: d.detail || d.message || '' }));
+  /* WHAT WAS PREVIEWED IS WHAT IS ISSUED (Owner, 7 Oct 2026): the console names the statement it showed */
+  const expected = clean(body.expectedProposal);
+  if (expected && expected !== a.proposalHash) {
+    return jsonRes({ ok: false, error: 'the statement has changed since it was previewed; preview it again',
+      reasons: ['PREVIEW_CHANGED'] }, 409, cors);
+  }
 
   if (revision == null) {
-    const { state, result } = current;
-    const gate = await readGate(env);
-    const decision = canIssue({
-      result, drifts: [...await readDrifts(env, holderId), ...currentDrifts],
-      activationGateApproved: gate.approved, fx, sourceGaps,
-    });
-    if (!decision.allowed) {
-      return jsonRes({ ok: false, error: 'Issue & Publish is blocked', reasons: decision.reasons }, 409, cors);
+    /* judged as the ledger will judge it, before anything is created */
+    if (!a.allowed) {
+      return jsonRes({ ok: false, error: 'Issue & Publish is blocked', reasons: a.reasons }, 409, cors);
     }
+    const { state, result } = current;
     settlementId = state.Settlement_ID;
     if (!settlementId) {
       const made = await ledgerCall(env, 'settlement', { holderId, create: true, by });
       settlementId = made && made.ok === true && made.settlement ? clean(made.settlement.Settlement_ID) : '';
       if (!settlementId) return jsonRes({ ok: false, error: (made && made.error) || 'the ledger allocated no Settlement' }, 409, cors);
     }
-    const created = await ledgerCall(env, 'revision-create', { holderId, result, by });
+    /* the settlement as it was assessed: a concurrent issue of the same preview is refused by the ledger, in its turn */
+    const created = await ledgerCall(env, 'revision-create', { holderId, result, by, expectedLatestRevision: Number(state.latestRevision) || 0 });
     revision = created && created.ok === true && created.revision ? Number(created.revision.Revision) : null;
-    if (!Number.isInteger(revision)) return jsonRes({ ok: false, error: (created && created.error) || 'the ledger created no revision' }, 409, cors);
+    if (!Number.isInteger(revision)) {
+      return jsonRes({ ok: false, error: (created && created.error) || 'the ledger created no revision',
+        reasons: created && created.stale ? ['PREVIEW_CHANGED'] : [] }, 409, cors);
+    }
     const readied = await ledgerCall(env, 'revision-state', { holderId, revision, action: 'READY', by, note: 'readied for Issue & Publish' });
     if (!readied || readied.ok !== true) return jsonRes({ ok: false, error: (readied && readied.error) || 'the revision could not be readied' }, 409, cors);
   }
@@ -767,7 +872,7 @@ async function adminIssue(env, identity, request, cors) {
   const issued = await ledgerCall(env, 'revision-issue', {
     holderId, revision, by,
     items: src.items, specialRates: src.specialRates, fx, sourceGaps,
-    sourceHash: await sourceHash({ items: src.items, specialRates: src.specialRates }),
+    sourceHash: a.sourceHash,
     issueDate: asOf, dueDateOverride: clean(body.dueDateOverride),
     evidenceStatus: clean(body.evidenceStatus), calculatedAt: new Date().toISOString(),
     paymentPreference: pref.channel, paymentPreferenceSource: pref.source,
@@ -903,6 +1008,340 @@ async function gateRead(env, identity, url, cors) {
   return jsonRes({ ok: true, gate: evaluated, stored, caseResults: inputs.caseResults, referenceCases: REFERENCE_CASES }, 200, cors);
 }
 
+/* ===================================================================== THE ADMIN CONSOLE (Owner, 7 Oct 2026)
+   /admin/billing reads and acts only through these routes, all behind the same BILLING_ADMIN gate as every
+   administration route (handleBilling: a guest gets 403 before anything is read). The Worker runs on the Free plan
+   (10 ms CPU, 50 subrequests per request), so the list of every guest is ONE cheap read — the served auth index, ONE
+   Sheets batch (006 + 008) and ONE ledger listing — and what needs a per-guest engine run (Guest Relations'
+   confirmation, the draft total, manual review) comes in chunks of at most ten, asked one after another. */
+
+/* ≤ 8 holders a request: one ledger read and two KV reads each (+ a ROOMS call at most) stay far inside 50 */
+const ADMIN_STATUS_CHUNK = 8;
+const INVITATION_RE = /^INV-[A-Z0-9-]+$/;
+const EMAIL_RE = /^[^\s@<>()",;:]+@[^\s@<>()",;:]+\.[A-Za-z]{2,}$/;
+const goodEmail = (v) => { const e = clean(v).toLowerCase(); return e.length <= 254 && EMAIL_RE.test(e) ? e : ''; };
+const METHOD_WORDS = { PAYPAL_EUR: 'PayPal (EUR)', SEPA_EUR: 'Bank transfer — SEPA (EUR)', PROMPTPAY_THB: 'PromptPay (THB)' };
+
+/* the register's name for one 006 ID — never a guess: an ID on two rows names nobody */
+function nameOf(register, contactId) {
+  const r = register && register[clean(contactId)];
+  if (!r || r.ambiguous) return null;
+  const full = [r.first, r.last].filter(Boolean).join(' ');
+  return full ? { full, first: r.first || null, nick: r.nick && r.nick !== r.first ? r.nick : null } : null;
+}
+/* every invitation of the served index, once: Holder_ID, the person, the 006 ID, hosts */
+function holdersOfIndex(entries) {
+  const byInv = new Map();
+  for (const e of Object.values(entries || {})) {
+    const i = clean(e && e.i);
+    if (!INVITATION_RE.test(i)) continue;
+    const row = { Holder_ID: i, guestId: clean(e.g) || null, contactId: clean(e.c) || null, hosts: e.h === 1 };
+    const had = byInv.get(i);
+    byInv.set(i, had && (had.guestId !== row.guestId || had.contactId !== row.contactId) ? { ...had, ambiguous: true } : row);
+  }
+  return [...byInv.values()];
+}
+async function kvJson(env, key) {
+  if (!env.REG_KV) return null;
+  try { const raw = await env.REG_KV.get(key); return raw ? JSON.parse(raw) : null; } catch (e) { return null; }
+}
+/* THE GUEST'S E-MAIL (brief §16): the server-persisted contact of the invitation; else the address the guest's own sent
+   trip went to; else none — "Email unavailable", never a guess */
+async function recipientOf(env, holderId) {
+  const c = await kvJson(env, 'contact:' + holderId);
+  const contact = goodEmail(c && c.email);
+  if (contact) return { email: contact, source: 'CONTACT', contact: c };
+  /* a contact address that is there but not usable is not replaced by an older one — the guest is asked, not guessed */
+  if (c && clean(c.email)) return { email: null, source: 'CONTACT_INVALID', contact: c };
+  const r = await kvJson(env, 'reg:' + holderId);
+  const sent = goodEmail(r && r.recipient && r.recipient.email);
+  return sent ? { email: sent, source: 'SENT_TRIP', contact: c } : { email: null, source: null, contact: c };
+}
+const lineView = (l, people) => ({
+  Person_ID: l.Person_ID || null, person: (people && people[l.Person_ID]) || null,
+  Item_ID: l.Item_ID || null, Billing_Category: l.Billing_Category || null, Rate_Basis: l.Rate_Basis || null,
+  rateSource: l.rateSource || null, rate: l.rateCents == null ? null : fromCents(l.rateCents),
+  nights: l.nights ?? null, payableNights: l.payableNights ?? null, quantity: l.quantity ?? null,
+  amount: l.amountCents == null ? null : fromCents(l.amountCents), block: l.block || null,
+  hosted: !!l.hosted, review: l.review ? (l.reviewReason || 'MANUAL_REVIEW_REQUIRED') : null,
+  Room_Unit_ID: l.Room_Unit_ID || null, Booking_ID: l.Booking_ID || null,
+});
+/* the names of the persons on a set of lines, from the index (guestId → 006 ID) and the register */
+function peopleOf(entries, register, lines) {
+  const ids = new Set((lines || []).map((l) => clean(l && l.Person_ID)).filter(Boolean));
+  const out = {};
+  for (const e of Object.values(entries || {})) {
+    const g = clean(e && e.g);
+    if (ids.has(g) && !out[g]) { const n = nameOf(register, e.c); if (n) out[g] = n.full; }
+  }
+  return out;
+}
+
+/** GET admin/overview — every holder of the register, cheap. */
+async function adminOverview(env, identity, url, cors) {
+  const asOf = evaluationDay(url.searchParams.get('asOf'));
+  const entries = await loadIndex(env, url.origin, false);
+  const holders = holdersOfIndex(entries);
+  if (!holders.length) return jsonRes({ ok: false, error: 'the register index is not readable just now', retry: true }, 503, cors);
+  const pre = await prefetchTabs(env, { ...cfgOf(env), asOf }, ['guestlist', 'paymentJournal']);
+  const [register, journalRows] = await Promise.all([loadGuestRegister(env, pre), loadPaymentJournal(env, pre)]);
+  const listing = await ledgerCall(env, 'holders', null);
+  if (!listing || listing.ok !== true || !Array.isArray(listing.holders)) throw new LedgerContractError('no holder listing');
+  const settlements = new Map(listing.holders.filter((h) => h && clean(h.Holder_ID)).map((h) => [clean(h.Holder_ID), h]));
+  const stored = listing.preferences && typeof listing.preferences === 'object' ? listing.preferences : {};
+  const natReg = nationalitiesOf(register);
+  const gate = await readGate(env);
+
+  const rows = holders.map((h) => {
+    const s = settlements.get(h.Holder_ID) || null;
+    const issued = !!(s && s.issuedRevision);
+    const pay = issued ? paymentStatus({
+      sollCents: s.issuedTotalPayableCents, journalRows, settlementId: s.Settlement_ID, today: asOf, dueDate: s.Due_Date,
+    }) : null;
+    /* the method: an issued statement keeps its own; otherwise the stored choice, else the approved route's default */
+    let method;
+    if (issued && s.issuedPaymentPreference) {
+      method = { channel: s.issuedPaymentPreference, currency: s.issuedPaymentCurrency || CHANNEL_CURRENCY[s.issuedPaymentPreference] || null,
+        determined: true, source: 'ISSUED_REVISION' };
+    } else {
+      const p = effectivePreference({ record: stored[h.Holder_ID] || null,
+        route: routeFor({ holderId: h.Holder_ID, nationality: nationalityOf(natReg, h.contactId) }) });
+      method = { channel: p.channel || null, currency: p.currency || null, determined: !!p.determined, source: p.source || null, reason: p.reason || null };
+    }
+    return {
+      Holder_ID: h.Holder_ID, guestId: h.guestId, hosts: h.hosts, ambiguous: !!h.ambiguous,
+      name: nameOf(register, h.contactId), billingAdmin: isBillingAdmin({ invitationId: h.Holder_ID, guestId: h.guestId, hosts: h.hosts }),
+      settlement: s ? {
+        Settlement_ID: s.Settlement_ID, state: s.Settlement_State, latestRevision: s.latestRevision || 0,
+        issuedRevision: s.issuedRevision || null, issueDate: s.Issue_Date || null, dueDate: s.Due_Date || null,
+        issuedTotal: s.issuedTotalPayable == null ? null : s.issuedTotalPayable, draftReview: s.draftReview || null,
+      } : null,
+      payment: pay ? { status: pay.status, ist: pay.ist, balance: pay.balance, overdue: (pay.flags || []).includes('OVERDUE'),
+        pendingCount: pay.pendingCount || 0, flags: pay.flags || [] } : null,
+      method,
+      drift: { count: s ? s.driftCount || 0 : 0, blocking: s ? s.blockingDriftCount || 0 : 0 },
+    };
+  }).sort((a, b) => clean(a.name && a.name.full || a.Holder_ID).localeCompare(clean(b.name && b.name.full || b.Holder_ID)));
+
+  return jsonRes({ ok: true, asOf, audience: adminLabel(identity), chunk: ADMIN_STATUS_CHUNK,
+    gate: { approved: gate.approved }, holders: rows }, 200, cors);
+}
+
+/** GET admin/status?ids=… — Guest Relations' confirmation and the draft, for up to ten holders. */
+async function adminStatus(env, identity, url, cors) {
+  const ids = [...new Set(clean(url.searchParams.get('ids')).split(',').map(clean).filter((x) => INVITATION_RE.test(x)))];
+  if (!ids.length) return jsonRes({ ok: false, error: 'ids required' }, 400, cors);
+  if (ids.length > ADMIN_STATUS_CHUNK) return jsonRes({ ok: false, error: 'at most ' + ADMIN_STATUS_CHUNK + ' ids per request' }, 400, cors);
+  const asOf = evaluationDay(url.searchParams.get('asOf'));
+  /* the held pricing source, never an old one: a stale answer is refused, not shown as a current check */
+  const src = await pricing(env, asOf, false);
+  if (src.stale) {
+    return jsonRes({ ok: false, stale: true, retry: true, error: 'the financial source is unavailable just now; nothing is judged on old figures' }, 503, cors);
+  }
+  const rows = [];
+  for (const id of ids) {
+    try {
+      const { state, result, unmapped, confirmation } = await calculateHolder(env, { invitationId: id, guestId: null }, id, src, asOf, url.origin);
+      rows.push({
+        Holder_ID: id,
+        confirmation: { state: confirmation.state || 'NONE', version: confirmation.version ?? null, confirmedAt: confirmation.confirmedAt || null },
+        draft: confirmation.state === 'CONFIRMED' ? {
+          total: result.totalPayable, lines: result.lines.length, manualReview: result.manualReview.length,
+          reviewReasons: result.manualReview.map((l) => l.reviewReason).filter(Boolean).slice(0, 5), unmapped,
+        } : null,
+        Settlement_ID: state.Settlement_ID || null,
+      });
+    } catch (e) {
+      rows.push({ Holder_ID: id, error: clean(e && e.message).slice(0, 200) || 'not readable' });
+    }
+  }
+  return jsonRes({ ok: true, asOf, source: { at: new Date(src.at).toISOString(), cached: src.cached }, rows }, 200, cors);
+}
+
+/** GET admin/holder?holder=INV — one guest in full: identity, preview, the issued statement, payments, e-mail log. */
+async function adminHolder(env, identity, url, cors) {
+  const holderId = clean(url.searchParams.get('holder'));
+  if (!INVITATION_RE.test(holderId)) return jsonRes({ ok: false, error: 'holder required' }, 400, cors);
+  const asOf = evaluationDay(url.searchParams.get('asOf'));
+  const entries = await loadIndex(env, url.origin, false);
+  const entry = holdersOfIndex(entries).find((h) => h.Holder_ID === holderId);
+  if (!entry || entry.ambiguous) return jsonRes({ ok: false, error: holderId + ' is not one invitation of the register' }, 404, cors);
+
+  const src = await loadSource(env, asOf, { register: true });
+  /* the issued statement and its payments never depend on the preview: a trip that cannot be calculated now (a
+     registration or a ROOMS read failing) leaves the preview unavailable, and everything already issued visible */
+  let a = null, previewError = null;
+  try { a = await assessIssue(env, holderId, src, asOf, url.origin); }
+  catch (e) { if (e instanceof LedgerContractError) throw e; previewError = clean(e && e.message).slice(0, 300) || 'the trip could not be calculated'; }
+  const state = a ? a.state : await holderState(env, holderId);
+  const view = await ledgerCall(env, 'read', { holderId });
+  if (!view || view.ok !== true || !view.holder) throw new LedgerContractError('no holder view for ' + holderId);
+  const issued = state.issuedRevision || null;
+  const sid = state.Settlement_ID || null;
+  const people = peopleOf(entries, src.register, [...(a ? a.current.result.lines : []), ...((issued && issued.lines) || [])]);
+  const recipient = await recipientOf(env, holderId);
+  const name = nameOf(src.register, entry.contactId);
+
+  const rows = sid ? src.journalRows.filter((r) => clean(r.Settlement_ID) === sid) : [];
+  /* ONE ledger read for every reported payment's decision — however many a guest reports */
+  const reportedIds = rows.filter((r) => clean(r.Record_Status) === RECORD_STATUS.REPORTED && clean(r.Payment_ID)).map((r) => clean(r.Payment_ID));
+  const dec = reportedIds.length ? await ledgerCall(env, 'payment-decision', { action: 'read', paymentIds: reportedIds }) : null;
+  const decisions = dec && dec.ok === true && dec.decisions ? dec.decisions : null;
+  const payments = [];
+  for (const r of rows) {
+    const status = clean(r.Record_Status);
+    let decision = null;
+    if (status === RECORD_STATUS.REPORTED && clean(r.Payment_ID)) decision = decisions ? decisions[clean(r.Payment_ID)] || null : { unreadable: true };
+    payments.push({
+      Payment_ID: clean(r.Payment_ID), Entry_Type: clean(r.Entry_Type) || ENTRY_TYPE.PAYMENT, Method: clean(r.Method),
+      Amount_Paid: r.Amount_Paid, Currency_Paid: clean(r.Currency_Paid), Amount_USD: r.Amount_USD,
+      Reported_By: clean(r.Reported_By), Reported_At: clean(r.Reported_At), Provider_Reference: clean(r.Provider_Reference),
+      Record_Status: status, Verified_By: clean(r.Verified_By), Verified_At: clean(r.Verified_At),
+      Reject_Reason: clean(r.Reject_Reason), Duplicate_Suspect: clean(r.Duplicate_Suspect) === 'TRUE', decision,
+    });
+  }
+  const pay = paymentStatus({ sollCents: issued ? issued.Total_Payable_Cents : null, journalRows: src.journalRows,
+    settlementId: sid, today: asOf, dueDate: issued ? issued.Due_Date : null });
+  const mail = issued ? await ledgerCall(env, 'statement-mail', { settlementId: sid, revision: issued.Revision, action: 'read' }) : null;
+  const r = a ? a.current.result : null;
+  const issuedFx = issued ? freezeFx({ FX_USD_THB: issued.FX_USD_THB, FX_USD_EUR: issued.FX_USD_EUR }) : null;
+
+  return jsonRes({
+    ok: true, asOf, Holder_ID: holderId,
+    guest: { name, guestId: entry.guestId, hosts: entry.hosts,
+      contactName: recipient.contact ? [clean(recipient.contact.firstName), clean(recipient.contact.lastName)].filter(Boolean).join(' ') || null : null,
+      email: recipient.email, emailSource: recipient.source },
+    confirmation: a ? a.confirmation : { state: 'UNREADABLE' },
+    method: a ? { channel: a.pref.channel || null, currency: a.pref.currency || null, determined: !!a.pref.determined,
+      source: a.pref.source || null, reason: a.pref.reason || null, locked: !!a.pref.locked,
+      destinationComplete: !!(a.destination && a.destination.complete) }
+      : { channel: issued ? issued.Payment_Preference : null, currency: issued ? issued.Payment_Currency : null, determined: !!issued, source: issued ? 'ISSUED_REVISION' : null, reason: previewError },
+    settlement: { Settlement_ID: sid, state: state.state || null, latestRevision: state.latestRevision || 0,
+      revisions: (view.holder.revisions || []).map((x) => ({ Revision: x.Revision, Revision_State: x.Revision_State, Issue_Date: x.Issue_Date,
+        Due_Date: x.Due_Date, total: x.Total_Payable_Cents == null ? null : fromCents(x.Total_Payable_Cents), issuedAt: x.issuedAt,
+        issuedBy: x.issuedBy, supersededAt: x.supersededAt })) },
+    preview: !a ? { error: previewError, issuable: false, reasons: ['PREVIEW_UNAVAILABLE: ' + previewError], proposalHash: null, lines: [], blockB: [] } : {
+      total: r.totalPayable, hostedValue: fromCents(r.hostedValueCents), lines: r.lines.map((l) => lineView(l, people)),
+      blockB: (r.blockB || []).map((l) => lineView(l, people)), manualReview: r.manualReview.map((l) => l.reviewReason).filter(Boolean),
+      unmapped: a.current.unmapped, issueDate: a.proposal ? a.proposal.Issue_Date : asOf, dueDate: a.proposal ? a.proposal.Due_Date : null,
+      fx: { FX_USD_THB: a.fx.FX_USD_THB, FX_USD_EUR: a.fx.FX_USD_EUR, gaps: a.fx.gaps || [] },
+      inCurrency: a.pref.channel ? inPreferredCurrency(r.totalPayableCents, a.pref.channel, a.fx) : null,
+      issuable: a.allowed, reasons: a.reasons, proposalHash: a.allowed ? a.proposalHash : null,
+      gate: a.gate, drifts: a.drifts.filter((d) => !d.resolved).map((d) => ({ code: d.code, detail: d.detail || '' })),
+    },
+    issued: issued ? {
+      Settlement_ID: issued.Settlement_ID, revision: issued.Revision, issueDate: issued.Issue_Date, dueDate: issued.Due_Date,
+      total: fromCents(issued.Total_Payable_Cents), hostedValue: fromCents(issued.Hosted_Value_Cents),
+      lines: (issued.lines || []).map((l) => lineView(l, people)), blockB: issued.Block_B_Informational || [],
+      fx: { FX_USD_THB: issued.FX_USD_THB, FX_USD_EUR: issued.FX_USD_EUR },
+      method: issued.Payment_Preference, currency: issued.Payment_Currency, recipient: issued.Payment_Recipient,
+      inCurrency: issued.Payment_Preference ? inPreferredCurrency(issued.Total_Payable_Cents, issued.Payment_Preference, issuedFx) : null,
+      engineVersion: issued.Engine_Version, evidence: issued.Evidence_Status,
+    } : null,
+    payment: issued ? { status: pay.status, soll: pay.soll, ist: pay.ist, balance: pay.balance, flags: pay.flags || [],
+      pendingCount: pay.pendingCount || 0, overdue: (pay.flags || []).includes('OVERDUE') } : null,
+    payments,
+    mail: mail && mail.ok === true ? { attempts: mail.attempts || [], open: mail.open || null } : (issued ? { unreadable: true } : null),
+  }, 200, cors);
+}
+
+/* what the send dialog shows, and what the send checks again: the CURRENT issued revision and the e-mail resolved NOW */
+async function sendContext(env, url, holderId) {
+  const state = await holderState(env, holderId);
+  const issued = state.issuedRevision || null;
+  if (!issued) return { issued: null };
+  const recipient = await recipientOf(env, holderId);
+  const entries = await loadIndex(env, url.origin, false);
+  const entry = holdersOfIndex(entries).find((h) => h.Holder_ID === holderId) || null;
+  let name = null;
+  try {
+    const pre = await prefetchTabs(env, cfgOf(env), ['guestlist']);
+    name = nameOf(await loadGuestRegister(env, pre), entry && entry.contactId);
+  } catch (e) { name = null; }   /* the name is a greeting, never a condition: the contact's own name stands in */
+  const c = recipient.contact || {};
+  const firstName = (name && (name.nick || name.first)) || clean(c.firstName) || null;
+  const fullName = (name && name.full) || [clean(c.firstName), clean(c.lastName)].filter(Boolean).join(' ') || null;
+  const fx = freezeFx({ FX_USD_THB: issued.FX_USD_THB, FX_USD_EUR: issued.FX_USD_EUR });
+  return { state, issued, recipient, firstName, fullName,
+    inCurrency: issued.Payment_Preference ? inPreferredCurrency(issued.Total_Payable_Cents, issued.Payment_Preference, fx) : null };
+}
+
+/** GET admin/send?holder=INV — the facts the confirmation shows before anything is sent. */
+async function adminSendGet(env, identity, url, cors) {
+  const holderId = clean(url.searchParams.get('holder'));
+  if (!INVITATION_RE.test(holderId)) return jsonRes({ ok: false, error: 'holder required' }, 400, cors);
+  const ctx = await sendContext(env, url, holderId);
+  if (!ctx.issued) return jsonRes({ ok: true, Holder_ID: holderId, issued: false }, 200, cors);
+  const log = await ledgerCall(env, 'statement-mail', { settlementId: ctx.issued.Settlement_ID, revision: ctx.issued.Revision, action: 'read' });
+  return jsonRes({ ok: true, Holder_ID: holderId, issued: true,
+    recipientName: ctx.fullName, firstName: ctx.firstName, email: ctx.recipient.email, emailSource: ctx.recipient.source,
+    Settlement_ID: ctx.issued.Settlement_ID, revision: ctx.issued.Revision, totalPayable: fromCents(ctx.issued.Total_Payable_Cents),
+    dueDate: ctx.issued.Due_Date, issueDate: ctx.issued.Issue_Date, inCurrency: ctx.inCurrency,
+    attempts: log && log.ok === true ? log.attempts : null, open: log && log.ok === true ? log.open : null }, 200, cors);
+}
+
+const base64Of = (bytes) => {
+  let bin = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(bin);
+};
+
+/**
+ * POST admin/send { holderId, revision, email, sendKey, again } — the issued statement to the guest, once, on a
+ * BILLING_ADMIN's explicit confirmation. Only the current issued revision, only to the e-mail the dialog showed (it is
+ * resolved again here and must be the same), claimed in the ledger under the confirmation's own key first. The PDF
+ * is the write-once object the download serves, attached — never a link.
+ */
+async function adminSendPost(env, identity, request, url, cors, deps) {
+  const body = await request.json().catch(() => null);
+  const holderId = clean(body && body.holderId);
+  if (!INVITATION_RE.test(holderId)) return jsonRes({ ok: false, error: 'holderId required' }, 400, cors);
+  const sendMail = deps && typeof deps.sendMail === 'function' ? deps.sendMail : null;
+  if (!sendMail) return jsonRes({ ok: false, error: 'the mail transport is not available here' }, 503, cors);
+  const ctx = await sendContext(env, url, holderId);
+  if (!ctx.issued) return jsonRes({ ok: false, error: 'no issued statement', reasons: ['NOT_ISSUED'] }, 409, cors);
+  if (Number(body.revision) !== Number(ctx.issued.Revision)) {
+    return jsonRes({ ok: false, error: 'revision ' + clean(body.revision) + ' is not the current statement', reasons: ['NOT_CURRENT_REVISION'] }, 409, cors);
+  }
+  if (!ctx.recipient.email) return jsonRes({ ok: false, error: 'Email unavailable', reasons: ['EMAIL_UNAVAILABLE'] }, 409, cors);
+  if (goodEmail(body.email) !== ctx.recipient.email) {
+    return jsonRes({ ok: false, error: 'the guest\'s e-mail has changed since the confirmation was shown', reasons: ['EMAIL_CHANGED'] }, 409, cors);
+  }
+  const sid = ctx.issued.Settlement_ID, rev = ctx.issued.Revision, by = adminLabel(identity);
+  const claim = await ledgerCall(env, 'statement-mail', { action: 'claim', settlementId: sid, revision: rev, by,
+    sendKey: clean(body.sendKey), again: body.again === true, to: ctx.recipient.email });
+  if (!claim || claim.ok !== true || !claim.token) {
+    if (claim && claim.replay && claim.attempt) {
+      return jsonRes({ ok: claim.attempt.outcome === 'SENT', replay: true, outcome: claim.attempt.outcome, attempt: claim.attempt, attempts: claim.attempts }, 200, cors);
+    }
+    return jsonRes({ ok: false, error: (claim && claim.error) || 'the send could not be claimed',
+      reasons: [claim && claim.alreadySent ? 'ALREADY_SENT' : claim && claim.inProgress ? 'IN_PROGRESS' : 'NOT_CLAIMED'],
+      attempts: claim && claim.attempts, open: claim && claim.open }, 409, cors);
+  }
+  const finish = (fields) => ledgerCall(env, 'statement-mail', { action: 'complete', settlementId: sid, revision: rev, token: claim.token, ...fields });
+
+  let bytes;
+  try {
+    const pdf = await issuedPdf(env, holderId, rev);
+    if (!pdf.obj) throw new Error(pdf.error || 'no PDF');
+    bytes = new Uint8Array(await pdf.obj.arrayBuffer());
+  } catch (e) {
+    const done = await finish({ outcome: 'NOT_SENT', error: 'the statement PDF is not available: ' + clean(e && e.message) });
+    return jsonRes({ ok: false, outcome: 'NOT_SENT', error: 'the statement PDF is not available just now; nothing was sent', attempt: done && done.attempt }, 503, cors);
+  }
+  const mail = composeStatementMail({
+    firstName: ctx.firstName, settlementId: sid, revision: rev, totalPayable: fromCents(ctx.issued.Total_Payable_Cents),
+    issueDate: ctx.issued.Issue_Date, dueDate: ctx.issued.Due_Date, inCurrency: ctx.inCurrency,
+    method: METHOD_WORDS[ctx.issued.Payment_Preference] || null, profileUrl: url.origin + '/profile#statement',
+  });
+  const sent = await sendMail(env, ctx.recipient.email, ctx.fullName || ctx.recipient.email, mail.subject, mail.text, mail.html,
+    [{ name: 'Statement-' + sid + '-V' + rev + '.pdf', content: base64Of(bytes) }]);
+  const outcome = sent && ['SENT', 'REJECTED', 'NOT_SENT'].includes(sent.outcome) ? sent.outcome : 'UNCERTAIN';
+  const done = await finish({ outcome, provider: sent && sent.provider, messageId: sent && sent.id, status: sent && sent.status, error: sent && sent.error });
+  return jsonRes({ ok: outcome === 'SENT', outcome, provider: sent && sent.provider, error: outcome === 'SENT' ? null : (sent && sent.error) || null,
+    attempt: done && done.ok === true ? done.attempt : null, recorded: !!(done && done.ok === true) }, outcome === 'SENT' ? 200 : 502, cors);
+}
+
 /* ------------------------------------------------------------ the router */
 
 const GUEST_ROUTES = new Set(['mine', 'payment/report', 'pdf', 'qr', 'catalogue', 'validate', 'preference']);
@@ -973,7 +1412,7 @@ async function paymentPreference(env, identity, request, url, cors) {
   return jsonRes({ ok: true, Holder_ID: holderId, paymentPreference: preferenceView(now, state.issuedRevision, env) }, 200, cors);
 }
 
-export async function handleBilling(request, env, url, cors) {
+export async function handleBilling(request, env, url, cors, deps) {
   if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
 
   const op = url.pathname.replace(/^\/api\/billing\/?/, '').replace(/\/$/, '') || 'mine';
@@ -1006,6 +1445,12 @@ export async function handleBilling(request, env, url, cors) {
 
       /* ---- BILLING_ADMIN ------------------------------------------- */
       case 'holders': return await adminHolders(env, identity, url, cors);
+      /* the admin console (/admin/billing · Owner, 7 Oct 2026) */
+      case 'admin/overview': return await adminOverview(env, identity, url, cors);
+      case 'admin/status': return await adminStatus(env, identity, url, cors);
+      case 'admin/holder': return await adminHolder(env, identity, url, cors);
+      case 'admin/send':
+        return request.method === 'POST' ? await adminSendPost(env, identity, request, url, cors, deps) : await adminSendGet(env, identity, url, cors);
       case 'issue': return await adminIssue(env, identity, request, cors);
       case 'revenue': return await adminRevenue(env, identity, url, cors);
       case 'reconcile': return await adminReconcile(env, identity, request, cors);

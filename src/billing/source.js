@@ -493,6 +493,24 @@ export async function loadGuestNationalities(env, cfg) {
   return out;
 }
 
+/**
+ * THE ADMIN CONSOLE'S NAMES (Owner, 7 Oct 2026): the same 006 rows, read-only, for the names Guest Relations keeps —
+ * Firstname, Surname, Nickname — beside the Nationality the payment route reads. A 006 ID on two rows is ambiguous and
+ * names nobody. Nothing is written and no column is added.
+ */
+export async function loadGuestRegister(env, cfg) {
+  const { records } = await readTab(env, cfg, 'guestlist');
+  const out = {};
+  for (const r of records) {
+    const id = clean(r.values.ID);
+    if (!id) continue;
+    out[id] = out[id] === undefined
+      ? { first: clean(r.values.Firstname), last: clean(r.values.Surname), nick: clean(r.values.Nickname), nationality: clean(r.values.Nationality) }
+      : { ambiguous: true };
+  }
+  return out;
+}
+
 /** The register's answer for one 006 ID: { found, value, reason }. */
 export function nationalityOf(register, contactId) {
   const id = clean(contactId);

@@ -103,8 +103,10 @@ const ROOM_UNIT = 'roomunit:';
 const DRIFT = 'drift:';
 const PAYPREF = 'paypref:';
 const PAYDEC = 'paydec:';
+/* THE STATEMENT E-MAIL LOG (Owner, 7 Oct 2026 · admin console): one record per issued revision, every attempt kept */
+const STMTMAIL = 'stmtmail:';
 /* the drift codes that compare the live source with an ISSUED snapshot */
-const SNAPSHOT_COMPARISON = ['RATE_DRIFT', 'SPECIAL_RATE_MISMATCH', 'INVOICE_DRIFT', 'SETTLEMENT_MISMATCH', 'CATEGORY_DRIFT', 'BOOKING_DRIFT'];
+export const SNAPSHOT_COMPARISON = ['RATE_DRIFT', 'SPECIAL_RATE_MISMATCH', 'INVOICE_DRIFT', 'SETTLEMENT_MISMATCH', 'CATEGORY_DRIFT', 'BOOKING_DRIFT'];
 /* a claim whose Worker never came back (crash between claim and Google write)
    is never taken over or released; after this long a BILLING_ADMIN may resume
    it — re-sending the claim's own fixed payload (action resume) */
@@ -118,7 +120,9 @@ const WRITE_MARGIN_MS = 3 * 60 * 1000;
 
 const OPS = ['read', 'settlement', 'draft', 'revision-create', 'revision-state',
   'revision-issue', 'override-set', 'gate-read', 'gate-approve', 'drift-set',
-  'drift-read', 'holders', 'payment-preference', 'payment-decision'];
+  'drift-read', 'holders', 'payment-preference', 'payment-decision', 'statement-mail'];
+/* a send whose Worker never reported back is never taken over silently: after this long it counts as UNCERTAIN */
+const MAIL_CLAIM_MS = 5 * 60 * 1000;
 
 /* Freeze · AB condition 5 is a human act. These names are never a human, and
    the first of them is this ledger: it must not be able to approve itself. */
@@ -445,6 +449,13 @@ export class BillingLedger {
         if (s.Settlement_State === SETTLEMENT_STATE.CLOSED) {
           return json({ ok: false, error: 'Settlement ' + s.Settlement_ID + ' is CLOSED; reopening it is a decision, not a write' }, 409);
         }
+        /* THE CONSOLE'S ISSUE NAMES THE SETTLEMENT IT PREVIEWED (Owner, 7 Oct 2026 · review): two issues of one preview —
+           two tabs, two admins, a retried request — find the second revision already there and are refused here, inside
+           this turn, before anything is created */
+        if (body.expectedLatestRevision != null && Number(s.latestRevision || 0) !== Number(body.expectedLatestRevision)) {
+          return json({ ok: false, stale: true, error: 'Settlement ' + s.Settlement_ID + ' has moved on since the preview (revision ' +
+            (Number(s.latestRevision) || 0) + ' exists); preview it again' }, 409);
+        }
         const n = (Number(s.latestRevision) || 0) + 1;
         const rec = {
           Settlement_ID: s.Settlement_ID, Revision: n, Holder_ID: holderId,
@@ -711,6 +722,10 @@ export class BillingLedger {
         s.Settlement_State = SETTLEMENT_STATE.ISSUED;
         s.issuedTotalPayableCents = snapshot.Total_Payable_Cents;
         s.Due_Date = snapshot.Due_Date;
+        /* what the admin overview lists without opening the revision (Owner, 7 Oct 2026) */
+        s.Issue_Date = snapshot.Issue_Date;
+        s.Payment_Preference = snapshot.Payment_Preference;
+        s.Payment_Currency = snapshot.Payment_Currency;
         s.updatedAt = at;
         await this.storage.put(SETTLEMENT + holderId, s);
 
@@ -937,6 +952,17 @@ export class BillingLedger {
        failed, and undoes the lock this claim took unless told the row is in fact
        VERIFIED already. */
     if (op === 'payment-decision') {
+      /* READ MANY (admin console): where the decisions on several payments stand, in one call — never a token */
+      if (clean(body.action).toLowerCase() === 'read' && Array.isArray(body.paymentIds)) {
+        const decisions = {};
+        for (const id of body.paymentIds.map(clean).filter(Boolean).slice(0, 500)) {
+          const d = (await this.storage.get(PAYDEC + id)) || null;
+          decisions[id] = d ? { state: d.state || null, decision: d.decision || null, by: d.by || null, claimedAt: d.claimedAt || null,
+            completedAt: d.completedAt || null, writeNotAfter: d.writeNotAfter || null,
+            resumable: d.state === 'PENDING' && !!d.claimedAt && Date.parse(at) - Date.parse(d.claimedAt) >= CLAIM_STALE_MS } : null;
+        }
+        return json({ ok: true, decisions });
+      }
       const paymentId = clean(body.paymentId);
       if (!paymentId) return json({ ok: false, error: 'paymentId required' }, 400);
       const action = clean(body.action).toLowerCase();
@@ -973,6 +999,14 @@ export class BillingLedger {
         return false;
       };
       const tokenOk = (claim) => !!claim && !!clean(claim.token) && clean(body.token) === clean(claim.token);
+
+      /* READ (Owner, 7 Oct 2026 · admin console): where a decision on this payment stands — never its token */
+      if (action === 'read') {
+        const d = (await this.storage.get(PAYDEC + paymentId)) || null;
+        return json({ ok: true, decision: d ? { state: d.state || null, decision: d.decision || null, by: d.by || null,
+          claimedAt: d.claimedAt || null, completedAt: d.completedAt || null, writeNotAfter: d.writeNotAfter || null,
+          resumable: d.state === 'PENDING' && !!d.claimedAt && Date.parse(at) - Date.parse(d.claimedAt) >= CLAIM_STALE_MS } : null });
+      }
 
       return await this.state.blockConcurrencyWhile(async () => {
         const prev = (await this.storage.get(PAYDEC + paymentId)) || null;
@@ -1101,14 +1135,98 @@ export class BillingLedger {
       });
     }
 
+    /* ------------------------------ statement-mail (Owner, 7 Oct 2026 · admin console)
+       THE ISSUED STATEMENT, SENT BY E-MAIL ONLY ON A BILLING_ADMIN'S EXPLICIT ACT, NEVER TWICE BY ACCIDENT.
+       One record per issued revision (stmtmail:<SID>:<rev>) keeps every attempt. A send is CLAIMED first under a key
+       the admin's confirmation carries: the same key never sends twice (a replay answers the recorded outcome); an
+       open claim blocks every other send; a claim nobody completed counts as UNCERTAIN once MAIL_CLAIM_MS have passed;
+       once anything may have reached the guest (SENT or UNCERTAIN) another send needs `again`, itself a new explicit
+       confirmation. */
+    if (op === 'statement-mail') {
+      const sid = clean(body.settlementId), rev = Number(body.revision);
+      if (!sid || !Number.isInteger(rev) || rev < 1) return json({ ok: false, error: 'settlementId and revision required' }, 400);
+      const key = STMTMAIL + sid + ':' + rev;
+      const action = clean(body.action) || 'read';
+      const view = (r) => ({ attempts: (r && r.attempts) || [], open: r && r.claim ? { at: r.claim.at, by: r.claim.by, to: r.claim.to } : null });
+      /* an unfinished claim older than MAIL_CLAIM_MS becomes an UNCERTAIN attempt: it may have been sent */
+      const settle = (r, now) => {
+        if (r && r.claim && Date.parse(now) - Date.parse(r.claim.at) >= MAIL_CLAIM_MS) {
+          r.attempts = [...(r.attempts || []), { sendKey: r.claim.sendKey, to: r.claim.to, by: r.claim.by, claimedAt: r.claim.at,
+            outcome: 'UNCERTAIN', reason: 'the send was never reported back', recordedAt: now }];
+          r.claim = null;
+          return true;
+        }
+        return false;
+      };
+      if (action === 'read') {
+        const r = (await this.storage.get(key)) || null;
+        if (r && settle(r, at)) await this.storage.put(key, r);
+        return json({ ok: true, ...view(r) });
+      }
+      return await this.state.blockConcurrencyWhile(async () => {
+        const r = (await this.storage.get(key)) || { Settlement_ID: sid, Revision: rev, attempts: [], claim: null };
+        settle(r, at);
+        const sendKey = clean(body.sendKey);
+        if (action === 'claim') {
+          if (!by) return json({ ok: false, error: 'by required' }, 400);
+          if (!/^[A-Za-z0-9_-]{16,80}$/.test(sendKey)) return json({ ok: false, error: 'sendKey required' }, 400);
+          const done = (r.attempts || []).find((x) => x.sendKey === sendKey);
+          if (done) { await this.storage.put(key, r); return json({ ok: false, replay: true, attempt: done, ...view(r) }, 409); }
+          if (r.claim) {
+            await this.storage.put(key, r);
+            return json({ ok: false, inProgress: r.claim.sendKey !== sendKey ? true : 'same', error: 'a send of this statement is in progress', ...view(r) }, 409);
+          }
+          const reached = (r.attempts || []).filter((x) => x.outcome === 'SENT' || x.outcome === 'UNCERTAIN');
+          if (reached.length && !yes(body.again)) {
+            await this.storage.put(key, r);
+            return json({ ok: false, alreadySent: true, error: 'this statement may already have reached the guest; sending it again needs its own confirmation', ...view(r) }, 409);
+          }
+          const token = crypto.randomUUID();
+          r.claim = { sendKey, token, at, by, to: clean(body.to).slice(0, 254), again: yes(body.again) };
+          await this.storage.put(key, r);
+          return json({ ok: true, token, ...view(r) });
+        }
+        if (action === 'complete') {
+          if (!r.claim || r.claim.token !== clean(body.token)) {
+            await this.storage.put(key, r);
+            return json({ ok: false, error: 'no open claim with this token', ...view(r) }, 409);
+          }
+          /* NOT_SENT: nothing left this server (no PDF, no transport) — like REJECTED it blocks no later send */
+          const outcome = ['SENT', 'REJECTED', 'UNCERTAIN', 'NOT_SENT'].includes(clean(body.outcome)) ? clean(body.outcome) : 'UNCERTAIN';
+          r.attempts = [...(r.attempts || []), { sendKey: r.claim.sendKey, to: r.claim.to, by: r.claim.by, claimedAt: r.claim.at, again: !!r.claim.again,
+            outcome, provider: clean(body.provider).slice(0, 20) || null, messageId: clean(body.messageId).slice(0, 200) || null,
+            status: Number(body.status) || 0, error: clean(body.error).slice(0, 200) || null, recordedAt: at }];
+          r.claim = null;
+          await this.storage.put(key, r);
+          return json({ ok: true, attempt: r.attempts[r.attempts.length - 1], ...view(r) });
+        }
+        return json({ ok: false, error: 'unknown statement-mail action ' + action }, 400);
+      });
+    }
+
     /* ------------------------------------- holders: the Billing Manager list */
     if (op === 'holders') {
       const settlements = await this.listOf(SETTLEMENT);
       const overrides = new Map(await this.listOf(OVERRIDE));
       const gate = await this.storage.get(GATE);
+      /* an issued revision's own facts, from the settlement — or, for a settlement issued before they were kept there,
+         from the immutable revision record itself */
+      const issuedFacts = new Map();
+      for (const [h, s] of settlements) {
+        if (!s.issuedRevision) continue;
+        if (s.Issue_Date && s.Payment_Preference) {
+          issuedFacts.set(h, { Issue_Date: s.Issue_Date, Payment_Preference: s.Payment_Preference, Payment_Currency: s.Payment_Currency || null });
+          continue;
+        }
+        const rec = await this.revisionOf(s.Settlement_ID, s.issuedRevision);
+        const snap = rec && rec.snapshot ? rec.snapshot : null;
+        issuedFacts.set(h, { Issue_Date: (snap && snap.Issue_Date) || rec && rec.Issue_Date || null,
+          Payment_Preference: snap ? snap.Payment_Preference || null : null, Payment_Currency: snap ? snap.Payment_Currency || null : null });
+      }
       const rows = settlements
         .map(([h, s]) => {
           const ov = overrides.get(h);
+          const f = issuedFacts.get(h) || {};
           return {
             Holder_ID: h,
             Settlement_ID: s.Settlement_ID,
@@ -1119,6 +1237,9 @@ export class BillingLedger {
             issuedTotalPayableCents: s.issuedTotalPayableCents == null ? null : s.issuedTotalPayableCents,
             issuedTotalPayable: fromCents(s.issuedTotalPayableCents),
             Due_Date: s.Due_Date || null,
+            Issue_Date: f.Issue_Date || null,
+            issuedPaymentPreference: f.Payment_Preference || null,
+            issuedPaymentCurrency: f.Payment_Currency || null,
             draftTotalPayableCents: s.draftTotalPayableCents == null ? null : s.draftTotalPayableCents,
             draftTotalPayable: fromCents(s.draftTotalPayableCents),
             draftReview: s.draftReview || null,
@@ -1132,8 +1253,13 @@ export class BillingLedger {
         })
         .sort((a, b) => String(a.Settlement_ID).localeCompare(String(b.Settlement_ID)));
 
+      /* the stored payment method of EVERY holder, settlement or not — the overview's method column without one read per guest */
+      const preferences = {};
+      for (const [h, p] of await this.listOf(PAYPREF)) {
+        if (p && typeof p === 'object') preferences[h] = { Payment_Preference: p.Payment_Preference || null, source: p.source || null, lockedAt: p.lockedAt || null };
+      }
       return json({
-        ok: true, holders: rows, count: rows.length,
+        ok: true, holders: rows, count: rows.length, preferences,
         engineVersion: ENGINE_VERSION, currency: ACCOUNTING_CURRENCY,
         issueAndPublishEnabled: !!(gate && gate.issueAndPublishEnabled),
         /* deliberately no grand total: a revenue figure is engine output

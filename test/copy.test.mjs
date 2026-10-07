@@ -35,7 +35,8 @@ test('COPY · no technical word, raw ISO stamp, internal seat id or GitHub link 
   const ISO = /\d{4}-\d\d-\d\dT\d\d:\d\d/;
   const SEAT_ID = /\b[CD]-[LRTB]-\d\d(-\d\d)?\b/;
   const ALLOW = /seatId|ledger id|data-|\.js|\.mjs|\.json|\/api\/|^[a-z0-9._-]+$|^\s*$/;
-  for (const f of [...PAGES, ...CLIENT.filter((c) => !/seating\.js|seatlabels\.js|seatpass\.js|confirm\.js|rooms\.js|stay\.js/.test(c)), 'src/mail-templates.js']) {
+  /* assets/admin-billing.js is the H&S admin console (BILLING_ADMIN only, never a guest): it names the Billing Engine and the ledger on purpose */
+  for (const f of [...PAGES, ...CLIENT.filter((c) => !/seating\.js|seatlabels\.js|seatpass\.js|confirm\.js|rooms\.js|stay\.js|admin-billing\.js/.test(c)), 'src/mail-templates.js']) {
     for (const lit of literals(read(f))) {
       if (ALLOW.test(lit) || lit.length < 12) continue;
       assert.doesNotMatch(lit, TECH, f + ': ' + lit.slice(0, 80));

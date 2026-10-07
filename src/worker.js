@@ -54,6 +54,8 @@ export { Drafts } from './drafts.js';
    008_Payment_Journal; this actor holds settlements, revisions and the immutable snapshots. */
 export { BillingLedger } from './billing-ledger.js';
 import { handleBilling } from './billing-routes.js';
+/* THE H&S ADMIN CONSOLE (Owner, 7 Oct 2026): the page, generated from src/admin/billing.html (src/build-admin-page.cjs) */
+import ADMIN_PAGE from './admin-page.js';
 import { confirmationStands } from './confirmation.js';
 import { identify, owns, loadIndex } from './auth.js';
 import { authIdOf } from '../register/crypto.mjs';   /* the one-way derivation the register's index is keyed by (the guest's own document read) */
@@ -93,12 +95,21 @@ export default {
      * authenticated: a guest reaches only their own Holder, the administration routes
      * resolve server-side to Haruthai and Suthep. The Owner's canonical payment write
      * path, POST /api/payments/report, is the same handler under its documented name. */
+    /* THE H&S ADMIN CONSOLE (Owner, 7 Oct 2026) — /admin/billing. The page carries no data and no secret: everything it
+     * shows comes from /api/billing/… with the BILLING_ADMIN's own bearer, refused (403) for anyone else. Served here, not
+     * as a static file, so it is never cached, never indexed and never framed. */
+    if (url.pathname === '/admin/billing' || url.pathname === '/admin/billing/') {
+      if (request.method !== 'GET' && request.method !== 'HEAD') return json({ ok: false, error: 'method not allowed' }, 405);
+      return new Response(request.method === 'HEAD' ? null : ADMIN_PAGE, { headers: {
+        'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store', 'x-robots-tag': 'noindex, nofollow',
+        'x-frame-options': 'DENY', 'referrer-policy': 'no-referrer', 'x-content-type-options': 'nosniff' } });
+    }
     if (url.pathname === '/api/billing' || url.pathname.startsWith('/api/billing/')) {
-      return handleBilling(request, env, url, corsHeaders(request));
+      return handleBilling(request, env, url, corsHeaders(request), BILLING_DEPS);
     }
     if (url.pathname === '/api/payments/report') {
       const u = new URL(request.url); u.pathname = '/api/billing/payment/report';
-      return handleBilling(request, env, u, corsHeaders(request));
+      return handleBilling(request, env, u, corsHeaders(request), BILLING_DEPS);
     }
 
     /* THE RETIRED CATEGORY LEDGER: replaced by the room occupancy engine */
@@ -1454,25 +1465,34 @@ async function submissionIdOf(invitationId, submittedAt) {
   return 'SYL-' + String(invitationId).replace(/^INV-/, '') + '-' + [...new Uint8Array(d)].slice(0, 4).map((b) => b.toString(16).padStart(2, '0')).join('').toUpperCase();
 }
 const MAIL_FROM_NAME = 'See You In Laos — Guest Relations';
+/* what the billing routes borrow from this Worker: the one mail transport (the admin console's statement email) */
+const BILLING_DEPS = Object.freeze({ sendMail: (...a) => sendMail(...a) });
 /* the email provider — the API key is a Worker secret, never in the repository:
  *   BREVO_API_KEY   → https://api.brevo.com/v3/smtp/email (sender = MAIL_FROM, a sender validated in Brevo)
  *   RESEND_API_KEY  → https://api.resend.com/emails       (sender = MAIL_FROM, a domain verified in Resend)
  * Without a key nothing is sent and the answer says so: { provider: 'none', accepted: false }. */
-async function sendMail(env, to, toName, subject, text, html) {
+async function sendMail(env, to, toName, subject, text, html, attachments) {
   const from = (env.MAIL_FROM || GR_EMAIL).trim();
-  const out = { provider: 'none', accepted: false, id: null, status: 0, error: null, at: new Date().toISOString() };
+  /* `outcome` (Owner, 7 Oct 2026 · the statement email): SENT — the provider accepted it; REJECTED — the provider answered
+     with a refusal (4xx), so nothing went out; UNCERTAIN — the request may have reached the provider without an answer
+     (a 5xx, a lost response, a thrown fetch): the guest may have it, so nobody sends it again without being told so;
+     NOT_SENT — no provider is configured. `accepted` keeps its meaning for every existing caller. */
+  const out = { provider: 'none', accepted: false, id: null, status: 0, error: null, at: new Date().toISOString(), outcome: 'NOT_SENT' };
+  /* attachments [{ name, content: base64 }] — only the statement email carries one */
+  const files = Array.isArray(attachments) ? attachments.filter((a) => a && a.name && a.content) : [];
+  const decide = (r) => { out.outcome = r.ok ? 'SENT' : (r.status >= 400 && r.status < 500 ? 'REJECTED' : 'UNCERTAIN'); };
   try {
     if (env.BREVO_API_KEY) {
-      out.provider = 'brevo';
+      out.provider = 'brevo'; out.outcome = 'UNCERTAIN';
       const r = await fetch('https://api.brevo.com/v3/smtp/email', { method: 'POST', headers: { 'api-key': env.BREVO_API_KEY, 'content-type': 'application/json', accept: 'application/json' },
-        body: JSON.stringify({ sender: { email: from, name: MAIL_FROM_NAME }, to: [{ email: to, name: toName || to }], replyTo: { email: GR_EMAIL, name: 'Guest Relations' }, subject, textContent: text, ...(html ? { htmlContent: html } : {}) }) });
-      out.status = r.status; let d = null; try { d = await r.json(); } catch (e) {}
+        body: JSON.stringify({ sender: { email: from, name: MAIL_FROM_NAME }, to: [{ email: to, name: toName || to }], replyTo: { email: GR_EMAIL, name: 'Guest Relations' }, subject, textContent: text, ...(html ? { htmlContent: html } : {}), ...(files.length ? { attachment: files.map((a) => ({ name: a.name, content: a.content })) } : {}) }) });
+      out.status = r.status; decide(r); let d = null; try { d = await r.json(); } catch (e) {}
       out.accepted = r.ok; out.id = d && (d.messageId || null); if (!r.ok) out.error = (d && (d.message || d.code)) || ('HTTP ' + r.status);
     } else if (env.RESEND_API_KEY) {
-      out.provider = 'resend';
+      out.provider = 'resend'; out.outcome = 'UNCERTAIN';
       const r = await fetch('https://api.resend.com/emails', { method: 'POST', headers: { authorization: 'Bearer ' + env.RESEND_API_KEY, 'content-type': 'application/json' },
-        body: JSON.stringify({ from: MAIL_FROM_NAME + ' <' + from + '>', to: [to], reply_to: GR_EMAIL, subject, text, ...(html ? { html } : {}) }) });
-      out.status = r.status; let d = null; try { d = await r.json(); } catch (e) {}
+        body: JSON.stringify({ from: MAIL_FROM_NAME + ' <' + from + '>', to: [to], reply_to: GR_EMAIL, subject, text, ...(html ? { html } : {}), ...(files.length ? { attachments: files.map((a) => ({ filename: a.name, content: a.content })) } : {}) }) });
+      out.status = r.status; decide(r); let d = null; try { d = await r.json(); } catch (e) {}
       out.accepted = r.ok; out.id = d && (d.id || null); if (!r.ok) out.error = (d && (d.message || d.name)) || ('HTTP ' + r.status);
     } else {
       out.error = 'no email provider configured (set the Worker secret BREVO_API_KEY or RESEND_API_KEY and the variable MAIL_FROM)';
