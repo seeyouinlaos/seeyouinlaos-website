@@ -196,6 +196,18 @@ test('ADMIN UI · Verify needs a confirmation; Reject needs a reason', async () 
   assert.equal(post.length, 2); assert.deepEqual(post[1].body, { Payment_ID: 'PAY-B', Reject_Reason: 'not on the PayPal statement' });
 });
 
+test('ADMIN UI · every in-page link names the console itself (the page has <base href="/">: "#revenue" alone would leave it)', async () => {
+  const { root, A } = load({ 'admin/overview': OVERVIEW, 'admin/status': statusAnswer, revenue: { ok: true, asOf: '2026-10-07', counts: {} } });
+  await tick(30);
+  const hrefs = [...root.innerHTML.matchAll(/href="([^"]+)"/g)].map((m) => m[1]);
+  assert.ok(hrefs.length >= 2);
+  for (const h of hrefs) assert.doesNotMatch(h, /^#/, 'a bare fragment link: ' + h);
+  assert.ok(hrefs.includes('/admin/billing#revenue') && hrefs.includes('/admin/billing#guests'));
+  el(root, 'data-ab-tab', '#revenue').onclick({ preventDefault() {} }); await tick(10);
+  assert.equal(A.state().route.view, 'revenue');
+  assert.match(root.innerHTML, /Confirmed revenue/);
+});
+
 test('ADMIN UI · the page module calls only billing routes, sends the bearer, and never stores what it reads', () => {
   const code = src('assets/admin-billing.js');
   assert.doesNotMatch(code, /localStorage\.setItem|sessionStorage|indexedDB/);

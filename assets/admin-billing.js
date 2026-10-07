@@ -268,7 +268,7 @@
       act('download', 'Download PDF', !!iss, iss ? '' : 'Not issued yet.') +
       act('send', 'Send statement', !!(iss && g.email), sendWhy) + '</div>' +
       (S.download ? '<p class="t-b2" role="status">' + esc(S.download) + '</p>' : '');
-    var head = '<div class="p-card ab-guest"><p class="t-l1"><a href="#guests" class="ab-back" data-ab-back>← All guests</a></p>' +
+    var head = '<div class="p-card ab-guest"><p class="t-l1"><a href="/admin/billing#guests" class="ab-back" data-ab-back>← All guests</a></p>' +
       '<h2 class="t-d1 ab-h">' + esc(name) + '</h2>' +
       '<div class="ab-grid2">' +
       kv('Holder', '<span data-i18n-skip>' + esc(H.Holder_ID) + '</span> · ' + esc(g.guestId || '') + (g.hosts ? ' · host' : '')) +
@@ -448,7 +448,8 @@
     if (S.phase === 'error') return '<div class="p-card"><p class="t-b1">' + esc(S.error) + '</p><div class="p-actions"><button type="button" class="p-link" data-ab-retry>Try again</button></div></div>';
     if (S.phase !== 'ready') return '<p class="t-b2 ab-progress" role="status">Reading the guest list…</p>';
     var o = S.overview, v = S.route.view;
-    var tabs = '<nav class="ab-tabs" aria-label="Sections"><a href="#guests" class="' + (v !== 'revenue' ? 'on' : '') + '">Guests</a><a href="#revenue" class="' + (v === 'revenue' ? 'on' : '') + '">Revenue</a>' +
+    /* the page has <base href="/">: an in-page link names the page itself, or "#revenue" would leave for the home page */
+    var tabs = '<nav class="ab-tabs" aria-label="Sections"><a href="/admin/billing#guests" data-ab-tab="#guests" class="' + (v !== 'revenue' ? 'on' : '') + '">Guests</a><a href="/admin/billing#revenue" data-ab-tab="#revenue" class="' + (v === 'revenue' ? 'on' : '') + '">Revenue</a>' +
       '<span class="ab-gate ' + (o.gate && o.gate.approved ? 'on' : 'open') + '">' + (o.gate && o.gate.approved ? 'Issue &amp; Publish enabled' : 'Activation Gate not approved') + '</span>' +
       '<span class="ab-who">Signed in · ' + esc(o.audience === 'BRIDE' ? 'Haruthai' : o.audience === 'GROOM' ? 'Suthep' : '') + '</span></nav>';
     return tabs + (v === 'holder' ? holderView() : v === 'revenue' ? revenueView() : listView());
@@ -575,6 +576,7 @@
     on('[data-ab-open]', 'click', function (el) { go('#holder=' + el.getAttribute('data-ab-open')); });
     on('[data-ab-open]', 'keydown', function (el, e) { if (e && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); go('#holder=' + el.getAttribute('data-ab-open')); } });
     on('[data-ab-back]', 'click', function (el, e) { if (e) e.preventDefault(); if (S.overviewStale) { S.overviewStale = false; go('#guests'); start(); } else go('#guests'); });
+    on('[data-ab-tab]', 'click', function (el, e) { if (e) e.preventDefault(); go(el.getAttribute('data-ab-tab')); });
     on('[data-ab-reload]', 'click', function () { if (S.route.id) loadHolder(S.route.id); draw(); });
     on('[data-ab-rev-reload]', 'click', function () { loadRevenue(); draw(); });
     on('[data-ab-act]', 'click', function (el) {
