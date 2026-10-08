@@ -373,13 +373,14 @@
   function priceBlock(pd) {
     if (!pd || !pd.lines || !pd.lines.length) return '';
     var rows = pd.lines.map(function (l) {
-      return '<tr' + (l.outcome === 'DIFFERENT' || l.outcome === 'PAYER_CHANGED' ? ' class="ab-diff"' : '') + '><td>' + esc(l.key || l.Item_ID || '—') + '</td><td data-i18n-skip>' + esc(cents(l.stated)) +
-        (l.sentPaidByHS ? ' <span class="ab-mute">paid by H&amp;S</span>' : '') + '</td><td data-i18n-skip>' + esc(cents(l.engine)) + (l.enginePaidByHS ? ' <span class="ab-mute">paid by H&amp;S</span>' : '') +
-        '</td><td>' + esc(OUTCOME_WORDS[l.outcome] || l.outcome) + '</td></tr>';
+      /* data-l: the column's name on each cell, so the stacked phone layout still says which amount is which */
+      return '<tr' + (l.outcome === 'DIFFERENT' || l.outcome === 'PAYER_CHANGED' ? ' class="ab-diff"' : '') + '><td data-l="Item">' + esc(l.key || l.Item_ID || '—') + '</td><td data-l="As sent to the guest" data-i18n-skip>' + esc(cents(l.stated)) +
+        (l.sentPaidByHS ? ' <span class="ab-mute">paid by H&amp;S</span>' : '') + '</td><td data-l="Billing Engine today" data-i18n-skip>' + esc(cents(l.engine)) + (l.enginePaidByHS ? ' <span class="ab-mute">paid by H&amp;S</span>' : '') +
+        '</td><td data-l="Compared">' + esc(OUTCOME_WORDS[l.outcome] || l.outcome) + '</td></tr>';
     }).join('');
     return '<div class="' + (pd.material ? 'ab-warn' : 'ab-note') + '" role="note" data-ab-price-difference="' + (pd.material ? 'material' : 'none') + '"><p class="t-l1">' +
       (pd.material ? 'The amounts this guest was sent differ from today\'s Billing Engine' : 'The amounts this guest was sent match today\'s Billing Engine') + '</p>' +
-      '<table class="ab-table t-b2"><thead><tr><th>Item</th><th>As sent to the guest</th><th>Billing Engine today</th><th></th></tr></thead><tbody>' + rows + '</tbody></table>' +
+      '<table class="ab-table t-b2"><thead><tr><th>Item</th><th>As sent to the guest</th><th>Billing Engine today</th><th>Compared</th></tr></thead><tbody>' + rows + '</tbody></table>' +
       (pd.material ? '<p class="t-b2">The statement uses today\'s amounts. The trip e-mail the guest received is not changed — tell the guest if needed.</p>' : '') + '</div>';
   }
   function pricesTick(on, busy, attr) {
