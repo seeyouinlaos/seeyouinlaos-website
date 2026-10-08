@@ -4,6 +4,9 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "seeyouinlaos-website",
   "main": "src/worker.js",
+  /* THE RELEASE VERIFICATION (Owner authorisation): wrangler runs this before every deploy and version upload; it refuses any tree
+     the release machine did not sign after npm test and the release check (F1, I1) passed — docs/RELEASE-ATTESTATION.md */
+  "build": { "command": "node src/release-verify.cjs" },
   "compatibility_date": "2025-01-15",
   "compatibility_flags": ["nodejs_compat"],
 
