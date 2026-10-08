@@ -259,13 +259,15 @@
   }
   /* A STAY H&S ALREADY PAID FOR THIS GUEST (Edit 10): the server's mark on the room shown, else on the room of this window in the
      bag, else on any room of the window. Nothing is known before the server has answered. */
-  function prepaidIn(at, slug) {
-    if (!billingReady() || !at) return false;
+  function prepaidQuoteIn(at, slug) {
+    if (!billingReady() || !at) return null;
     var s = slug;
     if (!s) { var B = window.SIYL_BAG, line = B && B.get ? B.get().filter(function (x) { return x && x.id === at.win.id; })[0] : null; if (line && line.room) s = line.room; }
     var slugs = s ? [s] : (at.stay.rooms || []).map(function (r) { return r.slug; });
-    return slugs.some(function (x) { var q = authoritative(at.win.id, x); return !!(q && q.paidByHS); });
+    for (var i = 0; i < slugs.length; i++) { var q = authoritative(at.win.id, slugs[i]); if (q && q.paidByHS) return q; }
+    return null;
   }
+  function prepaidIn(at, slug) { return !!prepaidQuoteIn(at, slug); }
   /* the words where there is no amount yet (never "USD 0") */
   function pendingWords() { return billingFailed() ? 'Price unavailable' : 'Price pending'; }
   /* a flat product's amount (the train, a flight class, a menu, the Sangkhathan …): the server's for a key it prices, the
@@ -684,6 +686,10 @@
      *   one room type       "USD 192 per person · USD 64 per person per night" */
     fromLine: function (windowId) {
       var at = locate(windowId); if (!at) return '';
+      /* a stay H&S already paid for this guest (Owner, 8 Oct 2026): the server's own amount — what the guest repays — never the
+         hotel's listing beside "already paid" (the room of the bag, else any room the server marks, exactly as bookingOf decides) */
+      var paid = prepaidQuoteIn(at);
+      if (paid) return paid.total == null ? pendingWords() : money(paid.total) + ' per person';
       var self = this, open = at.stay.rooms.filter(function (r) { return r.rate != null && !r.interest && !(r.notIn && r.notIn.indexOf(at.win.id) >= 0); });
       if (!open.length) return '';
       var low = open.reduce(function (m, r) { return rateOf(at.win.id, r) < rateOf(at.win.id, m) ? r : m; }, open[0]);

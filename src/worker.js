@@ -1538,7 +1538,9 @@ export async function markPaidByHS(env, who, lines, claimed, waitMs) {   /* expo
     const limit = new Promise((_, no) => { timer = setTimeout(() => no(new Error('paid check timed out')), waitMs || PAID_CHECK_MS); });
     paid = await Promise.race([paidByHSOf(env, who && who.invitationId, who && who.guestId, bare.filter((l) => l && l.stay)), limit]);
   } catch (e) {
-    return bare.map((l) => (l && l.stay && claimed.has(siteKeyOfSelection(l)) ? { ...l, prepaidUnverified: true } : l));
+    /* no amount of its own (Owner, 8 Oct 2026 · pricing source of truth): the hotel's rate × nights verifiedLines left on it is
+       never stored as what the guest owes — the e-mails say "Price to follow" and the Billing Engine decides */
+    return bare.map((l) => (l && l.stay && claimed.has(siteKeyOfSelection(l)) ? { ...l, prepaidUnverified: true, price: null } : l));
   } finally { clearTimeout(timer); }
   return bare.map((l) => {
     const p = l && l.stay ? paid.get(siteKeyOfSelection(l)) : null;

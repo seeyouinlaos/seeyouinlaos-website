@@ -124,18 +124,19 @@ const paidByHS = (o) => ({ Person_ID: 'GT1', Holder_ID: 'INV-T1', Rate_Status: '
 const pctx = (specialRates) => ({ items: PROVIDER_ITEMS, specialRates, asOf: '2026-10-07' });
 
 test('ENGINE 2.3 · a stay H&S booked and paid for the guest is PAYABLE — Block A, at the price paid, in the total; the party mate and every other line unchanged', () => {
-  const rows = [paidByHS({ Item_ID: 'T-HOTEL', Rate_Per_Person_Night: '18.16666667' }), paidByHS({ Item_ID: 'T-LODGE', Rate_Per_Person_Night: '58.155' })];
+  /* the Owner's figures per person (8 Oct 2026): USD 109.00 for three nights, USD 232.62 for two — never half */
+  const rows = [paidByHS({ Item_ID: 'T-HOTEL', Rate_Per_Person_Night: '36.33333333' }), paidByHS({ Item_ID: 'T-LODGE', Rate_Per_Person_Night: '116.31' })];
   const hotel = computeLine(booking({ Item_ID: 'T-HOTEL', Nights: 3 }), pctx(rows));
   assert.equal(hotel.block, 'A'); assert.equal(hotel.Billing_Category, 'GUEST_SETTLEMENT_REQUIRED');
   assert.deepEqual(hotel.categoryOverride, { from: 'GUEST_SELF_PAYMENT' });
   assert.equal(hotel.rateSource, 'SPECIAL_RATE'); assert.equal(hotel.payableNights, 3);
-  assert.equal(hotel.amountCents, 5450, '18.16666667 × 3 nights = USD 54.50, rounded once');
+  assert.equal(hotel.amountCents, 10900, '36.33333333 × 3 nights = USD 109.00, rounded once');
   assert.equal(hotel.specialRateRef, 'Booked and paid by Haruthai · reimbursed to Haruthai & Suthep', 'the PDF says why');
   assert.equal(hotel.review, null);
 
   const r = calculate([booking({ Item_ID: 'T-TRAIN' }), booking({ Item_ID: 'T-HOTEL', Nights: 3 }), booking({ Item_ID: 'T-LODGE', Nights: 2 }),
     booking({ Item_ID: 'T-FLIGHT' })], pctx(rows));
-  assert.equal(r.totalPayableCents, 10000 + 5450 + 11631, 'the train, the Kunming stay, the Lijiang stay — the flight stays the guest\'s own');
+  assert.equal(r.totalPayableCents, 10000 + 10900 + 23262, 'the train, the Kunming stay, the Lijiang stay — the flight stays the guest\'s own');
   assert.deepEqual(r.blockA.map((l) => l.Item_ID), ['T-TRAIN', 'T-HOTEL', 'T-LODGE']);
   assert.deepEqual(r.blockB.map((l) => l.Item_ID), ['T-FLIGHT']);
 

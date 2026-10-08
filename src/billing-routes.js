@@ -469,8 +469,8 @@ async function reportPayment(env, identity, request, cors) {
  * browser receives finished amounts and only formats them, which is why
  * assets/pricing.js can stop multiplying without a second engine appearing.
  */
-/** ONE prospective booking of one Item for this person, priced by the one engine — never stored. */
-function quoteOfItem(itemId, item, src, holderId, personId, asOf) {
+/** ONE prospective booking of one Item for this person, priced by the one engine — never stored. Gate F1 (src/pricing-guard.mjs) runs it too. */
+export function quoteOfItem(itemId, item, src, holderId, personId, asOf) {
   const nights = nightsOfItem(item) ?? NaN;
   const probe = [{
     Booking_ID: null, Holder_ID: holderId, Person_ID: personId, Item_ID: itemId,
@@ -498,7 +498,7 @@ function quoteOfItem(itemId, item, src, holderId, personId, asOf) {
     paidByHS: line && line.categoryOverride ? line.categoryOverride.from || null : null,
   };
 }
-function listRateOf(item) {
+export function listRateOf(item) {
   /* the website labels it "per person per night" and multiplies it by the nights: nothing else is sent */
   if (!item || clean(item.Rate_Basis) !== 'PER_PERSON_PER_NIGHT' || clean(item.Rate_Status) !== 'ACTIVE') return null;
   const raw = item.Standard_Rate;

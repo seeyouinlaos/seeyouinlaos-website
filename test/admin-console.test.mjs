@@ -637,15 +637,15 @@ test('PAID BY H&S · at sending, the server marks the paid stay and gives it the
     Rate_Basis: 'PER_PERSON_PER_NIGHT', Standard_Rate: '18.16666667', Currency: 'USD', Site_Product_Key: 'selfstay', 'Number of Nights': 3 })[row[0]] ?? '']));
   W.workbook['009_Special_Rates'] = [['Holder_ID', 'Person_ID', 'Item_ID', 'Rate_Per_Person_Night', 'Nights_Rule', 'Rate_Status', 'Effective_From', 'Effective_To', 'Approved_By', 'Note', 'Billing_Category'],
     ['', 'GT9', 'T-STAY', 75, 'ALL', 'ACTIVE', '', '', 'Suthep', 'synthetic', ''],
-    ['INV-T1', 'GT1', 'T-SELF', '18.16666667', '3', 'ACTIVE', '', '', 'Haruthai & Suthep', 'Haruthai has already paid this hotel booking for you.', 'GUEST_SETTLEMENT_REQUIRED']];
+    ['INV-T1', 'GT1', 'T-SELF', '36.33333333', '3', 'ACTIVE', '', '', 'Haruthai & Suthep', 'Haruthai has already paid this hotel booking for you.', 'GUEST_SETTLEMENT_REQUIRED']];
   const was = globalThis.fetch; globalThis.fetch = sheetsFetch(W.workbook, W.log);
   try {
     const stay = { id: 'selfstay', stay: 'x', qty: 1, price: 99, rate: 33, pay: 3 };
     const paid = await paidByHSOf(W.env, 'INV-T1', 'GT1', [stay, { id: 'train', qty: 1 }]);
-    assert.deepEqual([...paid.entries()], [['selfstay', { total: 54.5 }]], 'the hotel, at the engine\'s USD 54.50 — the train is no such stay');
+    assert.deepEqual([...paid.entries()], [['selfstay', { total: 109 }]], 'the hotel, at the engine\'s USD 109.00 (36.33333333 × 3) — the train is no such stay');
     assert.equal((await paidByHSOf(W.env, 'INV-T2', 'GT2', [stay])).size, 0, 'the party mate the row does not name');
     const out = await markPaidByHS(W.env, { invitationId: 'INV-T1', guestId: 'GT1' }, [{ ...stay, paidByHS: true }, { id: 'train', qty: 1, paidByHS: true }], new Set(['selfstay', 'train']));
-    assert.deepEqual([out[0].paidByHS, out[0].price, out[1].paidByHS], [true, 54.5, undefined], 'the device\'s mark on the train is dropped');
+    assert.deepEqual([out[0].paidByHS, out[0].price, out[1].paidByHS], [true, 109, undefined], 'the device\'s mark on the train is dropped');
     /* a trip whose device names no paid stay is never asked about: nothing read, every line as sent (a device mark dropped) */
     const reads = W.log.length;
     const none = await markPaidByHS(W.env, { invitationId: 'INV-T1', guestId: 'GT1' }, [{ ...stay, paidByHS: true }], new Set());

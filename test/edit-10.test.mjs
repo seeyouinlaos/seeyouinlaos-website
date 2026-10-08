@@ -115,8 +115,8 @@ const stayRec = (line) => ({ invitationId: 'INV-GT1', guestId: 'GT1', submission
   submittedAt: '2026-10-07T09:00:00.000Z', lastSentAt: '2026-10-07T09:00:00.000Z', recipient: { email: 'sam.example@example.org' },
   registration: { lang: 'en', contact: { email: 'sam.example@example.org' }, personal: { firstName: 'Sam', lastName: 'Example' },
     selections: [{ id: 'kmg', stay: 'kunming', room: 'jinri-terrace-double', name: 'Yifangju Designer Courtyard · Kunming',
-      meta: '1 – 4 March 2027 · 002 · Jinri Building Scenic Terrace Tub Double', price: 54.5, rate: 18.16666667, nights: 3, pay: 3, qty: 1, ...line }],
-    totalUsd: 54.5, guestRecord: { partyName: 'Sam', scope: { bangkok: false, vientianePreWedding: false, vientianeWedding: true, china: true, none: false },
+      meta: '1 – 4 March 2027 · 002 · Jinri Building Scenic Terrace Tub Double', price: 109, rate: 18.16666667, nights: 3, pay: 3, qty: 1, ...line }],
+    totalUsd: 109, guestRecord: { partyName: 'Sam', scope: { bangkok: false, vientianePreWedding: false, vientianeWedding: true, china: true, none: false },
       guests: [{ guestId: 'GT1', source: { fullName: 'Sam Example', preferredName: 'Sam' }, profile: {} }] } } });
 
 test('TRIP E-MAIL · a sent stay the server marked paidByHS reads "already paid for you by Haruthai" — never "Guest will book by themselves"; unverified: neither', () => {
@@ -126,7 +126,7 @@ test('TRIP E-MAIL · a sent stay the server marked paidByHS reads "already paid 
     assert.match(m.text + m.html, /already paid for you by Haruthai · you repay Haruthai &(amp;)? Suthep through your statement/i);
     assert.doesNotMatch(m.text + m.html, /Guest will book by themselves|Book with the hotel|pay this yourself on site/);
   }
-  assert.match(g.text, /USD 54\.50 per person — Already paid for you by Haruthai/);
+  assert.match(g.text, /USD 109 per person — Already paid for you by Haruthai/);   /* the amount H&S paid, per person (Owner, 8 Oct 2026) */
   assert.equal((g.text.match(/lready paid for you by Haruthai/g) || []).length, 1, 'the sentence once, not twice');
   const toFollow = composeGuestMail(stayRec({ paidByHS: true, price: null })), gr = composeOwnerMail(stayRec({ paidByHS: true, price: null }));
   assert.match(toFollow.text, /Price to follow/); assert.doesNotMatch(toFollow.text + gr.text, /USD 0\b/, 'a price still asked for is never "USD 0"');
@@ -137,7 +137,7 @@ test('TRIP E-MAIL · a sent stay the server marked paidByHS reads "already paid 
   /* Thai: the same sentence */
   const th = composeGuestMail({ ...stayRec({ paidByHS: true }), registration: { ...stayRec({ paidByHS: true }).registration, lang: 'th' } });
   assert.match(th.html, /Haruthai ชำระค่าที่พักนี้ให้คุณแล้ว/);
-  assert.match(th.text, /USD 54\.50 ต่อท่าน — Haruthai ชำระค่าที่พักนี้ให้คุณแล้ว · คุณชำระคืนให้ Haruthai & Suthep ผ่านใบแจ้งยอดของคุณ/, 'the plain text too');
+  assert.match(th.text, /USD 109 ต่อท่าน — Haruthai ชำระค่าที่พักนี้ให้คุณแล้ว · คุณชำระคืนให้ Haruthai & Suthep ผ่านใบแจ้งยอดของคุณ/, 'the plain text too');
 });
 
 test('PREPAID · while 009 still asks for the price paid, the bag line already carries the mark (no amount), so the sending is checked and the e-mail says who paid — "Price to follow", never the hotel\'s rate', () => {

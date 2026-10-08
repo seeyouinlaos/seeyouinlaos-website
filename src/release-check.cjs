@@ -813,6 +813,21 @@ gate('P7', 'Dress Code imagery real (23 — resort-01 retired by the owner), no 
     problems.length ? problems.join(' · ') : 'fingerprint ' + fp + ' · ' + R.ROUTES.length + ' routes · ' + R.STATES.length + ' states · ' + core.fullWidths().length + ' widths · 0 unexplained');
 }
 
+/* GATE F1 — THE PRICING SOURCE OF TRUTH (Owner, 8 Oct 2026): Google 002 / 009 → Billing Engine → Booked Value / Settlement →
+ * Website, never the reverse. src/pricing-guard.mjs runs THIS checkout's engine, server quote and website catalogue against the
+ * live Google source (read only): a per-person rate is never divided again, no local figure differs from a readable Google
+ * rate, every approved 009 amount is charged exactly, and no financial cell changed since the Owner's last acknowledged order.
+ * Google unreadable is not a pass (exit 2: UNAVAILABLE — run it again). */
+{
+  const { spawnSync } = require('child_process');
+  const r = spawnSync('node', [path.join(__dirname, 'pricing-guard.mjs')], { encoding: 'utf8', timeout: 120000 });
+  const lines = (r.stdout || '').trim().split('\n');
+  const last = lines[lines.length - 1].replace(/^PRICING SOURCE OF TRUTH: /, '');
+  gate('F1', 'Pricing source of truth: Google 002 / 009 → engine → website, no rate divided, overridden or changed unseen', r.status === 0,
+    last + (r.status === 0 ? '' : ' · ' + (lines.filter((l) => /^FAIL/.test(l)).slice(0, 6).join(' · ') ||
+      [r.error && r.error.message, r.signal && 'signal ' + r.signal, (r.stderr || '').trim().split('\n').slice(-2).join(' ')].filter(Boolean).join(' · '))));
+}
+
 let failed = 0;
 for (const r of results) {
   if (!r.ok) failed++;
