@@ -150,15 +150,38 @@ async function holderState(env, holderId) {
   return stateOfView(v, holderId);
 }
 
-/** Many holders' states in ONE ledger request (the Revenue Overview) — the same checks as holderState, holder by holder. */
-async function holderStates(env, holderIds) {
+/** The ledger's raw views of several holders in ONE request (read-many) — Map(id → view); judged per holder by the caller. */
+async function holderViews(env, holderIds) {
   const ids = [...new Set((holderIds || []).map(clean).filter(Boolean))];
   const out = new Map();
   if (!ids.length) return out;
   const reply = await ledgerCall(env, 'read-many', { holderIds: ids });
   const views = reply && reply.ok === true && Array.isArray(reply.holders) ? reply.holders : null;
   if (!views || views.length !== ids.length) throw new LedgerContractError('the billing ledger returned no holder views');
-  ids.forEach((id, i) => out.set(id, stateOfView(views[i] && typeof views[i] === 'object' ? views[i] : null, id)));
+  ids.forEach((id, i) => out.set(id, views[i] && typeof views[i] === 'object' ? views[i] : null));
+  return out;
+}
+/* a REG_KV that answers a repeated read of the same key from this request's first answer (raw values only, never an error);
+   for read-only routes — a route that re-reads before it writes must use the real binding */
+function memoKv(kv) {
+  if (!kv || typeof kv.get !== 'function') return kv;
+  const seen = new Map();
+  return new Proxy(kv, { get(target, prop) {
+    if (prop !== 'get') { const v = target[prop]; return typeof v === 'function' ? v.bind(target) : v; }
+    return (key, type) => {
+      const t = typeof type === 'string' ? type : (type && type.type) || 'text';
+      if (t !== 'text' && t !== 'json') return target.get(key, type);   /* streams and buffers: never shared */
+      const k = String(key);
+      if (!seen.has(k)) seen.set(k, Promise.resolve(target.get(key)).catch((e) => { seen.delete(k); throw e; }));
+      /* each reader gets its own value: the raw text, or a fresh parse of it */
+      return seen.get(k).then((raw) => (t === 'json' ? (raw == null ? null : JSON.parse(raw)) : raw));
+    };
+  } });
+}
+/** Many holders' states in ONE ledger request (the Revenue Overview) — the same checks as holderState, holder by holder. */
+async function holderStates(env, holderIds) {
+  const out = new Map();
+  for (const [id, view] of await holderViews(env, holderIds)) out.set(id, stateOfView(view, id));
   return out;
 }
 
@@ -523,7 +546,9 @@ export async function paidByHSOf(env, holderId, personId, lines, asOf) {
   const out = new Map();
   if (!env.SHEETS_ID || !Array.isArray(lines) || !lines.length) return out;
   const day = evaluationDay(asOf);
-  const src = await pricing(env, day, false);
+  /* read FRESH (Owner, 8 Oct 2026 · closeout): the amount a sent trip states for a stay H&S paid is Google's at the moment of
+     sending, never a held or stale copy — a failed read throws, and the caller says "Price to follow" */
+  const src = await pricing(env, day, true);
   const { index } = siteProductKeyIndex(src.items);
   for (const l of lines) {
     const key = siteKeyOfSelection(l);
@@ -1033,8 +1058,10 @@ async function confirmationHolders(env) {
   return out;
 }
 
-async function adminReconcile(env, identity, request, cors) {
-  const body = await request.json().catch(() => ({}));
+async function adminReconcile(env, identity, request, cors, write) {
+  /* `write` (a POST): drift state is recorded and a DRAFT may be proposed. Otherwise (a GET) the same report is computed and
+     nothing is written — no drift-set, no revision-create */
+  const body = write ? await request.json().catch(() => ({})) : { asOf: new URL(request.url).searchParams.get('asOf') };
   const asOf = clean(body && body.asOf) || new Date().toISOString().slice(0, 10);
   const src = await loadSource(env, asOf);
   const list = { holders: await readHolders(env) };
@@ -1052,13 +1079,17 @@ async function adminReconcile(env, identity, request, cors) {
        The proposal is the engine's current result in the ledger's own
        revision-create contract, created once while nothing newer is open, and
        every answer is checked — a refused write is reported, never success. */
-    const set = await ledgerCall(env, 'drift-set', { holderId: id, drifts });
-    if (!set || set.ok !== true) throw new LedgerContractError('drift for ' + id + ' was not recorded');
+    if (write) {
+      const set = await ledgerCall(env, 'drift-set', { holderId: id, drifts });
+      if (!set || set.ok !== true) throw new LedgerContractError('drift for ' + id + ' was not recorded');
+    }
     if (blockingOf(drifts).length && snapshot) {
       const proposal = proposeRevisionDraft({ holderId: id, settlementId: state.Settlement_ID,
         currentRevision: snapshot.Revision, result, drifts });
       if (Number(state.latestRevision) > Number(snapshot.Revision)) {
         proposals.push({ Holder_ID: id, created: false, reason: 'revision ' + state.latestRevision + ' is already open' });
+      } else if (!write) {
+        proposals.push({ Holder_ID: id, created: false, preview: true, proposal });
       } else {
         const made = await ledgerCall(env, 'revision-create', { holderId: id, result, by: 'reconciliation',
           note: 'proposed after drift: ' + blockingOf(drifts).map((d) => d.code || d).join(', ') });
@@ -1077,7 +1108,7 @@ async function adminReconcile(env, identity, request, cors) {
     payments[id] = pay;
     monitoring.push(...monitoringSignals({ snapshot, payment: pay, journalRows: src.journalRows, asOf, holderId: id }));
   }
-  return jsonRes({ ok: true, report: reconciliationReport({ holders: (list && list.holders) || [], drifts: all, payments, monitoring, asOf }), drifts: all, monitoring, proposals }, 200, cors);
+  return jsonRes({ ok: true, written: !!write, report: reconciliationReport({ holders: (list && list.holders) || [], drifts: all, payments, monitoring, asOf }), drifts: all, monitoring, proposals }, 200, cors);
 }
 
 /**
@@ -1291,6 +1322,12 @@ async function adminStatus(env, identity, url, cors) {
   }
   /* the person whose rates apply, resolved as the statement path resolves it (holderIdentity): exactly one register entry */
   const inRegister = new Map(holdersOfIndex(await loadIndex(env, url.origin, false)).map((h) => [h.Holder_ID, h]));
+  /* ONE ledger request for the chunk (closeout, 8 Oct 2026 — it was one per holder); each holder's view is judged inside its own
+     row, so one unreadable holder still fails only its row, and an unanswered batch falls back to the per-holder read */
+  let views = null;
+  try { views = await holderViews(env, ids.filter((id) => { const w = inRegister.get(id); return w && !w.ambiguous && w.guestId; })); } catch (e) { views = null; }
+  /* this request reads a sent trip once, however many of its steps ask for it (a read-only route: nothing here writes REG_KV) */
+  env = { ...env, REG_KV: memoKv(env.REG_KV) };
   const rows = [];
   for (const id of ids) {
     const who = inRegister.get(id);
@@ -1304,7 +1341,8 @@ async function adminStatus(env, identity, url, cors) {
     try { booked = await bookedOf(env, id, who.guestId, src, asOf, false); }
     catch (e) { booked = { error: clean(e && e.message).slice(0, 200) || 'not readable' }; }
     try {
-      const { state, result, unmapped, confirmation } = await calculateHolder(env, { invitationId: id, guestId: null }, id, src, asOf, url.origin);
+      const known = views && views.has(id) ? stateOfView(views.get(id), id) : undefined;
+      const { state, result, unmapped, confirmation } = await calculateHolder(env, { invitationId: id, guestId: null }, id, src, asOf, url.origin, undefined, known);
       rows.push({ booked,
         Holder_ID: id,
         confirmation: { state: confirmation.state || 'NONE', version: confirmation.version ?? null, confirmedAt: confirmation.confirmedAt || null },
@@ -1804,11 +1842,16 @@ export async function handleBilling(request, env, url, cors, deps) {
       /* Confirm booking: a BILLING_ADMIN confirms the submitted booking, as Guest Relations would (Owner, 7 Oct 2026) */
       case 'admin/confirm':
         return request.method === 'POST' ? await adminConfirmPost(env, identity, request, url, cors) : await adminConfirmGet(env, identity, url, cors);
-      case 'issue': return await adminIssue(env, identity, request, cors);
+      /* A READ NEVER WRITES (Owner, 8 Oct 2026 · closeout): every route below that records something in the ledger answers only a
+         POST; a GET of reconcile is its read-only preview — the same report, nothing recorded (written: false) */
+      case 'issue':
+        if (request.method !== 'POST') return jsonRes({ ok: false, error: 'POST required' }, 405, cors);
+        return await adminIssue(env, identity, request, cors);
       case 'revenue': return await adminRevenue(env, identity, url, cors);
-      case 'reconcile': return await adminReconcile(env, identity, request, cors);
+      case 'reconcile': return await adminReconcile(env, identity, request, cors, request.method === 'POST');
       case 'gate': return await gateRead(env, identity, url, cors);
       case 'gate/approve': {
+        if (request.method !== 'POST') return jsonRes({ ok: false, error: 'POST required' }, 405, cors);
         const body = await request.json().catch(() => ({}));
         /* Freeze · AB — a human act, recorded verbatim. Nothing here approves itself.
          * The ledger judges the conditions on the source as it stands at this
@@ -1828,6 +1871,7 @@ export async function handleBilling(request, env, url, cors, deps) {
         return jsonRes({ ok: true, gate: reply.gate, approved: reply.gate.approved === true, open: reply.gate.open || [] }, 200, cors);
       }
       case 'override': {
+        if (request.method !== 'POST') return jsonRes({ ok: false, error: 'POST required' }, 405, cors);
         const body = await request.json().catch(() => ({}));
         const stored = await ledgerCall(env, 'override-set', {
           holderId: clean(body.holderId), personId: clean(body.personId),

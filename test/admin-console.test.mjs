@@ -178,7 +178,7 @@ async function approveGate(st) {
 }
 async function hit(W, identity, pathq, body, method) {
   globalThis.__billingIdentity = identity;
-  globalThis.__billingIndex = INDEX;
+  globalThis.__billingIndex = W.index || INDEX;
   const url = new URL('https://stage.invalid/api/billing/' + pathq);
   const req = new Request(url, body ? { method: method || 'POST', body: JSON.stringify(body), headers: { 'content-type': 'application/json' } } : {});
   const was = globalThis.fetch;
@@ -973,4 +973,121 @@ test('CONFIRM BOOKING · a confirmation record that changed between the read and
   const r = await hit(W, GROOM, 'admin/confirm', { holderId: 'INV-T1', expected: expectedOf(ctx.j) });
   assert.equal(r.status, 409); assert.deepEqual(r.j.reasons, ['CONFIRMATION_CHANGED']);
   assert.equal(writes.length, 0);
+});
+
+/* ===== A READ NEVER WRITES · BATCHED READS · REVENUE SCALING (closeout, Owner, 8 Oct 2026) ===== */
+const ledgerSnapshot = (W) => JSON.stringify([...W.st._map].sort((a, b) => (a[0] < b[0] ? -1 : 1)));
+function countLedger(W) {
+  const ops = [];
+  const real = W.env.BILLING_LEDGER;
+  W.env.BILLING_LEDGER = { idFromName: real.idFromName, get: (id) => { const stub = real.get(id); return { fetch: (req) => { ops.push(new URL(req.url).pathname.split('/').pop()); return stub.fetch(req); } }; } };
+  return ops;
+}
+/* a REG_KV double that counts reads and lists by prefix (the shape the revenue population reads) */
+function countingKv(store) {
+  const gets = [];
+  return { gets, get: async (k) => { gets.push(k); return store[k] === undefined ? null : (typeof store[k] === 'string' ? store[k] : JSON.stringify(store[k])); },
+    list: async ({ prefix = '' } = {}) => ({ keys: Object.keys(store).filter((k) => k.startsWith(prefix)).map((name) => ({ name, metadata: { confirmedAt: '2026-10-02T09:00:00Z' } })), list_complete: true }) };
+}
+
+test('A READ NEVER WRITES · GET reconcile is a preview (written: false, the ledger untouched); gate/approve, override and issue answer only a POST', async () => {
+  const W = world(); await approveGate(W.st);
+  /* one issued statement, so reconcile has a holder to judge */
+  const h = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+  const issued = await hit(W, GROOM, 'issue', { holderId: 'INV-T1', expectedProposal: h.j.preview.proposalHash });
+  assert.equal(issued.status, 200, JSON.stringify(issued.j).slice(0, 200));
+  W.workbook['002_Accommodation_Details'] = W.workbook['002_Accommodation_Details'].map((r) => (r[0] === 'Standard_Rate' ? ['Standard_Rate', 150, ...r.slice(2)] : r));
+  clearCatalogueCache();
+  const before = ledgerSnapshot(W);
+  const ops = countLedger(W);
+  const r = await hit(W, GROOM, 'reconcile');
+  assert.equal(r.status, 200); assert.equal(r.j.written, false);
+  assert.ok(!ops.some((o) => /^(drift-set|revision-create|gate-approve|override-set|settlement|revision-issue|payment-decision)$/.test(o)), ops.join(','));
+  assert.equal(ledgerSnapshot(W), before, 'nothing recorded by a GET');
+  for (const p of ['gate/approve', 'override', 'issue']) {
+    const g = await hit(W, GROOM, p);
+    assert.equal(g.status, 405, p); assert.equal(ledgerSnapshot(W), before, p + ': nothing recorded');
+  }
+  /* the explicit action still records what it always recorded */
+  const post = await hit(W, GROOM, 'reconcile', { asOf: '2026-10-08' });
+  assert.equal(post.status, 200); assert.equal(post.j.written, true);
+  assert.ok(ops.includes('drift-set'), 'the POST records the drift the GET only showed');
+  assert.notEqual(ledgerSnapshot(W), before);
+});
+
+test('BATCHED READS · a Booked-value chunk asks the ledger once (read-many), reads each sent trip once, and one unreadable holder fails only its row', async () => {
+  const W = world(); await approveGate(W.st);
+  const store = { 'reg:INV-T1': SENT, 'conf:INV-T1': { confirmedAt: '2026-10-02T09:00:00Z', version: 1 }, 'reg:INV-T2': { ...SENT, submissionId: 'SYL-T2-1', registration: { ...SENT.registration, guestId: 'GT2' } } };
+  W.env.REG_KV = countingKv(store);
+  const ops = countLedger(W);
+  const r = await hit(W, GROOM, 'admin/status?ids=INV-T1,INV-T2');
+  assert.equal(r.status, 200);
+  assert.deepEqual(ops.filter((o) => o === 'read-many' || o === 'read'), ['read-many'], 'one ledger request for the chunk, none per holder');
+  for (const k of ['reg:INV-T1', 'reg:INV-T2']) assert.equal(W.env.REG_KV.gets.filter((g) => g === k).length, 1, k + ' read once');
+  assert.deepEqual(r.j.rows.map((x) => [x.Holder_ID, !!x.error]), [['INV-T1', false], ['INV-T2', false]]);
+  /* the ledger answers the batch with nothing usable: each holder is read on its own, as before */
+  const W2 = world(); await approveGate(W2.st);
+  const real = W2.env.BILLING_LEDGER;
+  W2.env.BILLING_LEDGER = { idFromName: real.idFromName, get: (id) => ({ fetch: (req) => (/read-many$/.test(new URL(req.url).pathname) ? Promise.resolve(Response.json({ ok: false })) : real.get(id).fetch(req)) }) };
+  const ops2 = countLedger(W2);
+  const r2 = await hit(W2, GROOM, 'admin/status?ids=INV-T1,INV-T2');
+  assert.equal(r2.status, 200); assert.deepEqual(r2.j.rows.map((x) => !!x.error), [false, false]);
+  assert.equal(ops2.filter((o) => o === 'read').length, 2, 'the fallback reads each holder on its own');
+  /* the batch answers, but one holder's view is not that holder's: only that row fails */
+  const W3 = world(); await approveGate(W3.st);
+  const real3 = W3.env.BILLING_LEDGER;
+  W3.env.BILLING_LEDGER = { idFromName: real3.idFromName, get: (id) => ({ fetch: async (req) => {
+    const res = await real3.get(id).fetch(req);
+    if (!/read-many$/.test(new URL(req.url).pathname)) return res;
+    const j = await res.json(); j.holders[1] = { ...j.holders[1], Holder_ID: 'INV-SOMEONE-ELSE' }; return Response.json(j);
+  } }) };
+  const r3 = await hit(W3, GROOM, 'admin/status?ids=INV-T1,INV-T2');
+  assert.equal(r3.status, 200); assert.deepEqual(r3.j.rows.map((x) => [x.Holder_ID, !!x.error]), [['INV-T1', false], ['INV-T2', true]]);
+});
+
+test('FRESH AT SENDING · the paid-by-H&S check reads Google now: a 009 change since the catalogue was held is the amount the trip states', async () => {
+  const W = world();
+  W.workbook['009_Special_Rates'] = [[...W.workbook['009_Special_Rates'][0], 'Billing_Category'], ['INV-T1', 'GT1', 'T-STAY', '36.33333333', '2', 'ACTIVE', '', '', 'Haruthai & Suthep', 'paid by H&S', 'GUEST_SETTLEMENT_REQUIRED']];
+  W.workbook['002_Accommodation_Details'] = W.workbook['002_Accommodation_Details'].map((r) => (r[0] === 'Billing_Category' ? ['Billing_Category', 'GUEST_SELF_PAYMENT', ...r.slice(2)] : r));
+  const { paidByHSOf } = await import('../src/billing-routes.js');
+  const was = globalThis.fetch; globalThis.fetch = sheetsFetch(W.workbook, W.log);
+  try {
+    const stay = { id: 'wedstay', stay: 'souphattra', room: 'heritage', qty: 1 };
+    const first = await paidByHSOf(W.env, 'INV-T1', 'GT1', [stay], '2026-10-08');
+    assert.deepEqual([...first.values()], [{ total: 72.67 }]);
+    W.workbook['009_Special_Rates'][1][3] = '72.66666667';
+    const reads = W.log.length;
+    const second = await paidByHSOf(W.env, 'INV-T1', 'GT1', [stay], '2026-10-08');
+    assert.deepEqual([...second.values()], [{ total: 145.33 }], 'never the held catalogue of a minute ago');
+    assert.ok(W.log.length > reads, 'Google was read again');
+  } finally { globalThis.fetch = was; clearCatalogueCache(); }
+});
+
+test('REVENUE SCALING · 1, 10 and 40 confirmed holders: one Google read, a constant number of ledger requests, two KV reads per holder', async () => {
+  const results = [];
+  for (const n of [1, 10, 40]) {
+    const W = world(); await approveGate(W.st);
+    const store = {}, index = { g: { i: 'INV-G049', g: 'G049', c: 'CON-G049', h: 1 } };
+    for (let k = 1; k <= n; k++) {
+      const inv = 'INV-S' + k, gid = 'GS' + k;
+      index['s' + k] = { i: inv, g: gid, c: 'CON-S' + k };
+      store['reg:' + inv] = { ...SENT, submissionId: 'SYL-S' + k + '-1', registration: { ...SENT.registration, guestId: gid } };
+      store['conf:' + inv] = { confirmedAt: '2026-10-02T09:00:00Z', version: 1, submissionId: 'SYL-S' + k + '-1' };
+    }
+    W.env.REG_KV = countingKv(store); W.index = index;
+    const ops = countLedger(W);
+    const t0 = process.cpuUsage();
+    const r = await hit(W, GROOM, 'revenue?asOf=2026-10-08');
+    const cpu = process.cpuUsage(t0);
+    assert.equal(r.status, 200, JSON.stringify(r.j).slice(0, 200));
+    assert.equal(r.j.population.withConfirmation, n);
+    const google = W.log.filter((l) => l[0] === 'batchGet' || l[0] === 'get').length;
+    results.push({ n, google, ledger: ops.length, kv: W.env.REG_KV.gets.length, cpuMs: Math.round((cpu.user + cpu.system) / 1000) });
+  }
+  for (const x of results) {
+    assert.equal(x.google, 1, 'one Google read, whatever the population');
+    assert.ok(x.kv <= 2 * x.n, 'at most two KV reads per holder: ' + JSON.stringify(x));
+  }
+  assert.equal(new Set(results.map((x) => x.ledger)).size, 1, 'ledger requests do not grow with the population: ' + JSON.stringify(results));
+  console.log('# revenue scaling (synthetic, Node CPU): ' + results.map((x) => 'n=' + x.n + ' google=' + x.google + ' ledger=' + x.ledger + ' kv=' + x.kv + ' cpu≈' + x.cpuMs + 'ms').join(' · '));
 });

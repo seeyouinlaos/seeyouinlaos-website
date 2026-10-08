@@ -1528,7 +1528,7 @@ function guestNameOf(record) {
    Only a trip whose device names such a stay is asked about (every other sending reads nothing more), and the answer is waited
    for at most PAID_CHECK_MS: if the source cannot be read in time, the line the device called prepaid carries
    `prepaidUnverified` and the e-mails say neither — the sending itself never fails or waits longer on Google. */
-const PAID_CHECK_MS = 1500;
+const PAID_CHECK_MS = 3000;   /* the check reads Google fresh (closeout, 8 Oct 2026): a cold isolate signs a token first */
 export async function markPaidByHS(env, who, lines, claimed, waitMs) {   /* exported for its test */
   if (!Array.isArray(lines)) return lines;
   const bare = lines.map((l) => { if (!l || typeof l !== 'object') return l; const { paidByHS, prepaidUnverified, ...rest } = l; return rest; });

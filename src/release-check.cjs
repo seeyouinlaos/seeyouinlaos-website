@@ -820,7 +820,9 @@ gate('P7', 'Dress Code imagery real (23 — resort-01 retired by the owner), no 
  * Google unreadable is not a pass (exit 2: UNAVAILABLE — run it again). */
 {
   const { spawnSync } = require('child_process');
-  const r = spawnSync('node', [path.join(__dirname, 'pricing-guard.mjs')], { encoding: 'utf8', timeout: 120000 });
+  /* the guard's test-mode variables never reach a release run */
+  const env = { ...process.env }; for (const k of ['PRICING_GUARD_TEST', 'PRICING_GUARD_KEY', 'PRICING_BASELINE_DETAIL', 'PRICING_BASELINE_COMMITTED']) delete env[k];
+  const r = spawnSync('node', [path.join(__dirname, 'pricing-guard.mjs')], { encoding: 'utf8', timeout: 120000, env });
   const lines = (r.stdout || '').trim().split('\n');
   const last = lines[lines.length - 1].replace(/^PRICING SOURCE OF TRUTH: /, '');
   gate('F1', 'Pricing source of truth: Google 002 / 009 → engine → website, no rate divided, overridden or changed unseen', r.status === 0,

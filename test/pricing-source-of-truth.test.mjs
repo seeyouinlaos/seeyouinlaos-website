@@ -20,7 +20,8 @@ import { loadItems, loadSpecialRates, RANGE } from '../src/billing/source.js';
 import { composeGuestMail, composeOwnerMail } from '../src/mail-templates.js';
 import { markPaidByHS } from '../src/worker.js';
 import { clearCatalogueCache } from '../src/billing/catalogue-cache.js';
-import { invariants, codeAgainstGoogle, snapshotOf, diffSnapshots, raw009 } from '../src/pricing-guard.mjs';
+import { invariants, codeAgainstGoogle, snapshotOf, diffSnapshots, raw009, digestsOf, baselineVerdict, markerVerdict, acceptPlan, committedValid } from '../src/pricing-guard.mjs';
+import fs from 'node:fs';
 
 const DAY = '2026-10-08';
 const PAYABLE = 'GUEST_SETTLEMENT_REQUIRED';
@@ -170,7 +171,7 @@ test('GATE F1 · the rules hold, a changed 009 amount is named by row and produc
   const swapped = [head, two[2], two[1]];
   assert.deepEqual(diffSnapshots(snapshotOf({ g002: [['Item_ID']], g009: two }), snapshotOf({ g002: [['Item_ID']], g009: swapped })), []);
   /* --accept states how many differences the Owner's order covers */
-  assert.match(src('src/pricing-guard.mjs'), /if \(base && !base\.broken && expected !== diff\.length\)/);
+  assert.match(src('src/pricing-guard.mjs'), /if \(!Number\.isInteger\(expect\) \|\| expect !== diff\.length\)/);
   const rc = src('src/release-check.cjs');
   assert.match(rc, /gate\('F1', 'Pricing source of truth: Google 002 \/ 009 → engine → website, no rate divided, overridden or changed unseen', r\.status === 0,/);
   assert.match(rc, /spawnSync\('node', \[path\.join\(__dirname, 'pricing-guard\.mjs'\)\]/);
@@ -188,4 +189,81 @@ test('NO LOCAL AMOUNT AT SENDING · a stay the device calls prepaid, which the s
   assert.deepEqual([out[0].prepaidUnverified, out[0].price, out[0].paidByHS], [true, null, undefined]);
   assert.deepEqual([out[1].price, out[1].prepaidUnverified], [105, undefined], 'every other line exactly as sent');
   clearCatalogueCache();
+});
+
+test('PORTABLE BASELINE · the committed digests are canonical (moving a row is no change, changing a cell is) and carry no id or amount', () => {
+  const head = ['Holder_ID', 'Person_ID', 'Item_ID', 'Rate_Per_Person_Night', 'Nights_Rule', 'Rate_Status', 'Approved_By', 'Billing_Category'];
+  const a = ['INV-GA', 'GA', 'F-JINRI-TERRACE-DOUBLE', 36.33333333, '3', 'ACTIVE', 'Haruthai & Suthep', PAYABLE];
+  const b = ['INV-GB', 'GB', 'H-PRIVATE-SOUP-VIEW', 116.31, '2', 'ACTIVE', 'Haruthai & Suthep', PAYABLE];
+  const g002 = [['Item_ID', 'X-ONE'], ['Standard_Rate', 10]];
+  const one = digestsOf(snapshotOf({ g002, g009: [head, a, b] })), swapped = digestsOf(snapshotOf({ g002, g009: [head, b, a] }));
+  const halved = digestsOf(snapshotOf({ g002, g009: [head, [...a.slice(0, 3), 18.16666667, ...a.slice(4)], b] }));
+  assert.equal(one.ref, swapped.ref, 'the order of the rows in the tab is not a financial fact');
+  assert.notEqual(one.ref, halved.ref, 'a halved rate is a different state');
+  assert.deepEqual([one.products, one.rows009, /^[0-9a-f]{12}$/.test(one.ref)], [1, 2, true]);
+  /* the committed file in this repository: digests, a reference, dates — nothing a guest could be found by */
+  const committed = JSON.parse(src('infra/pricing-baseline.json'));
+  assert.ok(committedValid(committed));
+  assert.deepEqual(Object.keys(committed).sort(), ['about', 'acknowledged', 'digest002', 'digest009', 'products', 'ref', 'rows009']);
+  /* no id, no order text, no amount — every value is a digest, a reference, a count, a date or the fixed description */
+  assert.doesNotMatch(JSON.stringify(committed), /INV-|CON\d|"order"/);
+  for (const [k, v] of Object.entries(committed)) if (k !== 'about' && k !== 'acknowledged') assert.match(String(v), /^([0-9a-f]{12}|[0-9a-f]{64}|\d+)$/, k);
+  assert.doesNotMatch(committed.about, /\d+\.\d{2}/);
+  for (const e of committed.acknowledged) assert.deepEqual(Object.keys(e).sort(), ['at', 'changes', 'ref']);
+});
+
+test('PORTABLE BASELINE · F1 fails closed: no committed baseline, a tampered one, or a Google change nobody acknowledged — and names the change where the private detail matches', () => {
+  const head = ['Holder_ID', 'Person_ID', 'Item_ID', 'Rate_Per_Person_Night', 'Nights_Rule', 'Rate_Status', 'Approved_By', 'Billing_Category'];
+  const snap = (rate) => snapshotOf({ g002: [['Item_ID', 'X-ONE'], ['Standard_Rate', 10]], g009: [head, ['INV-GA', 'GA', 'F-JINRI-TERRACE-DOUBLE', rate, '3', 'ACTIVE', 'Haruthai & Suthep', PAYABLE]] });
+  const approved = snap(36.33333333), d = digestsOf(approved);
+  const committed = { about: 'x', ref: d.ref, digest002: d.digest002, digest009: d.digest009, products: 1, rows009: 1, acknowledged: [{ at: '2026-10-08T00:00:00Z', ref: d.ref, changes: 0 }] };
+  const detail = { ...approved, ref: d.ref };
+  assert.deepEqual(baselineVerdict({ committed, detail, now: approved }).problems, []);
+  assert.deepEqual(baselineVerdict({ committed, detail: null, now: approved }).problems, [], 'a fresh checkout without the private detail still compares');
+  assert.match(baselineVerdict({ committed: null, detail, now: approved }).problems[0], /^no committed baseline/);
+  assert.match(baselineVerdict({ committed: { ...committed, digest009: '0'.repeat(64) }, detail, now: approved }).problems[0], /malformed or its digests do not match/);
+  const changed = baselineVerdict({ committed, detail, now: snap(18.16666667) }).problems;
+  assert.match(changed[0], /^CHANGED SINCE THE OWNER'S LAST ACKNOWLEDGED ORDER \(ref [0-9a-f]{12}, 2026-10-08\): Google 009 financial cells differ$/);
+  assert.equal(changed[1], 'CHANGED — 009 row 2 · F-JINRI-TERRACE-DOUBLE · Rate_Per_Person_Night: 36.33333333 → 18.16666667');
+  assert.match(baselineVerdict({ committed, detail: null, now: snap(18.16666667) }).problems[1], /cannot be named in this environment/);
+});
+
+test('PORTABLE BASELINE · only an OWNER-PRICING-CHANGE naming the ref may change it; git unreadable fails; --accept refuses without the matching detail or the stated number', () => {
+  const ref = 'a4a18a221d85';
+  assert.deepEqual(markerVerdict({ commits: [{ hash: 'c1', message: 'X\n\nOWNER-PRICING-CHANGE: first [ref ' + ref + ']\nCo-Authored-By: x' }], dirty: false, ref }), []);
+  assert.match(markerVerdict({ commits: [{ hash: 'c1', message: 'no trailer' }], dirty: false, ref })[0], /without an OWNER-PRICING-CHANGE trailer/);
+  /* a body line quoting the syntax, or an empty trailer line, is no trailer */
+  assert.equal(markerVerdict({ commits: [{ hash: 'c1', message: 'Use OWNER-PRICING-CHANGE: [ref ' + ref + '] next time\nOWNER-PRICING-CHANGE: [ref ' + ref + ']\n\nCo-Authored-By: x' }], dirty: false, ref }).length, 1);
+  assert.equal(markerVerdict({ commits: [{ hash: 'c1', message: 'X\n\nOWNER-PRICING-CHANGE:\nCo-Authored-By: [ref ' + ref + ']' }], dirty: false, ref }).length, 1);
+  assert.match(markerVerdict({ commits: [{ hash: 'c2', message: 'OWNER-PRICING-CHANGE: old [ref 000000000000]' }], dirty: false, ref })[0], /does not name ref/);
+  assert.match(markerVerdict({ commits: [], dirty: true, env: '', ref })[0], /OWNER_PRICING_CHANGE must name/);
+  assert.deepEqual(markerVerdict({ commits: [], dirty: true, env: 'order [ref ' + ref + ']', ref }), []);
+  assert.match(markerVerdict({ gitError: 'not a git repository', ref })[0], /cannot be verified/);
+  /* the commit that set today's baseline must name it; an older unmarked one is superseded by it (never a permanent block) */
+  assert.deepEqual(markerVerdict({ commits: [{ hash: 'c3', message: 'OWNER-PRICING-CHANGE: y [ref ' + ref + ']' }, { hash: 'c1', message: 'unmarked' }], dirty: false, ref }), []);
+  assert.equal(markerVerdict({ commits: [{ hash: 'c1', message: 'unmarked' }, { hash: 'c0', message: 'OWNER-PRICING-CHANGE: y [ref ' + ref + ']' }], dirty: false, ref }).length, 1);
+
+  const head = ['Holder_ID', 'Person_ID', 'Item_ID', 'Rate_Per_Person_Night', 'Nights_Rule', 'Rate_Status', 'Approved_By', 'Billing_Category'];
+  const snap = (rate) => snapshotOf({ g002: [['Item_ID', 'X-ONE'], ['Standard_Rate', 10]], g009: [head, ['INV-GA', 'GA', 'F-JINRI-TERRACE-DOUBLE', rate, '3', 'ACTIVE', 'Haruthai & Suthep', PAYABLE]] });
+  const a = snap(36.33333333), d = digestsOf(a);
+  const committed = { about: 'x', ref: d.ref, digest002: d.digest002, digest009: d.digest009, products: 1, rows009: 1, acknowledged: [{ at: 'x', ref: d.ref, changes: 0 }] };
+  const order = 'Owner order 9 Oct 2026: the rate is changed';
+  assert.match(acceptPlan({ committed, detail: null, now: snap(40), order, expect: 1 }).refused, /no local detail/);
+  assert.match(acceptPlan({ committed, detail: { ...snap(1), ref: 'ffffffffffff' }, now: snap(40), order, expect: 1 }).refused, /not the committed baseline/);
+  assert.match(acceptPlan({ committed, detail: { ...a, ref: d.ref }, now: snap(40), order, expect: NaN }).refused, /1 difference\(s\) found; --expect <n>/);
+  assert.match(acceptPlan({ committed, detail: { ...a, ref: d.ref }, now: snap(40), order: 'short', expect: 1 }).refused, /order in words/);
+  assert.match(acceptPlan({ committed, detail: { ...a, ref: d.ref }, now: a, order, expect: 0 }).refused, /nothing to accept/);
+  assert.equal(acceptPlan({ committed, detail: { ...a, ref: d.ref }, now: snap(40), order, expect: 1 }).diff.length, 1);
+  /* a deleted baseline is restored from git, never started again; a first one only with --bootstrap where git never held it */
+  assert.match(acceptPlan({ committed: null, detail: { ...a, ref: d.ref }, now: snap(40), order, expect: 1, inHistory: true, bootstrap: true }).refused, /restore it \(git checkout/);
+  assert.match(acceptPlan({ committed: null, detail: { ...a, ref: d.ref }, now: a, order, expect: 0, inHistory: false }).refused, /only --bootstrap starts one/);
+  assert.equal(acceptPlan({ committed: null, detail: { ...a, ref: d.ref }, now: a, order, expect: 0, inHistory: false, bootstrap: true }).refused, undefined);
+  /* test-mode overrides never reach a release run */
+  assert.match(src('src/release-check.cjs'), /for \(const k of \['PRICING_GUARD_TEST', 'PRICING_GUARD_KEY', 'PRICING_BASELINE_DETAIL', 'PRICING_BASELINE_COMMITTED'\]\) delete env\[k\];/);
+  assert.match(src('src/pricing-guard.mjs'), /if \(TEST_MODE\) problems\.push\('TEST MODE/);
+  /* nothing but the guard reads the baselines: no figure can come from them */
+  for (const dir of ['src', 'assets']) for (const f of fs.readdirSync(dir, { recursive: true })) {
+    const file = dir + '/' + f; if (!/\.(m?js|cjs)$/.test(file) || file === 'src/pricing-guard.mjs') continue;
+    assert.doesNotMatch(fs.readFileSync(file, 'utf8'), /pricing-baseline/, file);
+  }
 });

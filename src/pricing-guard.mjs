@@ -12,6 +12,9 @@
      node src/pricing-guard.mjs --accept "<the Owner's order>" --expect <n>
                                            records today's Google figures as the acknowledged baseline — only on an explicit
                                            Owner order that covers every difference listed (CLAUDE.md · pricing source of truth)
+     node src/pricing-guard.mjs --rebuild-detail
+                                           a fresh checkout: writes the local detail again — only while Google still equals the
+                                           committed, acknowledged baseline (it acknowledges nothing)
 
    What it proves:
      1. the rules, on synthetic data: a per-person rate is never divided by the room's occupancy; a person-scoped 009 amount
@@ -20,10 +23,15 @@
      2. this code against Google: every 002 product the website exposes — the server reads 002's Standard_Rate unchanged,
         lists it unchanged, prices it rate × payable nights, and the website's own catalogue figure is the same number;
         every approved 009 row — the engine charges exactly Rate_Per_Person_Night × Nights_Rule to the person it names.
-     3. nothing changed unseen: the financial cells of 002 and 009 equal the acknowledged baseline
-        (src/pricing-baseline.private.json, local and git-ignored — it holds holder and person ids). A difference fails
-        until the Owner's order for it is recorded with --accept. On a difference: ask the Owner. Never write Google to make
-        a figure match the baseline, never record a baseline the Owner has not ordered.
+     3. nothing changed unseen: the financial cells of 002 and 009 equal the Owner's last acknowledged order. The baseline
+        that every checkout carries is infra/pricing-baseline.json (committed): SHA-256 digests of the canonical 002 and 009
+        snapshots, their reference and the dates of the acknowledgements — no id, no amount, no guest. The local, git-ignored
+        src/pricing-baseline.private.json holds the same snapshot in full (holder and person ids), so a difference can be named
+        where it exists. A committed baseline passes only when the commit that set it carries an `OWNER-PRICING-CHANGE: … [ref <ref>]`
+        trailer naming it (an older unmarked commit is superseded by it); before the commit, OWNER_PRICING_CHANGE in the
+        environment must name the new ref. On a
+        difference: ask the Owner. Never write Google to make a figure match the baseline, never record one the Owner has not
+        ordered. Workers Builds deploys a push to main without running F1: `--live` after every deploy is the backstop.
 
    Exit 0 PASS · 1 FAIL · 2 UNAVAILABLE (Google or the Worker could not be read: still blocking — run it again).
    READ ONLY: it never writes Google or the Worker and prints no guest name; a 009 row is named by its row and Item_ID.
@@ -31,14 +39,22 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import crypto from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 import { calculate } from './billing/engine.js';
 import { prefetchTabs, loadItems, loadSpecialRates, RANGE, nightsOfItem } from './billing/source.js';
 import { quoteOfItem, listRateOf } from './billing-routes.js';
 import { itemIsActiveOn } from './billing/model.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const KEY_FILE = path.join(ROOT, 'src/google-service-account.private.json');
-const BASELINE = path.join(ROOT, 'src/pricing-baseline.private.json');
+/* TEST MODE (PRICING_GUARD_TEST=1) alone honours the path overrides used by the guard's own scenario runs — and a run in test
+   mode is never a release result: it always fails as such (release-check also strips these variables) */
+const TEST_MODE = process.env.PRICING_GUARD_TEST === '1';
+const override = (name, fallback) => (TEST_MODE && process.env[name]) || fallback;
+const KEY_FILE = override('PRICING_GUARD_KEY', path.join(ROOT, 'src/google-service-account.private.json'));
+const BASELINE = override('PRICING_BASELINE_DETAIL', path.join(ROOT, 'src/pricing-baseline.private.json'));
+const COMMITTED = override('PRICING_BASELINE_COMMITTED', path.join(ROOT, 'infra/pricing-baseline.json'));
+const COMMITTED_REL = 'infra/pricing-baseline.json';
 const TOKENS = path.join(ROOT, 'src/invitation-tokens.private.csv');
 
 const clean = (v) => (v == null ? '' : String(v).trim());
@@ -127,8 +143,12 @@ export async function readGoogle(asOf) {
   return { source: { items, specialRates }, g002: grid(RANGE.ACCOMMODATION_DETAILS), g009: grid(RANGE.SPECIAL_RATES) };
 }
 
-const FIELDS_002 = ['Item_ID', 'Site_Product_Key', 'Billing_Category', 'Rate_Status', 'Rate_Basis', 'Standard_Rate', 'Currency', 'Number of Nights', 'Modifiers', 'Effective_From', 'Effective_To'];
-const FIELDS_009 = ['Holder_ID', 'Person_ID', 'Item_ID', 'Rate_Per_Person_Night', 'Nights_Rule', 'Rate_Status', 'Effective_From', 'Effective_To', 'Approved_By', 'Billing_Category'];
+/* every 002 cell the engine reads (rates, nights, status, dates, quota, cutoffs, modifiers) and every 009 cell it reads or a
+   statement prints (the Note becomes the line's agreed-rate text) */
+const FIELDS_002 = ['Item_ID', 'Site_Product_Key', 'Billing_Category', 'Rate_Status', 'Rate_Basis', 'Standard_Rate', 'Currency', 'Number of Nights', 'Modifiers',
+  'Effective_From', 'Effective_To', 'Quota', 'Quota_Unit', 'Max_Pax', 'Change_Cutoff', 'Cancellation_Cutoff'];
+const FREE_TEXT = ['Note', 'Approved_By'];
+const FIELDS_009 = ['Holder_ID', 'Person_ID', 'Item_ID', 'Rate_Per_Person_Night', 'Nights_Rule', 'Rate_Status', 'Effective_From', 'Effective_To', 'Approved_By', 'Billing_Category', 'Note'];
 
 /** 002 read independently of the server's loader: labels in column A, one product per column. */
 export function raw002(grid) {
@@ -156,7 +176,7 @@ export function raw009(grid) {
   const head = (grid[0] || []).map(clean);
   return grid.slice(1).map((r, i) => {
     const rec = { row: i + 2 };
-    head.forEach((h, j) => { if (FIELDS_009.includes(h) || h === 'Note') rec[h] = clean((r || [])[j]); });
+    head.forEach((h, j) => { if (FIELDS_009.includes(h)) rec[h] = clean((r || [])[j]); });
     return rec;
   }).filter((r) => r.Item_ID);
 }
@@ -269,7 +289,10 @@ export async function codeAgainstGoogle({ source, g002, g009 }, asOf) {
 
 export function snapshotOf({ g002, g009 }) {
   const items = {};
-  for (const [id, cols] of raw002(g002)) items[id] = cols.map((c) => Object.fromEntries(FIELDS_002.map((f) => [f, c[f] || ''])));
+  /* dated columns of one product in a stable order (their order in the tab is not a financial fact) */
+  const key = (c) => [c.Effective_From, c.Effective_To, c.Rate_Status, c.Site_Product_Key].join('|');
+  for (const [id, cols] of raw002(g002)) items[id] = cols.map((c) => Object.fromEntries(FIELDS_002.map((f) => [f, c[f] || ''])))
+    .sort((a, b) => (key(a) < key(b) ? -1 : key(a) > key(b) ? 1 : 0));
   const special = raw009(g009).map((r) => Object.fromEntries(['row', ...FIELDS_009].map((f) => [f, r[f] ?? ''])));
   return { items, special };
 }
@@ -297,15 +320,94 @@ export function diffSnapshots(base, now) {
       const x = xs[i], y = ys[i];
       if (!x) { out.push('009 row ' + y.row + ' · ' + y.Item_ID + ': new row'); continue; }
       if (!y) { out.push('009 · ' + x.Item_ID + ' (was row ' + x.row + '): row removed'); continue; }
-      for (const f of FIELDS_009) if (f !== 'Holder_ID' && f !== 'Person_ID' && f !== 'Item_ID' && x[f] !== y[f]) out.push('009 row ' + y.row + ' · ' + y.Item_ID + ' · ' + f + ': ' + (x[f] || '—') + ' → ' + (y[f] || '—'));
+      /* free text (a Note is written for one guest's statement) is named as changed, never printed */
+      for (const f of FIELDS_009) if (f !== 'Holder_ID' && f !== 'Person_ID' && f !== 'Item_ID' && x[f] !== y[f]) out.push('009 row ' + y.row + ' · ' + y.Item_ID + ' · ' + f + (FREE_TEXT.includes(f) ? ' changed' : ': ' + (x[f] || '—') + ' → ' + (y[f] || '—')));
     }
   }
   return out;
 }
 
-function readBaseline() {
-  if (!fs.existsSync(BASELINE)) return null;
-  try { return JSON.parse(fs.readFileSync(BASELINE, 'utf8')); } catch (e) { return { broken: true }; }
+/* THE DIGESTS (privacy-safe, committed): one SHA-256 over the whole canonical 002 snapshot and one over the whole canonical 009
+   snapshot — keys sorted, rows sorted, the tab's row numbers left out, so moving a row is not a change and changing a cell is.
+   A single digest over the whole 009 table (ids, rates, nights, status, dates, the free-text Approved_By) cannot be reversed or
+   guessed row by row; no per-row or per-field digest is ever committed. Dates arrive as Google's formatted strings: changing a
+   date's display format changes the digest, which fails closed. */
+const sha256 = (s) => crypto.createHash('sha256').update(s).digest('hex');
+const sorted = (list) => list.map((x) => JSON.stringify(x)).sort();
+export function digestsOf(snap) {
+  const c002 = Object.keys(snap.items || {}).sort().map((id) => [id, sorted((snap.items[id] || []).map((col) => FIELDS_002.map((f) => col[f] || '')))]);
+  const c009 = sorted((snap.special || []).map((r) => FIELDS_009.map((f) => (r[f] == null ? '' : String(r[f])))));
+  const digest002 = sha256(JSON.stringify(c002)), digest009 = sha256(JSON.stringify(c009));
+  return { digest002, digest009, ref: sha256(digest002 + ':' + digest009).slice(0, 12), products: Object.keys(snap.items || {}).length, rows009: (snap.special || []).length };
+}
+
+const readJson = (file) => { if (!fs.existsSync(file)) return null; try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch (e) { return { broken: true }; } };
+const HEX64 = /^[0-9a-f]{64}$/, REF = /^[0-9a-f]{12}$/;
+export function committedValid(c) {
+  return !!(c && !c.broken && HEX64.test(c.digest002 || '') && HEX64.test(c.digest009 || '') && REF.test(c.ref || '') &&
+    sha256(c.digest002 + ':' + c.digest009).slice(0, 12) === c.ref && Array.isArray(c.acknowledged) && c.acknowledged.length > 0 &&
+    c.acknowledged[c.acknowledged.length - 1].ref === c.ref);
+}
+
+/** The committed baseline against today's Google: problems (blocking) and notes — nothing here reads a figure FROM the baseline. */
+export function baselineVerdict({ committed, detail, now }) {
+  const problems = [], info = [];
+  if (!committed) return { problems: ['no committed baseline (' + COMMITTED_REL + ') — the Owner\'s acknowledged figures cannot be compared'], info };
+  if (!committedValid(committed)) return { problems: [COMMITTED_REL + ' is malformed or its digests do not match its reference'], info };
+  const d = digestsOf(now), last = committed.acknowledged[committed.acknowledged.length - 1];
+  const detailOk = !!(detail && !detail.broken && detail.ref === committed.ref && digestsOf(detail).ref === committed.ref);
+  if (detail && !detailOk) info.push('the local detail (src/pricing-baseline.private.json) belongs to another baseline — differences cannot be named here; on an unchanged source run --rebuild-detail');
+  if (d.ref !== committed.ref) {
+    const what = [d.digest002 !== committed.digest002 && '002', d.digest009 !== committed.digest009 && '009'].filter(Boolean).join(' and ');
+    problems.push('CHANGED SINCE THE OWNER\'S LAST ACKNOWLEDGED ORDER (ref ' + committed.ref + ', ' + clean(last.at).slice(0, 10) + '): Google ' + what + ' financial cells differ');
+    if (detailOk) diffSnapshots(detail, now).forEach((x) => problems.push('CHANGED — ' + x));
+    else problems.push('CHANGED — the differences cannot be named in this environment (no matching local detail): ask the Owner, then record their order where the detail exists');
+  }
+  return { problems, info };
+}
+
+/* WHO MAY CHANGE THE BASELINE: every commit that touched the committed file carries an OWNER-PRICING-CHANGE trailer, the latest
+   one naming the reference it set; a change not yet committed is allowed only while OWNER_PRICING_CHANGE (in the environment)
+   names the new reference. Git unreadable → FAIL (never assumed fine). */
+export function markerVerdict({ commits, dirty, env, ref, gitError }) {
+  if (gitError) return ['the authorisation of ' + COMMITTED_REL + ' cannot be verified (git: ' + clean(gitError).slice(0, 120) + ')'];
+  const problems = [];
+  /* the trailer block only (the last paragraph), one line, text on it — a body line quoting the syntax is not a trailer */
+  const trailer = (msg) => { const parts = String(msg || '').trim().split(/\n\s*\n/); return (/^OWNER-PRICING-CHANGE:[ \t]*(\S.*)$/m.exec(parts[parts.length - 1] || '') || [])[1] || ''; };
+  /* the commit that set today's baseline must name it; an older unmarked commit is superseded by it (not reported) */
+  const latest = (commits || [])[0];
+  if (latest && !dirty) {
+    const t = trailer(latest.message);
+    if (!t) problems.push('commit ' + clean(latest.hash).slice(0, 8) + ' set ' + COMMITTED_REL + ' without an OWNER-PRICING-CHANGE trailer');
+    else if (!t.includes(ref)) problems.push('commit ' + clean(latest.hash).slice(0, 8) + ' set the baseline but its OWNER-PRICING-CHANGE trailer does not name ref ' + ref);
+  }
+  if (dirty && !clean(env).includes(ref)) problems.push(COMMITTED_REL + ' changed and not yet committed: OWNER_PRICING_CHANGE must name the Owner\'s order and ref ' + ref);
+  if (!dirty && !(commits || []).length) problems.push(COMMITTED_REL + ' is in no commit');
+  return problems;
+}
+function gitState(file) {
+  try {
+    const opts = { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] };
+    const log = execFileSync('git', ['log', '--topo-order', '--format=%H%x00%B%x01', '--', file], opts);
+    const commits = log.split('\x01').map((x) => x.trim()).filter(Boolean).map((x) => { const [hash, ...m] = x.split('\x00'); return { hash, message: m.join('\x00') }; });
+    const dirty = execFileSync('git', ['status', '--porcelain', '--', file], opts).trim() !== '';
+    return { commits, dirty };
+  } catch (e) { return { gitError: (e && (e.stderr || e.message)) || 'unreadable' }; }
+}
+
+/** --accept: what would be recorded, or why not. Pure; the caller writes. */
+export function acceptPlan({ committed, detail, now, expect, order, bootstrap, inHistory }) {
+  if (clean(order).length < 12) return { refused: '--accept needs the Owner\'s order in words (what was approved, by whom, when)' };
+  if (!committed && inHistory) return { refused: COMMITTED_REL + ' is missing but git knows it: restore it (git checkout -- ' + COMMITTED_REL + ') — it is never started again' };
+  if (!committed && !bootstrap) return { refused: 'no committed baseline: only --bootstrap starts one, and only where git has never held it' };
+  if (!detail || detail.broken) return { refused: 'no local detail: run --rebuild-detail on the acknowledged source first (it refuses if Google has changed)' };
+  if (committed && (!committedValid(committed) || detail.ref !== committed.ref || digestsOf(detail).ref !== committed.ref)) {
+    return { refused: 'the local detail is not the committed baseline (ref ' + (committed && committed.ref) + '): run --rebuild-detail on the acknowledged source first' };
+  }
+  const diff = diffSnapshots(detail, now);
+  if (!Number.isInteger(expect) || expect !== diff.length) return { refused: diff.length + ' difference(s) found; --expect ' + (Number.isInteger(expect) ? expect : '<n>') + ' must state that number', diff };
+  if (committed && !diff.length) return { refused: 'nothing changed since the acknowledged baseline: nothing to accept', diff };
+  return { diff, digests: digestsOf(now) };
 }
 
 /* ---------------------------------------------- --live · the deployed Worker */
@@ -379,33 +481,51 @@ async function liveChecks(google, asOf) {
 /* ------------------------------------------------------------------ main */
 
 async function main(argv) {
-  const live = argv.includes('--live'), accept = argv.indexOf('--accept');
+  const live = argv.includes('--live'), accept = argv.indexOf('--accept'), rebuild = argv.includes('--rebuild-detail');
   const asOf = utcDay();
-  const google = await readGoogle(asOf);
+  const google = await readGoogle(asOf);   /* Google unreadable → Unavailable (exit 2): the committed digests never stand in for it */
   const now = snapshotOf(google);
+  const committed = readJson(COMMITTED), detail = readJson(BASELINE);
+  const writeDetail = (d, history) => fs.writeFileSync(BASELINE, JSON.stringify({ ref: d.ref, digest002: d.digest002, digest009: d.digest009, takenAt: new Date().toISOString(),
+    note: 'PRIVATE (git-ignored): the financial cells of Google 002 and 009 as acknowledged — for naming differences only, never a source of truth: Google is.',
+    history, ...now }, null, 1) + '\n');
+
+  if (rebuild) {
+    /* a fresh checkout: the detail again, from a Google that still equals the acknowledged baseline — it acknowledges nothing */
+    if (!committedValid(committed)) { console.log('REFUSED: no valid committed baseline (' + COMMITTED_REL + ')'); return 1; }
+    const d = digestsOf(now);
+    if (d.ref !== committed.ref) { console.log('REFUSED: Google differs from the acknowledged baseline (ref ' + committed.ref + ' → ' + d.ref + '): ask the Owner — nothing rebuilt'); return 1; }
+    writeDetail(d, committed.acknowledged.map((a) => ({ at: a.at, ref: a.ref, changes: a.changes, order: '(rebuilt from ' + COMMITTED_REL + ')' })));
+    console.log('PRICING DETAIL: rebuilt for ref ' + d.ref);
+    return 0;
+  }
 
   if (accept >= 0) {
-    const order = clean(argv[accept + 1]);
-    if (order.length < 12) { console.log('REFUSED: --accept needs the Owner\'s order in words (what was approved, by whom, when)'); return 1; }
-    const base = readBaseline(), diff = base && !base.broken ? diffSnapshots(base, now) : ['(no earlier baseline)'];
-    /* the order covers what it covers: the number of differences it acknowledges is stated, and must be the number found */
-    const ex = argv.indexOf('--expect'), expected = ex >= 0 ? Number(argv[ex + 1]) : NaN;
-    if (base && !base.broken && expected !== diff.length) { diff.forEach((d) => console.log('FOUND ' + d)); console.log('REFUSED: ' + diff.length + ' difference(s) found; --expect ' + (Number.isFinite(expected) ? expected : '<n>') + ' must state that number'); return 1; }
-    diff.forEach((d) => console.log('ACCEPTED ' + d));
-    const history = ((base && base.history) || []).concat([{ at: new Date().toISOString(), order, changes: diff.length }]);
-    fs.writeFileSync(BASELINE, JSON.stringify({ takenAt: new Date().toISOString(), note: 'The financial cells of Google 002 and 009 as read at takenAt. Recorded on the Owner order in history — not a source of truth: Google is.', history, ...now }, null, 1) + '\n');
-    console.log('PRICING BASELINE: recorded (' + Object.keys(now.items).length + ' products · ' + now.special.length + ' 009 rows)');
+    const ex = argv.indexOf('--expect');
+    let inHistory = true;
+    try { inHistory = execFileSync('git', ['log', '--all', '--format=%H', '--', COMMITTED_REL], { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim() !== ''; } catch (e) { inHistory = true; }
+    const plan = acceptPlan({ committed, detail, now, order: argv[accept + 1], expect: ex >= 0 ? Number(argv[ex + 1]) : NaN, bootstrap: argv.includes('--bootstrap'), inHistory });
+    (plan.diff || []).forEach((d) => console.log((plan.refused ? 'FOUND ' : 'ACCEPTED ') + d));
+    if (plan.refused) { console.log('REFUSED: ' + plan.refused); return 1; }
+    const d = plan.digests, at = new Date().toISOString(), order = clean(argv[accept + 1]);
+    writeDetail(d, ((detail && detail.history) || []).concat([{ at, order, ref: d.ref, changes: plan.diff.length }]));
+    const acknowledged = ((committedValid(committed) && committed.acknowledged) || []).concat([{ at, ref: d.ref, changes: plan.diff.length }]);
+    fs.writeFileSync(COMMITTED, JSON.stringify({
+      about: 'Gate F1 (src/pricing-guard.mjs): the Owner\'s last acknowledged state of the financial cells of Google 002 and 009, as SHA-256 digests only — no id, no amount, no guest. Changed only with --accept on an explicit Owner order and a commit carrying OWNER-PRICING-CHANGE: <order> [ref <ref>]. Google stays the only source of every figure.',
+      ref: d.ref, digest002: d.digest002, digest009: d.digest009, products: d.products, rows009: d.rows009, acknowledged }, null, 1) + '\n');
+    console.log('PRICING BASELINE: recorded ref ' + d.ref + ' (' + d.products + ' products · ' + d.rows009 + ' 009 rows · ' + plan.diff.length + ' change(s))');
+    console.log('COMMIT WITH THE TRAILER: OWNER-PRICING-CHANGE: <the Owner\'s order, no guest names> [ref ' + d.ref + ']  (before the commit: OWNER_PRICING_CHANGE="… [ref ' + d.ref + ']")');
     return 0;
   }
 
   const problems = [], info = [];
+  if (TEST_MODE) problems.push('TEST MODE (PRICING_GUARD_TEST=1): path overrides may be in use — never a release result');
   problems.push(...(await invariants()));
   const code = await codeAgainstGoogle(google, asOf);
   problems.push(...code.problems); info.push(...code.info);
-  const base = readBaseline();
-  if (!base) problems.push('no acknowledged baseline (src/pricing-baseline.private.json) — record the Owner\'s figures with --accept');
-  else if (base.broken) problems.push('the baseline file cannot be read');
-  else diffSnapshots(base, now).forEach((d) => problems.push('CHANGED SINCE THE OWNER\'S LAST ACKNOWLEDGED ORDER — ' + d));
+  const b = baselineVerdict({ committed, detail, now });
+  problems.push(...b.problems); info.push(...b.info);
+  if (committedValid(committed)) problems.push(...markerVerdict({ ...gitState(COMMITTED_REL), env: process.env.OWNER_PRICING_CHANGE, ref: committed.ref }));
   let liveStats = null;
   if (live) { const l = await liveChecks(google, asOf); problems.push(...l.problems); info.push(...l.info); liveStats = l.stats; }
 
@@ -413,7 +533,8 @@ async function main(argv) {
   for (const p of problems) console.log('FAIL ' + p);
   const s = code.stats;
   const summary = s.products + ' products (' + s.priced + ' priced, ' + s.listed + ' listed, ' + s.website + ' website figures, ' + s.dated + ' dated) · ' +
-    s.named + ' named 009 charges, ' + s.provider + ' named rates the guest pays the provider' + (liveStats ? ' · live: ' + liveStats.listed + ' listed rates, ' + liveStats.rowsChecked + ' of ' + liveStats.rows + ' approved 009 rows charged (' + liveStats.booked + ' lines, ' + liveStats.holders + ' holders)' : '');
+    s.named + ' named 009 charges, ' + s.provider + ' named rates the guest pays the provider · baseline ref ' + ((committed && committed.ref) || 'none') +
+    (liveStats ? ' · live: ' + liveStats.listed + ' listed rates, ' + liveStats.rowsChecked + ' of ' + liveStats.rows + ' approved 009 rows charged (' + liveStats.booked + ' lines, ' + liveStats.holders + ' holders)' : '');
   console.log(problems.length ? 'PRICING SOURCE OF TRUTH: BLOCKED — ' + problems.length + ' difference(s) · ' + summary : 'PRICING SOURCE OF TRUTH: INTACT — ' + summary);
   return problems.length ? 1 : 0;
 }
