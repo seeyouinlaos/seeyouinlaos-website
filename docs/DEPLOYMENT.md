@@ -9,9 +9,12 @@ ONE website: the Cloudflare Worker `seeyouinlaos-website` at https://seeyouinlao
 1. Before the commit:
    - `npm test`;
    - `node src/release-check.cjs`: every gate, including I1 (infrastructure) and F1 (pricing source of truth, read-only against Google).
+1b. `node src/release-attest.mjs` after `git add`: runs both again and signs exactly the staged tree into
+    `infra/release-attestation.json` (docs/RELEASE-ATTESTATION.md). Commit it with the release.
 2. The approved change reaches `main` (CLAUDE.md: a task branch and a PR for substantial changes). Cloudflare **Workers Builds** builds
-   and deploys `main`. There is no manual `wrangler deploy`. Workers Builds does not run the release check: step 1 and step 3 are the
-   controls. Run F1 from a full clone; a shallow clone fails closed.
+   and deploys `main`. There is no manual `wrangler deploy`. Workers Builds cannot run the release check (no Google key there).
+   Once the Owner authorises the build step (docs/RELEASE-ATTESTATION.md · Activation), it refuses every tree without a valid
+   attestation. Until then, step 1b and step 3 are the controls. Run F1 from a full clone; a shallow clone fails closed.
 3. After the deploy:
    - check that the live version equals the commit (`npx wrangler deployments list --name seeyouinlaos-website`);
    - `node src/infra-guard.cjs --live` (public DNS + HTTPS, GitHub Pages still disabled);

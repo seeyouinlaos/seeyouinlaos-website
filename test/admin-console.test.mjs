@@ -1077,9 +1077,9 @@ test('FRESH AT SENDING · the paid-by-H&S check reads Google now: a 009 change s
   } finally { globalThis.fetch = was; clearCatalogueCache(); }
 });
 
-test('REVENUE SCALING · 1, 10 and 40 confirmed holders: one Google read, a constant number of ledger requests, two KV reads per holder', async () => {
+test('REVENUE SCALING · 1, 10, 40 and 111 confirmed holders (the live register): one Google read, a constant number of ledger requests, two KV reads per holder', async () => {
   const results = [];
-  for (const n of [1, 10, 40]) {
+  for (const n of [1, 10, 40, 111]) {
     const W = world(); await approveGate(W.st);
     const store = {}, index = { g: { i: 'INV-G049', g: 'G049', c: 'CON-G049', h: 1 } };
     for (let k = 1; k <= n; k++) {
