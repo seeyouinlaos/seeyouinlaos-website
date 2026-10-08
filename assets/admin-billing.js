@@ -279,6 +279,7 @@
           (withReview ? '<td data-l="Review">' + (l.review ? '<span class="ab-chip open">' + esc(l.review) + '</span>' : '—') + '</td>' : '') + '</tr>';
       }).join('') + '</tbody></table></div>';
   }
+  function pdOf(H) { return H && H.submission ? H.submission.priceDifference || null : null; }
   function kv(k, v) { return '<p class="t-b2 ab-kv"><span class="t-l1">' + esc(k) + '</span> <span>' + v + '</span></p>'; }
   function act(name, label, enabled, why, primary) {
     return '<div class="ab-act"><button type="button" class="' + (primary ? 'p-act' : 'p-act ab-ghost') + '" data-ab-act="' + name + '"' + (enabled ? '' : ' disabled') + '>' + esc(label) + '</button>' +
@@ -365,6 +366,25 @@
       (pv.issuable ? '<p class="t-b2 ab-ok">The server would issue exactly this statement now.</p>' : '<p class="t-l1 open">Not issuable now</p><ul class="t-b2 ab-reasons">' + reasons + '</ul>') +
       '</section>';
   }
+  /* AS SENT, AND TODAY (Owner, 8 Oct 2026): what the guest was sent beside the Billing Engine today — shown before Confirm and
+     Issue; a material difference needs its own tick, and the server needs its digest. Nothing the guest received is changed. */
+  var OUTCOME_WORDS = { MATCH: 'same', DIFFERENT: 'different', PAYER_CHANGED: 'payer changed', NOT_COMPARABLE: 'not comparable' };
+  function cents(c) { return c == null ? '—' : usd(c / 100); }
+  function priceBlock(pd) {
+    if (!pd || !pd.lines || !pd.lines.length) return '';
+    var rows = pd.lines.map(function (l) {
+      return '<tr' + (l.outcome === 'DIFFERENT' || l.outcome === 'PAYER_CHANGED' ? ' class="ab-diff"' : '') + '><td>' + esc(l.key || l.Item_ID || '—') + '</td><td data-i18n-skip>' + esc(cents(l.stated)) +
+        (l.sentPaidByHS ? ' <span class="ab-mute">paid by H&amp;S</span>' : '') + '</td><td data-i18n-skip>' + esc(cents(l.engine)) + (l.enginePaidByHS ? ' <span class="ab-mute">paid by H&amp;S</span>' : '') +
+        '</td><td>' + esc(OUTCOME_WORDS[l.outcome] || l.outcome) + '</td></tr>';
+    }).join('');
+    return '<div class="' + (pd.material ? 'ab-warn' : 'ab-note') + '" role="note" data-ab-price-difference="' + (pd.material ? 'material' : 'none') + '"><p class="t-l1">' +
+      (pd.material ? 'The amounts this guest was sent differ from today\'s Billing Engine' : 'The amounts this guest was sent match today\'s Billing Engine') + '</p>' +
+      '<table class="ab-table t-b2"><thead><tr><th>Item</th><th>As sent to the guest</th><th>Billing Engine today</th><th></th></tr></thead><tbody>' + rows + '</tbody></table>' +
+      (pd.material ? '<p class="t-b2">The statement uses today\'s amounts. The trip e-mail the guest received is not changed — tell the guest if needed.</p>' : '') + '</div>';
+  }
+  function pricesTick(on, busy, attr) {
+    return '<label class="p-check t-b2"><input type="checkbox" ' + attr + (on ? ' checked' : '') + (busy ? ' disabled' : '') + '><span>I have seen that the amounts sent to the guest differ from today\'s.</span></label>';
+  }
   function issuePanel() {
     var H = S.holder, pv = H.preview || {}, I = S.issue || {};
     if (I.done) return '<section class="p-card ab-panel ab-confirm" aria-label="Issued"><p class="t-l1 on">Issued</p><p class="t-b1">' + esc(I.done) + '</p></section>';
@@ -372,8 +392,9 @@
     return '<section class="p-card ab-panel ab-confirm" aria-label="Issue statement"><p class="t-l1 open">Issue statement · final</p>' +
       '<p class="t-b1">You are issuing the statement for <b>' + esc(g.name ? g.name.full : H.Holder_ID) + '</b>: <b data-i18n-skip>' + esc(usd(pv.total)) + '</b>, due <b>' + esc(day(pv.dueDate)) + '</b>, payable by ' + esc(METHOD[H.method && H.method.channel] || '—') + '.</p>' +
       '<p class="t-b2">An issued revision is immutable. The guest sees it in My Profile at once; nothing is e-mailed until you send it.</p>' +
+      priceBlock(pdOf(H)) + (pdOf(H) && pdOf(H).material ? pricesTick(I.prices, I.busy, 'data-ab-issue-prices') : '') +
       '<label class="p-check t-b2"><input type="checkbox" data-ab-issue-check' + (I.checked ? ' checked' : '') + (I.busy ? ' disabled' : '') + '><span>I have checked the preview above and want to issue it.</span></label>' +
-      '<div class="p-actions"><button type="button" class="p-act" data-ab-issue-go' + (I.checked && !I.busy ? '' : ' disabled') + '>' + (I.busy ? 'Issuing…' : 'Issue statement now') + '</button>' +
+      '<div class="p-actions"><button type="button" class="p-act" data-ab-issue-go' + (I.checked && (!(pdOf(H) && pdOf(H).material) || I.prices) && !I.busy ? '' : ' disabled') + '>' + (I.busy ? 'Issuing…' : 'Issue statement now') + '</button>' +
       '<button type="button" class="p-link mute" data-ab-close' + (I.busy ? ' disabled' : '') + '>Cancel</button></div>' +
       (I.error ? '<p class="t-b1 ab-err" role="alert">' + esc(I.error) + '</p>' : '') + '</section>';
   }
@@ -416,13 +437,15 @@
     var next = !after ? '' : after.error ? '<p class="t-b2 ab-why">After confirmation: the statement cannot be calculated just now — ' + esc(after.error) + '</p>'
       : after.issuable ? '<p class="t-b2 ab-ok">After confirmation, Issue statement becomes available: the statement preview would be <b data-i18n-skip>' + esc(usd(after.total)) + '</b>' + (after.dueDate ? ', due ' + esc(day(after.dueDate)) : '') + '. Nothing is issued until you issue it.</p>'
       : '<p class="t-b2">After confirmation, Issue statement still waits for:</p><ul class="t-b2 ab-reasons">' + (after.reasons || []).map(function (r) { return '<li>' + esc(reasonWords(r)) + '</li>'; }).join('') + '</ul>';
-    var ok = C.checked && (!needAck || C.ack) && !C.busy;
+    var pd = x.priceDifference, needPrices = !!(pd && pd.material);
+    var ok = C.checked && (!needAck || C.ack) && (!needPrices || C.prices) && !C.busy;
     return '<section class="p-card ab-panel ab-confirm" aria-label="Confirm booking"><p class="t-l1 open">Confirm booking · the submitted version</p>' +
       '<div class="ab-grid2">' + kv('Guest', '<b>' + esc(name) + '</b>') + kv('Submitted', esc(v) + ' · sent ' + esc(when(snap.sentAt))) +
       kv('Submitted booking value', '<b data-i18n-skip>' + esc(usd(sent.total)) + '</b>' + (sent.onRequest ? ' <span class="ab-mute">+ ' + esc(sent.onRequest) + ' on request</span>' : '')) +
       kv('Payable lines', esc(sent.payableLines != null ? sent.payableLines : '—') + (sent.providerSettled ? ' <span class="ab-mute">· ' + esc(sent.providerSettled) + ' settled with the provider</span>' : '')) + '</div>' +
       '<p class="t-b1">This confirms exactly the version the guest submitted — ' + esc(v) + ', sent ' + esc(when(snap.sentAt)) + ' — and nothing else. It counts as Guest Relations\' confirmation for billing. Nothing is issued and nothing is e-mailed.</p>' +
-      changed + next +
+      changed + priceBlock(pd) + next +
+      (needPrices ? pricesTick(C.prices, C.busy, 'data-ab-confirm-prices') : '') +
       (needAck ? '<label class="p-check t-b2"><input type="checkbox" data-ab-confirm-ack' + (C.ack ? ' checked' : '') + (C.busy ? ' disabled' : '') + '><span>I confirm the submitted ' + esc(v) + ', not the current selection.</span></label>' : '') +
       '<label class="p-check t-b2"><input type="checkbox" data-ab-confirm-check' + (C.checked ? ' checked' : '') + (C.busy ? ' disabled' : '') + '><span>I have checked the submitted booking and confirm it.</span></label>' +
       '<div class="p-actions"><button type="button" class="p-act" data-ab-confirm-go' + (ok ? '' : ' disabled') + '>' + (C.busy ? 'Confirming…' : 'Confirm booking now') + '</button>' +
@@ -584,7 +607,8 @@
     var hash = H.preview && H.preview.proposalHash;
     if (!hash) { I.error = 'The preview is not issuable.'; draw(); return; }
     I.busy = true; I.error = ''; draw();
-    api('issue', { method: 'POST', body: { holderId: H.Holder_ID, expectedProposal: hash } }).then(function (x) {
+    var pd = pdOf(H);
+    api('issue', { method: 'POST', body: { holderId: H.Holder_ID, expectedProposal: hash, acknowledgePriceDifference: pd && pd.material && I.prices ? pd.digest : undefined } }).then(function (x) {
       I.busy = false;
       if (x.ok) {
         I.done = 'Statement ' + x.j.Settlement_ID + ' · version ' + x.j.revision + ' is issued: ' + usd(x.j.totalPayable) + ', due ' + day(x.j.dueDate) + '. It is in the guest\'s My Profile now. Nothing has been e-mailed.';
@@ -604,7 +628,7 @@
         ? 'The statement changed since this preview (the source or the trip moved). Nothing was issued — the preview is read again.'
         : 'Nothing was issued: ' + (x.j.error || 'refused') + (reasons ? ' — ' + reasons : '');
       draw();
-      if ((x.j.reasons || []).indexOf('PREVIEW_CHANGED') >= 0) refreshAfterWrite(H.Holder_ID, 'preview');
+      if ((x.j.reasons || []).indexOf('PREVIEW_CHANGED') >= 0 || (x.j.reasons || []).indexOf('PRICE_DIFFERENCE') >= 0) refreshAfterWrite(H.Holder_ID, 'preview');
     });
   }
   function openConfirm() {
@@ -620,7 +644,9 @@
     var C = S.confirm, x = C && C.ctx, H = S.holder; if (!C || !x || !x.snapshot || C.busy || !C.checked) return;
     C.busy = true; C.error = ''; draw();
     var snap = x.snapshot;
-    api('admin/confirm', { method: 'POST', body: { holderId: H.Holder_ID, expected: { submissionId: snap.submissionId, version: snap.version, digest: snap.digest }, acknowledgeChange: !!C.ack } }).then(function (r) {
+    var pd = x.priceDifference;
+    api('admin/confirm', { method: 'POST', body: { holderId: H.Holder_ID, expected: { submissionId: snap.submissionId, version: snap.version, digest: snap.digest }, acknowledgeChange: !!C.ack,
+      acknowledgePriceDifference: pd && pd.material && C.prices ? pd.digest : undefined } }).then(function (r) {
       C.busy = false;
       if (r.ok) {
         var cf = r.j.confirmation || {};
@@ -642,6 +668,7 @@
       }
       var why = r.j.reasons || [];
       if (why.indexOf('SENT_CHANGED') >= 0) { S.msg = esc('The guest sent another version meanwhile. Nothing was confirmed — the submitted booking is read again.'); openConfirm(); return; }
+      if (why.indexOf('PRICE_DIFFERENCE') >= 0) { S.msg = esc('Today\'s amounts changed while this dialog was open. Nothing was confirmed — the comparison is read again.'); openConfirm(); return; }
       /* the guest changed the saved trip (or it became unreadable) while the dialog was open: read again, so the difference is shown and can be acknowledged */
       if (why.indexOf('ACKNOWLEDGE_CHANGE') >= 0 || why.indexOf('CONFIRMATION_CHANGED') >= 0) {
         S.msg = esc(why.indexOf('ACKNOWLEDGE_CHANGE') >= 0 ? 'The guest\'s current selection changed while this dialog was open. Nothing was confirmed — the submitted booking is read again.'
@@ -746,6 +773,8 @@
     on('[data-ab-close]', 'click', function () { S.issue = null; if (S.panel === 'send' || S.panel === 'confirm') { S.panel = null; S.send = null; S.confirm = null; } draw(); });
     on('[data-ab-confirm-check]', 'change', function (el) { if (S.confirm) { S.confirm.checked = !!el.checked; draw(); } });
     on('[data-ab-confirm-ack]', 'change', function (el) { if (S.confirm) { S.confirm.ack = !!el.checked; draw(); } });
+    on('[data-ab-confirm-prices]', 'change', function (el) { if (S.confirm) { S.confirm.prices = !!el.checked; draw(); } });
+    on('[data-ab-issue-prices]', 'change', function (el) { if (S.issue) { S.issue.prices = !!el.checked; draw(); } });
     on('[data-ab-confirm-go]', 'click', function () { confirmNow(); });
     on('[data-ab-issue-check]', 'change', function (el) { if (S.issue) { S.issue.checked = !!el.checked; draw(); } });
     on('[data-ab-issue-go]', 'click', function () { issueNow(); });

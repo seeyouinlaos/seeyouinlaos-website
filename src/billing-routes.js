@@ -39,6 +39,7 @@ import { pricingSource, catalogueKey } from './billing/catalogue-cache.js';
 import { effectivePreference, routeFor, destinationOf, firstVerifiedPayment, isChannel, PREFERENCE_SOURCE } from './billing/preference.js';
 import { GoogleSheetsUnavailable } from './google-sheets.js';
 import { calculate, perPerson } from './billing/engine.js';
+import { priceDifference } from './billing/price-difference.js';
 import {
   buildSnapshot, canIssue, dueDateFor, freezeFx, inPreferredCurrency,
   paymentStatus, isDuplicateSuspect, nextRevisionState,
@@ -919,12 +920,23 @@ async function adminIssue(env, identity, request, cors) {
     return jsonRes({ ok: false, error: 'the statement has changed since it was previewed; preview it again',
       reasons: ['PREVIEW_CHANGED'] }, 409, cors);
   }
+  /* as sent, and today (Owner, 8 Oct 2026): the statement uses today's amounts; a difference from what the guest was sent is
+     issued only once it has been seen — asked on both paths, after every other block, before anything is created */
+  const unseenDifference = async () => {
+    const who = holdersOfIndex(await loadIndex(env, origin, false)).find((h) => h.Holder_ID === holderId);
+    const sub = who && who.guestId ? await submittedOf(env, holderId, who.guestId, false) : null;
+    if (!sub || !sub.submitted) return null;
+    const diff = await sentDifference(src, holderId, who.guestId, sub.selections, asOf);
+    return diff.material && clean(body.acknowledgePriceDifference) !== diff.digest
+      ? jsonRes({ ok: false, error: PRICE_DIFFERENCE_WORDS, reasons: ['PRICE_DIFFERENCE'], priceDifference: priceDifferenceView(diff) }, 409, cors) : null;
+  };
 
   if (revision == null) {
     /* judged as the ledger will judge it, before anything is created */
     if (!a.allowed) {
       return jsonRes({ ok: false, error: 'Issue & Publish is blocked', reasons: a.reasons }, 409, cors);
     }
+    const unseen = await unseenDifference(); if (unseen) return unseen;
     const { state, result } = current;
     settlementId = state.Settlement_ID;
     if (!settlementId) {
@@ -948,6 +960,7 @@ async function adminIssue(env, identity, request, cors) {
      * today: its draft was calculated earlier, and the snapshot records the
      * CURRENT source. If the two differ, issuing would freeze figures under a
      * source they did not come from — refused; a new revision is the answer. */
+    const unseen = await unseenDifference(); if (unseen) return unseen;
     const view = await ledgerCall(env, 'read', { holderId, revision });
     const stored = view && view.ok === true && view.holder ? view.holder.revision : null;
     if (!stored) return jsonRes({ ok: false, error: 'revision ' + revision + ' of ' + holderId + ' does not exist' }, 404, cors);
@@ -1419,6 +1432,8 @@ async function adminHolder(env, identity, url, cors) {
     const sub = await submittedOf(env, holderId, entry.guestId, false);
     const st = await standingOf(env, holderId, sub);
     submission = { submitted: sub.submitted, version: sub.submitted ? sub.version : null, sentAt: sub.submitted ? sub.sentAt : null, ...st.view };
+    /* as sent, and today — shown beside Confirm booking and Issue (display only) */
+    if (sub.submitted) submission.priceDifference = priceDifferenceView(await sentDifference(src, holderId, entry.guestId, sub.selections, asOf));
   } catch (e) {
     if (e instanceof LedgerContractError) throw e;
     submission = { state: 'UNREADABLE', submitted: null, error: clean(e && e.message).slice(0, 300) || 'not readable' };
@@ -1472,6 +1487,28 @@ async function adminHolder(env, identity, url, cors) {
  * another person than the register holds for this invitation is an error, never "nothing sent" and never confirmable.
  * `digest` (withDigest) names the exact submission: its reference, version, time and the lines exactly as stored.
  */
+/* AS SENT, AND TODAY (Owner, 8 Oct 2026 · production safety): the submitted version's lines as the guest was sent them, beside
+   the Billing Engine today — display only (src/billing/price-difference.js). A material difference is confirmed or issued only
+   by someone who has seen it: the acknowledgement names exactly this comparison (its digest). */
+async function sentDifference(src, holderId, personId, selections, asOf) {
+  const priced = await priceSelection({ holderId, personId, selections, items: src.items, specialRates: src.specialRates, asOf, source: BOOKED_SOURCE.SENT });
+  return priceDifference({ selections, result: priced });
+}
+const priceDifferenceView = (d) => ({ material: d.material, digest: d.digest, statedCents: d.statedCents, engineCents: d.engineCents, lines: d.lines });
+const PRICE_DIFFERENCE_WORDS = 'The amounts this guest was sent differ from today\'s Billing Engine amounts. Nothing was changed: confirm that you have seen them (acknowledgePriceDifference = the digest shown).';
+
+/** GET /api/gr/price-check (Guest Relations): the comparison for one invitation's submitted version. Throws when it cannot be made. */
+export async function grPriceCheck(env, origin, invitationId) {
+  const entry = holdersOfIndex(await loadIndex(env, origin, false)).find((h) => h.Holder_ID === clean(invitationId));
+  if (!entry || entry.ambiguous || !entry.guestId) throw new SourceDataError('HOLDER_PERSON', invitationId + ' is not one person of the register');
+  const sub = await submittedOf(env, clean(invitationId), entry.guestId, false);
+  if (!sub.submitted) return { submitted: false, material: false, lines: [] };
+  const day = evaluationDay();
+  const src = await pricing(env, day, false);
+  if (src.stale) throw new GoogleSheetsUnavailable('the pricing source is stale');
+  return { submitted: true, version: sub.version, ...priceDifferenceView(await sentDifference(src, clean(invitationId), entry.guestId, sub.selections, day)) };
+}
+
 async function submittedOf(env, holderId, personId, withDigest) {
   if (!env.REG_KV) throw new SourceDataError('REGISTRATION_UNAVAILABLE', 'the registration store is not bound');
   const raw = await env.REG_KV.get('reg:' + holderId);
@@ -1572,6 +1609,7 @@ async function adminConfirmGet(env, identity, url, cors) {
     sent: { total: pricedTotal(priced), complete: priced.manualReview.length === 0, payableLines: (priced.blockA || []).length,
       onRequest: priced.manualReview.length, selected: priced.lines.filter((l) => l.block !== 'B').length,
       providerSettled: (priced.blockB || []).length, unmapped: priced.unmapped || [] },
+    priceDifference: priceDifferenceView(await priceDifference({ selections: sub.selections, result: priced })),
     current, afterConfirm }, 200, cors);
 }
 
@@ -1613,6 +1651,13 @@ async function adminConfirmPost(env, identity, request, url, cors) {
     return jsonRes({ ok: false, error: cur.changed ? 'The current selection has changed since submission: confirm that you confirm the submitted version.'
       : 'The current selection cannot be read: confirm that you confirm the submitted version.', reasons: ['ACKNOWLEDGE_CHANGE'], changed: cur.changed }, 409, cors);
   }
+  /* as sent, and today: a material difference is confirmed only once it has been seen */
+  const day = evaluationDay(), srcNow = await pricing(env, day, false);
+  if (srcNow.stale) return jsonRes({ ok: false, error: 'the financial source is unavailable just now; nothing was confirmed', reasons: ['PRICE_CHECK_UNAVAILABLE'], retry: true }, 503, cors);
+  const diff = await sentDifference(srcNow, holderId, entry.guestId, sub.selections, day);
+  if (diff.material && clean(body.acknowledgePriceDifference) !== diff.digest) {
+    return jsonRes({ ok: false, error: PRICE_DIFFERENCE_WORDS, reasons: ['PRICE_DIFFERENCE'], priceDifference: priceDifferenceView(diff) }, 409, cors);
+  }
   /* the record as it stands right before the write: a Guest Relations change since it was read is never overwritten
      blind (KV has no compare-and-swap; this narrows the window to the write itself) */
   const again = await env.REG_KV.get('conf:' + holderId);
@@ -1623,9 +1668,10 @@ async function adminConfirmPost(env, identity, request, url, cors) {
   const w = await writeConfirmation(env.REG_KV, {
     invitationId: holderId, action: 'confirm', actor: by, role: CONFIRMATION_ROLE.BILLING_ADMIN, source: 'admin-billing',
     note: 'Confirm booking from the admin console' + (cur.changed ? ' · the current selection differed from the submitted version (acknowledged)'
-      : cur.changed === null ? ' · the current selection could not be read (acknowledged)' : ''),
+      : cur.changed === null ? ' · the current selection could not be read (acknowledged)' : '')
+      + (diff.material ? ' · the amounts sent to the guest differ from today\'s Billing Engine (seen: ' + diff.digest.slice(0, 12) + ')' : ''),
     record: sub.record, current: standing.conf,
-    extra: { digest: sub.digest, acknowledgedChange: cur.changed !== false },
+    extra: { digest: sub.digest, acknowledgedChange: cur.changed !== false, ...(diff.material ? { priceDifference: diff.digest } : {}) },
   });
   const c = w.conf;
   return jsonRes({ ok: true, Holder_ID: holderId, unchanged: !!w.unchanged, acknowledgedChange: cur.changed !== false,

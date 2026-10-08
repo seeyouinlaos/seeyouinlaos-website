@@ -613,8 +613,20 @@ test('PAID BY H&S · the hotel is payable in the admin preview; PRICE REQUIRED b
   assert.equal(line.amount, 40); assert.equal(line.block, 'A'); assert.equal(line.Billing_Category, 'GUEST_SETTLEMENT_REQUIRED'); assert.equal(line.review, null);
   assert.equal(priced.j.preview.total, 430, '390 as before + the hotel, 2 nights × USD 20');
   assert.equal(priced.j.preview.issuable, true, JSON.stringify(priced.j.preview.reasons));
-  const ok = await hit(W, GROOM, 'issue', { holderId: 'INV-T1', expectedProposal: priced.j.preview.proposalHash });
+  /* AS SENT, AND TODAY (8 Oct 2026): the guest sent this stay as their own; it is now paid by H&S — the change is shown beside
+     Issue (and in the holder view) and issued only with the digest of exactly this comparison */
+  assert.equal(priced.j.submission.priceDifference.material, true);
+  const shown = priced.j.submission.priceDifference.lines.find((l) => l.key === 'selfstay');
+  assert.deepEqual([shown.outcome, shown.sentPaidByHS, shown.enginePaidByHS, shown.engine], ['PAYER_CHANGED', false, true, 4000]);
+  const unseen = await hit(W, GROOM, 'issue', { holderId: 'INV-T1', expectedProposal: priced.j.preview.proposalHash });
+  assert.equal(unseen.status, 409); assert.deepEqual(unseen.j.reasons, ['PRICE_DIFFERENCE']);
+  assert.equal(unseen.j.priceDifference.digest, priced.j.submission.priceDifference.digest);
+  const stale = await hit(W, GROOM, 'issue', { holderId: 'INV-T1', expectedProposal: priced.j.preview.proposalHash, acknowledgePriceDifference: 'f'.repeat(64) });
+  assert.equal(stale.status, 409, 'an acknowledgement of another comparison is no acknowledgement');
+  assert.equal(after0(W), 0, 'nothing was created by the refused issues');
+  const ok = await hit(W, GROOM, 'issue', { holderId: 'INV-T1', expectedProposal: priced.j.preview.proposalHash, acknowledgePriceDifference: priced.j.submission.priceDifference.digest });
   assert.equal(ok.status, 200, JSON.stringify(ok.j)); assert.equal(ok.j.totalPayable, 430);
+  assert.ok(after0(W) > 0, 'the acknowledged issue created its revision (the count above is not vacuous)');
 
   const after = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
   assert.equal(after.j.issued.total, 430);
@@ -976,6 +988,8 @@ test('CONFIRM BOOKING · a confirmation record that changed between the read and
 });
 
 /* ===== A READ NEVER WRITES · BATCHED READS · REVENUE SCALING (closeout, Owner, 8 Oct 2026) ===== */
+/* how many revisions the ledger holds for anyone (a refused issue creates none) */
+const after0 = (W) => [...W.st._map.keys()].filter((k) => /revision/i.test(k)).length;
 const ledgerSnapshot = (W) => JSON.stringify([...W.st._map].sort((a, b) => (a[0] < b[0] ? -1 : 1)));
 function countLedger(W) {
   const ops = [];
@@ -1090,4 +1104,64 @@ test('REVENUE SCALING · 1, 10 and 40 confirmed holders: one Google read, a cons
   }
   assert.equal(new Set(results.map((x) => x.ledger)).size, 1, 'ledger requests do not grow with the population: ' + JSON.stringify(results));
   console.log('# revenue scaling (synthetic, Node CPU): ' + results.map((x) => 'n=' + x.n + ' google=' + x.google + ' ledger=' + x.ledger + ' kv=' + x.kv + ' cpu≈' + x.cpuMs + 'ms').join(' · '));
+});
+
+test('GUEST RELATIONS · as sent, and today: the price check shows the difference; a first confirmation needs its digest (or UNVERIFIED); nothing is written before', async () => {
+  const { default: worker } = await import('../src/worker.js');
+  const W = world();
+  const store = { 'reg:INV-T1': JSON.stringify({ ...SENT, registration: { ...SENT.registration, selections: [{ id: 'wedstay', room: 'heritage', unit: 'A', qty: 1, price: 250 }, { id: 'train', qty: 1, price: 100 }] } }) };
+  W.env.REG_KV = { get: async (k, t) => (store[k] == null ? null : t === 'json' ? JSON.parse(store[k]) : store[k]), put: async (k, v) => { store[k] = v; }, delete: async (k) => { delete store[k]; },
+    list: async ({ prefix = '' } = {}) => ({ keys: Object.keys(store).filter((k) => k.startsWith(prefix)).map((name) => ({ name })), list_complete: true }) };
+  W.env.GR_TOKEN = 'gr-test-token-0123456789';
+  globalThis.__billingIndex = INDEX;
+  const call = async (pathq, body, method) => {
+    const was = globalThis.fetch; globalThis.fetch = sheetsFetch(W.workbook, W.log);
+    try {
+      const r = await worker.fetch(new Request('https://stage.invalid' + pathq, { method: method || (body ? 'POST' : 'GET'), headers: { 'x-gr-token': W.env.GR_TOKEN, 'content-type': 'application/json' }, body: body ? JSON.stringify(body) : undefined }), W.env, { waitUntil() {} });
+      return { status: r.status, j: await r.json() };
+    } finally { globalThis.fetch = was; }
+  };
+  const check = await call('/api/gr/price-check?invitation=INV-T1');
+  assert.equal(check.status, 200); assert.equal(check.j.material, true);
+  assert.deepEqual(check.j.lines.map((l) => [l.key, l.outcome, l.stated, l.engine]), [['wedstay/heritage', 'DIFFERENT', 25000, 29000], ['train', 'MATCH', 10000, 10000]]);
+  assert.equal((await call('/api/gr/price-check?invitation=INV-T1', { x: 1 })).status, 405);
+
+  const blind = await call('/api/confirm', { invitationId: 'INV-T1', action: 'confirm', actor: 'Tess' });
+  assert.equal(blind.status, 409); assert.deepEqual(blind.j.reasons, ['PRICE_DIFFERENCE']); assert.equal(blind.j.priceDifference.digest, check.j.digest);
+  assert.equal(store['conf:INV-T1'], undefined, 'nothing written before the difference was seen');
+  assert.equal((await call('/api/confirm', { invitationId: 'INV-T1', action: 'confirm', actor: 'Tess', acknowledgePriceDifference: 'f'.repeat(64) })).status, 409);
+  const seen = await call('/api/confirm', { invitationId: 'INV-T1', action: 'confirm', actor: 'Tess', acknowledgePriceDifference: check.j.digest });
+  assert.equal(seen.status, 200, JSON.stringify(seen.j));
+  assert.match(JSON.parse(store['conf:INV-T1']).note, /differ from today's Billing Engine \(seen: [0-9a-f]{12}\)/);
+  /* the record and every amount the guest was sent are untouched */
+  assert.equal(JSON.parse(store['reg:INV-T1']).registration.selections[0].price, 250);
+  /* confirming the same version again, or withdrawing, never asks */
+  assert.equal((await call('/api/confirm', { invitationId: 'INV-T1', action: 'confirm', actor: 'Tess' })).status, 200);
+  assert.equal((await call('/api/confirm', { invitationId: 'INV-T1', action: 'unconfirm', actor: 'Tess' })).status, 200);
+  /* Google unreadable: refused, unless confirmed explicitly without the comparison (recorded as such) */
+  clearCatalogueCache();
+  const was = globalThis.fetch; globalThis.fetch = async () => { throw new Error('offline'); };
+  try {
+    const down = await worker.fetch(new Request('https://stage.invalid/api/confirm', { method: 'POST', headers: { 'x-gr-token': W.env.GR_TOKEN, 'content-type': 'application/json' }, body: JSON.stringify({ invitationId: 'INV-T1', action: 'confirm', actor: 'Tess' }) }), W.env, { waitUntil() {} });
+    assert.equal(down.status, 409); assert.deepEqual((await down.json()).reasons, ['PRICE_CHECK_UNAVAILABLE']);
+    const unverified = await worker.fetch(new Request('https://stage.invalid/api/confirm', { method: 'POST', headers: { 'x-gr-token': W.env.GR_TOKEN, 'content-type': 'application/json' }, body: JSON.stringify({ invitationId: 'INV-T1', action: 'confirm', actor: 'Tess', acknowledgePriceDifference: 'UNVERIFIED' }) }), W.env, { waitUntil() {} });
+    assert.equal(unverified.status, 200);
+    assert.match(JSON.parse(store['conf:INV-T1']).note, /without the price comparison \(UNVERIFIED\)/);
+  } finally { globalThis.fetch = was; clearCatalogueCache(); }
+});
+
+test('ADMIN CONFIRM · the dialog shows the amounts as sent beside today\'s; a material difference is confirmed only with its digest', async () => {
+  const W = world({ store: { 'reg:INV-T1': { ...SENT, registration: { ...SENT.registration, selections: [{ id: 'wedstay', room: 'heritage', unit: 'A', qty: 1, price: 250 }, { id: 'train', qty: 1, price: 100 }] } } } });
+  await approveGate(W.st);
+  const store = {}; const real = W.env.REG_KV;
+  W.env.REG_KV = { get: async (k, t) => (store[k] !== undefined ? (t === 'json' ? JSON.parse(store[k]) : store[k]) : real.get(k, t)), put: async (k, v) => { store[k] = v; } };
+  const ctx = await hit(W, GROOM, 'admin/confirm?holder=INV-T1');
+  assert.equal(ctx.status, 200); assert.equal(ctx.j.priceDifference.material, true);
+  const expected = { submissionId: ctx.j.snapshot.submissionId, version: ctx.j.snapshot.version, digest: ctx.j.snapshot.digest };
+  const blind = await hit(W, GROOM, 'admin/confirm', { holderId: 'INV-T1', expected });
+  assert.equal(blind.status, 409); assert.deepEqual(blind.j.reasons, ['PRICE_DIFFERENCE']); assert.equal(store['conf:INV-T1'], undefined);
+  const ok = await hit(W, GROOM, 'admin/confirm', { holderId: 'INV-T1', expected, acknowledgePriceDifference: ctx.j.priceDifference.digest });
+  assert.equal(ok.status, 200, JSON.stringify(ok.j));
+  const conf = JSON.parse(store['conf:INV-T1']);
+  assert.equal(conf.priceDifference, ctx.j.priceDifference.digest); assert.match(conf.note, /seen: /);
 });
