@@ -42,8 +42,15 @@ test('RELEASE VERIFY · a signed, matching tree passes; every other case is refu
   assert.match(reasons({ attestation: attested(payload({ checks: { ...payload().checks, gates: { F1: 'FAIL', I1: 'PASS' } } })) }), /gate F1 did not pass/);
   assert.match(reasons({ attestation: attested(payload({ checks: { ...payload().checks, npmTest: { pass: 879, fail: 1 } } })) }), /npm test did not pass/);
   assert.match(reasons({ attestation: attested(payload({ checks: { ...payload().checks, releaseCheck: { passed: 33, total: 34 } } })) }), /release check did not pass every gate/);
-  assert.match(reasons({ dirty: ['src/billing/engine.js'] }), /working tree changes tracked files/);
+  assert.match(reasons({ dirty: ['src/billing/engine.js'] }), /holds changes the attestation does not cover/);
   assert.match(reasons({ ciCommit: 'e'.repeat(40) }), /is not the commit Workers Builds is building/);
+  assert.match(reasons({ inBuild: true, ciCommit: null }), /without WORKERS_CI_COMMIT_SHA/);
+  assert.deepEqual(V.verdict(facts({ inBuild: true, ciCommit: 'c'.repeat(40) })), []);
+  /* a key id that is a property of every object is still no pinned key */
+  assert.match(reasons({ attestation: attested(payload({ keyId: 'constructor' })) }), /not a pinned release key/);
+  /* the keys a Workers Builds variable names win over the tree's: a commit cannot add one */
+  assert.deepEqual(V.pinnedKeys({ SIYL_RELEASE_KEYS: JSON.stringify({ [other.id]: other.pub }) }), { [other.id]: other.pub });
+  assert.deepEqual(V.pinnedKeys({ SIYL_RELEASE_KEYS: 'not json' }), {}, 'an unreadable variable trusts nothing');
   /* the canonical form: key order never changes a signature */
   assert.equal(V.canonical({ b: 1, a: { d: [2, { y: 1, x: 0 }], c: 3 } }), V.canonical({ a: { c: 3, d: [2, { x: 0, y: 1 }] }, b: 1 }));
 });

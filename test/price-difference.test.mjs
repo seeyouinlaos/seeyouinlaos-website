@@ -72,3 +72,20 @@ test('AS SENT · one mapping with the engine (interest lines and keyless lines s
   const broken = await priceDifference({ selections: sent, result: { lines: result.lines.slice(0, 1) } });
   assert.deepEqual([broken.material, broken.lines[0].outcome], [true, OUTCOME.NOT_COMPARABLE]);
 });
+
+test('AS SENT · an unverified "paid" line was told neither and is not comparable; the totals add only priced lines; the digest names the guest and version', async () => {
+  const sent = [{ id: 'kmg', stay: 'kunming', room: 'jinri-terrace-double', qty: 1, price: null, prepaidUnverified: true }, { id: 'c86', qty: 1, price: 100 }];
+  const rows = [ROW({ Item_ID: 'F-JINRI-TERRACE-DOUBLE', Rate_Per_Person_Night: '36.33333333', Nights_Rule: '3', Billing_Category: PAYABLE })];
+  const result = await engineFor(sent, rows);
+  const d = await priceDifference({ selections: sent, result, context: { holderId: 'INV-GA', version: 1 } });
+  assert.deepEqual(d.lines.map((l) => [l.key, l.outcome]), [['kmg/jinri-terrace-double', OUTCOME.NOT_COMPARABLE], ['c86', OUTCOME.DIFFERENT]]);
+  assert.deepEqual([d.statedCents, d.engineCents], [10000, 10500], 'only the lines both sides price');
+  /* a payer change never mixes a provider's informational figure into the totals */
+  const own = [{ id: 'kmg', stay: 'kunming', room: 'jinri-terrace-double', qty: 1, price: 54.5 }];
+  const p = await priceDifference({ selections: own, result: await engineFor(own, rows) });
+  assert.deepEqual([p.lines[0].outcome, p.statedCents, p.engineCents], [OUTCOME.PAYER_CHANGED, 0, 0]);
+  /* the same lines for another guest, or another version, is another acknowledgement */
+  const other = await priceDifference({ selections: sent, result, context: { holderId: 'INV-GB', version: 1 } });
+  const later = await priceDifference({ selections: sent, result, context: { holderId: 'INV-GA', version: 2 } });
+  assert.notEqual(d.digest, other.digest); assert.notEqual(d.digest, later.digest);
+});

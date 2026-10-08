@@ -18,8 +18,8 @@
    - the commit's tree (without the attestation) against the signed tree;
    - the signed pricing reference against the committed baseline;
    - that every check passed;
-   - that no tracked file changed;
-   - HEAD = `WORKERS_CI_COMMIT_SHA`.
+   - that the working tree holds nothing the attestation does not cover (the lockfile and `dist/` build output aside);
+   - in a Workers Build, HEAD = `WORKERS_CI_COMMIT_SHA`, which must be present.
    Any failure stops wrangler, so nothing is deployed and the live version stays as it was.
 5. After the deploy:
    - the live version must be the merged commit;
@@ -50,10 +50,17 @@
 
 ## Limits (stated plainly)
 - The verifier, its pinned keys and the `build` setting all live in the repository they protect. That stops ACCIDENTAL unverified
-  deploys. It does not stop someone who deliberately removes the build step or swaps the key in a commit.
-- Tamper resistance outside the repository needs the Owner in the Cloudflare dashboard. Option: the Workers Builds deploy command
-  `echo "<sha256>  src/release-verify.cjs" | shasum -a 256 -c && node src/release-verify.cjs && npx wrangler deploy`, with the public
-  key as a build variable.
+  deploys. Gate I1 additionally pins the step, the verifier's sha256 and both keys, so changing any of them is an infrastructure
+  change. It does not stop someone who deliberately removes the build step or swaps the key in a commit.
+- Tamper resistance outside the repository (the Owner, in the Cloudflare dashboard → Workers Builds settings):
+  1. Set the build variable `SIYL_RELEASE_KEYS` = the two pinned keys as JSON. The verifier then trusts only those, whatever a commit
+     says.
+  2. Set the deploy command to
+     `echo "<pinned sha256>  src/release-verify.cjs" | shasum -a 256 -c && node src/release-verify.cjs && npx wrangler deploy`.
+- An older attested tree stays valid. Reverting to a former release redeploys it without a fresh F1 against today's Google. The
+  post-deploy `pricing-guard --live` is the check there.
+- Once active, every branch push without an attestation fails its Workers Builds preview check. That is intended: nothing unverified
+  is uploaded.
 - Optionally, a GitHub ruleset on `main`: require a PR, an up-to-date branch and a status check.
 - **Break-glass:** a rollback to an earlier version in the Cloudflare dashboard (Workers → Deployments) needs no build and is
   unaffected. Removing the build step is an infrastructure change.
@@ -64,12 +71,16 @@
 - `npm run build` (a dry run) verifies like a deploy would.
 
 ## Activation (an infrastructure change: needs the Owner's specific authorisation)
+0. Before anything else, the Owner reads the Workers Builds build and deploy commands in the dashboard. Neither can be read with the
+   API token. The verifier blocks a build that rewrites tracked files other than `dist/`.
 1. `wrangler.jsonc`: `"build": { "command": "node src/release-verify.cjs" }`.
-2. `infra/PRODUCTION.json`: `"releaseVerification": { "command": "node src/release-verify.cjs", "keys": { "<primary id>": "<spki b64>", "<backup id>": "<spki b64>" } }`.
-3. `src/infra-guard.cjs` (gate I1): both must stay as pinned.
+2. `infra/PRODUCTION.json`: `"releaseVerification": { "command": …, "verifierSha256": …, "keys": { "<primary id>": "<spki b64>", "<backup id>": "<spki b64>" } }`.
+3. `src/infra-guard.cjs` (gate I1): the step, the verifier's sha256, two keys whose ids match their public keys; the verifier is a
+   pinned file.
 4. One commit with `OWNER-INFRA-CHANGE: release verification build step + pinned release keys (Owner authorisation <date>)`, attested.
-5. Proof in production:
-   - an unattested docs-only commit to main must fail its Workers Build with the verifier's own BLOCKED line in the log, and the live
-     version must stay unchanged;
-   - an attested commit must deploy.
+5. Proof, preview branch first:
+   - an unattested commit on a branch must fail its Workers Build with the verifier's own `RELEASE VERIFY: BLOCKED` line;
+   - an attested branch commit must pass;
+   - then the attested commit on main deploys, and the live version equals it.
+   - Afterwards, move the backup private key offline. The activation script reads it once to pin its public half.
 6. Rollback: revert that commit (with `OWNER-INFRA-CHANGE`). Until it builds, the dashboard rollback stands.

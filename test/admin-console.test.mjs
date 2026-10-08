@@ -1130,9 +1130,13 @@ test('GUEST RELATIONS · as sent, and today: the price check shows the differenc
   assert.equal(blind.status, 409); assert.deepEqual(blind.j.reasons, ['PRICE_DIFFERENCE']); assert.equal(blind.j.priceDifference.digest, check.j.digest);
   assert.equal(store['conf:INV-T1'], undefined, 'nothing written before the difference was seen');
   assert.equal((await call('/api/confirm', { invitationId: 'INV-T1', action: 'confirm', actor: 'Tess', acknowledgePriceDifference: 'f'.repeat(64) })).status, 409);
+  /* UNVERIFIED is no way round a comparison that can be made */
+  const dodge = await call('/api/confirm', { invitationId: 'INV-T1', action: 'confirm', actor: 'Tess', acknowledgePriceDifference: 'UNVERIFIED' });
+  assert.equal(dodge.status, 409); assert.deepEqual(dodge.j.reasons, ['PRICE_DIFFERENCE']); assert.equal(store['conf:INV-T1'], undefined);
   const seen = await call('/api/confirm', { invitationId: 'INV-T1', action: 'confirm', actor: 'Tess', acknowledgePriceDifference: check.j.digest });
   assert.equal(seen.status, 200, JSON.stringify(seen.j));
   assert.match(JSON.parse(store['conf:INV-T1']).note, /differ from today's Billing Engine \(seen: [0-9a-f]{12}\)/);
+  assert.equal(JSON.parse(store['conf:INV-T1']).priceDifference, check.j.digest, 'recorded as a field, not only in the note');
   /* the record and every amount the guest was sent are untouched */
   assert.equal(JSON.parse(store['reg:INV-T1']).registration.selections[0].price, 250);
   /* confirming the same version again, or withdrawing, never asks */
@@ -1143,10 +1147,11 @@ test('GUEST RELATIONS · as sent, and today: the price check shows the differenc
   const was = globalThis.fetch; globalThis.fetch = async () => { throw new Error('offline'); };
   try {
     const down = await worker.fetch(new Request('https://stage.invalid/api/confirm', { method: 'POST', headers: { 'x-gr-token': W.env.GR_TOKEN, 'content-type': 'application/json' }, body: JSON.stringify({ invitationId: 'INV-T1', action: 'confirm', actor: 'Tess' }) }), W.env, { waitUntil() {} });
-    assert.equal(down.status, 409); assert.deepEqual((await down.json()).reasons, ['PRICE_CHECK_UNAVAILABLE']);
+    assert.equal(down.status, 503); assert.deepEqual((await down.json()).reasons, ['PRICE_CHECK_UNAVAILABLE']);
     const unverified = await worker.fetch(new Request('https://stage.invalid/api/confirm', { method: 'POST', headers: { 'x-gr-token': W.env.GR_TOKEN, 'content-type': 'application/json' }, body: JSON.stringify({ invitationId: 'INV-T1', action: 'confirm', actor: 'Tess', acknowledgePriceDifference: 'UNVERIFIED' }) }), W.env, { waitUntil() {} });
     assert.equal(unverified.status, 200);
-    assert.match(JSON.parse(store['conf:INV-T1']).note, /without the price comparison \(UNVERIFIED\)/);
+    assert.match(JSON.parse(store['conf:INV-T1']).note, /without the price comparison \(UNVERIFIED: it could not be made\)/);
+    assert.equal(JSON.parse(store['conf:INV-T1']).priceDifference, 'UNVERIFIED');
   } finally { globalThis.fetch = was; clearCatalogueCache(); }
 });
 

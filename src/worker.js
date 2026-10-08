@@ -1884,22 +1884,23 @@ async function handleConfirm(request, env) {
      amounts the guest was sent and today's Billing Engine must have been seen — the acknowledgement names its digest (GET
      /api/gr/price-check). 'UNVERIFIED' confirms without the comparison and says so in the record. Withdrawing, the idempotent
      repeat and an environment without the financial source never ask. Nothing historical is changed. */
-  let priceNote = '';
+  let priceNote = '', priceExtra = null;
   if (action === 'confirm' && record && record.submissionId && !confirmationStands(current, record) && env.SHEETS_ID) {
     const ack = String(body && body.acknowledgePriceDifference || '').trim();
-    if (ack === 'UNVERIFIED') priceNote = ' · confirmed without the price comparison (UNVERIFIED)';
-    else {
-      let d;
-      try { d = await grPriceCheck(env, new URL(request.url).origin, invitationId); }
-      catch (e) { return json({ ok: false, error: 'the amounts cannot be compared just now — nothing was confirmed; acknowledgePriceDifference "UNVERIFIED" confirms without the comparison', reasons: ['PRICE_CHECK_UNAVAILABLE'] }, 409); }
-      if (d.material && ack !== d.digest) {
-        return json({ ok: false, error: 'the amounts this guest was sent differ from today\'s Billing Engine amounts — nothing was confirmed; confirm with acknowledgePriceDifference = ' + d.digest, reasons: ['PRICE_DIFFERENCE'], priceDifference: d }, 409);
-      }
-      if (d.material) priceNote = ' · the amounts sent to the guest differ from today\'s Billing Engine (seen: ' + d.digest.slice(0, 12) + ')';
+    let d = null;
+    try { d = await grPriceCheck(env, new URL(request.url).origin, invitationId); } catch (e) { d = null; }
+    if (!d) {
+      /* only when the comparison cannot be made: an explicit UNVERIFIED confirms without it, and says so */
+      if (ack !== 'UNVERIFIED') return json({ ok: false, error: 'the amounts cannot be compared just now — nothing was confirmed; acknowledgePriceDifference "UNVERIFIED" confirms without the comparison', reasons: ['PRICE_CHECK_UNAVAILABLE'] }, 503);
+      priceNote = ' · confirmed without the price comparison (UNVERIFIED: it could not be made)'; priceExtra = 'UNVERIFIED';
+    } else if (d.material) {
+      if (ack !== d.digest) return json({ ok: false, error: 'the amounts this guest was sent differ from today\'s Billing Engine amounts — nothing was confirmed; confirm with acknowledgePriceDifference = ' + d.digest, reasons: ['PRICE_DIFFERENCE'], priceDifference: d }, 409);
+      priceNote = ' · the amounts sent to the guest differ from today\'s Billing Engine (seen: ' + d.digest.slice(0, 12) + ')'; priceExtra = d.digest;
     }
   }
   /* idempotent: confirming the version already confirmed (or withdrawing nothing) changes nothing */
-  const w = await writeConfirmation(env.REG_KV, { invitationId, action, actor, role: CONFIRMATION_ROLE.GUEST_RELATIONS, source: 'gr-endpoint', note: (note + priceNote).slice(0, 600), record, current });
+  const w = await writeConfirmation(env.REG_KV, { invitationId, action, actor, role: CONFIRMATION_ROLE.GUEST_RELATIONS, source: 'gr-endpoint', note: (note + priceNote).slice(0, 600), record, current,
+    ...(priceExtra ? { extra: { priceDifference: priceExtra } } : {}) });
   if (w.unchanged) {
     return action === 'confirm'
       ? json({ ok: true, invitationId, confirmedAt: w.conf.confirmedAt, version: w.conf.version != null ? w.conf.version : version, unchanged: true }, 200)

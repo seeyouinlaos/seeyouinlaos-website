@@ -23,7 +23,7 @@ import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { treeWithout, sign, keyIdOf, ATTESTATION } = require('./release-verify.cjs');
+const { treeWithout, sign, keyIdOf, signatureValid, pinnedKeys, ATTESTATION } = require('./release-verify.cjs');
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const KEY_FILES = { primary: 'src/release-signing.private.json', backup: 'src/release-signing-backup.private.json' };
 const git = (args) => execFileSync('git', args, { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
@@ -43,6 +43,9 @@ if (argv[0] === '--new-key') {
   process.exit(0);
 }
 
+/* no test switch may shape a signed result */
+const switches = Object.keys(process.env).filter((k) => k === 'INFRA_GUARD_MANIFEST' || k.startsWith('PRICING_GUARD_') || k.startsWith('PRICING_BASELINE_') || k === 'SIYL_RELEASE_VERIFY');
+if (switches.length) refuse('test switches are set (' + switches.join(', ') + ') — a release is attested without them');
 const keyFile = path.join(ROOT, KEY_FILES.primary);
 if (!fs.existsSync(keyFile)) refuse('no release signing key (' + KEY_FILES.primary + ') on this machine');
 const key = JSON.parse(fs.readFileSync(keyFile, 'utf8'));
@@ -61,7 +64,8 @@ const tree = treeWithout('INDEX');
 console.log('ATTEST: tree ' + tree.slice(0, 12) + ' — running npm test …');
 const t = spawnSync('npm', ['test'], { cwd: ROOT, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
 const out = (t.stdout || '') + (t.stderr || '');
-const pass = Number((/ℹ pass (\d+)/.exec(out) || [])[1]), fail = Number((/ℹ fail (\d+)/.exec(out) || [])[1]);
+const last = (re) => { const all = [...out.matchAll(re)]; return all.length ? Number(all[all.length - 1][1]) : NaN; };   /* the run's own summary: the last one */
+const pass = last(/ℹ pass (\d+)/g), fail = last(/ℹ fail (\d+)/g);
 if (t.status !== 0 || !(pass > 0) || fail !== 0) refuse('npm test did not pass (pass ' + pass + ', fail ' + fail + ')');
 
 console.log('ATTEST: npm test ' + pass + '/' + (pass + fail) + ' — running the release check …');
@@ -77,8 +81,14 @@ if (r.status !== 0 || passed !== total || gate('F1') !== 'PASS' || gate('I1') !=
 clean();
 if (treeWithout('INDEX') !== tree) refuse('the staged tree changed while the checks ran');
 const pricingRef = JSON.parse(fs.readFileSync(path.join(ROOT, 'infra/pricing-baseline.json'), 'utf8')).ref;
-const payload = { v: 1, tree, pricingRef, keyId: key.keyId, at: new Date().toISOString(), base: git(['rev-parse', 'HEAD']),
+/* the Owner markers this run relied on are part of what is signed (the commit must carry the same trailers) */
+const markers = Object.fromEntries(['OWNER_INFRA_CHANGE', 'OWNER_PRICING_CHANGE'].filter((k) => process.env[k]).map((k) => [k, process.env[k]]));
+const payload = { v: 1, tree, pricingRef, keyId: key.keyId, at: new Date().toISOString(), base: git(['rev-parse', 'HEAD']), markers,
   checks: { npmTest: { pass, fail }, releaseCheck: { passed, total }, gates: { F1: gate('F1'), I1: gate('I1') } } };
-fs.writeFileSync(path.join(ROOT, ATTESTATION), JSON.stringify({ about: 'Signed by src/release-attest.mjs on the release machine; verified by src/release-verify.cjs in the build. Not the Owner\'s consent — a record that these checks passed for exactly this tree.', payload, signature: sign(payload, key.privateKeyPem) }, null, 1) + '\n');
+const signature = sign(payload, key.privateKeyPem);
+if (!signatureValid(payload, signature, key.publicKey)) refuse('the signature does not verify with this key');
+const pinned = pinnedKeys(process.env);
+if (!Object.prototype.hasOwnProperty.call(pinned, key.keyId)) console.log('ATTEST: note — key ' + key.keyId + ' is not pinned yet (infra/PRODUCTION.json releaseVerification.keys): a build with the verification step active will refuse it');
+fs.writeFileSync(path.join(ROOT, ATTESTATION), JSON.stringify({ about: 'Signed by src/release-attest.mjs on the release machine; verified by src/release-verify.cjs in the build. Not the Owner\'s consent — a record that these checks passed for exactly this tree.', payload, signature }, null, 1) + '\n');
 git(['add', ATTESTATION]);
 console.log('ATTEST: SIGNED tree ' + tree.slice(0, 12) + ' · npm test ' + pass + '/' + pass + ' · release check ' + passed + '/' + total + ' (F1, I1) · pricing ref ' + pricingRef + ' · key ' + key.keyId + ' → ' + ATTESTATION + ' (staged; commit it with the release)');

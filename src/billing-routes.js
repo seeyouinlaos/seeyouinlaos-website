@@ -926,7 +926,7 @@ async function adminIssue(env, identity, request, cors) {
     const who = holdersOfIndex(await loadIndex(env, origin, false)).find((h) => h.Holder_ID === holderId);
     const sub = who && who.guestId ? await submittedOf(env, holderId, who.guestId, false) : null;
     if (!sub || !sub.submitted) return null;
-    const diff = await sentDifference(src, holderId, who.guestId, sub.selections, asOf);
+    const diff = await sentDifference(src, holderId, who.guestId, sub.selections, asOf, sub);
     return diff.material && clean(body.acknowledgePriceDifference) !== diff.digest
       ? jsonRes({ ok: false, error: PRICE_DIFFERENCE_WORDS, reasons: ['PRICE_DIFFERENCE'], priceDifference: priceDifferenceView(diff) }, 409, cors) : null;
   };
@@ -960,7 +960,6 @@ async function adminIssue(env, identity, request, cors) {
      * today: its draft was calculated earlier, and the snapshot records the
      * CURRENT source. If the two differ, issuing would freeze figures under a
      * source they did not come from — refused; a new revision is the answer. */
-    const unseen = await unseenDifference(); if (unseen) return unseen;
     const view = await ledgerCall(env, 'read', { holderId, revision });
     const stored = view && view.ok === true && view.holder ? view.holder.revision : null;
     if (!stored) return jsonRes({ ok: false, error: 'revision ' + revision + ' of ' + holderId + ' does not exist' }, 404, cors);
@@ -973,6 +972,8 @@ async function adminIssue(env, identity, request, cors) {
     }
   }
 
+  /* an existing revision: the as-sent check comes last, right before it is issued */
+  if (asked != null) { const unseen = await unseenDifference(); if (unseen) return unseen; }
   const issued = await ledgerCall(env, 'revision-issue', {
     holderId, revision, by,
     items: src.items, specialRates: src.specialRates, fx, sourceGaps,
@@ -1433,7 +1434,10 @@ async function adminHolder(env, identity, url, cors) {
     const st = await standingOf(env, holderId, sub);
     submission = { submitted: sub.submitted, version: sub.submitted ? sub.version : null, sentAt: sub.submitted ? sub.sentAt : null, ...st.view };
     /* as sent, and today — shown beside Confirm booking and Issue (display only) */
-    if (sub.submitted) submission.priceDifference = priceDifferenceView(await sentDifference(src, holderId, entry.guestId, sub.selections, asOf));
+    if (sub.submitted) {
+      try { submission.priceDifference = priceDifferenceView(await sentDifference(src, holderId, entry.guestId, sub.selections, asOf, sub)); }
+      catch (e) { if (e instanceof LedgerContractError) throw e; submission.priceDifference = { unavailable: clean(e && e.message).slice(0, 200) || 'the comparison could not be made' }; }
+    }
   } catch (e) {
     if (e instanceof LedgerContractError) throw e;
     submission = { state: 'UNREADABLE', submitted: null, error: clean(e && e.message).slice(0, 300) || 'not readable' };
@@ -1490,9 +1494,9 @@ async function adminHolder(env, identity, url, cors) {
 /* AS SENT, AND TODAY (Owner, 8 Oct 2026 · production safety): the submitted version's lines as the guest was sent them, beside
    the Billing Engine today — display only (src/billing/price-difference.js). A material difference is confirmed or issued only
    by someone who has seen it: the acknowledgement names exactly this comparison (its digest). */
-async function sentDifference(src, holderId, personId, selections, asOf) {
+async function sentDifference(src, holderId, personId, selections, asOf, sub) {
   const priced = await priceSelection({ holderId, personId, selections, items: src.items, specialRates: src.specialRates, asOf, source: BOOKED_SOURCE.SENT });
-  return priceDifference({ selections, result: priced });
+  return priceDifference({ selections, result: priced, context: { holderId, version: sub ? sub.version : null, submissionId: sub ? sub.submissionId || null : null } });
 }
 const priceDifferenceView = (d) => ({ material: d.material, digest: d.digest, statedCents: d.statedCents, engineCents: d.engineCents, lines: d.lines });
 const PRICE_DIFFERENCE_WORDS = 'The amounts this guest was sent differ from today\'s Billing Engine amounts. Nothing was changed: confirm that you have seen them (acknowledgePriceDifference = the digest shown).';
@@ -1506,7 +1510,7 @@ export async function grPriceCheck(env, origin, invitationId) {
   const day = evaluationDay();
   const src = await pricing(env, day, false);
   if (src.stale) throw new GoogleSheetsUnavailable('the pricing source is stale');
-  return { submitted: true, version: sub.version, ...priceDifferenceView(await sentDifference(src, clean(invitationId), entry.guestId, sub.selections, day)) };
+  return { submitted: true, version: sub.version, ...priceDifferenceView(await sentDifference(src, clean(invitationId), entry.guestId, sub.selections, day, sub)) };
 }
 
 async function submittedOf(env, holderId, personId, withDigest) {
@@ -1609,7 +1613,7 @@ async function adminConfirmGet(env, identity, url, cors) {
     sent: { total: pricedTotal(priced), complete: priced.manualReview.length === 0, payableLines: (priced.blockA || []).length,
       onRequest: priced.manualReview.length, selected: priced.lines.filter((l) => l.block !== 'B').length,
       providerSettled: (priced.blockB || []).length, unmapped: priced.unmapped || [] },
-    priceDifference: priceDifferenceView(await priceDifference({ selections: sub.selections, result: priced })),
+    priceDifference: priceDifferenceView(await priceDifference({ selections: sub.selections, result: priced, context: { holderId, version: sub.version, submissionId: sub.submissionId || null } })),
     current, afterConfirm }, 200, cors);
 }
 
@@ -1652,9 +1656,8 @@ async function adminConfirmPost(env, identity, request, url, cors) {
       : 'The current selection cannot be read: confirm that you confirm the submitted version.', reasons: ['ACKNOWLEDGE_CHANGE'], changed: cur.changed }, 409, cors);
   }
   /* as sent, and today: a material difference is confirmed only once it has been seen */
-  const day = evaluationDay(), srcNow = await pricing(env, day, false);
-  if (srcNow.stale) return jsonRes({ ok: false, error: 'the financial source is unavailable just now; nothing was confirmed', reasons: ['PRICE_CHECK_UNAVAILABLE'], retry: true }, 503, cors);
-  const diff = await sentDifference(srcNow, holderId, entry.guestId, sub.selections, day);
+  const day = evaluationDay(), srcNow = await loadSource(env, day);   /* the same fresh read the dialog was built on */
+  const diff = await sentDifference(srcNow, holderId, entry.guestId, sub.selections, day, sub);
   if (diff.material && clean(body.acknowledgePriceDifference) !== diff.digest) {
     return jsonRes({ ok: false, error: PRICE_DIFFERENCE_WORDS, reasons: ['PRICE_DIFFERENCE'], priceDifference: priceDifferenceView(diff) }, 409, cors);
   }

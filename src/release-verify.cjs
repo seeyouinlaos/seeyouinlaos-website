@@ -26,6 +26,8 @@ const fs = require('fs'), path = require('path'), os = require('os'), crypto = r
 const ROOT = path.resolve(__dirname, '..');
 const ATTESTATION = 'infra/release-attestation.json';
 const LOCKFILE = 'package-lock.json';
+/* build output a dry run rewrites (`npm run build` → dist/): never deployed (the Worker's main is src/worker.js; .assetsignore) */
+const BUILD_OUTPUT = /^dist\//;
 
 function git(args, opts, cwd) {
   return execFileSync('git', args, { cwd: cwd || ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], ...(opts || {}) }).trim();
@@ -62,11 +64,11 @@ function signatureValid(payload, signature, publicKeyDerB64) {
  * The verdict, from facts gathered by the caller (pure, so every refusal is testable):
  *   { attestation, keys: { keyId: spkiDerB64 }, tree, pricingRef, dirty: [paths], head, ciCommit }
  */
-function verdict({ attestation, keys, tree, pricingRef, dirty, head, ciCommit }) {
+function verdict({ attestation, keys, tree, pricingRef, dirty, head, ciCommit, inBuild }) {
   const problems = [];
   if (!keys || !Object.keys(keys).length) problems.push('no release key is pinned in infra/PRODUCTION.json (releaseVerification.keys)');
   if (!attestation || !attestation.payload) return problems.concat(['no attestation (' + ATTESTATION + '): this tree was never signed by the release machine']);
-  const p = attestation.payload, key = keys && keys[p.keyId];
+  const p = attestation.payload, key = keys && Object.prototype.hasOwnProperty.call(keys, p.keyId) ? keys[p.keyId] : null;
   if (!key || keyIdOf(key) !== p.keyId) problems.push('the attestation names key ' + p.keyId + ', which is not a pinned release key');
   else if (!signatureValid(p, attestation.signature, key)) problems.push('the attestation signature does not verify');
   if (p.tree !== tree) problems.push('this commit is not the tree that passed (signed ' + String(p.tree).slice(0, 12) + ', building ' + String(tree).slice(0, 12) + ')');
@@ -75,12 +77,17 @@ function verdict({ attestation, keys, tree, pricingRef, dirty, head, ciCommit })
   if (!(c.npmTest && c.npmTest.fail === 0 && c.npmTest.pass > 0)) problems.push('npm test did not pass in the signed run');
   if (!(c.releaseCheck && c.releaseCheck.passed === c.releaseCheck.total && c.releaseCheck.total > 0)) problems.push('the release check did not pass every gate in the signed run');
   for (const g of ['F1', 'I1']) if (!(c.gates && c.gates[g] === 'PASS')) problems.push('gate ' + g + ' did not pass in the signed run');
-  if (dirty && dirty.length) problems.push('the working tree changes tracked files that the attestation does not cover: ' + dirty.slice(0, 5).join(', '));
+  if (dirty && dirty.length) problems.push('the working tree holds changes the attestation does not cover: ' + dirty.slice(0, 5).join(', '));
   if (ciCommit && head !== ciCommit) problems.push('HEAD ' + String(head).slice(0, 12) + ' is not the commit Workers Builds is building (' + String(ciCommit).slice(0, 12) + ')');
+  if (inBuild && !ciCommit) problems.push('a Workers Build without WORKERS_CI_COMMIT_SHA: the commit being built cannot be confirmed');
   return problems;
 }
 
-function pinnedKeys() {
+/* the trusted keys: SIYL_RELEASE_KEYS (a Workers Builds variable the Owner sets — outside the repository, so a commit cannot swap
+   it) wins over the keys pinned in infra/PRODUCTION.json; once set, nothing in the tree can add a key */
+function pinnedKeys(env) {
+  const fromEnv = env && env.SIYL_RELEASE_KEYS;
+  if (fromEnv) { try { const k = JSON.parse(fromEnv); return k && typeof k === 'object' && !Array.isArray(k) ? k : {}; } catch (e) { return {}; } }
   try { const m = JSON.parse(fs.readFileSync(path.join(ROOT, 'infra/PRODUCTION.json'), 'utf8')); return (m.releaseVerification && m.releaseVerification.keys) || {}; }
   catch (e) { return {}; }
 }
@@ -97,9 +104,11 @@ function main() {
   let facts;
   try {
     if (!fs.existsSync(path.join(ROOT, '.git'))) throw new Error('no git checkout');
-    const dirty = git(['status', '--porcelain', '--untracked-files=no']).split('\n').map((l) => l.slice(3).trim()).filter((f) => f && f !== LOCKFILE);
+    /* every change the attestation does not cover — tracked or untracked-and-unignored — except the lockfile and build output */
+    const dirty = git(['status', '--porcelain', '--untracked-files=all']).split('\n').map((l) => l.slice(3).trim()).filter((f) => f && f !== LOCKFILE && !BUILD_OUTPUT.test(f));
     let attestation = null; try { attestation = JSON.parse(fs.readFileSync(path.join(ROOT, ATTESTATION), 'utf8')); } catch (e) { attestation = null; }
-    facts = { attestation, keys: pinnedKeys(), tree: treeWithout('HEAD'), pricingRef: committedPricingRef(), dirty, head: git(['rev-parse', 'HEAD']), ciCommit: process.env.WORKERS_CI_COMMIT_SHA || null };
+    facts = { attestation, keys: pinnedKeys(process.env), tree: treeWithout('HEAD'), pricingRef: committedPricingRef(), dirty, head: git(['rev-parse', 'HEAD']),
+      ciCommit: process.env.WORKERS_CI_COMMIT_SHA || null, inBuild: Object.keys(process.env).some((k) => k.startsWith('WORKERS_CI')) };
   } catch (e) {
     console.log('RELEASE VERIFY: BLOCKED — the checkout cannot be verified (' + String(e && e.message || e).split('\n')[0].slice(0, 160) + ')');
     return 1;
@@ -111,5 +120,5 @@ function main() {
   return problems.length ? 1 : 0;
 }
 
-module.exports = { treeWithout, canonical, keyIdOf, sign, signatureValid, verdict, ATTESTATION, inCI };
+module.exports = { treeWithout, canonical, keyIdOf, sign, signatureValid, verdict, pinnedKeys, ATTESTATION, inCI };
 if (require.main === module) process.exit(main());

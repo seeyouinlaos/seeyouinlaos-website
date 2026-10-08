@@ -31,18 +31,20 @@ async function sha256(text) {
 }
 
 /** { material, lines[], statedCents, engineCents, digest } — `result` is the engine's calculate() for these same selections. */
-export async function priceDifference({ selections, result }) {
+export async function priceDifference({ selections, result, context }) {
   const sent = selectionLinesOf(selections);
   const engine = (result && Array.isArray(result.lines)) ? result.lines : [];
   const lines = [];
   let statedCents = 0, engineCents = 0, material = false;
   if (sent.length !== engine.length) {
     material = true;
-    lines.push({ key: null, outcome: OUTCOME.NOT_COMPARABLE, why: 'the engine priced ' + engine.length + ' line(s) for ' + sent.length + ' sent line(s)' });
+    lines.push({ key: null, outcome: OUTCOME.NOT_COMPARABLE, why: 'the engine priced ' + engine.length + ' line(s) for ' + sent.length + ' sent line(s)',
+      sentKeys: sent.map((s) => siteKeyOfSelection(s)) });
   } else {
     sent.forEach((s, i) => {
       const e = engine[i];
       const paidSent = !!s.paidByHS;
+      const unverified = !paidSent && !!s.prepaidUnverified;   /* at sending, whether H&S paid could not be checked: the guest was told neither */
       const paidNow = !!(e.categoryOverride || e.Category_Override_From);
       const guestsOwn = e.block === 'B';
       if (guestsOwn && !paidSent) return;   /* the guest's own, with the provider: not an H&S amount */
@@ -51,14 +53,17 @@ export async function priceDifference({ selections, result }) {
       const line = { key: siteKeyOfSelection(s), Item_ID: e.Item_ID || null, stated, engine: now,
         sentPaidByHS: paidSent, enginePaidByHS: paidNow, engineBlock: e.block || null };
       /* the payer changed only where the engine says so: paid by H&S now (and not as sent), or the guest's own now */
-      if (paidSent !== paidNow || (paidSent && guestsOwn)) { line.outcome = OUTCOME.PAYER_CHANGED; material = true; }
+      if (unverified) line.outcome = OUTCOME.NOT_COMPARABLE;
+      else if (paidSent !== paidNow || (paidSent && guestsOwn)) { line.outcome = OUTCOME.PAYER_CHANGED; material = true; }
       else if (stated == null || now == null) line.outcome = OUTCOME.NOT_COMPARABLE;
       else if (stated !== now) { line.outcome = OUTCOME.DIFFERENT; material = true; }
       else line.outcome = OUTCOME.MATCH;
-      if (stated != null && now != null) { statedCents += stated; engineCents += now; }
+      /* the totals add only lines both sides price for H&S: never a provider's informational figure */
+      if ((line.outcome === OUTCOME.MATCH || line.outcome === OUTCOME.DIFFERENT) && stated != null && now != null) { statedCents += stated; engineCents += now; }
       lines.push(line);
     });
   }
-  const digest = await sha256(JSON.stringify(lines.map((l) => [l.key, l.Item_ID, l.outcome, l.stated, l.engine, l.sentPaidByHS, l.enginePaidByHS])));
+  /* the digest names exactly this comparison, for exactly this guest's submitted version */
+  const digest = await sha256(JSON.stringify([context || null, lines.map((l) => [l.key, l.Item_ID, l.outcome, l.stated, l.engine, l.sentPaidByHS, l.enginePaidByHS, l.why || null, l.sentKeys || null])]));
   return { material, lines, statedCents, engineCents, digest };
 }
