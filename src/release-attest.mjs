@@ -81,7 +81,7 @@ if (r.status !== 0 || passed !== total || gate('F1') !== 'PASS' || gate('I1') !=
 clean();
 if (treeWithout('INDEX') !== tree) refuse('the staged tree changed while the checks ran');
 const pricingRef = JSON.parse(fs.readFileSync(path.join(ROOT, 'infra/pricing-baseline.json'), 'utf8')).ref;
-/* the Owner markers this run relied on are part of what is signed (the commit must carry the same trailers) */
+/* the Owner markers this run relied on are recorded in what is signed (for the record: the build does not compare them with commit trailers) */
 const markers = Object.fromEntries(['OWNER_INFRA_CHANGE', 'OWNER_PRICING_CHANGE'].filter((k) => process.env[k]).map((k) => [k, process.env[k]]));
 const payload = { v: 1, tree, pricingRef, keyId: key.keyId, at: new Date().toISOString(), base: git(['rev-parse', 'HEAD']), markers,
   checks: { npmTest: { pass, fail }, releaseCheck: { passed, total }, gates: { F1: gate('F1'), I1: gate('I1') } } };
