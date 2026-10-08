@@ -194,17 +194,21 @@ export async function loadConfirmedBookings({ env, identity, holderId, items, ge
  * that carries none — the Confirmed Booking asks the ROOMS actor; one person's Booked value needs no unit (a unit only
  * groups several persons sharing one room), so it passes none.
  */
+/** The selected lines that become bookings, in order — ONE filter for the engine (below) and for the as-sent comparison
+    (price-difference.js), so line i of the engine's result is always line i of this list. */
+export function selectionLinesOf(selections) {
+  return canonicalLines(Array.isArray(selections) ? selections : [])
+    .filter((l) => l && typeof l === 'object' && !l.interest && siteKeyOfSelection(l));   /* an interest is not a booking */
+}
+
 export async function bookingsOfSelections({ holderId, personId, selections, items, generations, overrides, unitOf, source, version }) {
   const holder = clean(holderId), person = clean(personId);
   const index = itemIndexBySiteKey(items);
   const gen = generations || {};
   const billTo = overrides || {};
   const out = [];
-  for (const l of canonicalLines(Array.isArray(selections) ? selections : [])) {
-    if (!l || typeof l !== 'object') continue;
-    if (l.interest) continue;                     /* an interest is not a booking */
+  for (const l of selectionLinesOf(selections)) {
     const siteKey = siteKeyOfSelection(l);
-    if (!siteKey) continue;
     const itemId = index[siteKey] || null;
     const label = l.room ? (clean(l.unit) || (unitOf ? await unitOf(siteKey) : '')) : '';
     const g = Number(gen[[holder, person, itemId].join('|')]) || 1;

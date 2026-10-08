@@ -261,9 +261,12 @@ test('PORTABLE BASELINE · only an OWNER-PRICING-CHANGE naming the ref may chang
   /* test-mode overrides never reach a release run */
   assert.match(src('src/release-check.cjs'), /for \(const k of \['PRICING_GUARD_TEST', 'PRICING_GUARD_KEY', 'PRICING_BASELINE_DETAIL', 'PRICING_BASELINE_COMMITTED'\]\) delete env\[k\];/);
   assert.match(src('src/pricing-guard.mjs'), /if \(TEST_MODE\) problems\.push\('TEST MODE/);
-  /* nothing but the guard reads the baselines: no figure can come from them */
+  /* nothing but the guard reads the baselines — the release tools read only its reference: no figure can come from them */
+  const RELEASE_TOOLS = ['src/release-attest.mjs', 'src/release-verify.cjs'];
   for (const dir of ['src', 'assets']) for (const f of fs.readdirSync(dir, { recursive: true })) {
     const file = dir + '/' + f; if (!/\.(m?js|cjs)$/.test(file) || file === 'src/pricing-guard.mjs') continue;
-    assert.doesNotMatch(fs.readFileSync(file, 'utf8'), /pricing-baseline/, file);
+    const text = fs.readFileSync(file, 'utf8');
+    if (RELEASE_TOOLS.includes(file)) { for (const m of text.matchAll(/pricing-baseline\.json'\), 'utf8'\)\)(\.\w+)/g)) assert.equal(m[1], '.ref', file); continue; }
+    assert.doesNotMatch(text, /pricing-baseline/, file);
   }
 });

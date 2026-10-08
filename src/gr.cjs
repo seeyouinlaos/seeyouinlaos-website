@@ -8,7 +8,10 @@
    client, the repository or the deployed assets.
 
      GR_TOKEN=… node src/gr.cjs status INV-002
-     GR_TOKEN=… node src/gr.cjs confirm INV-002 --actor "Name" [--note "…"]
+     GR_TOKEN=… node src/gr.cjs confirm INV-002 --actor "Name" [--note "…"] [--acknowledge-prices <digest prefix> | --unverified]
+                                                                  # shows the amounts the guest was sent beside today's Billing
+                                                                  # Engine first; a difference is confirmed only with the digest
+                                                                  # prefix it printed; --unverified only while it cannot be compared
      GR_TOKEN=… node src/gr.cjs unconfirm INV-002 --actor "Name"
      GR_TOKEN=… node src/gr.cjs seating-plan
      GR_TOKEN=… node src/gr.cjs seating-config geometry.json --actor "Name"
@@ -117,7 +120,29 @@ async function documentsOpen(inv, gid, kind) {
   const actor = flag('actor') || process.env.USER || 'guest-relations';
   switch (cmd) {
     case 'status': return call('/api/status?invitation=' + encodeURIComponent(args[0] || ''), 'GET');
-    case 'confirm': return call('/api/confirm', 'POST', { invitationId: args[0], action: 'confirm', actor, note: flag('note') || '' });
+    case 'confirm': {
+      /* AS SENT, AND TODAY (Owner, 8 Oct 2026): what the guest was sent beside today's Billing Engine, before anything is confirmed */
+      const usd = (c) => (c == null ? '—' : 'USD ' + (c / 100).toFixed(2));
+      let ack;
+      const pc = await grJson('/api/gr/price-check?invitation=' + encodeURIComponent(args[0] || ''));
+      if (!pc.ok) {
+        if (!args.includes('--unverified')) { console.error('The amounts cannot be compared just now (' + pc.status + '): ' + ((pc.j && pc.j.error) || '') + '\nNothing was confirmed. Retry, or confirm with --unverified.'); process.exit(2); }
+        ack = 'UNVERIFIED'; console.log('Confirming WITHOUT the price comparison (it cannot be made now; recorded as UNVERIFIED).');
+      } else {
+        const lines = pc.j.lines || [];
+        if (lines.length) console.log('AS SENT TO THE GUEST            TODAY (BILLING ENGINE)   ' + lines.map((l) => '\n  ' + String(l.key || '?').padEnd(30) + usd(l.stated).padEnd(14) + usd(l.engine).padEnd(14) + l.outcome).join(''));
+        if (pc.j.material) {
+          const seen = flag('acknowledge-prices') || '';
+          console.log('\nDIGEST ' + pc.j.digest.slice(0, 12));
+          if (seen.length < 8 || !pc.j.digest.startsWith(seen)) {
+            console.error('The amounts this guest was sent differ from today\'s Billing Engine. Nothing was confirmed.\nThe statement will use today\'s amounts; tell the guest if needed. Confirm with --acknowledge-prices ' + pc.j.digest.slice(0, 12) + ' once seen.');
+            process.exit(2);
+          }
+          ack = pc.j.digest;
+        }
+      }
+      return call('/api/confirm', 'POST', { invitationId: args[0], action: 'confirm', actor, note: flag('note') || '', ...(ack ? { acknowledgePriceDifference: ack } : {}) });
+    }
     case 'unconfirm': return call('/api/confirm', 'POST', { invitationId: args[0], action: 'unconfirm', actor, note: flag('note') || '' });
     case 'seating-plan': return call('/api/seating/plan', 'GET');
     case 'seating-config': {

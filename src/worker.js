@@ -53,7 +53,7 @@ export { Drafts } from './drafts.js';
    the website side of the Guest Settlement. Guest payments stay canonical in Google
    008_Payment_Journal; this actor holds settlements, revisions and the immutable snapshots. */
 export { BillingLedger } from './billing-ledger.js';
-import { handleBilling, paidByHSOf } from './billing-routes.js';
+import { handleBilling, paidByHSOf, grPriceCheck } from './billing-routes.js';
 import { siteKeyOfSelection } from './billing/bookings.js';
 /* THE H&S ADMIN CONSOLE (Owner, 7 Oct 2026): the page, generated from src/admin/billing.html (src/build-admin-page.cjs) */
 import ADMIN_PAGE from './admin-page.js';
@@ -235,6 +235,17 @@ export default {
       if (!env.DOCS) return json({ ok: false, error: 'document storage is not enabled yet', enabled: false }, 503);
       if (url.pathname === '/api/gr/documents/retention') return handleGrRetention(env);   /* the policy and what stands under it — read only, never a deletion */
       return url.pathname === '/api/gr/documents' ? handleGrDocuments(url, env) : handleGrDocument(url, env);
+    }
+    /* AS SENT, AND TODAY (Owner, 8 Oct 2026): one invitation's submitted amounts beside the Billing Engine today — read only,
+       the GR token only; what `gr.cjs confirm` shows before Guest Relations confirms */
+    if (url.pathname === '/api/gr/price-check') {
+      if (!env.GR_TOKEN) return json({ ok: false, error: 'not enabled' }, 503);
+      if (!grAuthorised(request, env)) return json({ ok: false, error: 'unauthorised' }, 401);
+      if (request.method !== 'GET') return json({ ok: false, error: 'method not allowed' }, 405);
+      const inv = String(url.searchParams.get('invitation') || '').trim();
+      if (!INV_RE.test(inv)) return json({ ok: false, error: 'invalid invitation' }, 400);
+      try { return json({ ok: true, invitationId: inv, ...(await grPriceCheck(env, url.origin, inv)) }); }
+      catch (e) { return json({ ok: false, error: 'the amounts cannot be compared just now: ' + String(e && e.message || e).slice(0, 160) }, 503); }
     }
     /* GUEST RELATIONS: every guest's canonical current data (draft, submission, rooms, seats, mail) — the GR token only */
     if (url.pathname === '/api/gr/journeys') {
@@ -1869,8 +1880,27 @@ async function handleConfirm(request, env) {
      is shared with Haruthai and Suthep's Confirm booking in the admin console: one record, one history. */
   let record = null; try { record = JSON.parse(await env.REG_KV.get('reg:' + invitationId) || 'null'); } catch (e) { record = null; }
   const version = record && record.submissionId ? (record.version || 1) : null;
+  /* AS SENT, AND TODAY (Owner, 8 Oct 2026): before a version is confirmed for the first time, a material difference between the
+     amounts the guest was sent and today's Billing Engine must have been seen — the acknowledgement names its digest (GET
+     /api/gr/price-check). 'UNVERIFIED' confirms without the comparison and says so in the record. Withdrawing, the idempotent
+     repeat and an environment without the financial source never ask. Nothing historical is changed. */
+  let priceNote = '', priceExtra = null;
+  if (action === 'confirm' && record && record.submissionId && !confirmationStands(current, record) && env.SHEETS_ID) {
+    const ack = String(body && body.acknowledgePriceDifference || '').trim();
+    let d = null;
+    try { d = await grPriceCheck(env, new URL(request.url).origin, invitationId); } catch (e) { d = null; }
+    if (!d) {
+      /* only when the comparison cannot be made: an explicit UNVERIFIED confirms without it, and says so */
+      if (ack !== 'UNVERIFIED') return json({ ok: false, error: 'the amounts cannot be compared just now — nothing was confirmed; acknowledgePriceDifference "UNVERIFIED" confirms without the comparison', reasons: ['PRICE_CHECK_UNAVAILABLE'] }, 503);
+      priceNote = ' · confirmed without the price comparison (UNVERIFIED: it could not be made)'; priceExtra = 'UNVERIFIED';
+    } else if (d.material) {
+      if (ack !== d.digest) return json({ ok: false, error: 'the amounts this guest was sent differ from today\'s Billing Engine amounts — nothing was confirmed; confirm with acknowledgePriceDifference = ' + d.digest, reasons: ['PRICE_DIFFERENCE'], priceDifference: d }, 409);
+      priceNote = ' · the amounts sent to the guest differ from today\'s Billing Engine (seen: ' + d.digest.slice(0, 12) + ')'; priceExtra = d.digest;
+    }
+  }
   /* idempotent: confirming the version already confirmed (or withdrawing nothing) changes nothing */
-  const w = await writeConfirmation(env.REG_KV, { invitationId, action, actor, role: CONFIRMATION_ROLE.GUEST_RELATIONS, source: 'gr-endpoint', note, record, current });
+  const w = await writeConfirmation(env.REG_KV, { invitationId, action, actor, role: CONFIRMATION_ROLE.GUEST_RELATIONS, source: 'gr-endpoint', note: (note + priceNote).slice(0, 600), record, current,
+    ...(priceExtra ? { extra: { priceDifference: priceExtra } } : {}) });
   if (w.unchanged) {
     return action === 'confirm'
       ? json({ ok: true, invitationId, confirmedAt: w.conf.confirmedAt, version: w.conf.version != null ? w.conf.version : version, unchanged: true }, 200)

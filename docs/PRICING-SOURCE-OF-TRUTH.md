@@ -88,3 +88,37 @@ to make a figure match the baseline. The baseline is not a source of truth: Goog
 
 **INFO lines do not block.** One example: 002's display row "Total per Person, all Nights" differs from Standard_Rate × nights. The
 engine never reads that display row (Freeze · D), so it is an Owner question, not a release blocker.
+
+## Open Owner question — the unit of 002 row 27 for five products (recorded 8 Oct 2026, no correction made)
+
+All five products have Rate_Basis PER_PERSON_PER_NIGHT, Billing_Category GUEST_SELF_PAYMENT (the guest pays the hotel) and Max_Pax 2.
+In each, the sheet's own formulas take **row 27 as the input** and derive the rest from it: row 26 (per room, per night) = row 27 ÷
+nights, and row 25 (per person, per night) = row 26 ÷ 2. Row 47 (Standard_Rate, the engine's input) is a typed copy of row 25.
+
+| 002 column · product | Pax | Nights | Row 27 "Total per Person, all Nights" | Row 26 (formula) | Row 25 (formula) | Row 47 Standard_Rate |
+|---|---|---|---|---|---|---|
+| S · F-JINRI-TERRACE-DOUBLE | 2 | 3 | 109 | `=S27/3` → 36.33 | `=S26/2` → 18.1667 | 18.16666667 |
+| T · F-JINRI-FAMILY-SUITE | 2 | 3 | 128.67 | `=T27/3` → 42.89 | `=T26/2` → 21.445 | 21.445 |
+| W · H-VIEW-SUITE-270 | 2 | 2 | `=433.74/2` → 216.87 | `=W27/2` → 108.435 | `=W26/2` → 54.2175 | 54.2175 |
+| X · H-PRIVATE-SOUP-VIEW | 2 | 2 | 232.62 | `=X27/2` → 116.31 | `=X26/2` → 58.155 | 58.155 |
+| Z · J-JATU-ROOM | 2 | 2 | 163.41 | `=Z27/2` → 81.705 | `=Z26/Z23` → 40.8525 | 40.8525 |
+
+**Two readings. The sheet does not decide between them:**
+1. **Row 27 is the room total for all nights.** Only the label "per Person" is wrong in these five columns. Every figure stands: the
+   website shows a guest the per-person half of the room. This matches the formulas, and the 7 Oct closeout rule "per person = half
+   the room".
+2. **Row 27 is per person.** The label is right. Then rows 26 and 25 halve twice, and Standard_Rate is half the true per-person rate
+   for these five rooms.
+
+**Points the sheet leaves unexplained:**
+- What 433.74 is in W27.
+- Z25 divides by nights rather than by persons. The result is the same only because nights = Pax = 2.
+- The U Sathorn column treats row 27 as genuinely per person.
+
+**Impact:**
+- **H&S charges: none.** All five products are paid by the guest to the hotel (block B, USD 0). The only H&S charges on them are
+  person-scoped 009 rows (009 rows 27–30: USD 109.00 / 232.62 per person, Owner order 8 Oct 2026), and 009 does not depend on row 27.
+- **Other guests:** reading 2 would double the informational per-person price the website shows for these five rooms.
+
+Gate F1 lists the five products as INFO and never reads row 27 (Freeze · D). Neither the pricing agent nor Claude may settle the
+question by inference. Only an Owner order can, together with what 433.74 is.
