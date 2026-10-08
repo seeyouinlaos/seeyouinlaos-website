@@ -42,7 +42,7 @@ function marker() {
 }
 /* which pinned files changed against the previous commit (committed or in the working tree) */
 function changedPinned() {
-  const files = ['infra/PRODUCTION.json', 'wrangler.jsonc', 'src/auth.js', 'register/crypto.mjs', '.assetsignore'];
+  const files = ['infra/PRODUCTION.json', 'wrangler.jsonc', 'src/auth.js', 'register/crypto.mjs', '.assetsignore', 'src/release-verify.cjs'];
   try {
     const out = execSync('git diff --name-only HEAD~1 -- ' + files.map((f) => JSON.stringify(f)).join(' ') + ' ; git diff --name-only HEAD -- ' + files.map((f) => JSON.stringify(f)).join(' ') + ' ; git ls-files --others --exclude-standard -- ' + files.map((f) => JSON.stringify(f)).join(' '), { cwd: ROOT, encoding: 'utf8', shell: '/bin/sh' });
     return [...new Set(out.split('\n').map((s) => s.trim()).filter(Boolean))];
@@ -70,6 +70,16 @@ if (dos !== M.durableObjects.map((d) => d.name + ':' + d.class).sort().join(',')
 const mig = (cfg.migrations || []).map((m) => m.tag + ':' + [].concat(m.new_sqlite_classes || [], m.new_classes || []).join('+')).join(',');
 if (mig !== M.migrations.join(',')) bad('Durable Object migrations changed: ' + (mig || 'none') + ' (frozen: ' + M.migrations.join(',') + ')');
 if (!cfg.vars || cfg.vars.MAIL_FROM !== M.email.from) bad('MAIL_FROM changed (frozen: ' + M.email.from + ')');
+/* THE RELEASE VERIFICATION (docs/RELEASE-ATTESTATION.md): once pinned, the build step, the verifier and both release keys stay */
+if (M.releaseVerification) {
+  const cmd = cfg.build && cfg.build.command;
+  if (cmd !== M.releaseVerification.command) bad('the release verification build step changed: ' + (cmd || 'none') + ' (frozen: ' + M.releaseVerification.command + ')');
+  if (!exists('src/release-verify.cjs')) bad('src/release-verify.cjs is missing');
+  else if (sha('src/release-verify.cjs') !== M.releaseVerification.verifierSha256) bad('src/release-verify.cjs is not the pinned verifier (sha256 differs)');
+  const keys = M.releaseVerification.keys || {};
+  if (Object.keys(keys).length < 2) bad('fewer than two release keys are pinned (primary + offline backup)');
+  for (const [id, spki] of Object.entries(keys)) if (crypto.createHash('sha256').update(Buffer.from(String(spki), 'base64')).digest('hex').slice(0, 16) !== id) bad('pinned release key ' + id + ' does not match its public key');
+}
 if (/"pages_build_output_dir"|"pages"/.test(wj.replace(/\/\*[\s\S]*?\*\//g, ''))) bad('Cloudflare Pages configuration found in wrangler.jsonc');
 
 /* 2 · the public origin: the canonical host is service.subdomain.workers.dev and the only *.workers.dev host guest-facing code names */
