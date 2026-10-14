@@ -150,6 +150,9 @@ async function main() {
         members,
         /* the Owner's permanent person id and couple id (20 Sep 2026) — system-controlled, never editable on the site */
         ...(g.contactId ? { contactId: g.contactId } : {}), ...(g.couple ? { couple: g.couple } : {}),
+        /* the day the register last corrected this guest's name (14 Oct 2026): a session signed in before it opens the
+           invitation once more (assets/invite.mjs RENAMED), so the corrected name reaches every page and every send */
+        ...(g.named ? { named: g.named } : {}),
         /* what the guest list knows of the person (birth date · nationality · phone · email · address) — prefilled for the
            guest to review and correct in their own profile; readable only with the guest's own code */
         ...(g.profile && Object.keys(g.profile).length ? { profile: g.profile } : {}),

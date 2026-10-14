@@ -45,7 +45,8 @@
   function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
   function plan() { return window.SIYL_STAY_PLAN || null; }
   function calm() { try { return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); } catch (e) { return false; } }
-  function signedIn() { try { var a = JSON.parse(localStorage.getItem('siyl.auth') || 'null'); return !!(a && a.guestId); } catch (e) { return false; } }
+  /* the one rule of a valid session (assets/aman.js · invite-early.js · invite.mjs): one guest, its own invitation, a bearer */
+  function signedIn() { try { var a = JSON.parse(localStorage.getItem('siyl.auth') || 'null'); return !!(a && a.guestId && a.bearer && a.invitationId === 'INV-' + a.guestId); } catch (e) { return false; } }
 
   var R = 26, C = 2 * Math.PI * R;   /* the small ring's radius and circumference, in its own 60-unit viewBox */
 

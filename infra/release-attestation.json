@@ -2,17 +2,15 @@
  "about": "Signed by src/release-attest.mjs on the release machine; verified by src/release-verify.cjs in the build. Not the Owner's consent — a record that these checks passed for exactly this tree.",
  "payload": {
   "v": 1,
-  "tree": "20a932774dc0b21f345ec4d525a72beebdef863c",
+  "tree": "6da7adb61ec81b3cfb759fb2c6d23c65ecf41246",
   "pricingRef": "8d6b34089506",
   "keyId": "d02a1256537ec29e",
-  "at": "2026-10-08T13:50:30.766Z",
-  "base": "354055f5eab64e5e8fcfdefafc2292b372848760",
-  "markers": {
-   "OWNER_INFRA_CHANGE": "release verification build step + pinned release keys (Owner authorisation, 8 Oct 2026)"
-  },
+  "at": "2026-10-14T08:24:33.565Z",
+  "base": "fab9b9527be5085a8e2b5c9854a4eedd75f51c92",
+  "markers": {},
   "checks": {
    "npmTest": {
-    "pass": 888,
+    "pass": 892,
     "fail": 0
    },
    "releaseCheck": {
@@ -25,5 +23,5 @@
    }
   }
  },
- "signature": "/gjcm9wPUgIpIKsIIn6q7c57hHXTQ3ufbNIdMGRydXud/cjvU4rnY3Y+VQuf1yrpVFGKoOzK9tL1X9DCbNNgAg=="
+ "signature": "dGdMJCBO0aFAAiSlDoK01cW3JrDKJpby+snngMO3zninWFJTA6Au1dEjR/C1RowpGwqzprwwbcmLwvipWYVXCA=="
 }
