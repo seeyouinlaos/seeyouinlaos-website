@@ -13,8 +13,9 @@ import { src, PEGGY } from './sandbox.mjs';
 
 const hasSTM = typeof vm.SourceTextModule === 'function';
 /* the invitation module with a small fake DOM: a header, a few links, a location */
-async function harness({ auth = null, page = '/destination.html' } = {}) {
+async function harness({ auth = null, page = '/destination.html', keep = {} } = {}) {
   const store = new Map(); if (auth) store.set('siyl.auth', JSON.stringify(auth));
+  for (const [k, v] of Object.entries(keep)) store.set(k, v);
   const listeners = {}, links = [], inserted = [];
   const mkLink = (href) => { const attrs = { href }; return { tagName: 'A', getAttribute: (k) => (k in attrs ? attrs[k] : null), setAttribute: (k, v) => { attrs[k] = v; }, hasAttribute: (k) => k in attrs, attrs, addEventListener() {} }; };
   ['your-journey.html', 'cart.html', 'tickets.html', 'journeys.html#j-wedstay', 'wedding.html', 'invitation.html', 'experiences.html', 'https://example.org/x', 'mailto:x@y.z', '#top', 'room.html?stay=souphattra&room=heritage', 'transport.html?id=c86', 'review.html'].forEach((h) => links.push(mkLink(h)));
@@ -159,3 +160,37 @@ test('EDIT 3 · Harudot is a café; the dress references share one 3:4 card, cov
   assert.match(css, /\.p-rail > img \{ display: block; flex: 0 0 72%; width: 72%; max-width: 300px; height: auto; aspect-ratio: 3 \/ 4; object-fit: cover; object-position: 50% 12%;/);
   assert.doesNotMatch(css, /\.p-rail > img \{[^}]*object-fit: contain/);
 });
+
+/* A NAME CORRECTED AFTER SIGN-IN (Owner, 14 Oct 2026): the session keeps the record's words from the moment the code was entered and
+   the code is never kept. A session of an invitation whose name the register corrected, without that day, gives up its bearer and
+   the old words — the guest is asked once more for their own code — while this device's journey stays; every other session, a
+   session that carries the day (or a later one) and a signed-out device are untouched. Synthetic words only. */
+test('ACCESS · a session older than its invitation\'s name correction asks once more for the code; the journey on the device stays; nothing else changes', { skip: !hasSTM && 'run with --experimental-vm-modules' }, async () => {
+  const RENAMED = JSON.parse('{' + /const RENAMED = Object\.freeze\(\{([^}]*)\}\);/.exec(src('assets/invite.mjs'))[1].replace(/'/g, '"') + '}');
+  for (const [inv, day] of Object.entries(RENAMED)) { assert.match(inv, /^INV-G\d{3}$/, 'opaque ids only'); assert.match(day, /^\d{4}-\d{2}-\d{2}$/); }
+  const [inv, day] = Object.entries(RENAMED)[0], gid = inv.slice(4);
+  const old = { invitationId: inv, guestId: gid, partyId: 'INV-T01', partyName: 'Old Words', fullName: 'Old Words', preferredName: 'Old', members: [{ guestId: gid, preferredName: 'Old' }], profile: { nationality: 'Testland' }, bearer: 'b'.repeat(64), at: '2026-09-27T07:55:00.000Z' };
+  const journey = JSON.stringify({ contact: { phone: '+00 0' } });
+  const meta = JSON.stringify({ invitationId: inv, dirty: true }), base = JSON.stringify({ 'siyl.guest': journey });
+  const { sb } = await harness({ auth: old, page: '/your-journey.html', keep: { 'siyl.guest': journey, 'siyl.draft.owner': inv, 'siyl.draft.meta': meta, 'siyl.draft.base': base } });
+  assert.deepEqual(JSON.parse(sb.localStorage.getItem('siyl.auth')), { invitationId: inv, guestId: gid, partyId: 'INV-T01', at: old.at }, 'the bearer and the old words are gone, the ids stay');
+  assert.equal(sb.SIYL_INVITE.authed(), false); assert.equal(sb.SIYL_INVITE.stale(), true, 'the existing "Open your invitation once more"');
+  assert.equal(sb.localStorage.getItem('siyl.guest'), journey, 'the journey on this device stays'); assert.equal(sb.localStorage.getItem('siyl.draft.owner'), inv);
+  assert.deepEqual([sb.localStorage.getItem('siyl.draft.meta'), sb.localStorage.getItem('siyl.draft.base')], [meta, base], 'an unsaved change and its merge base stay (no siyl:signout)');
+  assert.equal(sb.document.documentElement.getAttribute('data-session'), 'out');
+  /* a session that carries the day, or a later one: untouched */
+  for (const named of [day, '2099-01-01']) {
+    const { sb: s2 } = await harness({ auth: { ...old, named }, page: '/your-journey.html' });
+    assert.equal(s2.SIYL_INVITE.authed(), true, named); assert.deepEqual(JSON.parse(s2.localStorage.getItem('siyl.auth')), { ...old, named });
+  }
+  /* any other invitation, and a signed-out device: untouched */
+  const { sb: s3 } = await harness({ auth: PEGGY, page: '/your-journey.html' });
+  assert.equal(s3.SIYL_INVITE.authed(), true); assert.deepEqual(JSON.parse(s3.localStorage.getItem('siyl.auth')), PEGGY);
+  const { sb: s4 } = await harness({ page: '/your-journey.html' }); assert.equal(s4.localStorage.getItem('siyl.auth'), null);
+  /* the code entered again: the corrected record's day is kept with the session, so the next page leaves it alone */
+  await sb.SIYL_AUTH.set({ invitationId: inv, guestId: gid, partyId: 'INV-T01', partyName: 'New', fullName: 'New Words', preferredName: 'New', token: 'abcdefghjkmnpqrs', named: day });
+  const back = JSON.parse(sb.localStorage.getItem('siyl.auth'));
+  assert.deepEqual([back.named, back.preferredName, !!back.bearer], [day, 'New', true]); assert.equal(sb.SIYL_INVITE.authed(), true);
+  assert.equal(sb.localStorage.getItem('siyl.guest'), journey, 'the same invitation coming back keeps its journey');
+});
+

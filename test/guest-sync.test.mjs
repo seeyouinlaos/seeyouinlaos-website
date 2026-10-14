@@ -8,7 +8,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { bearerOf, authIdOf } from '../register/crypto.mjs';
 
 const ROOT = new URL('..', import.meta.url).pathname;
@@ -34,6 +34,10 @@ function run(dir, rows) {
   const env = { ...process.env, SIYL_REGISTER_WORKDIR: dir };
   execFileSync('node', [path.join(ROOT, 'src/guestlist-from-contacts.cjs'), '--write', tsv], { env, stdio: 'pipe' });
   execFileSync('node', [path.join(ROOT, 'src/build-invitations.cjs')], { env, stdio: 'pipe' });
+  return state(dir);
+}
+/* what the folder holds now: the register, the codes, the shipped index and bundle */
+function state(dir) {
   const tok = fs.readFileSync(path.join(dir, 'invitation-tokens.private.csv'), 'utf8').trim().split('\n').slice(1).map((l) => l.split(','));
   const list = JSON.parse(fs.readFileSync(path.join(dir, 'guestlist.private.json'), 'utf8'));
   const byCon = {}; for (const p of list) for (const g of p.guests) if (g.contactId) byCon[g.contactId] = { ...g, partyId: p.invitationId, partyStatus: p.status || 'ACTIVE' };
@@ -41,11 +45,22 @@ function run(dir, rows) {
   return { list, byCon, codeOf, tok, index: JSON.parse(fs.readFileSync(path.join(dir, 'auth-index.json'), 'utf8')).entries, enc: fs.readFileSync(path.join(dir, 'invitations.enc.json'), 'utf8') };
 }
 
-let A, B;
-test.before(() => {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'siyl-sync-'));
+/* a fresh folder holding only the hosts (the FIXED allocation) */
+function seeded(prefix) {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), prefix));
   fs.writeFileSync(path.join(dir, 'guestlist.private.json'), JSON.stringify([{ invitationId: 'INV-001', partyName: 'Haruthai & Suthep', partyLead: 'G048', hosts: true, givingEligibility: 'PAIR',
     guests: [{ guestId: 'G048', fullName: 'Haruthai Testhost', preferredName: 'Haruthai', contactId: 'CONT001', couple: 'COUPLT01', hostRole: 'BRIDE' }, { guestId: 'G049', fullName: 'Suthep Testhost', preferredName: 'Suthep', contactId: 'CONT002', couple: 'COUPLT01', hostRole: 'GROOM' }] }]));
+  return dir;
+}
+/* the importer alone, as the Owner's run would be: its exit status and what it printed */
+function importOnly(dir, rows, extra) {
+  const tsv = path.join(dir, 'sheet.tsv'); fs.writeFileSync(tsv, [HEAD.join('\t')].concat(rows.map(row)).join('\n') + '\n');
+  return spawnSync('node', [path.join(ROOT, 'src/guestlist-from-contacts.cjs'), '--write', tsv].concat(extra || []), { env: { ...process.env, SIYL_REGISTER_WORKDIR: dir }, encoding: 'utf8' });
+}
+
+let A, B;
+test.before(() => {
+  const dir = seeded('siyl-sync-');
   A = run(dir, V1); B = run(dir, V2);
 });
 
@@ -105,3 +120,65 @@ test('12 · NO CODE IN WHAT IS SHIPPED — the synthetic bundle, and the real re
   const text = shipped.map((f) => fs.readFileSync(path.join(ROOT, f), 'utf8')).join('\n');
   assert.ok(codes.length >= 100); for (const c of codes) assert.ok(!text.includes(c), 'a code appears in a shipped file');
 });
+
+/* THE SAME PERSON (Owner, 14 Oct 2026 · a reused or renamed person id): a register guest is matched only while the row still names
+   that person. A row whose names no longer meet the register's is an IDENTITY CONFLICT: --write refuses, nothing is written, no
+   code, id or journey moves to another person. The Owner's word for one run (--same-person CONTxxx=Gxxx) keeps the guest, the code
+   and the person id under the corrected name, and stamps the day (`named`) so the website asks an older session for the code once
+   more. A married surname or a new nickname needs no word; a shared surname alone is never enough. */
+test('13 · A ROW THAT NOW NAMES ANOTHER PERSON — refused until the Owner\'s word; with it the same guest keeps id, code and person id under the corrected name', () => {
+  const dir = seeded('siyl-same-'), before = run(dir, V1);
+  const ben = before.byCon.CONT004, anna = before.byCon.CONT003, chen = before.byCon.CONT005;
+  const files = () => ['guestlist.private.json', 'invitation-tokens.private.csv'].map((f) => fs.readFileSync(path.join(dir, f), 'utf8')).join('\u0000');
+  const backups = () => fs.readdirSync(dir).filter((f) => /backup/.test(f)).length;
+  const was = files(), nBackups = backups();
+  /* CONT004: every name new (a reused id) · CONT005: the same surname, another first name (a relative) · CONT003: a married surname */
+  const V3 = V1.map((r) => (r.ID === 'CONT004' ? G('CONT004', 'Zed', 'Zulu', 'COUPLT02') : r.ID === 'CONT005' ? G('CONT005', 'Cora', 'Gamma', 'SIGL', { RSVP: 'Not Attending' }) : r.ID === 'CONT003' ? G('CONT003', 'Anna', 'Omega', 'COUPLT02', { Nickname: 'Annie' }) : r));
+  const refused = importOnly(dir, V3);
+  assert.equal(refused.status, 1, 'refused'); assert.match(refused.stdout, /IDENTITY CONFLICT: CONT004 \(register G\d{3}\), CONT005 \(register G\d{3}\)/); assert.match(refused.stdout, /REFUSED — nothing written/);
+  assert.doesNotMatch(refused.stdout, /CONT003/, 'a married surname with the same first name is the same person');
+  for (const n of ['Zed', 'Zulu', 'Cora', 'Ben', 'Beta', 'Chen']) assert.ok(!refused.stdout.includes(n), 'no name on the terminal: ' + n);
+  assert.equal(files(), was, 'nothing written'); assert.equal(backups(), nBackups, 'not even a backup');
+  /* a word that names another guest, or a row that is no conflict, decides nothing */
+  const wrong = importOnly(dir, V3, ['--same-person', 'CONT004=' + anna.guestId + ',CONT005=' + chen.guestId]);
+  assert.equal(wrong.status, 1); assert.match(wrong.stdout, /IDENTITY CONFLICT: CONT004/); assert.equal(files(), was);
+  const idle = importOnly(dir, V3, ['--same-person', 'CONT004=' + ben.guestId + ',CONT005=' + chen.guestId + ',CONT003=' + anna.guestId]);
+  assert.equal(idle.status, 1); assert.match(idle.stdout, /MET NO CONFLICT: CONT003=/); assert.equal(files(), was);
+  assert.notEqual(importOnly(dir, V3, ['--same-person', 'CONT004=G999']).status, 0, 'no such register guest'); assert.equal(files(), was);
+  /* the Owner's word for both: the same guests, codes and person ids under the corrected names, the day stamped */
+  const ok = importOnly(dir, V3, ['--same-person', 'CONT004=' + ben.guestId + ',CONT005=' + chen.guestId]);
+  assert.equal(ok.status, 0, ok.stdout + ok.stderr);
+  execFileSync('node', [path.join(ROOT, 'src/build-invitations.cjs')], { env: { ...process.env, SIYL_REGISTER_WORKDIR: dir }, stdio: 'pipe' });
+  const after = state(dir);
+  const today = new Date().toISOString().slice(0, 10);
+  for (const [con, g] of [['CONT004', ben], ['CONT005', chen], ['CONT003', anna]]) {
+    const a = after.byCon[con]; assert.equal(a.guestId, g.guestId, con + ' keeps the guest id'); assert.equal(after.codeOf(a.guestId), before.codeOf(g.guestId), con + ' keeps the code');
+    assert.equal(a.named, today, con + ': the day the name was corrected');
+  }
+  assert.equal(after.byCon.CONT004.fullName, 'Zed Zulu'); assert.equal(after.byCon.CONT003.fullName, 'Anna Omega'); assert.equal(after.byCon.CONT006, undefined);
+  assert.equal(after.byCon.CONT001.named, undefined, 'an unchanged name carries no date');
+  assert.equal(after.tok.filter((x) => x[7] === 'ACTIVE').length, before.tok.filter((x) => x[7] === 'ACTIVE').length, 'nobody new, nobody cancelled');
+  /* the index is the same: one-way ids, no name — the corrected record opens with the same code */
+  assert.deepEqual(after.index, before.index);
+});
+
+test('14 · A NAME OR AN ALIAS NEVER MOVES A GUEST TO ANOTHER PERSON ID — the register guest of CONT004 named again on a new row is a conflict', () => {
+  const dir = seeded('siyl-move-'), before = run(dir, V1);
+  const was = fs.readFileSync(path.join(dir, 'guestlist.private.json'), 'utf8');
+  /* the same person's name on a new row id, the old row gone: a name match onto the person CONT004 */
+  const V4 = V1.filter((r) => r.ID !== 'CONT004').concat([G('CONT020', 'Ben', 'Beta', 'COUPLT02')]);
+  const moved = importOnly(dir, V4);
+  assert.equal(moved.status, 1); assert.match(moved.stdout, new RegExp('IDENTITY CONFLICT: CONT020 \\(register ' + before.byCon.CONT004.guestId + '\\)'));
+  assert.equal(fs.readFileSync(path.join(dir, 'guestlist.private.json'), 'utf8'), was, 'nothing written');
+  /* the old row blank (it names nobody): still the same refusal — the person did not become someone new */
+  const blank = importOnly(dir, V1.map((r) => (r.ID === 'CONT004' ? { ID: 'CONT004' } : r)).concat([G('CONT020', 'Ben', 'Beta', 'COUPLT02')]));
+  assert.equal(blank.status, 1); assert.match(blank.stdout, /IDENTITY CONFLICT: CONT020/);
+  /* the old row still names its person (here: not attending): this row is someone else — a NEW guest with a NEW code, nothing moved */
+  const other = importOnly(dir, V1.map((r) => (r.ID === 'CONT004' ? { ...r, Notes: 'Not Attend' } : r)).concat([G('CONT020', 'Ben', 'Beta', 'COUPLT02')]));
+  assert.equal(other.status, 0, other.stdout + other.stderr);
+  execFileSync('node', [path.join(ROOT, 'src/build-invitations.cjs')], { env: { ...process.env, SIYL_REGISTER_WORKDIR: dir }, stdio: 'pipe' });
+  const now = state(dir), ben = before.byCon.CONT004;
+  assert.notEqual(now.byCon.CONT020.guestId, ben.guestId); assert.ok(now.codeOf(now.byCon.CONT020.guestId)); assert.notEqual(now.codeOf(now.byCon.CONT020.guestId), before.codeOf(ben.guestId));
+  assert.equal(now.byCon.CONT004.status, 'CANCELLED', 'the not-attending person keeps their id, their code is retired'); assert.equal(now.codeOf(ben.guestId), null);
+});
+

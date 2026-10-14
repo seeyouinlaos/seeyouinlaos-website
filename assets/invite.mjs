@@ -25,6 +25,24 @@ import { lookupByToken, bearerOf } from '../register/crypto.mjs';
 
 const KEY = 'siyl.auth';
 
+/* A NAME CORRECTED AFTER SIGN-IN (Owner, 14 Oct 2026): a session keeps the invitation's words as they were when the code was
+ * entered, and the code itself is never kept, so the record cannot be read again. For an invitation whose name the register
+ * has corrected (the date src/guestlist-from-contacts.cjs stamps as `named`), a session that does not carry that date gives up
+ * its bearer and the old words — the guest is asked once for their own code (the existing "Open your invitation once more"),
+ * and the corrected name reaches every page and every send. The same invitation coming back keeps this device's journey
+ * (GUEST.restore), and the page load has already pushed any unsaved change with the bearer. Opaque ids only. */
+const RENAMED = Object.freeze({ 'INV-G062': '2026-10-14', 'INV-G071': '2026-10-14' });
+(function reopenRenamed() {
+  try {
+    const v = JSON.parse(localStorage.getItem(KEY) || 'null');
+    const when = v && v.bearer && Object.prototype.hasOwnProperty.call(RENAMED, v.invitationId) ? RENAMED[v.invitationId] : null;
+    if (!when || (v.named && String(v.named) >= when)) return;
+    localStorage.setItem(KEY, JSON.stringify({ invitationId: v.invitationId, guestId: v.guestId, partyId: v.partyId || '', at: v.at || '' }));
+    /* the pages drawn from the old session draw again — signed out of it, not out of the journey (no siyl:signout) */
+    try { document.dispatchEvent(new CustomEvent('siyl:auth')); } catch (e) { /* no document */ }
+  } catch (e) { /* no storage: nothing kept, nothing to correct */ }
+})();
+
 let records = null;
 async function loadRecords() {
   if (!records) {
@@ -72,6 +90,8 @@ const AUTH = {
       /* what the guest list knows of this person (birth date · nationality · phone · email · address): prefilled once
          into the guest's own profile for review — this guest's record, decrypted with this guest's own code */
       ...(inv.profile && typeof inv.profile === 'object' ? { profile: inv.profile } : {}),
+      /* the day the register last corrected this guest's name, as the record says (RENAMED, below) */
+      ...(inv.named ? { named: String(inv.named) } : {}),
       /* what the Worker checks on every write — never the code itself */
       bearer,
       at: new Date().toISOString(),

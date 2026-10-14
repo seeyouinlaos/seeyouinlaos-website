@@ -23,7 +23,10 @@ const PRIVATE = path.join(ROOT, 'src/invitation-tokens.private.csv');
    each with a new code from the same builder; every existing code kept: 107 active guests in 83 parties.
    28 Sep 2026 (the live 006_Guestlist, CON001 – CON114): four new guests in two new parties of two (CON111 – CON114 → G114 – G117),
    each with a new code from the same builder; every existing code kept and opening the same guest; CON040 (blank on the sheet, no
-   cancellation) carried as on 26 Sep: 111 active guests in 85 parties. */
+   cancellation) carried as on 26 Sep: 111 active guests in 85 parties.
+   14 Oct 2026 (the Owner's order · CON031, CON032, CON040 from the live 006): two name corrections of the same people (the Owner's
+   word, --same-person) and the sheet's sending route and profile — every guest, invitation, party and person id and every code
+   unchanged, the auth index byte for byte: 111 active guests in 85 parties. */
 const ACTIVE = 111, CANCELLED = 6;
 test('REGISTER · the shipped index and bundle: one entry per active guest, every invitation INV-<guestId>, no guest twice, no id of a cancelled guest', () => {
   const entries = Object.values(index.entries);
@@ -54,6 +57,19 @@ test('REGISTER · (private register present) every active code opens exactly its
   /* a code of one guest opens no other guest's record */
   const a = await lookupByToken(active[0][5], records), b = await lookupByToken(active[1][5], records);
   assert.notEqual(a.guestId, b.guestId);
+});
+
+/* A NAME CORRECTED AFTER SIGN-IN (Owner, 14 Oct 2026): assets/invite.mjs asks a session of a RENAMED invitation without the
+   record's day to open the invitation once more. The table and the shipped records must agree, or a sign-in is stripped again on
+   every page: every listed invitation opens to a record carrying that day or a later one, and every record that carries a day is
+   listed with exactly it. */
+test('REGISTER · (private register present) the invitations asked to open once more and the records whose name was corrected are the same, with the same day', { skip: !fs.existsSync(PRIVATE) }, async () => {
+  const RENAMED = JSON.parse('{' + /const RENAMED = Object\.freeze\(\{([^}]*)\}\);/.exec(src('assets/invite.mjs'))[1].replace(/'/g, '"') + '}');
+  const rows = fs.readFileSync(PRIVATE, 'utf8').split(/\r?\n/).slice(1).filter(Boolean).map((l) => l.split(',')).filter((r) => r[7] === 'ACTIVE');
+  const named = {};
+  for (const r of rows) { const inv = await lookupByToken(r[5], records); if (inv && inv.named) named[inv.invitationId] = inv.named; }
+  for (const [inv, day] of Object.entries(RENAMED)) assert.ok(named[inv] && named[inv] >= day, inv + ': its record carries the day ' + day + ' (or a later one)');
+  for (const [inv, day] of Object.entries(named)) assert.equal(RENAMED[inv], day, inv + ': a corrected name is listed in assets/invite.mjs RENAMED with its day');
 });
 
 test('ENGINE · one guest cannot edit another; the party gives no permission; a claimed identity in the request body is ignored', async () => {
