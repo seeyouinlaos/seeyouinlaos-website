@@ -630,32 +630,88 @@
   }
 
   /* ------------------------------------------------------------- revenue */
-  var KPIS = [['confirmedRevenue', 'Confirmed revenue'], ['issuedRevenue', 'Issued revenue'], ['cashCollected', 'Cash collected'], ['outstanding', 'Outstanding'],
-    ['overdue', 'Overdue'], ['refundDue', 'Refund due'], ['hostedValue', 'Hosted value'], ['driftExposure', 'Drift exposure']];
+  /* THE REVENUE OVERVIEW (billing-revenue/2.3.0 · Owner, 15 Nov 2026): what is booked, what is invoiced, what is open and what
+     came in — calculated live from the confirmed bookings whenever the overview is loaded or recalculated (nothing stored), so
+     every booking the Owners or a guest confirm appears on the next calculation */
+  var KPIS = [['bookedRevenue', 'Booked revenue (confirmed)'], ['issuedRevenue', 'Invoiced'], ['notYetInvoiced', 'Booked, not yet invoiced'],
+    ['outstanding', 'Open receivables'], ['overdue', 'Of which overdue'], ['cashCollected', 'Payments received (verified)']];
+  var KPIS_MORE = [['changedSinceIssue', 'Changed since invoiced'], ['invoicedNotBooked', 'Invoiced, no longer booked'], ['refundDue', 'Refund due'],
+    ['hostedValue', 'Hosted value'], ['driftExposure', 'Drift exposure'], ['confirmedRevenue', 'Engine: confirmed bookings']];
+  var METHOD_WORDS = { PROMPTPAY_THB: 'PromptPay (THB)', PAYPAL_EUR: 'PayPal (EUR)', SEPA_EUR: 'SEPA (EUR)' };
   function kpiAmount(k) {
     if (!k) return '—';
     if (k.complete && k.amount != null) return usd(k.amount);
     if (k.partial && k.partial.amount != null) return usd(k.partial.amount) + ' · partial';
     return '—';
   }
+  function kpiCard(x, label) {
+    return '<div class="p-card ab-kpi"><p class="t-l1">' + esc(label) + '</p><p class="t-h1" data-i18n-skip>' + esc(kpiAmount(x)) + '</p>' +
+      (x && !x.complete ? '<p class="t-b2 ab-why">Manual review: ' + esc((x.gaps || []).length) + ' gap' + ((x.gaps || []).length === 1 ? '' : 's') + '</p>' : '') +
+      '<p class="t-b2 ab-mute">' + esc(x && x.definition || '') + '</p></div>';
+  }
+  function money2(m) { return m && m.amount != null ? usd(m.amount) : '—'; }
+  function tbl(head, rows, empty) {
+    if (!rows.length) return '<p class="t-b2">' + esc(empty) + '</p>';
+    return '<div class="ab-table-wrap"><table class="ab-table"><thead><tr>' + head.map(function (h) { return '<th' + (h[1] ? ' class="num"' : '') + '>' + esc(h[0]) + '</th>'; }).join('') + '</tr></thead><tbody>' + rows.join('') + '</tbody></table></div>';
+  }
+  function td(label, v, num) { return '<td data-l="' + esc(label) + '"' + (num ? ' class="num"' : '') + '>' + v + '</td>'; }
   function revenueView() {
     if (S.revenuePhase === 'loading' || S.revenuePhase === 'idle') return '<p class="t-b2 ab-progress" role="status">Calculating the revenue overview with the Billing Engine…</p>';
     if (S.revenuePhase === 'error') return '<div class="p-card"><p class="t-b1">' + esc(S.revenueError) + '</p><div class="p-actions"><button type="button" class="p-link" data-ab-rev-reload>Try again</button></div></div>';
-    var R = S.revenue;
-    var cards = KPIS.map(function (k) {
-      var x = R[k[0]];
-      return '<div class="p-card ab-kpi"><p class="t-l1">' + esc(k[1]) + '</p><p class="t-h1" data-i18n-skip>' + esc(kpiAmount(x)) + '</p>' +
-        (x && !x.complete ? '<p class="t-b2 ab-why">Manual review: ' + esc((x.gaps || []).length) + ' gap' + ((x.gaps || []).length === 1 ? '' : 's') + '</p>' : '') +
-        '<p class="t-b2 ab-mute">' + esc(x && x.definition || '') + '</p></div>';
-    }).join('');
+    var R = S.revenue, B = R.breakdown || {}, P = R.payments || {}, rep = R.paymentsReported || {};
+    var part = B.complete === false ? ' · partial' : '';   /* the breakdown stands for the whole booked figure only when that figure is complete */
+    var cards = KPIS.map(function (k) { return kpiCard(R[k[0]], k[1]); }).join('') +
+      '<div class="p-card ab-kpi" data-ab-reported><p class="t-l1">Payments reported, to verify</p><p class="t-h1" data-i18n-skip>' + esc(money2(rep)) + '</p>' +
+      '<p class="t-b2 ab-mute">' + esc((rep.rows || 0) + ' report' + (rep.rows === 1 ? '' : 's') + ' waiting for Verify / Reject — never counted as received' +
+        (rep.duplicateSuspects ? ' · ' + rep.duplicateSuspects + ' flagged as a possible duplicate (' + money2(rep.duplicateSuspectAmount) + '), not included' : '')) + '</p></div>';
+    var more = KPIS_MORE.map(function (k) { return kpiCard(R[k[0]], k[1]); }).join('');
+    var cat = tbl([['Room category'], ['Places', 1], ['Rooms', 1], ['Extra beds', 1], ['Amount', 1]], (B.roomsByCategory || []).map(function (c) {
+      return '<tr>' + td('Room category', '<span data-i18n-skip>' + esc(c.Item_ID) + '</span>' + (c.hostedLines ? ' <span class="ab-mute">· ' + esc(c.hostedLines) + ' hosted</span>' : '') + (c.complimentaryLines ? ' <span class="ab-mute">· ' + esc(c.complimentaryLines) + ' at USD 0 (named rate)</span>' : '')) +
+        td('Places', esc(c.places), 1) + td('Rooms', esc(c.rooms || '—'), 1) + td('Extra beds', c.extraBeds ? esc(c.extraBeds) + ' <span class="ab-mute">(' + esc(money2(c.extraBedAmount)) + ')</span>' : '—', 1) +
+        td('Amount', '<span data-i18n-skip>' + esc(money2(c)) + '</span>', 1) + '</tr>';
+    }).concat(B.roomsTotal && (B.roomsByCategory || []).length ? ['<tr class="ab-total"><td data-l="" colspan="4"><b>Accommodation together</b></td>' + td('Amount', '<b data-i18n-skip>' + esc(money2(B.roomsTotal) + part) + '</b>', 1) + '</tr>'] : []), 'No room is booked yet.');
+    var units = tbl([['Room'], ['Places', 1], ['Extra beds', 1], ['Payers', 1], ['Amount', 1]], (B.roomsByUnit || []).map(function (u) {
+      var label = u.Room_Unit_ID ? String(u.Room_Unit_ID).replace(/^RU·/, '').replace('·', ' · Room ') : '(no room recorded) ' + u.Item_ID;
+      return '<tr>' + td('Room', '<span data-i18n-skip>' + esc(label) + '</span>') + td('Places', esc(u.places), 1) + td('Extra beds', esc(u.extraBeds || '—'), 1) +
+        td('Payers', esc(u.payers), 1) + td('Amount', '<span data-i18n-skip>' + esc(money2(u)) + '</span>', 1) + '</tr>';
+    }), 'No room is booked yet.');
+    var extras = tbl([['Service'], ['Places', 1], ['Amount', 1]], (B.extras || []).map(function (e) {
+      return '<tr>' + td('Service', '<span data-i18n-skip>' + esc(e.Item_ID) + '</span>') + td('Places', esc(e.places), 1) + td('Amount', '<span data-i18n-skip>' + esc(money2(e)) + '</span>', 1) + '</tr>';
+    }).concat(B.extrasTotal && (B.extras || []).length ? ['<tr class="ab-total"><td data-l="" colspan="2"><b>Extra services together</b></td>' + td('Amount', '<b data-i18n-skip>' + esc(money2(B.extrasTotal) + part) + '</b>', 1) + '</tr>'] : []), 'No extra service is booked yet.');
+    var inv = tbl([['Payment method'], ['Statements', 1], ['Invoiced', 1], ['Open', 1]], (P.invoicesByMethod || []).map(function (m) {
+      return '<tr>' + td('Payment method', esc(METHOD_WORDS[m.method] || m.method)) + td('Statements', esc(m.statements), 1) + td('Invoiced', '<span data-i18n-skip>' + esc(money2(m.invoiced)) + '</span>', 1) + td('Open', '<span data-i18n-skip>' + esc(money2(m.outstanding)) + '</span>', 1) + '</tr>';
+    }), 'No statement is issued yet.');
+    var pay = tbl([['Payment method'], ['Received (verified)', 1], ['Reported, to verify', 1]], (P.byMethod || []).map(function (m) {
+      return '<tr>' + td('Payment method', esc(METHOD_WORDS[m.method] || m.method)) + td('Received (verified)', '<span data-i18n-skip>' + esc(money2(m.verified)) + '</span>', 1) + td('Reported, to verify', '<span data-i18n-skip>' + esc(money2(m.reported)) + '</span>', 1) + '</tr>';
+    }), 'No payment is recorded yet.');
+    var notes = [];
+    (R.doubleBookings || []).forEach(function (d) { notes.push('Double booking: ' + d.Person_ID + ' · ' + d.stage + ' — ' + d.sides.map(function (x) { return x.Holder_ID + ' (' + x.from + ', ' + money2(x.amount) + ')'; }).join(' and ') + '. Not counted until you decide which booking stands.'); });
+    (R.cancelledHolders || []).forEach(function (c) { notes.push('No longer on the guest list: ' + c.Holder_ID + (c.issued ? ' — its statement (' + money2(c.issued) + ') stays issued and open; nothing of it is booked.' : ' — nothing of it is booked.')); });
+    if ((R.lapsedConfirmations || []).length) notes.push('Booked as invoiced (a newer version was sent and is not confirmed yet): ' + R.lapsedConfirmations.join(', ') + '.');
+    (R.stayReadingDiffers || []).forEach(function (x) { notes.push('Guest House and hotel for the same guest (' + x.Person_ID + ', ' + x.holders.join(' / ') + '): billed as two stays; the room inventory counts them as one.'); });
+    if (B.reconciled === false) notes.push('The breakdown does not add up to the booked figure — see the manual review.');
+    (R.ownerRecordsWaiting || []).forEach(function (o) { notes.push('Bookings you recorded for ' + o.Holder_ID + ' changed since your confirmation — ' + (o.asIssued ? 'counted as last invoiced' : 'not counted') + ' until you confirm them again.'); });
+    if (B.unclassifiedTotal && B.unclassifiedTotal.cents) notes.push('Booked lines without a product key (' + (B.unclassifiedItems || []).join(', ') + '): ' + money2(B.unclassifiedTotal) + ' — part of the booked figure, in neither table.');
+    (R.unresolved || []).forEach(function (u) { notes.push('Not readable just now: ' + u.Holder_ID + ' — every figure it could belong to shows "partial".'); });
+    if ((R.lapsedNotCounted || []).length) notes.push('Sent a newer version, not confirmed and not invoiced — not counted until you confirm it: ' + R.lapsedNotCounted.join(', ') + '.');
+    ((R.bookedRevenue && R.bookedRevenue.gaps) || []).forEach(function (g) { if (g && g.Holder_ID && !/^DOUBLE_BOOKING|^not readable/.test(g.reason || '')) notes.push('Not counted: ' + g.Holder_ID + ' — ' + g.reason + '.'); });
+    if (B.complete === false) notes.push('The tables below cover only the counted bookings ("partial") until the points above are resolved.');
     var q = (R.quotaUtilisation || []).map(function (u) {
       return '<tr><td data-l="Item"><span data-i18n-skip>' + esc(u.Item_ID) + '</span></td><td data-l="Unit">' + esc(u.Quota_Unit || '—') + '</td><td data-l="Quota" class="num">' + esc(u.Quota != null ? u.Quota : '—') + '</td>' +
         '<td data-l="Used" class="num">' + esc(u.used) + '</td><td data-l="Remaining" class="num">' + esc(u.remaining != null ? u.remaining : '—') + '</td>' +
         '<td data-l="Utilisation" class="num">' + esc(u.utilisation != null ? u.utilisation + ' %' : '—') + (u.overQuota ? ' <span class="ab-chip open">over</span>' : '') + '</td></tr>';
     }).join('');
-    var counts = R.counts || {};
-    return '<section class="ab-sec" aria-label="Revenue"><div class="ab-kpis">' + cards + '</div>' +
-      '<p class="t-b2 ab-foot">' + (R.population ? esc(R.population.holders) + ' holders with a statement, a confirmation or a drift record · ' : '') + esc(counts.settlements || 0) + ' settlements · ' + esc(counts.issuedRevisions || 0) + ' issued revisions · ' + esc(counts.holdersUnderReview || 0) + ' under review · as of ' + esc(day(R.asOf)) + ' · engine ' + esc(R.engineVersion || '') + '</p>' +
+    var counts = R.counts || {}, pop = R.population || {};
+    return '<section class="ab-sec" aria-label="Revenue"><div class="ab-kpis" data-ab-rev-main>' + cards + '</div>' +
+      '<p class="t-b2 ab-foot"><button type="button" class="p-link" data-ab-rev-reload>Recalculate now</button> · Calculated live from the confirmed bookings · ' + esc(when(R.calculatedAt || '')) + ' · ' + esc(pop.holders || 0) + ' paying invitation' + (pop.holders === 1 ? '' : 's') + ' (' + esc(pop.withOwnerBookings || 0) + ' with bookings you recorded' + (pop.cancelled ? ', ' + esc(pop.cancelled) + ' no longer on the list' : '') + ') · ' +
+        esc(counts.issuedRevisions || 0) + ' statements · as of ' + esc(day(R.asOf)) + ' · engine ' + esc(R.engineVersion || '') + ' · ' + esc(R.revenueVersion || '') + '</p>' +
+      (notes.length ? '<div class="p-card ab-panel" data-ab-rev-notes><p class="t-l1">To look at</p><ul class="t-b2">' + notes.map(function (n) { return '<li>' + esc(n) + '</li>'; }).join('') + '</ul></div>' : '') +
+      '<div class="p-card ab-panel" data-ab-rev-rooms><p class="t-l1">Accommodation by room category</p>' + cat + '</div>' +
+      '<div class="p-card ab-panel" data-ab-rev-units><p class="t-l1">Accommodation by room</p>' + units + '</div>' +
+      '<div class="p-card ab-panel" data-ab-rev-extras><p class="t-l1">Extra services</p>' + extras + '</div>' +
+      '<div class="p-card ab-panel" data-ab-rev-invoices><p class="t-l1">Invoiced and open, by payment method</p>' + inv + '</div>' +
+      '<div class="p-card ab-panel" data-ab-rev-payments><p class="t-l1">Payments, by method</p>' + pay + '</div>' +
+      '<div class="ab-kpis ab-kpis-more">' + more + '</div>' +
       '<div class="p-card ab-panel"><p class="t-l1">Quota utilisation</p>' + (q ? '<div class="ab-table-wrap"><table class="ab-table"><thead><tr><th>Item</th><th>Unit</th><th class="num">Quota</th><th class="num">Used</th><th class="num">Remaining</th><th class="num">Utilisation</th></tr></thead><tbody>' + q + '</tbody></table></div>' : '<p class="t-b2">No quota is in use yet.</p>') + '</div></section>';
   }
 

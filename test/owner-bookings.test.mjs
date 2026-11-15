@@ -39,7 +39,9 @@ function doState() {
   blockConcurrencyWhile: (fn) => { if (inside) return Promise.resolve().then(fn); const next = turn.then(() => { inside = true; return fn(); }).finally(() => { inside = false; }); turn = next.then(() => undefined, () => undefined); return next; } };
 }
 /* a KV that writes, as REG_KV does */
-const memKv = (o) => { const m = new Map(Object.entries(o || {}).map(([k, v]) => [k, typeof v === 'string' ? v : JSON.stringify(v)])); return { get: async (k) => (m.has(k) ? m.get(k) : null), put: async (k, v) => { m.set(k, String(v)); }, _m: m }; };
+const memKv = (o) => { const m = new Map(Object.entries(o || {}).map(([k, v]) => [k, typeof v === 'string' ? v : JSON.stringify(v)])); const gets = [];
+  return { gets, get: async (k) => { gets.push(k); return m.has(k) ? m.get(k) : null; }, put: async (k, v) => { m.set(k, String(v)); }, _m: m,
+    list: async ({ prefix = '' } = {}) => ({ keys: [...m.keys()].filter((k) => k.startsWith(prefix)).map((name) => ({ name, metadata: name.startsWith('conf:') ? { confirmedAt: '2026-11-15T09:00:00Z' } : undefined })), list_complete: true }) }; };
 
 /* --- the synthetic products: a wedding-stay room like the real one (two places, two nights, the second complimentary) --- */
 const ITEMS = {
@@ -357,5 +359,33 @@ test('ROOMS · after a change the Owners confirm again: the places already held 
     assert.deepEqual(await unitOcc(env, 'I'), [P.sib, P.bed, P.payer].sort(), 'unit I unchanged'); assert.deepEqual(await unitOcc(env, 'A'), [P.mum, P.dad].sort());
     /* confirming the same revision twice changes nothing */
     assert.equal((await hit(env, GROOM, 'admin/owner-bookings', { holderId: PAYER, expectedRev: c2.j.rev, action: 'confirm' })).status, 200);
+  });
+});
+
+
+test('REVENUE · the Owners\' confirmed rooms join the Revenue overview: booked by room and category, the extra bed, nothing invoiced yet; an unconfirmed record does not count', async () => {
+  const env = routeEnv();
+  await withSheets(workbook(FAMILY_RATES), async () => {
+    assert.equal((await join(env, P.payer, 'I')).ok, true);
+    let rev = 0;
+    for (const [personId, room, extraBed] of [[P.mum, 'E'], [P.dad, 'E'], [P.payer, 'I'], [P.sib, 'I'], [P.bed, 'I', true]]) rev = (await hit(env, GROOM, 'admin/owner-bookings', { holderId: PAYER, expectedRev: rev, action: 'add', entry: { personId, itemId: 'T-EXEC', room, extraBed: !!extraBed } })).j.rev;
+    /* recorded, not confirmed: in the population, nothing booked */
+    let r = await hit(env, GROOM, 'revenue');
+    assert.equal(r.status, 200, JSON.stringify(r.j).slice(0, 300));
+    assert.equal(r.j.population.withOwnerBookings, 1); assert.equal(r.j.bookedRevenue.cents, 0, 'an unconfirmed record books nothing');
+    const c = await hit(env, GROOM, 'admin/owner-bookings', { holderId: PAYER, expectedRev: rev, action: 'confirm' });
+    assert.equal(c.status, 200, JSON.stringify(c.j));
+    env.REG_KV.gets.length = 0;
+    r = await hit(env, GROOM, 'revenue');
+    const exp = FAMILY_RATES.reduce((t, x) => t + x[3] * Number(x[4]), 0) * 100;
+    assert.equal(r.j.bookedRevenue.cents, exp); assert.equal(r.j.bookedRevenue.complete, true); assert.equal(r.j.notYetInvoiced.cents, exp);
+    assert.equal(r.j.issuedRevenue.cents, 0); assert.equal(r.j.outstanding.cents, 0, 'nothing invoiced, nothing receivable');
+    const unit = (u) => r.j.breakdown.roomsByUnit.find((x) => x.Room_Unit_ID === 'RU·T-EXEC·' + u);
+    assert.equal(unit('E').cents, 2 * 145 * 2 * 100); assert.equal(unit('E').places, 2);
+    assert.equal(unit('I').cents, (2 * 145 + 75) * 100); assert.equal(unit('I').places, 3); assert.equal(unit('I').extraBeds, 1);
+    assert.equal(r.j.breakdown.reconciled, true); assert.equal(r.j.breakdown.roomsTotal.cents, exp);
+    assert.deepEqual(r.j.holders.find((h) => h.Holder_ID === PAYER).bookedFrom, ['recorded by the Owners']);
+    /* the KV budget: each key read once in the request */
+    assert.equal(new Set(env.REG_KV.gets).size, env.REG_KV.gets.length, 'every key read once: ' + env.REG_KV.gets.join(','));
   });
 });
