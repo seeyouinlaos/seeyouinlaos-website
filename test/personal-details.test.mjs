@@ -114,7 +114,7 @@ test('THE REGISTER MODEL · the builder carries the person id, the couple id and
   assert.doesNotMatch(a, /contactId|couple/, 'the frozen auth authority is untouched — the Worker reads the person id beside it');
   assert.match(readFileSync('src/worker.js', 'utf8'), /async function personOf\(env, origin, who\)/);
   const entries = Object.values(idx.entries);
-  assert.ok(entries.length >= 100, 'the deployed index carries every active guest');
+  assert.ok(entries.length >= 60, 'the deployed index carries every active guest (64 since the Owners\' final list, 15 Nov 2026)');
   assert.ok(entries.every((e) => /^CON\d{3}$/.test(e.c) && /^(COUPL\d{3}|SIGL)$/.test(e.k)), 'every entry names a permanent person id and a couple state');
   assert.ok(entries.every((e) => Object.keys(e).every((k) => ['i', 'g', 'p', 'h', 'c', 'k', 'r'].includes(k))), 'nothing else in the index (r = the couple\'s role, 21 Sep 2026)'); assert.equal(entries.filter((e) => e.r).length, 2, 'two roles: the Bride and the Groom'); assert.ok(entries.filter((e) => e.r).every((e) => e.h === 1), 'a role only on a host');
   assert.equal(new Set(entries.map((e) => e.c)).size, entries.length, 'one person id per code'); assert.equal(new Set(entries.map((e) => e.g)).size, entries.length, 'one guest id per code');

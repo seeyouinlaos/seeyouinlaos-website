@@ -31,7 +31,8 @@ const KEY = 'siyl.auth';
  * its bearer and the old words — the guest is asked once for their own code (the existing "Open your invitation once more"),
  * and the corrected name reaches every page and every send. The same invitation coming back keeps this device's journey
  * (GUEST.restore), and the page load has already pushed any unsaved change with the bearer. Opaque ids only. */
-const RENAMED = Object.freeze({ 'INV-G062': '2026-10-14', 'INV-G071': '2026-10-14' });
+/* 15 Nov 2026: INV-G062 and INV-G071 are cancelled (no longer on the Owners' final list) — a cancelled invitation opens no session at all */
+const RENAMED = Object.freeze({ 'INV-G064': '2026-11-15', 'INV-G097': '2026-11-15' });
 (function reopenRenamed() {
   try {
     const v = JSON.parse(localStorage.getItem(KEY) || 'null');

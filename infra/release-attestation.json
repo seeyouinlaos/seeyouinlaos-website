@@ -2,15 +2,17 @@
  "about": "Signed by src/release-attest.mjs on the release machine; verified by src/release-verify.cjs in the build. Not the Owner's consent — a record that these checks passed for exactly this tree.",
  "payload": {
   "v": 1,
-  "tree": "78d0f775510e75a021516e9de622d72d7ece0f9d",
-  "pricingRef": "8d6b34089506",
+  "tree": "9f9db08aae2976fa378021c07718ec699c7f1658",
+  "pricingRef": "c5f69c2b9007",
   "keyId": "d02a1256537ec29e",
-  "at": "2026-11-15T14:49:39.039Z",
-  "base": "ccf16997d9097a662d486b2352bd2fb20c300abd",
-  "markers": {},
+  "at": "2026-11-15T17:19:33.148Z",
+  "base": "649d05b9494006385b6e1ceab4c91568b839489b",
+  "markers": {
+   "OWNER_PRICING_CHANGE": "Owner order 15 Nov 2026: five named D1-HERITAGE-EXECUTIVE rates for payer INV-G032, Room A 580 / Room I 365 [ref c5f69c2b9007]"
+  },
   "checks": {
    "npmTest": {
-    "pass": 895,
+    "pass": 909,
     "fail": 0
    },
    "releaseCheck": {
@@ -23,5 +25,5 @@
    }
   }
  },
- "signature": "J+KDbGu41BG/NTWjA/TBcOR54KM739yRoVsLsgMISf5IWxkwnH2ycCqU78IDjC7d0x61FGRusLLSvnTS5TxoCw=="
+ "signature": "JMcqPi2GdC4wlYEYM2DtPRNPOOlIpzSQmPfqLk5mNZrGUHenQ3xwR1LQh6FNlhHZlMbC+U6Ln67M/krU0xuaDg=="
 }

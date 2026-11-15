@@ -51,7 +51,7 @@ export function siteKeyDuplicates(items) {
 }
 
 /** Nights for an Item, strictly from 002's own "Number of Nights" row. */
-function nightsOf(items, itemId) {
+export function nightsOf(items, itemId) {
   return nightsOfItem(items && items[itemId]);
 }
 

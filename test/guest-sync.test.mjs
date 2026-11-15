@@ -118,7 +118,8 @@ test('12 · NO CODE IN WHAT IS SHIPPED — the synthetic bundle, and the real re
   const codes = fs.readFileSync(priv, 'utf8').trim().split('\n').slice(1).map((l) => l.split(',')[5]).filter(Boolean);
   const shipped = ['register/auth-index.json', 'register/invitations.enc.json'].concat(fs.readdirSync(ROOT).filter((f) => f.endsWith('.html')), fs.readdirSync(path.join(ROOT, 'assets')).filter((f) => f.endsWith('.js')).map((f) => 'assets/' + f), fs.readdirSync(path.join(ROOT, 'src')).filter((f) => /\.(js|mjs|cjs|json)$/.test(f) && !/private/.test(f)).map((f) => 'src/' + f));
   const text = shipped.map((f) => fs.readFileSync(path.join(ROOT, f), 'utf8')).join('\n');
-  assert.ok(codes.length >= 100); for (const c of codes) assert.ok(!text.includes(c), 'a code appears in a shipped file');
+  /* the real register (64 active guests since the Owners' final list, 15 Nov 2026; every retired code is still in the file) */
+  assert.ok(codes.length >= 60); for (const c of codes) assert.ok(!text.includes(c), 'a code appears in a shipped file');
 });
 
 /* THE SAME PERSON (Owner, 14 Oct 2026 · a reused or renamed person id): a register guest is matched only while the row still names
@@ -182,3 +183,38 @@ test('14 · A NAME OR AN ALIAS NEVER MOVES A GUEST TO ANOTHER PERSON ID — the 
   assert.equal(now.byCon.CONT004.status, 'CANCELLED', 'the not-attending person keeps their id, their code is retired'); assert.equal(now.codeOf(ben.guestId), null);
 });
 
+
+test('15 · ANOTHER PERSON ON A REUSED ROW (the Owner\'s word, --new-person) — the old guest is retired with everything it holds, the row is a new guest with a new code; a name match is never retired', () => {
+  const dir = seeded('siyl-new-'), before = run(dir, V1);
+  const ben = before.byCon.CONT004, anna = before.byCon.CONT003;
+  const files = () => ['guestlist.private.json', 'invitation-tokens.private.csv'].map((f) => fs.readFileSync(path.join(dir, f), 'utf8')).join('\u0000');
+  const was = files();
+  const V5 = V1.map((r) => (r.ID === 'CONT004' ? G('CONT004', 'Zed', 'Zulu', 'COUPLT09') : r));
+  /* the word must meet a contact-id conflict; it never contradicts --same-person; a row that is no conflict decides nothing */
+  const idle = importOnly(dir, V5, ['--new-person', 'CONT004,CONT003']);
+  assert.equal(idle.status, 1); assert.match(idle.stdout, /MET NO CONFLICT: CONT003 \(new person\)/); assert.equal(files(), was);
+  assert.notEqual(importOnly(dir, V5, ['--new-person', 'CONT004', '--same-person', 'CONT004=' + ben.guestId]).status, 0, 'contradictory words are refused'); assert.equal(files(), was);
+  /* a name match onto another row's person (the old row still on the sheet) is never retired by the word */
+  const moved = importOnly(dir, V1.concat([G('CONT020', 'Anna', 'Alpha', 'SIGL')]), ['--new-person', 'CONT020']);
+  assert.equal(moved.status, 1, 'a name match is not a contact-id conflict'); assert.equal(files(), was);
+  /* the word: Ben is retired, Zed is new */
+  const ok = importOnly(dir, V5, ['--new-person', 'CONT004']);
+  assert.equal(ok.status, 0, ok.stdout + ok.stderr);
+  for (const n of ['Zed', 'Zulu', 'Ben', 'Beta']) assert.ok(!ok.stdout.includes(n), 'no name on the terminal: ' + n);
+  execFileSync('node', [path.join(ROOT, 'src/build-invitations.cjs')], { env: { ...process.env, SIYL_REGISTER_WORKDIR: dir }, stdio: 'pipe' });
+  const after = state(dir);
+  const guests = after.list.flatMap((p) => p.guests.map((g) => ({ ...g, partyId: p.invitationId })));
+  const oldBen = guests.find((g) => g.guestId === ben.guestId), zed = guests.find((g) => g.contactId === 'CONT004' && g.guestId !== ben.guestId);
+  assert.equal(oldBen.status, 'CANCELLED', 'the old guest is retired'); assert.equal(oldBen.fullName, 'Ben Beta', 'with its own name, nothing relabelled'); assert.equal(oldBen.contactId, 'CONT004', 'and its record of the row');
+  assert.equal(after.codeOf(ben.guestId), null, 'its code is retired, never handed on');
+  assert.ok(zed && zed.fullName === 'Zed Zulu' && (zed.status || 'ACTIVE') === 'ACTIVE', 'the row is a new guest');
+  assert.ok(Number(zed.guestId.slice(1)) > Math.max(...before.list.flatMap((p) => p.guests).map((g) => Number(g.guestId.slice(1)))), 'a new id, never a reused one');
+  assert.notEqual(zed.partyId, ben.partyId, 'a party of its own — the old invitation is not handed on');
+  const zc = after.codeOf(zed.guestId); assert.ok(zc && zc !== before.codeOf(ben.guestId), 'a new code');
+  assert.equal(after.codeOf(anna.guestId), before.codeOf(anna.guestId), 'everyone else keeps their code');
+  /* a later run of the same sheet: the active guest owns the row, nothing changes, no conflict */
+  const again = importOnly(dir, V5);
+  assert.equal(again.status, 0, again.stdout + again.stderr); assert.doesNotMatch(again.stdout, /IDENTITY CONFLICT/);
+  const third = JSON.parse(fs.readFileSync(path.join(dir, 'guestlist.private.json'), 'utf8')).flatMap((p) => p.guests);
+  assert.equal(third.find((g) => g.guestId === zed.guestId).fullName, 'Zed Zulu'); assert.equal(third.find((g) => g.guestId === ben.guestId).status, 'CANCELLED');
+});

@@ -5,6 +5,7 @@
  *   node src/guestlist-from-contacts.cjs --report              # the mapping, counts only on stdout (names go to the private report)
  *   node src/guestlist-from-contacts.cjs --write               # writes src/guestlist.private.json (the old one backed up, dated)
  *   … --write <sheet.tsv> --same-person CON040=G071[,…]        # the Owner's word for this run: the same person under a corrected name
+ *   … --write <sheet.tsv> --new-person CON079[,…]              # the Owner's word for this run: another person now on that row
  *
  * Input (never committed): src/contacts-<date>.private.tsv — the CONTACTS sheet of H&S_Wedding_Operations_Master, the
  * register-relevant columns only: ID · Firstname · Surname · Nickname · Couple · Letter · Role · Sending Invitation · Notes.
@@ -15,7 +16,7 @@
  *   · a row is a guest when its Role starts with "Guest" or is "Document Owner" (the hosts) and it has a name
  *     (Firstname or Nickname); "No" as a first name is the sheet's word for no partner and is never a guest;
  *     a row whose Notes say "Not Attend" is not invited;
- *   · the party is the Couple code (COUPLnnn); SIGL / SIGNL are single-person parties;
+ *   · the party is the Couple code (COUPLnnn); SIGL / SIGNL — and a code without its number — are single-person parties;
  *   · preferred name = Nickname, else the first word of Firstname (a parenthesis is not a name);
  *     full name = Firstname + Surname (or the preferred name alone when the sheet carries no name);
  *   · an existing guest keeps guestId (and so the code): matched by full name, by preferred name, by first name + surname,
@@ -55,6 +56,21 @@ const SAME_PERSON = (() => {
   if (!Object.keys(out).length) throw new Error('--same-person names no pair');
   return out;
 })();
+/* THE OWNER'S WORD, THE OTHER WAY (15 Nov 2026): `--new-person CON079[,CONxxx]` — this contact id now names ANOTHER person. The
+   register guest it named is retired (CANCELLED: id, records, drafts and statements kept, never handed on) and the row becomes a
+   NEW guest with a new id and a new code. Only for a row whose own contact id names someone else; never with --same-person. */
+const NEW_PERSON = (() => {
+  const i = args.indexOf('--new-person');
+  if (i < 0) return new Set();
+  const out = new Set();
+  for (const con of String(args[i + 1] || '').split(',').map((s) => s.trim()).filter(Boolean)) {
+    if (!/^CONT?\d{3}$/.test(con)) throw new Error('--new-person takes CONxxx ids');
+    if (SAME_PERSON[con]) throw new Error('--new-person ' + con + ' and --same-person ' + con + ' contradict each other');
+    out.add(con);
+  }
+  if (!out.size) throw new Error('--new-person names no row');
+  return out;
+})();
 
 /* THE PERMANENT PERSON ID (Owner, 20 Sep 2026): CONxxx is one person for ever — never renumbered, never recycled. The register
    remembers it per guest (`contactId`) and matches by it first. The sheet was renumbered between the 19 Sep and the 20 Sep
@@ -89,13 +105,15 @@ function main() {
   const old = JSON.parse(fs.readFileSync(LIST, 'utf8'));
   const oldGuests = []; for (const p of old) for (const g of p.guests) oldGuests.push({ ...g, partyId: p.invitationId, partyName: p.partyName, hosts: !!p.hosts, giving: p.givingEligibility || '' });
   const byId = Object.fromEntries(oldGuests.map((g) => [g.guestId, g]));
-  const byContact = Object.fromEntries(oldGuests.filter((g) => g.contactId).map((g) => [g.contactId, g]));
+  /* a contact id a retired guest (--new-person) still carries belongs to the active guest on that row: the active one wins */
+  const byContact = Object.fromEntries(oldGuests.filter((g) => g.contactId).sort((a, b) => (a.status === 'CANCELLED' ? 0 : 1) - (b.status === 'CANCELLED' ? 0 : 1)).map((g) => [g.contactId, g]));
   const usedOld = new Set();
   const notes = [];   /* the private report lines */
   const skipped = [];
   const conflicts = [];   /* [row id, register guest id] — a contact id that now names another person */
   const resolved = [];    /* the Owner's word for this run, as applied */
   const said = new Set();   /* the rows the Owner's word resolved */
+  const retired = new Set();   /* register guests the Owner said are not this row's person (--new-person): cancelled, never matched again */
   /* the person ids this sheet still names (a blank or unnamed row names nobody: a person who moved from it is the same person) */
   const sheetIds = new Set(rows.filter((x) => x.ID && [x.Firstname, x.Nickname].some((v) => String(v || '').trim() && !NO_NAME(v))).map((x) => x.ID));
   for (const [con, gid] of Object.entries(SAME_PERSON)) if (!byId[gid]) throw new Error('--same-person ' + con + '=' + gid + ': no such register guest — nothing written');
@@ -135,6 +153,7 @@ function main() {
       if (!match && pn) { match = cands.find((g) => norm(g.preferredName) === pn && (!sn || !norm(g.fullName).includes(' ') || norm(g.fullName).endsWith(' ' + sn) || firstWord(g.fullName) === fn)) || null; if (match) how = 'preferred name'; }
       if (!match && fn) { const same = cands.filter((g) => firstWord(g.fullName) === fn); if (same.length === 1 && (!sn || !norm(same[0].fullName).includes(' '))) { match = same[0]; how = 'first name (the only one)'; } }
     }
+    if (match && retired.has(match.guestId)) { notes.push(r.ID + ' · ' + preferredName + ' → ' + match.guestId + ' was retired by the Owner\'s word (--new-person) — treated as NEW'); match = null; how = ''; }
     if (match && usedOld.has(match.guestId)) { notes.push(r.ID + ' · ' + preferredName + ' → ' + match.guestId + ' already taken by another row — treated as NEW'); match = null; how = ''; }
     /* THE SAME PERSON (Owner, 14 Oct 2026): a register guest is matched only while the row still names that person —
          · by the contact id: the row and the register guest share the first name or the nickname (a shared surname alone is a
@@ -143,7 +162,8 @@ function main() {
            that other id still names someone on this sheet, its row is the person and this row is someone else (NEW).
        The hosts are the FIXED allocation's and checked as such below. Anything else is an IDENTITY CONFLICT: nothing is re-labelled, carried over or moved — the register guest keeps id, code and
        data untouched, the row is reported, and `--write` refuses until the Owner has spoken. The Owner's word for one run is
-       `--same-person CONxxx=Gxxx` (the same person under a corrected name); a different person has no automatic path. */
+       `--same-person CONxxx=Gxxx` (the same person under a corrected name) or `--new-person CONxxx` (another person: the old guest is
+       retired with everything it holds, the row is a new guest — 15 Nov 2026). */
     if (match && r.Role !== 'Document Owner' && how !== 'contact id' && match.contactId && match.contactId !== r.ID && sheetIds.has(match.contactId)) {
       /* the person id the name found still has its own row on this sheet: that row is the person, this one is someone else */
       notes.push(r.ID + ' · ' + how + ' found ' + match.guestId + ', whose own row ' + match.contactId + ' is still on the sheet — another person, treated as NEW'); match = null; how = '';
@@ -153,6 +173,12 @@ function main() {
       const namesAgree = [firstWord(match.fullName), norm(match.preferredName), firstWord(match.preferredName)].some((n) => n && sheetNames.has(n));
       const why = how === 'contact id' ? (namesAgree ? '' : 'the contact id now names another person') : (match.contactId && match.contactId !== r.ID ? 'a name match onto the person ' + match.contactId : '');
       if (why && SAME_PERSON[r.ID] === match.guestId) { said.add(r.ID); how += ' · the same person (the Owner\'s word)'; resolved.push(r.ID + ' = ' + match.guestId + ' · ' + match.fullName + ' → ' + fullName + ' (' + why + ')'); }
+      else if (why && how === 'contact id' && NEW_PERSON.has(r.ID)) {
+        /* the Owner's word: another person on this row — the register's guest is retired (cancelled below, records kept), the row is NEW */
+        said.add(r.ID); retired.add(match.guestId);
+        resolved.push(r.ID + ' ≠ ' + match.guestId + ' · ' + match.fullName + ' retired; "' + fullName + '" is a new guest (the Owner\'s word, --new-person)');
+        match = null; how = '';
+      }
       else if (why) {
         conflicts.push([r.ID, match.guestId]); usedOld.add(match.guestId);
         skipped.push([r.ID, 'IDENTITY CONFLICT (' + why + ') — the register\'s ' + match.guestId + ' is "' + match.fullName + '", the sheet says "' + fullName + '": nothing re-labelled, the Owner decides', fullName]);
@@ -164,7 +190,10 @@ function main() {
     if (r.Role === 'Document Owner' && match) preferredName = match.preferredName;
     if (match && norm(match.preferredName) !== norm(preferredName)) notes.push(r.ID + ' · preferred name follows the sheet: ' + match.preferredName + ' → ' + preferredName + ' (' + match.guestId + ')');
     const named = match ? (match.fullName !== fullName || match.preferredName !== preferredName ? TODAY : match.named || null) : null;
-    invited.push({ row: r, guestId: match ? match.guestId : null, how, preferredName, fullName, contactId: r.ID, named, couple: /^COUPL/.test(r.Couple) ? r.Couple : 'SIGL', profile: profileOf(r), route: String(r['Sending Invitation'] || '').trim(), partyKey: /^COUPL/.test(r.Couple) ? r.Couple : 'SINGLE:' + r.ID,
+    /* a couple code without its number ("COUPL", 15 Nov 2026) names no party yet: the guest stands alone until it is complete */
+    const coupled = /^COUPL[A-Z]?\d+$/.test(r.Couple);
+    if (/^COUPL/.test(r.Couple) && !coupled) notes.push(r.ID + ' · couple code "' + r.Couple + '" has no number — a single party until the sheet completes it');
+    invited.push({ row: r, guestId: match ? match.guestId : null, how, preferredName, fullName, contactId: r.ID, named, couple: coupled ? r.Couple : 'SIGL', profile: profileOf(r), route: String(r['Sending Invitation'] || '').trim(), partyKey: coupled ? r.Couple : 'SINGLE:' + r.ID,
       hostRole: r.Role === 'Document Owner' ? (match && match.hostRole) || (/haruthai/i.test(first) ? 'BRIDE' : 'GROOM') : null, hosts: r.Role === 'Document Owner' });
   }
   /* new ids after the highest existing one */
@@ -214,7 +243,7 @@ function main() {
   for (const g of invited) rep.push('  ' + g.row.ID + ' · ' + g.preferredName + ' · ' + g.fullName + ' · ' + g.guestId + ' · ' + g.how + ' · ' + g.partyKey);
   rep.push('', 'NO LONGER INVITED (cancelled, code retired)'); for (const g of gone) rep.push('  ' + g.guestId + ' · ' + g.preferredName + ' · ' + g.fullName + ' · party ' + g.partyId);
   rep.push('', 'NOT INVITED BY THIS RUN (the Owner decides)'); for (const s of skipped) rep.push('  ' + s.join(' · '));
-  rep.push('', 'THE SAME PERSON UNDER A CORRECTED NAME (the Owner\'s word, --same-person)'); for (const s of resolved) rep.push('  ' + s);
+  rep.push('', 'THE OWNER\'S WORD (--same-person: the same person under a corrected name · --new-person: another person, the old guest retired)'); for (const s of resolved) rep.push('  ' + s);
   rep.push('', 'ALIASES (person as the sheet spells them → register guest)');
   for (const [k, gid] of Object.entries(ALIAS_BY_PERSON)) { const g = byId[gid]; rep.push('  ' + k + ' → ' + gid + ' ' + (g ? g.fullName + ' (' + g.preferredName + ')' : '?')); }
   rep.push('', 'PARTIES (couple id → members)'); for (const [key, p] of parties) rep.push('  ' + key + ' · ' + p.members.map((m) => m.contactId + ' ' + m.preferredName + ' (' + m.guestId + ')').join(' + '));
@@ -224,8 +253,8 @@ function main() {
   console.log(JSON.stringify(counts));
   console.log('report: ' + path.basename(REPORT) + ' (KEEP PRIVATE)');
   /* ids only on the terminal; the names are in the private report */
-  const unused = Object.keys(SAME_PERSON).filter((con) => !said.has(con));
-  if (unused.length) console.log('THE OWNER\'S WORD MET NO CONFLICT: ' + unused.map((con) => con + '=' + SAME_PERSON[con]).join(', ') + ' — nothing is decided by a word that does not apply');
+  const unused = [...Object.keys(SAME_PERSON).filter((con) => !said.has(con)).map((con) => con + '=' + SAME_PERSON[con]), ...[...NEW_PERSON].filter((con) => !said.has(con)).map((con) => con + ' (new person)')];
+  if (unused.length) console.log('THE OWNER\'S WORD MET NO CONFLICT: ' + unused.join(', ') + ' — nothing is decided by a word that does not apply');
   if (conflicts.length) console.log('IDENTITY CONFLICT: ' + conflicts.map(([con, gid]) => con + ' (register ' + gid + ')').join(', ') + ' — the row no longer names the register\'s person; nothing re-labelled. The Owner decides: the same person under a corrected name (--same-person CONxxx=Gxxx) or a different person (no automatic path)');
   if (!flag('write')) { console.log('report only — nothing written to the list'); return; }
   if (conflicts.length || unused.length) { console.log('REFUSED — nothing written: ' + conflicts.length + ' identity conflict(s) unresolved' + (unused.length ? ', ' + unused.length + ' word(s) of the Owner that met no conflict' : '')); process.exitCode = 1; return; }

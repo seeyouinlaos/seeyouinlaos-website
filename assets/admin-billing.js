@@ -101,7 +101,7 @@
   function go(hash) { if (location.hash === hash || !hashEvents) { location.hash = hash; onRoute(); } else location.hash = hash; }
   function onRoute() {
     S.route = readRoute();
-    S.panel = null; S.issue = null; S.send = null; S.pay = null; S.confirm = null; S.msg = ''; S.download = '';
+    S.panel = null; S.issue = null; S.send = null; S.pay = null; S.confirm = null; S.msg = ''; S.download = ''; S.owner = null; S.ownerMsg = ''; S.obForm = null;
     if (S.route.view === 'holder') loadHolder(S.route.id);
     else if (S.route.view === 'revenue' && S.revenuePhase === 'idle') loadRevenue();
     draw();
@@ -152,6 +152,28 @@
       if (x.status === 403) { S.phase = 'denied'; draw(); return; }
       if (!x.ok) { S.holderPhase = 'error'; S.holderError = x.j.error || 'This guest could not be read.'; draw(); return; }
       S.holder = x.j; S.holderPhase = 'ready'; draw();
+    }).then(function () { if (S.route.id === id) return loadOwner(id); });
+  }
+  /* THE OWNERS' OWN BOOKINGS (15 Nov 2026): what Haruthai & Suthep recorded for this paying invitation */
+  function loadOwner(id) {
+    S.ownerError = '';
+    return api('admin/owner-bookings?holder=' + encodeURIComponent(id)).then(function (x) {
+      if (S.route.id !== id) return;
+      if (!x.ok) { S.ownerError = x.j.error || 'The recorded bookings could not be read.'; draw(); return; }
+      S.owner = x.j; draw();
+    });
+  }
+  function ownerWrite(body) {
+    var id = S.route.id;
+    if (!S.owner || S.ownerBusy) return;
+    S.ownerBusy = true; S.ownerMsg = ''; draw();
+    api('admin/owner-bookings', { method: 'POST', body: Object.assign({ holderId: id, expectedRev: S.owner.rev }, body) }).then(function (x) {
+      S.ownerMsg = x.ok ? (body.action === 'confirm' ? 'Confirmed. These bookings are now part of the statement draft — nothing is issued or sent.' : 'Saved.')
+        : (x.j.reasons && x.j.reasons.length ? x.j.reasons.join(' · ') : (x.j.error || 'Not saved.'));
+      if (x.ok && body.action === 'add') S.obForm = { personId: '', itemId: S.obForm && S.obForm.itemId || '', room: S.obForm && S.obForm.room || '', extraBed: false, note: '' };
+      /* the panel stays busy until the stored revision has been read again — the next write names that revision */
+      var msg = S.ownerMsg;
+      return loadHolder(id).then(function () { S.ownerBusy = false; S.ownerMsg = msg; draw(); });
     });
   }
   function loadRevenue() {
@@ -322,7 +344,76 @@
       kv('Statement total', iss ? '<b data-i18n-skip>' + esc(usd(iss.total)) + '</b>' : '—') +
       '</div>' + actions + (S.msg ? '<p class="t-b1 ab-msg" role="status">' + S.msg + '</p>' : '') + '</div>';
     /* an open panel (preview, confirm, issue, view, send) sits right under the actions that opened it */
-    return head + panelView() + bookedView() + paymentsView() + mailView();
+    return head + panelView() + ownerView() + bookedView() + paymentsView() + mailView();
+  }
+  /* THE REAL UNITS (Owner, 15 Nov 2026): the units of the chosen room product with their free places now — a unit another guest
+     holds a place in is shown as such and cannot be reserved; a product without units takes no room */
+  function unitPicker(O, f) {
+    var item = (O.choices && O.choices.items || []).filter(function (i) { return i.itemId === f.itemId; })[0];
+    var units = item && item.key && O.units && O.units[item.key];
+    if (!item) return '<label class="t-b2">Room<br><span class="ab-mute">Choose a product first.</span></label>';
+    if (!units || !units.length) return '<label class="t-b2">Room<br><span class="ab-mute">This product takes no room unit.</span></label>';
+    /* "our" persons: the paying guest, the persons already recorded and the one being added — a place one of them holds is not
+       another guest's (the confirmation checks the same and holds the rest) */
+    var mine = {}; (O.entries || []).forEach(function (e) { mine[e.personId] = true; });
+    if (O.payerGuestId) mine[O.payerGuestId] = true;
+    if (f.personId) mine[f.personId] = true;
+    return '<label class="t-b2">Room unit (the website\'s own, with its free places now)<br><select data-ob-f="room"><option value="">No room</option>' +
+      units.map(function (u) {
+        var others = u.holders.filter(function (g) { return !mine[g]; }).length + u.kept;
+        var ours = u.holders.filter(function (g) { return mine[g]; }).length;
+        var words = 'Room ' + u.label + ' · ' + (others ? 'held by another guest' : u.free === u.places ? 'free' : u.free + ' of ' + u.places + ' places free' + (ours ? ' · ' + ours + ' held by this booking\'s guests' : ''));
+        return '<option value="' + esc(u.label) + '"' + (f.room === u.label ? ' selected' : '') + (others ? ' disabled' : '') + '>' + esc(words) + '</option>';
+      }).join('') + '</select></label>';
+  }
+  function ownerView() {
+    if (S.ownerError) return '<div class="p-card ab-panel"><p class="t-l1">Recorded by Haruthai &amp; Suthep</p><p class="t-b2">' + esc(S.ownerError) + '</p></div>';
+    var O = S.owner;
+    if (!O) return '';
+    var f = S.obForm || (S.obForm = { personId: '', itemId: '', room: '', extraBed: false, note: '' });
+    var chip = O.state === 'CONFIRMED' ? '<span class="ab-chip ok">Confirmed</span>' + (O.confirmed ? ' <span class="ab-mute">by ' + esc(WHO[O.confirmed.by] || O.confirmed.by) + ' · ' + esc(when(O.confirmed.at)) + '</span>' : '')
+      : O.state === 'RECORDED' ? '<span class="ab-chip open">Recorded — not confirmed</span>' : '<span class="ab-mute">Nothing recorded</span>';
+    var rows = (O.entries || []).map(function (e) {
+      var l = e.line || {};
+      return '<tr><td data-l="Person">' + esc(e.person) + '<br><span class="ab-mute" data-i18n-skip>' + esc(e.personId) + '</span>' + (e.note ? '<br><span class="ab-mute">' + esc(e.note) + '</span>' : '') + '</td>' +
+        '<td data-l="Item"><span data-i18n-skip>' + esc(e.itemId) + '</span></td>' +
+        '<td data-l="Room">' + esc(e.room || '—') + (e.extraBed ? ' · extra bed' : '') + (e.held ? '<br><span class="ab-mute">reserved in the website\'s rooms</span>' : (e.room ? '<br><span class="ab-mute">reserved when confirmed</span>' : '')) + '</td>' +
+        '<td data-l="Rate" class="num"><span data-i18n-skip>' + esc(l.rate != null ? usd(l.rate) : '—') + '</span><br><span class="ab-mute">' + esc(l.rateSource === 'SPECIAL_RATE' ? 'named rate (009)' : l.rateSource === 'STANDARD_RATE' ? 'standard rate (002)' : (l.rateSource || l.review || '—')) + '</span></td>' +
+        '<td data-l="Nights" class="num">' + esc(l.payableNights != null ? l.payableNights + (l.nights != null ? ' of ' + l.nights : '') : (l.nights != null ? l.nights : '—')) + '</td>' +
+        '<td data-l="Amount" class="num"><span data-i18n-skip>' + esc(l.amount != null ? usd(l.amount) : '—') + '</span>' + (l.review ? '<br><span class="ab-chip open">' + esc(l.review) + '</span>' : '') + '</td>' +
+        '<td data-l=""><button type="button" class="p-link" data-ob-remove="' + esc(e.id) + '"' + (S.ownerBusy ? ' disabled' : '') + '>Remove</button></td></tr>';
+    }).join('');
+    /* each room's own subtotal: the engine's amounts of the persons recorded in it */
+    var roomSum = {};
+    (O.entries || []).forEach(function (e) { if (e.room && e.line && e.line.amount != null) { var k = e.itemId + '|' + e.room; roomSum[k] = (roomSum[k] || 0) + Math.round(e.line.amount * 100); } });
+    var rooms = (O.rooms || []).map(function (r) {
+      return '<li data-ob-room>' + esc(r.itemId) + ' · room ' + esc(r.room) + ': ' + esc(r.names.join(', ')) + ' — ' + esc(r.occupants) + ' ' + (r.occupants === 1 ? 'person' : 'persons') + (r.maxPax ? ' · ' + esc(r.maxPax) + ' places' : '') + (r.extraBeds ? ' + ' + esc(r.extraBeds) + ' extra bed' : '') +
+        (roomSum[r.itemId + '|' + r.room] != null ? ' · <b data-i18n-skip>' + esc(usd(roomSum[r.itemId + '|' + r.room] / 100)) + '</b>' : '') +
+        (r.overCapacity ? ' <span class="ab-chip open">over capacity</span>' : '') + '</li>';
+    }).join('');
+    var persons = (O.choices && O.choices.persons || []).map(function (p) { return '<option value="' + esc(p.guestId) + '"' + (f.personId === p.guestId ? ' selected' : '') + '>' + esc(p.name + ' · ' + p.guestId) + '</option>'; }).join('');
+    var items = (O.choices && O.choices.items || []).map(function (i) { return '<option value="' + esc(i.itemId) + '"' + (f.itemId === i.itemId ? ' selected' : '') + '>' + esc(i.itemId + (i.rate != null ? ' · ' + usd(i.rate) + ' standard' : '')) + '</option>'; }).join('');
+    var canConfirm = O.state === 'RECORDED' && !(O.problems || []).length && !S.ownerBusy;
+    return '<section class="p-card ab-panel" aria-label="Recorded by Haruthai and Suthep" data-ob>' +
+      '<p class="t-l1">Recorded by Haruthai &amp; Suthep</p>' +
+      '<p class="t-b2">Bookings the Owners make for this paying invitation — a family\'s rooms, a guest who did not book on the site. Priced by the engine from Google (the standard rate, or the person\'s named rate for this payer). They join the statement only once confirmed here; nothing is issued or sent from this panel.</p>' +
+      '<p class="t-b2">' + chip + '</p>' +
+      ((O.problems || []).length ? '<ul class="t-b2 ab-why">' + O.problems.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : '') +
+      (rows ? '<div class="ab-table-wrap"><table class="ab-table"><thead><tr><th>Person</th><th>Product</th><th>Room</th><th class="num">Rate</th><th class="num">Nights charged</th><th class="num">Amount</th><th></th></tr></thead><tbody>' + rows +
+        '<tr><td colspan="5"><b>Total of these bookings</b></td><td class="num"><b data-i18n-skip>' + esc(O.total != null ? usd(O.total) : '—') + '</b></td><td></td></tr></tbody></table></div>' : '') +
+      (rooms ? '<p class="t-l1">Rooms</p><ul class="t-b2">' + rooms + '</ul>' +
+        (Object.keys(roomSum).length > 1 ? '<p class="t-b2" data-ob-rooms-total>Rooms together: <b data-i18n-skip>' + esc(usd(Object.keys(roomSum).reduce(function (t, k) { return t + roomSum[k]; }, 0) / 100)) + '</b></p>' : '') : '') +
+      '<div class="ab-grid2 ab-ob-form">' +
+      '<label class="t-b2">Person<br><select data-ob-f="personId"><option value="">Choose a guest…</option>' + persons + '</select></label>' +
+      '<label class="t-b2">Product (002)<br><select data-ob-f="itemId"><option value="">Choose a product…</option>' + items + '</select></label>' +
+      unitPicker(O, f) +
+      '<label class="t-b2"><input type="checkbox" data-ob-f="extraBed"' + (f.extraBed ? ' checked' : '') + '> Extra bed (priced only by this person\'s own 009 row)</label>' +
+      '<label class="t-b2">Note (for you only)<br><input type="text" maxlength="200" data-ob-f="note" value="' + esc(f.note) + '"></label>' +
+      '</div>' +
+      '<div class="ab-actions"><div class="ab-act"><button type="button" class="p-act ab-ghost" data-ob-add' + (f.personId && f.itemId && !S.ownerBusy ? '' : ' disabled') + '>Add booking</button></div>' +
+      '<div class="ab-act"><button type="button" class="p-act" data-ob-confirm' + (canConfirm ? '' : ' disabled') + '>Confirm these bookings</button>' +
+      (O.state === 'RECORDED' && (O.problems || []).length ? '<p class="t-b2 ab-why">Resolve the points above first.</p>' : '') + '</div></div>' +
+      (S.ownerMsg ? '<p class="t-b1 ab-msg" role="status">' + esc(S.ownerMsg) + '</p>' : '') + '</section>';
   }
   /* why Confirm booking is (not) offered — said to the BILLING_ADMINs, who confirm themselves */
   function confirmWhy(sub) {
@@ -790,6 +881,19 @@
     var reason = root.querySelector('[data-ab-pay-reason]');
     if (reason) reason.oninput = function () { if (S.pay) { S.pay.reason = reason.value; var go2 = root.querySelector('[data-ab-pay-go]'); if (go2) go2.disabled = !reason.value.trim() || !!S.pay.busy; } };
     on('[data-ab-pay-go]', 'click', function () { payGo(); });
+    /* the Owners' own bookings */
+    Array.prototype.forEach.call(root.querySelectorAll('[data-ob-f]'), function (el) {
+      var k = el.getAttribute('data-ob-f');
+      el[el.type === 'checkbox' || el.tagName === 'SELECT' ? 'onchange' : 'oninput'] = function () {
+        S.obForm = S.obForm || {}; S.obForm[k] = el.type === 'checkbox' ? !!el.checked : el.value;
+        if (k === 'itemId') { S.obForm.room = ''; draw(); return; }
+        if (k === 'personId') { draw(); return; }
+        var addBtn = root.querySelector('[data-ob-add]'); if (addBtn) addBtn.disabled = !(S.obForm.personId && S.obForm.itemId) || !!S.ownerBusy;
+      };
+    });
+    on('[data-ob-add]', 'click', function () { var f = S.obForm || {}; ownerWrite({ action: 'add', entry: { personId: f.personId, itemId: f.itemId, room: f.room, extraBed: !!f.extraBed, note: f.note } }); });
+    on('[data-ob-remove]', 'click', function (el) { ownerWrite({ action: 'remove', entryId: el.getAttribute('data-ob-remove') }); });
+    on('[data-ob-confirm]', 'click', function () { ownerWrite({ action: 'confirm' }); });
     on('[data-ab-pay-cancel]', 'click', function () { S.pay = null; draw(); });
   }
 
