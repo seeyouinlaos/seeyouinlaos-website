@@ -25,6 +25,15 @@
 
    The store is the isolate's own memory: nothing is written to KV, a cache or
    a log. It is lost when the isolate goes, which costs one read.
+
+   ONLY SETTLED DATA CROSSES A REQUEST (Owner, 15 Nov 2026 · reopen booking).
+   An in-flight load was once shared with every request that missed meanwhile.
+   On Workers a promise belongs to the request that created it: when that
+   request was cancelled (a guest leaving the page) its load could never
+   settle, and every later catalogue request of the isolate failed on it with
+   a 503 until the isolate went — every guest page "Price pending", every send
+   refused. A miss is now this request's own read; what is shared is only the
+   finished entry above. Two misses in the same moment cost two reads.
    ========================================================================== */
 
 import { GoogleSheetsUnavailable } from '../google-sheets.js';
@@ -34,8 +43,7 @@ export const STALE_MAX_MS = 10 * 60 * 1000;
 /* at most this many (spreadsheet, day) entries per isolate — a caller-chosen day can never grow memory without bound */
 export const MAX_ENTRIES = 16;
 
-const entries = new Map();   /* key -> { at, data } */
-const loading = new Map();   /* key -> Promise of a fresh entry */
+const entries = new Map();   /* key -> { at, data } — settled data only, never a promise */
 
 const clean = (v) => String(v == null ? '' : v).trim();
 
@@ -68,24 +76,17 @@ export async function pricingSource(key, load, { fresh = false, now = Date.now }
   const held = entries.get(key);
   if (!fresh && held && t - held.at < CATALOGUE_TTL_MS) return { ...held.data, at: held.at, cached: true, stale: false };
 
-  const read = async () => {
+  /* this request's own read — it never joins a load another request began (see ONLY SETTLED DATA CROSSES A REQUEST) */
+  const began = now();
+  try {
     const data = pricingOnly(await load());
     const entry = { at: now(), data };
-    entries.delete(key); entries.set(key, entry);
-    while (entries.size > MAX_ENTRIES) entries.delete(entries.keys().next().value);
-    return entry;
-  };
-  /* a fresh read is always its own read — it never joins a load that began before it was asked */
-  let p = fresh ? null : loading.get(key);
-  if (!p) {
-    p = read();
-    if (!fresh) {
-      loading.set(key, p);
-      p.then(() => { if (loading.get(key) === p) loading.delete(key); }, () => { if (loading.get(key) === p) loading.delete(key); });
+    /* two reads may overlap now: one that finished after this one began is at least as new — it is never replaced by this one */
+    const newer = entries.get(key);
+    if (!newer || newer.at <= began) {
+      entries.delete(key); entries.set(key, entry);
+      while (entries.size > MAX_ENTRIES) entries.delete(entries.keys().next().value);
     }
-  }
-  try {
-    const entry = await p;
     return { ...entry.data, at: entry.at, cached: false, stale: false };
   } catch (e) {
     /* transient unavailability only — and never for a fresh read */
@@ -98,4 +99,4 @@ export async function pricingSource(key, load, { fresh = false, now = Date.now }
 }
 
 /** Tests only: forget everything held. */
-export function clearCatalogueCache() { entries.clear(); loading.clear(); }
+export function clearCatalogueCache() { entries.clear(); }

@@ -203,7 +203,9 @@ async function assertion(cred) {
 
 /* -------------------------------------------------------- the access token */
 
-/* identity -> { token, expiresAt } once minted, { pending } while minting */
+/* identity -> { token, expiresAt } once minted. Settled data only (Owner, 15 Nov 2026): a mint in flight is never shared — on
+   Workers a promise belongs to the request that created it, and a cancelled request's mint could never settle, failing every
+   later Google read of the isolate. A request without a good held token mints its own. */
 const tokens = new Map();
 
 async function mint(cred) {
@@ -235,17 +237,14 @@ async function mint(cred) {
   return { token, expiresAt: Date.now() + Math.max(0, life - EXPIRY_SKEW) };
 }
 
-/** The held token while it is still good, otherwise one shared fresh mint. */
+/** The held token while it is still good, otherwise this request's own fresh mint. */
 async function accessToken(cred) {
   const held = tokens.get(cred.identity);
   if (held && held.token && Date.now() < held.expiresAt) return held.token;
-  if (held && held.pending) return held.pending;
-  const pending = mint(cred).then(
-    (fresh) => { tokens.set(cred.identity, fresh); return fresh.token; },
-    (err) => { tokens.delete(cred.identity); throw err; }
-  );
-  tokens.set(cred.identity, { pending });
-  return pending;
+  /* a failed mint stores nothing — and never removes a good token another request has held meanwhile */
+  const fresh = await mint(cred);
+  tokens.set(cred.identity, fresh);
+  return fresh.token;
 }
 
 /* ------------------------------------------------------------- the request */
