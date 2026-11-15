@@ -261,7 +261,10 @@ test('ADMIN UI · every in-page link names the console itself (the page has <bas
   assert.ok(hrefs.includes('/admin/billing#revenue') && hrefs.includes('/admin/billing#guests'));
   el(root, 'data-ab-tab', '#revenue').onclick({ preventDefault() {} }); await tick(10);
   assert.equal(A.state().route.view, 'revenue');
-  assert.match(root.innerHTML, /Confirmed revenue/);
+  assert.match(root.innerHTML, /Booked revenue \(confirmed\)/);
+  /* the revenue overview 2.3.0 (Owner, 15 Nov 2026): booked, invoiced, open, received and reported; by room category, by room, extras */
+  for (const t of ['Invoiced', 'Booked, not yet invoiced', 'Open receivables', 'Of which overdue', 'Payments received (verified)', 'Payments reported, to verify',
+    'Accommodation by room category', 'Accommodation by room', 'Extra services', 'Invoiced and open, by payment method', 'Payments, by method']) assert.ok(root.innerHTML.includes(t), t);
 });
 
 test('ADMIN UI · the page module calls only billing routes, sends the bearer, and never stores what it reads', () => {

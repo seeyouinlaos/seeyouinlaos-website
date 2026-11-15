@@ -338,7 +338,7 @@ async function calculateHolder(env, identity, holderId, src, asOf, origin, assum
   const bookings = owner && owner.state === OWNER_BOOKING_STATE.CONFIRMED ? [...registered, ...owner.rows] : [...registered];
   const result = calculate(bookings, { items: src.items, specialRates: src.specialRates, asOf: evaluationDay(asOf) });
   return { state, bookings, result, unmapped: unmappedProducts(bookings),
-    confirmation: owner ? combinedConfirmation(regConfirmation, owner.view) : regConfirmation, owner };
+    confirmation: owner ? combinedConfirmation(regConfirmation, owner.view) : regConfirmation, owner, regConfirmation };
 }
 
 /**
@@ -1080,24 +1080,44 @@ async function adminIssue(env, identity, request, cors) {
 async function adminRevenue(env, identity, url, cors) {
   const asOf = evaluationDay(url.searchParams.get('asOf'));
   const src = await loadSource(env, asOf);
-  const [ledgerHolders, driftRecords, confirmed] = await Promise.all([readHolders(env), readDriftRecords(env), confirmationHolders(env)]);
+  /* one read per key in this request (the Owners' records and the persons' trips are read by several checks) */
+  env = { ...env, REG_KV: memoKv(env.REG_KV) };
+  const [ledgerHolders, driftRecords, confirmed, recorded] = await Promise.all([readHolders(env), readDriftRecords(env), confirmationHolders(env), ownerRecordHolders(env)]);
+  /* THE REGISTER, read once: a holder is CANCELLED only when the register reads as the real one and names nobody for it —
+     an unreadable or empty register is never "everyone cancelled" (fail closed) */
+  const indexEntries = Object.values((await loadIndex(env, url.origin, false)) || {}).filter((e) => e && clean(e.i));
+  if (!indexEntries.length) return jsonRes({ ok: false, retry: true, error: 'the register could not be read just now; nothing is judged on an empty register' }, 503, cors);
+  const personsOf = (id) => indexEntries.filter((e) => clean(e.i) === id && clean(e.g)).length;
   const drifts = new Map(driftRecords.map((r) => [clean(r.Holder_ID), Array.isArray(r.drifts) ? r.drifts : []]));
   const withSettlement = ledgerHolders.map((h) => clean(h.Holder_ID));
   const withDrift = [...drifts].filter(([, d]) => d.length).map(([h]) => h);
-  const ids = [...new Set([...withSettlement, ...confirmed, ...withDrift])].filter(Boolean).sort();
+  const owners = new Set(recorded);
+  const ids = [...new Set([...withSettlement, ...confirmed, ...withDrift, ...recorded])].filter(Boolean).sort();
   const states = await holderStates(env, ids);
   const holders = [], unresolved = [];
   for (const id of ids) {
-    /* one holder that cannot be read (a removed invitation, an ambiguous person) is named as a gap — it never takes the
+    /* one holder that cannot be read (an ambiguous person, a store that does not answer) is named as a gap — it never takes the
        whole overview down, and its figures are never guessed (review, 7 Oct 2026) */
     try {
-      const { state, bookings } = await calculateHolder(env, { invitationId: id, guestId: null }, id, src, asOf, url.origin, undefined, states.get(id),
-        /* the Revenue overview keeps its KV budget (two reads per holder); the Owners' own bookings join it with the queued Revenue work */
-        { owner: false });
-      holders.push({ Holder_ID: id, Settlement_ID: state.Settlement_ID, bookings, settlement: state, drifts: drifts.get(id) || [],
-        noSettlementRecord: !state.settlement });
+      /* the Owners' recorded bookings are read for the holders that have a record (2.3.0); the others keep their budget */
+      const c = await calculateHolder(env, { invitationId: id, guestId: null }, id, src, asOf, url.origin, undefined, states.get(id),
+        owners.has(id) ? undefined : { owner: false });
+      const own = c.owner || null;
+      holders.push({ Holder_ID: id, Settlement_ID: c.state.Settlement_ID, bookings: c.bookings, settlement: c.state, drifts: drifts.get(id) || [],
+        noSettlementRecord: !c.state.settlement,
+        regState: (c.regConfirmation && c.regConfirmation.state) || 'NONE',
+        ownerState: own ? own.state : 'NONE', ownerProblems: own ? own.problems : [],
+        extraBeds: own ? own.rows.filter((b) => b.extraBed).map((b) => b.Booking_ID) : [] });
     } catch (e) {
       if (e instanceof LedgerContractError || e instanceof GoogleSheetsUnavailable) throw e;
+      /* CANCELLED (Owner, 15 Nov 2026 · the final list): the register names nobody for this invitation any more — nothing of it
+         is booked; a statement already issued stays issued and receivable, exactly as the ledger holds it */
+      if (e instanceof SourceDataError && e.code === 'HOLDER_PERSON' && personsOf(id) === 0 && states.get(id)) {
+        const st = states.get(id);
+        holders.push({ Holder_ID: id, Settlement_ID: st.Settlement_ID, bookings: [], settlement: st, drifts: drifts.get(id) || [],
+          noSettlementRecord: !st.settlement, cancelled: true, regState: 'CANCELLED', ownerState: 'NONE' });
+        continue;
+      }
       unresolved.push({ Holder_ID: id, reason: clean(e && e.message).slice(0, 200) || 'not readable' });
     }
   }
@@ -1109,14 +1129,32 @@ async function adminRevenue(env, identity, url, cors) {
     asOf,
   });
   /* an unread holder leaves every figure it could belong to incomplete, named — the computable part stays offered as partial */
-  for (const u of unresolved) for (const k of ['confirmedRevenue', 'issuedRevenue', 'cashCollected', 'outstanding', 'overdue', 'refundDue', 'driftExposure']) {
+  const KPI_KEYS = ['confirmedRevenue', 'issuedRevenue', 'cashCollected', 'outstanding', 'overdue', 'refundDue', 'driftExposure',
+    'bookedRevenue', 'notYetInvoiced', 'changedSinceIssue', 'invoicedNotBooked'];
+  for (const u of unresolved) for (const k of KPI_KEYS) {
     const kpi = overview[k]; if (!kpi || typeof kpi !== 'object') continue;
     if (kpi.complete !== false) { kpi.partial = { cents: kpi.cents, amount: kpi.amount, display: kpi.display }; kpi.cents = null; kpi.amount = null; kpi.display = null; kpi.complete = false; kpi.review = 'MANUAL_REVIEW_REQUIRED'; }
     kpi.gaps = [...(kpi.gaps || []), { Holder_ID: u.Holder_ID, reason: 'not readable: ' + u.reason }];
   }
-  if (unresolved.length) overview.incompleteKpis = [...new Set([...(overview.incompleteKpis || []), 'confirmedRevenue', 'issuedRevenue', 'cashCollected', 'outstanding', 'overdue', 'refundDue', 'driftExposure'])];
-  return jsonRes({ ok: true, ...overview, unresolved,
-    population: { holders: ids.length, withSettlement: withSettlement.length, withConfirmation: confirmed.length, withDrift: withDrift.length } }, 200, cors);
+  if (unresolved.length) overview.incompleteKpis = [...new Set([...(overview.incompleteKpis || []), ...KPI_KEYS])];
+  if (unresolved.length && overview.breakdown) { overview.breakdown.incomplete = true; overview.breakdown.complete = false; }
+  return jsonRes({ ok: true, ...overview, unresolved, calculatedAt: new Date().toISOString(),
+    population: { holders: ids.length, withSettlement: withSettlement.length, withConfirmation: confirmed.length, withDrift: withDrift.length,
+      withOwnerBookings: recorded.length, cancelled: holders.filter((h) => h.cancelled).length } }, 200, cors);
+}
+
+/** Every paying invitation with a record of the Owners' own bookings — one listing of the store, like the confirmations. */
+async function ownerRecordHolders(env) {
+  const kv = env.REG_KV;
+  if (!kv || typeof kv.list !== 'function') return [];
+  const out = [];
+  let cursor;
+  do {
+    const page = await kv.list({ prefix: 'obk:', ...(cursor ? { cursor } : {}) });
+    for (const k of (page && page.keys) || []) { const id = clean(k && k.name).slice('obk:'.length); if (INVITATION_RE.test(id)) out.push(id); }
+    cursor = page && !page.list_complete && page.cursor ? page.cursor : null;
+  } while (cursor);
+  return out;
 }
 
 /** The ledger's drift records, holder by holder ({ Holder_ID, drifts }). */

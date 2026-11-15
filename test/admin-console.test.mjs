@@ -702,7 +702,8 @@ test('REVENUE · a confirmed trip counts in Confirmed Revenue before any stateme
   W.env.BILLING_LEDGER = { idFromName: () => 'billing', get: () => ({ fetch: (req) => { ops.push(new URL(req.url).pathname.split('/').pop()); return real.fetch(req); } }) };
   let r = await hit(W, GROOM, 'revenue');
   assert.equal(r.status, 200, JSON.stringify(r.j));
-  assert.deepEqual(r.j.population, { holders: 1, withSettlement: 0, withConfirmation: 1, withDrift: 0 }, 'no settlement yet, and still counted');
+  assert.deepEqual(r.j.population, { holders: 1, withSettlement: 0, withConfirmation: 1, withDrift: 0, withOwnerBookings: 0, cancelled: 0 }, 'no settlement yet, and still counted');
+  assert.equal(r.j.bookedRevenue.cents, 39000, 'booked: the confirmed trip (2.3.0)'); assert.equal(r.j.notYetInvoiced.cents, 39000, 'and none of it invoiced yet');
   assert.equal(r.j.confirmedRevenue.cents, 39000, 'the confirmed trip, USD 390 — before any statement');
   for (const k of ['issuedRevenue', 'cashCollected', 'outstanding', 'overdue', 'refundDue']) { assert.equal(r.j[k].cents, 0, k + ': not issued yet is zero, not a gap'); assert.equal(r.j[k].complete, true, k); }
   assert.equal(ops.filter((o) => o === 'read').length, 0, 'never one ledger read per holder');
@@ -719,14 +720,27 @@ test('REVENUE · a confirmed trip counts in Confirmed Revenue before any stateme
   assert.equal(r.j.population.holders, 1);
   /* a guest gets nothing of it */
   assert.equal((await hit(W, GUEST, 'revenue')).status, 403);
-  /* a confirmation record for an invitation the register no longer resolves: a named gap, never a 503 (review, 7 Oct 2026) */
+  /* a confirmation record for an invitation the register no longer names (the Owners took the guest off the list, 15 Nov 2026):
+     CANCELLED — nothing of it is booked, every figure stays complete, the holder is listed; never a 503, never a blank KPI */
   store['conf:INV-GONE'] = { confirmedAt: '2026-10-02T09:00:00Z', version: 1 };
   r = await hit(W, GROOM, 'revenue');
   assert.equal(r.status, 200, JSON.stringify(r.j).slice(0, 300));
-  assert.deepEqual(r.j.unresolved.map((u) => u.Holder_ID), ['INV-GONE']);
-  assert.equal(r.j.confirmedRevenue.complete, false); assert.match(JSON.stringify(r.j.confirmedRevenue.gaps), /INV-GONE/);
-  assert.equal(r.j.confirmedRevenue.partial.cents, 39000, 'the computable part is still offered, marked partial');
+  assert.deepEqual(r.j.unresolved, []); assert.equal(r.j.population.cancelled, 1);
+  assert.deepEqual(r.j.cancelledHolders.map((c) => c.Holder_ID), ['INV-GONE']);
+  assert.equal(r.j.confirmedRevenue.complete, true); assert.equal(r.j.bookedRevenue.cents, 39000, 'a cancelled guest books nothing');
   delete store['conf:INV-GONE'];
+  /* an invitation the register names TWICE (an ambiguous person) is still a named gap: never taken for cancelled */
+  W.index = { ...INDEX, x1: { i: 'INV-AMB', g: 'GA1', c: 'CON-A1' }, x2: { i: 'INV-AMB', g: 'GA2', c: 'CON-A2' } };
+  store['conf:INV-AMB'] = { confirmedAt: '2026-10-02T09:00:00Z', version: 1 };
+  r = await hit(W, GROOM, 'revenue');
+  assert.deepEqual(r.j.unresolved.map((u) => u.Holder_ID), ['INV-AMB']);
+  assert.equal(r.j.bookedRevenue.complete, false); assert.equal(r.j.bookedRevenue.partial.cents, 39000, 'the computable part, marked partial');
+  assert.equal(r.j.confirmedRevenue.complete, false); assert.match(JSON.stringify(r.j.confirmedRevenue.gaps), /INV-AMB/);
+  delete store['conf:INV-AMB']; delete W.index;
+  /* an empty register (unreadable) is never "everyone cancelled": the overview refuses */
+  W.index = {};
+  assert.equal((await hit(W, GROOM, 'revenue')).status, 503);
+  delete W.index;
   /* a withdrawn confirmation (metadata confirmedAt null) is not population */
   const meta = { 'conf:INV-T2': { confirmedAt: null } };
   store['conf:INV-T2'] = { confirmedAt: null, version: null };
