@@ -847,7 +847,7 @@ test('QUOTA · the catalogue reads its five tabs through ONE batch request, and 
   });
 });
 
-test('QUOTA · the held pricing source: miss, hit, expiry, one load for concurrent callers, fresh bypass, pricing data only and frozen', async () => {
+test('QUOTA · the held pricing source: miss, hit, expiry, each concurrent miss its own load (15 Nov 2026), fresh bypass, pricing data only and frozen', async () => {
   clearCatalogueCache();
   let t = 1_000_000, loads = 0;
   const now = () => t;
@@ -863,10 +863,86 @@ test('QUOTA · the held pricing source: miss, hit, expiry, one load for concurre
   t += CATALOGUE_TTL_MS;
   await pricingSource('k', load, { now }); assert.equal(loads, 3, 'expired: read again');
   t += CATALOGUE_TTL_MS;
-  let release; const slow = () => new Promise((r) => { release = () => { loads++; r({ items: ITEMS, specialRates: SPECIAL }); }; });
+  /* no in-flight load is shared between requests (a promise belongs to its request on Workers): two misses, two loads */
+  const releases = []; const slow = () => new Promise((r) => { releases.push(() => { loads++; r({ items: ITEMS, specialRates: SPECIAL }); }); });
   const both = Promise.all([pricingSource('k', slow, { now }), pricingSource('k', slow, { now })]);
-  await new Promise((r) => setImmediate(r)); release();
-  await both; assert.equal(loads, 4, 'one load for both');
+  await new Promise((r) => setImmediate(r));
+  assert.equal(releases.length, 2, 'each miss started its own load');
+  releases.forEach((go) => go());
+  const [x, y] = await both; assert.equal(loads, 5, 'one load each'); assert.equal(x.cached, false); assert.equal(y.cached, false);
+  const after = await pricingSource('k', slow, { now });
+  assert.equal(after.cached, true); assert.equal(loads, 5, 'the finished entry serves the rest of the minute');
+});
+
+/* THE CATALOGUE 503 (Owner, 15 Nov 2026 · reopen booking). Live, a load begun by a request that was then cancelled could never
+   settle; it stayed the shared in-flight load and every later catalogue request of the isolate failed on it. Node has no
+   Workers request scope, so a load that never settles stands for the cancelled one: nothing later may wait for it. */
+const settlesWithin = (p, ms, what) => Promise.race([p, new Promise((_, no) => setTimeout(() => no(new Error(what + ' waited on a load that never settles')), ms))]);
+
+test('BOOKING REOPENED · an abandoned catalogue load never blocks a later request: its own read, then a held hit; the stale fallback still stands', async () => {
+  clearCatalogueCache();
+  let t = 9_000_000, hung = 0, good = 0;
+  const now = () => t;
+  const abandoned = pricingSource('h', () => { hung++; return new Promise(() => {}); }, { now });   /* the cancelled request — never awaited */
+  abandoned.catch(() => {});
+  await new Promise((r) => setImmediate(r));
+  const load2 = async () => { good++; return { items: ITEMS, specialRates: SPECIAL }; };
+  const later = await settlesWithin(pricingSource('h', load2, { now }), 500, 'the later request');
+  assert.equal(hung, 1); assert.equal(good, 1, 'the later request read the source itself, exactly once');
+  assert.equal(later.cached, false); assert.equal(later.items['T-STAY'].Standard_Rate, 145, 'the Owner\'s rate, unchanged');
+  const third = await settlesWithin(pricingSource('h', load2, { now }), 500, 'the third request');
+  assert.equal(third.cached, true); assert.equal(good, 1, 'then held for the minute');
+  /* a second abandoned load after expiry, then Google briefly unavailable: the last entry still stands in as stale (display only) */
+  t += CATALOGUE_TTL_MS + 1;
+  pricingSource('h', () => new Promise(() => {}), { now }).catch(() => {});
+  await new Promise((r) => setImmediate(r));
+  const quota = async () => { throw new GoogleSheetsUnavailable('Google Sheets refused the request', { status: 429 }); };
+  const st = await settlesWithin(pricingSource('h', quota, { now }), 500, 'the stale fallback');
+  assert.equal(st.stale, true); assert.equal(st.items['T-STAY'].Standard_Rate, 145);
+  const fr = await settlesWithin(pricingSource('h', load2, { now, fresh: true }), 500, 'a fresh read');
+  assert.equal(fr.cached, false); assert.equal(good, 2);
+});
+
+test('BOOKING REOPENED · two overlapping reads: the one that began first and finished last never replaces the newer entry', async () => {
+  clearCatalogueCache();
+  let t = 20_000_000; const now = () => t;
+  const NEW = { ...ITEMS, 'T-STAY': { ...ITEMS['T-STAY'], Standard_Rate: 150 } };
+  let releaseOld; const old = pricingSource('o', () => new Promise((r) => { releaseOld = () => r({ items: ITEMS, specialRates: SPECIAL }); }), { now });
+  await new Promise((r) => setImmediate(r));
+  t += 1000;
+  const second = await pricingSource('o', async () => ({ items: NEW, specialRates: SPECIAL }), { now });   /* began later, finished first */
+  assert.equal(second.items['T-STAY'].Standard_Rate, 150);
+  t += 1000; releaseOld();
+  assert.equal((await old).items['T-STAY'].Standard_Rate, 145, 'the old read answers its own request with what it read');
+  const held = await pricingSource('o', async () => { throw new Error('must be a hit'); }, { now });
+  assert.equal(held.cached, true); assert.equal(held.items['T-STAY'].Standard_Rate, 150, 'the newer entry stays held');
+});
+
+test('BOOKING REOPENED · an abandoned token mint never blocks a later Google read: the later request mints its own token and reads', async () => {
+  const was = globalThis.fetch;
+  let mints = 0, reads = 0, first = true;
+  globalThis.fetch = async (url) => {
+    const u = String(url);
+    if (u.startsWith('https://oauth2.googleapis.com/token')) {
+      mints++;
+      if (first) { first = false; return new Promise(() => {}); }   /* the cancelled request's mint — never settles */
+      return new Response(JSON.stringify({ access_token: 'synthetic-reopen', expires_in: 3600, token_type: 'Bearer' }), { status: 200, headers: { 'content-type': 'application/json' } });
+    }
+    if (/values:batchGet/.test(u)) { reads++; return new Response(JSON.stringify({ valueRanges: [{ range: '002!A1:B2', values: [['a', 'b']] }] }), { status: 200, headers: { 'content-type': 'application/json' } }); }
+    return new Response('{}', { status: 404 });
+  };
+  try {
+    /* an identity no earlier test has minted for, so no held token can make this pass by accident */
+    const env = { GOOGLE_SERVICE_ACCOUNT_JSON: JSON.stringify({ client_email: 'reopen-booking@test.invalid', private_key: privateKey, private_key_id: 'reopen-15-nov' }) };
+    batchReadRanges(env, 'SHEET-REOPEN', ['002!A1:B2']).catch(() => {});                              /* the abandoned request */
+    await new Promise((r) => setTimeout(r, 50));
+    assert.equal(mints, 1, 'the first mint is in flight and never settles');
+    const grids = await settlesWithin(batchReadRanges(env, 'SHEET-REOPEN', ['002!A1:B2']), 2000, 'the later read');
+    assert.deepEqual(grids, [[['a', 'b']]]);
+    assert.equal(mints, 2, 'its own mint'); assert.equal(reads, 1, 'and its own read');
+    await settlesWithin(batchReadRanges(env, 'SHEET-REOPEN', ['002!A1:B2']), 2000, 'the next read');
+    assert.equal(mints, 2, 'the finished token is held for the next request'); assert.equal(reads, 2);
+  } finally { globalThis.fetch = was; }
 });
 
 test('QUOTA · a transient Google failure serves the last source as stale (display only) up to its bound; a data error, a fresh read or an old entry never does', async () => {
