@@ -44,7 +44,8 @@ import {
   buildSnapshot, canIssue, dueDateFor, freezeFx, inPreferredCurrency,
   paymentStatus, isDuplicateSuspect, nextRevisionState,
 } from './billing/settlement.js';
-import { loadConfirmedBookings, unmappedProducts, siteKeyOfSelection } from './billing/bookings.js';
+import { loadConfirmedBookings, unmappedProducts, siteKeyOfSelection, nightsOf, selectionLinesOf } from './billing/bookings.js';
+import { OWNER_BOOKING_STATE, obkKey, OBK_INDEX_KEY, readRecord, stateOf as ownerStateOf, stageOf, applyAction, toBookings, occupancy, problemsOf, combinedConfirmation } from './billing/owner-bookings.js';
 import { canonicalLines } from './legacy-keys.js';
 import { renderSettlementPdf } from './billing/pdf.js';
 import { buildRevenueOverview } from './billing/revenue.js';
@@ -320,19 +321,82 @@ const preferenceView = (pref, issued, env) => ({
 
 /** The engine result for one Holder — the ONE calculation path (Freeze · V). `assume` is the admin console's what-if
     only (loadConfirmedBookings): never passed on an issue. */
-async function calculateHolder(env, identity, holderId, src, asOf, origin, assume, known) {
+async function calculateHolder(env, identity, holderId, src, asOf, origin, assume, known, opts) {
   if (!clean(identity && identity.guestId)) identity = await holderIdentity(env, origin, holderId);
   /* `known`: the holder's state already read in a batch (the Revenue Overview) — never a second ledger request */
   const state = known || await holderState(env, holderId);
-  const bookings = await loadConfirmedBookings({
+  const registered = await loadConfirmedBookings({
     env, identity, holderId, items: src.items,
     generations: (state && state.generations) || {},
     overrides: (state && state.overrides) || {},
     ...(assume ? { assume } : {}),
   });
+  const regConfirmation = (registered && registered.confirmation) || { state: 'NONE' };
+  /* THE OWNERS' OWN BOOKINGS (15 Nov 2026): billed beside the guest's confirmed trip once the Owners confirmed them; the
+     guest's own view (opts.owner === false) keeps to the trip they sent until a statement is issued */
+  const owner = opts && opts.owner === false ? null : await ownerBookingsOf(env, holderId, src, { guestId: identity && identity.guestId, origin, asOf: evaluationDay(asOf) });
+  const bookings = owner && owner.state === OWNER_BOOKING_STATE.CONFIRMED ? [...registered, ...owner.rows] : [...registered];
   const result = calculate(bookings, { items: src.items, specialRates: src.specialRates, asOf: evaluationDay(asOf) });
   return { state, bookings, result, unmapped: unmappedProducts(bookings),
-    confirmation: (bookings && bookings.confirmation) || { state: 'NONE' } };
+    confirmation: owner ? combinedConfirmation(regConfirmation, owner.view) : regConfirmation, owner };
+}
+
+/**
+ * THE OWNERS' BOOKINGS OF ONE PAYING INVITATION (src/billing/owner-bookings.js) — the record, its state, the engine rows and
+ * what stands in the way of billing them: an extra bed without its own 009 row, a room over its capacity, a person the same
+ * stay is already booked for elsewhere (their own sent trip, or another paying invitation's record — read at calculation
+ * time, not only when an entry was recorded). An unreadable record fails the calculation; it is never taken as empty.
+ */
+async function ownerBookingsOf(env, holderId, src, ctx) {
+  if (!env.REG_KV) return null;
+  const c = ctx || {};
+  const rec = readRecord(await env.REG_KV.get(obkKey(holderId)));
+  const st = ownerStateOf(rec);
+  const unreadable = [];
+  let index = {};
+  const rawIndex = await env.REG_KV.get(OBK_INDEX_KEY);
+  if (rawIndex) { try { index = JSON.parse(rawIndex) || {}; } catch (e) { index = {}; unreadable.push('the index of recorded persons'); } }
+  const recordOf = async (h) => { try { return readRecord(await env.REG_KV.get(obkKey(h))); } catch (e) { unreadable.push('the record of ' + h); return null; } };
+  const elsewhere = [];
+  /* the persons this payer recorded: their own sent trip, and other payers' records */
+  for (const p of [...new Set(rec.entries.map((e) => e.personId))]) {
+    const own = 'INV-' + p;
+    const reg = await kvJson(env, 'reg:' + own);
+    const sels = reg && reg.submissionId && reg.registration ? reg.registration.selections : null;
+    if (sels) for (const l of selectionLinesOf(sels)) {
+      const key = siteKeyOfSelection(l); if (key && key.includes('/')) elsewhere.push({ personId: p, stage: key.split('/')[0], by: own + '\'s own sent trip' });
+    }
+    for (const other of (Array.isArray(index[p]) ? index[p] : []).filter((h) => h !== holderId)) {
+      const o = await recordOf(other);
+      for (const e of (o && o.entries) || []) if (e.personId === p) elsewhere.push({ personId: p, stage: stageOf(src.items, e.itemId), by: 'the record of ' + other });
+    }
+  }
+  /* THE OTHER WAY ROUND (review, 15 Nov 2026): this invitation's own person, recorded by another payer for a stay their own sent trip
+     books too — named on this statement as well, so neither statement bills the stay twice */
+  const ownPerson = clean(c.guestId);
+  const recordedElsewhere = ownPerson ? (Array.isArray(index[ownPerson]) ? index[ownPerson] : []).filter((h) => h !== holderId) : [];
+  const reverse = [];
+  if (recordedElsewhere.length) {
+    const reg = await kvJson(env, 'reg:' + holderId);
+    const sels = reg && reg.submissionId && reg.registration ? reg.registration.selections : null;
+    const mine = new Set(sels ? selectionLinesOf(sels).map((l) => siteKeyOfSelection(l)).filter((k) => k && k.includes('/')).map((k) => k.split('/')[0]) : []);
+    for (const other of recordedElsewhere) {
+      const o = await recordOf(other);
+      for (const e of (o && o.entries) || []) {
+        const stage = stageOf(src.items, e.itemId);
+        if (e.personId === ownPerson && mine.has(stage)) reverse.push('DOUBLE_BOOKING: ' + ownPerson + ' has the ' + stage + ' stay in their own trip and in the record of ' + other);
+      }
+    }
+  }
+  let active = null;
+  if (c.origin && rec.entries.length) {
+    /* fail closed: a register that cannot be read is named, never taken as "everyone is still active" */
+    try { const list = holdersOfIndex(await loadIndex(env, c.origin, false)).filter((h) => !h.ambiguous && h.guestId); if (!list.length) throw new Error('empty'); active = new Set(list.map((h) => h.guestId)); }
+    catch (e) { active = null; unreadable.push('the register (who is still an active guest)'); }
+  }
+  const problems = [...new Set([...problemsOf({ holderId, rec, items: src.items, specialRates: src.specialRates, elsewhere, asOf: c.asOf, active, unreadable }), ...reverse])];
+  return { rec, state: st, rows: st === OWNER_BOOKING_STATE.NONE ? [] : toBookings(holderId, rec, src.items, nightsOf), problems,
+    view: { state: st, rev: rec.rev, confirmedBy: rec.confirmed && rec.confirmed.by, confirmedAt: rec.confirmed && rec.confirmed.at } };
 }
 
 /* ------------------------------------------------------------------ guest */
@@ -348,7 +412,7 @@ async function guestSettlement(env, identity, url, cors) {
   }
   const asOf = evaluationDay(url.searchParams.get('asOf'));
   const src = await loadSource(env, asOf);
-  const { state, result, unmapped, confirmation } = await calculateHolder(env, identity, holderId, src, asOf);
+  const { state, result, unmapped, confirmation } = await calculateHolder(env, identity, holderId, src, asOf, undefined, undefined, undefined, { owner: false });
 
   const settlementId = state && state.Settlement_ID;
   const issued = state.issuedRevision;
@@ -775,6 +839,7 @@ const CONFIRMATION_WORDS = Object.freeze({
   NONE: 'the guest has not submitted this trip yet',
   UNCONFIRMED: 'waiting for confirmation — Haruthai or Suthep can confirm this submitted booking (Confirm booking)',
   LAPSED: 'the guest sent a newer version after the confirmation — Haruthai or Suthep can confirm the new submitted booking (Confirm booking)',
+  OWNER_RECORDED: 'the bookings Haruthai & Suthep recorded are not confirmed in this version — confirm them in "Recorded by Haruthai & Suthep"',
 });
 
 /**
@@ -825,7 +890,10 @@ async function assessIssue(env, holderId, src, asOf, origin, opts) {
   if (!pref.determined) reasons.push('PAYMENT_PREFERENCE_UNDETERMINED: ' + pref.reason + ' — a BILLING_ADMIN states the method first');
   else if (!destination || !destination.complete) reasons.push('PAYMENT_DESTINATION_INCOMPLETE: ' + pref.channel + ' has no configured account');
   const confirmation = current.confirmation || { state: 'NONE' };
-  if (confirmation.state !== 'CONFIRMED') reasons.push('BOOKING_NOT_CONFIRMED: ' + (confirmation.state || 'NONE') + ' — ' + (CONFIRMATION_WORDS[confirmation.state] || CONFIRMATION_WORDS.NONE));
+  if (confirmation.state !== 'CONFIRMED') reasons.push('BOOKING_NOT_CONFIRMED: ' + (confirmation.state || 'NONE') + ' — ' + (confirmation.ownerRecorded && confirmation.ownerRecorded.state === OWNER_BOOKING_STATE.RECORDED && confirmation.state === 'UNCONFIRMED'
+    ? CONFIRMATION_WORDS.OWNER_RECORDED : (CONFIRMATION_WORDS[confirmation.state] || CONFIRMATION_WORDS.NONE)));
+  /* the Owners' bookings: what stands in the way of billing them (an unpriced extra bed, a room over capacity, a double booking) */
+  if (current.owner && current.owner.problems && current.owner.problems.length) reasons.push(...current.owner.problems.map((x) => 'OWNER_BOOKING · ' + x));
   if (!verdict.allowed) reasons.push(...verdict.reasons);
   if (gateNow && !gateNow.approved) reasons.push(...gateNow.open.map((o) => 'GATE_NOW: ' + o));
 
@@ -847,6 +915,7 @@ async function assessIssue(env, holderId, src, asOf, origin, opts) {
      matches, so one preview issues at most once */
   const proposalHash = proposal && !confirmation.assumed
     ? await sha256Hex(stableJson({ proposal: { ...proposal, calculated_at: null }, confirmedVersion: confirmation.version ?? null,
+      ownerRecorded: confirmation.ownerRecorded ? { state: confirmation.ownerRecorded.state, rev: confirmation.ownerRecorded.rev } : null,
       settlement: { id: state.Settlement_ID || null, latestRevision: Number(state.latestRevision) || 0, issuedRevision: issuedNow ? issuedNow.Revision : null } }))
     : null;
   return {
@@ -910,9 +979,10 @@ async function adminIssue(env, identity, request, cors) {
      version of the trip Guest Relations confirmed — never on a hold the guest
      has not sent, or on a sent change nobody has confirmed yet */
   if (!current.confirmation || current.confirmation.state !== 'CONFIRMED') {
+    const c = current.confirmation || {};
+    const ownerPending = c.ownerRecorded && c.ownerRecorded.state === OWNER_BOOKING_STATE.RECORDED && c.state === 'UNCONFIRMED';
     return jsonRes({ ok: false, error: 'Issue & Publish is blocked',
-      reasons: ['BOOKING_NOT_CONFIRMED: ' + ((current.confirmation && current.confirmation.state) || 'NONE') +
-        ' — ' + (CONFIRMATION_WORDS[current.confirmation && current.confirmation.state] || CONFIRMATION_WORDS.NONE)] }, 409, cors);
+      reasons: ['BOOKING_NOT_CONFIRMED: ' + (c.state || 'NONE') + ' — ' + (ownerPending ? CONFIRMATION_WORDS.OWNER_RECORDED : (CONFIRMATION_WORDS[c.state] || CONFIRMATION_WORDS.NONE))] }, 409, cors);
   }
   /* WHAT WAS PREVIEWED IS WHAT IS ISSUED (Owner, 7 Oct 2026): the console names the statement it showed */
   const expected = clean(body.expectedProposal);
@@ -1021,7 +1091,9 @@ async function adminRevenue(env, identity, url, cors) {
     /* one holder that cannot be read (a removed invitation, an ambiguous person) is named as a gap — it never takes the
        whole overview down, and its figures are never guessed (review, 7 Oct 2026) */
     try {
-      const { state, bookings } = await calculateHolder(env, { invitationId: id, guestId: null }, id, src, asOf, url.origin, undefined, states.get(id));
+      const { state, bookings } = await calculateHolder(env, { invitationId: id, guestId: null }, id, src, asOf, url.origin, undefined, states.get(id),
+        /* the Revenue overview keeps its KV budget (two reads per holder); the Owners' own bookings join it with the queued Revenue work */
+        { owner: false });
       holders.push({ Holder_ID: id, Settlement_ID: state.Settlement_ID, bookings, settlement: state, drifts: drifts.get(id) || [],
         noSettlementRecord: !state.settlement });
     } catch (e) {
@@ -1359,7 +1431,8 @@ async function adminStatus(env, identity, url, cors) {
       const { state, result, unmapped, confirmation } = await calculateHolder(env, { invitationId: id, guestId: null }, id, src, asOf, url.origin, undefined, known);
       rows.push({ booked,
         Holder_ID: id,
-        confirmation: { state: confirmation.state || 'NONE', version: confirmation.version ?? null, confirmedAt: confirmation.confirmedAt || null },
+        confirmation: { state: confirmation.state || 'NONE', version: confirmation.version ?? null, confirmedAt: confirmation.confirmedAt || null,
+          ownerRecorded: confirmation.ownerRecorded ? { state: confirmation.ownerRecorded.state, rev: confirmation.ownerRecorded.rev } : null },
         draft: confirmation.state === 'CONFIRMED' ? {
           total: result.totalPayable, lines: result.lines.length, manualReview: result.manualReview.length,
           reviewReasons: result.manualReview.map((l) => l.reviewReason).filter(Boolean).slice(0, 5), unmapped,
@@ -1779,6 +1852,94 @@ async function adminSendPost(env, identity, request, url, cors, deps) {
     attempt: done && done.ok === true ? done.attempt : null, recorded: !!(done && done.ok === true) }, outcome === 'SENT' ? 200 : 502, cors);
 }
 
+/* ----------------------------------------------- the Owners' own bookings */
+
+/**
+ * GET admin/owner-bookings?holder=INV — the bookings Haruthai & Suthep recorded for one paying invitation: each entry with the
+ * engine's price for it (002 standard rate or the person's 009 named rate for this payer, nights charged, amount), who sleeps in
+ * each recorded room, what still stands in the way of billing, the state (RECORDED / CONFIRMED) and the log; and what the form
+ * offers — the register's active guests and the 002 products. A read never writes.
+ */
+async function adminOwnerBookingsGet(env, identity, url, cors) {
+  const holderId = clean(url.searchParams.get('holder'));
+  if (!INVITATION_RE.test(holderId)) return jsonRes({ ok: false, error: 'holder required' }, 400, cors);
+  const asOf = evaluationDay(url.searchParams.get('asOf'));
+  const entries = await loadIndex(env, url.origin, false);
+  const holder = holdersOfIndex(entries).find((h) => h.Holder_ID === holderId);
+  if (!holder || holder.ambiguous) return jsonRes({ ok: false, error: holderId + ' is not one invitation of the register' }, 404, cors);
+  const src = await loadSource(env, asOf, { register: true });
+  const ob = await ownerBookingsOf(env, holderId, src, { guestId: holder.guestId, origin: url.origin, asOf });
+  const rows = ob.rec.entries.length ? calculate(toBookings(holderId, ob.rec, src.items, nightsOf), { items: src.items, specialRates: src.specialRates, asOf }) : null;
+  const persons = holdersOfIndex(entries).filter((h) => !h.ambiguous && h.guestId).map((h) => ({ guestId: h.guestId, name: (nameOf(src.register, h.contactId) || {}).full || h.guestId }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+  const names = Object.fromEntries(persons.map((p) => [p.guestId, p.name]));
+  return jsonRes({ ok: true, asOf, Holder_ID: holderId, rev: ob.rec.rev, state: ob.state,
+    confirmed: ob.rec.confirmed, problems: ob.problems,
+    /* each entry with its own engine line, matched by the Booking_ID the entry gave it (OB·holder·person·item·entry) */
+    entries: ob.rec.entries.map((e) => {
+      const l = rows ? rows.lines.find((x) => clean(x.Booking_ID).split('·').pop() === e.id) : null;
+      return { id: e.id, personId: e.personId, person: names[e.personId] || e.personId, itemId: e.itemId, room: e.room, extraBed: !!e.extraBed, note: e.note,
+        recordedBy: e.recordedBy, recordedAt: e.recordedAt, line: l ? lineView(l, names) : null };
+    }),
+    total: rows ? rows.totalPayable : 0, manualReview: rows ? rows.manualReview.length : 0,
+    rooms: occupancy(ob.rec, src.items).map((r) => ({ ...r, names: r.persons.map((p) => names[p] || p) })),
+    log: ob.rec.log.slice(-20),
+    choices: { persons, items: Object.entries(src.items).filter(([, it]) => clean(it.Rate_Status) !== 'RETIRED')
+      .map(([id, it]) => ({ itemId: id, key: clean(it.Site_Product_Key).split(/[,|]/)[0] || null, rate: listRateOf(it), basis: clean(it.Rate_Basis) || null, maxPax: Number(it.Max_Pax) || null })) },
+  }, 200, cors);
+}
+
+/**
+ * POST admin/owner-bookings { holderId, expectedRev, action: add|remove|confirm, entry|entryId } — a BILLING_ADMIN records,
+ * removes or confirms the Owners' bookings of one paying invitation. The revision shown must still be the stored one (STALE
+ * otherwise — KV has no compare-and-swap: this narrows the window to the write itself, and Issue binds the confirmed revision
+ * in its proposal hash). Confirm is refused while anything stands in the way of billing. Never issues, never e-mails.
+ */
+async function adminOwnerBookingsPost(env, identity, request, url, cors) {
+  const body = await request.json().catch(() => null);
+  const holderId = clean(body && body.holderId);
+  if (!INVITATION_RE.test(holderId)) return jsonRes({ ok: false, error: 'holderId required' }, 400, cors);
+  if (!env.REG_KV) return jsonRes({ ok: false, error: 'the booking store is not bound' }, 503, cors);
+  const action = clean(body.action);
+  if (!['add', 'remove', 'confirm'].includes(action)) return jsonRes({ ok: false, error: 'action must be add, remove or confirm' }, 400, cors);
+  const entries = await loadIndex(env, url.origin, false);
+  const holders = holdersOfIndex(entries);
+  const holder = holders.find((h) => h.Holder_ID === holderId);
+  if (!holder || holder.ambiguous) return jsonRes({ ok: false, error: holderId + ' is not one invitation of the register' }, 404, cors);
+  const asOf = evaluationDay();
+  /* a fresh read of 002/009: recording and confirming are financial acts, never judged on a held copy */
+  const src = await pricing(env, asOf, true);
+  const raw = await env.REG_KV.get(obkKey(holderId));
+  const rec = readRecord(raw);
+  if (Number(body.expectedRev) !== rec.rev) return jsonRes({ ok: false, error: 'the bookings changed since they were shown; nothing was written', reasons: ['STALE'], rev: rec.rev }, 409, cors);
+  if (action === 'confirm') {
+    const ob = await ownerBookingsOf(env, holderId, src, { guestId: holder.guestId, origin: url.origin, asOf });
+    if (ob.problems.length) return jsonRes({ ok: false, error: 'these bookings cannot be confirmed yet', reasons: ob.problems }, 409, cors);
+  }
+  const persons = new Map(holders.filter((h) => !h.ambiguous && h.guestId).map((h) => [h.guestId, h.guestId]));
+  const r = applyAction(rec, action, { entry: body.entry, entryId: body.entryId, by: adminLabel(identity), at: new Date().toISOString(), items: src.items, persons });
+  if (!r.ok) return jsonRes({ ok: false, error: r.error }, 409, cors);
+  if (r.unchanged) return jsonRes({ ok: true, unchanged: true, rev: rec.rev, state: ownerStateOf(rec) }, 200, cors);
+  /* the record as it stands right before the write */
+  if ((await env.REG_KV.get(obkKey(holderId))) !== raw) return jsonRes({ ok: false, error: 'the bookings changed meanwhile; nothing was written', reasons: ['STALE'] }, 409, cors);
+  /* which paying invitations hold which persons (the double-booking check across payers) — read before anything is written: an
+     unreadable index is never overwritten, nothing is written at all */
+  let index = {};
+  if (action !== 'confirm') {
+    try { index = JSON.parse((await env.REG_KV.get(OBK_INDEX_KEY)) || '{}') || {}; } catch (e) { index = null; }
+    if (!index) return jsonRes({ ok: false, error: 'the index of recorded persons is not readable; nothing was written', reasons: ['OWNER_RECORD_UNREADABLE'] }, 503, cors);
+  }
+  await env.REG_KV.put(obkKey(holderId), JSON.stringify(r.record));
+  if (action !== 'confirm') {
+    const mine = new Set(r.record.entries.map((e) => e.personId));
+    for (const p of Object.keys(index)) index[p] = (index[p] || []).filter((h) => h !== holderId || mine.has(p));
+    for (const p of mine) index[p] = [...new Set([...(index[p] || []), holderId])];
+    for (const p of Object.keys(index)) if (!index[p].length) delete index[p];
+    await env.REG_KV.put(OBK_INDEX_KEY, JSON.stringify(index));
+  }
+  return jsonRes({ ok: true, rev: r.record.rev, state: ownerStateOf(r.record) }, 200, cors);
+}
+
 /* ------------------------------------------------------------ the router */
 
 const GUEST_ROUTES = new Set(['mine', 'payment/report', 'pdf', 'qr', 'catalogue', 'validate', 'preference']);
@@ -1891,6 +2052,9 @@ export async function handleBilling(request, env, url, cors, deps) {
       /* Confirm booking: a BILLING_ADMIN confirms the submitted booking, as Guest Relations would (Owner, 7 Oct 2026) */
       case 'admin/confirm':
         return request.method === 'POST' ? await adminConfirmPost(env, identity, request, url, cors) : await adminConfirmGet(env, identity, url, cors);
+      /* the Owners' own bookings (15 Nov 2026): recorded, removed and confirmed by a BILLING_ADMIN; billed only once confirmed */
+      case 'admin/owner-bookings':
+        return request.method === 'POST' ? await adminOwnerBookingsPost(env, identity, request, url, cors) : await adminOwnerBookingsGet(env, identity, url, cors);
       /* A READ NEVER WRITES (Owner, 8 Oct 2026 · closeout): every route below that records something in the ledger answers only a
          POST; a GET of reconcile is its read-only preview — the same report, nothing recorded (written: false) */
       case 'issue':

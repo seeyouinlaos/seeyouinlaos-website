@@ -294,7 +294,7 @@ test('THE REGISTER · the builder skips a relationship placeholder and a "." sur
   const enc = JSON.parse(readFileSync('register/invitations.enc.json', 'utf8')), idx = JSON.parse(readFileSync('register/auth-index.json', 'utf8'));
   const flat = JSON.stringify(enc) + JSON.stringify(idx);
   assert.doesNotMatch(flat, /girlfriend|Aob|@|\+\d{6,}/, 'no placeholder, no contact detail in the served files');
-  assert.equal(Object.keys(idx.entries || idx).length >= 80, true, 'the whole register is served, encrypted');
+  assert.equal(Object.keys(idx.entries || idx).length >= 60, true, 'the whole register is served, encrypted (64 active guests since 15 Nov 2026)');
 });
 
 test('PARTY CAPACITY · a party larger than a room: the family fills one room and keeps the rest of its places in the next rooms of the category — or is refused as a whole; the kept places go with the party', async () => {
