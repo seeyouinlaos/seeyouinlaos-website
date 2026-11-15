@@ -25,6 +25,7 @@ export async function resolve(specifier, context, next) {
 
 const { handleBilling } = await import('../src/billing-routes.js');
 const { BillingLedger } = await import('../src/billing-ledger.js');
+const { Rooms } = await import('../src/rooms.js');
 const { calculate } = await import('../src/billing/engine.js');
 const { nightsOf } = await import('../src/billing/bookings.js');
 const { PAYMENT_JOURNAL_COLUMNS } = await import('../src/billing/source.js');
@@ -85,7 +86,8 @@ function routeEnv(kvInit) {
   const led = new BillingLedger(doState());
   return { SHEETS_ID: 'sheet-ob', GOOGLE_SERVICE_ACCOUNT_JSON: JSON.stringify({ client_email: 'owner-bookings@test.invalid', private_key: privateKey, private_key_id: 'ob' }),
     BILLING_LEDGER: { idFromName: () => 'billing', get: () => ({ fetch: (req) => led.fetch(req) }) }, REG_KV: memKv(kvInit),
-    ROOMS: { idFromName: () => 'r', get: () => ({ fetch: async () => new Response(JSON.stringify({ ok: true, mine: {} })) }) } };
+    /* the real Rooms engine on its own in-memory storage: the reservation is the engine's, not a stub's */
+    ROOMS: (() => { const rooms = new Rooms(doState()); return { idFromName: () => 'rooms', get: () => ({ fetch: (req) => rooms.fetch(req) }), _rooms: rooms }; })() };
 }
 const GROOM = { invitationId: 'INV-G049', guestId: 'G049', hosts: true };
 async function hit(env, identity, path, body) {
@@ -276,5 +278,84 @@ test('ROUTE admin/owner-bookings · an unreadable index of recorded persons fail
     await env.REG_KV.put('obk-index', '{not json');
     const c = await hit(env, GROOM, 'admin/owner-bookings', { holderId: PAYER, expectedRev: r.j.rev, action: 'confirm' });
     assert.equal(c.status, 409); assert.match(c.j.reasons[0], /^OWNER_RECORD_UNREADABLE/);
+  });
+});
+
+/* the Rooms engine as a guest would ask it: join a unit in their own name */
+const join = (env, guestId, label) => env.ROOMS.get().fetch(new Request('https://rooms/api/rooms/join', { method: 'POST',
+  headers: { 'x-siyl-identity': JSON.stringify({ invitationId: 'INV-' + guestId, guestId, firstName: 'Synth' }), 'content-type': 'application/json' },
+  body: JSON.stringify({ invitationId: 'INV-' + guestId, guestId, key: 'wedstay/heritage-executive', label, need: 1 }) })).then((r) => r.json());
+const unitOcc = async (env, label) => (await env.ROOMS.get().fetch(new Request('https://rooms/api/rooms/plan', { headers: { 'x-gr-verified': 'yes' } })).then((r) => r.json()))
+  .units['wedstay/heritage-executive'].find((u) => u.label === label).occupants.map((o) => o.guestId).sort();
+
+test('ROOMS · confirming the Owners\' bookings RESERVES the real units: the room\'s own places, the extra bed beyond them, nothing left for anyone else', async () => {
+  const env = routeEnv();
+  await withSheets(workbook(FAMILY_RATES), async () => {
+    /* the payer already holds a place in unit I from her own draft (as live) — it is hers, not a stranger's */
+    assert.equal((await join(env, P.payer, 'I')).ok, true);
+    let rev = 0;
+    for (const [personId, room, extraBed] of [[P.mum, 'A'], [P.dad, 'A'], [P.payer, 'I'], [P.sib, 'I'], [P.bed, 'I', true]]) {
+      const r = await hit(env, GROOM, 'admin/owner-bookings', { holderId: PAYER, expectedRev: rev, action: 'add', entry: { personId, itemId: 'T-EXEC', room, extraBed: !!extraBed } }); rev = r.j.rev;
+    }
+    const g = await hit(env, GROOM, 'admin/owner-bookings?holder=' + PAYER);
+    const unitsNow = g.j.units['wedstay/heritage-executive'];
+    assert.equal(unitsNow.find((u) => u.label === 'I').free, 1, 'before the confirmation: one place of I is still free'); assert.equal(unitsNow.find((u) => u.label === 'A').free, 2);
+    const c = await hit(env, GROOM, 'admin/owner-bookings', { holderId: PAYER, expectedRev: rev, action: 'confirm' });
+    assert.equal(c.status, 200, JSON.stringify(c.j));
+    assert.deepEqual(await unitOcc(env, 'I'), [P.sib, P.bed, P.payer].sort(), 'unit I: the three, the extra bed beyond its two places');
+    assert.deepEqual(await unitOcc(env, 'A'), [P.mum, P.dad].sort());
+    const stranger = await join(env, P.other, 'I');
+    assert.equal(stranger.ok, false); assert.equal(stranger.error, 'full', 'no place of unit I is offered to another guest');
+    assert.equal((await join(env, P.other, 'A')).error, 'full');
+    const after = (await hit(env, GROOM, 'admin/owner-bookings?holder=' + PAYER)).j;
+    assert.equal(after.units['wedstay/heritage-executive'].find((u) => u.label === 'I').free, 0);
+    assert.ok(after.entries.every((e) => e.held || !e.room), 'every room entry carries the place it holds');
+    /* removing a held entry gives that place back */
+    const rm = await hit(env, GROOM, 'admin/owner-bookings', { holderId: PAYER, expectedRev: after.rev, action: 'remove', entryId: after.entries.find((e) => e.personId === P.dad).id });
+    assert.equal(rm.status, 200); assert.deepEqual(await unitOcc(env, 'A'), [P.mum]);
+  });
+});
+
+test('ROOMS · a unit another guest already holds is refused at confirmation — nothing confirmed, nothing held', async () => {
+  const env = routeEnv();
+  await withSheets(workbook(FAMILY_RATES), async () => {
+    assert.equal((await join(env, P.other, 'B')).ok, true);
+    let rev = 0;
+    for (const p of [P.mum, P.dad]) rev = (await hit(env, GROOM, 'admin/owner-bookings', { holderId: PAYER, expectedRev: rev, action: 'add', entry: { personId: p, itemId: 'T-EXEC', room: 'B' } })).j.rev;
+    const c = await hit(env, GROOM, 'admin/owner-bookings', { holderId: PAYER, expectedRev: rev, action: 'confirm' });
+    assert.equal(c.status, 409); assert.match(c.j.reasons[0], /^ROOM_TAKEN: wedstay\/heritage-executive · B/);
+    assert.deepEqual(await unitOcc(env, 'B'), [P.other]);
+    assert.equal((await hit(env, GROOM, 'admin/owner-bookings?holder=' + PAYER)).j.state, 'RECORDED');
+    const z = await hit(env, GROOM, 'admin/owner-bookings', { holderId: PAYER, expectedRev: rev, action: 'add', entry: { personId: P.sib, itemId: 'T-EXEC', room: 'Z' } });
+    assert.equal(z.status, 200);
+    const c2 = await hit(env, GROOM, 'admin/owner-bookings', { holderId: PAYER, expectedRev: z.j.rev, action: 'confirm' });
+    assert.equal(c2.status, 409);
+  });
+});
+
+test('OWNER BOOKINGS · the temple offering is one product per person: a guest\'s own sent offering and the Owners\' entry are a double booking', () => {
+  assert.equal(OB.keyStage('sangkhathan'), 'sangkhathan'); assert.equal(OB.keyStage('wedstay/heritage-executive'), 'wedstay');
+  const items = { ...ITEMS, 'T-TEMPLE': { Item_ID: 'T-TEMPLE', Rate_Status: 'ACTIVE', Rate_Basis: 'PER_PERSON', Standard_Rate: 15, Site_Product_Key: 'sangkhathan' } };
+  let rec = OB.emptyRecord(); rec = OB.applyAction(rec, 'add', { entry: { personId: P.payer, itemId: 'T-TEMPLE' }, items, persons }).record;
+  assert.deepEqual(OB.holdPlan(rec, items), [], 'a product without a unit holds no room');
+  assert.match(OB.problemsOf({ holderId: PAYER, rec, items, specialRates: [], elsewhere: [{ personId: P.payer, stage: 'sangkhathan', by: 'x' }], asOf: '2026-11-15' })[0], /^DOUBLE_BOOKING: GT32 already has the sangkhathan stay/);
+});
+
+test('ROOMS · after a change the Owners confirm again: the places already held stay, only what is missing is asked (review, 15 Nov 2026)', async () => {
+  const env = routeEnv();
+  await withSheets(workbook(FAMILY_RATES), async () => {
+    assert.equal((await join(env, P.payer, 'I')).ok, true);
+    let rev = 0;
+    for (const [personId, room, extraBed] of [[P.payer, 'I'], [P.sib, 'I'], [P.bed, 'I', true]]) rev = (await hit(env, GROOM, 'admin/owner-bookings', { holderId: PAYER, expectedRev: rev, action: 'add', entry: { personId, itemId: 'T-EXEC', room, extraBed: !!extraBed } })).j.rev;
+    const c1 = await hit(env, GROOM, 'admin/owner-bookings', { holderId: PAYER, expectedRev: rev, action: 'confirm' });
+    assert.equal(c1.status, 200, JSON.stringify(c1.j));
+    /* a later addition (the parents) and a second confirmation */
+    rev = c1.j.rev;
+    for (const p of [P.mum, P.dad]) rev = (await hit(env, GROOM, 'admin/owner-bookings', { holderId: PAYER, expectedRev: rev, action: 'add', entry: { personId: p, itemId: 'T-EXEC', room: 'A' } })).j.rev;
+    const c2 = await hit(env, GROOM, 'admin/owner-bookings', { holderId: PAYER, expectedRev: rev, action: 'confirm' });
+    assert.equal(c2.status, 200, JSON.stringify(c2.j)); assert.equal(c2.j.state, 'CONFIRMED');
+    assert.deepEqual(await unitOcc(env, 'I'), [P.sib, P.bed, P.payer].sort(), 'unit I unchanged'); assert.deepEqual(await unitOcc(env, 'A'), [P.mum, P.dad].sort());
+    /* confirming the same revision twice changes nothing */
+    assert.equal((await hit(env, GROOM, 'admin/owner-bookings', { holderId: PAYER, expectedRev: c2.j.rev, action: 'confirm' })).status, 200);
   });
 });

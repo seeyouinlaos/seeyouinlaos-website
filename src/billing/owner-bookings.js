@@ -54,11 +54,12 @@ export function stateOf(rec) {
   return rec.confirmed && rec.confirmed.rev === rec.rev ? OWNER_BOOKING_STATE.CONFIRMED : OWNER_BOOKING_STATE.RECORDED;
 }
 
-/** The stay a product belongs to (002 Site_Product_Key "wedstay/heritage-executive" → "wedstay"): two rooms of one stay are one stay. */
-export function stageOf(items, itemId) {
-  const key = clean(items && items[itemId] && items[itemId].Site_Product_Key).split(/[,|]/)[0];
-  return key.includes('/') ? key.split('/')[0] : clean(itemId);
-}
+/** The site key a product is sold under (002 Site_Product_Key, the first one): "wedstay/heritage-executive", "sangkhathan" … */
+export function siteKeyOf(items, itemId) { return clean(items && items[itemId] && items[itemId].Site_Product_Key).split(/[,|]/)[0]; }
+/** What may be booked once per person: a stay ("wedstay/…" → "wedstay": two rooms of one stay are one stay), else the product
+    itself by its site key ("sangkhathan") — the same rule for a guest's own selection line (keyStage) and an Owners' entry. */
+export function keyStage(siteKey) { const k = clean(siteKey); return k.includes('/') ? k.split('/')[0] : k; }
+export function stageOf(items, itemId) { return keyStage(siteKeyOf(items, itemId)) || clean(itemId); }
 
 /** One new entry, checked. `persons` = Map(guestId → name) of the register's ACTIVE guests. */
 export function checkEntry(entry, { items, persons }) {
@@ -126,6 +127,18 @@ export function toBookings(holderId, rec, items, nightsOf) {
     State: 'CONFIRMED', Nights: nightsOf ? nightsOf(items, e.itemId) : null, Quantity: 1, Selected: true,
     source: OWNER_BOOKING_SOURCE, ownerEntry: e.id, extraBed: !!e.extraBed,
   }));
+}
+
+/**
+ * THE ROOM INVENTORY (Owner, 15 Nov 2026 · "a warning alone does not establish that the room is reserved"): the places the
+ * Owners' confirmation holds in the Rooms engine — one per person recorded in a room, in that very unit, the persons in the
+ * room's own places first and an extra bed last (the extra bed is the one place beyond the unit's two). A product sold
+ * without a unit (no Quota_Unit ROOM, or no room named) holds nothing.
+ */
+export function holdPlan(rec, items) {
+  const rows = (rec.entries || []).filter((e) => e.room && clean(items && items[e.itemId] && items[e.itemId].Quota_Unit) === 'ROOM' && siteKeyOf(items, e.itemId).includes('/'))
+    .map((e) => ({ entryId: e.id, personId: e.personId, key: siteKeyOf(items, e.itemId), label: clean(e.room).toUpperCase(), extraBed: !!e.extraBed }));
+  return [...rows.filter((r) => !r.extraBed), ...rows.filter((r) => r.extraBed)];
 }
 
 /** Who sleeps in each recorded room: persons, extra beds, and the room's own capacity (002 Max_Pax). */

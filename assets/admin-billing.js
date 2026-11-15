@@ -346,6 +346,26 @@
     /* an open panel (preview, confirm, issue, view, send) sits right under the actions that opened it */
     return head + panelView() + ownerView() + bookedView() + paymentsView() + mailView();
   }
+  /* THE REAL UNITS (Owner, 15 Nov 2026): the units of the chosen room product with their free places now — a unit another guest
+     holds a place in is shown as such and cannot be reserved; a product without units takes no room */
+  function unitPicker(O, f) {
+    var item = (O.choices && O.choices.items || []).filter(function (i) { return i.itemId === f.itemId; })[0];
+    var units = item && item.key && O.units && O.units[item.key];
+    if (!item) return '<label class="t-b2">Room<br><span class="ab-mute">Choose a product first.</span></label>';
+    if (!units || !units.length) return '<label class="t-b2">Room<br><span class="ab-mute">This product takes no room unit.</span></label>';
+    /* "our" persons: the paying guest, the persons already recorded and the one being added — a place one of them holds is not
+       another guest's (the confirmation checks the same and holds the rest) */
+    var mine = {}; (O.entries || []).forEach(function (e) { mine[e.personId] = true; });
+    if (O.payerGuestId) mine[O.payerGuestId] = true;
+    if (f.personId) mine[f.personId] = true;
+    return '<label class="t-b2">Room unit (the website\'s own, with its free places now)<br><select data-ob-f="room"><option value="">No room</option>' +
+      units.map(function (u) {
+        var others = u.holders.filter(function (g) { return !mine[g]; }).length + u.kept;
+        var ours = u.holders.filter(function (g) { return mine[g]; }).length;
+        var words = 'Room ' + u.label + ' · ' + (others ? 'held by another guest' : u.free === u.places ? 'free' : u.free + ' of ' + u.places + ' places free' + (ours ? ' · ' + ours + ' held by this booking\'s guests' : ''));
+        return '<option value="' + esc(u.label) + '"' + (f.room === u.label ? ' selected' : '') + (others ? ' disabled' : '') + '>' + esc(words) + '</option>';
+      }).join('') + '</select></label>';
+  }
   function ownerView() {
     if (S.ownerError) return '<div class="p-card ab-panel"><p class="t-l1">Recorded by Haruthai &amp; Suthep</p><p class="t-b2">' + esc(S.ownerError) + '</p></div>';
     var O = S.owner;
@@ -357,7 +377,7 @@
       var l = e.line || {};
       return '<tr><td data-l="Person">' + esc(e.person) + '<br><span class="ab-mute" data-i18n-skip>' + esc(e.personId) + '</span>' + (e.note ? '<br><span class="ab-mute">' + esc(e.note) + '</span>' : '') + '</td>' +
         '<td data-l="Item"><span data-i18n-skip>' + esc(e.itemId) + '</span></td>' +
-        '<td data-l="Room">' + esc(e.room || '—') + (e.extraBed ? ' · extra bed' : '') + '</td>' +
+        '<td data-l="Room">' + esc(e.room || '—') + (e.extraBed ? ' · extra bed' : '') + (e.held ? '<br><span class="ab-mute">reserved in the website\'s rooms</span>' : (e.room ? '<br><span class="ab-mute">reserved when confirmed</span>' : '')) + '</td>' +
         '<td data-l="Rate" class="num"><span data-i18n-skip>' + esc(l.rate != null ? usd(l.rate) : '—') + '</span><br><span class="ab-mute">' + esc(l.rateSource === 'SPECIAL_RATE' ? 'named rate (009)' : l.rateSource === 'STANDARD_RATE' ? 'standard rate (002)' : (l.rateSource || l.review || '—')) + '</span></td>' +
         '<td data-l="Nights" class="num">' + esc(l.payableNights != null ? l.payableNights + (l.nights != null ? ' of ' + l.nights : '') : (l.nights != null ? l.nights : '—')) + '</td>' +
         '<td data-l="Amount" class="num"><span data-i18n-skip>' + esc(l.amount != null ? usd(l.amount) : '—') + '</span>' + (l.review ? '<br><span class="ab-chip open">' + esc(l.review) + '</span>' : '') + '</td>' +
@@ -381,11 +401,12 @@
       ((O.problems || []).length ? '<ul class="t-b2 ab-why">' + O.problems.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : '') +
       (rows ? '<div class="ab-table-wrap"><table class="ab-table"><thead><tr><th>Person</th><th>Product</th><th>Room</th><th class="num">Rate</th><th class="num">Nights charged</th><th class="num">Amount</th><th></th></tr></thead><tbody>' + rows +
         '<tr><td colspan="5"><b>Total of these bookings</b></td><td class="num"><b data-i18n-skip>' + esc(O.total != null ? usd(O.total) : '—') + '</b></td><td></td></tr></tbody></table></div>' : '') +
-      (rooms ? '<p class="t-l1">Rooms</p><ul class="t-b2">' + rooms + '</ul>' : '') +
+      (rooms ? '<p class="t-l1">Rooms</p><ul class="t-b2">' + rooms + '</ul>' +
+        (Object.keys(roomSum).length > 1 ? '<p class="t-b2" data-ob-rooms-total>Rooms together: <b data-i18n-skip>' + esc(usd(Object.keys(roomSum).reduce(function (t, k) { return t + roomSum[k]; }, 0) / 100)) + '</b></p>' : '') : '') +
       '<div class="ab-grid2 ab-ob-form">' +
       '<label class="t-b2">Person<br><select data-ob-f="personId"><option value="">Choose a guest…</option>' + persons + '</select></label>' +
       '<label class="t-b2">Product (002)<br><select data-ob-f="itemId"><option value="">Choose a product…</option>' + items + '</select></label>' +
-      '<label class="t-b2">Room (the website\'s unit letter, e.g. I)<br><input type="text" maxlength="20" data-ob-f="room" value="' + esc(f.room) + '" placeholder="e.g. I"></label>' +
+      unitPicker(O, f) +
       '<label class="t-b2"><input type="checkbox" data-ob-f="extraBed"' + (f.extraBed ? ' checked' : '') + '> Extra bed (priced only by this person\'s own 009 row)</label>' +
       '<label class="t-b2">Note (for you only)<br><input type="text" maxlength="200" data-ob-f="note" value="' + esc(f.note) + '"></label>' +
       '</div>' +
@@ -865,6 +886,8 @@
       var k = el.getAttribute('data-ob-f');
       el[el.type === 'checkbox' || el.tagName === 'SELECT' ? 'onchange' : 'oninput'] = function () {
         S.obForm = S.obForm || {}; S.obForm[k] = el.type === 'checkbox' ? !!el.checked : el.value;
+        if (k === 'itemId') { S.obForm.room = ''; draw(); return; }
+        if (k === 'personId') { draw(); return; }
         var addBtn = root.querySelector('[data-ob-add]'); if (addBtn) addBtn.disabled = !(S.obForm.personId && S.obForm.itemId) || !!S.ownerBusy;
       };
     });

@@ -45,7 +45,7 @@ import {
   paymentStatus, isDuplicateSuspect, nextRevisionState,
 } from './billing/settlement.js';
 import { loadConfirmedBookings, unmappedProducts, siteKeyOfSelection, nightsOf, selectionLinesOf } from './billing/bookings.js';
-import { OWNER_BOOKING_STATE, obkKey, OBK_INDEX_KEY, readRecord, stateOf as ownerStateOf, stageOf, applyAction, toBookings, occupancy, problemsOf, combinedConfirmation } from './billing/owner-bookings.js';
+import { OWNER_BOOKING_STATE, obkKey, OBK_INDEX_KEY, readRecord, stateOf as ownerStateOf, stageOf, keyStage, holdPlan, applyAction, toBookings, occupancy, problemsOf, combinedConfirmation } from './billing/owner-bookings.js';
 import { canonicalLines } from './legacy-keys.js';
 import { renderSettlementPdf } from './billing/pdf.js';
 import { buildRevenueOverview } from './billing/revenue.js';
@@ -364,7 +364,7 @@ async function ownerBookingsOf(env, holderId, src, ctx) {
     const reg = await kvJson(env, 'reg:' + own);
     const sels = reg && reg.submissionId && reg.registration ? reg.registration.selections : null;
     if (sels) for (const l of selectionLinesOf(sels)) {
-      const key = siteKeyOfSelection(l); if (key && key.includes('/')) elsewhere.push({ personId: p, stage: key.split('/')[0], by: own + '\'s own sent trip' });
+      const key = siteKeyOfSelection(l); if (key) elsewhere.push({ personId: p, stage: keyStage(key), by: own + '\'s own sent trip' });
     }
     for (const other of (Array.isArray(index[p]) ? index[p] : []).filter((h) => h !== holderId)) {
       const o = await recordOf(other);
@@ -379,7 +379,7 @@ async function ownerBookingsOf(env, holderId, src, ctx) {
   if (recordedElsewhere.length) {
     const reg = await kvJson(env, 'reg:' + holderId);
     const sels = reg && reg.submissionId && reg.registration ? reg.registration.selections : null;
-    const mine = new Set(sels ? selectionLinesOf(sels).map((l) => siteKeyOfSelection(l)).filter((k) => k && k.includes('/')).map((k) => k.split('/')[0]) : []);
+    const mine = new Set(sels ? selectionLinesOf(sels).map((l) => siteKeyOfSelection(l)).filter(Boolean).map(keyStage) : []);
     for (const other of recordedElsewhere) {
       const o = await recordOf(other);
       for (const e of (o && o.entries) || []) {
@@ -1271,7 +1271,7 @@ function holdersOfIndex(entries) {
   for (const e of Object.values(entries || {})) {
     const i = clean(e && e.i);
     if (!INVITATION_RE.test(i)) continue;
-    const row = { Holder_ID: i, guestId: clean(e.g) || null, contactId: clean(e.c) || null, hosts: e.h === 1 };
+    const row = { Holder_ID: i, guestId: clean(e.g) || null, contactId: clean(e.c) || null, hosts: e.h === 1, partyId: clean(e.p) || null };
     const had = byInv.get(i);
     byInv.set(i, had && (had.guestId !== row.guestId || had.contactId !== row.contactId) ? { ...had, ambiguous: true } : row);
   }
@@ -1854,6 +1854,31 @@ async function adminSendPost(env, identity, request, url, cors, deps) {
 
 /* ----------------------------------------------- the Owners' own bookings */
 
+/* the Rooms engine, as Guest Relations asks it (the actor trusts the Worker's own header; no guest request carries it) */
+async function roomsGr(env, op, body) {
+  if (!env.ROOMS) throw new SourceDataError('ROOMS_UNAVAILABLE', 'the Rooms engine is not bound');
+  const stub = env.ROOMS.get(env.ROOMS.idFromName('rooms'));
+  const res = await stub.fetch(new Request('https://rooms/api/rooms/' + op, { method: body ? 'POST' : 'GET', headers: { 'x-gr-verified': 'yes', 'content-type': 'application/json' }, body: body ? JSON.stringify(body) : undefined }));
+  const j = await res.json().catch(() => null);
+  if (!j) throw new SourceDataError('ROOMS_UNREADABLE', 'the Rooms engine did not answer');
+  return j;
+}
+/* every unit of the products the Owners can record a room in: its places, who holds them (ids and first names) and what is free */
+async function unitsForOwners(env, items) {
+  const keys = new Set(Object.values(items).filter((it) => clean(it.Quota_Unit) === 'ROOM' && clean(it.Rate_Status) !== 'RETIRED')
+    .map((it) => clean(it.Site_Product_Key).split(/[,|]/)[0]).filter((k) => k.includes('/')));
+  const plan = await roomsGr(env, 'plan');
+  const out = {};
+  for (const k of keys) {
+    const units = (plan.units && plan.units[k]) || [];
+    out[k] = units.filter((u) => !u.dedicatedTo).map((u) => ({ label: u.label, places: u.places,
+      holders: (u.occupants || []).filter((o) => o.guestId).map((o) => o.guestId), kept: (u.occupants || []).filter((o) => !o.guestId).length,
+      keptFor: (u.occupants || []).filter((o) => !o.guestId).map((o) => o.partyId || null),
+      free: Math.max(0, u.places - (u.occupants || []).length) }));
+  }
+  return out;
+}
+
 /**
  * GET admin/owner-bookings?holder=INV — the bookings Haruthai & Suthep recorded for one paying invitation: each entry with the
  * engine's price for it (002 standard rate or the person's 009 named rate for this payer, nights charged, amount), who sleeps in
@@ -1873,17 +1898,19 @@ async function adminOwnerBookingsGet(env, identity, url, cors) {
   const persons = holdersOfIndex(entries).filter((h) => !h.ambiguous && h.guestId).map((h) => ({ guestId: h.guestId, name: (nameOf(src.register, h.contactId) || {}).full || h.guestId }))
     .sort((a, b) => a.name.localeCompare(b.name));
   const names = Object.fromEntries(persons.map((p) => [p.guestId, p.name]));
-  return jsonRes({ ok: true, asOf, Holder_ID: holderId, rev: ob.rec.rev, state: ob.state,
+  return jsonRes({ ok: true, asOf, Holder_ID: holderId, payerGuestId: holder.guestId, rev: ob.rec.rev, state: ob.state,
     confirmed: ob.rec.confirmed, problems: ob.problems,
     /* each entry with its own engine line, matched by the Booking_ID the entry gave it (OB·holder·person·item·entry) */
     entries: ob.rec.entries.map((e) => {
       const l = rows ? rows.lines.find((x) => clean(x.Booking_ID).split('·').pop() === e.id) : null;
-      return { id: e.id, personId: e.personId, person: names[e.personId] || e.personId, itemId: e.itemId, room: e.room, extraBed: !!e.extraBed, note: e.note,
+      return { id: e.id, personId: e.personId, person: names[e.personId] || e.personId, itemId: e.itemId, room: e.room, extraBed: !!e.extraBed, note: e.note, held: e.held || null,
         recordedBy: e.recordedBy, recordedAt: e.recordedAt, line: l ? lineView(l, names) : null };
     }),
     total: rows ? rows.totalPayable : 0, manualReview: rows ? rows.manualReview.length : 0,
     rooms: occupancy(ob.rec, src.items).map((r) => ({ ...r, names: r.persons.map((p) => names[p] || p) })),
     log: ob.rec.log.slice(-20),
+    /* THE REAL UNITS (Owner, 15 Nov 2026): what is free in each room product now, so the Owners pick a unit that exists and is free */
+    units: await unitsForOwners(env, src.items).catch((e) => ({ error: clean(e && e.message).slice(0, 160) })),
     choices: { persons, items: Object.entries(src.items).filter(([, it]) => clean(it.Rate_Status) !== 'RETIRED')
       .map(([id, it]) => ({ itemId: id, key: clean(it.Site_Product_Key).split(/[,|]/)[0] || null, rate: listRateOf(it), basis: clean(it.Rate_Basis) || null, maxPax: Number(it.Max_Pax) || null })) },
   }, 200, cors);
@@ -1912,13 +1939,47 @@ async function adminOwnerBookingsPost(env, identity, request, url, cors) {
   const raw = await env.REG_KV.get(obkKey(holderId));
   const rec = readRecord(raw);
   if (Number(body.expectedRev) !== rec.rev) return jsonRes({ ok: false, error: 'the bookings changed since they were shown; nothing was written', reasons: ['STALE'], rev: rec.rev }, 409, cors);
+  let held = null;
   if (action === 'confirm') {
     const ob = await ownerBookingsOf(env, holderId, src, { guestId: holder.guestId, origin: url.origin, asOf });
     if (ob.problems.length) return jsonRes({ ok: false, error: 'these bookings cannot be confirmed yet', reasons: ob.problems }, 409, cors);
+    /* THE ROOM IS RESERVED, NOT ONLY NAMED (Owner, 15 Nov 2026): every person recorded in a room holds their place in that very
+       unit of the Rooms engine before the confirmation is written — the room's own places first, the extra bed beyond them —
+       so no place of it is offered to anyone else. A unit another guest holds a place in is refused, nothing is confirmed. */
+    const plan = holdPlan(rec, src.items);
+    if (plan.length) {
+      const free = await unitsForOwners(env, src.items);
+      const byHolderIndex = new Map(holders.filter((h) => !h.ambiguous && h.guestId).map((h) => [h.guestId, h]));
+      const recorded = new Set(plan.map((x) => x.personId));
+      /* the recorded persons' own parties: a place kept for one of them is theirs, not a stranger's */
+      const ourParties = new Set(plan.map((x) => (byHolderIndex.get(x.personId) || {}).partyId).filter(Boolean));
+      for (const [k, label] of [...new Set(plan.map((x) => x.key + '|' + x.label))].map((x) => x.split('|'))) {
+        const unit = (free[k] || []).find((u) => u.label === label);
+        if (!unit) return jsonRes({ ok: false, error: 'room ' + label + ' is not a unit of ' + k, reasons: ['ROOM_UNKNOWN: ' + k + ' · ' + label] }, 409, cors);
+        const strangers = unit.holders.filter((g) => !recorded.has(g)).length + (unit.keptFor || []).filter((pid) => !pid || !ourParties.has(pid)).length;
+        const own = plan.filter((x) => x.key === k && x.label === label && !x.extraBed).length;
+        if (strangers > 0) return jsonRes({ ok: false, error: 'room ' + label + ' is held by another guest', reasons: ['ROOM_TAKEN: ' + k + ' · ' + label + ' holds ' + strangers + ' place(s) of another guest'] }, 409, cors);
+        if (own > unit.places) return jsonRes({ ok: false, error: 'room ' + label + ' has ' + unit.places + ' places', reasons: ['ROOM_OVER_CAPACITY: ' + k + ' · ' + label] }, 409, cors);
+      }
+      const names = await loadGuestRegister(env, await prefetchTabs(env, cfgOf(env), ['guestlist'])).catch(() => null);
+      const occupants = plan.map((x) => { const h = byHolderIndex.get(x.personId) || {}; const n = names ? nameOf(names, h.contactId) : null;
+        return { key: x.key, label: x.label, guestId: x.personId, invitationId: h.Holder_ID || ('INV-' + x.personId), partyId: h.partyId || null, name: (n && (n.nick || n.first)) || '' }; });
+      /* a person who already holds exactly this unit keeps that place — a second confirmation (after a change, or twice) asks
+         the Rooms engine only for the places still missing (review, 15 Nov 2026) */
+      const holdsIt = (o) => ((free[o.key] || []).find((u) => u.label === o.label) || { holders: [] }).holders.includes(o.guestId);
+      /* the room's own places, then the extra bed — the one place beyond the unit's capacity, and only for a person recorded as such */
+      const regular = occupants.filter((o, i) => !plan[i].extraBed && !holdsIt(o)), beds = occupants.filter((o, i) => plan[i].extraBed && !holdsIt(o));
+      const a = regular.length ? await roomsGr(env, 'assign', { occupants: regular }) : { ok: true, done: [] };
+      const b = beds.length ? await roomsGr(env, 'assign', { occupants: beds, force: true }) : { ok: true, done: [] };
+      if (!a.ok || !b.ok) return jsonRes({ ok: false, error: 'the room could not be reserved; nothing was confirmed', reasons: [...(a.refused || []), ...(b.refused || [])].map((x) => 'ROOM_REFUSED: ' + x.guestId + ' · ' + x.key + ' · ' + x.label + ' · ' + x.error) }, 409, cors);
+      held = new Map(plan.map((x) => [x.entryId, { key: x.key, label: x.label }]));
+    }
   }
   const persons = new Map(holders.filter((h) => !h.ambiguous && h.guestId).map((h) => [h.guestId, h.guestId]));
   const r = applyAction(rec, action, { entry: body.entry, entryId: body.entryId, by: adminLabel(identity), at: new Date().toISOString(), items: src.items, persons });
   if (!r.ok) return jsonRes({ ok: false, error: r.error }, 409, cors);
+  /* the entries the confirmation holds a place for carry it (a removal gives that place back) */
+  if (held && r.record) r.record.entries = r.record.entries.map((e) => (held.has(e.id) ? { ...e, held: held.get(e.id) } : e));
   if (r.unchanged) return jsonRes({ ok: true, unchanged: true, rev: rec.rev, state: ownerStateOf(rec) }, 200, cors);
   /* the record as it stands right before the write */
   if ((await env.REG_KV.get(obkKey(holderId))) !== raw) return jsonRes({ ok: false, error: 'the bookings changed meanwhile; nothing was written', reasons: ['STALE'] }, 409, cors);
@@ -1930,6 +1991,11 @@ async function adminOwnerBookingsPost(env, identity, request, url, cors) {
     if (!index) return jsonRes({ ok: false, error: 'the index of recorded persons is not readable; nothing was written', reasons: ['OWNER_RECORD_UNREADABLE'] }, 503, cors);
   }
   await env.REG_KV.put(obkKey(holderId), JSON.stringify(r.record));
+  /* a removed entry whose place the Owners' confirmation held gives that place back to the room */
+  if (action === 'remove') {
+    const gone = rec.entries.find((e) => e.id === clean(body.entryId));
+    if (gone && gone.held) await roomsGr(env, 'unassign', { guestId: gone.personId, key: gone.held.key }).catch(() => null);
+  }
   if (action !== 'confirm') {
     const mine = new Set(r.record.entries.map((e) => e.personId));
     for (const p of Object.keys(index)) index[p] = (index[p] || []).filter((h) => h !== holderId || mine.has(p));
