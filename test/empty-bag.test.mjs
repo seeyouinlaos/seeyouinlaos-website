@@ -43,7 +43,7 @@ test('ENGINE · nothing is held for anyone in advance (Owner, 19 Sep 2026): a ho
   const rooms = new Rooms(doState());
   const h = await call(rooms, 'read', null, HOST);
   assert.equal(h.status, 200); assert.equal(h.d.fixed, undefined, 'no fixed map for the hosts'); assert.deepEqual(h.d.mine, {}); assert.deepEqual(h.d.waitlist, {}); assert.deepEqual(h.d.waiting, {});
-  for (const list of Object.values(h.d.units)) for (const u of list) { assert.equal(u.reservedFor, null); assert.equal(u.eligible, true); assert.equal(u.taken, 0); assert.equal(u.full, false); assert.equal(u.free, u.places); }
+  for (const list of Object.values(h.d.units)) for (const u of list) { assert.equal(u.reservedFor, null); assert.equal(u.eligible, true); assert.equal(u.taken, 0); assert.equal(u.full, false); assert.equal(u.free, u.places + (u.extraBeds || 0)); }
   const usat = h.d.units['bkk-stay/u-sathorn-superior-garden']; assert.equal(usat.length, 6); assert.ok(usat.every((u) => u.places === 2)); assert.equal(h.d.summary['bkk-stay/u-sathorn-superior-garden'].remainingPlaces, 12); assert.equal(h.d.summary['bkk-stay/u-sathorn-superior-garden'].ownerReservedRooms, 0);
   assert.equal(h.d.units['bkk-stay/penthouse'], undefined, 'the deleted Sathorn Penthouse has no units'); assert.equal(h.d.summary['bkk-stay/penthouse'], undefined);
   assert.equal(h.d.summary['guesthouse/guest-house'].places, 4); assert.equal(h.d.summary['guesthouse/guest-house'].remainingPlaces, 4, 'empty: 4 of 4 places remaining'); assert.equal(h.d.summary['guesthouse/guest-house'].kind, 'property');
