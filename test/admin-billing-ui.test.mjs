@@ -520,6 +520,11 @@ test('REVENUE AND BUDGET UI · Accommodation and Transportation side by side, tr
   assert.match(h, /a named person&#39;s own place or ticket|a named person's own place or ticket/);
   assert.match(h, /no approved supplier cost for the guests&#39; van in 004|no approved supplier cost for the guests' van in 004/);
   assert.match(h, /THB 9,000\.00/); assert.doesNotMatch(h, /USD 9,300|9,300\.00/, 'currencies stand apart, never added');
+  /* 1.1.0: committed, paid and outstanding stand apart; what is owed is the 007 total less the payments counted */
+  assert.match(h, /Committed \(007 totals, as typed\)/); assert.match(h, /Paid to suppliers \(007, counted\)/);
+  assert.match(h, /Outstanding to suppliers \(007 total less counted payments\)/); assert.match(h, /data-l="Outstanding"/);
+  const supTable = h.slice(h.indexOf('Supplier (007)'));
+  assert.match(supTable, /data-l="Outstanding"[^>]*>(<[^>]+>)*USD 300\.00/, 'nothing paid yet: the whole typed total is owed');
   assert.match(h, /data-ab-inventory/); assert.match(h, /Quota utilisation/, 'the existing quota panel stays as it was');
   /* every cell of the comparison carries its label for the phone layout */
   const sec = h.slice(h.indexOf('data-ab-budget'), h.indexOf('data-ab-rev-rooms'));
@@ -535,4 +540,31 @@ test('REVENUE AND BUDGET UI · a comparison that could not be built is said in i
   await tick(30);
   assert.match(root.innerHTML, /could not be read from Google just now — every revenue figure above stands as it is/);
   assert.match(root.innerHTML, /Quota utilisation/); assert.doesNotMatch(root.innerHTML, /data-ab-budget-main/);
+});
+
+test('REVENUE AND BUDGET UI 1.1 · outstanding, possible duplicates, nights without a line and a summary cell\'s range are said as the server says them — the nights listed apart from the difference', async () => {
+  const budget = budgetFixture();
+  const s = budget.suppliers.find((x) => /^Souphattra/.test(x.vendor));
+  const usd = (cents) => ({ currency: 'USD', cents, amount: cents / 100 });
+  Object.assign(s, { outstanding: null, paidAbove: null, contractVsPlan: usd(360000), possibleDuplicates: { rows: [], amount: null, partlyRows: [24] },
+    outstandingWhy: 'payments B16, B25 recorded in 007 but not counted (dated 03.09.2031, after today — not counted as paid)',
+    stays: [{ stage: 'D1', uncovered: [{ night: '2031-02-27', items: ['The Heritage'], others: [{ row: 23, why: 'names A & B — their own place or ticket (A-2)' }] }] }], notPlaced: [] });
+  Object.assign(budget.categories.find((c) => c.category === 'Accommodation'), { possibleDuplicates: { rows: [], amount: null, partlyRows: [24] }, outstanding: [], paidAbove: [], outstandingNotStated: [s.vendor] });
+  budget.reconciliation.budget004.checks = [
+    { what: 'the positive lines', cell: 'A5', sheet: usd(3138854), lines: usd(3208454), equal: false, formula: '=SUMIF(K8:K87, ">0")', range: { from: 8, to: 87 }, outside: [{ row: 88, amount: usd(69600) }], carries: null },
+    { what: 'the positive lines less the planned guest contributions', cell: 'J5', sheet: usd(2730854), lines: usd(2800454), equal: false, formula: '=A5-G5', range: null, outside: [], carries: ['A5'] }];
+  const revenue = { ok: true, asOf: '2026-11-17', counts: {}, bookedRevenue: { cents: 24500, amount: 245, complete: true }, quotaUtilisation: [{ Item_ID: 'D1-X', Quota_Unit: 'ROOM', Quota: 2, used: 1, remaining: 1 }], budget };
+  const { root, calls } = load({ 'admin/overview': OVERVIEW, 'admin/status': statusAnswer, revenue }, { hash: '#revenue' });
+  await tick(30);
+  const h = root.innerHTML;
+  assert.match(h, /not stated: payments B16, B25 recorded in 007 but not counted \(dated 03\.09\.2031, after today — not counted as paid\)/);
+  assert.match(h, /not stated for Souphattra Heritage Vientiane \(see the supplier table\)/);
+  assert.match(h, /possibly counted twice in 004 \(assumption A-5\): row 24 partly or unclear, no amount/);
+  assert.match(h, /Beside the 007 totals — listed apart, not a breakdown of any difference/);
+  assert.match(h, /nights of its stays with no approved 004 line for the guests(&#39;|')s? rooms — D1: 27\.02\.2031 \(row 23 — names A &amp; B — their own place or ticket \(A-2\)\)/);
+  const cell = (h.match(/data-l="Contract vs 004"[^]*?<\/td>/) || [''])[0];
+  assert.match(cell, /USD 3,600\.00/); assert.match(cell, /007 does not say what its total covers/); assert.doesNotMatch(cell, /row 23|27\.02/, 'the nights are not set under the difference');
+  assert.match(h, /its formula sums rows 8–87; row 88 \(USD 696\.00\) outside it\./);
+  assert.match(h, /J5 is =A5-G5 and carries A5(&#39;|')s difference\./);
+  assert.ok(calls.every((c) => c.method === 'GET'), 'still read only');
 });

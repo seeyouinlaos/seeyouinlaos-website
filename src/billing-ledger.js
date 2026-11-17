@@ -120,7 +120,7 @@ const WRITE_MARGIN_MS = 3 * 60 * 1000;
 
 const OPS = ['read', 'read-many', 'settlement', 'draft', 'revision-create', 'revision-state',
   'revision-issue', 'override-set', 'gate-read', 'gate-approve', 'drift-set',
-  'drift-read', 'holders', 'payment-preference', 'payment-decision', 'statement-mail'];
+  'drift-read', 'holders', 'payment-preference', 'payment-decision', 'statement-mail', 'fx-reference'];
 /* a send whose Worker never reported back is never taken over silently: after this long it counts as UNCERTAIN */
 const MAIL_CLAIM_MS = 5 * 60 * 1000;
 
@@ -1222,6 +1222,17 @@ export class BillingLedger {
     }
 
     /* ------------------------------------- holders: the Billing Manager list */
+    /* THE PROJECT'S EXCHANGE-RATE REFERENCE (Owners, 17 Nov 2026): the Issue_Date of the project's first issued statement — the
+       earliest of every immutable revision that was issued (now ISSUED or SUPERSEDED). Read only. */
+    if (op === 'fx-reference') {
+      let first = null;
+      for (const [, rec] of await this.listOf(REVISION)) {
+        if (!rec || !rec.snapshot || (rec.Revision_State !== REVISION_STATE.ISSUED && rec.Revision_State !== REVISION_STATE.SUPERSEDED)) continue;
+        const d = String(rec.snapshot.Issue_Date || rec.Issue_Date || '');
+        if (/^\d{4}-\d{2}-\d{2}$/.test(d) && (!first || d < first)) first = d;
+      }
+      return json({ ok: true, firstIssueDate: first });
+    }
     if (op === 'holders') {
       const settlements = await this.listOf(SETTLEMENT);
       const overrides = new Map(await this.listOf(OVERRIDE));

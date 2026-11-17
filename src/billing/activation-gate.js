@@ -107,12 +107,13 @@ export const REFERENCE_CASES = Object.freeze([
     item: 'D2 Guest House', expectPerPersonUSD: 0,
     note: 'HOSTED_NO_GUEST_CHARGE · quota 4 PERSON',
     bookings: STANDARD('D2-GUEST-HOUSE'), rateSource: HOSTED }),
+  /* the couple's own stay (Owners, 17 Nov 2026 · engine 2.4.0): complimentary — hosted, USD 0, whatever 009 names for them;
+     its value stays visible as hosted value, the suite's real cost is 004's */
   Object.freeze({ id: 'bride-groom-presidential', who: 'Haruthai + Suthep',
-    item: 'Package C · Souphattra Presidential', expectPerPersonUSD: 150,
-    expectCombinedUSD: 300,
-    note: 'USD 75 per person per night × 2 nights = USD 150 per person, USD 300 combined. ' +
-          'The engine reads G18 / Standard_Rate — never the G19 / G20 display totals, and G20 stays USD 150.',
-    bookings: named('C-SOUPHATTRA-PRESIDENTIAL', 'G048', 'G049'), rateSource: SPECIAL }),
+    item: 'Package C · Souphattra Presidential', expectPerPersonUSD: 0,
+    expectCombinedUSD: 0,
+    note: 'the couple\'s own booking is complimentary (USD 0, hosted) — their costs are Google 004\'s',
+    bookings: named('C-SOUPHATTRA-PRESIDENTIAL', 'G048', 'G049'), rateSource: HOSTED }),
 ]);
 
 /**

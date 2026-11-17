@@ -85,7 +85,7 @@ function grAuthorised(request, env) {
 const GR_SEATING_OPS = ['config', 'state', 'assign', 'unassign', 'plan', 'rekey', 'reset'];
 /* the writes a signed-in guest may make on their own accommodation — the paid extension is one of them (Owner, 22 Sep 2026) */
 const GUEST_ROOMS_WRITES = ['join', 'leave', 'wait', 'unwait'];
-const GR_ROOMS_OPS = ['plan', 'migrate', 'assign', 'unassign', 'reset'];
+const GR_ROOMS_OPS = ['plan', 'migrate', 'assign', 'unassign', 'reset', 'bed'];
 
 export default {
   async fetch(request, env) {

@@ -41,7 +41,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import crypto from 'node:crypto';
 import { execFileSync } from 'node:child_process';
-import { calculate } from './billing/engine.js';
+import { calculate, COUPLE_PERSONS } from './billing/engine.js';
 import { prefetchTabs, loadItems, loadSpecialRates, RANGE, nightsOfItem } from './billing/source.js';
 import { quoteOfItem, listRateOf } from './billing-routes.js';
 import { itemIsActiveOn } from './billing/model.js';
@@ -265,6 +265,13 @@ export async function codeAgainstGoogle({ source, g002, g009 }, asOf) {
     const q = quoteOfItem(r.Item_ID, it, source, r.Holder_ID, r.Person_ID || 'F1-ANY-MEMBER', asOf);
     /* a named rate on a product H&S does not charge (the hotel the guest pays, a hosted stay) is the rate the guest meets
        there — never an H&S charge; only 009's Billing_Category makes such a booking payable (engine 2.3.0) */
+    /* THE COUPLE (Owners, 17 Nov 2026 · engine 2.4.0): what Haruthai and Suthep book for their own use is hosted, USD 0 — a 009 row
+       naming them is never charged; the engine must say hosted and 0 */
+    if (COUPLE_PERSONS.includes(clean(r.Person_ID))) {
+      if (!(q.hosted && centsOf(q.total) === 0)) problems.push(name + ': names the couple — their own booking must be hosted (USD 0); the engine charges ' + usd(centsOf(q.total)) + ' (' + (q.rateSource || '') + ')');
+      else { stats.couple = (stats.couple || 0) + 1; info.push(name + ': names the couple — hosted by the complimentary rule (Owners, 17 Nov 2026); the row\'s ' + rate + ' is not charged'); }
+      continue;
+    }
     const category = r.Billing_Category === PAYABLE ? PAYABLE : clean(it.Billing_Category);
     if (category !== PAYABLE) {
       const none = PROVIDER_SETTLED.includes(category) ? q.block === 'B' && centsOf(q.total) === 0 : category === 'HOSTED_NO_GUEST_CHARGE' ? q.hosted && centsOf(q.total) === 0 : true;
@@ -466,6 +473,7 @@ async function liveChecks(google, asOf) {
       for (const l of mine) {
         stats.booked++;
         const name = 'live 009 row ' + r.row + ' · ' + r.Item_ID;
+        if (COUPLE_PERSONS.includes(clean(r.Person_ID))) { if (l.amount != null && centsOf(l.amount) !== 0) problems.push(name + ': the couple\'s own booking was charged ' + usd(centsOf(l.amount)) + ' — it is complimentary'); continue; }
         if (category !== PAYABLE) { if (l.amount != null && centsOf(l.amount) !== 0) problems.push(name + ': a ' + category + ' product became an H&S charge of ' + usd(centsOf(l.amount))); continue; }
         if (/^\d+$/.test(rule) && Number(l.payableNights) !== Number(rule)) problems.push(name + ': ' + l.payableNights + ' payable nights, 009 says ' + rule);
         const units = (/^\d+$/.test(rule) ? Number(rule) : num(l.nights)) * (Number(l.quantity) || 1);
