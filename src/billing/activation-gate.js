@@ -85,10 +85,16 @@ export const REFERENCE_CASES = Object.freeze([
     item: 'Package D1 · The Heritage', expectPerPersonUSD: 145,
     note: 'USD 145 per person; the second night is USD 0 (SECOND_NIGHT_COMPLIMENTARY)',
     bookings: STANDARD('D1-HERITAGE'), rateSource: STANDARD_RATE }),
-  Object.freeze({ id: 'four-couples-150', who: 'Wanlee & Suvit · Somsri & Pattanapong · Kanokporn & Chatchai · Nipapat & Weerapat',
+  /* the four couples of 5 Oct 2026 — split by the Owners' order of 17 Nov 2026: the three couples of the wedding stay's Heritage
+     Executive Rooms A, B, C are complimentary (009 rows 12–17 at USD 0); the fourth couple keeps USD 150 (009 rows 18–19) */
+  Object.freeze({ id: 'rooms-abc-complimentary', who: 'the three couples of Heritage Executive Rooms A, B, C (009 rows 12–17)',
+    item: 'Package D1 · Heritage Executive', expectPerPersonUSD: 0,
+    note: 'complimentary by the Owners\' order of 17 Nov 2026 — a named special rate of USD 0',
+    bookings: named('D1-HERITAGE-EXECUTIVE', 'G015', 'G035', 'G016', 'G036', 'G037', 'G017'), rateSource: SPECIAL }),
+  Object.freeze({ id: 'couple-150', who: 'the fourth couple of 5 Oct 2026 (009 rows 18–19)',
     item: 'Package C', expectPerPersonUSD: 150,
     note: 'USD 150 per person for both nights',
-    bookings: named('D1-HERITAGE-EXECUTIVE', 'G015', 'G035', 'G016', 'G036', 'G037', 'G017', 'G091', 'G092'), rateSource: SPECIAL }),
+    bookings: named('D1-HERITAGE-EXECUTIVE', 'G091', 'G092'), rateSource: SPECIAL }),
   Object.freeze({ id: 'zero-rate-couples', who: 'Nongyao & Suthee · Karunrat & Kornjirat',
     item: 'Package C', expectPerPersonUSD: 0,
     note: 'a named special rate of USD 0 is a decision, not an absence',

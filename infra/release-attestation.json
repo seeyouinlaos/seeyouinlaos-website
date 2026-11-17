@@ -2,14 +2,12 @@
  "about": "Signed by src/release-attest.mjs on the release machine; verified by src/release-verify.cjs in the build. Not the Owner's consent — a record that these checks passed for exactly this tree.",
  "payload": {
   "v": 1,
-  "tree": "1f793777797f8415031a7c0e5ab44be226d3e588",
+  "tree": "1ac032b14002f9a69151558cd2a7212e8fdae172",
   "pricingRef": "fe2657bd0663",
   "keyId": "d02a1256537ec29e",
-  "at": "2026-11-17T17:00:55.882Z",
-  "base": "82c6bf40ff4b0f7ec853c9edb52aa02aa73100b3",
-  "markers": {
-   "OWNER_PRICING_CHANGE": "The Heritage Room D extra bed USD 75, second night complimentary, 009 row 40 [ref fe2657bd0663]"
-  },
+  "at": "2026-11-17T18:51:01.572Z",
+  "base": "7e3bb298537153f9daa908c3a3ab5d3e340f068a",
+  "markers": {},
   "checks": {
    "npmTest": {
     "pass": 974,
@@ -25,5 +23,5 @@
    }
   }
  },
- "signature": "ezqdgC+OIUSiJFOD81BXQDbTZeJP6p5ah/jyhil8No4IvHOgMLUeXrMAHWokP1TdrNxMFo0tX44TMsd34HiwBw=="
+ "signature": "T9smVgdunL02E6NSudsOrRaNQXCjrlhnKujPjQ626ndhvbIBhi36r71Upfyxei2QE9S2HgIPPOdKdFKeNKt2Cw=="
 }
