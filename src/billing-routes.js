@@ -1142,18 +1142,22 @@ async function adminRevenue(env, identity, url, cors) {
      Owners issue a revision; its amount is listed here, never counted as revenue, receivable or overdue. */
   const coupleIds = new Set(COUPLE_PERSONS.map((g) => 'INV-' + g));
   const paying = holders.filter((h) => !coupleIds.has(h.Holder_ID));
+  /* the couple's own payment-journal rows go with their statements — never paying-guest receipts, never a row of "no settlement" */
+  const coupleSids = new Set(holders.filter((h) => coupleIds.has(h.Holder_ID)).map((h) => clean(h.Settlement_ID)).filter(Boolean));
+  const journalOf = (sid) => (src.journalRows || []).filter((r) => clean(r.Settlement_ID) === sid);
   const couple = holders.filter((h) => coupleIds.has(h.Holder_ID)).map((h) => {
     const iss = h.settlement && h.settlement.issuedRevision;
     const issuedCents = iss ? Number(iss.Total_Payable_Cents ?? (iss.snapshot && iss.snapshot.Total_Payable_Cents)) : null;
     const now = calculate(h.bookings, { items: src.items, specialRates: src.specialRates, asOf });
     return { Holder_ID: h.Holder_ID, issuedRevision: iss ? Number(iss.Revision) || null : null, issueDate: iss ? iss.Issue_Date || null : null,
       issued: Number.isFinite(issuedCents) ? fromCents(issuedCents) : null, payableNow: fromCents(now.totalPayableCents), hostedValue: fromCents(now.hostedValueCents),
-      revisionDue: Number.isFinite(issuedCents) && issuedCents !== now.totalPayableCents };
+      revisionDue: Number.isFinite(issuedCents) && issuedCents !== now.totalPayableCents,
+      journal: journalOf(clean(h.Settlement_ID)).map((r) => ({ type: clean(r.Entry_Type) || null, status: clean(r.Record_Status) || null })) };
   });
   /* Freeze · U — the overview reuses the engine; it owns no formula. */
   const overview = buildRevenueOverview({
     holders: paying, items: src.items, specialRates: src.specialRates,
-    journalRows: src.journalRows,
+    journalRows: (src.journalRows || []).filter((r) => !coupleSids.has(clean(r.Settlement_ID))),
     issuedRevisions: paying.map((h) => h.settlement && h.settlement.issuedRevision).filter(Boolean),
     asOf,
   });
