@@ -2,12 +2,14 @@
  "about": "Signed by src/release-attest.mjs on the release machine; verified by src/release-verify.cjs in the build. Not the Owner's consent — a record that these checks passed for exactly this tree.",
  "payload": {
   "v": 1,
-  "tree": "37980af2c0f7c0f17de758205a870325053e8352",
-  "pricingRef": "c5f69c2b9007",
+  "tree": "fea3a9c5099ea46e1858d7885b43491822558ac1",
+  "pricingRef": "ad8c93cc41dc",
   "keyId": "d02a1256537ec29e",
-  "at": "2026-11-17T14:49:57.177Z",
-  "base": "9fdb48123c4a81760082a6de2a8be31d44d1ef3d",
-  "markers": {},
+  "at": "2026-11-17T15:54:29.578Z",
+  "base": "aef660329ff0536637c33dc1d341d728d84c211c",
+  "markers": {
+   "OWNER_PRICING_CHANGE": "Wedding stay Heritage Executive Rooms A, B, C complimentary (USD 0), 009 rows 12-17 [ref ad8c93cc41dc]"
+  },
   "checks": {
    "npmTest": {
     "pass": 974,
@@ -23,5 +25,5 @@
    }
   }
  },
- "signature": "vN0FE8rjbQGprVIQGYkgYGOL/DGgO7lEVLf1GJhZV68uu3kymCyOVTea9O92g88u6JfT9Oba29Ymbw0Ujh8/BQ=="
+ "signature": "eEUm//QcjQ8ayGqUkmHJS3iHPsIkmUtG4zXSZ7kfWABkzWwKRy64/WwzmhIZKn+Cg5ifeElDXeH7mwE2aDpyAw=="
 }
