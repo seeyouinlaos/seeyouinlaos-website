@@ -235,7 +235,8 @@ test('THE WORDS · category lines are derived from the physical rooms the engine
   const U = w.SIYL_UNITS; await U.load(true); assert.equal(U.ready(), true); assert.equal(U.error(), null);
   /* TO-01208 · PRQ-03-09: the one counting grammar — empty rooms of the category, then free places in shared rooms */
   assert.equal(U.label('wedstay', 'heritage'), '3 of 5 rooms left · 1 free place in a shared room');
-  assert.deepEqual(plain(U.count('wedstay', 'heritage')), { rooms: 5, places: 10, reserved: 0, free: 7, open: 4, empty: 3, shared: 1 });
+  /* Room D's extra bed (Owners, 17 Nov 2026) is one more place of the category */
+  assert.deepEqual(plain(U.count('wedstay', 'heritage')), { rooms: 5, places: 11, reserved: 0, free: 8, open: 4, empty: 3, shared: 1 });
   assert.equal(U.unitWords(U.units('wedstay', 'heritage')[0]), 'Haruthai · 1 place free', 'first names only');
   assert.equal(U.unitWords(U.units('wedstay', 'heritage')[1]), 'Lin and Noor · full');
   assert.equal(U.unitWords(U.units('wedstay', 'heritage')[2]), 'empty · 2 places');

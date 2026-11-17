@@ -28,77 +28,76 @@ const leave = (rooms, as) => call(rooms, 'leave', { invitationId: as.invitationI
 const unitIn = (v, label) => v.units[KEY].find((u) => u.label === label);
 const inI = async (rooms) => unitIn(await view(rooms, OTHER), 'I').taken;
 
-test('EXTRA BED · the seed: Room I of the wedding stay\'s Heritage Executive has one extra bed, for three guest ids; no other room changes', () => {
-  assert.deepEqual(plain(SEED[KEY].extraBeds), [{ label: 'I', beds: 1, for: ['G032', 'G120', 'G121'] }]);
+test('EXTRA BED · the seed: the Owners give Room I (Heritage Executive) and Room D (The Heritage) of the wedding stay one extra bed each — a property of the room, never of a guest', () => {
+  assert.deepEqual(plain(SEED[KEY].extraBeds), [{ label: 'I', beds: 1 }]);
+  assert.deepEqual(plain(SEED['wedstay/heritage'].extraBeds), [{ label: 'D', beds: 1 }]);
   const units = unitsOf(KEY);
   assert.equal(units.length, 13, 'thirteen rooms, none added, none removed');
   const i = units.find((u) => u.label === 'I');
-  assert.deepEqual([i.places, i.extraBeds, i.extraBedFor], [2, 1, ['G032', 'G120', 'G121']], 'two places of its own, the extra bed beyond them');
-  assert.ok(units.filter((u) => u.label !== 'I').every((u) => u.places === 2 && !u.extraBeds), 'no other room changes');
-  assert.ok(!SEED['prewed/heritage-executive'].extraBeds, 'the pre-wedding window is another period: no extra bed there');
-  assert.deepEqual([bedsFor(i, 'G121'), bedsFor(i, 'G050'), bedsFor(i, ''), bedsFor(units[0], 'G121')], [1, 0, 0, 0]);
-  assert.deepEqual(unitsFor(KEY, STRANGER).map((u) => u.label), unitsFor(KEY, PAYER).map((u) => u.label), 'everyone sees the same thirteen rooms');
+  assert.deepEqual([i.places, i.extraBeds, i.extraBedFor], [2, 1, undefined], 'two places of its own, the extra bed beyond them, no guest list');
+  assert.ok(units.filter((u) => u.label !== 'I').every((u) => u.places === 2 && !u.extraBeds), 'no other Heritage Executive room changes');
+  const d = unitsOf('wedstay/heritage').find((u) => u.label === 'D');
+  assert.deepEqual([d.places, d.extraBeds], [2, 1]);
+  assert.ok(unitsOf('wedstay/heritage').filter((u) => u.label !== 'D').every((u) => !u.extraBeds));
+  assert.ok(!SEED['prewed/heritage-executive'].extraBeds && !SEED['prewed/heritage'].extraBeds, 'the pre-wedding window is another period: no extra bed there');
+  assert.deepEqual([bedsFor(i, 'G121'), bedsFor(i, 'G050'), bedsFor(i), bedsFor(units[0], 'G121')], [1, 1, 1, 0], 'the same for every guest');
 });
 
-test('EXTRA BED · what each guest sees: the three see Room I with the bed (3 free), everyone else two places; the counts never pass the source', async () => {
+test('EXTRA BED · what each guest sees: everyone — signed in or not — sees Room I with its two places and the bed; the counts never pass the source', async () => {
   const rooms = new Rooms(doState());
-  for (const g of [PAYER, SECOND, THIRD]) {
+  for (const g of [PAYER, SECOND, THIRD, STRANGER, null]) {
     const v = await view(rooms, g), u = unitIn(v, 'I');
-    assert.deepEqual([u.places, u.extraBeds, u.free, u.full], [2, 1, 3, false], g.guestId);
-    assert.deepEqual([v.summary[KEY].sourcePlaces, v.summary[KEY].remainingPlaces], [27, 27], 'the bed counted in the source too, never 27 of 26');
+    assert.deepEqual([u.places, u.extraBeds, u.free, u.full], [2, 1, 3, false], g ? g.guestId : 'signed out');
+    assert.deepEqual([v.summary[KEY].sourcePlaces, v.summary[KEY].remainingPlaces], [27, 27], 'the bed counted in the source too');
   }
-  const s = unitIn(await view(rooms, STRANGER), 'I');
-  assert.deepEqual([s.places, s.extraBeds || 0, s.free, s.full], [2, 0, 2, false]);
-  assert.equal((await view(rooms, STRANGER)).summary[KEY].sourcePlaces, 26);
-  for (const g of [PAYER, STRANGER, null]) assert.ok(!/extraBedFor|G120|G121/.test(JSON.stringify(unitIn(await view(rooms, g), 'I'))), 'who may use the bed is never shown');
+  assert.ok(!/extraBedFor/.test(JSON.stringify(unitIn(await view(rooms, PAYER), 'I'))));
 });
 
-test('EXTRA BED · the first one\'s open selection holds her place; the second and the third book theirs — the third on the bed; then Room I is full for everyone', async () => {
+test('EXTRA BED · an open selection holds one place and hides none; the next guests book theirs — whoever comes third takes the bed and is marked; then the room is full for everyone', async () => {
   const rooms = new Rooms(doState());
   assert.equal((await join(rooms, PAYER, 'I')).status, 200, 'an open selection: a place held, nothing sent');
   let seen = unitIn(await view(rooms, SECOND), 'I');
   assert.deepEqual([seen.free, seen.full], [2, false], 'her open selection hides no place: a place and the bed are free');
   assert.equal((await join(rooms, SECOND, 'I')).status, 200);
-  seen = unitIn(await view(rooms, THIRD), 'I');
-  assert.deepEqual([seen.free, seen.full], [1, false], 'the bed is still there for the third');
-  const st = unitIn(await view(rooms, STRANGER), 'I'); assert.deepEqual([st.free, st.full], [0, true], 'for anyone else Room I is full');
+  for (const g of [THIRD, STRANGER]) { seen = unitIn(await view(rooms, g), 'I'); assert.deepEqual([seen.free, seen.full], [1, false], 'the bed is open to ' + g.guestId); }
   const third = await join(rooms, THIRD, 'I');
   assert.equal(third.status, 200, JSON.stringify(third.d)); assert.deepEqual(third.d.joined, { key: KEY, label: 'I' });
   assert.equal(await inI(rooms), 3);
   for (const g of [PAYER, SECOND, THIRD, STRANGER]) { const u = unitIn(await view(rooms, g), 'I'); assert.deepEqual([u.free, u.full], [0, true], g.guestId); }
   const r = await join(rooms, STRANGER, 'I'); assert.equal(r.status, 409); assert.equal(r.d.error, 'full');
-  const mine = unitIn(await view(rooms, THIRD), 'I');
-  assert.equal(mine.occupants.length, 3); assert.equal(mine.occupants.filter((o) => o.mine).length, 1);
+  const plan = await (await rooms.fetch(new Request('https://x/api/rooms/plan', { headers: { 'x-gr-verified': 'yes' } }))).json();
+  assert.deepEqual(plan.units[KEY].find((u) => u.label === 'I').occupants.filter((o) => o.bed).map((o) => o.guestId), ['G121'], 'the third booking is the bed');
 });
 
-test('EXTRA BED · in any order: whoever of the three comes third takes the bed', async () => {
-  for (const order of [[THIRD, SECOND, PAYER], [SECOND, PAYER, THIRD], [THIRD, PAYER, SECOND]]) {
+test('EXTRA BED · in any order: whoever comes third takes the bed', async () => {
+  for (const order of [[THIRD, SECOND, PAYER], [SECOND, PAYER, THIRD], [STRANGER, PAYER, OTHER]]) {
     const rooms = new Rooms(doState());
     for (const g of order) { const r = await join(rooms, g, 'I'); assert.equal(r.status, 200, order.map((x) => x.guestId).join('>') + ' ' + g.guestId + ' ' + JSON.stringify(r.d)); }
     assert.equal(await inI(rooms), 3);
   }
 });
 
-test('EXTRA BED · never anyone else\'s: a stranger takes a free regular place as in every room, never the bed (no pre-reserved room)', async () => {
+test('ROOM D · The Heritage: two guests hold its places, any third guest books the extra bed — no name needed in advance; a fourth is refused', async () => {
   const rooms = new Rooms(doState());
-  assert.equal((await join(rooms, PAYER, 'I')).status, 200);
-  assert.equal((await join(rooms, SECOND, 'I')).status, 200);
-  const r = await join(rooms, STRANGER, 'I'); assert.equal(r.status, 409); assert.equal(r.d.error, 'full', 'two in: the bed is not his');
-  const rooms2 = new Rooms(doState());
-  assert.equal((await join(rooms2, PAYER, 'I')).status, 200);
-  assert.equal((await join(rooms2, STRANGER, 'I')).status, 200, 'the regular places stay the standard pool\'s');
-  assert.equal((await join(rooms2, OTHER, 'I')).status, 409);
-  assert.equal((await join(rooms2, THIRD, 'I')).status, 200, 'the bed is still the family\'s');
+  const H = (g) => call(rooms, 'join', { invitationId: g.invitationId, guestId: g.guestId, key: 'wedstay/heritage', label: 'D' }, g);
+  const BAM = who('G091'), BOON = who('G092'), ANY = who('G110');
+  assert.equal((await H(BAM)).status, 200); assert.equal((await H(BOON)).status, 200);
+  const d = (await view(rooms, ANY)).units['wedstay/heritage'].find((u) => u.label === 'D');
+  assert.deepEqual([d.places, d.extraBeds, d.taken, d.free, d.full], [2, 1, 2, 1, false], 'not full while the bed is free');
+  assert.equal((await H(ANY)).status, 200, 'the third place, booked by a guest nobody named beforehand');
+  const full = (await view(rooms, STRANGER)).units['wedstay/heritage'].find((u) => u.label === 'D');
+  assert.deepEqual([full.taken, full.free, full.full], [3, 0, true]);
+  const r = await H(STRANGER); assert.equal(r.status, 409); assert.equal(r.d.error, 'full');
+  const plan = await (await rooms.fetch(new Request('https://x/api/rooms/plan', { headers: { 'x-gr-verified': 'yes' } }))).json();
+  assert.deepEqual(plan.units['wedstay/heritage'].find((u) => u.label === 'D').occupants.map((o) => o.guestId + (o.bed ? '·bed' : '')), ['G091', 'G092', 'G110·bed']);
 });
 
 test('EXTRA BED · the bed is one guest\'s own seat: never a place kept for a party member, never a party squeezed onto it', async () => {
   const PAYER_P = who('G032', 'INV-PAYERPARTY');
-  /* a stranger holds one place; the payer books for herself and a party mate (need 2): one regular place is not two — refused, nothing kept on the bed */
   let rooms = new Rooms(doState());
   assert.equal((await join(rooms, STRANGER, 'I')).status, 200);
   let r = await join(rooms, PAYER_P, 'I', { need: 2 });
   assert.equal(r.status, 409); assert.equal(r.d.error, 'full for your party'); assert.equal(await inI(rooms), 1, 'nothing held, nothing kept');
-  /* both regular places taken: the bed takes her alone — with a party mate to place it is refused; alone it is hers */
   rooms = new Rooms(doState());
   assert.equal((await join(rooms, STRANGER, 'I')).status, 200); assert.equal((await join(rooms, OTHER, 'I')).status, 200);
   r = await join(rooms, PAYER_P, 'I', { need: 2 });
@@ -108,11 +107,11 @@ test('EXTRA BED · the bed is one guest\'s own seat: never a place kept for a pa
   assert.equal(unitIn(await view(rooms, MATE), 'I').occupants.filter((o) => o.placeholder).length, 0, 'no place kept on the bed');
 });
 
-test('EXTRA BED · leaving gives the place back; a move out of Room I frees it for the three again', async () => {
+test('EXTRA BED · leaving gives the place back; a move out of Room I frees it again', async () => {
   const rooms = new Rooms(doState());
   for (const g of [PAYER, SECOND, THIRD]) assert.equal((await join(rooms, g, 'I')).status, 200);
   assert.equal((await leave(rooms, THIRD)).status, 200);
-  assert.deepEqual([unitIn(await view(rooms, THIRD), 'I').free, unitIn(await view(rooms, STRANGER), 'I').free], [1, 0]);
+  assert.deepEqual([unitIn(await view(rooms, THIRD), 'I').free, unitIn(await view(rooms, STRANGER), 'I').free], [1, 1]);
   assert.equal((await join(rooms, SECOND, 'H')).status, 200, 'a move: the new place first, then the old one goes');
   assert.equal(await inI(rooms), 1);
   assert.equal((await join(rooms, THIRD, 'I')).status, 200); assert.equal((await join(rooms, SECOND, 'I')).status, 200);
@@ -129,18 +128,20 @@ test('ROOM E · the couple book theirs: the first keeps the second place for the
   assert.deepEqual([e.taken, e.free, e.full, e.extraBeds || 0], [2, 0, true, 0]);
 });
 
-test('GUEST RELATIONS · the plan names the bed; an assignment of one of the three may use it — anyone else\'s needs the force the Owners\' extra bed uses', async () => {
+test('GUEST RELATIONS · the plan shows the bed; an assignment may use it for anyone and marks it; beyond it only the Owners\' force', async () => {
   const rooms = new Rooms(doState());
   for (const g of [PAYER, SECOND]) assert.equal((await join(rooms, g, 'I')).status, 200);
   const plan = await (await rooms.fetch(new Request('https://x/api/rooms/plan', { headers: { 'x-gr-verified': 'yes' } }))).json();
   const i = plan.units[KEY].find((u) => u.label === 'I');
-  assert.deepEqual([i.places, i.extraBeds, i.extraBedFor, i.occupants.length], [2, 1, ['G032', 'G120', 'G121'], 2]);
+  assert.deepEqual([i.places, i.extraBeds, i.extraBedFor, i.occupants.length], [2, 1, undefined, 2]);
   const gr = (occupants) => rooms.fetch(new Request('https://x/api/rooms/assign', { method: 'POST', headers: { 'x-gr-verified': 'yes' }, body: JSON.stringify({ occupants }) })).then((r) => r.json());
-  const no = await gr([{ key: KEY, label: 'I', guestId: 'G050', invitationId: 'INV-G050', contactId: 'CON-ANY' }]);
-  assert.equal(no.ok, false); assert.equal(no.refused[0].error, 'full', 'a register id in the body grants nothing');
-  const yes = await gr([{ key: KEY, label: 'I', guestId: 'G121', invitationId: 'INV-G121' }]);
+  const yes = await gr([{ key: KEY, label: 'I', guestId: 'G050', invitationId: 'INV-G050' }]);
   assert.equal(yes.ok, true, JSON.stringify(yes));
   assert.equal(await inI(rooms), 3);
+  const no = await gr([{ key: KEY, label: 'I', guestId: 'G051', invitationId: 'INV-G051' }]);
+  assert.equal(no.ok, false); assert.equal(no.refused[0].error, 'full');
+  const p2 = await (await rooms.fetch(new Request('https://x/api/rooms/plan', { headers: { 'x-gr-verified': 'yes' } }))).json();
+  assert.deepEqual(p2.units[KEY].find((u) => u.label === 'I').occupants.filter((o) => o.bed).map((o) => o.guestId), ['G050']);
 });
 
 /* ---- THROUGH THE WORKER: sign in with a code (bearer → the deployed index → the verified identity) → read the rooms → book the
@@ -168,11 +169,11 @@ async function workerWorld() {
 
 test('THROUGH THE WORKER · each signs in with their own code and books their own place: Room I for three (the bed to the third), Room E for two — the occupancy as the engine holds it', async () => {
   const { get, book, plan } = await workerWorld();
-  assert.deepEqual([unitIn(await get('PAYER'), 'I').free, unitIn(await get('STRANGER'), 'I').free, unitIn(await get(null), 'I').free], [3, 2, 2], 'signed in: the three see the bed; signed out: counts only');
+  assert.deepEqual([unitIn(await get('PAYER'), 'I').free, unitIn(await get('STRANGER'), 'I').free, unitIn(await get(null), 'I').free], [3, 3, 3], 'the room\'s bed, the same for everyone');
   assert.equal((await book('PAYER', 'I')).status, 200, 'the first books and sends nothing');
   assert.equal((await book('SECOND', 'I')).status, 200);
   const third = await book('THIRD', 'I'); assert.equal(third.status, 200, JSON.stringify(third.d));
-  assert.equal((await book('STRANGER', 'I')).status, 409, 'nobody else gets a place in Room I');
+  assert.equal((await book('STRANGER', 'I')).status, 409, 'three in: Room I is full');
   assert.equal((await book('PARENT1', 'E', { need: 2 })).status, 200);
   assert.equal((await book('PARENT2', 'E')).status, 200);
   const seen = await get('THIRD');
@@ -224,7 +225,7 @@ const pageFor = async (rooms, g) => {
   return w;
 };
 const roomI = (w) => w.SIYL_UNITS.units('wedstay', 'heritage-executive').find((u) => u.label === 'I');
-test('THE PAGE · the guests it is for read Room I with its bed and can choose it to the last place; anyone else reads it full — the engine\'s words, no second count', async () => {
+test('THE PAGE · every guest reads Room I with its bed and can choose it to the last place — the engine\'s words, no second count', async () => {
   const rooms = new Rooms(doState());
   let w = await pageFor(rooms, THIRD);
   assert.equal(w.SIYL_UNITS.stateOf(roomI(w)).state, 'empty · 2 places and the extra bed');
@@ -235,7 +236,8 @@ test('THE PAGE · the guests it is for read Room I with its bed and can choose i
   assert.equal(w.SIYL_UNITS.fitsParty('wedstay', 'heritage-executive', roomI(w), 1), true, 'the third can choose Room I');
   assert.equal(w.SIYL_UNITS.fitsParty('wedstay', 'heritage-executive', roomI(w), 2), false, 'never a party onto the bed — as the engine refuses it');
   const s = await pageFor(rooms, STRANGER);
-  assert.equal(s.SIYL_UNITS.stateOf(roomI(s)).state, 'full'); assert.equal(s.SIYL_UNITS.fitsParty('wedstay', 'heritage-executive', roomI(s), 1), false);
+  assert.equal(s.SIYL_UNITS.stateOf(roomI(s)).state, 'the extra bed free', 'the bed is the room\'s, open to him too');
+  assert.equal(s.SIYL_UNITS.fitsParty('wedstay', 'heritage-executive', roomI(s), 1), true);
   /* the page's own Choose: the browser asks the engine to join, the third lands on the bed */
   const r = await w.SIYL_UNITS.join('wedstay', 'heritage-executive', 'I');
   assert.ok(r && r.ok !== false, JSON.stringify(r));
@@ -293,7 +295,7 @@ test('THE PAGE · a guest on a regular place reads the extra bed once the room u
   const rooms2 = new Rooms(doState());
   for (const g of [STRANGER, OTHER]) assert.equal((await join(rooms2, g, 'I')).status, 200);
   const o = await pageFor(rooms2, STRANGER);
-  assert.equal(o.SIYL_UNITS.occupancySentence(roomI(o)), 'Room I has two sleeping places. You and N hold them; the room is full.');
+  assert.equal(o.SIYL_UNITS.occupancySentence(roomI(o)), 'Room I has two sleeping places and an extra bed. You and N hold two; one is free.');
 });
 
 test('THAI · every new room phrase reads in Thai — no English word left (the room letter and names aside)', async () => {

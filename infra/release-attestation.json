@@ -2,13 +2,13 @@
  "about": "Signed by src/release-attest.mjs on the release machine; verified by src/release-verify.cjs in the build. Not the Owner's consent — a record that these checks passed for exactly this tree.",
  "payload": {
   "v": 1,
-  "tree": "51fc37fc9d0a87681e55ca09982579beee22c831",
-  "pricingRef": "ad8c93cc41dc",
+  "tree": "1f793777797f8415031a7c0e5ab44be226d3e588",
+  "pricingRef": "fe2657bd0663",
   "keyId": "d02a1256537ec29e",
-  "at": "2026-11-17T16:04:13.127Z",
-  "base": "aa589127476e62c9ca9ec469f7a0bd44ec356ee7",
+  "at": "2026-11-17T17:00:55.882Z",
+  "base": "82c6bf40ff4b0f7ec853c9edb52aa02aa73100b3",
   "markers": {
-   "OWNER_PRICING_CHANGE": "Wedding stay Heritage Executive Rooms A, B, C complimentary (USD 0), 009 rows 12-17 [ref ad8c93cc41dc]"
+   "OWNER_PRICING_CHANGE": "The Heritage Room D extra bed USD 75, second night complimentary, 009 row 40 [ref fe2657bd0663]"
   },
   "checks": {
    "npmTest": {
@@ -25,5 +25,5 @@
    }
   }
  },
- "signature": "xNTpOAr+UAaZPdPdMjgGaJid+K3kCYLA8A554hed4Qez9Msb3spCeawHiYBjPThdzhPYVthNRg4+L8TFtRfNDw=="
+ "signature": "ezqdgC+OIUSiJFOD81BXQDbTZeJP6p5ah/jyhil8No4IvHOgMLUeXrMAHWokP1TdrNxMFo0tX44TMsd34HiwBw=="
 }

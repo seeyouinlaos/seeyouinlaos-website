@@ -95,7 +95,7 @@ test('PARTY CAPACITY · a two-place room with one stranger cannot take a party o
   c = unit((await call(rooms, 'read', null, PEG)).d, key, 'C'); assert.equal(c.taken, 0, 'nothing is kept once the party has left');
   assert.equal((await join(rooms, PEG, key, 'D', 2, 'Peggy')).status, 200);
   assert.equal((await call(rooms, 'leave', { invitationId: STE.invitationId, guestId: STE.guestId, stage: 'wedstay' }, STE)).status, 200, 'Steffie is not joining the wedding stay');
-  c = unit((await call(rooms, 'read', null, PEG)).d, key, 'D'); assert.equal(c.taken, 1, 'her kept place is given back'); assert.equal(c.free, 1);
+  c = unit((await call(rooms, 'read', null, PEG)).d, key, 'D'); assert.equal(c.taken, 1, 'her kept place is given back'); assert.equal(c.free, 1 + (c.extraBeds || 0), 'its own place free, and the room\'s extra bed where it has one');
 });
 
 test('PARTY CAPACITY · the client offers only units that take the whole party, and asks the engine for that many places', async () => {

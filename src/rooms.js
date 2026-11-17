@@ -29,8 +29,8 @@
    actually books a place in it, and the couple book their own places like every other guest. Capacity is units × places,
    never a separate counter, and only real bookings consume it. Planning names in the Operations Master are never bookings.
    ONE EXCEPTION BY OWNER ORDER — AN EXTRA BED (17 Nov 2026): a room the seed gives `extraBeds` has one more sleeping place
-   beyond its own, usable only by the guest ids the seed names (those 009 prices for it); nothing is held for them in advance
-   and the room's own places stay everyone's. The bed is a guest's own seat — never a place kept for a party member.
+   beyond its own — the room's capacity, open to every signed-in guest like its other places, nothing held in advance. The
+   bed is a guest's own seat — never a place kept for a party member; the guest whose booking takes it is marked `bed`.
 
    A guest holds at most one place per STAGE of the journey: the wedding window is one stage whether spent in the hotel,
    the Souphattra or the Guest House.
@@ -97,7 +97,7 @@ export function unitsOf(key) {
          whole occupancy (honourOccupancy — the Penang suite, 27 Sep 2026) has that many */
       places: s.occupancy === 1 ? 1 : s.honourOccupancy ? s.occupancy : PLACES,
       reservedFor: null,
-      ...(bed && Number(bed.beds) > 0 ? { extraBeds: Number(bed.beds), extraBedFor: (bed.for || []).map(String) } : {}) });
+      ...(bed && Number(bed.beds) > 0 ? { extraBeds: Number(bed.beds) } : {}) });
   }
   /* A DEDICATED ROOM (002 · W · Owner, 29 Sep 2026): one more unit of the same category, for one register id only — its own
      label after the standard pool, its own place count; never the standard pool's */
@@ -122,11 +122,10 @@ export function allUnits() {
   return out;
 }
 export function unitOf(key, label) { return unitsOf(key).find((u) => u.label === String(label || '').toUpperCase()) || null; }
-/* THE EXTRA BEDS ONE GUEST MAY USE in a unit (Owner, 17 Nov 2026): the unit's beds when the verified guest id is one the seed names
-   for them, else none. The bed is a guest's own seat only — never a place kept for a party member (review, 17 Nov 2026). */
-export function bedsFor(unit, guestId) {
-  const g = String(guestId || '');
-  return unit && unit.extraBeds && g && (unit.extraBedFor || []).includes(g) ? unit.extraBeds : 0;
+/* THE EXTRA BEDS OF A UNIT (Owners, 17 Nov 2026): the room's own, the same for every guest — capacity is the room's, never a
+   guest's permission. The bed is a guest's own seat only — never a place kept for a party member (review, 17 Nov 2026). */
+export function bedsFor(unit) {
+  return unit && unit.extraBeds ? unit.extraBeds : 0;
 }
 
 /* who may take a place in a unit: any authenticated guest, in any unit (Owner, 15 Sep 2026 · 19 Sep 2026) */
@@ -272,8 +271,8 @@ export class Rooms {
               : { name: shownName(o, names), mine: o.guestId === identity.guestId, party: !!(identity.partyId && o.partyId === identity.partyId), ...(o.guestId === identity.guestId ? { guestId: o.guestId } : {}) }))
           : here.map(() => ({}));
         const elig = !identity ? { ok: false } : mayJoin(u, identity);
-        /* the extra bed is shown only to a guest who may use it — never who else may, never a register id (Owner, 17 Nov 2026) */
-        const beds = identity ? bedsFor(u, identity.guestId) : 0;
+        /* the room's extra bed, the same for everyone (Owners, 17 Nov 2026) */
+        const beds = bedsFor(u);
         return { key, label: u.label, name: u.name, kind: u.kind, places: u.places, reservedFor: null, ...(u.dedicatedTo ? { dedicated: true, rate: u.rate } : {}),
                  ...(beds ? { extraBeds: beds } : {}),
                  eligible: elig.ok, occupants, taken, free: Math.max(0, u.places + beds - taken), full: taken >= u.places + beds };
@@ -456,7 +455,9 @@ export class Rooms {
         /* HOLD THE NEW PLACE FIRST … — a place this guest already holds here under the former key is the same place: it is
            re-keyed to the canonical key with its own time, never released and taken again */
         const heldHere = occ.find((o) => !o.placeholder && o.key === key && o.label === label && o.guestId === guestId);
-        await this.storage.put(this.keyOf(key, label, guestId), { invitationId, partyId: identity.partyId || null, name, at: heldHere && heldHere.at ? heldHere.at : new Date().toISOString() });
+        /* the guest whose booking takes the extra bed is marked: the statement check asks for that person's own rate only */
+        await this.storage.put(this.keyOf(key, label, guestId), { invitationId, partyId: identity.partyId || null, name, at: heldHere && heldHere.at ? heldHere.at : new Date().toISOString(),
+          ...((onBed || (heldHere && heldHere.bed)) ? { bed: true } : {}) });
         if (heldHere && this.rowKey(heldHere) !== this.keyOf(key, label, guestId)) await this.storage.delete(this.rowKey(heldHere));
         if (identity.partyId) {
           /* … this guest's own join takes one place kept for the party here; the places the absent members still need are kept */
@@ -512,7 +513,7 @@ export class Rooms {
       const occ = await this.occupancies();
       const out = { ok: true, places: PLACES, units: {}, waitlist: await this.waitlist() };
       for (const key of Object.keys(SEED)) {
-        out.units[key] = unitsOf(key).map((u) => ({ ...u, occupants: occ.filter((o) => o.key === key && o.label === u.label).map((o) => ({ invitationId: o.invitationId, guestId: o.guestId, partyId: o.partyId, name: o.name, at: o.at })) }));
+        out.units[key] = unitsOf(key).map((u) => ({ ...u, occupants: occ.filter((o) => o.key === key && o.label === u.label).map((o) => ({ invitationId: o.invitationId, guestId: o.guestId, partyId: o.partyId, name: o.name, at: o.at, ...(o.bed ? { bed: true } : {}) })) }));
       }
       return json(out);
     }
@@ -529,11 +530,12 @@ export class Rooms {
           if (unit.dedicatedTo && o.contactId !== unit.dedicatedTo) { refused.push({ ...o, error: 'dedicated room' }); continue; }
           const occ = await this.occupancies();
           const others = occ.filter((x) => x.key === key && x.label === label && x.guestId !== guestId).length;
-          /* the extra bed by the guest id being assigned (never a register id from the body) */
-          if (others >= unit.places + bedsFor(unit, guestId) && !body.force) { refused.push({ ...o, error: 'full' }); continue; }
+          /* the room's extra bed counts like its places (Owners, 17 Nov 2026); beyond it only the Owners' force */
+          if (others >= unit.places + bedsFor(unit) && !body.force) { refused.push({ ...o, error: 'full' }); continue; }
           const legacyHere = occ.find((x) => !x.placeholder && x.key === key && x.label === label && x.guestId === guestId && this.rowKey(x) !== this.keyOf(key, label, guestId));
           if (legacyHere) await this.storage.delete(this.rowKey(legacyHere));
-          await this.storage.put(this.keyOf(key, label, guestId), { invitationId: String(o.invitationId), partyId: o.partyId || null, name: String(o.name || '').slice(0, 24), at: new Date().toISOString(), by: String(body.actor || 'guest-relations') });
+          await this.storage.put(this.keyOf(key, label, guestId), { invitationId: String(o.invitationId), partyId: o.partyId || null, name: String(o.name || '').slice(0, 24), at: new Date().toISOString(), by: String(body.actor || 'guest-relations'),
+            ...(others >= unit.places ? { bed: true } : {}) });
           const stage = stageOf(key);
           for (const x of occ) if (x.guestId === guestId && stageOf(x.key) === stage && !(x.key === key && x.label === label)) await this.storage.delete(this.rowKey(x));
           await this.resolveWait(stage, guestId);   /* an assignment by Guest Relations resolves the waiting-list entry */

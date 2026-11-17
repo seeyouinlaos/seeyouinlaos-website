@@ -39,7 +39,7 @@ import { pricingSource, catalogueKey } from './billing/catalogue-cache.js';
 import { effectivePreference, routeFor, destinationOf, firstVerifiedPayment, isChannel, PREFERENCE_SOURCE } from './billing/preference.js';
 import { GoogleSheetsUnavailable, batchReadRanges } from './google-sheets.js';
 import { calculate, perPerson, matchSpecialRate } from './billing/engine.js';
-import { unitOf as roomUnitOf, bedsFor as roomBedsFor } from './rooms.js';
+import { unitOf as roomUnitOf } from './rooms.js';
 import { priceDifference } from './billing/price-difference.js';
 import {
   buildSnapshot, canIssue, dueDateFor, freezeFx, inPreferredCurrency,
@@ -1978,9 +1978,8 @@ async function roomsGr(env, op, body) {
 }
 /* AN EXTRA BED IS PRICED ONLY BY ITS OWN 009 ROW (pricing guard C2, 17 Nov 2026): a person of this statement in a room that has an
    extra bed (src/inventory-seed.js), while the Rooms engine holds more persons there than the room's own places, must have an
-   approved 009 row naming them in effect — else Issue waits, named. Which person is "on the bed" is never decided: every person
-   the seed names for the bed is checked, and a person it does not name only when the others alone already fill the room's own
-   places (a guest on a regular place is never held up by a bed that is not theirs). No price is computed; nothing is written.
+   approved 009 row naming them in effect — else Issue waits, named. The person checked is the one whose booking took the bed
+   (marked by the Rooms engine); a guest on a regular place is never held up by it. No price is computed; nothing is written.
    The room list is read only when a line is in such a room; a room it does not list is named, never passed. */
 async function extraBedReasons(env, current, src, asOf) {
   const out = [];
@@ -1997,8 +1996,9 @@ async function extraBedReasons(env, current, src, asOf) {
     if (!u) { out.push('EXTRA_BED_UNCHECKED: room ' + unit.label + ' of ' + itemId + ' is not in the room list just now — the extra bed of this statement cannot be checked'); continue; }
     const inRoom = u.holders.length + (u.kept || 0);
     if (inRoom <= unit.places) continue;
-    const notNamed = u.holders.filter((g) => !roomBedsFor(unit, g)).length + (u.kept || 0);
-    if (!roomBedsFor(unit, clean(l.Person_ID)) && notNamed <= unit.places) continue;
+    /* the guest the Rooms engine seated on the bed is the one checked; a room beyond its places with nobody marked (an older
+       booking) checks everyone in it — fail closed */
+    if (Array.isArray(u.beds) && u.beds.length && !u.beds.includes(clean(l.Person_ID))) continue;
     const m = matchSpecialRate(src.specialRates || [], { holderId: clean(l.Holder_ID), personId: clean(l.Person_ID), itemId, asOf: evaluationDay(asOf) });
     if (!(m.rate && m.personScoped)) out.push('EXTRA_BED_UNPRICED: ' + clean(l.Person_ID) + ' is in room ' + unit.label + ' of ' + itemId + ', which holds ' + inRoom + ' for its ' + unit.places + ' places — no approved 009 row of their own is in effect');
   }
@@ -2016,6 +2016,8 @@ async function unitsForOwners(env, items) {
     out[k] = units.filter((u) => !u.dedicatedTo).map((u) => ({ label: u.label, places: u.places,
       holders: (u.occupants || []).filter((o) => o.guestId).map((o) => o.guestId), kept: (u.occupants || []).filter((o) => !o.guestId).length,
       keptFor: (u.occupants || []).filter((o) => !o.guestId).map((o) => o.partyId || null),
+      /* the guests whose booking took the extra bed (src/rooms.js marks them) */
+      beds: (u.occupants || []).filter((o) => o.guestId && o.bed).map((o) => o.guestId),
       free: Math.max(0, u.places - (u.occupants || []).length),
       /* the extra bed beyond the room's own places (src/inventory-seed.js, Owner 17 Nov 2026): its count only, never who may use it */
       ...(u.extraBeds ? { extraBeds: u.extraBeds } : {}) }));
