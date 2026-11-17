@@ -225,7 +225,10 @@
         var words = u.stateOf ? u.stateOf(x) : { names: [], state: '' };
         var names = words.names;
         var dots = '';
-        for (var i = 0; i < x.places; i++) { var o = x.occupants[i]; dots += '<i class="' + (o ? (o.mine ? 'on me' : 'on') : '') + '" aria-hidden="true"></i>'; }
+        /* one dot per sleeping place — the room's own, the extra bed for a guest it is for (Owner, 17 Nov 2026), and every person in it;
+           the bed's dot is marked `bed` and drawn like the others (the words name it; no stylesheet change, layout contract L2) */
+        var seats = Math.max(x.places + (x.extraBeds || 0), x.occupants.length);
+        for (var i = 0; i < seats; i++) { var o = x.occupants[i]; dots += '<i class="' + (o ? (o.mine ? 'on me' : 'on') : '') + (i >= x.places ? ' bed' : '') + '" aria-hidden="true"></i>'; }
         /* names joined with "and" (TO-01214): "You and Ada" · "You, Ada and Ben" */
         var bold = names.map(function (n) { return '<b>' + esc(n) + '</b>'; });
         var who = bold.length <= 1 ? (bold[0] || '') : bold.slice(0, -1).join(', ') + ' and ' + bold[bold.length - 1];

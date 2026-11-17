@@ -114,11 +114,17 @@
       /* the party members already here count for the party; a place KEPT for the party (the engine's party place) is the guest's to take */
       var here = u.occupants.filter(function (o) { return o.party && !o.mine && !o.placeholder; }).length;
       var kept = u.occupants.filter(function (o) { return o.party && o.placeholder; }).length;
-      if (need <= u.places) return u.free + kept >= Math.max(1, need - here);
+      /* AN EXTRA BED (Owner, 17 Nov 2026) is the guest's own seat only — never a place for a party member: the party is counted on
+         the room's own places, the bed only for a guest booking for themselves (the engine's rule, word for word) */
+      var bed = u.extraBeds || 0, regular = Math.max(0, u.free - bed);
+      if (need <= u.places) {
+        var want = Math.max(1, need - here);
+        return regular + kept >= want || (bed > 0 && u.free > regular && want === 1);
+      }
       /* a party larger than a unit: a place here for this guest, and enough places across the category for the rest */
-      if (u.free + kept < 1) return false;
+      if (regular + kept < 1) return false;
       var list = this.units(win, slug), catFree = 0, catParty = 0;
-      list.forEach(function (x) { catFree += x.free + x.occupants.filter(function (o) { return o.party && o.placeholder; }).length; catParty += x.occupants.filter(function (o) { return o.party && !o.mine && !o.placeholder; }).length; });
+      list.forEach(function (x) { catFree += Math.max(0, x.free - (x.extraBeds || 0)) + x.occupants.filter(function (o) { return o.party && o.placeholder; }).length; catParty += x.occupants.filter(function (o) { return o.party && !o.mine && !o.placeholder; }).length; });
       return catFree >= Math.max(1, need - catParty);
     },
     /* does the guest's party keep a place for them in a unit of this stage (a place their party member took for them)? */
@@ -243,9 +249,15 @@
       var free = u.free, parts = [];
       var youHoldStage = mineIn || (stage ? !!U.mine(stage) : false);
       if (u.dedicated) return { names: mineIn ? ['You'] : [], who: mineIn ? 'You' : '', state: mineIn ? 'the whole room is yours' : 'the whole room · for you alone' };
-      if (!real.length && !keptMine) return { names: [], who: '', state: 'empty · ' + u.places + (u.places === 1 ? ' place' : ' places') };
+      /* AN EXTRA BED (Owner, 17 Nov 2026): shown only to the guests it is for (the engine's `extraBeds`), said apart from the room's own places */
+      var bed = u.extraBeds || 0;
+      if (!real.length && !keptMine) return { names: [], who: '', state: 'empty · ' + u.places + (u.places === 1 ? ' place' : ' places') + (bed ? ' and the extra bed' : '') };
       if (u.kind === 'property') parts.push(free + ' of ' + u.places + ' places free');
-      else if (free > 0) parts.push(free + (free === 1 ? ' place free' : ' places free'));
+      else if (free > 0) {
+        var regFree = Math.max(0, free - bed);
+        if (regFree > 0) parts.push(regFree + (regFree === 1 ? ' place free' : ' places free'));
+        if (free > regFree) parts.push('the extra bed free');
+      }
       if (keptMine) {
         var forWhom = youHoldStage ? absentMembers(stage) : ['you'].concat(absentMembers(stage));
         forWhom = forWhom.slice(0, keptMine);
@@ -271,7 +283,9 @@
       var names = real.slice().sort(function (a, b) { return (b.mine ? 1 : 0) - (a.mine ? 1 : 0); }).map(whoOf);
       var H = real.length, K = u.occupants.filter(function (o) { return o.placeholder; }).length, F = u.free;
       var subject = u.kind === 'property' ? 'The Guest House' : this.unitName(u);
-      var head = subject + ' has ' + numWord(u.places) + ' sleeping ' + (u.places === 1 ? 'place' : 'places') + '. ';
+      /* the extra bed is said to the guest it is for, and to anyone sharing the room once it is in use (more persons than places) */
+      var bedSaid = u.kind !== 'property' && (u.extraBeds || H + K > u.places);
+      var head = subject + ' has ' + numWord(u.places) + ' sleeping ' + (u.places === 1 ? 'place' : 'places') + (bedSaid ? ' and an extra bed' : '') + '. ';
       if (!F && !K) {
         if (u.kind === 'property') return head + 'All ' + numWord(u.places) + ' are taken, one of them by you.';
         return head + (H === 1 ? 'You hold it.' : andJoin(names) + ' hold them; the room is full.');

@@ -364,6 +364,8 @@
         var others = u.holders.filter(function (g) { return !mine[g]; }).length + u.kept;
         var ours = u.holders.filter(function (g) { return mine[g]; }).length;
         var words = 'Room ' + u.label + ' · ' + (others ? 'held by another guest' : u.free === u.places ? 'free' : u.free + ' of ' + u.places + ' places free' + (ours ? ' · ' + ours + ' held by this booking\'s guests' : ''));
+        /* a room with an extra bed (Owner, 17 Nov 2026) says whether the bed is still free: in use once the room holds more than its places */
+        if (u.extraBeds && !others) words += ' · extra bed ' + (u.holders.length + u.kept > u.places ? 'taken' : 'free');
         return '<option value="' + esc(u.label) + '"' + (f.room === u.label ? ' selected' : '') + (others ? ' disabled' : '') + '>' + esc(words) + '</option>';
       }).join('') + '</select></label>';
   }

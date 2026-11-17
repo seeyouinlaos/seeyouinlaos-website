@@ -38,7 +38,8 @@ import { composeStatementMail } from './mail-templates.js';
 import { pricingSource, catalogueKey } from './billing/catalogue-cache.js';
 import { effectivePreference, routeFor, destinationOf, firstVerifiedPayment, isChannel, PREFERENCE_SOURCE } from './billing/preference.js';
 import { GoogleSheetsUnavailable, batchReadRanges } from './google-sheets.js';
-import { calculate, perPerson } from './billing/engine.js';
+import { calculate, perPerson, matchSpecialRate } from './billing/engine.js';
+import { unitOf as roomUnitOf, bedsFor as roomBedsFor } from './rooms.js';
 import { priceDifference } from './billing/price-difference.js';
 import {
   buildSnapshot, canIssue, dueDateFor, freezeFx, inPreferredCurrency,
@@ -896,6 +897,8 @@ async function assessIssue(env, holderId, src, asOf, origin, opts) {
     ? CONFIRMATION_WORDS.OWNER_RECORDED : (CONFIRMATION_WORDS[confirmation.state] || CONFIRMATION_WORDS.NONE)));
   /* the Owners' bookings: what stands in the way of billing them (an unpriced extra bed, a room over capacity, a double booking) */
   if (current.owner && current.owner.problems && current.owner.problems.length) reasons.push(...current.owner.problems.map((x) => 'OWNER_BOOKING · ' + x));
+  /* an extra bed a guest booked themselves is priced only by their own 009 row (pricing guard C2, 17 Nov 2026) */
+  reasons.push(...await extraBedReasons(env, current, src, asOf).catch(() => ['EXTRA_BED_UNCHECKED: the room list could not be read just now — the extra bed of this statement cannot be checked']));
   if (!verdict.allowed) reasons.push(...verdict.reasons);
   if (gateNow && !gateNow.approved) reasons.push(...gateNow.open.map((o) => 'GATE_NOW: ' + o));
 
@@ -1973,6 +1976,35 @@ async function roomsGr(env, op, body) {
   if (!j) throw new SourceDataError('ROOMS_UNREADABLE', 'the Rooms engine did not answer');
   return j;
 }
+/* AN EXTRA BED IS PRICED ONLY BY ITS OWN 009 ROW (pricing guard C2, 17 Nov 2026): a person of this statement in a room that has an
+   extra bed (src/inventory-seed.js), while the Rooms engine holds more persons there than the room's own places, must have an
+   approved 009 row naming them in effect — else Issue waits, named. Which person is "on the bed" is never decided: every person
+   the seed names for the bed is checked, and a person it does not name only when the others alone already fill the room's own
+   places (a guest on a regular place is never held up by a bed that is not theirs). No price is computed; nothing is written.
+   The room list is read only when a line is in such a room; a room it does not list is named, never passed. */
+async function extraBedReasons(env, current, src, asOf) {
+  const out = [];
+  let units = null;
+  for (const l of ((current && current.result && current.result.lines) || [])) {
+    const ru = clean(l.Room_Unit_ID); if (!ru) continue;
+    const parts = ru.split('·'), label = parts[parts.length - 1], itemId = parts.slice(1, -1).join('·');
+    const it = src.items && src.items[itemId]; if (!it) continue;
+    const key = clean(it.Site_Product_Key).split(/[,|]/)[0];
+    const unit = roomUnitOf(key, label);
+    if (!unit || !unit.extraBeds) continue;
+    if (!units) units = await unitsForOwners(env, src.items);
+    const u = ((units && units[key]) || []).find((x) => x.label === unit.label);
+    if (!u) { out.push('EXTRA_BED_UNCHECKED: room ' + unit.label + ' of ' + itemId + ' is not in the room list just now — the extra bed of this statement cannot be checked'); continue; }
+    const inRoom = u.holders.length + (u.kept || 0);
+    if (inRoom <= unit.places) continue;
+    const notNamed = u.holders.filter((g) => !roomBedsFor(unit, g)).length + (u.kept || 0);
+    if (!roomBedsFor(unit, clean(l.Person_ID)) && notNamed <= unit.places) continue;
+    const m = matchSpecialRate(src.specialRates || [], { holderId: clean(l.Holder_ID), personId: clean(l.Person_ID), itemId, asOf: evaluationDay(asOf) });
+    if (!(m.rate && m.personScoped)) out.push('EXTRA_BED_UNPRICED: ' + clean(l.Person_ID) + ' is in room ' + unit.label + ' of ' + itemId + ', which holds ' + inRoom + ' for its ' + unit.places + ' places — no approved 009 row of their own is in effect');
+  }
+  return [...new Set(out)];
+}
+
 /* every unit of the products the Owners can record a room in: its places, who holds them (ids and first names) and what is free */
 async function unitsForOwners(env, items) {
   const keys = new Set(Object.values(items).filter((it) => clean(it.Quota_Unit) === 'ROOM' && clean(it.Rate_Status) !== 'RETIRED')
@@ -1984,7 +2016,9 @@ async function unitsForOwners(env, items) {
     out[k] = units.filter((u) => !u.dedicatedTo).map((u) => ({ label: u.label, places: u.places,
       holders: (u.occupants || []).filter((o) => o.guestId).map((o) => o.guestId), kept: (u.occupants || []).filter((o) => !o.guestId).length,
       keptFor: (u.occupants || []).filter((o) => !o.guestId).map((o) => o.partyId || null),
-      free: Math.max(0, u.places - (u.occupants || []).length) }));
+      free: Math.max(0, u.places - (u.occupants || []).length),
+      /* the extra bed beyond the room's own places (src/inventory-seed.js, Owner 17 Nov 2026): its count only, never who may use it */
+      ...(u.extraBeds ? { extraBeds: u.extraBeds } : {}) }));
   }
   return out;
 }
@@ -2061,13 +2095,20 @@ async function adminOwnerBookingsPost(env, identity, request, url, cors) {
       const free = await unitsForOwners(env, src.items);
       const byHolderIndex = new Map(holders.filter((h) => !h.ambiguous && h.guestId).map((h) => [h.guestId, h]));
       const recorded = new Set(plan.map((x) => x.personId));
+      /* THE PAYING GUEST'S OWN PLACE IS THIS BOOKING'S (Owner, 17 Nov 2026): the payer keeps her room through her own selection and
+         the Owners record the others into it — her place is not "another guest's", recorded or not, exactly as the form shows it
+         ("held by this booking's guests"); it fills one of the room's own places all the same */
+      const ours = new Set([...recorded, clean(holder.guestId)].filter(Boolean));
       /* the recorded persons' own parties: a place kept for one of them is theirs, not a stranger's */
       const ourParties = new Set(plan.map((x) => (byHolderIndex.get(x.personId) || {}).partyId).filter(Boolean));
       for (const [k, label] of [...new Set(plan.map((x) => x.key + '|' + x.label))].map((x) => x.split('|'))) {
         const unit = (free[k] || []).find((u) => u.label === label);
         if (!unit) return jsonRes({ ok: false, error: 'room ' + label + ' is not a unit of ' + k, reasons: ['ROOM_UNKNOWN: ' + k + ' · ' + label] }, 409, cors);
-        const strangers = unit.holders.filter((g) => !recorded.has(g)).length + (unit.keptFor || []).filter((pid) => !pid || !ourParties.has(pid)).length;
-        const own = plan.filter((x) => x.key === k && x.label === label && !x.extraBed).length;
+        const strangers = unit.holders.filter((g) => !ours.has(g)).length + (unit.keptFor || []).filter((pid) => !pid || !ourParties.has(pid)).length;
+        /* counted per unit (review, 17 Nov 2026): a place one of ours holds HERE fills one of its own places unless that person is
+           recorded into this very unit — an entry of hers in another unit or stage never hides it */
+        const inUnit = new Set(plan.filter((x) => x.key === k && x.label === label).map((x) => x.personId));
+        const own = plan.filter((x) => x.key === k && x.label === label && !x.extraBed).length + unit.holders.filter((g) => ours.has(g) && !inUnit.has(g)).length;
         if (strangers > 0) return jsonRes({ ok: false, error: 'room ' + label + ' is held by another guest', reasons: ['ROOM_TAKEN: ' + k + ' · ' + label + ' holds ' + strangers + ' place(s) of another guest'] }, 409, cors);
         if (own > unit.places) return jsonRes({ ok: false, error: 'room ' + label + ' has ' + unit.places + ' places', reasons: ['ROOM_OVER_CAPACITY: ' + k + ' · ' + label] }, 409, cors);
       }

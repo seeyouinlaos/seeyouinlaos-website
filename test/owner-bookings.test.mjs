@@ -56,7 +56,9 @@ const P = { payer: 'GT32', sib: 'GT20', bed: 'GT21', mum: 'GT96', dad: 'GT97', o
 const PAYER = 'INV-' + P.payer;
 const INDEX = Object.fromEntries(Object.values(P).map((g, i) => ['k' + i, { i: 'INV-' + g, g, c: 'CON-' + g }]));
 const R009 = (person, rate, rule) => [PAYER, person, 'T-EXEC', rate, String(rule), 'ACTIVE', '', '', 'Synthetic Owner order', 'synthetic'];
-const FAMILY_RATES = [R009(P.payer, 145, 1), R009(P.sib, 145, 1), R009(P.bed, 75, 1), R009(P.mum, 145, 2), R009(P.dad, 145, 2)];
+/* synthetic named rates (never the real 009 figures): a room rate and an extra-bed rate */
+const RATE = 131, BED_RATE = 47;
+const FAMILY_RATES = [R009(P.payer, RATE, 1), R009(P.sib, RATE, 1), R009(P.bed, BED_RATE, 1), R009(P.mum, RATE, 2), R009(P.dad, RATE, 2)];
 
 function workbook(rates) {
   const labels = ['Item_ID', 'Billing_Category', 'Rate_Status', 'Effective_From', 'Effective_To', 'Rate_Basis', 'Standard_Rate', 'Quota', 'Quota_Unit', 'Max_Pax', 'Change_Cutoff', 'Cancellation_Cutoff', 'Currency', 'Site_Product_Key', 'Number of Nights', 'Modifiers'];
@@ -152,7 +154,7 @@ test('OWNER BOOKINGS · a family\'s two rooms through the engine: each person on
   const exp = Object.fromEntries(special.map((s) => [s.Person_ID, s.Rate_Per_Person_Night * Number(s.Nights_Rule)]));
   for (const p of Object.values(P).filter((x) => x !== P.other)) { assert.equal(amountOf(p), exp[p], p); assert.equal(res.lines.find((l) => l.Person_ID === p).rateSource, 'SPECIAL_RATE'); }
   const roomA = amountOf(P.mum) + amountOf(P.dad), roomB = amountOf(P.payer) + amountOf(P.sib) + amountOf(P.bed);
-  assert.equal(roomA, 2 * 145 * 2); assert.equal(roomB, 2 * 145 + 75); assert.equal(res.totalPayableCents / 100, roomA + roomB);
+  assert.equal(roomA, 2 * RATE * 2); assert.equal(roomB, 2 * RATE + BED_RATE); assert.equal(res.totalPayableCents / 100, roomA + roomB);
   const occ = OB.occupancy(rec, ITEMS);
   assert.deepEqual(occ.map((r) => [r.room, r.occupants, r.extraBeds, r.overCapacity]), [['A', 2, 0, false], ['B', 3, 1, false]]);
   /* the extra bed is priced only by its own 009 row; three in a room for two without an extra bed is over capacity */
@@ -250,7 +252,7 @@ test('ROUTE admin/owner-bookings · only a Billing Admin records; a guest cannot
 
 test('OWNER BOOKINGS · review fixes: the extra bed needs the row the engine applies; a person no longer active and an unreadable record block', () => {
   let rec = OB.emptyRecord(); for (const [p, bed] of [[P.payer], [P.sib], [P.bed, true]]) rec = add(rec, p, 'T-EXEC', 'I', bed).record;
-  const row = (o) => ({ Holder_ID: PAYER, Person_ID: P.bed, Item_ID: 'T-EXEC', Rate_Per_Person_Night: 75, Nights_Rule: '1', Rate_Status: 'ACTIVE', Approved_By: 'Synthetic Owner order', ...o });
+  const row = (o) => ({ Holder_ID: PAYER, Person_ID: P.bed, Item_ID: 'T-EXEC', Rate_Per_Person_Night: BED_RATE, Nights_Rule: '1', Rate_Status: 'ACTIVE', Approved_By: 'Synthetic Owner order', ...o });
   const base = { holderId: PAYER, rec, items: ITEMS, elsewhere: [], asOf: '2026-11-15' };
   assert.deepEqual(OB.problemsOf({ ...base, specialRates: [row()] }), []);
   assert.match(OB.problemsOf({ ...base, specialRates: [row({ Approved_By: '' })] })[0], /^EXTRA_BED_UNPRICED/, 'an unapproved row is one the engine skips');
@@ -335,6 +337,127 @@ test('ROOMS · a unit another guest already holds is refused at confirmation —
   });
 });
 
+test('ROOMS · the payer keeps her own place in the room and the Owners record the others into it: her place is this booking\'s, not another guest\'s (17 Nov 2026)', async () => {
+  const env = routeEnv();
+  await withSheets(workbook(FAMILY_RATES), async () => {
+    /* as live: the payer holds a place in unit I through her own selection and is NOT recorded by the Owners */
+    assert.equal((await join(env, P.payer, 'I')).ok, true);
+    let rev = 0;
+    for (const [personId, room, extraBed] of [[P.mum, 'A'], [P.dad, 'A'], [P.sib, 'I'], [P.bed, 'I', true]]) {
+      const r = await hit(env, GROOM, 'admin/owner-bookings', { holderId: PAYER, expectedRev: rev, action: 'add', entry: { personId, itemId: 'T-EXEC', room, extraBed: !!extraBed } });
+      assert.equal(r.status, 200, JSON.stringify(r.j)); rev = r.j.rev;
+    }
+    const c = await hit(env, GROOM, 'admin/owner-bookings', { holderId: PAYER, expectedRev: rev, action: 'confirm' });
+    assert.equal(c.status, 200, JSON.stringify(c.j)); assert.equal(c.j.state, 'CONFIRMED');
+    assert.deepEqual(await unitOcc(env, 'I'), [P.sib, P.bed, P.payer].sort(), 'unit I: the payer\'s own place, the second place, the extra bed');
+    assert.deepEqual(await unitOcc(env, 'A'), [P.mum, P.dad].sort());
+    assert.equal((await join(env, P.other, 'I')).error, 'full', 'nothing of unit I is left for anyone else');
+  });
+});
+
+test('ROOMS · the payer\'s own place counts in the room: two more persons in its own places are refused — nothing confirmed, nothing held', async () => {
+  const env = routeEnv();
+  await withSheets(workbook(FAMILY_RATES), async () => {
+    assert.equal((await join(env, P.payer, 'I')).ok, true);
+    let rev = 0;
+    for (const p of [P.sib, P.mum]) {
+      const r = await hit(env, GROOM, 'admin/owner-bookings', { holderId: PAYER, expectedRev: rev, action: 'add', entry: { personId: p, itemId: 'T-EXEC', room: 'I' } });
+      assert.equal(r.status, 200, JSON.stringify(r.j)); rev = r.j.rev;
+    }
+    const c = await hit(env, GROOM, 'admin/owner-bookings', { holderId: PAYER, expectedRev: rev, action: 'confirm' });
+    assert.equal(c.status, 409); assert.match(c.j.reasons[0], /^ROOM_OVER_CAPACITY: wedstay\/heritage-executive · I/);
+    assert.deepEqual(await unitOcc(env, 'I'), [P.payer], 'nothing was held');
+    assert.equal((await hit(env, GROOM, 'admin/owner-bookings?holder=' + PAYER)).j.state, 'RECORDED');
+    /* a stranger's place is still another guest's, payer or not */
+    const env2 = routeEnv();
+    assert.equal((await join(env2, P.other, 'I')).ok, true);
+    let r2 = 0;
+    r2 = (await hit(env2, GROOM, 'admin/owner-bookings', { holderId: PAYER, expectedRev: r2, action: 'add', entry: { personId: P.sib, itemId: 'T-EXEC', room: 'I' } })).j.rev;
+    const c2 = await hit(env2, GROOM, 'admin/owner-bookings', { holderId: PAYER, expectedRev: r2, action: 'confirm' });
+    assert.equal(c2.status, 409); assert.match(c2.j.reasons[0], /^ROOM_TAKEN: wedstay\/heritage-executive · I/);
+    assert.deepEqual(await unitOcc(env2, 'I'), [P.other], 'the stranger keeps the place, nobody was added');
+  });
+});
+
+test('ROOMS · the payer\'s own place counts per unit — an entry of hers in another room never hides it; removing others never releases it (review, 17 Nov 2026)', async () => {
+  const env = routeEnv();
+  await withSheets(workbook(FAMILY_RATES), async () => {
+    assert.equal((await join(env, P.payer, 'I')).ok, true);
+    let rev = 0;
+    /* the payer recorded into ANOTHER room (A); two persons in I's own places and the extra bed: her place in I still counts */
+    for (const [personId, room, extraBed] of [[P.payer, 'A'], [P.sib, 'I'], [P.mum, 'I'], [P.bed, 'I', true]]) {
+      const r = await hit(env, GROOM, 'admin/owner-bookings', { holderId: PAYER, expectedRev: rev, action: 'add', entry: { personId, itemId: 'T-EXEC', room, extraBed: !!extraBed } });
+      assert.equal(r.status, 200, JSON.stringify(r.j)); rev = r.j.rev;
+    }
+    const c = await hit(env, GROOM, 'admin/owner-bookings', { holderId: PAYER, expectedRev: rev, action: 'confirm' });
+    assert.equal(c.status, 409, 'refused before anything is held'); assert.match(c.j.reasons[0], /^ROOM_OVER_CAPACITY: wedstay\/heritage-executive · I/);
+    assert.deepEqual(await unitOcc(env, 'I'), [P.payer]); assert.deepEqual(await unitOcc(env, 'A'), [], 'nothing held anywhere');
+    /* the family as the payer keeps her own place: confirmed; then removing the sibling gives back only the sibling's place */
+    const env2 = routeEnv();
+    assert.equal((await join(env2, P.payer, 'I')).ok, true);
+    let r2 = 0;
+    for (const [personId, room, extraBed] of [[P.sib, 'I'], [P.bed, 'I', true]]) {
+      const r = await hit(env2, GROOM, 'admin/owner-bookings', { holderId: PAYER, expectedRev: r2, action: 'add', entry: { personId, itemId: 'T-EXEC', room, extraBed: !!extraBed } });
+      assert.equal(r.status, 200, JSON.stringify(r.j)); r2 = r.j.rev;
+    }
+    const ok = await hit(env2, GROOM, 'admin/owner-bookings', { holderId: PAYER, expectedRev: r2, action: 'confirm' });
+    assert.equal(ok.status, 200, JSON.stringify(ok.j));
+    const now = (await hit(env2, GROOM, 'admin/owner-bookings?holder=' + PAYER)).j;
+    const rm = await hit(env2, GROOM, 'admin/owner-bookings', { holderId: PAYER, expectedRev: now.rev, action: 'remove', entryId: now.entries.find((e) => e.personId === P.sib).id });
+    assert.equal(rm.status, 200);
+    assert.deepEqual(await unitOcc(env2, 'I'), [P.bed, P.payer].sort(), 'the payer\'s own place stays — only the sibling\'s was given back');
+  });
+});
+
+test('ISSUE · an extra bed a guest booked themselves is priced only by their own 009 row: beyond a room\'s own places, a person without one is named and Issue waits (pricing guard C2)', async () => {
+  /* three sent and confirmed trips in Room I of the wedding stay (the seed gives that room an extra bed); two of them have their own 009 row */
+  const kv = {};
+  for (const g of [P.payer, P.sib, P.bed]) {
+    kv['reg:INV-' + g] = { submissionId: 's-' + g, version: 1, registration: { guestId: g, selections: [{ id: 'wedstay', room: 'heritage-executive', qty: 1 }] } };
+    kv['conf:INV-' + g] = { confirmedAt: '2026-11-15T09:00:00Z', version: 1, submissionId: 's-' + g };
+  }
+  const env = routeEnv(kv);
+  await withSheets(workbook([R009(P.payer, RATE, 1), R009(P.sib, RATE, 1)]), async () => {
+    const assign = (occupants) => env.ROOMS.get().fetch(new Request('https://rooms/api/rooms/assign', { method: 'POST', headers: { 'x-gr-verified': 'yes' }, body: JSON.stringify({ occupants, force: true }) })).then((r) => r.json());
+    assert.equal((await assign([P.payer, P.sib, P.bed].map((g) => ({ key: 'wedstay/heritage-executive', label: 'I', guestId: g, invitationId: 'INV-' + g })))).ok, true);
+    const third = await hit(env, GROOM, 'admin/holder?holder=INV-' + P.bed);
+    assert.equal(third.status, 200, JSON.stringify(third.j));
+    assert.ok(third.j.preview.reasons.some((r) => /^EXTRA_BED_UNPRICED: GT21 is in room I of T-EXEC, which holds 3 for its 2 places — no approved 009 row of their own is in effect$/.test(r)), JSON.stringify(third.j.preview.reasons));
+    assert.equal(third.j.preview.issuable, false);
+    /* a person of the same room WITH their own row is not named; nothing about who is "on the bed" is decided */
+    const first = await hit(env, GROOM, 'admin/holder?holder=INV-' + P.payer);
+    assert.ok(!first.j.preview.reasons.some((r) => /^EXTRA_BED_/.test(r)), JSON.stringify(first.j.preview.reasons));
+    /* two in the room: no extra bed in use, nobody named */
+    await env.ROOMS.get().fetch(new Request('https://rooms/api/rooms/unassign', { method: 'POST', headers: { 'x-gr-verified': 'yes' }, body: JSON.stringify({ guestId: P.sib, key: 'wedstay/heritage-executive' }) }));
+    const again = await hit(env, GROOM, 'admin/holder?holder=INV-' + P.bed);
+    assert.ok(!again.j.preview.reasons.some((r) => /^EXTRA_BED_/.test(r)), JSON.stringify(again.j.preview.reasons));
+  });
+});
+
+test('ISSUE · the extra-bed check holds up only who may be on the bed: a guest the seed does not name, on a regular place beside two it names, is never named; an unreadable room list is named, never passed (review, 17 Nov 2026)', async () => {
+  const KEY = 'wedstay/heritage-executive';
+  const kv = { ['reg:INV-' + P.other]: { submissionId: 's-o', version: 1, registration: { guestId: P.other, selections: [{ id: 'wedstay', room: 'heritage-executive', unit: 'I', qty: 1 }] } },
+    ['conf:INV-' + P.other]: { confirmedAt: '2026-11-15T09:00:00Z', version: 1, submissionId: 's-o' } };
+  const env = routeEnv(kv);
+  await withSheets(workbook([]), async () => {
+    /* he takes a regular place first; two of the guest ids the seed names follow — the second of them on the bed (no force) */
+    const assign = (occupants) => env.ROOMS.get().fetch(new Request('https://rooms/api/rooms/assign', { method: 'POST', headers: { 'x-gr-verified': 'yes' }, body: JSON.stringify({ occupants }) })).then((r) => r.json());
+    const a = await assign([P.other, 'G032', 'G120'].map((g) => ({ key: KEY, label: 'I', guestId: g, invitationId: 'INV-' + g })));
+    assert.equal(a.ok, true, JSON.stringify(a));
+    const s = await hit(env, GROOM, 'admin/holder?holder=INV-' + P.other);
+    assert.equal(s.status, 200, JSON.stringify(s.j));
+    assert.ok(!s.j.preview.reasons.some((r) => /^EXTRA_BED_/.test(r)), 'a regular place is never held up by a bed that is not his: ' + JSON.stringify(s.j.preview.reasons));
+    /* the room list without this room: named, never passed */
+    const real = env.ROOMS.get;
+    env.ROOMS.get = () => ({ fetch: (req) => (new URL(req.url).pathname.endsWith('/plan') ? new Response(JSON.stringify({ ok: true, units: {} }), { headers: { 'content-type': 'application/json' } }) : real().fetch(req)) });
+    try {
+      const u = await hit(env, GROOM, 'admin/holder?holder=INV-' + P.other);
+      assert.ok(u.j.preview.reasons.some((r) => /^EXTRA_BED_UNCHECKED: room I of T-EXEC is not in the room list just now/.test(r)), JSON.stringify(u.j.preview.reasons));
+      assert.equal(u.j.preview.issuable, false);
+    } finally { env.ROOMS.get = real; }
+  });
+});
+
 test('OWNER BOOKINGS · the temple offering is one product per person: a guest\'s own sent offering and the Owners\' entry are a double booking', () => {
   assert.equal(OB.keyStage('sangkhathan'), 'sangkhathan'); assert.equal(OB.keyStage('wedstay/heritage-executive'), 'wedstay');
   const items = { ...ITEMS, 'T-TEMPLE': { Item_ID: 'T-TEMPLE', Rate_Status: 'ACTIVE', Rate_Basis: 'PER_PERSON', Standard_Rate: 15, Site_Product_Key: 'sangkhathan' } };
@@ -381,8 +504,8 @@ test('REVENUE · the Owners\' confirmed rooms join the Revenue overview: booked 
     assert.equal(r.j.bookedRevenue.cents, exp); assert.equal(r.j.bookedRevenue.complete, true); assert.equal(r.j.notYetInvoiced.cents, exp);
     assert.equal(r.j.issuedRevenue.cents, 0); assert.equal(r.j.outstanding.cents, 0, 'nothing invoiced, nothing receivable');
     const unit = (u) => r.j.breakdown.roomsByUnit.find((x) => x.Room_Unit_ID === 'RU·T-EXEC·' + u);
-    assert.equal(unit('E').cents, 2 * 145 * 2 * 100); assert.equal(unit('E').places, 2);
-    assert.equal(unit('I').cents, (2 * 145 + 75) * 100); assert.equal(unit('I').places, 3); assert.equal(unit('I').extraBeds, 1);
+    assert.equal(unit('E').cents, 2 * RATE * 2 * 100); assert.equal(unit('E').places, 2);
+    assert.equal(unit('I').cents, (2 * RATE + BED_RATE) * 100); assert.equal(unit('I').places, 3); assert.equal(unit('I').extraBeds, 1);
     assert.equal(r.j.breakdown.reconciled, true); assert.equal(r.j.breakdown.roomsTotal.cents, exp);
     assert.deepEqual(r.j.holders.find((h) => h.Holder_ID === PAYER).bookedFrom, ['recorded by the Owners']);
     /* the KV budget: each key read once in the request */

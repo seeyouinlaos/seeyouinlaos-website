@@ -28,6 +28,9 @@
    Bride & Groom, the family or anyone else in advance; no "fixed allocation" exists: every unit is available until a guest
    actually books a place in it, and the couple book their own places like every other guest. Capacity is units × places,
    never a separate counter, and only real bookings consume it. Planning names in the Operations Master are never bookings.
+   ONE EXCEPTION BY OWNER ORDER — AN EXTRA BED (17 Nov 2026): a room the seed gives `extraBeds` has one more sleeping place
+   beyond its own, usable only by the guest ids the seed names (those 009 prices for it); nothing is held for them in advance
+   and the room's own places stay everyone's. The bed is a guest's own seat — never a place kept for a party member.
 
    A guest holds at most one place per STAGE of the journey: the wedding window is one stage whether spent in the hotel,
    the Souphattra or the Guest House.
@@ -83,14 +86,18 @@ export function unitsOf(key) {
     return [{ key, label: 'A', name: s.name, kind: 'property', places: s.capacity, reservedFor: null }];
   }
   const out = [];
+  /* AN EXTRA BED (Owner, 17 Nov 2026): one more sleeping place beyond a room's own, for the guest ids the seed names only */
+  const beds = new Map((s.extraBeds || []).map((b) => [String(b.label || '').toUpperCase(), b]));
   /* exactly one unit per physical room — never a Room G for six rooms */
   for (let i = 0; i < s.capacity; i++) {
     const label = i < 26 ? LETTERS[i] : LETTERS[Math.floor(i / 26) - 1] + LETTERS[i % 26];
+    const bed = beds.get(label);
     out.push({ key, label, name: 'Room ' + label, kind: 'room',
       /* the Owner's rule (15 Sep 2026): two guest places per room; a single room stays what it is; a room the Owner opened to its
          whole occupancy (honourOccupancy — the Penang suite, 27 Sep 2026) has that many */
       places: s.occupancy === 1 ? 1 : s.honourOccupancy ? s.occupancy : PLACES,
-      reservedFor: null });
+      reservedFor: null,
+      ...(bed && Number(bed.beds) > 0 ? { extraBeds: Number(bed.beds), extraBedFor: (bed.for || []).map(String) } : {}) });
   }
   /* A DEDICATED ROOM (002 · W · Owner, 29 Sep 2026): one more unit of the same category, for one register id only — its own
      label after the standard pool, its own place count; never the standard pool's */
@@ -115,6 +122,12 @@ export function allUnits() {
   return out;
 }
 export function unitOf(key, label) { return unitsOf(key).find((u) => u.label === String(label || '').toUpperCase()) || null; }
+/* THE EXTRA BEDS ONE GUEST MAY USE in a unit (Owner, 17 Nov 2026): the unit's beds when the verified guest id is one the seed names
+   for them, else none. The bed is a guest's own seat only — never a place kept for a party member (review, 17 Nov 2026). */
+export function bedsFor(unit, guestId) {
+  const g = String(guestId || '');
+  return unit && unit.extraBeds && g && (unit.extraBedFor || []).includes(g) ? unit.extraBeds : 0;
+}
 
 /* who may take a place in a unit: any authenticated guest, in any unit (Owner, 15 Sep 2026 · 19 Sep 2026) */
 export function mayJoin(unit, identity) {
@@ -127,7 +140,8 @@ export function mayJoin(unit, identity) {
    the same object every surface renders, the same rule the booking answers by. soldOut is remainingPlaces === 0 and nothing
    else: never a guest's own selection, never the CTA. */
 export function availabilityOf(key, list) {
-  const sourcePlaces = list.reduce((n, u) => n + u.places, 0);
+  /* a bed this viewer may use counts in the source too — never "27 of 26" (review, 17 Nov 2026) */
+  const sourcePlaces = list.reduce((n, u) => n + u.places + (u.extraBeds || 0), 0);
   const remainingPlaces = list.reduce((n, u) => n + u.free, 0), remainingRooms = list.filter((u) => u.free > 0).length;
   /* THE COUNTING GRAMMAR (PRQ-03-09): an EMPTY room is one nobody holds a place in; a SHARED free place is a free place
      inside a room someone already holds — "rooms left" counts the first, never a half-held room */
@@ -258,8 +272,11 @@ export class Rooms {
               : { name: shownName(o, names), mine: o.guestId === identity.guestId, party: !!(identity.partyId && o.partyId === identity.partyId), ...(o.guestId === identity.guestId ? { guestId: o.guestId } : {}) }))
           : here.map(() => ({}));
         const elig = !identity ? { ok: false } : mayJoin(u, identity);
+        /* the extra bed is shown only to a guest who may use it — never who else may, never a register id (Owner, 17 Nov 2026) */
+        const beds = identity ? bedsFor(u, identity.guestId) : 0;
         return { key, label: u.label, name: u.name, kind: u.kind, places: u.places, reservedFor: null, ...(u.dedicatedTo ? { dedicated: true, rate: u.rate } : {}),
-                 eligible: elig.ok, occupants, taken, free: Math.max(0, u.places - taken), full: taken >= u.places };
+                 ...(beds ? { extraBeds: beds } : {}),
+                 eligible: elig.ok, occupants, taken, free: Math.max(0, u.places + beds - taken), full: taken >= u.places + beds };
       });
     }
     if (identity) for (const o of occ) if (!o.placeholder && o.guestId === identity.guestId) mine[stageOf(o.key)] = { key: o.key, label: o.label };
@@ -392,7 +409,14 @@ export class Rooms {
         const myParty = (o) => !!(identity.partyId && o.partyId === identity.partyId);
         /* a place kept for this guest's party is theirs to take: it does not count against them */
         const others = occ.filter((o) => o.key === key && o.label === label && o.guestId !== guestId && !(o.placeholder && myParty(o))).length;
-        if (!already && others >= unit.places) return json({ ...(await this.view(identity)), ok: false, error: 'full' }, 409);   /* the last place was just filled: one wins, the other chooses another room */
+        /* a place KEPT here for this guest's party is theirs: taking it adds nobody to the room — never "full", never the bed
+           (review, 17 Nov 2026: a person on the extra bed must not count against a place the party already holds) */
+        const keptMine = identity.partyId ? await this.partyPlaces(key, label, identity.partyId, occ) : [];
+        /* the guest's own seat may be the extra bed the seed names for them (Owner, 17 Nov 2026) */
+        const beds = bedsFor(unit, guestId);
+        if (!already && !keptMine.length && others >= unit.places + beds) return json({ ...(await this.view(identity)), ok: false, error: 'full' }, 409);   /* the last place was just filled: one wins, the other chooses another room */
+        /* the room's own places are taken: this guest's seat is the extra bed — theirs alone, nobody of the party beside it */
+        const onBed = !already && !keptMine.length && beds > 0 && others >= unit.places;
         /* PARTY CAPACITY (Owner, 19 Sep 2026 · never partially booked): `need` = the party's size. A party that fits ONE unit
            takes it whole (the members already here and the places kept for them count). A party larger than a unit fills
            this unit and keeps the rest of its places in the other units of the category — or is refused as a whole. */
@@ -407,18 +431,21 @@ export class Rooms {
         const realOthersIn = (u) => occ.filter((o) => !o.placeholder && o.key === key && o.label === u.label && myParty(o) && o.guestId !== guestId).length;
         const leaving = (u) => u.label !== label && occ.some((o) => !o.placeholder && o.key === key && o.label === u.label && o.guestId === guestId) && realOthersIn(u) === 0;
         const partyIn = (u) => identity.partyId ? occ.filter((o) => o.key === key && o.label === u.label && myParty(o) && o.guestId !== guestId && !(o.placeholder && leaving(u))).length : 0;
-        const keptHere = identity.partyId ? await this.partyPlaces(key, label, identity.partyId, occ) : [];
+        const keptHere = keptMine;
         /* what the party still needs once this guest sits here: the members and kept places of the whole category count (a kept
            place this guest takes is theirs, not a second person) */
         const partyCat = catUnits.reduce((n, u) => n + partyIn(u), 0);
         const remainingNeed = already ? 0 : Math.max(0, need - partyCat - 1 + (keptHere.length ? 1 : 0));
         let keepHere = 0, spread = [];   /* places kept here, and [unit, places] kept in other units for a party larger than this unit */
-        if (!already) {
+        if (onBed) {
+          /* the extra bed takes this guest alone: a party still needing places beside them here is refused, nothing kept */
+          if (need - partyHere > 1) return json({ ...(await this.view(identity)), ok: false, error: 'full for your party', need, free: 1 }, 409);
+        } else if (!already) {
           if (need <= unit.places) {
             if (need - partyHere > freeForMe) return json({ ...(await this.view(identity)), ok: false, error: 'full for your party', need, free: freeForMe }, 409);
-            keepHere = Math.min(remainingNeed, freeForMe - 1);
+            keepHere = Math.max(0, Math.min(remainingNeed, freeForMe - 1));
           } else {
-            if (freeForMe < 1) return json({ ...(await this.view(identity)), ok: false, error: 'full' }, 409);
+            if (freeForMe < 1 && !keptMine.length) return json({ ...(await this.view(identity)), ok: false, error: 'full' }, 409);
             keepHere = Math.max(0, Math.min(remainingNeed, freeForMe - 1));
             let rest = remainingNeed - keepHere;
             const others2 = catUnits.filter((u) => u.label !== label).map((u) => [u, freeIn(u)]).sort((x, y) => y[1] - x[1]);
@@ -502,7 +529,8 @@ export class Rooms {
           if (unit.dedicatedTo && o.contactId !== unit.dedicatedTo) { refused.push({ ...o, error: 'dedicated room' }); continue; }
           const occ = await this.occupancies();
           const others = occ.filter((x) => x.key === key && x.label === label && x.guestId !== guestId).length;
-          if (others >= unit.places && !body.force) { refused.push({ ...o, error: 'full' }); continue; }
+          /* the extra bed by the guest id being assigned (never a register id from the body) */
+          if (others >= unit.places + bedsFor(unit, guestId) && !body.force) { refused.push({ ...o, error: 'full' }); continue; }
           const legacyHere = occ.find((x) => !x.placeholder && x.key === key && x.label === label && x.guestId === guestId && this.rowKey(x) !== this.keyOf(key, label, guestId));
           if (legacyHere) await this.storage.delete(this.rowKey(legacyHere));
           await this.storage.put(this.keyOf(key, label, guestId), { invitationId: String(o.invitationId), partyId: o.partyId || null, name: String(o.name || '').slice(0, 24), at: new Date().toISOString(), by: String(body.actor || 'guest-relations') });
