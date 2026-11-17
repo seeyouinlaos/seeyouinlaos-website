@@ -37,7 +37,7 @@ import { loadBookedSelection, priceSelection, BOOKED_SOURCE } from './billing/bo
 import { composeStatementMail } from './mail-templates.js';
 import { pricingSource, catalogueKey } from './billing/catalogue-cache.js';
 import { effectivePreference, routeFor, destinationOf, firstVerifiedPayment, isChannel, PREFERENCE_SOURCE } from './billing/preference.js';
-import { GoogleSheetsUnavailable } from './google-sheets.js';
+import { GoogleSheetsUnavailable, batchReadRanges } from './google-sheets.js';
 import { calculate, perPerson } from './billing/engine.js';
 import { priceDifference } from './billing/price-difference.js';
 import {
@@ -49,6 +49,8 @@ import { OWNER_BOOKING_STATE, obkKey, OBK_INDEX_KEY, readRecord, stateOf as owne
 import { canonicalLines } from './legacy-keys.js';
 import { renderSettlementPdf } from './billing/pdf.js';
 import { buildRevenueOverview } from './billing/revenue.js';
+import { buildBudgetComparison } from './billing/budget.js';
+import { BUDGET_TABS, rangeOfTab, parseBudget004, parseVendors007, parseItemDisplay, parseSpecialRateRows } from './billing/budget-source.js';
 import { detectDrift, blockingOf, monitoringSignals, proposeRevisionDraft, reconciliationReport } from './billing/reconciliation.js';
 import { REFERENCE_CASES, evaluateGate, runReferenceCases, GATE_NOT_RUN } from './billing/activation-gate.js';
 import { PAYMENT_CHANNEL, CHANNEL_CURRENCY, RECORD_STATUS, ENTRY_TYPE, REVISION_STATE, toCents, fromCents } from './billing/model.js';
@@ -1087,6 +1089,9 @@ async function adminRevenue(env, identity, url, cors) {
      an unreadable or empty register is never "everyone cancelled" (fail closed) */
   const indexEntries = Object.values((await loadIndex(env, url.origin, false)) || {}).filter((e) => e && clean(e.i));
   if (!indexEntries.length) return jsonRes({ ok: false, retry: true, error: 'the register could not be read just now; nothing is judged on an empty register' }, 503, cors);
+  /* the budget comparison's own reads (billing-budget/1.0.0), started beside the holders' calculation — nothing of them is
+     used before every revenue figure below is final, and none of them can fail it */
+  const budgetReads = readBudgetSources(env);
   const personsOf = (id) => indexEntries.filter((e) => clean(e.i) === id && clean(e.g)).length;
   const drifts = new Map(driftRecords.map((r) => [clean(r.Holder_ID), Array.isArray(r.drifts) ? r.drifts : []]));
   const withSettlement = ledgerHolders.map((h) => clean(h.Holder_ID));
@@ -1138,9 +1143,76 @@ async function adminRevenue(env, identity, url, cors) {
   }
   if (unresolved.length) overview.incompleteKpis = [...new Set([...(overview.incompleteKpis || []), ...KPI_KEYS])];
   if (unresolved.length && overview.breakdown) { overview.breakdown.incomplete = true; overview.breakdown.complete = false; }
+  /* REVENUE AND BUDGET: built from the final figures above, beside them — every key above is exactly what it was without it */
+  const budget = await budgetBesideRevenue(env, budgetReads, { overview, src, asOf, indexEntries, unresolved });
   return jsonRes({ ok: true, ...overview, unresolved, calculatedAt: new Date().toISOString(),
     population: { holders: ids.length, withSettlement: withSettlement.length, withConfirmation: confirmed.length, withDrift: withDrift.length,
-      withOwnerBookings: recorded.length, cancelled: holders.filter((h) => h.cancelled).length } }, 200, cors);
+      withOwnerBookings: recorded.length, cancelled: holders.filter((h) => h.cancelled).length }, budget }, 200, cors);
+}
+
+/* ------------------------------------------------------------ revenue and budget */
+
+/* THE SUPPLIER SIDE, read for the Revenue tab only (billing-budget/1.0.0 · Owners, 15 Nov 2026): ONE values read (004, 007,
+   002, 009, 006) and ONE formulas read (004, 007 — a figure the sheet computes is told apart from one the Owners typed),
+   never inside the billing source's own batch (pricing guard C4), and the Rooms engine's plan (the rooming list, read only).
+   Settled, never rejected: a read that fails is a named gap of the comparison, never of a revenue figure. */
+function readBudgetSources(env) {
+  const id = cfgOf(env).spreadsheetId;
+  return Promise.allSettled([
+    batchReadRanges(env, id, [BUDGET_TABS.budget, BUDGET_TABS.payments, BUDGET_TABS.items, BUDGET_TABS.rates, BUDGET_TABS.register].map(rangeOfTab)),
+    batchReadRanges(env, id, [BUDGET_TABS.budget, BUDGET_TABS.payments].map(rangeOfTab), { render: 'FORMULA' }),
+    roomsGr(env, 'plan'),
+  ]);
+}
+
+/* the persons' and payers' names for the comparison, from the index and the 006 register — an id that names nobody
+   (or two rows) stays an id */
+function budgetNames(entries, register) {
+  const persons = {}, holders = {};
+  for (const e of entries || []) {
+    const g = clean(e && e.g);
+    if (g && !persons[g]) { const n = nameOf(register, e.c); if (n) persons[g] = n.full; }
+  }
+  for (const h of holdersOfIndex(entries)) {
+    if (h.ambiguous) continue;
+    const n = nameOf(register, h.contactId); if (n) holders[h.Holder_ID] = n.full;
+  }
+  return { persons, holders };
+}
+
+/* the revenue figures never wait long on the comparison: reads still out after this are a named gap (review, 17 Nov 2026) */
+const BUDGET_WAIT_MS = 8000;
+async function budgetBesideRevenue(env, reads, { overview, src, asOf, indexEntries, unresolved }) {
+  const gap = (why) => ({ available: false, gap: why + ' — every revenue figure above stands as it is' });
+  try {
+    let timer;
+    const wait = Number(env.BUDGET_WAIT_MS) > 0 ? Number(env.BUDGET_WAIT_MS) : BUDGET_WAIT_MS;   /* configuration, not a secret */
+    const settled = await Promise.race([reads, new Promise((res) => { timer = setTimeout(() => res(null), wait); })]);
+    clearTimeout(timer);
+    if (!settled) return gap('The budget sources did not answer within ' + (wait >= 1000 ? Math.round(wait / 1000) + ' seconds' : wait + ' ms'));
+    const [values, formulas, plan] = settled;
+    if (values.status !== 'fulfilled') return gap('The budget tabs (004, 007, 002, 009, 006) could not be read from Google just now');
+    const [g004, g007, g002, g009, g006] = values.value;
+    const f = formulas.status === 'fulfilled' ? formulas.value : null;
+    const readProblems = [];
+    if (!f) readProblems.push('The formulas of 004 and 007 could not be read just now: no 007 figure counts as typed, and 004 "Actual USD" is not judged');
+    let names = null;
+    try {
+      names = budgetNames(indexEntries, await loadGuestRegister(env, { ...cfgOf(env), grids: { [rangeOfTab(BUDGET_TABS.register)]: g006 } }));
+    } catch (e) { readProblems.push('006 could not be read just now — guests and payers are shown by their ids'); }
+    const rooms = plan.status === 'fulfilled' && plan.value && plan.value.ok === true ? plan.value : null;
+    const kpi = (k) => (k && typeof k === 'object' ? { cents: k.cents, display: k.display, complete: k.complete } : null);
+    return buildBudgetComparison({
+      asOf, booked: overview.bookedLines, items: src.items,
+      display: parseItemDisplay(g002), budget: parseBudget004(g004, f ? f[0] : null), vendors: parseVendors007(g007, f ? f[1] : null),
+      rates009: parseSpecialRateRows(g009), names, rooms, quota: overview.quotaUtilisation, bookedRevenue: overview.bookedRevenue,
+      receipts: { cashCollected: kpi(overview.cashCollected), refundDue: kpi(overview.refundDue),
+        source: '008_Payment_Journal — the verified receipts and the refunds due, as the overview above counts them' },
+      unresolved, readProblems,
+    });
+  } catch (e) {
+    return gap('The budget comparison could not be built just now');
+  }
 }
 
 /** Every paying invitation with a record of the Owners' own bookings — one listing of the store, like the confirmations. */

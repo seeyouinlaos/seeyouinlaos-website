@@ -77,6 +77,18 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 /* the shared stacking margin between cards (.p-card + .p-card) is for a column; in the figures' grid every card starts level */
 .ab-kpis>.p-card+.p-card{margin-top:0}
 .ab-gatekeep{max-width:560px;margin:40px auto}
+/* revenue and budget (15 Nov 2026): the two categories side by side, each stay / route opened to its rooms and budget lines */
+.ab-bcats{gap:12px 16px;align-items:start}
+.ab-bcats>.p-card+.p-card{margin-top:0}
+.ab-bcat .ab-kv .t-l1{display:block;min-width:0;margin-top:6px}
+.ab-bd{border:1px solid #DAD9D7;background:#FCFAF6;margin-top:10px}
+.ab-bd>summary{cursor:pointer;padding:12px 14px;min-height:44px;line-height:1.55;font-size:13.5px}
+.ab-bd[open]>summary{border-bottom:1px solid #EDEBE7}
+.ab-bd-body{padding:6px 14px 14px}
+.ab-bd-body>.t-l1,.ab-bd-h{margin-top:16px}
+.ab-bd-body ul,.ab-panel ul.t-b2{margin:6px 0 10px 18px}
+.ab-table td ul{margin:0;padding-left:16px;text-align:left}
+.ab-table td ul li+li{margin-top:6px}
 /* phones: every table row becomes a card, each cell named */
 @media(max-width:759px){
   .ab-main{padding:16px 16px 56px}
@@ -99,5 +111,5 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <header class="hd"><a class="bd" href="/">see you in laos<span class="dot">.</span></a><span class="ab-title">Guest Settlement · H&amp;S</span></header>
 <main class="ab-main"><h1>Guest Settlement</h1><p class="t-b2 ab-sub">Statements, payments and revenue — for Haruthai and Suthep. Nothing here happens without your confirmation.</p>
 <div id="admin" aria-live="polite"></div></main>
-<script src="assets/admin-billing.js?v=95680e63"></script>
+<script src="assets/admin-billing.js?v=19cbeb60"></script>
 </body></html>

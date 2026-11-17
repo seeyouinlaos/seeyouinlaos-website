@@ -77,7 +77,7 @@ import { calculate } from './engine.js';
 import { dueDateFor, journalPosition, paymentStatus } from './settlement.js';
 import { siteKeyOf, keyStage } from './owner-bookings.js';
 
-export const REVENUE_VERSION = 'billing-revenue/2.3.0';
+export const REVENUE_VERSION = 'billing-revenue/2.4.0';
 
 /** Freeze · Y — the only role this overview may ever be served to. */
 export const REVENUE_AUDIENCE = ROLE.BILLING_ADMIN;
@@ -497,6 +497,7 @@ function bookedPicture({ perHolder, result, items, journal }) {
   const list = (mp, f) => [...mp.values()].sort((a, b) => byText(a.Item_ID || a.Room_Unit_ID || '', b.Item_ID || b.Room_Unit_ID || '')).map(f);
   return {
     rows,
+    extraBedIds: [...extraBeds].sort(byText),
     bookedRevenue: kpi('the confirmed bookings of every holder (the engine) — a source not confirmed now as last issued', acc.booked,
       acc.booked.cents, { source: 'engine.calculate() lines; Revision Snapshot lines where a source is not confirmed now', doubleBookings: pairs.length }),
     notYetInvoiced: kpi('booked lines no issued statement carries yet', acc.notYet, acc.notYet.cents, { source: 'by Booking_ID against the current ISSUED revision' }),
@@ -893,7 +894,7 @@ export function buildRevenueOverview(input) {
 
   const incomplete = Object.keys(kpis).filter((k) => !kpis[k].complete);
 
-  return {
+  const overview = {
     revenueVersion: REVENUE_VERSION,
     engineVersion: result.engineVersion,
     audience: REVENUE_AUDIENCE,
@@ -951,4 +952,16 @@ export function buildRevenueOverview(input) {
     incompleteKpis: incomplete,
     review: incomplete.length ? MANUAL_REVIEW_REQUIRED : null,
   };
+  /* THE BOOKED LINES, for the budget comparison (billing-budget/1.0.0 · 15 Nov 2026): exactly the lines behind the booked
+     figure, per holder, with its gap — NOT enumerable, so the overview's JSON is byte-identical with or without it, and
+     no arithmetic of the comparison ever lives in this module (src/billing/budget.js holds it) */
+  Object.defineProperty(overview, 'bookedLines', {
+    enumerable: false,
+    value: Object.freeze({
+      holders: [...bp.rows].map(([id, r]) => ({ Holder_ID: id, lines: r.lines, gapReason: r.gapReason || null, bookedFrom: r.bookedFrom,
+        Settlement_ID: (rows.find((x) => x.Holder_ID === id) || {}).Settlement_ID || null })),
+      extraBedIds: bp.extraBedIds,
+    }),
+  });
+  return overview;
 }
