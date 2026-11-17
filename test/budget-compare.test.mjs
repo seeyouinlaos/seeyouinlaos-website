@@ -77,10 +77,10 @@ function world(o = {}) {
   const specialRates = o.specialRates || [];
   const ov = buildRevenueOverview({ holders: Object.entries(bookings).map(([id, b]) => H(id, b)), items, specialRates, journalRows: [], issuedRevisions: [], asOf: ASOF });
   const lines = o.lines004 || [BLOCK27, BLOCK28, TRAIN, VAN, CHINA, CAKE, PLAN];
-  const g = grid004(lines, o.totals);
+  const g = o.grid004 || grid004(lines, o.totals);
   const input = {
-    asOf: ASOF, booked: o.booked ? o.booked(ov.bookedLines) : ov.bookedLines, items, display: parseItemDisplay(GRID002),
-    budget: parseBudget004(g, o.noFormulas ? null : FORMULAS(g)), vendors: parseVendors007(V7, o.noFormulas ? null : F7),
+    asOf: ASOF, booked: o.booked ? o.booked(ov.bookedLines) : ov.bookedLines, items, display: parseItemDisplay(o.grid002 || GRID002),
+    budget: parseBudget004(g, o.noFormulas ? null : (o.formulas004 || FORMULAS)(g)), vendors: parseVendors007(o.v7 || V7, o.noFormulas ? null : (o.f7 || F7)),
     rates009: parseSpecialRateRows(o.grid009 || [['Holder_ID', 'Person_ID', 'Item_ID', 'Rate_Per_Person_Night', 'Nights_Rule', 'Rate_Status', 'Approved_By']]),
     names: o.names || null, rooms: o.rooms || null, quota: ov.quotaUtilisation, bookedRevenue: o.bookedRevenue || ov.bookedRevenue,
     receipts: null, unresolved: o.unresolved || [], readProblems: [],
@@ -326,4 +326,207 @@ test('BUDGET · only the sheet\'s own approval entry approves; a gap of the book
   assert.equal(C(only, 'B').status, 'COMPLETE', 'a gap the set-aside holder explains stays with its own stays');
   const rounding = K(world({ lines004: [BLOCK27, BLOCK28, { ...TRAIN, 'Rate USD': 100, 'Budget USD': 300 }, { ...VAN, 'Rate USD': 0, 'Budget USD': 0 }, { ...CHINA, 'Rate USD': 100.01, 'Budget USD': 200.02 }] }).out, 'Transportation');
   assert.equal(rounding.difference.cents, -2); assert.equal(rounding.label, 'ROUNDING');
+});
+
+/* ---- billing-budget/1.1.0 (Owners, 17 Nov 2026): the review of the Souphattra figures — why a 007 total and its 004 lines
+   differ, what is still owed, why a sheet total differs from its lines. Nothing excluded, split, re-priced or explained by an
+   inferred figure (independent review + pricing guard conditions 1–4). ---- */
+const PAIR = { ...BLOCK28, Details: 'All Categories Rooms (Alex + Sam)', Qty: 1, 'Budget USD': 150 };
+const SOUP = (out) => out.suppliers.find((v) => /^Souphattra/.test(v.vendor));
+
+test('BUDGET 1.1 · a room line inside a block of every room of the stay is named as possibly counted twice (A-5) — never dropped, never split', () => {
+  const { out } = world({ lines004: [BLOCK27, BLOCK28, PAIR, TRAIN, VAN, CHINA] });
+  const d1 = C(out, 'D1');
+  const x = d1.lines004.find((l) => l.row === 7);
+  assert.equal(x.whose, 'PERSON_NAMED');
+  assert.deepEqual(x.insideBlock, { rows: [6], nights: ['2031-02-28'], wholly: true });
+  assert.match(x.notes.join(' '), /inside budget row 6 on 28\.02\.2031 — row 6 buys all 4 rooms of this stay \(A-5\): possibly counted twice/);
+  assert.deepEqual([d1.possibleDuplicates.rows, d1.possibleDuplicates.amount.cents, d1.possibleDuplicates.partlyRows], [[7], 15000, []]);
+  assert.equal(d1.planned.all.cents, 60000 + 60000 + 15000, 'the sums stay 004 as stated — the line is named, not removed');
+  assert.equal(d1.status, 'COMPLETE', 'a named line of named persons changes no coverage');
+  assert.ok(d1.checks.some((c) => c.severity === 'data' && /^Budget row 7 \(USD 150\.00\) budgets a room inside budget row 6 on 28\.02\.2031 — row 6 buys all 4 rooms of this stay \(A-5\): possibly counted twice$/.test(c.text)));
+  assert.deepEqual([K(out, 'Accommodation').possibleDuplicates.rows, K(out, 'Accommodation').possibleDuplicates.amount.cents], [[7], 15000]);
+  assert.deepEqual([SOUP(out).possibleDuplicates.rows, SOUP(out).possibleDuplicates.amount.cents], [[7], 15000]);
+  assert.ok(out.assumptions.some((a) => a.id === 'A-5'));
+  /* its own cells disagree on its nights (period 1 night, "Nights, Rooms, EA" 2): named, NO amount — the conflict is never settled here */
+  const odd = C(world({ lines004: [BLOCK27, BLOCK28, { ...PAIR, 'Nights, Rooms, EA': 2, 'Budget USD': 300 }, TRAIN, VAN, CHINA] }).out, 'D1');
+  const o = odd.lines004.find((l) => l.row === 7);
+  assert.deepEqual(o.insideBlock, { rows: [6], nights: ['2031-02-28'], wholly: false });
+  assert.match(o.notes.join(' '), /by its period inside budget row 6 on 28\.02\.2031; its own cells disagree on its nights — what of it row 6 already buys is not stated \(A-5\)/);
+  assert.deepEqual([odd.possibleDuplicates.rows, odd.possibleDuplicates.amount, odd.possibleDuplicates.partlyRows], [[], null, [7]]);
+  assert.doesNotMatch(odd.checks.map((c) => c.text).join(' '), /USD 300\.00\) budgets a room/, 'no amount put on a line whose cells disagree');
+  const oddOut = world({ lines004: [BLOCK27, BLOCK28, { ...PAIR, 'Nights, Rooms, EA': 2, 'Budget USD': 300 }, TRAIN, VAN, CHINA] }).out;
+  for (const d of [K(oddOut, 'Accommodation').possibleDuplicates, SOUP(oddOut).possibleDuplicates]) assert.deepEqual([d.rows, d.amount, d.partlyRows], [[], null, [7]]);
+  const supText = oddOut.checks.find((c) => /^Souphattra Heritage Vientiane: the typed 007 total/.test(c.text)).text;
+  assert.match(supText, /; row 7 possibly inside row 6$/); assert.doesNotMatch(supText, /row 7 \(USD/, 'no amount for it at the supplier either');
+  /* a block of every room typed twice (the copy unapproved), and an approved line inside an unapproved block: both named, no amount */
+  const twice = C(world({ lines004: [BLOCK27, { ...BLOCK27, 'Suthep approval': '' }, BLOCK28, TRAIN, VAN, CHINA] }).out, 'D1');
+  assert.deepEqual([twice.possibleDuplicates.rows, twice.possibleDuplicates.amount, twice.possibleDuplicates.partlyRows], [[], null, [5, 6]]);
+  assert.match(twice.checks.map((c) => c.text).join(' '), /Budget row 6 is a second block of every room of this stay on 27\.02\.2031 beside budget row 5 — one of them possibly counted twice; which one is not stated \(A-5\)/);
+  assert.equal(twice.planned.all.cents, 180000, 'the sum stays as 004 states it — named, not taken out');
+  const twiceOut = world({ lines004: [BLOCK27, { ...BLOCK27, 'Suthep approval': '' }, BLOCK28, TRAIN, VAN, CHINA] }).out;
+  const twiceText = twiceOut.checks.find((c) => /^Souphattra Heritage Vientiane: the typed 007 total/.test(c.text)).text;
+  assert.match(twiceText, /; rows 5 and 6 are two blocks of every room on 27\.02\.2031 — which one is counted twice is not stated$/);
+  assert.doesNotMatch(twiceText, /possibly inside/, 'said once, never circularly');
+  const inUnapproved = C(world({ lines004: [{ ...BLOCK27, 'Suthep approval': '' }, { ...BLOCK27, Details: 'Heritage Executive rooms', Qty: 3, 'Budget USD': 450 }, BLOCK28, TRAIN, VAN, CHINA] }).out, 'D1');
+  assert.deepEqual(inUnapproved.lines004.find((l) => l.row === 6).insideBlock, { rows: [5], nights: ['2031-02-27'], wholly: true });
+  /* partly inside: named, its amount never split or attributed */
+  const part = C(world({ lines004: [BLOCK28, { ...PAIR, 'Date or period': '27.02-01.03..2031', 'Nights, Rooms, EA': 2, 'Budget USD': 300 }, TRAIN, VAN, CHINA] }).out, 'D1');
+  assert.deepEqual(part.lines004.find((l) => l.row === 6).insideBlock, { rows: [5], nights: ['2031-02-28'], wholly: false });
+  assert.match(part.lines004.find((l) => l.row === 6).notes.join(' '), /partly inside budget row 5 \(28\.02\.2031\) — the rest of it is not/);
+  assert.deepEqual([part.possibleDuplicates.rows, part.possibleDuplicates.amount, part.possibleDuplicates.partlyRows], [[], null, [6]]);
+  /* inside two whole-hotel blocks, night by night */
+  const two = C(world({ lines004: [BLOCK27, BLOCK28, { ...PAIR, 'Date or period': '27.02-01.03..2031', 'Nights, Rooms, EA': 2, 'Budget USD': 300 }, TRAIN, VAN, CHINA] }).out, 'D1');
+  assert.deepEqual(two.lines004.find((l) => l.row === 7).insideBlock, { rows: [5, 6], nights: ['2031-02-27', '2031-02-28'], wholly: true });
+  assert.equal(two.possibleDuplicates.amount.cents, 30000);
+  /* a block holding fewer rooms than the stay's 002 quotas does not buy every room: nothing is named */
+  const smaller = C(world({ lines004: [{ ...BLOCK27, Qty: 3, 'Budget USD': 450 }, { ...BLOCK28, Qty: 3, 'Budget USD': 450 }, PAIR, TRAIN, VAN, CHINA] }).out, 'D1');
+  assert.equal(smaller.possibleDuplicates, null); assert.equal(smaller.lines004.find((l) => l.row === 7).insideBlock, null);
+  assert.equal(world().out.centres.every((c) => c.possibleDuplicates == null), true, 'nothing to name in the plain world');
+  assert.equal(world().out.assumptions.some((a) => a.id === 'A-5'), false);
+});
+
+test('BUDGET 1.1 · a named person booked at no charge is said so — never "paid twice" — in ONE check with the block the line lies in', () => {
+  const casey = { Holder_ID: 'INV-GC', Person_ID: 'GC1', Item_ID: 'D1-EXEC', Rate_Per_Person_Night: 0, Nights_Rule: '2', Rate_Status: 'ACTIVE', Approved_By: 'H&S' };
+  const { out } = world({ lines004: [BLOCK27, BLOCK28, { ...PAIR, Details: 'All Categories Rooms (Casey + Dana)' }, TRAIN, VAN, CHINA], specialRates: [casey],
+    names: { persons: { GC1: 'Casey Example', GA1: 'Alex Example', GA2: 'Sam Example' }, holders: { 'INV-GC': 'Casey Example', 'INV-GA': 'Alex Example' } } });
+  const texts = C(out, 'D1').checks.map((c) => c.text).filter((t) => /^Budget row 7 /.test(t));
+  assert.equal(texts.length, 1, 'one check for the line');
+  assert.match(texts[0], /^Budget row 7 budgets Casey's own place as a host cost; Casey Example \(INV-GC\) is booked for Heritage Executive at no charge \(009 rate 0\) — what the hosts pay for it may be counted twice; the line is inside budget row 6 on 28\.02\.2031 — row 6 buys all 4 rooms of this stay \(A-5\): possibly counted twice$/);
+});
+
+test('BUDGET 1.1 · a supplier\'s 007 total beside its 004 lines: what 007 cannot say, the lines possibly counted twice — the difference itself unchanged and never explained by an inferred figure', () => {
+  const { out } = world({ lines004: [BLOCK28, PAIR, TRAIN, VAN, CHINA] });
+  const s = SOUP(out);
+  assert.equal(s.contractVsPlan.cents, 100000 - (60000 + 15000), 'the arithmetic is unchanged — the 007 typed total less the 004 lines as stated');
+  assert.deepEqual(s.stays, [{ stage: 'D1', uncovered: [{ night: '2031-02-27', items: ['Grand Majestic Suite', 'Heritage Executive'], others: [] }] }]);
+  const t = out.checks.find((c) => c.severity === 'data' && /^Souphattra Heritage Vientiane: the typed 007 total/.test(c.text)).text;
+  assert.equal(t, 'Souphattra Heritage Vientiane: the typed 007 total is USD 1000.00; the 004 lines of its stays (rows 5, 6) add up to USD 750.00 — 007 does not say what its total covers; row 6 (USD 150.00) lies inside row 5 — possibly counted twice');
+  assert.doesNotMatch(t, /not a cost|explain|missing cost/i);
+  assert.deepEqual(SOUP(world().out).stays, [{ stage: 'D1', uncovered: [] }], 'every night of its stays covered: none named');
+});
+
+function withA2() {
+  const items = { ...ITEMS, 'A2-UST': { Item_ID: 'A2-UST', Billing_Category: 'GUEST_SETTLEMENT_REQUIRED', Rate_Status: 'ACTIVE', Rate_Basis: 'PER_PERSON_PER_NIGHT', Standard_Rate: 70,
+    Quota: 3, Quota_Unit: 'ROOM', Max_Pax: 2, Currency: 'USD', Site_Product_Key: 'bangkok/u-sathorn', 'Number of Nights': 2 } };
+  const grid002 = GRID002.map((r) => ({ Item_ID: [...r, 'A2-UST'], Name: [...r, 'Deluxe Room'], Room: [...r, 'Deluxe Room'], 'Check In Date': [...r, '21.02.2031'],
+    'Check Out Date': [...r, '23.02.2031'], 'Number of Nights': [...r, 2], 'Rooms available': [...r, ''], Package: [...r, 'A2'], Category: [...r, 'Accommodation'] }[r[0]] || r));
+  const bookings = { ...BOOKINGS, 'INV-GA': [...BOOKINGS['INV-GA'], { ...bk('INV-GA', 'GA1', 'D1-EXEC', 'A'), Booking_ID: 'BK·INV-GA·GA1·A2-UST·g1', Item_ID: 'A2-UST', Room_Unit_ID: 'RU·A2-UST·A', Nights: 2 }] };
+  return { items, grid002, bookings };
+}
+test('BUDGET 1.1 · the nights no approved 004 line covers name the lines that do cover them and why they do not count (a stay whose rule says no "whose")', () => {
+  const ust = { Item: 'U Sathorn Bangkok', Vendor: 'Hotel', Category: 'Accommodation', Details: '21-23.02.2031', 'Rate USD': 100, Qty: 1, 'Nights, Rooms, EA': 2, 'Budget USD': 200,
+    'Date or period': '21-23.02.2031', Currency: 'USD', 'Suthep approval': OK };
+  const { out } = world({ ...withA2(), lines004: [BLOCK27, BLOCK28, TRAIN, VAN, CHINA, ust] });
+  const a2 = C(out, 'A2');
+  assert.equal(a2.status, 'NOT_COMPLETE');
+  assert.deepEqual(a2.uncovered.map((u) => [u.night, u.items, u.others.map((x) => [x.row, x.why])]), [
+    ['2031-02-21', ['Deluxe Room'], [[10, 'does not say whose place it is — a question for the Owners']]],
+    ['2031-02-22', ['Deluxe Room'], [[10, 'does not say whose place it is — a question for the Owners']]]]);
+});
+
+test('BUDGET 1.1 · outstanding = the typed total less the payments counted — stated only when every payment 007 records counts and every cell of its column is read', () => {
+  const v7of = (rows) => ({ v7: rows, f7: rows.map((r, i) => r.map((c, j) => (i === 2 && j === 1 ? '=B4*33.25' : c))) });
+  /* one payment dated after today: what is owed is not stated — the payment is named, never deducted, never re-dated */
+  const { out } = world();
+  const s = SOUP(out);
+  assert.equal(s.outstanding, null); assert.equal(s.paidAbove, null);
+  assert.equal(s.outstandingWhy, 'payment B15 recorded in 007 but not counted (dated 03.09.2031, after today — not counted as paid)');
+  assert.deepEqual(s.notCounted.map((m) => [m.currency, m.cents]), [['USD', 25000]]);
+  assert.deepEqual(K(out, 'Accommodation').outstanding, []); assert.deepEqual(K(out, 'Accommodation').outstandingNotStated, ['Souphattra Heritage Vientiane']);
+  /* every payment counted: USD 1,000 less USD 500 */
+  const paid = world(v7of(V7.map((r) => (r[0] === 'Payment Date' && r[1] === '03.09.2031' ? ['Payment Date', '01.10.2030'] : r)))).out;
+  assert.deepEqual([SOUP(paid).outstanding.currency, SOUP(paid).outstanding.cents], ['USD', 50000]); assert.equal(SOUP(paid).outstandingWhy, null);
+  assert.deepEqual(K(paid, 'Accommodation').outstanding.map((m) => [m.currency, m.cents]), [['USD', 50000]]); assert.deepEqual(K(paid, 'Accommodation').outstandingNotStated, []);
+  /* more paid than the total: said as paid above it, never a negative balance */
+  const above = world(v7of(V7.map((r) => (r[0] === 'Payment Date' && r[1] === '03.09.2031' ? ['Payment Date', '01.10.2030'] : r[0] === 'Ben USD' ? ['Ben USD', 900] : r)).map((r, i, all) => (r[0] === 'Paid Amount' && all[i - 1][0] === 'Ben USD' ? ['Paid Amount', 900] : r)))).out;
+  assert.equal(SOUP(above).outstanding, null); assert.deepEqual([SOUP(above).paidAbove.currency, SOUP(above).paidAbove.cents], ['USD', 15000]);
+  assert.deepEqual(K(above, 'Accommodation').paidAbove.map((m) => m.cents), [15000]); assert.deepEqual(K(above, 'Accommodation').outstandingNotStated, []);
+  /* a cell of its column under a row 007 does not label — or a stated balance row, never read as a payer — nothing is stated */
+  for (const label of ['Remark', 'Balance USD', 'Outstanding THB', 'Amount due USD']) {
+    const odd = world(v7of([...V7, [label, 500]])).out;
+    assert.equal(SOUP(odd).outstanding, null, label); assert.match(SOUP(odd).outstandingWhy, /^007 row 18 of its column is not read$/, label);
+    assert.equal(SOUP(odd).payments.length, 2, label + ' is no payment block');
+    assert.ok(odd.checks.some((c) => new RegExp('007 row 18 \\("' + label + '"\\) has no known label').test(c.text)), label + ' is named');
+  }
+  /* a payment in another currency than the total: never converted, nothing stated */
+  const thb = world(v7of(V7.map((r) => (r[0] === 'Ann USD' ? ['Ann THB', 8312.5] : r[0] === 'Payment Date' && r[1] === '03.09.2031' ? ['Payment Date', '01.10.2030'] : r))
+    .map((r, i, all) => (r[0] === 'Paid Amount' && all[i - 1][0] === 'Ann THB' ? ['Paid Amount', 8312.5] : r)))).out;
+  assert.deepEqual(SOUP(thb).payments.map((p) => [p.amount.currency, p.counted]), [['THB', true], ['USD', true]]);
+  assert.equal(SOUP(thb).outstanding, null); assert.match(SOUP(thb).outstandingWhy, /^a payment is in another currency than the total — never converted$/);
+  /* a "Balance USD" row ends the payer block above it: the payment below it is nobody's block, never the last payer's */
+  const bal = SOUP(world(v7of([...V7, ['Balance USD', 500], ['Paid Amount', 500], ['Payment Date', '01.10.2030']])).out);
+  assert.equal(bal.payments.length, 3); assert.equal(bal.payments[2].block, null); assert.equal(bal.outstanding, null);
+  /* two suppliers of one category: while one has no stated figure, the category states none — never a partial sum */
+  const a2 = withA2();
+  const two7 = (rows) => rows.map((r) => (!r.length ? r : r[0] === 'Vendor' ? [...r, 'U Sathorn Bangkok'] : r[0] === 'Category' ? [...r, 'Hotel'] : r[0] === 'Total Price USD' ? [...r, 300] : [...r, '']));
+  const both = world({ ...a2, lines004: [BLOCK27, BLOCK28, TRAIN, VAN, CHINA], v7: two7(V7), f7: two7(V7).map((r, i) => r.map((c, j) => (i === 2 && j === 1 ? '=B4*33.25' : c))) }).out;
+  assert.deepEqual([both.suppliers.find((v) => /^U Sathorn/.test(v.vendor)).outstanding.cents, SOUP(both).outstanding], [30000, null]);
+  assert.deepEqual(K(both, 'Accommodation').outstanding, [], 'U Sathorn alone is no category figure');
+  assert.deepEqual(K(both, 'Accommodation').outstandingNotStated, ['Souphattra Heritage Vientiane']);
+  const allPaid = two7(V7.map((r) => (r[0] === 'Payment Date' && r[1] === '03.09.2031' ? ['Payment Date', '01.10.2030'] : r)));
+  const both2 = world({ ...a2, lines004: [BLOCK27, BLOCK28, TRAIN, VAN, CHINA], v7: allPaid, f7: allPaid.map((r, i) => r.map((c, j) => (i === 2 && j === 1 ? '=B4*33.25' : c))) }).out;
+  assert.deepEqual(K(both2, 'Accommodation').outstanding.map((m) => [m.currency, m.cents]), [['USD', 50000 + 30000]]);
+  assert.match(SOUP(world({ v7: V7.map((r) => (r[0] === 'Total Price THB' ? ['Total Price THB', 33250] : r)), f7: V7 }).out).outstandingWhy, /^typed in USD and THB — no single total$/);
+  /* no typed total: nothing owed can be stated */
+  assert.match(SOUP(world({ noFormulas: true }).out).outstandingWhy, /^no typed contract total$/);
+});
+
+test('BUDGET 1.1 · a sheet total that differs from its lines names its formula\'s range only when the rows outside it are the difference; NET HOST COST carries it', () => {
+  const lines = [BLOCK27, BLOCK28, TRAIN, VAN, CHINA, CAKE, PLAN];   /* rows 5–11: CAKE row 10, PLAN row 11 */
+  const g = [['TOTAL PLANNED BUDGET', '', 'GUEST CONTRIBUTIONS', 'GROSS PROJECT COST', 'NET HOST COST'], [1610, '', 580, 2040, 1460], [], HEAD, ...lines.map(L)];
+  const withRow2 = (row2) => (x) => FORMULAS(x).map((r, i) => (i === 1 ? row2 : r));
+  const w = world({ grid004: g, formulas004: withRow2(['=SUM(J5:J11)', '', '=ABS(SUMIF(J5:J11, "<0"))', '=SUMIF($J$5:$J$9, ">0")', '=D2-C2']) });
+  assert.equal(w.input.budget.totals.grossCostFormula, '=SUMIF($J$5:$J$9, ">0")');
+  const ck = w.out.reconciliation.budget004.checks;
+  assert.deepEqual(ck.map((c) => [c.cell, c.equal]), [['A2', true], ['D2', false], ['C2', true], ['E2', false]]);
+  const gross = ck.find((c) => c.cell === 'D2');
+  assert.equal(gross.sheet.cents, 204000, 'the cell as stated'); assert.deepEqual(gross.range, { from: 5, to: 9 });
+  assert.deepEqual(gross.outside.map((x) => [x.row, x.amount.cents]), [[10, 15000]]);
+  assert.deepEqual(ck.find((c) => c.cell === 'E2').carries, ['D2']);
+  const texts = w.out.checks.map((c) => c.text).join('\n');
+  assert.match(texts, /^004 D2 states 2040\.00; the positive lines add up to 2190\.00 — its formula sums rows 5–9; row 10 \(150\.00\) lies outside it$/m);
+  assert.match(texts, /^004 E2 states 1460\.00; the positive lines less the planned guest contributions add up to 1610\.00 — E2 is =D2-C2 and carries D2's difference$/m);
+  /* two ranges, a criteria range in another column, a range in another column, or no formula read: the plain sentence, nothing guessed */
+  for (const f of ['=SUM(J5:J8)+SUM(J9:J9)', '=SUMIF(P5:P9, "x", J5:J9)', '=SUM(K5:K9)', '=D2']) {
+    const o = world({ grid004: g, formulas004: withRow2(['=SUM(J5:J11)', '', '=ABS(SUMIF(J5:J11, "<0"))', f, '=D2-C2']) }).out;
+    assert.equal(o.reconciliation.budget004.checks.find((c) => c.cell === 'D2').range, null, f);
+    assert.match(o.checks.map((c) => c.text).join('\n'), /^004 D2 states 2040\.00; the positive lines add up to 2190\.00$/m, f);
+  }
+  const g2 = g.map((r, i) => (i === 1 ? [1610, '', 580, 2000, 999] : r));
+  const off = world({ grid004: g2, formulas004: withRow2(['=SUM(J5:J11)', '', '=ABS(SUMIF(J5:J11, "<0"))', '=SUMIF($J$5:$J$9, ">0")', '=D2-C2-461']) }).out.reconciliation.budget004.checks;
+  assert.equal(off.find((c) => c.cell === 'D2').range, null, 'row 10 (150) is not the difference of 190 — nothing named');
+  assert.equal(off.find((c) => c.cell === 'E2').carries, null, 'E2 is out by 611, D2 by 190 — no carry claimed');
+  const spur = world({ grid004: g, formulas004: withRow2(['=SUM(J5:J11)', '', '=ABS(SUMIF(J5:J11, "<0"))', '=SUMIF($J$5:$J$9, ">0")', '=SUMIF(D20:D30,"x")+1']) }).out.reconciliation.budget004.checks;
+  assert.equal(spur.find((c) => c.cell === 'E2').carries, null, 'D20:D30 is no reference to D2');
+  const blind = world({ grid004: g, noFormulas: true });
+  assert.equal(blind.input.budget.totals.grossCostFormula, null); assert.equal(blind.out.reconciliation.budget004.checks.find((c) => c.cell === 'D2').range, null);
+});
+
+/* ---- THE FINANCIAL DASHBOARD (Owners, 17 Nov 2026): 004 gross costs, the forecast with a confirmed whole-contract supplier,
+   007 commitments, the Revenue Report's paying-guest revenue and the owner-funded position — derived, nothing written ---- */
+const REV = (invoiced, booked, extra) => ({ invoiced: { cents: invoiced, complete: true }, booked: { cents: booked, complete: true },
+  notYetInvoiced: { cents: Math.max(0, booked - invoiced) }, changedSinceIssue: { cents: Math.min(0, booked - invoiced) }, invoicedNotBooked: { cents: 0 }, ...(extra || {}) });
+test('DASHBOARD · costs are 004 gross (never reduced by revenue); the forecast takes the whole hotel contract in place of its stays\' lines; the position follows invoiced and expected revenue', () => {
+  const w = world();
+  const out = buildBudgetComparison({ ...w.input, revenue: REV(30000, 45000) });
+  const D = out.dashboard, gross = { lines: out.reconciliation.grossLines };
+  const positive = out.centres.flatMap((c) => c.lines004).concat(out.noGuestService.flatMap((x) => x.lines)).filter((l) => l.budget.cents > 0);
+  assert.equal(D.costs.original.cents, gross.lines.cents, 'original = every positive 004 line');
+  assert.ok(D.costs.original.cents >= positive.reduce((t, l) => t + l.budget.cents, 0) - 0, 'never less than the positive lines the comparison places');
+  const s = SOUP(out);
+  if (s.contract && s.contract.currency === 'USD' && s.planned004) {
+    assert.equal(D.costs.adjustments.length, 1); assert.equal(D.costs.adjustments[0].difference.cents, s.contract.cents - s.planned004.cents);
+    assert.equal(D.costs.forecast.cents, gross.lines.cents + s.contract.cents - s.planned004.cents);
+  } else assert.equal(D.costs.forecast.cents, gross.lines.cents);
+  assert.equal(D.costs.variance.cents, D.costs.forecast.cents - D.costs.original.cents);
+  assert.deepEqual([D.revenue.invoiced.cents, D.revenue.expectedTotal.cents, D.revenue.expectedNotYetInvoiced.cents], [30000, 45000, 15000], 'invoiced counted once inside the expected total');
+  assert.deepEqual([D.position.stated, D.position.currentOwnerFunded.cents, D.position.projectedOwnerFunded.cents], [true, D.costs.forecast.cents - 30000, D.costs.forecast.cents - 45000]);
+  assert.equal(D.position.coverageInvoiced, Math.round((30000 / D.costs.forecast.cents) * 1000) / 10);
+  assert.ok(D.costs.plannedContributionsNote && /never counted twice/.test(D.costs.plannedContributionsNote), '004\'s planned contributions are a plan only');
+  /* an incomplete Revenue Report states no position */
+  const half = buildBudgetComparison({ ...w.input, revenue: { ...REV(30000, 45000), booked: { cents: 45000, complete: false } } }).dashboard;
+  assert.deepEqual([half.position.stated, half.revenue.invoiced], [false, null]);
+  /* the hotel contracts' rooms for the rate list: the whole wedding stay and the suite of 25–27.02, at USD 150 per room night */
+  assert.deepEqual(out.roomContracts.map((x) => [x.stay, x.items, x.ratePerRoomNight]).sort((a, b) => (a[0] < b[0] ? -1 : 1)), [['C', ['C-SOUPHATTRA-PRESIDENTIAL'], 150], ['D1', '*', 150]]);
 });

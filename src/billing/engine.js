@@ -26,6 +26,7 @@
    and the Room Assignment subordinate to them. A cart line is a selection.
    ========================================================================== */
 
+import { BILLING_ADMINS } from './admin.js';
 import {
   BILLING_CATEGORY, MODIFIER, RATE_BASIS, QUOTA_UNIT, RATE_STATUS, BOOKING_STATE,
   MANUAL_REVIEW_REQUIRED, ACCOUNTING_CURRENCY, DEFAULT_CHANGE_CUTOFF,
@@ -33,8 +34,13 @@ import {
 } from './model.js';
 
 /* 2.2.1 (5 Oct 2026): approved, person-scoped, unambiguous named rates only; a charge rounded once
-   2.3.0 (7 Oct 2026): a booking H&S booked and paid for a guest is payable — named by a person-scoped 009 row */
-export const ENGINE_VERSION = 'billing-engine/2.3.0';
+   2.3.0 (7 Oct 2026): a booking H&S booked and paid for a guest is payable — named by a person-scoped 009 row
+   2.4.0 (17 Nov 2026): the couple's own bookings are complimentary — hosted, USD 0, never guest revenue */
+export const ENGINE_VERSION = 'billing-engine/2.4.0';
+/* THE COUPLE (Owners, 17 Nov 2026): Haruthai and Suthep organise the wedding; what they book for their own use is hosted —
+   USD 0, its value shown as hosted value — whatever the product or rate. Their real costs are Google 004's. The persons are the
+   verified identities of the Billing Admin allowlist (src/billing/admin.js), never a room or a party. */
+export const COUPLE_PERSONS = Object.freeze(BILLING_ADMINS.map((a) => a.guestId));
 
 /* THE BOOKING H&S PAID FOR THE GUEST (Owner, 7 Oct 2026). Where Haruthai & Suthep booked and paid a provider on a
    guest's behalf — an item the guest would otherwise settle with the provider — the guest reimburses H&S, so the line
@@ -321,6 +327,14 @@ export function computeLine(booking, ctx) {
   if (line.Billing_Category === BILLING_CATEGORY.HOSTED_NO_GUEST_CHARGE) {
     line.rateSource = 'HOSTED'; line.amountCents = 0; line.block = 'A'; line.hosted = true;
     line.note = 'hosted by Haruthai & Suthep';
+    line.hostedValueCents = hostedValueOf(item, booking, line);
+    return line;
+  }
+  /* the couple's own booking (2.4.0): hosted like a hosted product — never self-pay lines, which carry no H&S charge anyway */
+  if (COUPLE_PERSONS.includes(clean(line.Person_ID)) && line.Billing_Category !== BILLING_CATEGORY.GUEST_SELF_PAYMENT &&
+      line.Billing_Category !== BILLING_CATEGORY.GUEST_SELF_BOOKING) {
+    line.rateSource = 'HOSTED'; line.amountCents = 0; line.block = 'A'; line.hosted = true; line.couple = true;
+    line.note = 'the couple\'s own booking — complimentary';
     line.hostedValueCents = hostedValueOf(item, booking, line);
     return line;
   }

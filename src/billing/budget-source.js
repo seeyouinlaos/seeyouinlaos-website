@@ -19,8 +19,28 @@
 /** The tabs the comparison reads, beside (never inside) the billing source's own batch read (pricing guard C4). */
 export const BUDGET_TABS = Object.freeze({
   budget: '004_Budget_Finance', payments: '007_Deposit/Payment_Details', items: '002_Accommodation_Details', register: '006_Guestlist',
-  rates: '009_Special_Rates',
+  rates: '009_Special_Rates', roomList: '012_Room Number and Rate List',
 });
+
+/** GOOGLE 012 — the Owners' room number and rate list (Owners, 17 Nov 2026): a READ-ONLY reconciliation reference. One row per hotel
+    room: building, room type, the hotel's room number, dates and up to three guests (their names as the Owners typed them). Never
+    a source of a rate or a booking; a row without a room type is skipped. */
+export function parseRoomList012(grid) {
+  const rows = Array.isArray(grid) ? grid : [];
+  const head = (rows[0] || []).map((c) => clean(c).toLowerCase());
+  const at = (name) => head.findIndex((h) => h === name);
+  const guestCols = head.map((h, i) => (/^guest\s*0?\d+$/.test(h) ? i : -1)).filter((i) => i >= 0);
+  const out = [];
+  let building = '';
+  for (let r = 1; r < rows.length; r++) {
+    const row = rows[r] || [];
+    if (clean(row[at('building')])) building = clean(row[at('building')]);
+    const roomType = clean(row[at('room type')]); if (!roomType) continue;
+    out.push({ row: r + 1, building, roomType, roomNo: clean(row[at('rm no.')]), checkIn: clean(row[at('check in date')]), checkOut: clean(row[at('check out date')]),
+      guests: guestCols.map((i) => clean(row[i])).filter(Boolean) });
+  }
+  return out;
+}
 /** A tab's whole read range, quoted exactly as src/billing/source.js quotes its own (so a prefetched grid is found). */
 export const rangeOfTab = (tab) => "'" + String(tab).replace(/'/g, "''") + "'!A1:AZ";
 
@@ -153,6 +173,9 @@ export function parseBudget004(values, formulas) {
       const n = readNumber((V[r + 1] || [])[j]);
       totals[hit[0]] = n.ok ? n.value : null;
       totals[hit[0] + 'Cell'] = colLetter(j) + (r + 2);
+      /* the cell's own formula, as the sheet holds it (1.1.0): only to NAME the rows it sums — never to repair or recompute it */
+      const f = (F[r + 1] || [])[j];
+      totals[hit[0] + 'Formula'] = known && isFormula(f) ? clean(f) : null;
     });
   }
 
@@ -232,8 +255,12 @@ export function parseVendors007(values, formulas) {
   let block = null, blockNo = 0;   /* the payer block the rows below belong to — every payer row starts a new one */
   const blockPay = new Map();       /* `${blockNo}|${j}` → { block, stated, list: the payments of that column, in row order } */
   const payerRows = new Map();      /* a payer named twice is read as two blocks, and said */
+  /* a row naming what is still owed or already summed ("Balance USD", "Outstanding THB", "Amount due USD", …) is no payer: it is
+     named as unread, never read as a payment block (pricing guard, 17 Nov 2026) */
+  const NOT_PAYER = /^(balance|outstanding|remaining|remainder|rest|due|amount due|open|open balance|unpaid|refund|total|subtotal|sum|paid)\b/;
   const knownLabel = (l) => l === 'vendor' || l === 'category' || /^total price (thb|eur|usd)$/.test(l) || l === 'deposit %' ||
-    /^deposit amount (thb|eur|usd)$/.test(l) || /^[a-z][a-z .'-]* (thb|eur|usd)$/.test(l) || ['paid amount', 'payment date', 'paid by', 'payment method'].includes(l);
+    /^deposit amount (thb|eur|usd)$/.test(l) || (/^[a-z][a-z .'-]* (thb|eur|usd)$/.test(l) && !NOT_PAYER.test(l)) ||
+    ['paid amount', 'payment date', 'paid by', 'payment method'].includes(l);
 
   for (let r = 0; r < V.length; r++) {
     const row = V[r];
@@ -245,6 +272,8 @@ export function parseVendors007(values, formulas) {
       constants.push({ currency: clean(V[r][0]).toUpperCase(), value: readNumber(V[r + 1][0]).value, cell: 'A' + (r + 2) });
     }
     if (!knownLabel(l)) {
+      /* a balance-like row ("Balance USD", …) ends the payer block above it: a "Paid Amount" below it is never credited to that payer */
+      if (/^[a-z][a-z .'-]* (thb|eur|usd)$/.test(l) && NOT_PAYER.test(l)) { block = null; blockNo += 1; }
       if (anyCell) unread.push({ row: r + 1, label: clean(V[r][0]) || null, cells: row.map((c, j) => ({ j, c })).filter((x) => x.j > 0 && clean(x.c) !== '')
         .map((x) => ({ col: colLetter(x.j), vendor: byJ.has(x.j) ? byJ.get(x.j).vendor : null, value: clean(x.c) })) });
       continue;
@@ -259,7 +288,7 @@ export function parseVendors007(values, formulas) {
       if (l === 'deposit %') { v.depositPct = numOrNull(x); continue; }
       if ((m = /^deposit amount (thb|eur|usd)$/.exec(l))) { const a = money(x, f, known); if (a) v.deposit[m[1].toUpperCase()] = a; continue; }
     }
-    if ((m = /^([a-z][a-z .'-]*) (thb|eur|usd)$/.exec(l)) && !/^total price$|^deposit amount$/.test(m[1])) {
+    if ((m = /^([a-z][a-z .'-]*) (thb|eur|usd)$/.exec(l)) && !/^total price$|^deposit amount$/.test(m[1]) && !NOT_PAYER.test(m[1])) {
       const name = clean(V[r][0]).replace(/\s+(THB|EUR|USD)$/i, '');
       /* "Ann THB" then "Ann USD" open ONE block; the same payer again after a payment row opens a new one */
       const paidInBlock = [...blockPay].some(([k, b]) => k.startsWith(blockNo + '|') && b.list.length > 0);

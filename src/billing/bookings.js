@@ -118,6 +118,19 @@ export const CONFIRMATION = Object.freeze({
   CONFIRMED: 'CONFIRMED',
 });
 
+/** THE STAGE OF ONE INVITATION'S OWN TRIP (Owners, 17 Nov 2026 — the booking completeness view): NONE (nothing sent),
+    UNCONFIRMED / LAPSED (sent, waiting for a confirmation) or CONFIRMED — the same two records and the same rule as
+    loadConfirmedBookings below, never a second judgement. An unreadable record throws; it never reads as NONE. */
+export async function registrationState(env, holderId) {
+  const holder = clean(holderId);
+  if (!holder) return CONFIRMATION.NONE;
+  const rec = await registrationRecord(env, holder);
+  if (!rec || !rec.submissionId) return CONFIRMATION.NONE;
+  const conf = await confirmationRecord(env, holder);
+  if (!confirmationStands(conf, rec)) return conf && conf.confirmedAt ? CONFIRMATION.LAPSED : CONFIRMATION.UNCONFIRMED;
+  return CONFIRMATION.CONFIRMED;
+}
+
 /**
  * Confirmed Bookings for ONE Holder, shaped exactly as engine.calculate wants
  * (Freeze · A, Codex final review 5 Oct 2026).

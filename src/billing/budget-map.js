@@ -70,7 +70,12 @@ export const ROOM_SCOPES = Object.freeze([
 ]);
 
 export const VENDORS = Object.freeze([
-  { vendor: /^souphattra\s+heritage\b/i, stages: ['C', 'D1'] },
+  /* coversAll (Owners, 17 Nov 2026): the 007 total is the supplier's whole contract for these stays — "26 rooms, 54 contracted room
+     nights, USD 150 per room night, total USD 8,100" — so the cost forecast takes it in place of the 004 lines of its stays */
+  { vendor: /^souphattra\s+heritage\b/i, stages: ['C', 'D1'], coversAll: 'the hotel agreement: 26 rooms, 54 room nights, USD 150 per room night, USD 8,100 (Owners, 17 Nov 2026)',
+    /* the rooms that agreement buys, at its rate per room night: every room of the wedding stay (D1, 27.02–01.03) and the
+       Presidential suite of 25–27.02 (004 row 23) — the rate list's hotel cost per room comes from here, nowhere else */
+    roomContract: { ratePerRoomNight: 150, rooms: { D1: '*', C: ['C-SOUPHATTRA-PRESIDENTIAL'] } } },
   { vendor: /^u\s*sathorn\b/i, stages: ['A2'] },
   { vendor: /^yifangju\b/i, stages: ['F'] },
   { vendor: /^luye\s+baisha\b/i, stages: ['H'] },

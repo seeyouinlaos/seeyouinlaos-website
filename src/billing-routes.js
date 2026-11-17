@@ -38,20 +38,20 @@ import { composeStatementMail } from './mail-templates.js';
 import { pricingSource, catalogueKey } from './billing/catalogue-cache.js';
 import { effectivePreference, routeFor, destinationOf, firstVerifiedPayment, isChannel, PREFERENCE_SOURCE } from './billing/preference.js';
 import { GoogleSheetsUnavailable, batchReadRanges } from './google-sheets.js';
-import { calculate, perPerson, matchSpecialRate } from './billing/engine.js';
+import { calculate, perPerson, matchSpecialRate, COUPLE_PERSONS } from './billing/engine.js';
 import { unitOf as roomUnitOf } from './rooms.js';
 import { priceDifference } from './billing/price-difference.js';
 import {
   buildSnapshot, canIssue, dueDateFor, freezeFx, inPreferredCurrency,
   paymentStatus, isDuplicateSuspect, nextRevisionState,
 } from './billing/settlement.js';
-import { loadConfirmedBookings, unmappedProducts, siteKeyOfSelection, nightsOf, selectionLinesOf } from './billing/bookings.js';
+import { loadConfirmedBookings, unmappedProducts, siteKeyOfSelection, nightsOf, selectionLinesOf, registrationState } from './billing/bookings.js';
 import { OWNER_BOOKING_STATE, obkKey, OBK_INDEX_KEY, readRecord, stateOf as ownerStateOf, stageOf, keyStage, holdPlan, applyAction, toBookings, occupancy, problemsOf, combinedConfirmation } from './billing/owner-bookings.js';
 import { canonicalLines } from './legacy-keys.js';
 import { renderSettlementPdf } from './billing/pdf.js';
 import { buildRevenueOverview } from './billing/revenue.js';
 import { buildBudgetComparison } from './billing/budget.js';
-import { BUDGET_TABS, rangeOfTab, parseBudget004, parseVendors007, parseItemDisplay, parseSpecialRateRows } from './billing/budget-source.js';
+import { BUDGET_TABS, rangeOfTab, parseBudget004, parseVendors007, parseItemDisplay, parseSpecialRateRows, parseRoomList012 } from './billing/budget-source.js';
 import { detectDrift, blockingOf, monitoringSignals, proposeRevisionDraft, reconciliationReport } from './billing/reconciliation.js';
 import { REFERENCE_CASES, evaluateGate, runReferenceCases, GATE_NOT_RUN } from './billing/activation-gate.js';
 import { PAYMENT_CHANNEL, CHANNEL_CURRENCY, RECORD_STATUS, ENTRY_TYPE, REVISION_STATE, toCents, fromCents } from './billing/model.js';
@@ -424,7 +424,7 @@ async function guestSettlement(env, identity, url, cors) {
    * the currently effective approved rate used, as a preview. */
   const fx = issued
     ? freezeFx({ FX_USD_THB: issued.FX_USD_THB, FX_USD_EUR: issued.FX_USD_EUR })
-    : freezeFx(resolveFx(src.configRows, asOf || utcDay()));
+    : freezeFx(resolveFx(src.configRows, await fxReferenceDay(env, asOf || utcDay())));   /* the project's reference (17 Nov 2026) */
   const fxSource = issued ? 'ISSUED_REVISION' : 'CURRENT_PREVIEW';
 
   /* Freeze · O — Soll is the current valid ISSUED revision, never the draft. */
@@ -492,7 +492,7 @@ async function reportPayment(env, identity, request, cors) {
   const reportedAt = new Date().toISOString();
   const issued = state.issuedRevision || null;
   const fx = issued ? { FX_USD_THB: issued.FX_USD_THB, FX_USD_EUR: issued.FX_USD_EUR }
-                    : freezeFx(resolveFx(src.configRows, reportedAt.slice(0, 10)));
+                    : freezeFx(resolveFx(src.configRows, await fxReferenceDay(env, reportedAt.slice(0, 10))));
 
   /* The guest pays in their own currency; the journal also carries the USD
    * figure, converted with the revision's FROZEN rate (Freeze · M). */
@@ -859,11 +859,19 @@ const CONFIRMATION_WORDS = Object.freeze({
  * less the ids the ledger allocates, plus the confirmed version of the trip. Issue refuses PREVIEW_CHANGED unless the
  * console confirms this very hash: what was previewed is what is issued.
  */
+/* THE PROJECT'S EXCHANGE-RATE REFERENCE (Owners, 17 Nov 2026): every statement and every revision freezes the Google 011 rates in
+   effect on the day the project's first statement was issued (the ledger's earliest issued Issue_Date, immutable); before any
+   statement exists, the day of issue. Never a new rate source and never a change to a statement already issued. */
+async function fxReferenceDay(env, day) {
+  try { const r = await ledgerCall(env, 'fx-reference', null); if (r && r.ok && /^\d{4}-\d{2}-\d{2}$/.test(clean(r.firstIssueDate))) return clean(r.firstIssueDate); } catch (e) { /* the day itself */ }
+  return day;
+}
+
 async function assessIssue(env, holderId, src, asOf, origin, opts) {
   const o = opts || {};
   /* THE WHAT-IF of the confirmation dialog (admin/confirm GET): the sent version as if confirmed — never issued from */
   const assume = Number.isInteger(o.assumeConfirmedVersion) ? { version: o.assumeConfirmedVersion } : null;
-  const fx = freezeFx(resolveFx(src.configRows, asOf));
+  const fx = freezeFx(resolveFx(src.configRows, await fxReferenceDay(env, evaluationDay(asOf))));
   const sourceGaps = sourceGapsOf(src);
   const state = await holderState(env, holderId);
   const pref = await preferenceOf(env, origin, holderId, state, src, src.nationalities || undefined);
@@ -1129,11 +1137,24 @@ async function adminRevenue(env, identity, url, cors) {
       unresolved.push({ Holder_ID: id, reason: clean(e && e.message).slice(0, 200) || 'not readable' });
     }
   }
+  /* THE COUPLE (Owners, 17 Nov 2026): what Haruthai and Suthep book for their own use is complimentary — never paying-guest
+     revenue. Their invitations are read like every other and reported apart: an issued statement stands, immutable, until the
+     Owners issue a revision; its amount is listed here, never counted as revenue, receivable or overdue. */
+  const coupleIds = new Set(COUPLE_PERSONS.map((g) => 'INV-' + g));
+  const paying = holders.filter((h) => !coupleIds.has(h.Holder_ID));
+  const couple = holders.filter((h) => coupleIds.has(h.Holder_ID)).map((h) => {
+    const iss = h.settlement && h.settlement.issuedRevision;
+    const issuedCents = iss ? Number(iss.Total_Payable_Cents ?? (iss.snapshot && iss.snapshot.Total_Payable_Cents)) : null;
+    const now = calculate(h.bookings, { items: src.items, specialRates: src.specialRates, asOf });
+    return { Holder_ID: h.Holder_ID, issuedRevision: iss ? Number(iss.Revision) || null : null, issueDate: iss ? iss.Issue_Date || null : null,
+      issued: Number.isFinite(issuedCents) ? fromCents(issuedCents) : null, payableNow: fromCents(now.totalPayableCents), hostedValue: fromCents(now.hostedValueCents),
+      revisionDue: Number.isFinite(issuedCents) && issuedCents !== now.totalPayableCents };
+  });
   /* Freeze · U — the overview reuses the engine; it owns no formula. */
   const overview = buildRevenueOverview({
-    holders, items: src.items, specialRates: src.specialRates,
+    holders: paying, items: src.items, specialRates: src.specialRates,
     journalRows: src.journalRows,
-    issuedRevisions: holders.map((h) => h.settlement && h.settlement.issuedRevision).filter(Boolean),
+    issuedRevisions: paying.map((h) => h.settlement && h.settlement.issuedRevision).filter(Boolean),
     asOf,
   });
   /* an unread holder leaves every figure it could belong to incomplete, named — the computable part stays offered as partial */
@@ -1147,10 +1168,19 @@ async function adminRevenue(env, identity, url, cors) {
   if (unresolved.length) overview.incompleteKpis = [...new Set([...(overview.incompleteKpis || []), ...KPI_KEYS])];
   if (unresolved.length && overview.breakdown) { overview.breakdown.incomplete = true; overview.breakdown.complete = false; }
   /* REVENUE AND BUDGET: built from the final figures above, beside them — every key above is exactly what it was without it */
-  const budget = await budgetBesideRevenue(env, budgetReads, { overview, src, asOf, indexEntries, unresolved });
-  return jsonRes({ ok: true, ...overview, unresolved, calculatedAt: new Date().toISOString(),
+  const budget = await budgetBesideRevenue(env, budgetReads, { overview, src, asOf, indexEntries, unresolved, couple });
+  /* the extra bed of a room the guests booked themselves (17 Nov 2026): a room holding more persons than its own places says so */
+  extraBedsBeyondPlaces(overview.breakdown, src.items);
+  /* where every active guest stands — only CONFIRMED bookings are revenue above; the rest is named here, never as money */
+  let progress; try { progress = await bookingProgress(env, indexEntries, { ownerRecords: recorded.length > 0 }); } catch (e) { progress = { error: clean(e && e.message).slice(0, 200) || 'not readable' }; }
+  /* the project's exchange-rate reference (Owners, 17 Nov 2026): the day of the first issued statement and the 011 rates in effect */
+  let fxReference = null;
+  /* the first issued statement's day from the ledger listing already read (no further request) */
+  const issuedDays = ledgerHolders.map((h) => clean(h.Issue_Date || (h.settlement && h.settlement.Issue_Date))).filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d)).sort();
+  try { const day = issuedDays[0] || asOf; const fx = freezeFx(resolveFx(src.configRows, day)); fxReference = { day, FX_USD_THB: fx.FX_USD_THB, FX_USD_EUR: fx.FX_USD_EUR, gaps: fx.gaps || [], firstIssued: day !== asOf || null }; } catch (e) { fxReference = { error: 'not readable just now' }; }
+  return jsonRes({ ok: true, ...overview, unresolved, calculatedAt: new Date().toISOString(), bookingProgress: progress, fxReference,
     population: { holders: ids.length, withSettlement: withSettlement.length, withConfirmation: confirmed.length, withDrift: withDrift.length,
-      withOwnerBookings: recorded.length, cancelled: holders.filter((h) => h.cancelled).length }, budget }, 200, cors);
+      withOwnerBookings: recorded.length, cancelled: holders.filter((h) => h.cancelled).length, couple: couple.length }, couple, budget }, 200, cors);
 }
 
 /* ------------------------------------------------------------ revenue and budget */
@@ -1165,6 +1195,8 @@ function readBudgetSources(env) {
     batchReadRanges(env, id, [BUDGET_TABS.budget, BUDGET_TABS.payments, BUDGET_TABS.items, BUDGET_TABS.rates, BUDGET_TABS.register].map(rangeOfTab)),
     batchReadRanges(env, id, [BUDGET_TABS.budget, BUDGET_TABS.payments].map(rangeOfTab), { render: 'FORMULA' }),
     roomsGr(env, 'plan'),
+    /* Google 012, read apart: a missing or renamed tab never takes the budget reads down (reconciliation reference only) */
+    batchReadRanges(env, id, [rangeOfTab(BUDGET_TABS.roomList)]),
   ]);
 }
 
@@ -1185,7 +1217,7 @@ function budgetNames(entries, register) {
 
 /* the revenue figures never wait long on the comparison: reads still out after this are a named gap (review, 17 Nov 2026) */
 const BUDGET_WAIT_MS = 8000;
-async function budgetBesideRevenue(env, reads, { overview, src, asOf, indexEntries, unresolved }) {
+async function budgetBesideRevenue(env, reads, { overview, src, asOf, indexEntries, unresolved, couple }) {
   const gap = (why) => ({ available: false, gap: why + ' — every revenue figure above stands as it is' });
   try {
     let timer;
@@ -1193,7 +1225,7 @@ async function budgetBesideRevenue(env, reads, { overview, src, asOf, indexEntri
     const settled = await Promise.race([reads, new Promise((res) => { timer = setTimeout(() => res(null), wait); })]);
     clearTimeout(timer);
     if (!settled) return gap('The budget sources did not answer within ' + (wait >= 1000 ? Math.round(wait / 1000) + ' seconds' : wait + ' ms'));
-    const [values, formulas, plan] = settled;
+    const [values, formulas, plan, list012] = settled;
     if (values.status !== 'fulfilled') return gap('The budget tabs (004, 007, 002, 009, 006) could not be read from Google just now');
     const [g004, g007, g002, g009, g006] = values.value;
     const f = formulas.status === 'fulfilled' ? formulas.value : null;
@@ -1212,6 +1244,11 @@ async function budgetBesideRevenue(env, reads, { overview, src, asOf, indexEntri
       receipts: { cashCollected: kpi(overview.cashCollected), refundDue: kpi(overview.refundDue),
         source: '008_Payment_Journal — the verified receipts and the refunds due, as the overview above counts them' },
       unresolved, readProblems,
+      /* the Revenue Report's paying-guest figures for the financial dashboard (Owners, 17 Nov 2026) — read, never recomputed */
+      revenue: { invoiced: kpi(overview.issuedRevenue), booked: kpi(overview.bookedRevenue), notYetInvoiced: kpi(overview.notYetInvoiced),
+        changedSinceIssue: kpi(overview.changedSinceIssue), invoicedNotBooked: kpi(overview.invoicedNotBooked) },
+      couple: couple || null,
+      roomList012: list012 && list012.status === 'fulfilled' && Array.isArray(list012.value) ? parseRoomList012(list012.value[0]) : null,
     });
   } catch (e) {
     return gap('The budget comparison could not be built just now');
@@ -1230,6 +1267,61 @@ async function ownerRecordHolders(env) {
     cursor = page && !page.list_complete && page.cursor ? page.cursor : null;
   } while (cursor);
   return out;
+}
+
+/* BOOKING PROGRESS (Owners, 17 Nov 2026): where each ACTIVE guest of the register stands while the Owners and the guests book —
+   CONFIRMED (their own trip confirmed, or a confirmed Owners' record names them) · AWAITING CONFIRMATION (a trip sent, or an
+   Owners' record not yet confirmed) · NOT SENT (a room held or a Bag with lines, nothing sent) · NO BOOKING. Read from the same
+   records the statements read (registrationState, the Owners' records through their index, the Rooms plan, the guest's saved
+   Bag); counts and invitations only, never an amount. A guest whose records cannot be read is named as unreadable. */
+async function bookingProgress(env, indexEntries, opts) {
+  /* the guests — the couple organise the wedding and book complimentary (17 Nov 2026), they are not counted here */
+  const persons = [...new Map(indexEntries.filter((e) => clean(e.g) && clean(e.i) && e.h !== 1).map((e) => [clean(e.i), clean(e.g)])).entries()];
+  /* the Rooms engine is asked once, never waited on longer than the budget's own limit */
+  const wait = Number(env.BUDGET_WAIT_MS) > 0 ? Number(env.BUDGET_WAIT_MS) : BUDGET_WAIT_MS;
+  let plan = null, timer;
+  try { plan = await Promise.race([roomsGr(env, 'plan'), new Promise((res) => { timer = setTimeout(() => res(null), wait); })]); } catch (e) { plan = null; } finally { clearTimeout(timer); }
+  const noRecords = !!(opts && opts.ownerRecords === false);
+  const holding = new Set();
+  if (plan && plan.units) for (const units of Object.values(plan.units)) for (const u of units || []) for (const o of (u && u.occupants) || []) if (o && o.guestId) holding.add(clean(o.guestId));
+  const memo = {};
+  const out = { guests: persons.length, confirmed: [], awaitingConfirmation: [], notSent: [], noBooking: [], unreadable: [], roomsReadable: !!plan };
+  const stageOfPerson = async ([id, g]) => {
+    const reg = await registrationState(env, id);
+    const recs = noRecords ? [] : await recordedElsewhere(env, g, '', memo);
+    if (recs === null || recs.some((r) => r.state === 'UNREADABLE')) return 'unreadable';
+    if (reg === 'CONFIRMED' || recs.some((r) => r.state === OWNER_BOOKING_STATE.CONFIRMED)) return 'confirmed';
+    if (reg === 'UNCONFIRMED' || reg === 'LAPSED' || recs.some((r) => r.state === OWNER_BOOKING_STATE.RECORDED)) return 'awaitingConfirmation';
+    if (holding.has(g)) return 'notSent';
+    const raw = await env.REG_KV.get('draft:' + id);
+    if (raw) {
+      let bag = [];
+      try { const d = JSON.parse(raw); const keys = (d && (d.keys || (d.draft && d.draft.keys))) || {}; bag = JSON.parse(keys['siyl.bag'] || '[]'); } catch (e) { return 'unreadable'; }
+      if (Array.isArray(bag) && bag.length) return 'notSent';
+    }
+    return 'noBooking';
+  };
+  const stages = await Promise.all(persons.map((p) => stageOfPerson(p).catch(() => 'unreadable')));
+  persons.forEach(([id], i) => out[stages[i]].push(id));
+  for (const k of ['confirmed', 'awaitingConfirmation', 'notSent', 'noBooking', 'unreadable']) out[k].sort();
+  out.complete = out.confirmed.length === out.guests && !out.unreadable.length;
+  return out;
+}
+
+/* A ROOM BEYOND ITS OWN PLACES (17 Nov 2026): a unit holding more persons than the seed gives it places is using its extra bed —
+   counted per unit (never which person is on it) beside the beds the Owners' records mark; the amounts stay the engine's. */
+function extraBedsBeyondPlaces(breakdown, items) {
+  if (!breakdown || !Array.isArray(breakdown.roomsByUnit)) return;
+  const byItem = new Map();
+  for (const u of breakdown.roomsByUnit) {
+    const parts = clean(u.Room_Unit_ID).split('·'); if (parts.length < 3) continue;
+    const label = parts[parts.length - 1], itemId = parts.slice(1, -1).join('·');
+    const unit = roomUnitOf(clean(items && items[itemId] && items[itemId].Site_Product_Key).split(/[,|]/)[0], label);
+    const beyond = unit ? Math.max(0, (Number(u.persons) || 0) - unit.places) : 0;
+    if (beyond > (Number(u.extraBeds) || 0)) u.extraBeds = beyond;
+    byItem.set(itemId, (byItem.get(itemId) || 0) + (Number(u.extraBeds) || 0));
+  }
+  for (const c of breakdown.roomsByCategory || []) if (byItem.has(c.Item_ID) && byItem.get(c.Item_ID) > (Number(c.extraBeds) || 0)) c.extraBeds = byItem.get(c.Item_ID);
 }
 
 /** The ledger's drift records, holder by holder ({ Holder_ID, drifts }). */
@@ -1508,6 +1600,53 @@ async function adminOverview(env, identity, url, cors) {
     gate: { approved: gate.approved }, holders: rows }, 200, cors);
 }
 
+/* BOOKED FOR A GUEST BY ANOTHER PAYER (Owners, 17 Nov 2026 — the booking completeness view): the Owners' records of OTHER
+   paying invitations that name this guest, read through the index of recorded persons; each record is read and must still
+   name the guest, and carries its own state (RECORDED / CONFIRMED). null when the index cannot be read — never guessed. */
+async function recordedElsewhere(env, guestId, holderId, memo) {
+  const m = memo || {};
+  const g = clean(guestId); if (!g || !env.REG_KV) return [];
+  if (m.index === undefined) { try { const raw = await env.REG_KV.get(OBK_INDEX_KEY); m.index = raw ? JSON.parse(raw) || {} : {}; } catch (e) { m.index = null; } }
+  if (!m.index) return null;
+  m.records = m.records || new Map();
+  const out = [];
+  for (const h of (Array.isArray(m.index[g]) ? m.index[g] : []).map(clean).filter((x) => x && x !== holderId)) {
+    if (!m.records.has(h)) { let rec; try { rec = readRecord(await env.REG_KV.get(obkKey(h))); } catch (e) { rec = false; } m.records.set(h, rec); }
+    const rec = m.records.get(h);
+    if (rec === false) out.push({ Holder_ID: h, state: 'UNREADABLE' });
+    else if (rec.entries.some((e) => clean(e && e.personId) === g)) out.push({ Holder_ID: h, state: ownerStateOf(rec) });
+  }
+  return out;
+}
+
+/**
+ * GET admin/readiness?ids=… — INVOICE READINESS (Owners, 17 Nov 2026): for up to ADMIN_STATUS_CHUNK paying invitations, what
+ * Issue would say right now — the very assessment Preview and Issue run (assessIssue), its reasons word for word and the
+ * total it would freeze. Reads only: nothing is issued, confirmed, recorded or sent. One holder that cannot be read fails
+ * only its own row.
+ */
+async function adminReadiness(env, identity, url, cors) {
+  const ids = [...new Set(clean(url.searchParams.get('ids')).split(',').map(clean).filter((x) => INVITATION_RE.test(x)))];
+  if (!ids.length) return jsonRes({ ok: false, error: 'ids required' }, 400, cors);
+  if (ids.length > ADMIN_STATUS_CHUNK) return jsonRes({ ok: false, error: 'at most ' + ADMIN_STATUS_CHUNK + ' ids per request' }, 400, cors);
+  const asOf = evaluationDay(url.searchParams.get('asOf'));
+  const src = await loadSource(env, asOf, { register: true });
+  env = { ...env, REG_KV: memoKv(env.REG_KV) };
+  const rows = [];
+  for (const id of ids) {
+    try {
+      const a = await assessIssue(env, id, src, asOf, url.origin);
+      const r = a.current.result;
+      rows.push({ Holder_ID: id, allowed: a.allowed, reasons: a.reasons, total: r.totalPayable, manualReview: r.manualReview.length,
+        confirmation: (a.confirmation && a.confirmation.state) || 'NONE', issuedRevision: a.state.issuedRevision ? a.state.issuedRevision.Revision : null });
+    } catch (e) {
+      if (e instanceof LedgerContractError || e instanceof GoogleSheetsUnavailable) throw e;
+      rows.push({ Holder_ID: id, error: clean(e && e.message).slice(0, 200) || 'not readable' });
+    }
+  }
+  return jsonRes({ ok: true, asOf, rows }, 200, cors);
+}
+
 /** GET admin/status?ids=… — Guest Relations' confirmation and the draft, for up to ten holders. */
 async function adminStatus(env, identity, url, cors) {
   const ids = [...new Set(clean(url.searchParams.get('ids')).split(',').map(clean).filter((x) => INVITATION_RE.test(x)))];
@@ -1527,6 +1666,7 @@ async function adminStatus(env, identity, url, cors) {
   try { views = await holderViews(env, ids.filter((id) => { const w = inRegister.get(id); return w && !w.ambiguous && w.guestId; })); } catch (e) { views = null; }
   /* this request reads a sent trip once, however many of its steps ask for it (a read-only route: nothing here writes REG_KV) */
   env = { ...env, REG_KV: memoKv(env.REG_KV) };
+  const obMemo = {};
   const rows = [];
   for (const id of ids) {
     const who = inRegister.get(id);
@@ -1542,7 +1682,9 @@ async function adminStatus(env, identity, url, cors) {
     try {
       const known = views && views.has(id) ? stateOfView(views.get(id), id) : undefined;
       const { state, result, unmapped, confirmation } = await calculateHolder(env, { invitationId: id, guestId: null }, id, src, asOf, url.origin, undefined, known);
-      rows.push({ booked,
+      /* booked for this guest by another paying invitation (the Owners' records naming them) — the completeness view */
+      let elsewhere = null; try { elsewhere = await recordedElsewhere(env, who.guestId, id, obMemo); } catch (e) { elsewhere = null; }
+      rows.push({ booked, elsewhere,
         Holder_ID: id,
         confirmation: { state: confirmation.state || 'NONE', version: confirmation.version ?? null, confirmedAt: confirmation.confirmedAt || null,
           ownerRecorded: confirmation.ownerRecorded ? { state: confirmation.ownerRecorded.state, rev: confirmation.ownerRecorded.rev } : null },
@@ -1580,6 +1722,8 @@ async function adminHolder(env, identity, url, cors) {
   const issued = state.issuedRevision || null;
   const sid = state.Settlement_ID || null;
   const people = peopleOf(entries, src.register, [...(a ? a.current.result.lines : []), ...((issued && issued.lines) || [])]);
+  /* the rooms of this statement whose extra bed is in use, with who is recorded on it — the Owners may correct that attribution */
+  let extraBedRooms = []; try { extraBedRooms = a ? await extraBedRoomsOf(env, a.current, src) : []; } catch (e) { extraBedRooms = [{ error: clean(e && e.message).slice(0, 160) || 'the room list could not be read' }]; }
   const recipient = await recipientOf(env, holderId);
   const name = nameOf(src.register, entry.contactId);
 
@@ -1634,7 +1778,7 @@ async function adminHolder(env, identity, url, cors) {
     guest: { name, guestId: entry.guestId, hosts: entry.hosts,
       contactName: recipient.contact ? [clean(recipient.contact.firstName), clean(recipient.contact.lastName)].filter(Boolean).join(' ') || null : null,
       email: recipient.email, emailSource: recipient.source },
-    booked, submission,
+    booked, submission, extraBedRooms,
     confirmation: a ? a.confirmation : { state: 'UNREADABLE' },
     method: a ? { channel: a.pref.channel || null, currency: a.pref.currency || null, determined: !!a.pref.determined,
       source: a.pref.source || null, reason: a.pref.reason || null, locked: !!a.pref.locked,
@@ -1981,6 +2125,71 @@ async function roomsGr(env, op, body) {
    approved 009 row naming them in effect — else Issue waits, named. The person checked is the one whose booking took the bed
    (marked by the Rooms engine); a guest on a regular place is never held up by it. No price is computed; nothing is written.
    The room list is read only when a line is in such a room; a room it does not list is named, never passed. */
+/* THE ROOMS OF A STATEMENT WITH THEIR EXTRA BED IN USE (Owners, 17 Nov 2026): for each line in a room the seed gives an extra bed
+   while the room holds more persons than its places — its occupants (guest id, first name) and who the Rooms engine records on the
+   bed. Read only; the Owners change the attribution with admin/extra-bed. */
+async function extraBedRoomsOf(env, current, src) {
+  const out = [], seen = new Set();
+  let plan = null;
+  for (const l of ((current && current.result && current.result.lines) || [])) {
+    const ru = clean(l.Room_Unit_ID); if (!ru || seen.has(ru)) continue;
+    const parts = ru.split('·'), label = parts[parts.length - 1], itemId = parts.slice(1, -1).join('·');
+    const it = src.items && src.items[itemId]; if (!it) continue;
+    const key = clean(it.Site_Product_Key).split(/[,|]/)[0];
+    const unit = roomUnitOf(key, label); if (!unit || !unit.extraBeds) continue;
+    seen.add(ru);
+    if (!plan) plan = await roomsGr(env, 'plan');
+    const u = ((plan.units && plan.units[key]) || []).find((x) => x.label === unit.label); if (!u) continue;
+    const occ = (u.occupants || []).filter((o) => o.guestId);
+    if ((u.occupants || []).length <= unit.places) continue;
+    out.push({ key, label: unit.label, itemId, places: unit.places, inRoom: (u.occupants || []).length,
+      bed: (occ.find((o) => o.bed) || {}).guestId || null, occupants: occ.map((o) => ({ guestId: o.guestId, name: clean(o.name) || null, bed: !!o.bed })) });
+  }
+  return out;
+}
+
+/**
+ * POST admin/extra-bed { key, label, guestId } — the Owners name who sleeps on a room's extra bed (17 Nov 2026). Nobody moves,
+ * no place is taken or given back; the Rooms engine records the attribution (op 'bed'), and the statement check then asks that
+ * person — only that person — for their own approved 009 row. BILLING_ADMIN only; nothing is priced, issued or e-mailed here.
+ */
+async function adminExtraBed(env, identity, request, cors) {
+  const body = await request.json().catch(() => null);
+  const key = clean(body && body.key), label = clean(body && body.label).toUpperCase(), guestId = clean(body && body.guestId);
+  if (!key || !label || !/^G\d{3,}$/.test(guestId)) return jsonRes({ ok: false, error: 'key, label and the guest id are required' }, 400, cors);
+  const r = await roomsGr(env, 'bed', { key, label, guestId, actor: adminLabel(identity) });
+  return jsonRes(r, r.ok ? 200 : 409, cors);
+}
+
+/**
+ * THE HOTEL ROOM RATE LIST — APPROVED VERSIONS (Owners, 17 Nov 2026). The list itself is generated in the console from the budget
+ * comparison's own per-room lines (bookings · 002 · 009 · the Rooms engine); the Owners approve what they see, and that version is
+ * frozen here with who, when and its SHA-256: GET admin/rate-list?stay=<centre> lists the versions (the latest with its rows);
+ * POST { stay, rows } freezes one (an unchanged list is not a new version). KV `ratelist:<centre>`, the last 20 versions.
+ */
+async function adminRateList(env, identity, request, url, cors) {
+  const stay = clean(request.method === 'POST' ? (await request.clone().json().catch(() => ({}))).stay : url.searchParams.get('stay'));
+  if (!/^[A-Z][A-Z0-9]{0,3}$/.test(stay)) return jsonRes({ ok: false, error: 'stay required (a stay of 002, e.g. D1)' }, 400, cors);
+  const key = 'ratelist:' + stay;
+  let rec = { versions: [] };
+  try { const raw = await env.REG_KV.get(key); if (raw) rec = JSON.parse(raw); } catch (e) { return jsonRes({ ok: false, error: 'the approved versions are not readable just now' }, 503, cors); }
+  const meta = (v) => ({ n: v.n, at: v.at, by: v.by, hash: v.hash, count: (v.rows || []).length });
+  if (request.method !== 'POST') {
+    const latest = rec.versions[rec.versions.length - 1] || null;
+    return jsonRes({ ok: true, stay, versions: rec.versions.map(meta), latest: latest ? { ...meta(latest), rows: latest.rows } : null }, 200, cors);
+  }
+  const body = await request.json().catch(() => null);
+  const rows = Array.isArray(body && body.rows) ? body.rows.slice(0, 400) : null;
+  if (!rows || !rows.length) return jsonRes({ ok: false, error: 'rows required' }, 400, cors);
+  const hash = await sha256Hex(stableJson(rows));
+  const last = rec.versions[rec.versions.length - 1];
+  if (last && last.hash === hash) return jsonRes({ ok: true, unchanged: true, stay, version: meta(last) }, 200, cors);
+  const v = { n: (last ? last.n : 0) + 1, at: new Date().toISOString(), by: adminLabel(identity), hash, rows };
+  rec.versions = [...rec.versions, v].slice(-20);
+  await env.REG_KV.put(key, JSON.stringify(rec));
+  return jsonRes({ ok: true, stay, version: meta(v) }, 200, cors);
+}
+
 async function extraBedReasons(env, current, src, asOf) {
   const out = [];
   let units = null;
@@ -2265,6 +2474,7 @@ export async function handleBilling(request, env, url, cors, deps) {
       /* the admin console (/admin/billing · Owner, 7 Oct 2026) */
       case 'admin/overview': return await adminOverview(env, identity, url, cors);
       case 'admin/status': return await adminStatus(env, identity, url, cors);
+      case 'admin/readiness': return await adminReadiness(env, identity, url, cors);
       case 'admin/holder': return await adminHolder(env, identity, url, cors);
       case 'admin/send':
         return request.method === 'POST' ? await adminSendPost(env, identity, request, url, cors, deps) : await adminSendGet(env, identity, url, cors);
@@ -2274,6 +2484,10 @@ export async function handleBilling(request, env, url, cors, deps) {
       /* the Owners' own bookings (15 Nov 2026): recorded, removed and confirmed by a BILLING_ADMIN; billed only once confirmed */
       case 'admin/owner-bookings':
         return request.method === 'POST' ? await adminOwnerBookingsPost(env, identity, request, url, cors) : await adminOwnerBookingsGet(env, identity, url, cors);
+      case 'admin/rate-list': return await adminRateList(env, identity, request, url, cors);
+      case 'admin/extra-bed':
+        if (request.method !== 'POST') return jsonRes({ ok: false, error: 'POST only' }, 405, cors);
+        return await adminExtraBed(env, identity, request, cors);
       /* A READ NEVER WRITES (Owner, 8 Oct 2026 · closeout): every route below that records something in the ledger answers only a
          POST; a GET of reconcile is its read-only preview — the same report, nothing recorded (written: false) */
       case 'issue':

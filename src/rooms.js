@@ -555,6 +555,28 @@ export class Rooms {
         return json({ ok: true, released: had.map((o) => ({ key: o.key, label: o.label })) });
       });
     }
+    /* WHO SLEEPS ON THE EXTRA BED (Owners, 17 Nov 2026): set by the Owners for a room that holds more persons than its own places
+       — one of its occupants, named by guest id; nobody moves, no place is taken or given back, only the attribution changes.
+       The statement check prices the extra bed by that person's own 009 row (src/billing-routes.js · extraBedReasons). */
+    if (op === 'bed') {
+      const body = await safeJson(request);
+      const key = canonicalKey(String(body && body.key || '')), label = String(body && body.label || '').toUpperCase(), guestId = String(body && body.guestId || '');
+      const unit = unitOf(key, label);
+      if (!unit || !unit.extraBeds) return json({ ok: false, error: 'this room has no extra bed' }, 400);
+      return await this.state.blockConcurrencyWhile(async () => {
+        const occ = (await this.occupancies()).filter((o) => o.key === key && o.label === label);
+        const real = occ.filter((o) => !o.placeholder);
+        if (!real.some((o) => o.guestId === guestId)) return json({ ok: false, error: 'not an occupant of this room' }, 409);
+        if (occ.length <= unit.places) return json({ ok: false, error: 'the extra bed is not in use: the room holds no more than its own places' }, 409);
+        for (const o of real) {
+          const want = o.guestId === guestId;
+          if (!!o.bed === want) continue;
+          const v = { invitationId: o.invitationId, partyId: o.partyId || null, name: o.name, at: o.at, ...(o.by ? { by: o.by } : {}), ...(want ? { bed: true } : {}) };
+          await this.storage.put(this.rowKey(o), v);
+        }
+        return json({ ok: true, key, label, bed: guestId, by: String(body && body.actor || 'guest-relations').slice(0, 60) });
+      });
+    }
     return json({ ok: false, error: 'unknown rooms operation' }, 404);
   }
 }

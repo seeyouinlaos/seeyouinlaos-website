@@ -145,7 +145,7 @@ test('ENGINE 2.3 · a stay H&S booked and paid for the guest is PAYABLE — Bloc
   assert.equal(mate.block, 'B'); assert.equal(mate.amountCents, 0); assert.equal(mate.Billing_Category, 'GUEST_SELF_PAYMENT');
   /* the same person and another self-payment line no row names: unchanged */
   assert.equal(computeLine(booking({ Item_ID: 'T-FLIGHT' }), pctx(rows)).block, 'B');
-  assert.equal(ENGINE_VERSION, 'billing-engine/2.3.0');
+  assert.equal(ENGINE_VERSION, 'billing-engine/2.4.0');   /* 2.4.0 (17 Nov 2026): the couple's own bookings hosted — a stay H&S paid for a guest stays payable */
 });
 
 test('ENGINE 2.3 · without the price paid the line asks for it: PRICE REQUIRED, MANUAL REVIEW, no total — never the catalogue figure', () => {

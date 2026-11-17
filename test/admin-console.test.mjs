@@ -702,7 +702,7 @@ test('REVENUE · a confirmed trip counts in Confirmed Revenue before any stateme
   W.env.BILLING_LEDGER = { idFromName: () => 'billing', get: () => ({ fetch: (req) => { ops.push(new URL(req.url).pathname.split('/').pop()); return real.fetch(req); } }) };
   let r = await hit(W, GROOM, 'revenue');
   assert.equal(r.status, 200, JSON.stringify(r.j));
-  assert.deepEqual(r.j.population, { holders: 1, withSettlement: 0, withConfirmation: 1, withDrift: 0, withOwnerBookings: 0, cancelled: 0 }, 'no settlement yet, and still counted');
+  assert.deepEqual(r.j.population, { holders: 1, withSettlement: 0, withConfirmation: 1, withDrift: 0, withOwnerBookings: 0, cancelled: 0, couple: 0 }, 'no settlement yet, and still counted');
   assert.equal(r.j.bookedRevenue.cents, 39000, 'booked: the confirmed trip (2.3.0)'); assert.equal(r.j.notYetInvoiced.cents, 39000, 'and none of it invoiced yet');
   assert.equal(r.j.confirmedRevenue.cents, 39000, 'the confirmed trip, USD 390 — before any statement');
   for (const k of ['issuedRevenue', 'cashCollected', 'outstanding', 'overdue', 'refundDue']) { assert.equal(r.j[k].cents, 0, k + ': not issued yet is zero, not a gap'); assert.equal(r.j[k].complete, true, k); }
@@ -1111,13 +1111,14 @@ test('REVENUE SCALING · 1, 10, 40 and 111 confirmed holders (the live register)
     assert.equal(r.j.population.withConfirmation, n);
     const google = W.log.filter((l) => l[0] === 'batchGet' || l[0] === 'get').length;
     /* the budget comparison (billing-budget/1.0.0): its own values read and formulas read, never inside the source's batch */
+    /* … and Google 012 read apart (the Owners' room list, a reconciliation reference only — 17 Nov 2026) */
     assert.deepEqual(W.log.filter((l) => l[0] === 'batchGet').slice(1).map((l) => l[1].join(',')).sort(),
-      ['004_Budget_Finance,007_Deposit/Payment_Details', '004_Budget_Finance,007_Deposit/Payment_Details,002_Accommodation_Details,009_Special_Rates,006_Guestlist']);
+      ['004_Budget_Finance,007_Deposit/Payment_Details', '004_Budget_Finance,007_Deposit/Payment_Details,002_Accommodation_Details,009_Special_Rates,006_Guestlist', '012_Room Number and Rate List']);
     assert.ok(!W.log[0][1].includes('004_Budget_Finance'), 'the billing source\'s own batch is unchanged');
     results.push({ n, google, ledger: ops.length, kv: W.env.REG_KV.gets.length, cpuMs: Math.round((cpu.user + cpu.system) / 1000) });
   }
   for (const x of results) {
-    assert.equal(x.google, 3, 'one source read and the budget comparison\'s two (values, formulas), whatever the population');
+    assert.equal(x.google, 4, 'one source read, the budget comparison\'s two (values, formulas) and 012, whatever the population');
     assert.ok(x.kv <= 2 * x.n, 'at most two KV reads per holder: ' + JSON.stringify(x));
   }
   assert.equal(new Set(results.map((x) => x.ledger)).size, 1, 'ledger requests do not grow with the population: ' + JSON.stringify(results));
