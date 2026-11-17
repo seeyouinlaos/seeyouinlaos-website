@@ -63,7 +63,13 @@ export const SEED = {
 
   /* ---------------------------------------------- Vientiane · Wedding Stay */
   'wedstay/heritage':                { unit: 'room', capacity: 5,  occupancy: 2, held: 0, name: 'The Heritage' },
-  'wedstay/heritage-executive':      { unit: 'room', capacity: 13, occupancy: 2, held: 0, name: 'Heritage Executive' },
+  /* AN EXTRA BED (Owner, 17 Nov 2026 · "Das Zimmer ist für drei Personen inklusive Zusatzbett konfiguriert"): Room I sleeps
+     three — its two places and one extra bed beyond them. The bed is for the guest ids 009 prices for that room (rows 35–37,
+     Owner order 15 Nov 2026) and for nobody else: a bed is priced only by the person's own approved 009 row (pricing guard
+     C1/C2, 17 Nov 2026). Keyed on the guest id the Worker verifies from the bearer — never a register id alone (CON ids were
+     re-used). The two regular places stay the standard pool's, like every room's. */
+  'wedstay/heritage-executive':      { unit: 'room', capacity: 13, occupancy: 2, held: 0, name: 'Heritage Executive',
+    extraBeds: [{ label: 'I', beds: 1, for: ['G032', 'G120', 'G121'] }] },
   'wedstay/heritage-grand-premier':  { unit: 'room', capacity: 3,  occupancy: 2, held: 0, name: 'Heritage Grand Premier' },
   'wedstay/noble-courtyard':         { unit: 'room', capacity: 1,  occupancy: 2, held: 0, name: 'Noble Courtyard Suite' },
   'wedstay/grand-majestic':          { unit: 'room', capacity: 2,  occupancy: 2, held: 0, name: 'Grand Majestic Suite' },   /* opened to everyone (Owner, Edit 5 · 18 Sep 2026) */

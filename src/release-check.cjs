@@ -42,7 +42,10 @@ gate(2, 'Inventory display decision recorded',
    engine of persistent allocation units with two guest places each, atomic
    join / change / release in the guest's own name, no client-side allocation,
    stock from the seed and nowhere else. This is what makes a public
-   availability claim honest. */
+   availability claim honest. One exception by Owner order (17 Nov 2026): a
+   unit the seed gives `extraBeds` has an extra bed beyond its own places, for
+   the guest ids the seed names only — still the seed's stock, still held only
+   by a real booking, never pre-reserved. */
 {
   const seed = read('src/inventory-seed.js');
   const engine = read('src/rooms.js');
@@ -98,7 +101,7 @@ gate(2, 'Inventory display decision recorded',
     inv.length === 0,
     inv.length ? inv.join(' · ')
       : 'one Durable Object engine ("rooms") serialises every place; ' + keys +
-        ' categories seeded from Accommodation_Details; full answers 409; a change holds the new place before the old one goes; the client holds no capacity of its own.');
+        ' categories seeded from Accommodation_Details; full answers 409; a change holds the new place before the old one goes; the client holds no capacity of its own; an extra bed only where the seed names it, for the guests it names (17 Nov 2026).');
 }
 
 /* Gate 3 — production lookup: encrypted bundle, no demo data, no plaintext PII */
