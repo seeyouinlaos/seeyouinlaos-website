@@ -75,6 +75,7 @@
     holder: null, holderPhase: 'idle', holderError: '', panel: null,
     issue: null, send: null, pay: null, confirm: null, msg: '', download: '',
     revenue: null, revenuePhase: 'idle', revenueError: '',
+    budgetOpen: {},   /* which stays / routes of the budget comparison are open — kept across a redraw */
   };
   var root = null;
 
@@ -655,6 +656,177 @@
     return '<div class="ab-table-wrap"><table class="ab-table"><thead><tr>' + head.map(function (h) { return '<th' + (h[1] ? ' class="num"' : '') + '>' + esc(h[0]) + '</th>'; }).join('') + '</tr></thead><tbody>' + rows.join('') + '</tbody></table></div>';
   }
   function td(label, v, num) { return '<td data-l="' + esc(label) + '"' + (num ? ' class="num"' : '') + '>' + v + '</td>'; }
+
+  /* ---------------------------------- REVENUE AND BUDGET (billing-budget/1.0.0 · Owners, 15 Nov 2026)
+     The server's comparison (src/billing/budget.js), arranged — nothing is computed here: every figure, label, coverage
+     and reason is the server's. Amounts in different currencies stand side by side, never added. Read only. */
+  var BUD_STATUS = { COMPLETE: ['Complete', 'on'], NOT_COMPLETE: ['Not complete', 'open'], OUTSIDE: ['Outside the comparison', ''] };
+  var BUD_ROLE = { PLANNED_CONTRIBUTION: 'Planned guest contribution — comparison only, never revenue', SUPPLIER_COST: 'Supplier cost' };
+  var BUD_WHOSE = { GUEST_SERVICE: 'the guests\' rooms or seats', PERSON_NAMED: 'a named person\'s own place or ticket', UNSTATED: 'whose place — not stated' };
+  var BUD_MODEL = { ROOM_BLOCK: 'room block, its Budget USD as stated', FLAT: 'whole vehicle or booking, its Budget USD once', PER_UNIT: 'Rate USD per ticket or place' };
+  var BUD_BASIS = { PER_PERSON_PER_NIGHT: 'per person-night', PER_PERSON: 'per person', PER_ROOM_PER_NIGHT: 'per room-night', PER_ROOM: 'per room' };
+  var BUD_SEVERITY = [['blocking', 'Missing before a difference can be shown'], ['data', 'Data to check'], ['info', 'For information']];
+  function cash(m) { return m && m.amount != null ? money(m.currency || 'USD', m.amount) : '—'; }
+  function cashS(m) { return '<span data-i18n-skip>' + esc(cash(m)) + '</span>'; }
+  function cashList(list) { return list && list.length ? list.map(cashS).join(' · ') : '—'; }
+  function dmy(iso) { return iso ? String(iso).slice(8, 10) + '.' + String(iso).slice(5, 7) + '.' + String(iso).slice(0, 4) : ''; }
+  function period(from, to) { return from ? dmy(from) + (to && to !== from ? ' – ' + dmy(to) : '') : '—'; }
+  function li(t) { return '<li>' + esc(t) + '</li>'; }
+  function aChips(ids, BG) {
+    return (ids || []).map(function (id) {
+      var a = (BG.assumptions || []).filter(function (x) { return x.id === id; })[0];
+      return ' <span class="ab-chip" title="' + esc(a ? a.text : '') + '">assumption ' + esc(id) + '</span>';
+    }).join('');
+  }
+  /* the server's label, then the amount it labels: "Cost still to be covered by the hosts USD 123.80" — the sign is in the words */
+  function labelled(text, m) { return m && m.amount != null ? text + ' ' + money(m.currency || 'USD', Math.abs(m.amount)) : text; }
+  function stChip(s) { var w = BUD_STATUS[s] || [s, '']; return '<span class="ab-chip ' + w[1] + '">' + esc(w[0]) + '</span>'; }
+  function budgetCard(c, BG) {
+    var inCmp = c.complete.centres.length + c.notComplete.centres.length;
+    var top = c.differenceAvailable
+      ? '<p class="t-h1" data-i18n-skip>' + esc(money(c.difference.currency || 'USD', Math.abs(c.difference.amount))) + '</p><p class="t-b2">' +
+        (c.labelText ? '<b>' + esc(c.labelText) + '</b>' : 'No difference in total — but not each of its stays and routes is at cost (see each below)') + aChips(c.complete.assumptions, BG) + '</p>'
+      : '<p class="t-h1">No difference yet</p><p class="t-b2 ab-why">' + esc(!c.billable ? 'Nothing of it is billed to the guests.'
+        : c.notComplete.centres.length + ' of ' + inCmp + (inCmp === 1 ? ' stay or route is' : ' stays and routes are') + ' not complete — the difference is shown once every one of them is.') + '</p>';
+    return '<div class="p-card ab-bcat" data-ab-bcat="' + esc(c.category) + '"><p class="t-l1">' + esc(c.category) + '</p>' + top +
+      kv('Guest contributions (booked)', cashS(c.contribution)) +
+      (c.complete.centres.length ? kv('Complete · ' + c.complete.centres.join(', '), cashS(c.complete.contribution) + ' contributions · ' + cashS(c.complete.cost) +
+        ' supplier cost <span class="ab-mute">— the difference of each stands on its own row below</span>' + aChips(c.complete.assumptions, BG)) : '') +
+      (c.notComplete.centres.length ? kv('Not complete · ' + c.notComplete.centres.join(', '), cashS(c.notComplete.contribution) + ' contributions · ' + cashS(c.notComplete.known) +
+        ' supplier cost known so far <span class="ab-mute">— side by side, not subtracted</span>') : '') +
+      (c.outside.length ? kv('Outside the comparison', esc(c.outside.join(', ')) + ' <span class="ab-mute">— the guests book or pay it themselves</span>') : '') +
+      kv('Planned supplier cost (004)', cashS(c.planned) + ' <span class="ab-mute" data-i18n-skip>· guests\' services ' + esc(cash(c.plannedGuestServices)) +
+        ' · named persons\' own ' + esc(cash(c.plannedPersons)) + ' · whose not stated ' + esc(cash(c.plannedUnstated)) + '</span>') +
+      (c.plannedContributions && c.plannedContributions.cents ? kv('Planned guest contributions (004 — never revenue)', cashS(c.plannedContributions)) : '') +
+      kv('Verified (007 contracts, as typed)', cashList(c.verified)) +
+      kv('Paid to suppliers (007, dated by today)', cashList(c.paid) + (c.paidNotCounted.length ? ' <span class="ab-mute">· not counted, dated after today: ' +
+        c.paidNotCounted.map(cashS).join(' · ') + '</span>' : '')) +
+      (c.paid004 && c.paid004.cents ? kv('004 "Amount paid USD" (listed apart)', cashS(c.paid004)) : '') + '</div>';
+  }
+  function rateWords(g) {
+    var r = g.rate ? cash(g.rate) + ' ' + (BUD_BASIS[g.rateBasis] || String(g.rateBasis || '').toLowerCase()) + ' · ' : '';
+    return r + (g.rateSource || '—') + (g.rate009 ? (g.rate009.row ? ' row ' + g.rate009.row : ' (' + g.rate009.why + ')') : '');
+  }
+  function payerWords(g) {
+    return 'Payer ' + (g.payerName ? g.payerName + ' · ' : '') + (g.payer || '—') + (g.statement ? ' · statement ' + g.statement : ' · no statement yet') +
+      ' · ' + g.source + (g.asInvoiced ? ' (as invoiced)' : '');
+  }
+  function guestLi(g) {
+    return '<li><b>' + esc(g.personName || g.person || '—') + '</b>' + (g.personName && g.person ? ' <span class="ab-mute" data-i18n-skip>' + esc(g.person) + '</span>' : '') +
+      ' <span class="ab-mute" data-i18n-skip>· ' + esc(g.nightsWords) + ' · ' + esc(rateWords(g)) + '</span>' +
+      (g.extraBed ? ' <span class="ab-chip">extra bed</span>' : '') + (g.paidByHSWords ? ' <span class="ab-chip open">' + esc(g.paidByHSWords) + '</span>' : '') +
+      ' → <b>' + cashS(g.amount) + '</b><span class="ab-id" data-i18n-skip>' + esc(payerWords(g)) + '</span></li>';
+  }
+  function nightWords(n) {
+    return dmy(n.night) + ': ' + (n.row ? 'budget row ' + n.row + (n.perRoomNight ? ' · ' + cash(n.perRoomNight) + ' per room-night (block rate)' : n.model === 'FLAT' ? ' · the whole booking' : '')
+      : n.overlap ? 'rows ' + n.overlap.join(' and ') + ' overlap' : 'no supplier cost in 004');
+  }
+  function lines004Table(c, BG) {
+    return tbl([['Row'], ['Item · details'], ['Reading'], ['Date or period'], ['Approved'], ['Budget USD', 1], ['In the comparison']], (c.lines004 || []).map(function (x) {
+      var used = (c.usedRows || []).indexOf(x.row) >= 0;
+      var why = [x.why].concat(x.conflicts || [], x.notes || []).filter(Boolean);
+      return '<tr>' + td('Row', '<span data-i18n-skip>' + esc(x.row) + '</span>') +
+        td('Item · details', esc(x.item) + (x.details ? '<span class="ab-id">' + esc(x.details) + '</span>' : '')) +
+        td('Reading', esc(BUD_ROLE[x.role] || x.role) + (x.whose ? ' · ' + esc(BUD_WHOSE[x.whose] || x.whose) : '') + ' · ' + esc(BUD_MODEL[x.model] || x.model) + (x.service ? ' · ' + esc(x.service) : '') + aChips(x.assumption ? [x.assumption] : [], BG)) +
+        td('Date or period', esc(x.periodText || '—')) + td('Approved', x.approved ? esc(x.approval) : x.approval ? '<span class="ab-chip open">not recognised</span> ' + esc(x.approval) : '<span class="ab-chip open">not approved</span>') +
+        td('Budget USD', cashS(x.budget) + '<span class="ab-id" data-i18n-skip>' + esc((x.rate != null ? 'Rate ' + x.rate : '') + (x.qty != null ? ' × Qty ' + x.qty : '') + (x.mult != null ? ' × ' + x.mult : '')) + '</span>', 1) +
+        td('In the comparison', (used ? '<span class="ab-chip on">used</span> ' : '') + (why.length ? '<span class="ab-why">' + esc(why.join(' · ')) + '</span>' : '')) + '</tr>';
+    }), 'No budget line of 004 belongs to it.');
+  }
+  function budgetCentre(c, BG) {
+    var open = S.budgetOpen && S.budgetOpen[c.id];
+    var head = '<summary><b>' + esc(c.place) + '</b> <span class="ab-mute">· ' + esc(c.category) + ' · ' + esc(period(c.from, c.to)) + '</span> ' + stChip(c.status) +
+      ' <span class="ab-mute" data-i18n-skip>· contributions ' + esc(cash(c.contribution)) +
+      (c.status === 'COMPLETE' ? ' · supplier cost ' + esc(cash(c.cost)) : c.status === 'NOT_COMPLETE' ? ' · supplier cost known so far ' + esc(cash(c.known)) : '') + '</span>' +
+      (c.labelText ? ' → <b>' + esc(labelled(c.labelText, c.difference)) + '</b>' + aChips(c.assumptions, BG) : c.difference ? ' → difference ' + cashS(c.difference) : '') + '</summary>';
+    var b = '';
+    if (c.status === 'OUTSIDE') b += '<p class="t-b2">' + esc(c.why) + '</p>';
+    if ((c.missing || []).length) b += '<div class="ab-warn" role="note"><p class="t-l1">Not complete because</p><ul class="t-b2">' + c.missing.map(li).join('') + '</ul></div>';
+    if (c.coverage) b += '<p class="t-b2 ab-mute">Covered: ' + esc(c.coverage.covered + ' of ' + c.coverage.total + ' ' + c.coverage.unit + (c.coverage.total === 1 ? '' : 's')) +
+      ((c.usedRows || []).length ? ' · budget rows used: ' + esc(c.usedRows.join(', ')) : '') + '</p>';
+    if (c.rooms) {
+      b += '<p class="t-l1">Rooms</p>' + tbl([['Room'], ['Guests — nights · rate · amount · payer'], ['Contribution', 1], ['Supplier cost per night (004)']], c.rooms.map(function (r) {
+        return '<tr>' + td('Room', '<span data-i18n-skip>' + esc((r.label ? 'Room ' + r.label + ' · ' : '') + r.itemName) + '</span>') +
+          td('Guests', '<ul>' + r.lines.map(guestLi).join('') + '</ul>') + td('Contribution', cashS(r.contribution), 1) +
+          td('Supplier cost', '<span data-i18n-skip>' + r.nights.map(function (n) { return esc(nightWords(n)); }).join('<br>') + '</span>' +
+            (r.notes.length ? '<span class="ab-why">' + esc(r.notes.join(' · ')) + '</span>' : '')) + '</tr>';
+      }), 'No room of it is booked.');
+      if ((c.notBooked || []).length) b += '<ul class="t-b2 ab-mute">' + c.notBooked.map(function (n) {
+        return li('Budget row ' + n.row + ' · ' + dmy(n.night) + ': ' + n.rooms + ' of ' + n.inBlock + ' rooms not booked' + (n.perRoomNight ? ' (' + cash(n.perRoomNight) + ' per room-night)' : '') + ' — part of the block\'s cost as stated');
+      }).join('') + '</ul>';
+    }
+    if (c.services) {
+      b += '<p class="t-l1">Services</p>' + tbl([['Service'], ['Budget rows'], ['Basis'], ['Unit cost', 1], ['Booked', 1], ['Supplier cost', 1]], c.services.map(function (s) {
+        return '<tr>' + td('Service', esc(s.service)) + td('Budget rows', esc(s.rows.join(', ') || '—')) + td('Basis', esc(s.basis || 'no approved line')) +
+          td('Unit cost', cashS(s.unit), 1) + td('Booked', esc(s.tickets), 1) + td('Supplier cost', cashS(s.cost), 1) + '</tr>';
+      }), '—');
+      b += '<p class="t-l1">Guests</p>' + tbl([['Guest'], ['Rate · source'], ['Places', 1], ['Contribution', 1], ['Payer · statement']], (c.guest || []).map(function (g) {
+        return '<tr>' + td('Guest', esc(g.personName || g.person || '—') + (g.personName && g.person ? '<span class="ab-id" data-i18n-skip>' + esc(g.person) + '</span>' : '')) +
+          td('Rate · source', '<span data-i18n-skip>' + esc(rateWords(g)) + '</span>' + (g.paidByHSWords ? ' <span class="ab-chip open">' + esc(g.paidByHSWords) + '</span>' : '')) +
+          td('Places', esc(g.quantity), 1) + td('Contribution', cashS(g.amount), 1) + td('Payer · statement', '<span data-i18n-skip>' + esc(payerWords(g)) + '</span>') + '</tr>';
+      }), 'Nobody is booked on it.');
+    }
+    b += '<p class="t-l1">Budget lines (004)</p>' + lines004Table(c, BG);
+    if ((c.checks || []).length) b += '<p class="t-l1">Checks</p><ul class="t-b2">' + c.checks.map(function (x) { return li(x.text); }).join('') + '</ul>';
+    return '<details class="ab-bd" data-ab-bd="' + esc(c.id) + '"' + (open ? ' open' : '') + '>' + head + '<div class="ab-bd-body">' + b + '</div></details>';
+  }
+  function budgetView(BG) {
+    if (!BG) return '';
+    if (BG.available === false) return '<div class="p-card ab-panel" data-ab-budget><p class="t-l1">Revenue and budget (004)</p><p class="t-b2">' + esc(BG.gap || 'Not available just now.') + '</p></div>';
+    var cats = BG.categories || [];
+    var main = cats.filter(function (c) { return /^(accommodation|transportation)$/i.test(c.category); });
+    var other = cats.filter(function (c) { return main.indexOf(c) < 0; });
+    var checks = BUD_SEVERITY.map(function (s) {
+      var list = (BG.checks || []).filter(function (x) { return x.severity === s[0]; });
+      return list.length ? '<p class="t-l1">' + esc(s[1]) + ' (' + list.length + ')</p><ul class="t-b2">' + list.map(function (x) { return li((x.centre ? x.centre + ' · ' : '') + x.text); }).join('') + '</ul>' : '';
+    }).join('');
+    var sup = tbl([['Supplier (007)'], ['Stays'], ['Contract, as typed', 1], ['Deposit', 1], ['Paid by today', 1], ['Payments not counted'], ['004 lines', 1], ['Contract vs 004', 1]], (BG.suppliers || []).map(function (s) {
+      var off = s.payments.filter(function (p) { return !p.counted; });
+      return '<tr>' + td('Supplier', esc(s.vendor) + '<span class="ab-id">' + esc(s.category || '') + ' · column ' + esc(s.column) + '</span>') + td('Stays', esc(s.stages.join(', ') || '—')) +
+        td('Contract', cashS(s.contract) + (s.contractNote ? '<span class="ab-why">' + esc(s.contractNote) + '</span>' : '') +
+          (s.converted.length ? '<span class="ab-why">' + esc(s.converted.map(function (x) { return x.currency; }).join(', ') + ' converted inside 007 — not an approved reporting conversion, never used') + '</span>' : ''), 1) +
+        td('Deposit', cashS(s.deposit) + (s.depositPct != null ? '<span class="ab-id">' + esc(s.depositPct) + ' %</span>' : ''), 1) + td('Paid by today', cashList(s.paidCounted), 1) +
+        td('Payments not counted', off.length ? '<span class="ab-why">' + esc(off.map(function (p) { return p.cell + ' ' + cash(p.amount) + ' — ' + p.why; }).join(' · ')) + '</span>' : '—') +
+        td('004 lines', s.planned004 ? cashS(s.planned004) + '<span class="ab-id" data-i18n-skip>rows ' + esc(s.planned004Rows.join(', ')) + '</span>' : '—', 1) + td('Contract vs 004', cashS(s.contractVsPlan), 1) + '</tr>';
+    }), 'No supplier is recorded in 007.');
+    var none = tbl([['004 category'], ['Budget lines'], ['Planned supplier cost', 1]], (BG.noGuestService || []).map(function (g) {
+      return '<tr>' + td('004 category', esc(g.category)) + td('Budget lines', '<span class="ab-why">' + esc(g.lines.map(function (l) { return 'row ' + l.row + ' ' + l.item + ' ' + cash(l.budget); }).join(' · ')) + '</span>') + td('Planned', cashS(g.total), 1) + '</tr>';
+    }), 'Every budget line meets a guest service.');
+    var rc = BG.reconciliation || {}, bd = rc.budget004 || {};
+    var src = [
+      'Guest contributions in this comparison ' + cash(rc.contributions) + (rc.bookedRevenue ? (rc.contributionsEqualBooked ? ' = the booked revenue above.' : ' ≠ the booked revenue above (' + cash(rc.bookedRevenue) + ').') : ' — the booked revenue is not complete just now.'),
+    ].concat((bd.checks || []).map(function (x) { return '004 ' + x.cell + ' states ' + cash(x.sheet) + '; ' + x.what + ' add up to ' + cash(x.lines) + (x.equal ? ' — equal.' : ' — differs.'); }),
+      bd.actualIsBudget ? ['"Actual USD" repeats the Budget USD by formula on ' + bd.actualIsBudget + ' rows — never read as an actual cost.'] : [],
+      [BG.currencies, 'Receipts from guests stay those of the overview above (008: verified, net of refunds).'],
+      (BG.assumptions || []).map(function (a) { return 'Assumption ' + a.id + ': ' + a.text; }),
+      ['004 ' + (bd.readable != null ? bd.readable + ' of ' + bd.lines + ' lines read' : '') + ' · ' + (BG.version || '') + ' · ' + (BG.mapVersion || '') + ' · as of ' + day(BG.asOf)]);
+    return '<div class="p-card ab-panel" data-ab-budget><p class="t-l1">Revenue and budget — 004_Budget_Finance</p>' +
+      '<p class="t-b2 ab-mute">What the guests contribute (the booked lines of the Billing Engine) beside what 004 and 007 say the suppliers cost, per category, stay and route. ' +
+      'A difference is shown only where the supplier cost is stated for every booked room-night or ticket. Read only — nothing here books, invoices or writes.</p>' +
+      '<div class="ab-grid2 ab-bcats" data-ab-budget-main>' + main.map(function (c) { return budgetCard(c, BG); }).join('') + '</div>' +
+      (other.length ? '<div class="ab-grid2 ab-bcats">' + other.map(function (c) { return budgetCard(c, BG); }).join('') + '</div>' : '') +
+      '<p class="t-l1 ab-bd-h">Stays, routes and services — open one to trace it to the rooms, the guests and the budget lines</p>' +
+      (BG.centres || []).map(function (c) { return budgetCentre(c, BG); }).join('') +
+      ((BG.questions || []).length ? '<div class="ab-note" data-ab-budget-questions><p class="t-l1">Questions for you — what would complete the comparison</p><ul class="t-b2">' +
+        BG.questions.map(function (q) { return li((q.centre ? q.centre + ' · ' : '') + q.text); }).join('') + '</ul></div>' : '') +
+      (checks ? '<details class="ab-bd" data-ab-bd="checks"' + (S.budgetOpen && S.budgetOpen.checks ? ' open' : '') + '><summary><b>Checks of the comparison</b> <span class="ab-mute">· ' +
+        esc((BG.checks || []).length) + '</span></summary><div class="ab-bd-body">' + checks + '</div></details>' : '') +
+      '<p class="t-l1 ab-bd-h">Suppliers (007_Deposit/Payment_Details)</p>' + sup +
+      '<p class="t-l1 ab-bd-h">Budget lines without a guest service</p>' + none +
+      '<p class="t-l1 ab-bd-h">Sources</p><ul class="t-b2 ab-mute" data-ab-budget-sources>' + src.map(li).join('') + '</ul></div>';
+  }
+  function inventoryView(R) {
+    var BG = R.budget;
+    if (!BG || BG.available === false || !BG.inventory) return null;
+    return tbl([['Item'], ['Stay or route'], ['Unit'], ['Quota (002)', 1], ['Booked (counted)', 1], ['Quota − booked', 1], ['Confirmed (engine)', 1], ['Planned in 004 (Qty)', 1], ['Rooms available (002)', 1]], BG.inventory.map(function (i) {
+      return '<tr>' + td('Item', '<span data-i18n-skip>' + esc(i.name) + '</span><span class="ab-id" data-i18n-skip>' + esc(i.Item_ID) + '</span>') + td('Stay or route', esc(i.centre)) +
+        td('Unit', esc(i.unit || 'not stated')) + td('Quota', esc(i.quota != null ? i.quota : 'not stated'), 1) +
+        td('Booked (counted)', esc(i.booked) + (i.unit === 'ROOM' && i.persons ? '<span class="ab-id">' + esc(i.persons) + ' guest' + (i.persons === 1 ? '' : 's') + '</span>' : ''), 1) +
+        td('Quota − booked', esc(i.remaining != null ? i.remaining : '—'), 1) + td('Confirmed (engine)', esc(i.engineUsed != null ? i.engineUsed : '—'), 1) +
+        td('Planned in 004', esc(i.planned004 != null ? i.planned004 : '—') + ((i.plannedRows || []).length ? '<span class="ab-id" data-i18n-skip>row ' + esc(i.plannedRows.join(', ')) + '</span>' : ''), 1) +
+        td('Rooms available', esc(i.roomsAvailable != null ? i.roomsAvailable : '—'), 1) + '</tr>';
+    }), 'No item is booked or holds a quota.');
+  }
   function revenueView() {
     if (S.revenuePhase === 'loading' || S.revenuePhase === 'idle') return '<p class="t-b2 ab-progress" role="status">Calculating the revenue overview with the Billing Engine…</p>';
     if (S.revenuePhase === 'error') return '<div class="p-card"><p class="t-b1">' + esc(S.revenueError) + '</p><div class="p-actions"><button type="button" class="p-link" data-ab-rev-reload>Try again</button></div></div>';
@@ -702,17 +874,20 @@
         '<td data-l="Utilisation" class="num">' + esc(u.utilisation != null ? u.utilisation + ' %' : '—') + (u.overQuota ? ' <span class="ab-chip open">over</span>' : '') + '</td></tr>';
     }).join('');
     var counts = R.counts || {}, pop = R.population || {};
+    var inventory = inventoryView(R);
     return '<section class="ab-sec" aria-label="Revenue"><div class="ab-kpis" data-ab-rev-main>' + cards + '</div>' +
       '<p class="t-b2 ab-foot"><button type="button" class="p-link" data-ab-rev-reload>Recalculate now</button> · Calculated live from the confirmed bookings · ' + esc(when(R.calculatedAt || '')) + ' · ' + esc(pop.holders || 0) + ' paying invitation' + (pop.holders === 1 ? '' : 's') + ' (' + esc(pop.withOwnerBookings || 0) + ' with bookings you recorded' + (pop.cancelled ? ', ' + esc(pop.cancelled) + ' no longer on the list' : '') + ') · ' +
         esc(counts.issuedRevisions || 0) + ' statements · as of ' + esc(day(R.asOf)) + ' · engine ' + esc(R.engineVersion || '') + ' · ' + esc(R.revenueVersion || '') + '</p>' +
       (notes.length ? '<div class="p-card ab-panel" data-ab-rev-notes><p class="t-l1">To look at</p><ul class="t-b2">' + notes.map(function (n) { return '<li>' + esc(n) + '</li>'; }).join('') + '</ul></div>' : '') +
+      budgetView(R.budget) +
       '<div class="p-card ab-panel" data-ab-rev-rooms><p class="t-l1">Accommodation by room category</p>' + cat + '</div>' +
       '<div class="p-card ab-panel" data-ab-rev-units><p class="t-l1">Accommodation by room</p>' + units + '</div>' +
       '<div class="p-card ab-panel" data-ab-rev-extras><p class="t-l1">Extra services</p>' + extras + '</div>' +
       '<div class="p-card ab-panel" data-ab-rev-invoices><p class="t-l1">Invoiced and open, by payment method</p>' + inv + '</div>' +
       '<div class="p-card ab-panel" data-ab-rev-payments><p class="t-l1">Payments, by method</p>' + pay + '</div>' +
       '<div class="ab-kpis ab-kpis-more">' + more + '</div>' +
-      '<div class="p-card ab-panel"><p class="t-l1">Quota utilisation</p>' + (q ? '<div class="ab-table-wrap"><table class="ab-table"><thead><tr><th>Item</th><th>Unit</th><th class="num">Quota</th><th class="num">Used</th><th class="num">Remaining</th><th class="num">Utilisation</th></tr></thead><tbody>' + q + '</tbody></table></div>' : '<p class="t-b2">No quota is in use yet.</p>') + '</div></section>';
+      '<div class="p-card ab-panel"><p class="t-l1">Quota utilisation</p>' + (q ? '<div class="ab-table-wrap"><table class="ab-table"><thead><tr><th>Item</th><th>Unit</th><th class="num">Quota</th><th class="num">Used</th><th class="num">Remaining</th><th class="num">Utilisation</th></tr></thead><tbody>' + q + '</tbody></table></div>' : '<p class="t-b2">No quota is in use yet.</p>') + '</div>' +
+      (inventory != null ? '<div class="p-card ab-panel" data-ab-inventory><p class="t-l1">Inventory beside the budget — counted bookings and 004\'s planned quantities</p>' + inventory + '</div>' : '') + '</section>';
   }
 
   /* --------------------------------------------------------------- the page */
@@ -907,6 +1082,7 @@
     on('[data-ab-tab]', 'click', function (el, e) { if (e) e.preventDefault(); go(el.getAttribute('data-ab-tab')); });
     on('[data-ab-reload]', 'click', function () { if (S.route.id) loadHolder(S.route.id); draw(); });
     on('[data-ab-rev-reload]', 'click', function () { loadRevenue(); draw(); });
+    on('[data-ab-bd]', 'toggle', function (el) { S.budgetOpen[el.getAttribute('data-ab-bd')] = !!el.open; });
     on('[data-ab-act]', 'click', function (el) {
       var a = el.getAttribute('data-ab-act');
       S.msg = '';

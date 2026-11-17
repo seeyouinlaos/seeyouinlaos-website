@@ -1091,7 +1091,7 @@ test('FRESH AT SENDING · the paid-by-H&S check reads Google now: a 009 change s
   } finally { globalThis.fetch = was; clearCatalogueCache(); }
 });
 
-test('REVENUE SCALING · 1, 10, 40 and 111 confirmed holders (the live register): one Google read, a constant number of ledger requests, two KV reads per holder', async () => {
+test('REVENUE SCALING · 1, 10, 40 and 111 confirmed holders (the live register): one source read and the budget\'s two, a constant number of ledger requests, two KV reads per holder', async () => {
   const results = [];
   for (const n of [1, 10, 40, 111]) {
     const W = world(); await approveGate(W.st);
@@ -1110,14 +1110,81 @@ test('REVENUE SCALING · 1, 10, 40 and 111 confirmed holders (the live register)
     assert.equal(r.status, 200, JSON.stringify(r.j).slice(0, 200));
     assert.equal(r.j.population.withConfirmation, n);
     const google = W.log.filter((l) => l[0] === 'batchGet' || l[0] === 'get').length;
+    /* the budget comparison (billing-budget/1.0.0): its own values read and formulas read, never inside the source's batch */
+    assert.deepEqual(W.log.filter((l) => l[0] === 'batchGet').slice(1).map((l) => l[1].join(',')).sort(),
+      ['004_Budget_Finance,007_Deposit/Payment_Details', '004_Budget_Finance,007_Deposit/Payment_Details,002_Accommodation_Details,009_Special_Rates,006_Guestlist']);
+    assert.ok(!W.log[0][1].includes('004_Budget_Finance'), 'the billing source\'s own batch is unchanged');
     results.push({ n, google, ledger: ops.length, kv: W.env.REG_KV.gets.length, cpuMs: Math.round((cpu.user + cpu.system) / 1000) });
   }
   for (const x of results) {
-    assert.equal(x.google, 1, 'one Google read, whatever the population');
+    assert.equal(x.google, 3, 'one source read and the budget comparison\'s two (values, formulas), whatever the population');
     assert.ok(x.kv <= 2 * x.n, 'at most two KV reads per holder: ' + JSON.stringify(x));
   }
   assert.equal(new Set(results.map((x) => x.ledger)).size, 1, 'ledger requests do not grow with the population: ' + JSON.stringify(results));
   console.log('# revenue scaling (synthetic, Node CPU): ' + results.map((x) => 'n=' + x.n + ' google=' + x.google + ' ledger=' + x.ledger + ' kv=' + x.kv + ' cpu≈' + x.cpuMs + 'ms').join(' · '));
+});
+
+/* REVENUE AND BUDGET (billing-budget/1.0.0 · Owners, 15 Nov 2026): the comparison rides beside the overview — every figure the
+   overview had stays exactly what it was, whether the budget's own reads succeed, fail, or lack the register */
+test('REVENUE AND BUDGET · beside the overview: the same figures with or without it; 004 unreadable → a named gap; 006 unreadable → ids, not names', async () => {
+  const W = world(); await approveGate(W.st);
+  W.workbook['008_Payment_Journal'] = [W.workbook['008_Payment_Journal'][0]];
+  const store = { 'reg:INV-T1': SENT, 'conf:INV-T1': { confirmedAt: '2026-10-02T09:00:00Z', version: 1 } };
+  const base = kv(store);
+  W.env.REG_KV = { get: base.get, list: async ({ prefix }) => ({ keys: Object.keys(store).filter((k) => k.startsWith(prefix)).map((name) => ({ name })), list_complete: true }) };
+  /* 002's display rows beside its structured rows; a synthetic 004 and 007 */
+  const disp = { Category: ['Accommodation', 'Transportation', 'Transportation'], Package: ['D1', 'B', ''], 'Check In Date': ['27.02.2031', '24.02.2031', '24.02.2031'],
+    'Check Out Date': ['01.03.2031', '25.02.2031', '24.02.2031'], Name: ['The Heritage', 'Night train', 'Bus'], Room: ['The Heritage', 'Train', 'Bus'], 'Rooms available': [5, '', ''] };
+  W.workbook['002_Accommodation_Details'] = [...W.workbook['002_Accommodation_Details'], ...Object.entries(disp).map(([k, v]) => [k, ...v])];
+  const head = ['Item', 'Vendor', 'Category', 'Details', 'Rate USD', 'Qty', 'Nights, Rooms, EA', 'Budget USD', 'Actual USD', 'Amount paid USD', 'Status', 'Date or period', 'Currency', 'Suthep approval'];
+  W.workbook['004_Budget_Finance'] = [['TOTAL PLANNED BUDGET'], [600], [], head,
+    ['Souphattra Heritage Vientiane', 'Souphattra', 'Accommodation', 'All Categories Rooms', 150, 2, 1, 300, 300, '', '', '27-28.02.2031', 'USD', 'Approve by S.'],
+    ['Souphattra Heritage Vientiane', 'Souphattra', 'Accommodation', 'All Categories Rooms', 150, 2, 1, 300, 300, '', '', '28.02-01.03..2031', 'USD', 'Approve by S.']];
+  W.workbook['007_Deposit/Payment_Details'] = [['Vendor', 'Souphattra Heritage Vientiane'], ['Total Price USD', 600]];
+  let r = await hit(W, GROOM, 'revenue?asOf=2026-10-08');
+  assert.equal(r.status, 200, JSON.stringify(r.j).slice(0, 300));
+  const B = r.j.budget;
+  assert.equal(B.available, true, JSON.stringify(B).slice(0, 300));
+  assert.equal(B.reconciliation.contributions.cents, r.j.bookedRevenue.cents, 'the comparison\'s contributions are the booked figure');
+  assert.deepEqual(B.categories.map((c) => c.category), ['Accommodation', 'Transportation']);
+  const d1 = B.centres.find((c) => c.id === 'D1');
+  assert.equal(d1.status, 'COMPLETE'); assert.equal(d1.cost.cents, 60000); assert.equal(d1.difference.cents, 29000 - 60000); assert.equal(d1.labelText, 'Cost still to be covered by the hosts');
+  assert.equal(d1.rooms[0].lines[0].personName, 'Testa Example', '006 names the guest'); assert.equal(d1.rooms[0].lines[0].payerName, 'Testa Example');
+  assert.match(JSON.stringify(B.checks), /rooming list \(Rooms engine\) could not be read just now/, 'no Rooms engine bound here: a named check, nothing else');
+  const keep = (j) => { const o = { ...j }; delete o.budget; delete o.calculatedAt; return o; };
+  const withBudget = keep(r.j);
+  /* the budget's own reads refused: the overview identical, the comparison a named gap */
+  const was = globalThis.fetch;
+  const refuse = (inner) => async (url, init) => (/values:batchGet/.test(String(url)) && /004_Budget_Finance/.test(decodeURIComponent(String(url)))
+    ? new Response(JSON.stringify({ error: { message: 'synthetic refusal' } }), { status: 403, headers: { 'content-type': 'application/json' } }) : inner(url, init));
+  const hitRefused = async () => {
+    globalThis.__billingIdentity = GROOM; globalThis.__billingIndex = INDEX;
+    const url = new URL('https://stage.invalid/api/billing/revenue?asOf=2026-10-08');
+    globalThis.fetch = refuse(sheetsFetch(W.workbook, W.log));
+    try { const res = await handleBilling(new Request(url), W.env, url, {}, W.deps); return { status: res.status, j: await res.json() }; } finally { globalThis.fetch = was; }
+  };
+  r = await hitRefused();
+  assert.equal(r.status, 200);
+  assert.deepEqual(keep(r.j), withBudget, 'every figure of the overview is exactly what it was');
+  assert.equal(r.j.budget.available, false); assert.match(r.j.budget.gap, /could not be read from Google just now — every revenue figure above stands as it is/);
+  /* a register without its header: the comparison stands, guests by their ids */
+  const reg = W.workbook['006_Guestlist']; W.workbook['006_Guestlist'] = [['no header here']];
+  r = await hit(W, GROOM, 'revenue?asOf=2026-10-08');
+  W.workbook['006_Guestlist'] = reg;
+  assert.equal(r.j.budget.available, true); assert.deepEqual(keep(r.j), withBudget);
+  assert.equal(r.j.budget.centres.find((c) => c.id === 'D1').rooms[0].lines[0].personName, null);
+  assert.match(JSON.stringify(r.j.budget.checks), /006 could not be read just now — guests and payers are shown by their ids/);
+  /* without 004 in the workbook: available false, named — the overview again unchanged */
+  const b004 = W.workbook['004_Budget_Finance']; delete W.workbook['004_Budget_Finance'];
+  r = await hit(W, GROOM, 'revenue?asOf=2026-10-08');
+  W.workbook['004_Budget_Finance'] = b004;
+  assert.equal(r.j.budget.available, false); assert.match(r.j.budget.gap, /004 has no header row/); assert.deepEqual(keep(r.j), withBudget);
+  /* a Rooms engine that never answers: the figures do not wait on it — a named gap after the limit */
+  W.env.ROOMS = { idFromName: () => 'rooms', get: () => ({ fetch: () => new Promise(() => {}) }) }; W.env.BUDGET_WAIT_MS = '30';
+  r = await hit(W, GROOM, 'revenue?asOf=2026-10-08');
+  delete W.env.ROOMS; delete W.env.BUDGET_WAIT_MS;
+  assert.equal(r.status, 200); assert.equal(r.j.budget.available, false); assert.match(r.j.budget.gap, /did not answer within 30 ms/);
+  assert.deepEqual(keep(r.j), withBudget);
 });
 
 test('GUEST RELATIONS · as sent, and today: the price check shows the difference; a first confirmation needs its digest (or UNVERIFIED); nothing is written before', async () => {

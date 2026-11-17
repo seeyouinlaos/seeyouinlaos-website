@@ -351,12 +351,16 @@ export async function readRange(env, spreadsheetId, a1Range) {
  * an answer that does not carry one value range per range asked is refused, never
  * matched up by guess. One call counts as ONE read against the quota.
  */
-export async function batchReadRanges(env, spreadsheetId, a1Ranges) {
+export async function batchReadRanges(env, spreadsheetId, a1Ranges, opts) {
   const ranges = (Array.isArray(a1Ranges) ? a1Ranges : []).map(clean).filter(Boolean);
   if (!ranges.length) throw unavailable('batchReadRanges was given no range');
   const id = target(spreadsheetId, ranges[0]).id;
+  /* `{ render: 'FORMULA' }` (the budget comparison, 15 Nov 2026): the same ranges as the Owners typed them — a formula
+     as its text — so a figure the sheet computes (a currency conversion inside a sheet) is told apart from a typed one.
+     Every other caller reads computed values, exactly as before. */
+  const render = opts && opts.render === 'FORMULA' ? 'FORMULA' : 'UNFORMATTED_VALUE';
   const query = ranges.map((r) => 'ranges=' + encodeURIComponent(r)).join('&') +
-    '&majorDimension=ROWS&valueRenderOption=UNFORMATTED_VALUE&dateTimeRenderOption=FORMATTED_STRING';
+    '&majorDimension=ROWS&valueRenderOption=' + render + '&dateTimeRenderOption=FORMATTED_STRING';
   const data = await call(env, '/' + id + '/values:batchGet?' + query);
   const got = Array.isArray(data.valueRanges) ? data.valueRanges : null;
   if (!got || got.length !== ranges.length) {

@@ -474,3 +474,65 @@ test('CONFIRM BOOKING UI · "by Haruthai / Suthep" only for a BILLING_ADMIN\'s c
     assert.match(h, /version 2 · 7 Oct 2026 · by Guest Relations/); assert.doesNotMatch(h, /by Suthep/);
   });
 });
+
+/* REVENUE AND BUDGET (billing-budget/1.0.0 · Owners, 15 Nov 2026): the comparison as the server builds it (src/billing/budget.js on
+   invented grids), arranged on the Revenue tab — Accommodation and Transportation side by side, each stay / route opened to its
+   rooms, guests and budget lines, the inventory in place of the quota table. Read only: the tab asks for nothing but the revenue. */
+const { buildBudgetComparison } = await import('../src/billing/budget.js');
+const BS = await import('../src/billing/budget-source.js');
+function budgetFixture() {
+  const items = {
+    'D1-X': { Item_ID: 'D1-X', Billing_Category: 'GUEST_SETTLEMENT_REQUIRED', Rate_Basis: 'PER_PERSON_PER_NIGHT', Standard_Rate: 145, Quota: 2, Quota_Unit: 'ROOM', Site_Product_Key: 'wedstay/heritage', 'Number of Nights': 1 },
+    'B-T': { Item_ID: 'B-T', Billing_Category: 'GUEST_SETTLEMENT_REQUIRED', Rate_Basis: 'PER_PERSON', Standard_Rate: 100, Quota: 12, Quota_Unit: 'PERSON', Site_Product_Key: 'train' },
+  };
+  const display = BS.parseItemDisplay([['Name', 'The Heritage', 'Night train'], ['Check In Date', '27.02.2031', '24.02.2031'], ['Check Out Date', '28.02.2031', '25.02.2031'],
+    ['Number of Nights', 1, 1], ['Rooms available', 2, ''], ['Room', 'The Heritage', 'Train'], ['Package', 'D1', 'B'], ['Category', 'Accommodation', 'Transportation'], ['Item_ID', 'D1-X', 'B-T']]);
+  const H = ['Item', 'Vendor', 'Category', 'Details', 'Rate USD', 'Qty', 'Nights, Rooms, EA', 'Budget USD', 'Actual USD', 'Amount paid USD', 'Status', 'Date or period', 'Currency', 'Suthep approval'];
+  const budget = BS.parseBudget004([H,
+    ['Souphattra Heritage Vientiane', 'S', 'Accommodation', 'All Categories Rooms', 150, 2, 1, 300, 300, '', '', '27-28.02.2031', 'USD', 'Approve by S.'],
+    ['Train Bangkok - Nong Khai', 'R', 'Transportation', 'Guests', 80, 1, 1, 80, 80, '', '', '24.02.2031', 'USD', 'Approve by S.'],
+    ['Train Bangkok - Nong Khai, Alex', 'R', 'Transportation', 'Seat', 80, 1, 1, 80, 80, '', '', '24.02.2031', 'USD', 'Approve by S.']], []);
+  const vendors = BS.parseVendors007([['Vendor', 'Souphattra Heritage Vientiane', 'U Sathorn Bangkok'], ['Total Price USD', 300, ''], ['Total Price THB', '', 9000]],
+    [['Vendor', 'Souphattra Heritage Vientiane', 'U Sathorn Bangkok'], ['Total Price USD', 300, ''], ['Total Price THB', '', 9000]]);
+  const line = (p, item, unit, cents, extra) => ({ Booking_ID: 'BK·INV-T1·' + p + '·' + item, Holder_ID: 'INV-T1', Bill_To_Holder_ID: 'INV-T1', Person_ID: p, Item_ID: item,
+    Room_Unit_ID: unit ? 'RU·' + item + '·' + unit : null, block: 'A', amountCents: cents, rateCents: cents, rateSource: 'STANDARD_RATE', quantity: 1, ...(extra || {}) });
+  const booked = { holders: [{ Holder_ID: 'INV-T1', Settlement_ID: 'S-T1-0001', gapReason: null, lines: [
+    line('GT1', 'D1-X', 'A', 14500, { Rate_Basis: 'PER_PERSON_PER_NIGHT', nights: 1, payableNights: 1 }), line('GT1', 'B-T', null, 10000, { Rate_Basis: 'PER_PERSON' })] }], extraBedIds: [] };
+  return buildBudgetComparison({ asOf: '2026-11-17', booked, items, display, budget, vendors, rates009: { ok: true, rows: [] },
+    names: { persons: { GT1: 'Guest 1' }, holders: { 'INV-T1': 'Guest 1' } }, rooms: null, quota: [{ Item_ID: 'D1-X', used: 1, remaining: 1 }],
+    bookedRevenue: { cents: 24500, complete: true }, receipts: null, unresolved: [], readProblems: [] });
+}
+
+test('REVENUE AND BUDGET UI · Accommodation and Transportation side by side, traced to rooms, guests and budget lines; inventory in place of the quota table; read only', async () => {
+  const budget = budgetFixture();
+  assert.equal(budget.available, true);
+  const revenue = { ok: true, asOf: '2026-11-17', counts: {}, bookedRevenue: { cents: 24500, amount: 245, complete: true }, quotaUtilisation: [{ Item_ID: 'D1-X', Quota_Unit: 'ROOM', Quota: 2, used: 1, remaining: 1 }], budget };
+  const { root, calls } = load({ 'admin/overview': OVERVIEW, 'admin/status': statusAnswer, revenue }, { hash: '#revenue' });
+  await tick(30);
+  const h = root.innerHTML;
+  assert.match(h, /Revenue and budget — 004_Budget_Finance/);
+  const main = h.slice(h.indexOf('data-ab-budget-main'));
+  assert.ok(main.indexOf('data-ab-bcat="Accommodation"') >= 0 && main.indexOf('data-ab-bcat="Transportation"') > main.indexOf('data-ab-bcat="Accommodation"'), 'side by side, Accommodation first');
+  assert.match(h, /Cost still to be covered by the hosts/); assert.match(h, /Cost still to be covered by the hosts USD 155\.00/, 'the stay: USD 145 against the block of USD 300 — the label carries the sign');
+  assert.match(h, /No difference yet/, 'the route lacks its van');
+  assert.match(h, /data-ab-bd="D1"/); assert.match(h, /data-ab-bd="B"/);
+  assert.match(h, /Room A · The Heritage/); assert.match(h, /Guest 1/); assert.match(h, /budget row 2 · USD 150\.00 per room-night \(block rate\)/);
+  assert.match(h, /a named person&#39;s own place or ticket|a named person's own place or ticket/);
+  assert.match(h, /no approved supplier cost for the guests&#39; van in 004|no approved supplier cost for the guests' van in 004/);
+  assert.match(h, /THB 9,000\.00/); assert.doesNotMatch(h, /USD 9,300|9,300\.00/, 'currencies stand apart, never added');
+  assert.match(h, /data-ab-inventory/); assert.match(h, /Quota utilisation/, 'the existing quota panel stays as it was');
+  /* every cell of the comparison carries its label for the phone layout */
+  const sec = h.slice(h.indexOf('data-ab-budget'), h.indexOf('data-ab-rev-rooms'));
+  assert.ok((sec.match(/<td(?![^>]*data-l=)/g) || []).length === 0, 'a table cell without data-l');
+  assert.ok(calls.every((c) => c.method === 'GET'), 'the Revenue tab only reads');
+  assert.ok(calls.some((c) => /\/api\/billing\/revenue/.test(c.url)));
+});
+
+test('REVENUE AND BUDGET UI · a comparison that could not be built is said in its place; the quota table stays', async () => {
+  const revenue = { ok: true, asOf: '2026-11-17', counts: {}, quotaUtilisation: [{ Item_ID: 'D1-X', Quota_Unit: 'ROOM', Quota: 2, used: 1, remaining: 1 }],
+    budget: { available: false, gap: 'The budget tabs (004, 007, 002, 009, 006) could not be read from Google just now — every revenue figure above stands as it is' } };
+  const { root } = load({ 'admin/overview': OVERVIEW, 'admin/status': statusAnswer, revenue }, { hash: '#revenue' });
+  await tick(30);
+  assert.match(root.innerHTML, /could not be read from Google just now — every revenue figure above stands as it is/);
+  assert.match(root.innerHTML, /Quota utilisation/); assert.doesNotMatch(root.innerHTML, /data-ab-budget-main/);
+});
