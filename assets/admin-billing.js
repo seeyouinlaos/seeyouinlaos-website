@@ -904,7 +904,8 @@
       return '<tr><td data-l="Guest">' + esc(who(h.Holder_ID)) + '</td><td data-l="Issued" class="num"><span data-i18n-skip>' + esc(h.issued && h.issued.display || '—') + '</span></td><td data-l="Difference" class="num"><span data-i18n-skip>' + esc(usd(d / 100)) + '</span></td><td data-l="">a revision is due</td></tr>';
     }).concat(couple.map(function (c) {
       return '<tr><td data-l="Guest">' + esc(who(c.Holder_ID)) + '</td><td data-l="Issued" class="num"><span data-i18n-skip>' + esc(usd(c.issued)) + '</span></td><td data-l="Difference" class="num"><span data-i18n-skip>' + esc(usd(c.payableNow - c.issued)) + '</span></td>' +
-        '<td data-l="">the couple\'s own bookings — complimentary; not revenue' + (c.revisionDue ? '; a revision withdraws the issued amount' : '') + '</td></tr>';
+        '<td data-l="">the couple\'s own bookings — complimentary; not revenue' + (c.revisionDue ? '; a revision withdraws the issued amount' : '') +
+        ((c.journal || []).length ? '; ' + c.journal.length + ' payment report' + (c.journal.length === 1 ? '' : 's') + ' on it (' + c.journal.map(function (x) { return x.status || x.type; }).join(', ') + ') — kept with it, not guest receipts' : '') + '</td></tr>';
     })).join('');
     return '<div class="p-card ab-panel" data-ab-rev-revisions><p class="t-l1">Statements to revise · ' + (due.length + couple.length) + '</p>' +
       '<p class="t-b2">Issued statements stay as issued until you issue a revision in the guest\'s view; nothing here issues, sends or changes one.</p>' +
