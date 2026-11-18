@@ -1176,8 +1176,8 @@ async function adminRevenue(env, identity, url, cors) {
   /* the first issued statement's day from the ledger listing already read (no further request) */
   const issuedDays = ledgerHolders.map((h) => clean(h.Issue_Date || (h.settlement && h.settlement.Issue_Date))).filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d)).sort();
   try { const day = issuedDays[0] || asOf; const fx = freezeFx(resolveFx(src.configRows, day)); fxReference = { day, FX_USD_THB: fx.FX_USD_THB, FX_USD_EUR: fx.FX_USD_EUR, gaps: fx.gaps || [], firstIssued: day !== asOf || null }; } catch (e) { fxReference = { error: 'not readable just now' }; }
-  /* REVENUE AND BUDGET: built from the final figures above, beside them — the exchange-rate reference rides along for an
-     indicative note only (Owners' review, 18 Nov 2026: no reporting rate is approved, so it is never added to a figure) */
+  /* REVENUE AND BUDGET: built from the final figures above, beside them — the statements' exchange-rate reference (011) rides along
+     only to be compared with the Owners' reporting reference rates (budget-map REPORTING_FX, 18 Nov 2026); it never changes a figure */
   const budget = await budgetBesideRevenue(env, budgetReads, { overview, src, asOf, indexEntries, unresolved, couple, fx: fxReference && !fxReference.error ? fxReference : null });
   /* the extra bed of a room the guests booked themselves (17 Nov 2026): a room holding more persons than its own places says so */
   extraBedsBeyondPlaces(overview.breakdown, src.items);

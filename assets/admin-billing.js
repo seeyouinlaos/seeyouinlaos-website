@@ -372,22 +372,23 @@
     if (n) return n + ' night' + (n === 1 ? '' : 's') + ' complimentary';
     return l.amount && l.amount.cents === 0 ? 'complimentary' : '';
   }
-  function roomStatus(x) { return x.line ? (x.line.statement ? 'invoiced' : 'confirmed') : 'held, not confirmed'; }
+  function roomStatus(x, h) { return h && h.billingAdmin ? 'the couple\'s own room' : x.line ? (x.line.statement ? 'invoiced' : 'confirmed') : 'held, not confirmed'; }
   function stayCell(h) {
     var idx = guestRooms();
     if (!idx) return S.revenuePhase === 'error' ? '<span class="ab-mute">rooms not readable just now</span>' : S.revenuePhase === 'ready' ? '<span class="ab-mute">rooms not available: ' + esc((S.revenue && S.revenue.budget && S.revenue.budget.gap) || 'the room plan could not be read') + '</span>' : '<span class="ab-mute">…</span>';
     var list = idx[h.guestId] || [];
     if (!list.length) return '<span class="ab-mute">no room</span>';
     return list.map(function (x) {
-      var no = x.room012 && x.room012.roomNo ? ' · no. <b data-i18n-skip>' + esc(x.room012.roomNo) + '</b>' + (x.room012.status === 'VERIFY' ? ' <span class="ab-chip" title="' + esc((x.room012.verify || []).join('; ')) + '">verify in 012</span>' : '') : '';
+      /* 012 is a historical template (Owners, 18 Nov 2026): its room number is a reference, shown only where it is certain */
+      var no = x.room012 && x.room012.roomNo ? ' · no. <b data-i18n-skip>' + esc(x.room012.roomNo) + '</b> <span class="ab-mute">(012 ref.)</span>' : '';
       var cw = compWords(h, x);
       return '<span class="ab-stay"><span class="ab-stay-h" data-i18n-skip>' + esc(x.place) + ' · ' + esc(dmy(x.from)) + ' – ' + esc(dmy(x.to)) + (x.nights ? ' · ' + x.nights + ' night' + (x.nights === 1 ? '' : 's') : '') + '</span>' +
-        '<span data-i18n-skip>' + esc(x.type) + ' · Room ' + esc(x.label) + '</span>' + no + ' <span class="ab-mute">· ' + esc(roomStatus(x)) + '</span>' +
+        '<span data-i18n-skip>' + esc(x.type) + ' · Room ' + esc(x.label) + '</span>' + no + ' <span class="ab-mute">· ' + esc(roomStatus(x, h)) + '</span>' +
         (x.bed ? ' <span class="ab-chip">extra bed</span>' : '') + (cw ? ' <span class="ab-chip on">' + esc(cw) + '</span>' : '') + '</span>';
     }).join('');
   }
   /* THE COMPLETE GUEST LIST as CSV: one row per guest and stay (a guest without a room: one row); every figure the server's */
-  var GL_HEAD = ['Guest ID', 'Guest', 'Invitation', 'Stay', 'Arrival', 'Departure', 'Nights', 'Room', 'Hotel room no. (012)', 'Room no. check', 'Room category',
+  var GL_HEAD = ['Guest ID', 'Guest', 'Invitation', 'Stay', 'Arrival', 'Departure', 'Nights', 'Room', 'Hotel room no. (012 reference)', 'Room category',
     'Extra bed', 'Complimentary', 'Room amount USD', 'Room status', 'Booking stage', 'Confirmation', 'Statement', 'Statement no.', 'Issued', 'Due',
     'Statement total USD', 'Booked value USD', 'Paid USD', 'Outstanding USD', 'Payment status', 'Overdue', 'Review'];
   function guestCsvRows(list) {
@@ -403,10 +404,10 @@
       var rooms = idx[h.guestId] || [];
       /* the invitation's own figures stand on its first row only — a sum in Excel never counts them twice */
       var blank = tail.map(function (v) { return typeof v === 'number' ? null : v; });
-      if (!rooms.length) out.push(head.concat(['', '', '', '', '', '', '', '', '', '', null, ''], tail));
+      if (!rooms.length) out.push(head.concat(['', '', '', '', '', '', '', '', '', null, ''], tail));
       rooms.forEach(function (x, i) {
-        out.push(head.concat([x.place, x.from || '', x.to || '', x.nights, x.label, x.room012 ? x.room012.roomNo : '', x.room012 ? (x.room012.status === 'VERIFY' ? 'verify: ' + (x.room012.verify || []).join('; ') : 'ok') : '',
-          x.type, x.bed ? 'yes' : '', compWords(h, x), x.line && x.line.amount ? num(x.line.amount) : null, roomStatus(x)], i === 0 ? tail : blank));
+        out.push(head.concat([x.place, x.from || '', x.to || '', x.nights, x.label, x.room012 ? x.room012.roomNo : '',
+          x.type, x.bed ? 'yes' : '', compWords(h, x), x.line && x.line.amount ? num(x.line.amount) : null, roomStatus(x, h)], i === 0 ? tail : blank));
       });
     });
     return out;
@@ -418,7 +419,7 @@
     return csvDoc('See You In Laos — Complete Guest List', [['Generated', nowStamp()], ['Guests', rows.length + ' of ' + o.holders.length + ' invitations in the register (' + label + ')'],
       ['Data as of', 'register ' + (o.asOf || '') + ' · rooms ' + (R.calculatedAt ? R.calculatedAt.slice(0, 16).replace('T', ' ') + ' UTC' : 'not loaded')], ['Currency', 'USD'],
       ['Rooms', guestRooms() ? 'read' : 'not available — ' + ((R.budget && R.budget.gap) || (S.revenuePhase === 'error' ? S.revenueError : 'not loaded yet'))],
-      ['Basis', 'one row per guest and stay — the invitation\'s amounts (statement total, booked value, paid, outstanding) on its first row only; rooms: the Rooms engine (held, sent or confirmed); room numbers: Google 012 (read only, matched by name — "verify" where uncertain); amounts: the Billing Engine and the issued statements']],
+      ['Basis', 'one row per guest and stay — the invitation\'s amounts (statement total, booked value, paid, outstanding) on its first row only; rooms: the Rooms engine (held, sent or confirmed); hotel room numbers: Google 012, a historical template — a reference only, shown where the guests\' names match it with certainty; amounts: the Billing Engine and the issued statements']],
       GL_HEAD, guestCsvRows(rows));
   }
   function listView() {
@@ -458,7 +459,7 @@
         : '<p class="t-b1 ab-empty">No guest matches this filter.</p>') +
       '<p class="t-b2 ab-foot">' + shown.length + ' shown · ' + rows.length + ' invitations of the register (the couple included)' +
       (withRoom != null ? ' · ' + withRoom + ' with a room' : S.revenuePhase === 'loading' ? ' · reading the rooms…' : '') + ' · as of ' + esc(day(o.asOf)) + '<br>' +
-      '<b>Stays &amp; rooms</b> — the room each guest holds (held, sent or confirmed), its hotel room number from Google 012 ("verify in 012" where the names or dates differ), extra bed and complimentary nights. ' +
+      '<b>Stays &amp; rooms</b> — the room each guest holds (held, sent or confirmed), its hotel room number where Google 012 (a historical template, for reference only) names it with certainty, extra bed and complimentary nights. ' +
       '<b>Booked value</b> — what the guest has selected now, priced by the Billing Engine now; it is not a statement and does not make anyone issuable. ' +
       '<b>Ready to issue</b> / <b>Blocked</b> — what Issue would say now for a confirmed booking (the same checks as Preview), never an issue. ' +
       '<b>Statement total</b>, <b>Paid</b> and <b>Outstanding</b> — the issued, immutable statement only. All in USD.</p></section>';
@@ -1033,13 +1034,16 @@
      (roomContracts: its rate per room night × the stay's nights) — beside what its guests pay (sale) and the surplus; a room no
      contract covers has no cost here, never an estimate. Amounts are the engine's; the couple's own room sells at USD 0. */
   function nightsOfStay(c) { var a = Date.parse(c.from), b = Date.parse(c.to); return a && b && b > a ? Math.round((b - a) / 86400000) : null; }
-  function roomSummary(c, contracts) {
-    var n = nightsOfStay(c), mine = (contracts || []).filter(function (x) { return x.stay === c.id; })[0];
+  /* each room's hotel cost as the server sets it on the room plan (the agreement, or additional nights at the Owners' confirmed rate,
+     plus the additional-person charge) — the same figure the Rooms tab shows, never recomputed here */
+  function roomSummary(c, BG) {
+    var n = nightsOfStay(c), plan = (BG.roomPlan || []).filter(function (p) { return p.stay === c.id; })[0] || { rooms: [] };
     return (c.rooms || []).filter(function (r) { return (r.lines || []).length; }).map(function (r) {
-      var item = r.item || ((r.lines[0] || {}).item), covered = mine && (mine.items === '*' || mine.items.indexOf(item) >= 0);
-      var cost = covered && n ? Math.round(mine.ratePerRoomNight * n * 100) : null;
+      var item = r.item || ((r.lines[0] || {}).item);
+      var u = plan.rooms.filter(function (x) { return x.item === item && x.label === r.label; })[0] || {};
+      var cost = u.hotelCost ? u.hotelCost.cents + (u.hotelSupplement ? u.hotelSupplement.cents : 0) : null;
       var sale = r.lines.reduce(function (t, l) { return t + (l.amount ? l.amount.cents : 0); }, 0);
-      return { label: r.label, item: (r.lines[0] || {}).itemName || item, guests: r.lines.length, nights: n, rate: covered ? mine.ratePerRoomNight : null, cost: cost, sale: sale, surplus: cost == null ? null : sale - cost };
+      return { label: r.label, item: (r.lines[0] || {}).itemName || item, guests: r.lines.length, nights: n, rate: u.hotelCost && n ? u.hotelCost.cents / 100 / n : null, cost: cost, sale: sale, surplus: cost == null ? null : sale - cost };
     });
   }
   function csvOf(rows) { return [RL_HEAD].concat(rows).map(function (r) { return r.map(function (v) { var s = String(v == null ? '' : v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }).join(','); }).join('\r\n'); }
@@ -1057,14 +1061,14 @@
           '<div class="ab-actions"><div class="ab-act"><button type="button" class="p-act ab-ghost" data-ab-rl-csv="' + esc(c.id) + '">Download CSV</button></div>' +
           '<div class="ab-act"><button type="button" class="p-act" data-ab-rl-approve="' + esc(c.id) + '"' + (S.rlBusy ? ' disabled' : '') + '>Approve this version</button></div></div>' +
           (function () {
-            var rs = roomSummary(c, BG.roomContracts); if (!rs.length) return '';
+            var rs = roomSummary(c, BG); if (!rs.length) return '';
             var tc = 0, ts = 0, known = true; rs.forEach(function (x) { ts += x.sale; if (x.cost == null) known = false; else tc += x.cost; });
             return '<p class="t-l1">Per room · hotel cost (purchase) · guest revenue (sale) · surplus</p><div class="ab-table-wrap"><table class="ab-table"><thead><tr><th>Room</th><th>Room type</th><th class="num">Guests</th><th class="num">Nights</th><th class="num">Hotel rate / room night</th><th class="num">Hotel cost</th><th class="num">Guest revenue</th><th class="num">Surplus</th></tr></thead><tbody>' +
               rs.map(function (x) { return '<tr><td data-l="Room">' + esc(x.label) + '</td><td data-l="Room type">' + esc(x.item) + '</td><td data-l="Guests" class="num">' + x.guests + '</td><td data-l="Nights" class="num">' + esc(x.nights == null ? '—' : x.nights) + '</td>' +
-                '<td data-l="Hotel rate" class="num"><span data-i18n-skip>' + (x.rate == null ? '—' : esc(usd(x.rate))) + '</span></td><td data-l="Hotel cost" class="num"><span data-i18n-skip>' + (x.cost == null ? '<span class="ab-mute">no contract</span>' : esc(usd(x.cost / 100))) + '</span></td>' +
+                '<td data-l="Hotel rate" class="num"><span data-i18n-skip>' + (x.rate == null ? '—' : esc(usd(x.rate))) + '</span></td><td data-l="Hotel cost" class="num"><span data-i18n-skip>' + (x.cost == null ? '<span class="ab-mute">no purchase rate</span>' : esc(usd(x.cost / 100))) + '</span></td>' +
                 '<td data-l="Guest revenue" class="num"><span data-i18n-skip>' + esc(usd(x.sale / 100)) + '</span></td><td data-l="Surplus" class="num"><span data-i18n-skip>' + (x.surplus == null ? '—' : esc(usd(x.surplus / 100))) + '</span></td></tr>'; }).join('') +
-              '<tr><td colspan="5"><b>Rooms with guests</b>' + (known ? '' : ' <span class="ab-mute">(a room without a contract has no cost here)</span>') + '</td><td class="num"><b data-i18n-skip>' + esc(usd(tc / 100)) + '</b></td><td class="num"><b data-i18n-skip>' + esc(usd(ts / 100)) + '</b></td><td class="num"><b data-i18n-skip>' + (known ? esc(usd((ts - tc) / 100)) : '—') + '</b></td></tr></tbody></table></div>' +
-              '<p class="t-b2 ab-mute">The hotel cost counts only the rooms with guests; the hotel contract itself (all rooms it buys) is in the financial position above.</p>';
+              '<tr><td colspan="5"><b>Rooms with guests</b>' + (known ? '' : ' <span class="ab-mute">(a room without a purchase rate has no cost here)</span>') + '</td><td class="num"><b data-i18n-skip>' + esc(usd(tc / 100)) + '</b></td><td class="num"><b data-i18n-skip>' + esc(usd(ts / 100)) + '</b></td><td class="num"><b data-i18n-skip>' + (known ? esc(usd((ts - tc) / 100)) : '—') + '</b></td></tr></tbody></table></div>' +
+              '<p class="t-b2 ab-mute">The hotel cost counts only the rooms with guests (the agreement\'s rate, or additional nights at the confirmed purchase rate, with the additional-person charge); every room the agreement buys is in Finance · D.</p>';
           })() +
           (v && v.versions && v.versions.length ? '<p class="t-b2 ab-mute">Approved versions: ' + v.versions.map(function (x) { return 'v' + x.n + ' · ' + day(x.at) + ' · ' + x.by + ' · ' + x.count + ' rows · ' + String(x.hash).slice(0, 12); }).join(' · ') + '</p>' : '') +
           (S.rlMsg && S.rlMsg.stay === c.id ? '<p class="t-b2" role="status">' + esc(S.rlMsg.text) + '</p>' : '') + '</details>';
@@ -1184,42 +1188,76 @@
   function kd(x) { return x && x.cents != null ? money(x.currency || 'USD', x.cents / 100) : (x && x.display ? x.display : '—'); }
   function curList(list) { return (list || []).length ? list.map(cash).join(' · ') : '—'; }
   function secH(letter, title, note) { return '<h2 class="ab-sec-h"><span class="ab-sec-n">' + letter + '</span> ' + esc(title) + (note ? ' <span class="ab-mute">' + esc(note) + '</span>' : '') + '</h2>'; }
+  /* the USD equivalent of amounts kept in their own currency, at the Owners' reporting reference rates — always labelled */
+  function eqWords(e) { return e && e.total && e.converted ? '≈ ' + kd(e.total) + ' (USD equivalent at the reference rates)' : ''; }
   function finSummary(R, rep, D) {
-    var P = (D && D.position) || {}, cashv = rep.cash || {};
+    var cashv = rep.cash || {}, hp = rep.purchase || {}, pos = rep.position || {}, fx = rep.reportingFx || {};
     var incomplete = rep.forecastComplete === false ? (rep.forecastGaps || []).length + ' cost' + ((rep.forecastGaps || []).length === 1 ? '' : 's') + ' not yet known — see E' : '';
+    var addl = hp.available && hp.confirmed ? { cents: hp.confirmed.additional.cents + hp.confirmed.supplement.cents } : null;
+    var inSheet = hp.available && hp.recorded ? hp.recorded.additional.cents + hp.recorded.supplement.cents : null;
     return [
       ['approved', 'Approved budget', rep.approved ? esc(usd(rep.approved.amount)) : '—', '004 · TOTAL BUDGET (' + ((rep.approved && rep.approved.cell) || 'A2') + '), the approved frame incl. its reserve', rep.approved ? '' : (rep.approvedWhy || '')],
-      ['forecast', 'Current forecast', esc(kd(rep.forecast)), '004 planned lines (' + kd(rep.planned) + '), the Souphattra agreement in place of its 004 lines', incomplete],
+      ['planned', 'Planned project costs', esc(kd(rep.planned)), '004 · every positive line, as the Owners wrote it', ''],
+      ['paid', 'Paid project costs', esc(curList(rep.paid)), '007 · supplier payments counted (dated, typed), each in its own currency' + (rep.paidUsd && rep.paidUsd.converted ? ' · ' + eqWords(rep.paidUsd) : ''), ''],
+      ['remaining', 'Remaining project budget', esc(rep.budgetLeftSheet ? signed(rep.budgetLeftSheet) : '—'), '004 ' + ((rep.budgetLeftSheet && rep.budgetLeftSheet.cell) || 'F2') + ' · approved − planned, as the sheet states it', rep.budgetLeftSheet && rep.budgetLeftSheet.cents < 0 ? 'planned above the approved budget' : ''],
+      ['hotel', 'Additional hotel purchase costs', addl ? esc(usd(addl.cents / 100)) : '—', 'Souphattra · booked room nights outside the agreement (USD 150 per room night) and the additional-person charge (USD 60 per room night), confirmed bookings' +
+        (inSheet != null ? ' · ' + usd(inSheet / 100) + ' already in 004' : ''), hp.available ? (hp.notIn004Parts && (hp.notIn004Parts.additional.cents + hp.notIn004Parts.supplement.cents) ? usd((hp.notIn004Parts.additional.cents + hp.notIn004Parts.supplement.cents) / 100) + ' not yet in 004 — proposed in E' : '') + (hp.pending && hp.pending.cents ? ' · ' + kd(hp.pending) + ' pending (held, not confirmed)' : '') : (hp.why || 'not available just now')],
+      ['forecast', 'Forecast project cost', esc(kd(rep.forecast)), 'planned (004) + the hotel costs of the confirmed bookings 004 does not hold yet' + (hp.notIn004 ? ' (' + kd(hp.notIn004) + ')' : ''), incomplete],
       ['variance', 'Budget variance', esc(signed(rep.varianceToApproved)), 'forecast − approved budget', rep.varianceToApproved && rep.varianceToApproved.cents > 0 ? 'above the approved budget' : ''],
-      ['committed', 'Committed costs', esc(curList(rep.committed)), '007 · supplier contracts as typed; THB is never converted', ''],
-      ['paid', 'Paid to suppliers', esc(curList(rep.paid)), '007 · supplier payments counted (dated, typed)', ''],
-      ['booked', 'Confirmed guest revenue', esc(kd(R.bookedRevenue)), 'paying guests\' confirmed bookings, priced by the Billing Engine (the couple excluded)', R.bookedRevenue && R.bookedRevenue.complete === false ? 'partial' : ''],
-      ['invoiced', 'Invoiced revenue', esc(kd(R.issuedRevenue)), 'issued statements (frozen as issued)', ''],
-      ['received', 'Payments received', esc(kd(R.cashCollected)), 'verified receipts (008); reported payments are not counted', ''],
+      ['booked', 'Booked guest revenue', esc(kd(R.bookedRevenue)), 'paying guests\' confirmed bookings, priced by the Billing Engine exactly as stored (the couple excluded)', R.bookedRevenue && R.bookedRevenue.complete === false ? 'partial' : ''],
+      ['invoiced', 'Invoiced revenue', esc(kd(R.issuedRevenue)), 'issued statements (frozen as issued) — a stage of the booked revenue, not more revenue', ''],
+      ['received', 'Received guest payments', esc(kd(R.cashCollected)), 'verified receipts (008); reported payments are not counted', ''],
       ['outstanding', 'Outstanding receivables', esc(kd(R.outstanding)), 'issued, not yet paid', R.overdue && R.overdue.cents ? kd(R.overdue) + ' overdue' : ''],
+      ['position', 'Projected financial position', pos.stated ? esc(signed(pos.net)) : '—', 'booked guest revenue − forecast project cost; negative = what H&S fund' + (pos.coverage != null ? ' · guests cover ' + pos.coverage + ' %' : '') +
+        (pos.stated && pos.today ? '; today, against invoiced revenue only: ' + signed(pos.today) : ''), pos.stated ? (incomplete ? 'rests on an incomplete forecast' : '') : (pos.why || '')],
       ['owner', 'Owner cash still to provide', esc(kd(cashv.ownerStillToProvide)), cashv.formula || '', cashv.complete === false ? 'incomplete: ' + (cashv.why || []).join('; ') : ''],
-      ['position', 'Projected net cost to H&S', P.stated ? esc(kd(P.projectedOwnerFunded)) : '—', 'forecast − confirmed guest revenue' + (P.coverageProjected != null ? ' · guests cover ' + P.coverageProjected + ' %' : '') +
-        (P.stated ? '; today, against invoiced revenue only: ' + kd(P.currentOwnerFunded) + (P.coverageInvoiced != null ? ' (' + P.coverageInvoiced + ' %)' : '') : ''), P.stated ? (incomplete ? 'rests on an incomplete forecast' : '') : (P.why || '')],
     ];
   }
   function finCsv(kind) {
-    var R = S.revenue, BG = R.budget || {}, rep = BG.report || {}, D = BG.dashboard || {};
-    var meta = [['Generated', nowStamp()], ['Data as of', (R.calculatedAt || '').slice(0, 16).replace('T', ' ') + ' UTC'], ['Currency', 'USD; other currencies named, never converted'],
-      ['Basis', 'costs: Google 004 (planned) and 007 (committed, paid); forecast: 004 with the Souphattra agreement in place of its lines; revenue: the Billing Engine, the issued statements and 008 (paying guests; the couple excluded)']];
+    var R = S.revenue, BG = R.budget || {}, rep = BG.report || {}, D = BG.dashboard || {}, fx = rep.reportingFx || {};
+    var meta = [['Generated', nowStamp()], ['Data as of', (R.calculatedAt || '').slice(0, 16).replace('T', ' ') + ' UTC'],
+      ['Currency', 'USD; THB and EUR kept in their own currency, each beside its USD equivalent at the reporting reference rates (1 USD = ' + (fx.USD_THB || 33.68) + ' THB · 1 USD = ' + (fx.USD_EUR || 0.89) + ' EUR) — a reference conversion, not a transaction rate'],
+      ['Basis', 'costs: Google 004 (planned, approved budget) and 007 (committed, paid); forecast: 004 + the hotel costs of the confirmed bookings 004 does not hold yet; revenue: the booking system — the Billing Engine, the issued statements and 008 (paying guests; the couple excluded)']];
     if (kind === 'finance-summary') {
-      return csvDoc('See You In Laos — Financial Summary', meta, ['Figure', 'USD', 'THB', 'Definition', 'Note'], finSummary(R, rep, D).map(function (k) {
-        var m = { approved: rep.approved, forecast: rep.forecast, variance: rep.varianceToApproved, committed: null, paid: null, booked: R.bookedRevenue, invoiced: R.issuedRevenue, received: R.cashCollected,
-          outstanding: R.outstanding, owner: (rep.cash || {}).ownerStillToProvide, position: (D.position || {}).projectedOwnerFunded }[k[0]];
-        var usdv = k[0] === 'committed' ? curOf(rep.committed, 'USD') : k[0] === 'paid' ? curOf(rep.paid, 'USD') : num(m);
-        var thb = k[0] === 'committed' ? curOf(rep.committed, 'THB') : k[0] === 'paid' ? curOf(rep.paid, 'THB') : null;
-        return [k[1], usdv, thb, k[3], k[4]];
+      return csvDoc('See You In Laos — Financial Summary', meta, ['Figure', 'USD', 'THB', 'USD equivalent (reference rate)', 'Definition', 'Note'], finSummary(R, rep, D).map(function (k) {
+        var hp = rep.purchase || {};
+        var m = { approved: rep.approved, planned: rep.planned, paid: null, remaining: rep.budgetLeftSheet, hotel: hp.confirmed ? { cents: hp.confirmed.additional.cents + hp.confirmed.supplement.cents } : null,
+          forecast: rep.forecast, variance: rep.varianceToApproved, booked: R.bookedRevenue, invoiced: R.issuedRevenue, received: R.cashCollected, outstanding: R.outstanding,
+          position: (rep.position || {}).net, owner: (rep.cash || {}).ownerStillToProvide }[k[0]];
+        var usdv = k[0] === 'paid' ? curOf(rep.paid, 'USD') : num(m);
+        var thb = k[0] === 'paid' ? curOf(rep.paid, 'THB') : null;
+        var eq = k[0] === 'paid' && rep.paidUsd && rep.paidUsd.total ? num(rep.paidUsd.total) : null;
+        return [k[1], usdv, thb, eq, k[3], k[4]];
       }));
     }
-    var rows = (rep.byCategory || []).map(function (c) { return [c.category, num(c.planned), num(c.forecast), num(c.variance), curOf(c.committed, 'USD'), curOf(c.committed, 'THB'), curOf(c.paid, 'USD'), curOf(c.paid, 'THB'), (c.suppliers || []).join(', ')]; });
-    rows.push(['Total', num(rep.planned), num(rep.forecast), rep.forecast && rep.planned ? (rep.forecast.cents - rep.planned.cents) / 100 : null, curOf(rep.committed, 'USD'), curOf(rep.committed, 'THB'), curOf(rep.paid, 'USD'), curOf(rep.paid, 'THB'), '']);
-    rows.push(['Approved budget (004 ' + ((rep.approved && rep.approved.cell) || 'A2') + ', total only)', num(rep.approved), null, rep.varianceToApproved ? num(rep.varianceToApproved) : null, null, null, null, null, 'variance = forecast − approved']);
+    if (kind === 'reconciliation-004') return reconCsv(meta);
+    var rows = (rep.byCategory || []).map(function (c) { return [c.category, num(c.planned), num(c.forecast), num(c.variance), curOf(c.committed, 'USD'), curOf(c.committed, 'THB'), c.committedUsd && c.committedUsd.total ? num(c.committedUsd.total) : null,
+      curOf(c.paid, 'USD'), curOf(c.paid, 'THB'), c.paidUsd && c.paidUsd.total ? num(c.paidUsd.total) : null, (c.suppliers || []).join(', ')]; });
+    rows.push(['Total', num(rep.planned), num(rep.forecast), rep.forecast && rep.planned ? (rep.forecast.cents - rep.planned.cents) / 100 : null, curOf(rep.committed, 'USD'), curOf(rep.committed, 'THB'),
+      rep.committedUsd && rep.committedUsd.total ? num(rep.committedUsd.total) : null, curOf(rep.paid, 'USD'), curOf(rep.paid, 'THB'), rep.paidUsd && rep.paidUsd.total ? num(rep.paidUsd.total) : null, '']);
+    rows.push(['Approved budget (004 ' + ((rep.approved && rep.approved.cell) || 'A2') + ', total only)', num(rep.approved), null, rep.varianceToApproved ? num(rep.varianceToApproved) : null, null, null, null, null, null, null, 'variance = forecast − approved']);
     return csvDoc('See You In Laos — Budget vs Actual / Forecast', meta.concat([['Actual', 'paid to suppliers (007); 004 "Actual USD" repeats the budget by formula and is not used']]),
-      ['004 category', 'Planned USD (004)', 'Forecast USD', 'Variance USD (forecast − planned)', 'Committed USD (007)', 'Committed THB (007)', 'Paid USD (007)', 'Paid THB (007)', '007 suppliers'], rows);
+      ['004 category', 'Planned USD (004)', 'Forecast USD', 'Variance USD (forecast − planned)', 'Committed USD (007)', 'Committed THB (007)', 'Committed, USD equivalent (reference rate)', 'Paid USD (007)', 'Paid THB (007)', 'Paid, USD equivalent (reference rate)', '007 suppliers'], rows);
+  }
+  /* 004 RECONCILIATION & PROPOSED ADDITIONS (Owners' order, 18 Nov 2026): 004's hotel rows beside the booked rooms, then every exact
+     entry 004 does not hold yet — for the Owners' approval; nothing is written to 004 from here */
+  var RC_HEAD = ['Section', '004 row', 'Kind', 'Status', 'Stay', 'Room', 'Room category', 'Guests', 'Guest IDs', 'Check-in', 'Check-out', 'Nights', 'Rate USD', 'Qty', 'Amount USD', 'In forecast',
+    '004 entry — Details', '004 entry — Date or period', 'Note'];
+  var RC_KIND = { CONTRACT: 'hotel agreement', ADDITIONAL: 'additional room nights', SUPPLEMENT: 'additional-person charge' };
+  function reconCsv(meta) {
+    var hp = (S.revenue.budget.report || {}).purchase || {}, rows = [];
+    (hp.rows004 || []).forEach(function (r) {
+      rows.push(['004 row as written', r.row, RC_KIND[r.role] || r.role.toLowerCase(), r.role === 'CONTRACT' || r.role === 'ADDITIONAL' || r.role === 'SUPPLEMENT' ? (r.rest ? 'set, ' + usd(r.rest.cents / 100) + ' above the bookings' : 'set against the booked rooms') : 'not set — ' + (r.why || ''),
+        (r.rooms || []).map(function (x) { return x.stay; }).filter(function (x, i, a) { return a.indexOf(x) === i; }).join(' + '), (r.rooms || []).length === 1 ? r.rooms[0].label : (r.rooms || []).length + ' rooms', (r.rooms || []).length === 1 ? r.rooms[0].type : '',
+        '', '', '', '', r.nights, r.rate, r.qty, num(r.amount), 'yes (in 004)', r.details, r.periodText || '', '']);
+    });
+    (hp.proposals || []).forEach(function (x) {
+      rows.push(['Proposed ' + (x.status === 'RAISE' ? 'correction' : 'addition'), (x.existing004 || []).join(', '), RC_KIND[x.kind], x.status === 'RAISE' ? 'raise the existing row' : 'new entry', x.stay, x.label || '', x.type,
+        (x.guests || []).map(function (g) { return g.name || g.guestId; }).join(' + '), (x.guests || []).map(function (g) { return g.guestId; }).join(' + '), x.from, x.to, x.nights, x.rate ? x.rate.amount : null,
+        x.suggested ? x.suggested.qty : null, num(x.total), x.confirmed ? 'yes (confirmed booking)' : 'no — pending (held, not confirmed)', x.suggested ? x.suggested.details : '', x.suggested ? x.suggested.period : '', 'awaiting the Owners\' approval — not written to 004']);
+    });
+    (hp.corrections || []).forEach(function (c) { rows.push(['Proposed text correction', c.row, 'Date or period', 'text only — no amount', '', '', '', '', '', c.from, c.to, c.nights, null, null, null, '', '', c.booked, c.text]); });
+    return csvDoc('See You In Laos — 004 Reconciliation & Proposed Additions (Souphattra Heritage)', meta.concat([['Totals', hp.available ? 'booked purchase ' + kd(hp.totals.total) + ' (agreement ' + kd(hp.totals.contract) + ' · additional nights ' + kd(hp.totals.additional) + ' · additional-person charge ' + kd(hp.totals.supplement) + '); not yet in 004 ' + kd(hp.notIn004) + '; pending ' + kd(hp.pending) : (hp.why || 'not available')]]), RC_HEAD, rows);
   }
   function budgetTable(rep) {
     var cell = function (label, v, n) { return '<td data-l="' + esc(label) + '"' + (n ? ' class="num"' : '') + '>' + v + '</td>'; };
@@ -1235,9 +1273,12 @@
       cell('Variance', '<b data-i18n-skip>' + esc(signed(tv)) + '</b>', 1) + cell('Committed (007)', '<b data-i18n-skip>' + esc(curList(rep.committed)) + '</b>', 1) + cell('Paid (007)', '<b data-i18n-skip>' + esc(curList(rep.paid)) + '</b>', 1) + '</tr>';
     rows += '<tr>' + cell('Category', 'Approved budget <span class="ab-id">004 ' + esc((rep.approved && rep.approved.cell) || 'A2') + ' · set as a total only</span>') + cell('Planned (004)', '<span data-i18n-skip>' + esc(rep.approved ? usd(rep.approved.amount) : '—') + '</span>', 1) +
       cell('Forecast', '<span class="ab-mute">planned ' + esc(signed(rep.plannedVsApproved)) + '</span>', 1) + cell('Variance', '<span data-i18n-skip class="ab-neg">' + esc(signed(rep.varianceToApproved)) + '</span>', 1) + cell('Committed (007)', '', 1) + cell('Paid (007)', '', 1) + '</tr>';
+    if ((rep.committedUsd && rep.committedUsd.converted) || (rep.paidUsd && rep.paidUsd.converted)) rows += '<tr>' + cell('Category', 'USD equivalent <span class="ab-id">at the reporting reference rates — a reference, not a transaction rate</span>') + cell('Planned (004)', '', 1) + cell('Forecast', '', 1) + cell('Variance', '', 1) +
+      cell('Committed (007)', rep.committedUsd && rep.committedUsd.converted ? '<span data-i18n-skip>≈ ' + esc(kd(rep.committedUsd.total)) + '</span>' : '', 1) + cell('Paid (007)', rep.paidUsd && rep.paidUsd.converted ? '<span data-i18n-skip>≈ ' + esc(kd(rep.paidUsd.total)) + '</span>' : '', 1) + '</tr>';
     return '<div class="ab-table-wrap"><table class="ab-table ab-fin"><thead><tr><th>004 category</th><th class="num">Planned (004)</th><th class="num">Forecast</th><th class="num">Variance</th><th class="num">Committed (007)</th><th class="num">Paid (007)</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
       '<p class="t-b2 ab-mute">Variance per category = forecast − planned; on the last row, forecast − approved. ' + (rep.budgetLeftSheet ? '004 ' + esc(rep.budgetLeftSheet.cell || 'F2') + ' "Budget left" states ' + esc(signed(rep.budgetLeftSheet)) + '. ' : '') +
-      'Actual = paid to suppliers (007); 004 "Actual USD" repeats the budget by formula and is not used. ' + (rep.indicative ? esc(rep.indicative.words) + ': THB committed ≈ ' + esc(kd(rep.indicative.committedOtherUsd)) + ', paid ≈ ' + esc(kd(rep.indicative.paidOtherUsd)) + '.' : '') + '</p>';
+      'Actual = paid to suppliers (007); 004 "Actual USD" repeats the budget by formula and is not used. Forecast = planned + the hotel costs of the confirmed bookings 004 does not hold yet (E). ' +
+      (rep.reportingFx ? 'THB and EUR stay in their own currency; their USD equivalent uses the reporting reference rates (1 USD = ' + esc(rep.reportingFx.USD_THB) + ' THB · 1 USD = ' + esc(rep.reportingFx.USD_EUR) + ' EUR).' : '') + '</p>';
   }
   function revenueSummary(R) {
     var row = function (label, v, cls, sign) { return '<tr' + (cls ? ' class="' + cls + '"' : '') + '><td data-l="">' + esc(label) + '</td><td data-l="USD" class="num"><span data-i18n-skip>' + esc(sign && v && v.cents ? signed({ currency: 'USD', amount: v.cents / 100 }) : kd(v)) + '</span></td></tr>'; };
@@ -1259,17 +1300,60 @@
       tr += h.revenue ? h.revenue.cents : 0;
       if (h.cost) tc += h.cost.cents;
       if (h.surplus) ts += h.surplus.cents; else allKnown = false;
-      var costWords = h.cost ? esc(kd(h.cost)) + (h.costComplete ? '' : '<span class="ab-why">+ ' + h.uncontracted.length + ' room' + (h.uncontracted.length === 1 ? '' : 's') + ' with guests not in the agreement — no cost agreed</span>')
+      var cp = h.costParts;
+      var costWords = h.cost ? esc(kd(h.cost)) + (cp ? '<span class="ab-why">agreement ' + esc(kd(cp.contract)) + (cp.additional.cents ? ' · additional nights ' + esc(kd(cp.additional)) : '') + (cp.supplement.cents ? ' · additional-person ' + esc(kd(cp.supplement)) : '') + '</span>' : '') +
+        ((h.held || []).length ? '<span class="ab-why">+ ' + h.held.length + ' held room' + (h.held.length === 1 ? '' : 's') + ' pending, not counted</span>' : '') +
+        (h.costComplete || cp ? '' : '<span class="ab-why">+ ' + h.uncontracted.length + ' room' + (h.uncontracted.length === 1 ? '' : 's') + ' with guests not in the agreement — no purchase rate</span>')
         : '<span class="ab-mute">' + (h.costBasis === 'SUPPLIER_TOTAL_UNSTATED' ? '007: ' + esc(h.suppliers.map(function (x) { return cash(x.contract); }).join(' · ')) + ' — what it covers is not stated' : 'no contract') + '</span>';
       return '<tr>' + cell('Hotel', '<span data-i18n-skip>' + esc(h.place) + '</span><span class="ab-id" data-i18n-skip>' + esc(dmy(h.from)) + ' – ' + esc(dmy(h.to)) + (h.nights ? ' · ' + h.nights + ' night' + (h.nights === 1 ? '' : 's') : '') + '</span>') +
-        cell('Rooms', esc(h.roomsBought != null ? h.roomsOccupied + ' of ' + h.roomsBought + ' bought' : h.roomsOccupied + ' with guests') + (h.rate ? '<span class="ab-id" data-i18n-skip>' + esc(kd(h.rate)) + ' per room night</span>' : ''), 1) +
+        cell('Rooms', esc(h.roomsAdditional != null ? h.roomsOccupied + ' with guests · ' + h.roomsBought + ' in the agreement' + (h.roomsAdditional ? ' + ' + h.roomsAdditional + ' additional' : '') : h.roomsBought != null ? h.roomsOccupied + ' of ' + h.roomsBought + ' bought' : h.roomsOccupied + ' with guests') + (h.rate ? '<span class="ab-id" data-i18n-skip>' + esc(kd(h.rate)) + ' per room night</span>' : ''), 1) +
         cell('Guests', esc(h.guests), 1) + cell('Hotel cost (purchase)', costWords, 1) + cell('Guest revenue (sale)', '<span data-i18n-skip>' + esc(kd(h.revenue)) + '</span>', 1) +
         cell('Surplus', '<span data-i18n-skip class="' + (h.surplus && h.surplus.cents < 0 ? 'ab-neg' : '') + '">' + esc(h.surplus ? signed(h.surplus) : '—') + '</span>', 1) + '</tr>';
     }).join('');
     rows += '<tr class="ab-total">' + cell('Hotel', '<b>All stays</b>') + cell('Rooms', '', 1) + cell('Guests', '', 1) + cell('Hotel cost (purchase)', '<b data-i18n-skip>' + esc(usd(tc / 100)) + '</b><span class="ab-why">stated costs only</span>', 1) +
       cell('Guest revenue (sale)', '<b data-i18n-skip>' + esc(usd(tr / 100)) + '</b>', 1) + cell('Surplus', '<b data-i18n-skip>' + esc(signed({ currency: 'USD', amount: ts / 100 })) + '</b><span class="ab-why">' + (allKnown ? 'every stay' : 'stays with a complete cost only') + '</span>', 1) + '</tr>';
     return '<div class="ab-table-wrap"><table class="ab-table ab-fin"><thead><tr><th>Hotel and period</th><th class="num">Rooms</th><th class="num">Guests</th><th class="num">Hotel cost (purchase)</th><th class="num">Guest revenue (sale)</th><th class="num">Surplus</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
-      '<p class="t-b2 ab-mute">Hotel cost = what a hotel agreement charges for every room it buys (occupied or not) — only where an agreement states it, never estimated. Guest revenue = the booked room lines of the stay (the couple\'s own rooms at USD 0). Surplus = revenue − cost, stated only where the cost is complete.</p>';
+      '<p class="t-b2 ab-mute">Hotel cost (purchase) = what the hotel charges H&amp;S: the agreement for every room it buys (occupied or not), the confirmed bookings\' additional room nights at the Owners\' confirmed rate and the additional-person charge — never estimated, never a guest\'s price. Guest revenue (sale) = the booked room lines of the stay (the couple\'s own rooms at USD 0). Surplus = revenue − cost, stated only where the cost is complete.</p>';
+  }
+  /* E · 004 RECONCILIATION (Owners' order, 18 Nov 2026): the hotel's 004 rows beside the booked rooms, the exact entries 004 does not hold
+     yet (awaiting the Owners' approval — nothing is written to 004 from here) and the text corrections */
+  function reconView(rep) {
+    var hp = rep.purchase || {};
+    if (!hp.available) return '<p class="t-b2 ab-flag">Souphattra Heritage: ' + esc(hp.why || 'the hotel\'s purchase costs could not be set beside 004 just now') + ' — 004 is counted as written.</p>';
+    var cell = function (label, v, n) { return '<td data-l="' + esc(label) + '"' + (n ? ' class="num"' : '') + '>' + v + '</td>'; };
+    var setWords = function (r) {
+      if (r.role === 'CONTRACT' || r.role === 'ADDITIONAL' || r.role === 'SUPPLEMENT') {
+        var st = (r.rooms || []).map(function (x) { return x.stay; }).filter(function (x, i, a) { return a.indexOf(x) === i; });
+        return esc(RC_KIND[r.role]) + ' · ' + ((r.rooms || []).length === 1 ? 'room ' + esc(r.rooms[0].label) + ' (' + esc(r.rooms[0].type) + ')' : (r.rooms || []).length + ' rooms') + ' · ' + esc(st.join(' + ')) +
+          (r.rest ? '<span class="ab-why">' + esc(kd(r.rest)) + ' above the booked rooms — kept as written</span>' : '');
+      }
+      return '<span class="ab-chip open">not set</span> <span class="ab-why">' + esc(r.why || '') + '</span>';
+    };
+    var rows = (hp.rows004 || []).map(function (r) {
+      return '<tr>' + cell('004 row', '<b data-i18n-skip>' + esc(r.row) + '</b>') + cell('As written in 004', '<span data-i18n-skip>' + esc(r.details || r.item) + '</span><span class="ab-id" data-i18n-skip>' + esc((r.rate != null ? 'USD ' + r.rate : '') + ' × ' + (r.qty != null ? r.qty : '—') + ' × ' + (r.nights != null ? r.nights : '—') + (r.periodText ? ' · ' + r.periodText : '')) + '</span>') +
+        cell('Amount', '<span data-i18n-skip>' + esc(kd(r.amount)) + '</span>', 1) + cell('Set against the bookings', setWords(r)) + '</tr>';
+    }).join('');
+    var props = (hp.proposals || []).map(function (x) {
+      var who = (x.guests || []).map(function (g) { return (g.name || g.guestId) + ' (' + g.guestId + ')'; }).join(', ');
+      return '<tr>' + cell('Entry', '<b>' + esc(RC_KIND[x.kind]) + '</b><span class="ab-id" data-i18n-skip>' + esc(x.place + (x.label ? ' · room ' + x.label : '') + ' · ' + x.type) + '</span>' + (who ? '<span class="ab-id" data-i18n-skip>' + esc(who) + '</span>' : '')) +
+        cell('Dates · nights', '<span data-i18n-skip>' + esc(dmy(x.from)) + ' – ' + esc(dmy(x.to)) + ' · ' + esc(x.nights) + '</span>') +
+        cell('Rate', '<span data-i18n-skip>' + esc(kd(x.rate)) + '</span><span class="ab-id">' + (x.kind === 'SUPPLEMENT' ? 'per room night' : 'per room night') + '</span>', 1) +
+        cell('Amount', '<b data-i18n-skip>' + esc(kd(x.total)) + '</b>', 1) +
+        cell('Suggested 004 entry', '<span data-i18n-skip>' + esc(x.suggested ? x.suggested.details + ' · ' + x.suggested.rate + ' × ' + x.suggested.qty + ' × ' + x.suggested.nights + ' = ' + x.suggested.budget + ' · ' + x.suggested.period : '') + '</span>') +
+        cell('Status', (x.status === 'RAISE' ? 'raise 004 row ' + esc((x.existing004 || []).join(', ')) : 'new entry') + (x.confirmed ? '' : ' <span class="ab-chip open">pending — held, not confirmed</span>')) + '</tr>';
+    }).join('');
+    var tp = (hp.proposals || []).filter(function (x) { return x.confirmed; }).reduce(function (t, x) { return t + x.total.cents; }, 0);
+    if (props) props += '<tr class="ab-total">' + cell('Entry', '<b>Not yet in 004 (confirmed bookings)</b>') + cell('Dates · nights', '') + cell('Rate', '', 1) + cell('Amount', '<b data-i18n-skip>' + esc(usd(tp / 100)) + '</b>', 1) + cell('Suggested 004 entry', '') + cell('Status', '') + '</tr>';
+    return '<p class="t-l1 ab-bd-h">Souphattra Heritage · the bookings beside 004</p>' +
+      '<p class="t-b2">Booked hotel purchase <b data-i18n-skip>' + esc(kd(hp.totals.total)) + '</b> = agreement ' + esc(kd(hp.totals.contract)) + ' + additional room nights ' + esc(kd(hp.totals.additional)) + ' + additional-person charge ' + esc(kd(hp.totals.supplement)) +
+        ' · 004 holds ' + esc(usd((hp.rows004 || []).reduce(function (t, r) { return t + r.amount.cents; }, 0) / 100)) + ' (row' + ((hp.rows004 || []).length === 1 ? ' ' : 's ') + esc((hp.rows004 || []).map(function (r) { return r.row; }).join(', ')) + ')' +
+        ' · <b>not yet in 004: <span data-i18n-skip>' + esc(kd(hp.notIn004)) + '</span></b>' + (hp.pending && hp.pending.cents ? ' · pending (held): ' + esc(kd(hp.pending)) : '') + '</p>' +
+      (rows ? '<div class="ab-table-wrap" data-ab-recon><table class="ab-table ab-fin"><thead><tr><th>004 row</th><th>As written in 004</th><th class="num">Amount</th><th>Set against the bookings</th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '') +
+      '<p class="t-l1 ab-bd-h">Proposed 004 additions · awaiting your approval</p>' +
+      (props ? '<div class="ab-table-wrap" data-ab-proposals><table class="ab-table ab-fin"><thead><tr><th>Entry</th><th>Dates · nights</th><th class="num">Rate</th><th class="num">Amount</th><th>Suggested 004 entry</th><th>Status</th></tr></thead><tbody>' + props + '</tbody></table></div>' +
+        '<p class="t-b2 ab-mute">Each entry is a hotel purchase cost of a booked room that 004 does not hold yet — already counted in the forecast (confirmed bookings only). Nothing is written to 004 from here: once you approve, the entries are added through the authorised Google integration and this report refreshes. A 004 entry written as suggested (the guests\' first names in brackets) is recognised and never counted twice.</p>'
+        : '<p class="t-b2">None — 004 holds every hotel cost of the booked rooms.</p>') +
+      ((hp.corrections || []).length ? '<p class="t-l1 ab-bd-h">Proposed 004 text corrections · no amount changes</p><ul class="t-b2">' + hp.corrections.map(function (c) { return li(c.text); }).join('') + '</ul>' : '');
   }
   var EX_KIND = [['DECISION', 'Your decisions', 'open'], ['DATA', 'Data to complete or correct', ''], ['INFO', 'For information', '']];
   function exceptionsView(R, rep) {
@@ -1296,25 +1380,25 @@
     var kpis = finSummary(R, rep, D).map(function (k) { return kpiBox(k[1], k[2], k[3], k[4], k[0] === 'variance' && rep.varianceToApproved && rep.varianceToApproved.cents > 0 ? 'ab-kpi-warn' : ''); }).join('');
     var fx = R.fxReference || {};
     var sources = [
-      'Costs: Google 004_Budget_Finance — ' + (BG.reconciliation && BG.reconciliation.budget004 ? BG.reconciliation.budget004.readable + ' of ' + BG.reconciliation.budget004.lines + ' lines read' : 'read') + '; approved budget = 004 TOTAL BUDGET; planned = every positive 004 line.',
-      'Forecast: planned, with the Souphattra agreement (USD 8,100: 26 rooms, 54 room nights, USD 150) in place of its 004 lines; nothing else is assumed.',
-      'Commitments and supplier payments: Google 007 as typed (a payment counts when dated and typed); THB is never converted.',
+      'Costs: Google 004_Budget_Finance — ' + (BG.reconciliation && BG.reconciliation.budget004 ? BG.reconciliation.budget004.readable + ' of ' + BG.reconciliation.budget004.lines + ' lines read' : 'read') + '; approved budget = 004 TOTAL BUDGET; planned = every positive 004 line; remaining = 004 BUDGET LEFT as stated.',
+      'Forecast: planned (004) + the hotel purchase of the confirmed bookings that 004 does not hold yet — the Souphattra agreement (USD 8,100: 26 rooms, 54 room nights, USD 150), additional room nights at USD 150 and the additional-person charge of USD 60 per room night (the Owners, 18 Nov 2026); 004\'s own rows are never reduced or replaced; nothing else is assumed.',
+      'Commitments and supplier payments: Google 007 as typed (a payment counts when dated and typed), each in its own currency.',
       'Categories of 007 suppliers: ' + (rep.byCategory || []).filter(function (c) { return (c.suppliers || []).length; }).map(function (c) { return c.category + ' — ' + c.suppliers.join(', '); }).join('; ') + '.',
-      'Guest revenue, receivables and receipts: the Billing Engine (002/009), the issued statements and 008 — paying guests only; the couple\'s own bookings are complimentary.',
-      'Hotel cost per room: the agreement\'s rate per room night × the stay\'s nights; room numbers: Google 012 (read only, matched by the guests\' names).',
-      'Statements keep the exchange rates they were issued with; the project reference is 011 on the first issued statement' + (fx.day ? ' (' + dmy(fx.day) + ': USD/THB ' + fx.FX_USD_THB + ', USD/EUR ' + fx.FX_USD_EUR + ')' : '') + '.',
+      'Guest revenue, receivables and receipts: the booking system — the Billing Engine with the confirmed booked prices exactly as stored, the issued statements and 008; paying guests only; the couple\'s own bookings are complimentary. 009 never overrides a confirmed booking price; no revenue comes from a Google sheet.',
+      'Hotel cost per room: the agreement\'s rate, or additional nights at the confirmed purchase rate, × the stay\'s nights; the additional-person charge per room per night; hotel room numbers: Google 012, a historical template — a reference only, never required, never above the bookings.',
+      'Currencies: amounts keep their own currency; a USD equivalent at the reporting reference rates (1 USD = ' + ((rep.reportingFx || {}).USD_THB || 33.68) + ' THB · 1 USD = ' + ((rep.reportingFx || {}).USD_EUR || 0.89) + ' EUR) is shown beside them, labelled. Statements keep the exchange rates they were issued with' + (fx.day ? ' (011 on ' + dmy(fx.day) + ': USD/THB ' + fx.FX_USD_THB + ', USD/EUR ' + fx.FX_USD_EUR + ')' : '') + '.',
       (BG.version || '') + ' · ' + (rep.version || '') + ' · engine ' + (R.engineVersion || '') + ' · calculated ' + asOf + ' UTC'];
     var open = function (id) { return S.budgetOpen && S.budgetOpen[id] ? ' open' : ''; };
     var inv = guarded(function () { return inventoryView(R); }, null);
     return '<section class="ab-sec ab-report" aria-label="Finance">' +
-      '<div class="ab-print-head"><p class="t-l1">See You In Laos · Financial Summary</p><p class="t-b2">Printed ' + esc(nowStamp()) + ' · data as of ' + esc(asOf) + ' UTC · USD (THB named, never converted) · costs 004/007, revenue Billing Engine and issued statements</p></div>' +
-      exportBar([['finance-summary', 'CSV · financial summary'], ['budget-vs-actual', 'CSV · budget vs actual / forecast']], '<button type="button" class="ab-filter" data-ab-print>Print / save as PDF</button>') +
+      '<div class="ab-print-head"><p class="t-l1">See You In Laos · Financial Summary</p><p class="t-b2">Printed ' + esc(nowStamp()) + ' · data as of ' + esc(asOf) + ' UTC · USD (THB / EUR in their own currency, USD equivalents at the reporting reference rates, labelled) · costs 004/007, revenue: the booking system</p></div>' +
+      exportBar([['finance-summary', 'CSV · financial summary'], ['budget-vs-actual', 'CSV · budget vs actual / forecast'], ['reconciliation-004', 'CSV · 004 reconciliation & proposed additions']], '<button type="button" class="ab-filter" data-ab-print>Print / save as PDF</button>') +
       '<p class="t-b2 ab-mute">Calculated live ' + esc(asOf) + ' UTC · all amounts USD unless named · <button type="button" class="p-link" data-ab-rev-reload>Recalculate now</button></p>' +
       secH('A', 'Executive summary') + '<div class="ab-kpis ab-exec" data-ab-exec>' + kpis + '</div>' +
       secH('B', 'Budget vs actual and forecast', 'by 004 category') + '<div data-ab-budget-vs>' + budgetTable(rep) + '</div>' +
       secH('C', 'Guest revenue and receivables') + '<div data-ab-fin-revenue>' + revenueSummary(R) + '</div>' +
       secH('D', 'Hotel financial performance', 'purchase · sale · surplus') + '<div data-ab-hotels>' + hotelTable(rep) + '</div>' +
-      secH('E', 'Reconciliation and exceptions') + '<div data-ab-exceptions>' + exceptionsView(R, rep) + '</div>' +
+      secH('E', 'Reconciliation and exceptions') + '<div data-ab-reconciliation>' + guarded(function () { return reconView(rep); }) + '</div>' + '<div data-ab-exceptions>' + exceptionsView(R, rep) + '</div>' +
       '<p class="t-l1 ab-bd-h">Detail</p>' +
       '<details class="ab-bd" data-ab-bd="fin-budget"' + open('fin-budget') + '><summary><b>Budget detail</b> <span class="ab-mute">· 004 and 007 line by line, per stay and route</span></summary><div class="ab-bd-body">' + guarded(function () { return budgetView(BG); }) + '</div></details>' +
       (inv != null ? '<details class="ab-bd" data-ab-bd="fin-inventory"' + open('fin-inventory') + '><summary><b>Inventory beside the budget</b> <span class="ab-mute">· counted bookings and 004\'s planned quantities</span></summary><div class="ab-bd-body"><div data-ab-inventory>' + inv + '</div></div></details>' : '') +
@@ -1326,23 +1410,44 @@
      Per hotel and period: every room with guests — its hotel room number (012), category, guests and their status, check-in,
      check-out, nights, the hotel's cost where an agreement buys it, what its guests pay and the surplus; subtotals; the rooms
      without guests; then the hotel's rate list (unchanged: generated, approved by version, its own CSV). */
-  var RM_HEAD = ['Stay', 'Hotel', 'Arrival', 'Departure', 'Nights', 'Room', 'Hotel room no. (012)', 'Room no. check', 'Room category', 'Guest ID', 'Guest', 'Extra bed', 'Status', 'Complimentary'];
+  /* THE OPERATIONAL ROOMING LIST (Owners' order, 18 Nov 2026): live from the booking system — one row per guest and stay; the room's
+     hotel purchase (agreement or additional nights, the additional-person charge, the 004 row holding it) on the room's first guest
+     row only, so a sum in Excel never counts a room twice; the guest's own booked line beside it. No code, no token. */
+  var RM_HEAD = ['Stay', 'Hotel', 'Room', 'Room category', 'Hotel room no. (012 reference)', 'Guest ID', 'Guest', 'Invitation', 'Booking ID', 'Booking status',
+    'Check-in', 'Check-out', 'Nights', 'Extra bed', 'Agreement nights (room)', 'Additional nights (room)', 'Hotel purchase rate USD per room night', 'Hotel purchase cost USD (room)',
+    'Additional-person charge USD (room)', 'Hotel cost in 004 (room)', 'Guest rate USD per night', 'Guest booked amount USD', 'Complimentary', 'Statement no.', 'Invoice status', 'Payment status'];
+  /* where 004 holds a room's hotel cost, in words: its row, or "not in 004" (a proposed addition — Finance · E) */
+  function in004Words(u) {
+    var w = u.hotelIn004; if (!w) return '';
+    var parts = [], held = u.hotelStatus === 'HELD';
+    var say = function (what, rows, has, pending) { if (has) parts.push(what + ': ' + (rows.length ? '004 row ' + rows.join(', ') : pending ? 'pending (held, not confirmed)' : 'not in 004 — proposed')); };
+    say('agreement', w.contract || [], u.hotelCostBasis === 'CONTRACT', false);
+    say('additional nights', w.additional || [], u.hotelCostBasis === 'ADDITIONAL', held);
+    say('additional-person charge', w.supplement || [], !!u.hotelSupplement, u.hotelSupplementStatus === 'HELD');
+    return parts.join(' · ');
+  }
   function roomingCsv() {
     var R = S.revenue, BG = R.budget || {}, rows = [];
-    var hs = {}; ((S.overview && S.overview.holders) || []).forEach(function (h) { hs[h.guestId] = h; });
+    var hs = {}, byInv = {}; ((S.overview && S.overview.holders) || []).forEach(function (h) { hs[h.guestId] = h; byInv[h.Holder_ID] = h; });
     var idx = guestRooms() || {};
     (BG.roomPlan || []).forEach(function (p) {
       (p.rooms || []).forEach(function (u) {
+        var first = true, n = nightsBetweenDays(p.from, p.to), N = u.hotelNights || {};
         (u.occupants || []).forEach(function (o) {
           if (!o.guestId) return;
           var x = (idx[o.guestId] || []).filter(function (y) { return y.stay === p.stay && y.label === u.label && y.type === u.type; })[0] || { line: null };
-          rows.push([p.stay, p.place, p.from || '', p.to || '', nightsBetweenDays(p.from, p.to), u.label, u.room012 ? u.room012.roomNo : '', u.room012 ? (u.room012.status === 'VERIFY' ? 'verify: ' + (u.room012.verify || []).join('; ') : 'ok') : '',
-            u.type, o.guestId, o.name || '', o.bed ? 'yes' : '', roomStatus(x), compWords(hs[o.guestId], x)]);
+          var l = x.line, h = hs[o.guestId] || {}, payer = l && byInv[l.payer], pay = payer && payer.payment;
+          var room = first ? [N.contract != null ? N.contract : '', N.additional != null ? N.additional : '', u.hotelCost && n ? u.hotelCost.cents / 100 / n : null, u.hotelCost ? num(u.hotelCost) : null,
+            u.hotelSupplement ? num(u.hotelSupplement) : null, in004Words(u)] : ['', '', null, null, null, ''];
+          rows.push([p.stay, p.place, u.label, u.type, u.room012 ? u.room012.roomNo : '', o.guestId, o.name || '', h.Holder_ID || '', l && l.bookingId ? l.bookingId : '', h.billingAdmin ? 'the couple\'s own room' : l ? 'confirmed' : 'held, not confirmed',
+            p.from || '', p.to || '', n, o.bed ? 'yes' : ''].concat(room, [l && l.rate && l.rateBasis === 'PER_PERSON_PER_NIGHT' ? num(l.rate) : null, l && l.amount ? num(l.amount) : null, compWords(h, x),
+            l && l.statement ? l.statement : '', l ? (l.statement ? 'invoiced' : 'not yet invoiced') : '', pay ? (PAY[pay.status] || pay.status || '') : '']));
+          first = false;
         });
       });
     });
-    return csvDoc('See You In Laos — Hotel Rooming List', [['Generated', nowStamp()], ['Data as of', (R.calculatedAt || '').slice(0, 16).replace('T', ' ') + ' UTC'], ['Currency', 'none (rooming only)'],
-      ['Basis', 'the Rooms engine (held, sent or confirmed alike); room numbers from Google 012 (read only, matched by the guests\' names — "verify" where names or dates differ)']], RM_HEAD, rows);
+    return csvDoc('See You In Laos — Hotel Rooming List', [['Generated', nowStamp()], ['Data as of', (R.calculatedAt || '').slice(0, 16).replace('T', ' ') + ' UTC'], ['Currency', 'USD'],
+      ['Basis', 'the booking system, live: the Rooms engine (held, sent or confirmed alike) and the Billing Engine\'s booked lines; hotel purchase = the hotel agreement (USD 150 per room night) or additional room nights at the Owners\' confirmed purchase rate, and the additional-person charge — on the room\'s first guest row only; the guest columns are the guest\'s own booked line (selling price), never the purchase; 012 room numbers are a reference only']], RM_HEAD, rows);
   }
   function roomsTabView() {
     var g = revenueGate(); if (g) return g;
@@ -1364,44 +1469,52 @@
           var l = lines[r.item + '|' + r.label + '|' + o.guestId]; if (l && l.amount) sale += l.amount.cents;
           var x = { line: l || null }, cw = compWords(hs[o.guestId], x);
           return '<span class="ab-stay"><span data-i18n-skip>' + esc(o.name || o.guestId) + '</span> <span class="ab-id" data-i18n-skip>' + esc(o.guestId) + '</span>' +
-            '<span class="ab-mute"> ' + esc(roomStatus(x)) + (l && l.statement ? ' · ' + esc(l.statement) : '') + (l && l.amount ? ' · ' + esc(usd(l.amount.cents / 100)) + (l.rateSource ? ' (' + esc(l.rateSource) + ')' : '') : '') + '</span>' +
+            '<span class="ab-mute"> ' + esc(roomStatus(x, hs[o.guestId])) + (l && l.statement ? ' · ' + esc(l.statement) : '') + (l && l.amount ? ' · ' + esc(usd(l.amount.cents / 100)) + (l.rateSource ? ' (' + esc(l.rateSource) + ')' : '') : '') + '</span>' +
             (o.bed ? ' <span class="ab-chip">extra bed</span>' : '') + (cw ? ' <span class="ab-chip on">' + esc(cw) + '</span>' : '') + '</span>';
         }).join('');
-        var cost = r.hotelCost ? r.hotelCost.cents : null;
-        if (cost == null) costKnown = false; else sumCost += cost;
+        /* the room's hotel purchase as the server sets it: the agreement's or the additional nights', plus the additional-person charge;
+           a room only held (not confirmed) is shown, its additional cost pending — not in the subtotal */
+        var heldRoom = r.hotelStatus === 'HELD' && r.hotelCostBasis !== 'CONTRACT', heldSup = !!r.hotelSupplement && r.hotelSupplementStatus === 'HELD', held = heldRoom || heldSup;
+        var cost = r.hotelCost ? r.hotelCost.cents + (r.hotelSupplement ? r.hotelSupplement.cents : 0) : null;
+        /* the subtotal counts what Finance · D counts: the agreement, confirmed additional nights, a confirmed extra person's charge */
+        if (cost == null) costKnown = false; else sumCost += (heldRoom ? 0 : r.hotelCost.cents) + (r.hotelSupplement && !heldSup ? r.hotelSupplement.cents : 0);
         sumSale += sale;
-        var no = r.room012 && r.room012.roomNo ? '<b data-i18n-skip>' + esc(r.room012.roomNo) + '</b>' + (r.room012.status === 'VERIFY' ? ' <span class="ab-chip" title="' + esc((r.room012.verify || []).join('; ')) + '">verify</span>' : '') : '<span class="ab-mute">—</span>';
+        var N = r.hotelNights || {}, rate = r.hotelCost && n ? r.hotelCost.cents / 100 / n : null;
+        var basis = r.hotelCostBasis === 'CONTRACT' ? 'agreement · ' + (N.contract || n) + ' nights × ' + usd(rate) : r.hotelCostBasis === 'ADDITIONAL' ? 'additional · ' + (N.additional || n) + ' nights × ' + usd(rate) : '';
+        var costHtml = cost == null ? '<span class="ab-mute">no purchase rate</span>' : esc(usd(cost / 100)) + '<span class="ab-why">' + esc(basis) + (r.hotelSupplement ? ' · + ' + esc(usd(r.hotelSupplement.cents / 100)) + ' additional-person charge' : '') + '</span>' +
+          '<span class="ab-why">' + esc(in004Words(r)) + '</span>' + (held ? ' <span class="ab-chip open">pending</span>' : '');
+        var no = r.room012 && r.room012.roomNo ? '<b data-i18n-skip>' + esc(r.room012.roomNo) + '</b> <span class="ab-mute">012 ref.</span>' : '<span class="ab-mute">—</span>';
         var places = r.occupants.filter(function (o) { return o.guestId; }).length;
         return '<tr><td data-l="Room">Room ' + esc(r.label) + '<span class="ab-id">no. ' + no + '</span></td><td data-l="Category" data-i18n-skip>' + esc(r.type || r.item || '') + '</td>' +
           '<td data-l="Occupancy" class="num">' + esc(places + ' / ' + r.places) + (r.extraBeds ? ' <span class="ab-id">+ ' + esc(r.extraBeds) + ' extra bed</span>' : '') + '</td>' +
           '<td data-l="Guests">' + who + '</td><td data-l="Check-in" data-i18n-skip>' + esc(dmy(p.from)) + '</td><td data-l="Check-out" data-i18n-skip>' + esc(dmy(p.to)) + '</td><td data-l="Nights" class="num">' + esc(n == null ? '—' : n) + '</td>' +
-          '<td data-l="Hotel cost (purchase)" class="num"><span data-i18n-skip>' + (cost == null ? '<span class="ab-mute">no contract</span>' : esc(usd(cost / 100))) + '</span></td>' +
+          '<td data-l="Hotel cost (purchase)" class="num"><span data-i18n-skip>' + costHtml + '</span></td>' +
           '<td data-l="Guest revenue (sale)" class="num"><span data-i18n-skip>' + esc(usd(sale / 100)) + '</span></td>' +
-          '<td data-l="Surplus" class="num"><span data-i18n-skip class="' + (cost != null && sale < cost ? 'ab-neg' : '') + '">' + (cost == null ? '—' : esc(signed({ currency: 'USD', amount: (sale - cost) / 100 }))) + '</span></td></tr>';
+          '<td data-l="Surplus" class="num"><span data-i18n-skip class="' + (cost != null && sale < cost ? 'ab-neg' : '') + '">' + (cost == null || held ? '—' : esc(signed({ currency: 'USD', amount: (sale - cost) / 100 }))) + '</span></td></tr>';
+        /* (a held cost is shown, marked pending; its surplus is not stated) */
       }).join('');
       var sub = rows ? '<tr class="ab-total"><td data-l="Room"><b>' + occ.length + ' room' + (occ.length === 1 ? '' : 's') + ' with guests</b></td><td data-l="Category"></td><td data-l="Occupancy" class="num"><b>' + guests + '</b></td><td data-l="Guests"></td><td data-l="Check-in"></td><td data-l="Check-out"></td><td data-l="Nights"></td>' +
-        '<td data-l="Hotel cost (purchase)" class="num"><b data-i18n-skip>' + esc(usd(sumCost / 100)) + '</b>' + (costKnown ? '' : '<span class="ab-why">rooms with a contract</span>') + '</td><td data-l="Guest revenue (sale)" class="num"><b data-i18n-skip>' + esc(usd(sumSale / 100)) + '</b></td>' +
+        '<td data-l="Hotel cost (purchase)" class="num"><b data-i18n-skip>' + esc(usd(sumCost / 100)) + '</b>' + (costKnown ? '' : '<span class="ab-why">rooms with a purchase rate</span>') + '</td><td data-l="Guest revenue (sale)" class="num"><b data-i18n-skip>' + esc(usd(sumSale / 100)) + '</b></td>' +
         '<td data-l="Surplus" class="num"><b data-i18n-skip>' + (costKnown ? esc(signed({ currency: 'USD', amount: (sumSale - sumCost) / 100 })) : '—') + '</b></td></tr>' : '';
       var byType = {}; p.rooms.filter(function (r) { return !r.occupants.some(function (o) { return o.guestId; }); }).forEach(function (r) { (byType[r.type || r.key] = byType[r.type || r.key] || []).push(r.label + (r.occupants.length ? ' (a place kept for a party)' : '')); });
       var empty = Object.keys(byType).map(function (t) { return t + ': ' + byType[t].join(', '); });
       /* the room type as 012 is matched (src/billing/finance-report.js · roomTypeKey): "The", "(…)" and "Suite" aside */
       var typeKey = function (t) { return String(t || '').trim().toLowerCase().replace(/\([^)]*\)/g, ' ').replace(/^the\s+/, '').replace(/\bsuite\b/g, ' ').replace(/\s+/g, ' ').trim(); };
       var free012 = (m012.free || []).filter(function (f) { return Object.keys(byType).some(function (t) { return typeKey(t) === f.roomType; }); });
-      var notes = (m012.notIn012 || []).concat(m012.ambiguous || []).filter(function (x) { return x.stay === p.stay; }).map(function (x) { return 'Room ' + x.label + ' (' + x.guests.join(', ') + '): ' + ((m012.ambiguous || []).indexOf(x) >= 0 ? 'more than one 012 row fits' : 'not in 012'); });
       var head = esc(p.place || p.stay) + ' · ' + esc(dmy(p.from)) + ' – ' + esc(dmy(p.to)) + (n ? ' · ' + n + ' night' + (n === 1 ? '' : 's') : '') +
-        ' <span class="ab-mute">· ' + occ.length + (h.roomsBought != null ? ' of ' + h.roomsBought + ' rooms bought' : ' room' + (occ.length === 1 ? '' : 's')) + ' · ' + guests + ' guest' + (guests === 1 ? '' : 's') +
+        ' <span class="ab-mute">· ' + occ.length + ' room' + (occ.length === 1 ? '' : 's') + ' with guests' + (h.roomsBought != null ? ' · ' + h.roomsBought + ' in the agreement' + (h.roomsAdditional ? ' + ' + h.roomsAdditional + ' additional' : '') : '') + ' · ' + guests + ' guest' + (guests === 1 ? '' : 's') +
         (h.cost ? ' · hotel ' + esc(kd(h.cost)) : '') + ' · guests ' + esc(kd(h.revenue)) + (h.surplus ? ' · surplus ' + esc(signed(h.surplus)) : '') + '</span>';
       return '<details class="ab-bd" data-ab-rooms="' + esc(p.stay) + '"' + (S.budgetOpen && S.budgetOpen['rooms-' + p.stay] != null ? (S.budgetOpen['rooms-' + p.stay] ? ' open' : '') : (/^D1$|^C$/.test(p.stay) ? ' open' : '')) + ' data-ab-bd="rooms-' + esc(p.stay) + '"><summary data-i18n-skip>' + head + '</summary><div class="ab-bd-body">' +
-        (rows ? '<div class="ab-table-wrap"><table class="ab-table"><thead><tr><th>Room · no. (012)</th><th>Category</th><th class="num">Occupancy</th><th>Guests · status · sale price</th><th>Check-in</th><th>Check-out</th><th class="num">Nights</th><th class="num">Hotel cost (purchase)</th><th class="num">Guest revenue (sale)</th><th class="num">Surplus</th></tr></thead><tbody>' + rows + sub + '</tbody></table></div>' : '<p class="t-b2">No guests yet.</p>') +
+        (rows ? '<div class="ab-table-wrap"><table class="ab-table"><thead><tr><th>Room · no. (012 ref.)</th><th>Category</th><th class="num">Occupancy</th><th>Guests · status · sale price</th><th>Check-in</th><th>Check-out</th><th class="num">Nights</th><th class="num">Hotel cost (purchase)</th><th class="num">Guest revenue (sale)</th><th class="num">Surplus</th></tr></thead><tbody>' + rows + sub + '</tbody></table></div>' : '<p class="t-b2">No guests yet.</p>') +
         (h.emptyBought ? '<p class="t-b2">The agreement also buys ' + h.emptyBought + ' room' + (h.emptyBought === 1 ? '' : 's') + ' without guests (' + esc(usd(h.emptyBought * (h.rate ? h.rate.amount : 0) * (n || 0))) + '); the stay\'s hotel cost ' + esc(kd(h.cost)) + ' counts every room it buys.</p>' : '') +
-        (h.uncontracted && h.uncontracted.length && h.roomsBought != null ? '<p class="t-b2 ab-flag">' + h.uncontracted.length + ' room' + (h.uncontracted.length === 1 ? '' : 's') + ' with guests the agreement does not buy for these nights (' + esc(h.uncontracted.map(function (u) { return u.roomNo || ('room ' + u.label); }).join(', ')) + ') — their hotel cost is not agreed; see Finance · E.</p>' : '') +
-        (empty.length ? '<p class="t-b2 ab-mute">Rooms without guests — ' + esc(empty.join(' · ')) + (free012.length ? ' · free in 012: ' + esc(free012.map(function (f) { return f.label + ' ' + f.roomNos.join(', '); }).join(' · ')) : '') + '</p>' : '') +
-        (notes.length ? '<p class="t-b2 ab-flag">012: ' + esc(notes.join(' · ')) + '</p>' : '') + '</div></details>';
+        (h.uncontracted && h.uncontracted.length && h.roomsBought != null ? '<p class="t-b2 ab-flag">' + h.uncontracted.length + ' room' + (h.uncontracted.length === 1 ? '' : 's') + ' with guests the agreement does not buy for these nights (' + esc(h.uncontracted.map(function (u) { return 'room ' + u.label; }).join(', ')) + ') — no purchase rate is set for them.</p>' : '') +
+        (h.held && h.held.length ? '<p class="t-b2 ab-flag">Held, not confirmed: ' + esc(h.held.map(function (u) { return 'room ' + u.label + ' (' + usd(u.cost.cents / 100) + ')'; }).join(', ')) + ' — their additional hotel cost is pending, not in the forecast.</p>' : '') +
+        (empty.length ? '<p class="t-b2 ab-mute">Rooms without guests — ' + esc(empty.join(' · ')) + (free012.length ? ' · free in 012 (reference): ' + esc(free012.map(function (f) { return f.label + ' ' + f.roomNos.join(', '); }).join(' · ')) : '') + '</p>' : '') + '</div></details>';
     }).join('');
     return '<section class="ab-sec" aria-label="Rooms and rates">' +
       exportBar([['rooming', 'CSV · hotel rooming list (all stays)']]) +
       '<div class="p-card ab-panel" data-ab-rooms-all><p class="t-l1">Rooms by hotel and period · guests · purchase and sale</p>' +
-      '<p class="t-b2 ab-mute">Hotel cost = what the hotel agreement charges for the room (purchase price); guest revenue = what its guests pay (sale price, Billing Engine 002 / 009; the couple\'s own room is complimentary); they are never mixed. Room numbers: Google 012, read only.</p>' + html + '</div>' +
+      '<p class="t-b2 ab-mute">Live from the booking system. Hotel cost = what the hotel charges H&amp;S for the room (purchase price): the agreement\'s rooms at its rate, every other booked room night at the Owners\' confirmed purchase rate, and the additional-person charge for a third person — with the 004 row that holds it, or "not in 004 — proposed" (Finance · E). Guest revenue = what its guests booked (selling price, Billing Engine 002 / 009; the couple\'s own room is complimentary); the two are never mixed. Hotel room numbers: Google 012, a historical template — a reference only.</p>' + html + '</div>' +
       rateListView(BG) + '</section>';
   }
   /* RECEIVABLES BY GUEST (Owners' review, 18 Nov 2026): every issued statement of a paying guest — invoiced, received, open,
@@ -1755,7 +1868,7 @@
       var k = el.getAttribute('data-ab-csv'), today = new Date().toISOString().slice(0, 10), doc = null, name = '';
       if (k === 'guests-all' || k === 'guests-shown') { doc = guestCsv(k === 'guests-all' ? 'all' : 'shown'); name = 'guest-list-' + (k === 'guests-all' ? 'complete' : 'filtered') + '-' + today + '.csv'; }
       else if (S.revenue && k === 'rooming') { doc = roomingCsv(); name = 'hotel-rooming-list-' + today + '.csv'; }
-      else if (S.revenue && (k === 'finance-summary' || k === 'budget-vs-actual')) { doc = finCsv(k); name = k + '-' + today + '.csv'; }
+      else if (S.revenue && (k === 'finance-summary' || k === 'budget-vs-actual' || k === 'reconciliation-004')) { doc = finCsv(k); name = (k === 'reconciliation-004' ? '004-reconciliation-proposed-additions' : k) + '-' + today + '.csv'; }
       else if (S.revenue && k === 'receivables') { doc = receivablesCsv(); name = 'revenue-receivables-' + today + '.csv'; }
       if (doc) saveText(name, doc);
     });

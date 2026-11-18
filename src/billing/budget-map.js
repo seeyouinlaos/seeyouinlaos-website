@@ -24,7 +24,7 @@
               of the supplier, never split between stays).
    ========================================================================== */
 
-export const BUDGET_MAP_VERSION = 'budget-map/1.1.0';
+export const BUDGET_MAP_VERSION = 'budget-map/1.2.0';
 
 export const STAGES = Object.freeze({
   A2: { place: 'U Sathorn Bangkok' },
@@ -71,15 +71,23 @@ export const ROOM_SCOPES = Object.freeze([
 
 export const VENDORS = Object.freeze([
   /* coversAll (Owners, 17 Nov 2026): the 007 total is the supplier's whole contract for these stays — "26 rooms, 54 contracted room
-     nights, USD 150 per room night, total USD 8,100" — so the cost forecast takes it in place of the 004 lines of its stays */
+     nights, USD 150 per room night, total USD 8,100". Since the Owners' order of 18 Nov 2026 the forecast no longer takes it in place
+     of the 004 lines: it adds what the bookings cost at this hotel (the agreement, additional room nights, the additional-person
+     charge) and 004 does not hold yet — 004's own rows stay as written (src/billing/finance-report.js · hotelPurchaseOf) */
   { vendor: /^souphattra\s+heritage\b/i, stages: ['C', 'D1'], coversAll: 'the hotel agreement: 26 rooms, 54 room nights, USD 150 per room night, USD 8,100 (Owners, 17 Nov 2026)',
     /* the rooms that agreement buys, at its rate per room night: every room of the wedding stay (D1, 27.02–01.03) and the
-       Presidential suite of 25–27.02 (004 row 23) — the rate list's hotel cost per room comes from here, nowhere else */
+       Presidential suite of 25–27.02 — the rate list's hotel cost per room comes from here, nowhere else */
     roomContract: { ratePerRoomNight: 150, rooms: { D1: '*', C: ['C-SOUPHATTRA-PRESIDENTIAL'] },
-      /* the agreement's room policy (31 Aug 2026, page 2): "Triple occupancy supplement: USD 60 net per room/night including
-         breakfast". NOT an Owner order: shown only as a decision (what it would add), never in any cost or forecast */
-      supplement: { perRoomNight: 60, when: 'a third person in the room', source: 'the hotel agreement of 31 Aug 2026, room policies: triple occupancy supplement USD 60 net per room/night incl. breakfast' },
-      agreementDates: 'The hotel agreement (31 Aug 2026) writes check-out "29/02/2027", a date 2027 does not have; 012 and the bookings say 01.03.2027.' } },
+      /* what the agreement buys, as it states it: the room plan is checked against it (a different count is named, never adjusted) */
+      agreement: { rooms: { D1: 26, C: 1 }, roomNights: 54, total: 8100 },
+      /* EVERY OTHER ROOM NIGHT AT THIS HOTEL (Owners, 18 Nov 2026): an earlier arrival, an extended stay or a room for a newly confirmed
+         guest is charged apart, at the confirmed hotel purchase rate of USD 150 per room per night — a PURCHASE price (what the hotel
+         charges H&S), never a guest's selling price */
+      additional: { ratePerRoomNight: 150, source: 'the Owners, 18 Nov 2026: additional room nights outside the agreement at USD 150 per room per night (earlier arrivals, extended stays, additional rooms; the additional rooms of 25–27.02 quoted at USD 150)' },
+      /* THE HOTEL'S ADDITIONAL-PERSON CHARGE (Owners, 18 Nov 2026, confirming the agreement's room policy of 31 Aug 2026): USD 60 per room
+         per night for a third person in the room — a purchase cost, kept apart from the extra occupant's own selling price (009) */
+      supplement: { perRoomNight: 60, confirmed: true, when: 'a third person (an extra bed) in the room', source: 'the Owners, 18 Nov 2026, confirming the agreement of 31 Aug 2026: additional-person charge USD 60 per room per night' },
+      agreementDates: 'The hotel agreement (31 Aug 2026) writes check-out "29/02/2027", a date 2027 does not have; the bookings say 01.03.2027.' } },
   { vendor: /^u\s*sathorn\b/i, stages: ['A2'] },
   { vendor: /^yifangju\b/i, stages: ['F'] },
   { vendor: /^luye\s+baisha\b/i, stages: ['H'] },
@@ -122,3 +130,8 @@ export const SUPPLIER_CATEGORY = Object.freeze([
   { vendor: /^bloom\s+and\s+bite\b/i, category: 'Flower & Decoration', lines: '004 Ceremony Decoration and Flowers (Bloom and Bite)' },
   { vendor: /^canva\s+stand\b/i, category: 'Flower & Decoration', lines: '004 Art Display Stand / Canvas (signage)' },
 ]);
+
+/* THE INTERNAL REPORTING REFERENCE RATES (Owners, 18 Nov 2026): 1 USD = 33.68 THB, 1 USD = 0.89 EUR. Used only to show a USD
+   equivalent BESIDE an amount kept in its own currency — labelled as a reference conversion, never the rate a transaction was made
+   at, never written back. A statement keeps the rate it was issued with (011). */
+export const REPORTING_FX = Object.freeze({ USD_THB: 33.68, USD_EUR: 0.89, source: 'the Owners\' approved internal reporting reference rates (18 Nov 2026): 1 USD = 33.68 THB · 1 USD = 0.89 EUR' });
