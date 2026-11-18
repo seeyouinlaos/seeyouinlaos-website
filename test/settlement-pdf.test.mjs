@@ -29,11 +29,11 @@ const ORDINARY = {
   ...BASE,
   lines: [
     L({ Person_ID: 'GT1', Item_ID: 'A2-U-SATHORN', Rate_Basis: 'PER_PERSON_PER_NIGHT', rateCents: 6781, nights: 3, payableNights: 3, amountCents: 20342 }),
-    L({ Person_ID: 'GT1', Item_ID: 'B-TRAIN-BKK-NKI', Rate_Basis: 'PER_PERSON', rateCents: 10000, nights: 1, payableNights: 1, amountCents: 10000 }),
+    L({ Person_ID: 'GT1', Item_ID: 'B-TRAIN-BKK-NKI', Rate_Basis: 'PER_PERSON', rateCents: 10000, nights: 1, payableNights: null, amountCents: 10000 }),
     L({ Person_ID: 'GT1', Item_ID: 'C-SOUPHATTRA-PRESIDENTIAL', Rate_Basis: 'PER_PERSON_PER_NIGHT', rateCents: 7500, nights: 2, payableNights: 2, amountCents: 15000, rateSource: 'SPECIAL_RATE', specialRateRef: AGREED }),
     L({ Person_ID: 'GT1', Item_ID: 'D1-SOUPHATTRA-PRESIDENTIAL', Rate_Basis: 'PER_PERSON_PER_NIGHT', rateCents: 7500, nights: 2, payableNights: 2, amountCents: 15000, rateSource: 'SPECIAL_RATE', specialRateRef: AGREED }),
-    L({ Person_ID: 'GT1', Item_ID: 'G-TRAIN-KMG-LJG', Rate_Basis: 'PER_PERSON', rateCents: 10500, nights: 1, payableNights: 1, amountCents: 10500 }),
-    L({ Person_ID: 'GT1', Item_ID: 'TEMPLE-OFFERING', Rate_Basis: 'PER_PERSON', rateCents: 1500, nights: 1, payableNights: 1, amountCents: 1500 }),
+    L({ Person_ID: 'GT1', Item_ID: 'G-TRAIN-KMG-LJG', Rate_Basis: 'PER_PERSON', rateCents: 10500, nights: 1, payableNights: null, amountCents: 10500 }),
+    L({ Person_ID: 'GT1', Item_ID: 'TEMPLE-OFFERING', Rate_Basis: 'PER_PERSON', rateCents: 1500, nights: 1, payableNights: null, amountCents: 1500 }),
     ...['E2-FLIGHT-VTE-KMG', 'I-FLIGHT-LJG-BKK'].map((Item_ID) => L({ Person_ID: 'GT1', Item_ID, Billing_Category: 'GUEST_SELF_BOOKING', block: 'B', amountCents: 0 })),
     ...['J-JATU-ROOM', 'F-JINRI-FAMILY-SUITE', 'H-VIEW-SUITE-270'].map((Item_ID) => L({ Person_ID: 'GT1', Item_ID, Billing_Category: 'GUEST_SELF_PAYMENT', block: 'B', amountCents: 0 })),
   ],
@@ -47,7 +47,7 @@ const LONG = {
   lines: [
     ...Array.from({ length: 26 }, (_, i) => L({
       Person_ID: 'GT' + (10 + (i % 4)), Item_ID: 'X' + i + '-VERY-LONG-PRODUCT-KEY-WITHOUT-ANY-SPACES-' + i,
-      Rate_Basis: i % 3 ? 'PER_PERSON_PER_NIGHT' : 'PER_ROOM', rateCents: 123456, nights: 3, payableNights: i % 2 ? 2 : 3,
+      Rate_Basis: i % 3 ? 'PER_PERSON_PER_NIGHT' : 'PER_ROOM', rateCents: 123456, nights: 3, payableNights: i % 3 ? (i % 2 ? 2 : 3) : null,
       quantity: i % 5 ? 1 : 2, amountCents: 1234567 + i, rateSource: i % 4 ? 'STANDARD' : 'SPECIAL_RATE',
       specialRateRef: i % 4 ? null : 'Bride & Groom only · a long agreed note that runs over more than one line of the item column',
     })),
@@ -171,8 +171,8 @@ test('PDF LINES · layout only — every figure, rate, date, FX row and sentence
 test('PDF LINES · the same Snapshot gives the same bytes, and the file names this layout\'s writer', () => {
   const a = renderSettlementPdf(LONG, LONG_OPTS), b = renderSettlementPdf(LONG, LONG_OPTS);
   assert.deepEqual(a, b);
-  assert.equal(PDF_WRITER_VERSION, 'guest-settlement-pdf/1.1');
-  assert.match(Buffer.from(a).toString('latin1'), /\/Producer \(guest-settlement-pdf\/1\.1\)/);
+  assert.equal(PDF_WRITER_VERSION, 'guest-settlement-pdf/1.2');
+  assert.match(Buffer.from(a).toString('latin1'), /\/Producer \(guest-settlement-pdf\/1\.2\)/);
 });
 
 test('PDF LINES · layout only — every cell is still printed: persons, bases, rates, nights, named rates, markers, notes, sentences', () => {
@@ -182,7 +182,8 @@ test('PDF LINES · layout only — every cell is still printed: persons, bases, 
   const o = text(read(renderSettlementPdf(ORDINARY, {})));
   assert.equal(count(o, 'GT1'), 11, 'one person cell per line');
   assert.equal(count(o, 'per person per night'), 3); assert.equal(count(o, 'per person'), 3);
-  assert.equal(count(o, '3 nights'), 1); assert.equal(count(o, '2 nights'), 2); assert.equal(count(o, '1 night'), 3);
+  /* layout 1.2 (Owners, 18 Nov 2026): nights only where the rate is per night — the two trains and the temple offering show "1" */
+  assert.equal(count(o, '3 nights'), 1); assert.equal(count(o, '2 nights'), 2); assert.equal(count(o, '1 night'), 0); assert.ok(count(o, '1') >= 3);
   assert.equal(count(o, 'named special rate'), 2);
   assert.equal(count(o, 'you book and pay this yourself'), 2); assert.equal(count(o, 'you pay this yourself on site'), 3);
   for (const s of ['Guest Settlement', 'S-TEST-0001 · Revision V1', 'ISSUED', 'DUE', 'CURRENCY', 'USD', 'Payable to Haruthai & Suthep',
@@ -195,8 +196,9 @@ test('PDF LINES · layout only — every cell is still printed: persons, bases, 
   const l = text(read(renderSettlementPdf(LONG, LONG_OPTS)));
   assert.equal(count(l, 'named special rate'), 7);
   assert.equal(count(l, 'per room'), 9); assert.equal(count(l, 'per person per night'), 17); assert.equal(count(l, 'at USD 1234.56'), 26);
-  assert.equal(count(l, '3 nights'), 10); assert.equal(count(l, '2 of 3 nights'), 10);
-  assert.equal(count(l, '3 nights x 2'), 3); assert.equal(count(l, '2 of 3 nights x 2'), 3);
+  /* the per-room lines show their quantity (their amount is rate × quantity, Freeze · B); the per-night lines their nights */
+  assert.equal(count(l, '3 nights'), 6); assert.equal(count(l, '2 of 3 nights'), 7);
+  assert.equal(count(l, '3 nights x 2'), 2); assert.equal(count(l, '2 of 3 nights x 2'), 2);
   for (const s of ['hosted, no charge', 'USD 0.00', 'not yet determined', 'REVIEW', 'How to pay']) assert.ok(l.includes(s), s);
   assert.equal(count(l, 'Manual review required'), 2, 'the review box and the total');
   for (const s of ['This due date was set by hand and replaces the standard schedule.',
@@ -246,4 +248,80 @@ test('PDF LINES · page breaks: a heading never stands alone at the foot of a pa
     assert.ok(fx.texts.some((t) => t.s === '1 USD = 0.89 EUR') && fx.texts.some((t) => /^These rates were frozen/.test(t.s)),
       n + '/' + k + ': the FX heading with its rates and sentence');
   }
+});
+
+/* ---------------------------------------------------------------- layout 1.2 (Owners, 18 Nov 2026) */
+const ONE = (lines) => ({ ...BASE, Settlement_ID: 'HS-TEST-0023', Total_Payable_Cents: lines.reduce((t, l) => t + (l.amountCents || 0), 0), Payment_Preference: 'PAYPAL_EUR', lines });
+const raw = (bytes) => Buffer.from(bytes).toString('latin1');
+
+test('PDF 1.2 · THE UNIT OF A LINE IS ITS OWN: nights only where the rate is per night; a temple offering, a train seat, a per-room or flat charge show their quantity — never "night"; every amount as before', () => {
+  const s = ONE([
+    L({ Person_ID: 'GT1', Item_ID: 'D1-HERITAGE-EXECUTIVE', Rate_Basis: 'PER_PERSON_PER_NIGHT', rateCents: 15500, nights: 2, payableNights: 1, amountCents: 15500 }),
+    L({ Person_ID: 'GT1', Item_ID: 'C-HERITAGE-EXECUTIVE', Rate_Basis: 'PER_PERSON_PER_NIGHT', rateCents: 13000, nights: 2, payableNights: 2, amountCents: 26000 }),
+    L({ Person_ID: 'GT1', Item_ID: 'TEMPLE-OFFERING', Rate_Basis: 'PER_PERSON', rateCents: 1500, nights: 1, payableNights: null, amountCents: 1500 }),
+    L({ Person_ID: 'GT1', Item_ID: 'B-TRAIN-BKK-NKI', Rate_Basis: 'PER_PERSON', rateCents: 8000, nights: 1, quantity: 2, amountCents: 16000 }),
+    L({ Person_ID: 'GT1', Item_ID: 'X-ROOM', Rate_Basis: 'PER_ROOM', rateCents: 10000, nights: 3, amountCents: 10000 }),
+    L({ Person_ID: 'GT1', Item_ID: 'X-FLAT', Rate_Basis: 'FLAT', rateCents: 500, nights: 1, amountCents: 500 }),
+    /* a named 009 rate on a per-person product is charged per payable night (engine) — its unit is the nights it was charged for */
+    L({ Person_ID: 'GT1', Item_ID: 'X-PP-NAMED', Rate_Basis: 'PER_PERSON', rateCents: 5000, nights: 2, payableNights: 2, amountCents: 10000, rateSource: 'SPECIAL_RATE', specialRateRef: 'named' }),
+  ]);
+  const t = text(read(renderSettlementPdf(s, {})));
+  assert.ok(t.includes('1 of 2 nights') && t.includes('2 nights'), 'accommodation in nights');
+  assert.equal(t.filter((x) => x === '1 night').length, 0, 'no "1 night" anywhere');
+  assert.equal(t.filter((x) => /^\d.*\bnights?$/.test(x)).length, 2, 'only the stays count nights');
+  /* the named rate on a per-person product: its multiplier (payable nights × quantity), the word never "night" */
+  assert.ok(t.includes('USD 100.00'));
+  assert.ok(t.includes('2'), 'the train seats: quantity 2');
+  for (const a of ['USD 155.00', 'USD 260.00', 'USD 15.00', 'USD 160.00', 'USD 100.00', 'USD 5.00', 'USD 795.00']) assert.ok(t.includes(a), a + ' unchanged');
+  /* the quantity exactly as the line holds it — never a figure the snapshot does not carry */
+  const noQty = text(read(renderSettlementPdf(ONE([L({ Person_ID: 'GT1', Item_ID: 'TEMPLE-OFFERING', Rate_Basis: 'PER_PERSON', rateCents: 1500, quantity: null, amountCents: 1500 })]), {})));
+  assert.ok(!noQty.includes('1'), 'no invented quantity');
+});
+test('PDF 1.2 · the statement amount at the frozen rate is the server\'s own conversion: USD 341.62 under SEPA at 0.89 prints EUR 304.04 beside USD 341.62 — no half figure, no balance', async () => {
+  const { inPreferredCurrency } = await import('../src/billing/settlement.js');
+  const s = ONE([L({ Person_ID: 'GT1', Item_ID: 'D1-HERITAGE', Rate_Basis: 'PER_PERSON_PER_NIGHT', rateCents: 34162, nights: 2, payableNights: 1, amountCents: 34162 })]);
+  const amount = inPreferredCurrency(34162, 'SEPA_EUR', { FX_USD_EUR: 0.89, FX_USD_THB: 33.68 });
+  const t = text(read(renderSettlementPdf(s, { payment: { method: 'SEPA_EUR', amount, totalUsd: 341.62, recipient: 'Account Holder Example', iban: 'DE00123456780000000000', reference: 'HS-TEST-0023' } })));
+  assert.ok(t.includes("EUR 304.04  (USD 341.62 at this statement's frozen rate)"));
+  assert.ok(!t.includes('Amount to pay'), 'a frozen document never states what is still to pay');
+});
+
+test('PDF 1.2 · HOW TO PAY: the guest page\'s own payment facts, printed as given — SEPA with the IBAN grouped, the reference, the amount at the frozen rate, the due date; a missing IBAN or code points to My Profile, nothing is invented', () => {
+  const s = ONE([L({ Person_ID: 'GT1', Item_ID: 'TEMPLE-OFFERING', Rate_Basis: 'PER_PERSON', rateCents: 1500, nights: 1, amountCents: 1500 })]);
+  const sepa = { method: 'SEPA_EUR', amount: { currency: 'EUR', amount: 13.35 }, totalUsd: 15, dueDate: '2026-10-28', recipient: 'Account Holder Example', iban: 'DE00123456780000000000', reference: 'HS-TEST-0023' };
+  const t = text(read(renderSettlementPdf(s, { payment: sepa })));
+  for (const x of ['How to pay', 'Payment method', 'Bank transfer (SEPA), in euros (EUR) (as issued)', 'Statement amount', 'Pay by', '2026-10-28', 'Account holder', 'Account Holder Example', 'IBAN', 'DE00 1234 5678 0000 0000 00', 'Reference no.', 'HS-TEST-0023']) assert.ok(t.includes(x), x);
+  assert.ok(t.some((x) => /^EUR 13\.35 +\(USD 15\.00 at this statement's frozen rate\)$/.test(x)));
+  const noIban = text(read(renderSettlementPdf(s, { payment: { ...sepa, iban: null } })));
+  assert.ok(noIban.includes('shown in My Profile, under Your statement')); assert.ok(!noIban.some((x) => /DE00/.test(x)));
+  const pp = text(read(renderSettlementPdf(s, { payment: { method: 'PAYPAL_EUR', amount: { currency: 'EUR', amount: 13.35 }, totalUsd: 15, recipient: 'Suthep', reference: 'HS-TEST-0023', qr: null } })));
+  assert.ok(pp.includes('The payment code is shown in My Profile, under Your statement.'));
+  const none = text(read(renderSettlementPdf(s, {})));
+  assert.ok(!none.includes('Payment method'), 'no payment facts given, none printed');
+  const unknown = text(read(renderSettlementPdf(s, { payment: { method: null } })));
+  assert.ok(unknown.includes('Guest Relations will tell you how to pay this statement.'));
+});
+
+test('PDF 1.2 · THE PAYMENT CODE is the caller\'s image, embedded once as an image XObject on its page; the file stays valid (every xref offset points at its object) and the same input gives the same bytes', () => {
+  const s = ONE([L({ Person_ID: 'GT1', Item_ID: 'TEMPLE-OFFERING', Rate_Basis: 'PER_PERSON', rateCents: 1500, nights: 1, amountCents: 1500 })]);
+  const img = { width: 2, height: 3, colorSpace: 'DeviceRGB', filter: 'FlateDecode', data: new Uint8Array([120, 156, 0, 255, 13, 10, 128, 37, 69, 79, 70]) };   /* binary bytes, CR/LF and '%EOF'-like text inside */
+  const opts = { payment: { method: 'PAYPAL_EUR', amount: { currency: 'EUR', amount: 13.35 }, totalUsd: 15, recipient: 'Suthep', reference: 'HS-TEST-0023', qr: img } };
+  const a = renderSettlementPdf(s, opts), b = renderSettlementPdf(s, opts), r = raw(a);
+  assert.deepEqual(a, b);
+  assert.match(r, /\/Subtype \/Image \/Width 2 \/Height 3 \/ColorSpace \/DeviceRGB \/BitsPerComponent 8 \/Filter \/FlateDecode \/Length 11 >>\nstream\n/);
+  assert.match(r, /\/XObject << \/Im1 \d+ 0 R >>/); assert.match(r, /\/Im1 Do Q/);
+  const at = r.lastIndexOf('\nxref\n') + 1, xref = r.slice(at).split('\n'), size = Number(xref[1].split(' ')[1]);
+  for (let n = 1; n < size; n++) { const off = Number(xref[2 + n].slice(0, 10)); assert.equal(r.slice(off, off + String(n).length + 6), n + ' 0 obj', 'object ' + n); }
+  assert.equal(Number(r.slice(r.lastIndexOf('startxref\n') + 10).split('\n')[0]), at);
+  const jpg = raw(renderSettlementPdf(s, { payment: { ...opts.payment, method: 'PROMPTPAY_THB', amount: { currency: 'THB', amount: 505.2 }, qr: { width: 885, height: 1200, colorSpace: 'DeviceRGB', filter: 'DCTDecode', data: new Uint8Array([0xff, 0xd8, 0xff, 0xd9]) } } }));
+  assert.match(jpg, /\/Filter \/DCTDecode/); assert.match(jpg, /PromptPay, in Thai baht \\\(THB\\\)/);
+});
+
+test('PDF 1.2 · a replaced version never instructs to pay (it points to the current one); a statement with nothing payable says so; neither prints an account or a code', () => {
+  const s = ONE([L({ Person_ID: 'GT1', Item_ID: 'TEMPLE-OFFERING', Rate_Basis: 'PER_PERSON', rateCents: 1500, nights: 1, amountCents: 1500 })]);
+  const old = text(read(renderSettlementPdf(s, { payment: { supersededBy: 'V2' } })));
+  assert.ok(old.join(' ').includes('This version was replaced by version V2. My Profile shows the current statement and how to pay it.'));
+  assert.ok(!old.includes('Payment method') && !old.includes('IBAN') && !old.includes('Reference no.'));
+  const zero = text(read(renderSettlementPdf(s, { payment: { nothingDue: true } })));
+  assert.ok(zero.includes('Nothing is payable on this statement.')); assert.ok(!zero.includes('Payment method'));
 });

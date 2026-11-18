@@ -450,7 +450,8 @@
         '<td data-l="Guest Relations">' + confChip(S.status[h.Holder_ID]) + (stage(h) ? '<br><span class="ab-mute" data-ab-stage="' + stage(h).key + '">' + esc(stage(h).words) + '</span>' : '') + readyWords(h) + '</td>' +
         '<td data-l="Booked value" class="num">' + bookedCell(h) + '</td>' +
         '<td data-l="Statement">' + esc(stmtWords(h)) + (s.Settlement_ID ? '<span class="ab-id" data-i18n-skip>' + esc(s.Settlement_ID) + '</span>' : '') + (p ? (s.Settlement_ID ? '' : '<br>') + '<span class="ab-mute">' + esc(PAY[p.status] || p.status || '') + (p.pendingCount ? ' · ' + p.pendingCount + ' reported' : '') + '</span>' : '') + '</td>' +
-        '<td data-l="Issued · due">' + (s.issueDate ? esc(day(s.issueDate)) + '<br><span class="ab-mute">due ' + esc(day(s.dueDate)) + '</span>' : '<span class="ab-mute">—</span>') + '</td>' +
+        '<td data-l="Issued · due">' + (s.issueDate ? esc(day(s.issueDate)) + '<br><span class="ab-mute">due ' + esc(day(s.dueDate)) + '</span>' : '<span class="ab-mute">—</span>') +
+          (s.Settlement_ID && s.issuedRevision ? '<br><button type="button" class="p-link" data-ab-row-pdf="' + esc(h.Holder_ID) + '" data-ab-pdf-sid="' + esc(s.Settlement_ID) + '" data-ab-pdf-rev="' + esc(s.issuedRevision) + '">Download Original PDF · V' + esc(s.issuedRevision) + '</button>' : '') + '</td>' +
         '<td data-l="Statement total" class="num">' + totalCell(h) + '</td>' +
         '<td data-l="Paid" class="num">' + (p ? '<span data-i18n-skip>' + esc(usd(p.ist)) + '</span>' : '<span class="ab-mute">—</span>') + '</td>' +
         '<td data-l="Outstanding" class="num">' + out + '</td>' +
@@ -461,6 +462,7 @@
       '<div class="ab-tools"><label class="ab-search"><span class="t-l1">Search</span><input type="search" placeholder="Name, G… or INV-…" value="' + esc(S.q) + '" data-ab-q autocomplete="off"></label>' +
       '<div class="ab-filters" role="group" aria-label="Filter">' + chips + '</div></div>' + progress +
       exportBar([['guests-all', 'CSV · complete guest list (' + rows.length + ')'], ['guests-shown', 'CSV · this filter (' + shown.length + ')']]) +
+      (S.download ? '<p class="t-b2 ab-msg" role="status">' + esc(S.download) + '</p>' : '') +
       (shown.length ? '<div class="ab-table-wrap"><table class="ab-table"><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>'
         : '<p class="t-b1 ab-empty">No guest matches this filter.</p>') +
       '<p class="t-b2 ab-foot">' + shown.length + ' shown · ' + rows.length + ' invitations of the register (the couple included)' +
@@ -528,7 +530,7 @@
       act('confirm', 'Confirm booking', canConfirm && S.panel !== 'confirm', confirmWhy(sub), canConfirm && S.panel !== 'confirm') +
       act('issue', iss ? 'Issue new revision' : 'Issue statement', !!pv.issuable && S.panel === 'preview', issueWhy, S.panel === 'preview') +
       act('view', 'View statement', !!iss, iss ? '' : 'Not issued yet.') +
-      act('download', 'Download PDF', !!iss, iss ? '' : 'Not issued yet.') +
+      act('download', 'Download Original PDF', !!iss, iss ? 'the issued version, exactly as the guest receives it' : 'Not issued yet.') +
       act('send', 'Send statement', !!(iss && g.email), sendWhy) + '</div>' +
       (S.download ? '<p class="t-b2" role="status">' + esc(S.download) + '</p>' : '');
     var head = '<div class="p-card ab-guest"><p class="t-l1"><a href="/admin/billing#guests" class="ab-back" data-ab-back>← All guests</a></p>' +
@@ -708,8 +710,12 @@
       kv('Frozen FX', '<span data-i18n-skip>1 USD = ' + esc(x.fx.FX_USD_EUR) + ' EUR · ' + esc(x.fx.FX_USD_THB) + ' THB</span>') +
       kv('Hosted value', '<span data-i18n-skip>' + esc(usd(x.hostedValue)) + '</span>') + kv('Engine', esc(x.engineVersion || '—')) + '</div>' +
       linesTable(x.lines, false) +
-      (revs.length ? '<p class="t-l1">Revisions</p><ul class="t-b2 ab-revs">' + revs.map(function (r) {
-        return '<li>V' + esc(r.Revision) + ' · ' + esc(r.Revision_State) + (r.total != null ? ' · ' + esc(usd(r.total)) : '') + (r.issuedAt ? ' · issued ' + esc(when(r.issuedAt)) + (r.issuedBy ? ' by ' + esc(r.issuedBy) : '') : '') + '</li>';
+      (revs.length ? '<p class="t-l1">Statement versions · each the original PDF the guest received</p><ul class="t-b2 ab-revs" data-ab-versions>' + revs.map(function (r) {
+        var issued = r.Revision_State === 'ISSUED' || r.Revision_State === 'SUPERSEDED';
+        var made = r.pdf ? (r.pdf.produced ? ' · original produced (' + esc(String(r.pdf.writer || '').replace('guest-settlement-pdf/', 'layout ')) + ')' : ' · not produced yet (produced on first download, layout 1.2)') : '';
+        return '<li>V' + esc(r.Revision) + ' · ' + esc(r.Revision_State === 'ISSUED' ? 'current' : r.Revision_State === 'SUPERSEDED' ? 'superseded (historical original)' : r.Revision_State) + (r.total != null ? ' · ' + esc(usd(r.total)) : '') +
+          (r.Issue_Date ? ' · issued ' + esc(day(r.Issue_Date)) : r.issuedAt ? ' · issued ' + esc(when(r.issuedAt)) : '') + (r.Due_Date ? ' · due ' + esc(day(r.Due_Date)) : '') + (r.issuedBy ? ' · by ' + esc(r.issuedBy) : '') + made +
+          (issued ? ' · <button type="button" class="p-link" data-ab-pdf="' + esc(r.Revision) + '" data-ab-pdf-sid="' + esc(x.Settlement_ID) + '">Download Original PDF · V' + esc(r.Revision) + '</button>' : '') + '</li>';
       }).join('') + '</ul>' : '') + '</section>';
   }
   /* CONFIRM BOOKING — the submitted version, shown in full before anything is confirmed */
@@ -1645,20 +1651,25 @@
   }
 
   /* --------------------------------------------------------------- actions */
-  function download() {
-    var x = S.holder && S.holder.issued; if (!x) return;
-    var id = S.holder.Holder_ID;
-    S.download = 'Preparing the PDF…'; draw();
+  /* DOWNLOAD ORIGINAL PDF (Owners, 18 Nov 2026): the very file the guest downloads and the statement e-mail carries — the issued
+     revision's write-once PDF from the server (GET /api/billing/pdf, BILLING_ADMIN may name the holder), never a copy made here;
+     any version, the current one or a superseded original. Reading it issues, sends or changes nothing. */
+  function download(holderId, settlementId, revision) {
+    var x = S.holder && S.holder.issued;
+    var id = holderId || (S.holder && S.holder.Holder_ID), sid = settlementId || (x && x.Settlement_ID), rev = revision || (x && x.revision);
+    if (!id || !sid || !rev || S.downloading) return;   /* one download at a time */
+    S.downloading = true;
+    S.download = 'Preparing the original PDF of ' + sid + ' V' + rev + '…'; draw();
     var a = auth();
-    fetch('/api/billing/pdf?holder=' + encodeURIComponent(id) + '&rev=' + encodeURIComponent(x.revision), { headers: { 'x-siyl-auth': a ? a.bearer : '' }, cache: 'no-store' })
+    fetch('/api/billing/pdf?holder=' + encodeURIComponent(id) + '&rev=' + encodeURIComponent(rev), { headers: { 'x-siyl-auth': a ? a.bearer : '' }, cache: 'no-store' })
       .then(function (r) { if (!r.ok) throw new Error('pdf ' + r.status); return r.blob(); })
       .then(function (blob) {
         var url = URL.createObjectURL(blob), el = document.createElement('a');
-        el.href = url; el.download = 'Statement-' + x.Settlement_ID + '-V' + x.revision + '.pdf';
+        el.href = url; el.download = 'Statement-' + sid + '-V' + rev + '.pdf';
         document.body.appendChild(el); el.click(); el.remove();
         setTimeout(function () { try { URL.revokeObjectURL(url); } catch (e) {} }, 60000);
-        S.download = ''; draw();
-      }, function () { S.download = 'The PDF could not be downloaded just now. Please try again.'; draw(); });
+        S.downloading = false; S.download = ''; draw();
+      })['catch'](function () { S.downloading = false; S.download = 'The PDF could not be downloaded just now. Please try again.'; draw(); });
   }
   function issueNow() {
     var H = S.holder, I = S.issue; if (!H || !I || !I.checked || I.busy) return;
@@ -1821,7 +1832,7 @@
     var q = root.querySelector('[data-ab-q]');
     if (q) q.oninput = function () { S.q = q.value; var pos = q.selectionStart; draw(); var n = root.querySelector('[data-ab-q]'); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} } };
     on('[data-ab-open]', 'click', function (el) { go('#holder=' + el.getAttribute('data-ab-open')); });
-    on('[data-ab-open]', 'keydown', function (el, e) { if (e && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); go('#holder=' + el.getAttribute('data-ab-open')); } });
+    on('[data-ab-open]', 'keydown', function (el, e) { if (e && e.target && e.target !== el && e.target.tagName === 'BUTTON') return; if (e && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); go('#holder=' + el.getAttribute('data-ab-open')); } });
     on('[data-ab-back]', 'click', function (el, e) { if (e) e.preventDefault(); if (S.overviewStale) { S.overviewStale = false; go('#guests'); start(); } else go('#guests'); });
     on('[data-ab-tab]', 'click', function (el, e) { if (e) e.preventDefault(); go(el.getAttribute('data-ab-tab')); });
     on('[data-ab-reload]', 'click', function () { if (S.route.id) loadHolder(S.route.id); draw(); });
@@ -1907,6 +1918,9 @@
       });
     });
     on('[data-ab-pay-cancel]', 'click', function () { S.pay = null; draw(); });
+    /* the original PDF of a version (holder view) and of the current version (a guest's row — the row itself is not opened) */
+    on('[data-ab-pdf]', 'click', function (el) { download(S.holder && S.holder.Holder_ID, el.getAttribute('data-ab-pdf-sid'), el.getAttribute('data-ab-pdf')); });
+    on('[data-ab-row-pdf]', 'click', function (el, e) { if (e && e.stopPropagation) e.stopPropagation(); download(el.getAttribute('data-ab-row-pdf'), el.getAttribute('data-ab-pdf-sid'), el.getAttribute('data-ab-pdf-rev')); });
     if (EXT && EXT.wire) EXT.wire(root, on);
   }
 

@@ -50,7 +50,8 @@ import {
 import { loadConfirmedBookings, unmappedProducts, siteKeyOfSelection, nightsOf, selectionLinesOf, registrationState } from './billing/bookings.js';
 import { OWNER_BOOKING_STATE, obkKey, OBK_INDEX_KEY, readRecord, stateOf as ownerStateOf, stageOf, keyStage, holdPlan, applyAction, toBookings, occupancy, problemsOf, combinedConfirmation } from './billing/owner-bookings.js';
 import { canonicalLines, canonicalKey } from './legacy-keys.js';
-import { renderSettlementPdf } from './billing/pdf.js';
+import { renderSettlementPdf, PDF_WRITER_VERSION } from './billing/pdf.js';
+import { qrImageOf } from './billing/pdf-image.js';
 import { buildRevenueOverview } from './billing/revenue.js';
 import { buildBudgetComparison } from './billing/budget.js';
 import { BUDGET_TABS, rangeOfTab, parseBudget004, parseVendors007, parseItemDisplay, parseSpecialRateRows, parseRoomList012 } from './billing/budget-source.js';
@@ -766,12 +767,53 @@ async function issuedPdf(env, holderId, askedRevision) {
     const one = view && view.ok === true && view.holder ? view.holder.revision : null;
     const snapshot = one && one.snapshot && Number(one.snapshot.Revision) === rev ? one.snapshot : null;
     if (!snapshot) return { status: 404, error: 'no snapshot for that revision' };
-    const bytes = renderSettlementPdf(snapshot, {});
-    await env.DOCS.put(key, bytes, { httpMetadata: { contentType: 'application/pdf' } });
+    /* THE COMPLETE STATEMENT (Owners, 18 Nov 2026): the payment section — the method frozen with this revision, its amount at the
+       frozen rate, the payee, the account or the approved payment code — read once, here, from the authoritative payment source,
+       and frozen into the write-once PDF; an existing PDF is never rendered again (above) */
+    /* a version already replaced carries no instruction to pay (it points to the current one) */
+    const current = Number(state.issuedRevision && state.issuedRevision.Revision) || null;
+    const payment = current && rev !== current ? { supersededBy: 'V' + current } : await paymentForPdf(env, snapshot);
+    /* FAIL CLOSED: a payment section that cannot be read completely just now (the code, the account) is never frozen into the
+       original — nothing is stored, the request is answered "try again", the e-mail records NOT_SENT */
+    if (payment.incomplete) return { status: 503, error: 'the statement cannot be prepared just now (' + payment.incomplete + '); please try again in a moment' };
+    const bytes = renderSettlementPdf(snapshot, { payment });
+    await env.DOCS.put(key, bytes, { httpMetadata: { contentType: 'application/pdf' }, customMetadata: { writer: PDF_WRITER_VERSION, method: clean(payment.method) || '', qrSha256: payment.qrSha256 || '' } });
     obj = await env.DOCS.get(key);
     if (!obj) return { status: 503, error: 'the statement could not be stored' };
   }
   return { obj, settlementId, revision: rev };
+}
+
+/* the payment facts of one issued revision, exactly as the guest's statement page shows them (assets/statement.js · How to pay):
+   the snapshot's frozen method and rates, the destination of src/billing/preference.js (the IBAN from its Worker secret), the
+   approved payment code from the document store — nothing invented; what cannot be read is left out and the PDF says where to
+   find it (My Profile) */
+async function paymentForPdf(env, snapshot) {
+  const total = Number(snapshot && snapshot.Total_Payable_Cents);
+  if (!Number.isFinite(total) || total <= 0) return { nothingDue: Number.isFinite(total) && total <= 0, method: null };
+  const channel = clean(snapshot && snapshot.Payment_Preference);
+  /* the method and its currency frozen with the revision must agree, or no instruction is printed (Guest Relations tells) */
+  if (!isChannel(channel) || (clean(snapshot.Payment_Currency) && clean(snapshot.Payment_Currency) !== CHANNEL_CURRENCY[channel])) return { method: null };
+  const dest = destinationOf(channel, env) || {};
+  if (channel === 'SEPA_EUR' && !dest.iban) return { incomplete: 'the bank account is not configured' };
+  const fx = { FX_USD_THB: snapshot.FX_USD_THB, FX_USD_EUR: snapshot.FX_USD_EUR };
+  let qr = null, qrSha256 = '';
+  if (QR_KEYS[channel]) {
+    if (!env.DOCS) return { incomplete: 'the document store is not reachable' };
+    let raw = null;
+    try { const obj = await env.DOCS.get(QR_KEYS[channel]); raw = obj ? new Uint8Array(await obj.arrayBuffer()) : null; } catch (e) { raw = null; }
+    if (!raw) return { incomplete: 'the approved payment code cannot be read' };
+    qr = await qrImageOf(raw);
+    if (!qr) return { incomplete: 'the approved payment code cannot be embedded' };
+    qrSha256 = [...new Uint8Array(await crypto.subtle.digest('SHA-256', raw))].map((x) => x.toString(16).padStart(2, '0')).join('');   /* the code's own bytes — which approved image this PDF carries */
+  }
+  return { method: channel, amount: inPreferredCurrency(total, channel, fx), totalUsd: fromCents(total),
+    dueDate: clean(snapshot.Due_Date) || null, recipient: dest.recipient || null, iban: dest.iban || null, reference: clean(snapshot.Settlement_ID) || null, qr, qrSha256 };
+}
+
+async function pdfStateOf(env, sid, x) {
+  if (!sid || !(x.Revision_State === 'ISSUED' || x.Revision_State === 'SUPERSEDED') || !env.DOCS || typeof env.DOCS.head !== 'function') return null;
+  try { const h = await env.DOCS.head(pdfKey(sid, x.Revision)); return h ? { produced: true, writer: (h.customMetadata && h.customMetadata.writer) || 'guest-settlement-pdf/1.1 or earlier' } : { produced: false }; } catch (e) { return null; }
 }
 
 async function servePdf(env, identity, url, cors) {
@@ -1813,9 +1855,11 @@ async function adminHolder(env, identity, url, cors) {
       destinationComplete: !!(a.destination && a.destination.complete) }
       : { channel: issued ? issued.Payment_Preference : null, currency: issued ? issued.Payment_Currency : null, determined: !!issued, source: issued ? 'ISSUED_REVISION' : null, reason: previewError },
     settlement: { Settlement_ID: sid, state: state.state || null, latestRevision: state.latestRevision || 0,
-      revisions: (view.holder.revisions || []).map((x) => ({ Revision: x.Revision, Revision_State: x.Revision_State, Issue_Date: x.Issue_Date,
+      revisions: await Promise.all((view.holder.revisions || []).map(async (x) => ({ Revision: x.Revision, Revision_State: x.Revision_State, Issue_Date: x.Issue_Date,
         Due_Date: x.Due_Date, total: x.Total_Payable_Cents == null ? null : fromCents(x.Total_Payable_Cents), issuedAt: x.issuedAt,
-        issuedBy: x.issuedBy, supersededAt: x.supersededAt })) },
+        issuedBy: x.issuedBy, supersededAt: x.supersededAt,
+        /* the original PDF: produced (and by which writer — before 18 Nov 2026 always 1.1) or not yet — read with a HEAD, never rendered here */
+        pdf: await pdfStateOf(env, sid, x) }))) },
     preview: !a ? { error: previewError, issuable: false, reasons: ['PREVIEW_UNAVAILABLE: ' + previewError], proposalHash: null, lines: [], blockB: [] } : {
       total: r.totalPayable, hostedValue: fromCents(r.hostedValueCents), lines: r.lines.filter((l) => l.block !== 'B').map((l) => lineView(l, people)),
       blockB: (r.blockB || []).map((l) => lineView(l, people)), manualReview: r.manualReview.map((l) => l.reviewReason).filter(Boolean),
