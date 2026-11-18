@@ -36,7 +36,7 @@ import { confirmationStands, writeConfirmation, CONFIRMATION_ROLE } from './conf
 import { loadBookedSelection, priceSelection, BOOKED_SOURCE } from './billing/booked.js';
 import { composeStatementMail } from './mail-templates.js';
 import { pricingSource, catalogueKey } from './billing/catalogue-cache.js';
-import { effectivePreference, routeFor, destinationOf, firstVerifiedPayment, isChannel, PREFERENCE_SOURCE } from './billing/preference.js';
+import { effectivePreference, routeFor, statedNationality, destinationOf, firstVerifiedPayment, isChannel, PREFERENCE_SOURCE } from './billing/preference.js';
 import { GoogleSheetsUnavailable, batchReadRanges } from './google-sheets.js';
 import { calculate, perPerson, matchSpecialRate, COUPLE_PERSONS } from './billing/engine.js';
 import { unitOf as roomUnitOf } from './rooms.js';
@@ -298,7 +298,8 @@ async function holderIdentity(env, origin, holderId) {
 async function preferenceOf(env, origin, holderId, state, src, register) {
   const who = await holderIdentity(env, origin, holderId);
   const reg = register || await loadGuestNationalities(env, src.cfg);
-  const route = routeFor({ holderId, nationality: nationalityOf(reg, who.contactId) });
+  const nat = nationalityOf(reg, who.contactId);
+  const route = routeFor({ holderId, nationality: nat, stated: await statedOf(env, holderId, who, nat) });
   const pref = effectivePreference({ record: state.paymentPreference, route });
   const verified = firstVerifiedPayment(src.journalRows, state.Settlement_ID);
   return {
@@ -307,6 +308,17 @@ async function preferenceOf(env, origin, holderId, state, src, register) {
     lockedBy: (state.paymentPreference && state.paymentPreference.lockedBy) || (verified ? clean(verified.Payment_ID) : null),
     verifiedPaymentId: verified ? clean(verified.Payment_ID) : null,
   };
+}
+
+/* THE GUEST'S OWN WORD (Owners, 18 Nov 2026): read only where the person's 006 row holds no nationality — two KV reads, nothing else */
+async function statedOf(env, holderId, who, nat) {
+  if (!nat || !nat.found || clean(nat.value)) return null;
+  /* a read that fails is said as such — never taken for "nothing there" */
+  const read = async (key) => { if (!env.REG_KV) throw new Error('no store'); const raw = await env.REG_KV.get(key); return raw ? JSON.parse(raw) : null; };
+  try {
+    const [record, contact] = await Promise.all([read('reg:' + holderId), read('contact:' + holderId)]);
+    return statedNationality({ record, contact, guestId: who.guestId, contactId: who.contactId });
+  } catch (e) { return statedNationality({ unreadable: true }); }
 }
 
 /* what a guest or an admin is told about the method — reasons, never the register's words */
@@ -1065,7 +1077,7 @@ async function adminIssue(env, identity, request, cors) {
     sourceHash: a.sourceHash,
     issueDate: asOf, dueDateOverride: clean(body.dueDateOverride),
     evidenceStatus: clean(body.evidenceStatus), calculatedAt: new Date().toISOString(),
-    paymentPreference: pref.channel, paymentPreferenceSource: pref.source,
+    paymentPreference: pref.channel, paymentPreferenceSource: pref.source, paymentPreferenceBasis: pref.basis || null,
     /* the ledger freezes this exact method or refuses: its destination is the one checked above */
     expectedPaymentPreference: pref.channel,
     gateCheck, currentDrifts,
@@ -1571,6 +1583,15 @@ async function adminOverview(env, identity, url, cors) {
   const stored = listing.preferences && typeof listing.preferences === 'object' ? listing.preferences : {};
   const natReg = nationalitiesOf(register);
   const gate = await readGate(env);
+  /* the guest's own sent word, only for the holders without a stored or issued method whose 006 row holds no nationality */
+  const stated = {};
+  const candidates = holders.filter((h) => {
+    const s = settlements.get(h.Holder_ID) || null;
+    return !((s && s.issuedRevision && s.issuedPaymentPreference) || (stored[h.Holder_ID] && isChannel(stored[h.Holder_ID].Payment_Preference)) || h.ambiguous);
+  });
+  for (let k = 0; k < candidates.length; k += 10) {   /* ten at a time */
+    await Promise.all(candidates.slice(k, k + 10).map(async (h) => { stated[h.Holder_ID] = await statedOf(env, h.Holder_ID, h, nationalityOf(natReg, h.contactId)); }));
+  }
 
   const rows = holders.map((h) => {
     const s = settlements.get(h.Holder_ID) || null;
@@ -1585,7 +1606,7 @@ async function adminOverview(env, identity, url, cors) {
         determined: true, source: 'ISSUED_REVISION' };
     } else {
       const p = effectivePreference({ record: stored[h.Holder_ID] || null,
-        route: routeFor({ holderId: h.Holder_ID, nationality: nationalityOf(natReg, h.contactId) }) });
+        route: routeFor({ holderId: h.Holder_ID, nationality: nationalityOf(natReg, h.contactId), stated: stated[h.Holder_ID] || null }) });
       method = { channel: p.channel || null, currency: p.currency || null, determined: !!p.determined, source: p.source || null, reason: p.reason || null };
     }
     return {
@@ -2808,7 +2829,7 @@ export async function handleBilling(request, env, url, cors, deps) {
            the verification and its lock. */
         const pref = locks ? await preferenceOf(env, url.origin, holder, await holderState(env, holder), src) : null;
         const claim = await ledgerCall(env, 'payment-decision', { paymentId, action: 'claim', decision, rejectReason,
-          holderId: holder || null, lockPreference: locks, channel: pref && pref.channel, source: pref && pref.source, by });
+          holderId: holder || null, lockPreference: locks, channel: pref && pref.channel, source: pref && pref.source, basis: (pref && pref.basis) || null, by });
         if (!claim || claim.ok !== true || !claim.claim) {
           return jsonRes({ ok: false, error: (claim && claim.error) || 'the decision could not be claimed',
             decided: !!(claim && claim.decided), inProgress: !!(claim && claim.inProgress) }, 409, cors);

@@ -1252,3 +1252,55 @@ test('ADMIN CONFIRM · the dialog shows the amounts as sent beside today\'s; a m
   const conf = JSON.parse(store['conf:INV-T1']);
   assert.equal(conf.priceDifference, ctx.j.priceDifference.digest); assert.match(conf.note, /seen: /);
 });
+
+
+test('THE GUEST\'S OWN WORD (Owners, 18 Nov 2026): a confirmed guest whose 006 row holds no nationality is routed by the nationality of their own sent registration — the method is determined, the block is gone; without it the block stays', async () => {
+  const T2 = { submissionId: 'SYL-T2-1', version: 1, lastSentAt: '2026-11-18T15:57:39Z', guestId: 'GT2',
+    registration: { guestId: 'GT2', contactId: 'CON-T2', personal: { guestId: 'GT2', nationality: 'Thai' }, selections: [{ id: 'wedstay', room: 'heritage', unit: 'A', qty: 1 }] } };
+  const base = { 'reg:INV-T1': SENT, 'conf:INV-T1': { confirmedAt: '2026-10-02T09:00:00Z', version: 1 }, 'contact:INV-T1': { email: 'Tess.Example@Example.invalid', firstName: 'Tess' } };
+  const W = world({ store: { ...base, 'reg:INV-T2': T2, 'conf:INV-T2': { confirmedAt: '2026-11-18T16:10:00Z', version: 1 }, 'contact:INV-T2': { email: 'Probe.Sample@Example.invalid', nationality: 'Thai' } } });
+  await approveGate(W.st);
+  const h = await hit(W, GROOM, 'admin/holder?holder=INV-T2');
+  assert.equal(h.status, 200, JSON.stringify(h.j));
+  assert.equal(h.j.method.determined, true); assert.equal(h.j.method.channel, 'PROMPTPAY_THB');
+  assert.ok(!h.j.preview.reasons.some((r) => /PAYMENT_PREFERENCE_UNDETERMINED/.test(r)), JSON.stringify(h.j.preview.reasons));
+  const o = await hit(W, GROOM, 'admin/overview');
+  const row = o.j.holders.find((x) => x.Holder_ID === 'INV-T2');
+  assert.equal(row.method.determined, true); assert.equal(row.method.channel, 'PROMPTPAY_THB');
+  /* the guest may now pick among the route's methods themselves (THB: PromptPay) */
+  const g = await hit(W, { invitationId: 'INV-T2', guestId: 'GT2' }, 'preference');
+  assert.equal(g.status, 200, JSON.stringify(g.j)); assert.equal(g.j.paymentPreference.determined, true); assert.equal(g.j.paymentPreference.route, 'THB');
+  assert.equal(W.docs._puts(), 0, 'nothing produced'); assert.equal(W.sent.length, 0, 'nothing sent');
+
+  /* not sent: the block stays, with the register's reason */
+  const W2 = world({ store: { ...base, 'conf:INV-T2': { confirmedAt: '2026-11-18T16:10:00Z', version: 1 }, 'contact:INV-T2': { nationality: 'Thai' } } });
+  await approveGate(W2.st);
+  const h2 = await hit(W2, GROOM, 'admin/holder?holder=INV-T2');
+  assert.equal(h2.j.method.determined, false); assert.equal(h2.j.method.reason, 'NATIONALITY_MISSING');
+  /* 006 holds a nationality (INV-T1: German): the registration is not read, the route is the register's */
+  const t1 = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+  assert.equal(t1.j.method.channel, 'PAYPAL_EUR');
+
+  /* the issue — only on the Owners' own click — freezes PromptPay and records why the route offered it */
+  const ok = await hit(W, GROOM, 'issue', { holderId: 'INV-T2', expectedProposal: h.j.preview.proposalHash });
+  assert.equal(ok.status, 200, JSON.stringify(ok.j)); assert.equal(ok.j.Payment_Preference, 'PROMPTPAY_THB');
+  const rec = await W.st.storage.get('paypref:INV-T2');
+  assert.equal(rec.source, 'DEFAULT_ROUTING'); assert.equal(rec.basis, 'REGISTRATION_THAI'); assert.equal(rec.history[0].basis, 'REGISTRATION_THAI');
+
+  /* a store that cannot be read is never taken for "nothing there": the block stays, said as such */
+  const W3 = world({ store: { ...base, 'reg:INV-T2': T2, 'conf:INV-T2': { confirmedAt: '2026-11-18T16:10:00Z', version: 1 } } });
+  await approveGate(W3.st);
+  const get = W3.env.REG_KV.get; W3.env.REG_KV.get = async (k) => { if (k === 'contact:INV-T2') throw new Error('KV down'); return get(k); };
+  const h3 = await hit(W3, GROOM, 'admin/holder?holder=INV-T2');
+  assert.equal(h3.j.method.determined, false); assert.equal(h3.j.method.reason, 'REGISTRATION_UNREADABLE');
+});
+
+test('THE GUEST\'S OWN WORD · the console overview reads the registration only for holders without a method whose 006 row is blank — two reads each, none for anyone else', async () => {
+  const T2 = { submissionId: 'SYL-T2-1', version: 1, guestId: 'GT2', registration: { guestId: 'GT2', contactId: 'CON-T2', personal: { guestId: 'GT2', nationality: 'Thai' } } };
+  const W = world({ store: { 'reg:INV-T1': SENT, 'conf:INV-T1': { confirmedAt: '2026-10-02T09:00:00Z', version: 1 }, 'reg:INV-T2': T2 } });
+  const seen = []; const get = W.env.REG_KV.get; W.env.REG_KV.get = async (k) => { seen.push(k); return get(k); };
+  const o = await hit(W, GROOM, 'admin/overview');
+  assert.equal(o.status, 200);
+  assert.deepEqual(seen.filter((k) => /^(reg|contact):/.test(k)).sort(), ['contact:INV-T2', 'reg:INV-T2']);
+  assert.equal(o.j.holders.find((x) => x.Holder_ID === 'INV-T2').method.channel, 'PROMPTPAY_THB');
+});

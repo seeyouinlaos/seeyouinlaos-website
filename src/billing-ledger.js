@@ -689,8 +689,10 @@ export class BillingLedger {
             Holder_ID: holderId, Payment_Preference: channel,
             source: clean(body.paymentPreferenceSource) || PREFERENCE_SOURCE.DEFAULT_ROUTING,
             setAt: at, setBy: by || null, note: 'stored with the issue of revision ' + n,
+            /* why the route offered this method (e.g. REGISTRATION_THAI · NATIONALITY_NON_THAI) — kept, as the register may change later */
+            basis: clean(body.paymentPreferenceBasis) || null,
             lockedAt: null, lockedBy: null,
-            history: [{ action: 'ISSUE_DEFAULT', Payment_Preference: channel, by: by || null, at, revision: n }],
+            history: [{ action: 'ISSUE_DEFAULT', Payment_Preference: channel, basis: clean(body.paymentPreferenceBasis) || null, by: by || null, at, revision: n }],
           });
         }
         rec.snapshot = snapshot;
@@ -1055,6 +1057,7 @@ export class BillingLedger {
               if (!isChannel(rec.Payment_Preference) && isChannel(offered)) {
                 rec.Payment_Preference = offered;
                 rec.source = clean(body.source) || PREFERENCE_SOURCE.DEFAULT_ROUTING;
+                rec.basis = clean(body.basis) || null;   /* why the route offered it */
                 rec.setAt = at; rec.setBy = by;
               }
               rec.lockedAt = at; rec.lockedBy = paymentId; rec.lockPending = true;
