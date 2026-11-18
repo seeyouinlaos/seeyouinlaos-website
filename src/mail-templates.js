@@ -86,9 +86,10 @@ const NOT_AT_WEDDING = 'You are not joining us for the wedding in Vientiane.';
 
 /* the seat label the guest knows (assets/seatlabels.js, the same pure mapping): C-L-rr-01 → A rr … D-T-nn → A nn */
 export function seatLabel(seatId) {
-  const c = /^C-([LR])-(0[1-9]|10)-(0[1-3])$/.exec(seatId || '');
-  if (c) { const col = ({ L: ['A', 'B'], R: ['D', 'E', 'F'] })[c[1]][Number(c[3]) - 1]; return col ? col + Number(c[2]) : null; }
-  const d = /^D-([TB])-(0[1-9]|1[0-9]|2[0-6])$/.exec(seatId || '');
+  /* left rows 1–11, right rows 1–10 · the dinner 1–28 without 13 (Owners, 18 Nov 2026 — 54 people) */
+  const c = /^C-([LR])-(0[1-9]|1[01])-(0[1-3])$/.exec(seatId || '');
+  if (c) { const col = ({ L: ['A', 'B'], R: ['D', 'E', 'F'] })[c[1]][Number(c[3]) - 1]; return col && Number(c[2]) <= ({ L: 11, R: 10 })[c[1]] ? col + Number(c[2]) : null; }
+  const d = /^D-([TB])-(0[1-9]|1[0-9]|2[0-8])$/.exec(seatId || '');
   if (d) return Number(d[2]) === 13 ? null : ({ T: 'A', B: 'B' })[d[1]] + Number(d[2]);   /* A13 / B13 are not on the plan (OQ-03) */
   return null;
 }

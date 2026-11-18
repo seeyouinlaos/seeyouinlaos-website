@@ -164,11 +164,53 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
   details>summary{list-style:none}
   details{border:0!important}
 }
+/* THE OWNERS' SEATING & ROOM ASSIGNMENTS (18 Nov 2026 · assets/admin-assign.js) — the plans drawn as buttons, every state named */
+.as-sw{display:flex;gap:8px;margin:8px 0 14px}
+.as-kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0 0 12px}
+.as-kpi>div{border:1px solid #DAD9D7;background:#FCFAF6;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.as-kpi b{font-family:'PP Editorial Old',serif;font-weight:200;font-size:26px;line-height:1.1}.as-kpi small{font-size:11.5px;color:#6B6964}
+.as-hint{border-left:3px solid #313131;background:#FCFAF6;padding:10px 14px;margin:12px 0;font-size:13px}
+.as-layout{display:grid;grid-template-columns:1fr;gap:16px;align-items:start}
+@media(min-width:1440px){.as-layout.as-two{grid-template-columns:minmax(0,auto) minmax(0,1fr)}}
+.as-layout>*{min-width:0}
+.as-planbox{border:1px solid #DAD9D7;background:#FCFAF6;padding:12px;overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
+.as-plan{display:flex;flex-direction:column;gap:6px;width:max-content}
+.as-front,.as-row{display:flex;align-items:center;gap:6px}
+.as-rn{width:22px;font-size:11px;color:#6B6964;text-align:right;font-variant-numeric:tabular-nums}
+.as-blk{display:inline-flex;gap:6px}.as-blk.as-l{min-width:calc(2 * 58px + 6px)}
+.as-aisle{width:26px}
+.as-front .as-seat{width:auto;min-width:96px;padding:3px 10px}.as-blk.as-fl{justify-content:flex-end}
+.as-seat{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;width:58px;min-height:48px;padding:3px 2px;border:1px solid #CFCBC4;background:#fff;color:#313131;font:inherit;font-size:11px;line-height:1.2;cursor:pointer}
+.as-seat b{font-weight:500;font-size:12px}.as-seat small{font-size:10px;max-width:54px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#6B6964}
+.as-seat.as-st-free{background:#fff;border-style:dashed}
+.as-seat.as-st-held{background:#EEE8DF}
+.as-seat.as-st-placed{background:#E3ECE3;border-color:#2F5D3A}
+.as-seat.as-couple{background:#313131;color:#F3EEE7;border-color:#313131;cursor:default}.as-seat.as-couple small{color:#DAD9D7}
+.as-seat.as-chg{outline:2px solid #74070E;outline-offset:-2px}
+.as-seat.as-sel,.as-occ.as-sel{box-shadow:0 0 0 3px #313131}
+.as-seat:focus-visible,.as-occ:focus-visible,.as-free:focus-visible{outline:2px solid #313131;outline-offset:2px}
+.as-legend{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-top:10px;font-size:11.5px;color:#6B6964}.as-legend .as-seat{width:34px;min-height:24px;cursor:default}
+.as-side{display:flex;flex-direction:column;gap:4px}.as-sl{font-size:10.5px;letter-spacing:1.6px;text-transform:uppercase;color:#6B6964}
+.as-drow{display:flex;gap:4px}
+.as-table{border:1px solid #313131;border-radius:3px;padding:6px;text-align:center;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:#6B6964}
+.as-pend{margin-bottom:12px}.as-chg{margin:6px 0 0 18px;font-size:13px}
+.as-guests tr.as-on td{background:#F3EEE7}
+.ab-tick{display:flex;gap:8px;align-items:flex-start;margin:10px 0;font-size:13px}
+.as-cat{margin-top:12px}.as-catn{font-weight:400;margin-bottom:6px}
+.as-units{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.as-unit{border:1px solid #DAD9D7;background:#fff;padding:8px;display:flex;flex-direction:column;gap:4px}
+.as-unit.as-lock{background:#F7F3EC}.as-unit.as-chg{outline:2px solid #74070E;outline-offset:-2px}.as-unit.as-dim{opacity:.45}
+.as-un{font-size:12px;font-weight:500}.as-un small{font-weight:300;color:#6B6964}
+.as-occ,.as-free{display:block;width:100%;text-align:left;min-height:40px;padding:6px 8px;border:1px solid #CFCBC4;background:#EEE8DF;font:inherit;font-size:12.5px;color:#313131;cursor:pointer}
+.as-occ small{display:block;font-size:10.5px;color:#6B6964}.as-occ.as-placed{background:#E3ECE3;border-color:#2F5D3A}
+.as-free{background:#fff;border-style:dashed;color:#6B6964}.as-free[disabled],.as-occ[disabled]{cursor:not-allowed}
+@media print{.as-hint,.as-pend,[data-as-export],[data-as-final],[data-as-rfinal]{display:none!important}}
 </style>
 <link rel="stylesheet" href="assets/prep.css?v=0a6eb26a">
 </head><body class="prep p-in">
 <header class="hd"><a class="bd" href="/">see you in laos<span class="dot">.</span></a><span class="ab-title">Guest Settlement · H&amp;S</span></header>
 <main class="ab-main"><h1>Guest Settlement</h1><p class="t-b2 ab-sub">Statements, payments and revenue — for Haruthai and Suthep. Nothing here happens without your confirmation.</p>
 <div id="admin" aria-live="polite"></div></main>
-<script src="assets/admin-billing.js?v=2b7bef37"></script>
+<script src="assets/admin-assign.js?v=a0115acf"></script>
+<script src="assets/admin-billing.js?v=3e96ed92"></script>
 </body></html>

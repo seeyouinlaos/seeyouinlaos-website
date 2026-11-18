@@ -136,7 +136,7 @@ test('THE PAGES AND THE WORKER CARRY IT · the engine view, the join, the record
   const w = src('src/worker.js');
   assert.match(w, /const canon = canonicalLines\(registration\.selections\);[\s\S]{0,400}registration\.selections = verifiedLines\(canon, giftsFor/);
   assert.match(w, /sentSelections: Array\.isArray\(reg\.selections\) \? canonicalLines\(reg\.selections\) : \[\]/);
-  assert.match(w, /const entry = \(m, stage\) => \{ m = \{ \.\.\.m, key: canonicalKey\(m\.key\) \};/);
+  assert.match(w, /function roomEntryOf\(m, stage\) \{\n  m = \{ \.\.\.m, key: canonicalKey\(m\.key\) \};/);
   assert.match(w, /if \(unsent\) for \(const f2 of await otherForms\(\)\) if \(record\.selectionFingerprint === f2\.v3\)/);
   const r = src('src/rooms.js');
   assert.match(r, /const key = canonicalKey\(parts\[0\]\);/); assert.doesNotMatch(r, /storage\.delete\(this\.keyOf\(/, 'every release reaches the row where it lives');

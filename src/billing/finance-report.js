@@ -217,7 +217,10 @@ export function hotelPurchaseOf({ plan, roomContract, contracts, lines004, rule,
     for (const u of asArray(s.rooms)) {
       const occ = asArray(u.occupants), guests = occ.filter((o) => o && o.guestId), kept = occ.filter((o) => o && o.kept).length;
       const covered = !!(k && (k.items === '*' || asArray(k.items).includes(u.item)));
-      const isConf = (o) => hosts.has(o.guestId) || bookedIn.has(s.stay + '|' + u.item + '|' + u.label + '|' + o.guestId);
+      /* a guest the Owners moved here from another room of the same category (placedFrom) is confirmed by the booking billed in that
+         room — stay, item and guest the same, the billed label among the rooms they held before (Owners' assignments, 18 Nov 2026) */
+      const isConf = (o) => hosts.has(o.guestId) || bookedIn.has(s.stay + '|' + u.item + '|' + u.label + '|' + o.guestId)
+        || (Array.isArray(o.placedFrom) && o.placedFrom.some((l) => bookedIn.has(s.stay + '|' + u.item + '|' + l + '|' + o.guestId)));
       const conf = guests.filter(isConf);
       const booked = guests.length > 0 || kept > 0;
       /* a third person: the guest the extra bed is attributed to, else every person (a kept place too) beyond the room's places */

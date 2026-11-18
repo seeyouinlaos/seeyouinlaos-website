@@ -40,6 +40,8 @@ import { effectivePreference, routeFor, destinationOf, firstVerifiedPayment, isC
 import { GoogleSheetsUnavailable, batchReadRanges } from './google-sheets.js';
 import { calculate, perPerson, matchSpecialRate, COUPLE_PERSONS } from './billing/engine.js';
 import { unitOf as roomUnitOf } from './rooms.js';
+import { SEED as ROOM_SEED } from './inventory-seed.js';
+import { ASSIGNMENTS_VERSION, EVENTS as ASSIGNMENT_EVENTS, coupleOfEntries, guestsOfIndex, personName, attendanceOf, rosterOf, staysOf, seatChangeOf, roomChangeOf, roomMovesOf, sentRoomLines } from './billing/assignments.js';
 import { priceDifference } from './billing/price-difference.js';
 import {
   buildSnapshot, canIssue, dueDateFor, freezeFx, inPreferredCurrency,
@@ -47,7 +49,7 @@ import {
 } from './billing/settlement.js';
 import { loadConfirmedBookings, unmappedProducts, siteKeyOfSelection, nightsOf, selectionLinesOf, registrationState } from './billing/bookings.js';
 import { OWNER_BOOKING_STATE, obkKey, OBK_INDEX_KEY, readRecord, stateOf as ownerStateOf, stageOf, keyStage, holdPlan, applyAction, toBookings, occupancy, problemsOf, combinedConfirmation } from './billing/owner-bookings.js';
-import { canonicalLines } from './legacy-keys.js';
+import { canonicalLines, canonicalKey } from './legacy-keys.js';
 import { renderSettlementPdf } from './billing/pdf.js';
 import { buildRevenueOverview } from './billing/revenue.js';
 import { buildBudgetComparison } from './billing/budget.js';
@@ -2166,6 +2168,181 @@ async function adminExtraBed(env, identity, request, cors) {
   return jsonRes(r, r.ok ? 200 : 409, cors);
 }
 
+/* ======================================================================================================================
+   THE OWNERS' SEATING & ROOM ASSIGNMENTS (Owners, 18 Nov 2026 · EMERGENCY P1 · src/billing/assignments.js) — BILLING_ADMIN only.
+   The seating ledger and the room engine are asked as Guest Relations asks them, AND with the Owner named (x-siyl-admin): the
+   engines accept their admin operations from this route only (the public /api/seating and /api/rooms never forward the header).
+   Every guest a write names is resolved HERE from the served index — never from what the console sent; the actor of every change
+   is the Owner's audit label (BRIDE / GROOM), never a name. Nothing here reads 009 or 012, prices anything or touches a booking,
+   a statement or a payment.
+   ====================================================================================================================== */
+async function engineAdmin(env, ns, name, op, admin, body, couple) {
+  if (!env[ns]) throw new SourceDataError(ns + '_UNAVAILABLE', 'the ' + name + ' engine is not bound');
+  const h = { 'x-gr-verified': 'yes', 'x-siyl-admin': admin, 'content-type': 'application/json' };
+  if (couple) h['x-siyl-couple'] = JSON.stringify(couple);
+  const stub = env[ns].get(env[ns].idFromName(name));
+  const res = await stub.fetch(new Request('https://' + name + '/api/' + name + '/' + op, { method: body ? 'POST' : 'GET', headers: h, body: body ? JSON.stringify(body) : undefined }));
+  const j = await res.json().catch(() => null);
+  if (!j) throw new SourceDataError(ns + '_UNREADABLE', 'the ' + name + ' engine did not answer');
+  return { status: res.status, j };
+}
+/* the sent trips and their confirmations of the given invitations — read in small groups, a read that fails is null (named, never guessed) */
+async function recordsOf(env, invs) {
+  const records = {}, confs = {};
+  const list = [...new Set(invs)].filter((i) => /^INV-[A-Z0-9-]+$/.test(i));
+  for (let i = 0; i < list.length; i += 16) {
+    await Promise.all(list.slice(i, i + 16).map(async (inv) => { records[inv] = await kvJson(env, 'reg:' + inv); confs[inv] = await kvJson(env, 'conf:' + inv); }));
+  }
+  return { records, confs };
+}
+/* 002 (a stay's dates) and 006 (names) in ONE read — never 009, never 012; a read that fails or is slow is a named gap */
+async function assignmentSources(env, waitMs) {
+  const id = cfgOf(env).spreadsheetId, ranges = [rangeOfTab(BUDGET_TABS.items), rangeOfTab(BUDGET_TABS.register)], wait = waitMs || 8000;
+  let timer;
+  try {
+    const grids = await Promise.race([batchReadRanges(env, id, ranges), new Promise((res) => { timer = setTimeout(() => res(null), wait); })]);
+    clearTimeout(timer);
+    if (!grids) return { register: null, datesOf: null, gaps: ['Google did not answer within ' + Math.round(wait / 1000) + ' seconds — names are the guests\' first names, stay dates are not shown'] };
+    const gaps = [];
+    let register = null, datesOf = null;
+    try { register = await loadGuestRegister(env, { ...cfgOf(env), grids: { [ranges[1]]: grids[1] } }); } catch (e) { gaps.push('006 could not be read just now — names are the guests\' first names'); }
+    try {
+      const items = await loadItems(env, { ...cfgOf(env), grids: { [ranges[0]]: grids[0] } });
+      const display = parseItemDisplay(grids[0]).items || {};
+      const { index } = siteProductKeyIndex(items);
+      datesOf = {};
+      for (const [key, itemId] of Object.entries(index)) { const d = display[itemId] || {}; datesOf[key.split(/[,|]/)[0]] = { item: itemId, checkIn: d.checkIn || null, checkOut: d.checkOut || null, nights: nightsOfItem(items[itemId]) }; }
+    } catch (e) { gaps.push('002 could not be read just now — stay dates are not shown'); }
+    return { register, datesOf, gaps };
+  } catch (e) {
+    clearTimeout(timer);
+    return { register: null, datesOf: null, gaps: ['Google could not be read just now — names are the guests\' first names, stay dates are not shown'] };
+  }
+}
+
+/** GET admin/assignments — the seating plans, the rooming list and every guest, in one read; nothing is written. */
+async function adminAssignments(env, identity, url, cors) {
+  const admin = adminLabel(identity);
+  const entries = await loadIndex(env, url.origin, false);
+  if (!entries || !Object.keys(entries).length) return jsonRes({ ok: false, retry: true, error: 'the register index is not readable just now' }, 503, cors);
+  const couple = coupleOfEntries(entries);
+  const guests = guestsOfIndex(entries);
+  const [seat, room, src, kv] = await Promise.all([
+    engineAdmin(env, 'SEATING', 'seating', 'admin-read', admin, null, couple),
+    engineAdmin(env, 'ROOMS', 'rooms', 'admin-read', admin),
+    assignmentSources(env),
+    recordsOf(env, Object.values(guests).map((g) => g.invitationId)),
+  ]);
+  if (!seat.j.ok || !room.j.ok) return jsonRes({ ok: false, retry: true, error: 'the seating ledger or the room engine could not be read just now' }, 503, cors);
+  const seedNames = Object.fromEntries(Object.keys(ROOM_SEED).map((k) => [k, ROOM_SEED[k].name]));
+  const roster = rosterOf({ entries, register: src.register, records: kv.records, confs: kv.confs, seating: seat.j, rooms: room.j, couple });
+  return jsonRes({ ok: true, version: ASSIGNMENTS_VERSION, at: new Date().toISOString(), audience: admin, events: ASSIGNMENT_EVENTS,
+    people: seat.j.people, capacity: seat.j.capacity,
+    seating: { open: seat.j.open, frozen: seat.j.frozen, events: seat.j.events, log: seat.j.log },
+    rooms: { stays: staysOf({ rooms: room.j, seedNames, datesOf: src.datesOf }), digest: room.j.digest, final: room.j.final, waitlist: room.j.waitlist || [], log: room.j.log },
+    roster, gaps: src.gaps }, 200, cors);
+}
+
+/* the guests a write names, resolved from the index: guest id → { invitationId, partyId, name } — or the ids that resolve to nobody */
+function resolveGuests(entries, ids, register) {
+  const g = guestsOfIndex(entries), out = {}, unknown = [];
+  for (const id of ids) {
+    const e = g[id];
+    if (!e || e.ambiguous) { unknown.push(id); continue; }
+    const n = personName(register, e.contactId);
+    out[id] = { invitationId: e.invitationId, partyId: e.partyId, name: n ? (n.nick || n.first || '') : '' };
+  }
+  return { guests: out, unknown };
+}
+/* what the Owners are told before they confirm a seat: a guest seated who answered "not joining", has not sent the trip, or is not
+   coming to the wedding (a seat makes them part of the Wedding Circle) — said, never refused */
+function seatWarnings(change, records, entries) {
+  const g = guestsOfIndex(entries), out = [];
+  for (const [seatId, guestId] of Object.entries(change.target)) {
+    if (!guestId || change.expect[seatId] === guestId || !g[guestId]) continue;
+    const a = attendanceOf(records[g[guestId].invitationId] || null, guestId, g[guestId].hosts);
+    const v = a[change.event];
+    if (v === 'no') out.push({ guestId, seatId, text: a.wedding === false ? 'is not coming to the wedding in Vientiane (their sent trip says so)' : 'answered "not joining" for the ' + ASSIGNMENT_EVENTS[change.event].name });
+    else if (v === 'not-sent') out.push({ guestId, seatId, text: 'has not sent their trip yet' });
+    else if (v === 'undecided') out.push({ guestId, seatId, text: 'has not decided yet for the ' + ASSIGNMENT_EVENTS[change.event].name });
+  }
+  return out;
+}
+
+/** POST admin/seating/apply { event, target, expect, dryRun } — one confirmed change of a seating plan (or its dry run). */
+async function adminSeatingApply(env, identity, request, url, cors, deps) {
+  const change = seatChangeOf(await request.json().catch(() => null));
+  if (change.error) return jsonRes({ ok: false, reason: 'INVALID', error: change.error }, 400, cors);
+  const entries = await loadIndex(env, url.origin, false);
+  const couple = coupleOfEntries(entries);
+  if (change.event === 'ceremony' && !couple) return jsonRes({ ok: false, retry: true, reason: 'COUPLE_UNKNOWN', error: 'the couple\'s places cannot be named just now — nothing was changed' }, 503, cors);
+  const named = Object.values(change.target).filter(Boolean);
+  /* the register's first name for a new hold — read for the confirmation only, never for a review (the ledger shows its own learned
+     names; a name is display, never identity) */
+  const src = named.length && !change.dryRun ? await assignmentSources(env, 3000) : { register: null };
+  const r = resolveGuests(entries, named, src.register);
+  if (r.unknown.length) return jsonRes({ ok: false, reason: 'UNKNOWN_GUEST', error: 'not a guest of the register: ' + r.unknown.join(', ') }, 400, cors);
+  if (!change.dryRun && deps && deps.resetLocked && await deps.resetLocked(env)) return jsonRes({ ok: false, retry: true, reason: 'RESET', error: 'the clean reset is running — try again in a moment' }, 503, cors);
+  const kv = await recordsOf(env, named.map((g) => r.guests[g].invitationId));
+  const warnings = seatWarnings(change, kv.records, entries);
+  const out = await engineAdmin(env, 'SEATING', 'seating', 'admin-apply', adminLabel(identity), { event: change.event, target: change.target, expect: change.expect, guests: r.guests, dryRun: change.dryRun }, couple);
+  /* a seat given or taken changes who is joined (the Wedding Circle's union): read again at once */
+  if (out.j.ok && !change.dryRun && deps && deps.cohortStale) deps.cohortStale(env);
+  return jsonRes({ ...out.j, warnings }, out.status, cors);
+}
+/** POST admin/seating/final { event, action: release | withdraw, expectDigest } */
+async function adminSeatingFinal(env, identity, request, url, cors, deps) {
+  const body = await request.json().catch(() => null);
+  if (deps && deps.resetLocked && await deps.resetLocked(env)) return jsonRes({ ok: false, retry: true, reason: 'RESET', error: 'the clean reset is running — try again in a moment' }, 503, cors);
+  const couple = coupleOfEntries(await loadIndex(env, url.origin, false));
+  const out = await engineAdmin(env, 'SEATING', 'seating', 'admin-final', adminLabel(identity), { event: clean(body && body.event), action: clean(body && body.action), expectDigest: clean(body && body.expectDigest) }, couple);
+  return jsonRes(out.j, out.status, cors);
+}
+/** POST admin/seating/state { open?, frozen? } — guests' own seat choice, by the Owners */
+async function adminSeatingState(env, identity, request, cors, deps) {
+  const body = await request.json().catch(() => null);
+  const ask = {}; if (body && typeof body.open === 'boolean') ask.open = body.open; if (body && typeof body.frozen === 'boolean') ask.frozen = body.frozen;
+  if (!Object.keys(ask).length) return jsonRes({ ok: false, reason: 'INVALID', error: 'open or frozen (true / false) is required' }, 400, cors);
+  if (deps && deps.resetLocked && await deps.resetLocked(env)) return jsonRes({ ok: false, retry: true, reason: 'RESET', error: 'the clean reset is running — try again in a moment' }, 503, cors);
+  const out = await engineAdmin(env, 'SEATING', 'seating', 'admin-state', adminLabel(identity), ask);
+  if (out.j.ok && deps && deps.cohortStale) deps.cohortStale(env);
+  return jsonRes(out.j, out.status, cors);
+}
+/** POST admin/rooms/apply { target, expect, approveRoomCount, dryRun } — one confirmed re-arrangement of one room category. */
+async function adminRoomsApply(env, identity, request, url, cors, deps) {
+  const change = roomChangeOf(await request.json().catch(() => null));
+  if (change.error) return jsonRes({ ok: false, reason: 'INVALID', error: change.error }, 400, cors);
+  const entries = await loadIndex(env, url.origin, false), g = guestsOfIndex(entries);
+  const moves = roomMovesOf(change);
+  const problems = [];
+  const unknown = moves.filter((m) => !g[m.guestId] || g[m.guestId].ambiguous).map((m) => m.guestId);
+  if (unknown.length) return jsonRes({ ok: false, reason: 'UNKNOWN_GUEST', error: 'not a guest of the register: ' + unknown.join(', ') }, 400, cors);
+  if (moves.length) {
+    /* A BOOKED ROOM STAYS THE BOOKED ROOM (pricing guard, 18 Nov 2026): a guest whose sent room line carries no room label (its billed
+       room would follow the engine) or whose room is fixed by a booking the Owners recorded is never moved by an assignment */
+    const kv = await recordsOf(env, moves.map((m) => g[m.guestId].invitationId));
+    let obkIndex = null; try { obkIndex = JSON.parse((env.REG_KV && await env.REG_KV.get(OBK_INDEX_KEY)) || '{}') || {}; } catch (e) { obkIndex = null; }
+    for (const m of moves) {
+      const key = canonicalKey(m.to.slice(0, m.to.lastIndexOf('|')));
+      const lines = sentRoomLines(kv.records[g[m.guestId].invitationId], key, canonicalKey);
+      if (lines.some((l) => !l.unit)) problems.push({ guestId: m.guestId, reason: 'NO_BILLED_ROOM', text: 'their sent booking names no room label — the booking decides their room' });
+      if (obkIndex === null) problems.push({ guestId: m.guestId, reason: 'UNREADABLE', text: 'the Owners\' recorded bookings cannot be read just now' });
+      else if (Array.isArray(obkIndex[m.guestId]) && obkIndex[m.guestId].length) problems.push({ guestId: m.guestId, reason: 'OWNER_RECORDED', text: 'their room is fixed by a booking you recorded — change it in that booking' });
+    }
+  }
+  if (problems.length) return jsonRes({ ok: false, reason: 'REFUSED', error: 'the change cannot be made — nothing was changed', problems }, 409, cors);
+  if (!change.dryRun && deps && deps.resetLocked && await deps.resetLocked(env)) return jsonRes({ ok: false, retry: true, reason: 'RESET', error: 'the clean reset is running — try again in a moment' }, 503, cors);
+  const out = await engineAdmin(env, 'ROOMS', 'rooms', 'admin-apply', adminLabel(identity), { target: change.target, expect: change.expect, approveRoomCount: change.approveRoomCount, dryRun: change.dryRun });
+  return jsonRes(out.j, out.status, cors);
+}
+/** POST admin/rooms/final { action: release | withdraw, expectDigest } */
+async function adminRoomsFinal(env, identity, request, cors, deps) {
+  const body = await request.json().catch(() => null);
+  if (deps && deps.resetLocked && await deps.resetLocked(env)) return jsonRes({ ok: false, retry: true, reason: 'RESET', error: 'the clean reset is running — try again in a moment' }, 503, cors);
+  const out = await engineAdmin(env, 'ROOMS', 'rooms', 'admin-final', adminLabel(identity), { action: clean(body && body.action), expectDigest: clean(body && body.expectDigest) });
+  return jsonRes(out.j, out.status, cors);
+}
+
 /**
  * THE HOTEL ROOM RATE LIST — APPROVED VERSIONS (Owners, 17 Nov 2026). The list itself is generated in the console from the budget
  * comparison's own per-room lines (bookings · 002 · 009 · the Rooms engine); the Owners approve what they see, and that version is
@@ -2228,8 +2405,9 @@ async function unitsForOwners(env, items) {
   for (const k of keys) {
     const units = (plan.units && plan.units[k]) || [];
     out[k] = units.filter((u) => !u.dedicatedTo).map((u) => ({ label: u.label, places: u.places,
-      holders: (u.occupants || []).filter((o) => o.guestId).map((o) => o.guestId), kept: (u.occupants || []).filter((o) => !o.guestId).length,
-      keptFor: (u.occupants || []).filter((o) => !o.guestId).map((o) => o.partyId || null),
+      /* a place kept for a party carries the guest id "~…" — it is a kept place, never a person */
+      holders: (u.occupants || []).filter((o) => o.guestId && !String(o.guestId).startsWith('~')).map((o) => o.guestId), kept: (u.occupants || []).filter((o) => !o.guestId || String(o.guestId).startsWith('~')).length,
+      keptFor: (u.occupants || []).filter((o) => !o.guestId || String(o.guestId).startsWith('~')).map((o) => o.partyId || null),
       /* the guests whose booking took the extra bed (src/rooms.js marks them) */
       beds: (u.occupants || []).filter((o) => o.guestId && o.bed).map((o) => o.guestId),
       free: Math.max(0, u.places - (u.occupants || []).length),
@@ -2493,6 +2671,23 @@ export async function handleBilling(request, env, url, cors, deps) {
       case 'admin/extra-bed':
         if (request.method !== 'POST') return jsonRes({ ok: false, error: 'POST only' }, 405, cors);
         return await adminExtraBed(env, identity, request, cors);
+      /* THE OWNERS' SEATING & ROOM ASSIGNMENTS (Owners, 18 Nov 2026) — read with GET, every write a POST */
+      case 'admin/assignments': return await adminAssignments(env, identity, url, cors);
+      case 'admin/seating/apply':
+        if (request.method !== 'POST') return jsonRes({ ok: false, error: 'POST only' }, 405, cors);
+        return await adminSeatingApply(env, identity, request, url, cors, deps);
+      case 'admin/seating/final':
+        if (request.method !== 'POST') return jsonRes({ ok: false, error: 'POST only' }, 405, cors);
+        return await adminSeatingFinal(env, identity, request, url, cors, deps);
+      case 'admin/seating/state':
+        if (request.method !== 'POST') return jsonRes({ ok: false, error: 'POST only' }, 405, cors);
+        return await adminSeatingState(env, identity, request, cors, deps);
+      case 'admin/rooms/apply':
+        if (request.method !== 'POST') return jsonRes({ ok: false, error: 'POST only' }, 405, cors);
+        return await adminRoomsApply(env, identity, request, url, cors, deps);
+      case 'admin/rooms/final':
+        if (request.method !== 'POST') return jsonRes({ ok: false, error: 'POST only' }, 405, cors);
+        return await adminRoomsFinal(env, identity, request, cors, deps);
       /* A READ NEVER WRITES (Owner, 8 Oct 2026 · closeout): every route below that records something in the ledger answers only a
          POST; a GET of reconcile is its read-only preview — the same report, nothing recorded (written: false) */
       case 'issue':
