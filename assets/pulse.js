@@ -198,7 +198,7 @@
     if (x.empty) return '<li class="pl-seatp is-empty">' + (arrow === 'l' ? '<span aria-hidden="true">&larr;</span> ' : '') + tag + ' <span class="pl-free">Not taken yet</span>' + (arrow === 'r' ? ' <span aria-hidden="true">&rarr;</span>' : '') + '</li>';
     return person(x.p, ' <span class="pl-seatno">' + esc(label(x.seat.seatId)) + '</span>').replace('<li class="pl-p"', '<li class="pl-p pl-seatp"' + (arrow ? ' data-dir="' + arrow + '"' : ''));
   }
-  /* THE COUPLE'S TWO PLACES (Owner, 2 Oct 2026): the Bride and the Groom are two of the fifty — their fixed places at the front
+  /* THE COUPLE'S TWO PLACES (Owner, 2 Oct 2026): the Bride and the Groom are two of the fifty-four — their fixed places at the front
      centre come with the plan itself (the ledger names their holders from the register's roles), drawn with the same seat as every
      guest, held, the viewer's own marked as theirs. Nobody else can take them; nobody is left out of the plan. */
   function couplePlaces(v) { return (v && v.ceremony && v.ceremony.couple) || []; }
@@ -222,15 +222,17 @@
     return h + '</div>';
   }
   function ceremonySeats(v) { return [].concat.apply([], ((v && v.ceremony && v.ceremony.rows) || []).map(function (r) { return (r.seats || []).filter(Boolean); })); }
-  /* the ceremony's places, counted from the plan: the guest chairs and the couple's two — fifty */
+  /* the ceremony's places, counted from the plan: the guest chairs and the couple's two — fifty-four */
   function ceremonyTotal(v) { return ceremonySeats(v).length + couplePlaces(v).length; }
   function dinnerMap(v, mine) {
     var S = dinnerSides(v); if (!S) return '';
     var cell = function (s) { return '<i class="pl-c' + (s.seatId === mine ? ' is-me' : held(s) ? ' is-held' : '') + '"></i>'; };
+    /* the table is as long as its longer side (27 since the Owners' extension, 18 Nov 2026) — the columns follow the plan, never a number */
+    var n = Math.max(S.T.length, S.B.length, 1), cols = ' style="grid-template-columns:repeat(' + n + ',minmax(0,12px))"';
     return '<div class="pl-dmap" role="img" aria-label="Wedding Dinner · one long table · ' + (S.T.length + S.B.length) + ' seats">' +
-      '<p class="pl-dside">A</p><div class="pl-drow">' + S.T.map(cell).join('') + '</div>' +
-      '<div class="pl-table"></div>' +
-      '<div class="pl-drow">' + S.B.map(cell).join('') + '</div><p class="pl-dside">B</p></div>';
+      '<p class="pl-dside">A</p><div class="pl-drow"' + cols + '>' + S.T.map(cell).join('') + '</div>' +
+      '<div class="pl-table" style="max-width:calc(' + n + ' * 15px)"></div>' +
+      '<div class="pl-drow"' + cols + '>' + S.B.map(cell).join('') + '</div><p class="pl-dside">B</p></div>';
   }
   function heldCount(list) { return list.filter(held).length; }
   function ceremonyHtml(v, me, byPeople) {

@@ -45,7 +45,7 @@ test('THE PULSE (Worker) · an authenticated read of the joining cohort in the n
   });
   assert.equal((await h.get('/api/pulse')).status, 401, 'signed out: nothing');
   const { status, d } = await h.get('/api/pulse', { 'x-siyl-auth': h.ada });
-  assert.equal(status, 200); assert.equal(d.capacity, 50, 'FIFTY PEOPLE IN ALL, the couple included (Owner, 2 Oct 2026) — never 52');
+  assert.equal(status, 200); assert.equal(d.capacity, 54, 'FIFTY-FOUR PEOPLE IN ALL, the couple included (Owners, 18 Nov 2026)');
   assert.equal(d.joining, 6, 'the couple + Ada, Ben, Cleo, Emil — never Dora (declined) or Zed (cancelled)');
   assert.deepEqual(d.people.slice(0, 2).map((p) => p.id), ['G048', 'G049'], 'the Bride, then the Groom, first');
   assert.deepEqual(d.people.slice(2).map((p) => p.id).sort(), ['G101', 'G102', 'G103', 'G105'], 'then every joining guest');
@@ -80,7 +80,7 @@ test('GUEST RELATIONS · the aggregates of the two answers beside the journeys �
   assert.equal((await h.get('/api/gr/journeys', { 'x-siyl-auth': h.ada })).status, 401, 'a guest is not Guest Relations');
   const { d } = await h.get('/api/gr/journeys', { 'x-gr-token': 'gr-secret' });
   assert.ok(Array.isArray(d.journeys) && d.acknowledgements && d.acknowledgements.unwrittenRules, 'the journeys and the acknowledgement summary stand');
-  const a = d.answers; assert.equal(a.joining, 4); assert.equal(a.capacity, 50);
+  const a = d.answers; assert.equal(a.joining, 4); assert.equal(a.capacity, 54);
   assert.deepEqual(a.music.leaders, ['Latin']);
   assert.deepEqual(a.music.ranking.find((r) => r.genre === 'Latin').guests.map((g) => g.guestId).sort(), ['G101', 'G102'], 'who chose Latin, by guest');
   assert.equal(a.music.ranking.find((r) => r.genre === 'Latin').count, 2); assert.equal(a.music.responses, 2);
@@ -91,8 +91,9 @@ test('GUEST RELATIONS · the aggregates of the two answers beside the journeys �
 /* the seats as the ledger reads them to a signed-in guest */
 function seatsView() {
   const C = [];
-  for (let r = 1; r <= 10; r++) for (const side of ['L', 'R']) C.push({ side, row: r, seats: Array.from({ length: side === 'L' ? 2 : 3 }, (_, i) => ({ seatId: 'C-' + side + '-' + String(r).padStart(2, '0') + '-0' + (i + 1), state: 'available' })) });
-  const nums = [...Array(26).keys()].map((i) => i + 1).filter((n) => n !== 13);
+  /* the Owners' plan of 18 Nov 2026: left rows 1–11, right rows 1–10; the long table 1–28 without 13 */
+  for (let r = 1; r <= 11; r++) for (const side of ['L', 'R']) if (side === 'L' || r <= 10) C.push({ side, row: r, seats: Array.from({ length: side === 'L' ? 2 : 3 }, (_, i) => ({ seatId: 'C-' + side + '-' + String(r).padStart(2, '0') + '-0' + (i + 1), state: 'available' })) });
+  const nums = [...Array(28).keys()].map((i) => i + 1).filter((n) => n !== 13);
   const side = (k) => nums.map((n) => ({ seatId: 'D-' + k + '-' + String(n).padStart(2, '0'), state: 'available', side: k }));
   return { ceremony: { rows: C }, dinner: { sides: { T: side('T'), B: side('B') } } };
 }
@@ -115,19 +116,19 @@ test('THE SEATS (read-only) · around a ceremony seat: the chairs that touch it 
   const a12 = plain(P.aroundDinner(v, 'D-B-12'));
   assert.deepEqual([a12.left.seatId, a12.right.seatId, a12.across.seatId], ['D-B-11', 'D-B-14', 'D-T-12'], 'B12: B11 and B14 beside it (13 never existed), A12 across');
   assert.equal(plain(P.aroundDinner(v, 'D-T-01')).left, null, 'the end of the table has no left neighbour');
-  assert.equal(v.dinner.sides.T.length + v.dinner.sides.B.length, 50); assert.ok(!v.dinner.sides.T.concat(v.dinner.sides.B).some((s) => /-13$/.test(s.seatId)));
+  assert.equal(v.dinner.sides.T.length + v.dinner.sides.B.length, 54); assert.ok(!v.dinner.sides.T.concat(v.dinner.sides.B).some((s) => /-13$/.test(s.seatId)));
 });
 
 test('YOUR WEDDING CIRCLE · the guest\'s seat, the people around, the pulse — read-only: no booking control, no seat can be chosen here; unassigned and unopened states are said as they are; the hosts see the whole plan', () => {
   const w = timers(page({ auth: PEGGY, modules: PULSE })), P = w.SIYL_PULSE, v = seatsView();
   hold(v, 'C-L-03-02', PEGGY.guestId, 'Peggy', 'yours'); hold(v, 'C-L-03-01', 'G2', 'Ben'); hold(v, 'D-T-07', PEGGY.guestId, 'Peggy', 'yours'); hold(v, 'D-T-06', 'G2', 'Ben');
   w.SIYL_SEATS = { view: () => v, seatOf: (ev) => (ev === 'ceremony' ? 'C-L-03-02' : 'D-T-07') };
-  const data = { ok: true, capacity: 50, joining: 3, people: [{ id: 'G2', name: 'Ben', photo: false, nationality: 'German', joinedAt: '2026-09-19', music: ['Pop'], after: 'party' }, { id: PEGGY.guestId, name: 'Peggy', photo: true, nationality: 'Swiss', joinedAt: '2026-09-18', music: ['Latin'], after: 'pool' }],
+  const data = { ok: true, capacity: 54, joining: 3, people: [{ id: 'G2', name: 'Ben', photo: false, nationality: 'German', joinedAt: '2026-09-19', music: ['Pop'], after: 'party' }, { id: PEGGY.guestId, name: 'Peggy', photo: true, nationality: 'Swiss', joinedAt: '2026-09-18', music: ['Latin'], after: 'pool' }],
     music: { responses: 2, leaders: ['Latin', 'Pop'], ranking: GENRES.map((g) => ({ genre: g, count: g === 'Pop' || g === 'Latin' ? 1 : 0 })) }, after: { responses: 2, pool: 1, party: 1 } };
   w.fetch = () => Promise.resolve({ ok: true, json: () => Promise.resolve(data) });
   return P.load(true).then(() => {
     const h = P.circleHtml({ guestId: PEGGY.guestId }, false);
-    assert.match(h, /id="circle" data-pl-circle/); assert.match(h, /<b>3<\/b><span class="pl-of">\/ 50<\/span>/); assert.doesNotMatch(h, /\/ 52/);
+    assert.match(h, /id="circle" data-pl-circle/); assert.match(h, /<b>3<\/b><span class="pl-of">\/ 54<\/span>/); assert.doesNotMatch(h, /\/ 5[0-3]\b/);
     assert.match(h, /<span>Your seat<\/span> <b>B3<\/b>/); assert.match(h, /<span>Your seat<\/span> <b>A7<\/b>/);
     assert.match(h, /Around you[\s\S]*Ben[\s\S]*German/); assert.match(h, /Next to you[\s\S]*data-dir="l"[\s\S]*Ben/); assert.match(h, /Across from you[\s\S]*B7[\s\S]*Not taken yet/);
     assert.match(h, /pl-c is-me/, 'the guest\'s own chair is marked');

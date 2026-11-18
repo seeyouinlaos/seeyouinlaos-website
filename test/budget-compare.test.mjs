@@ -255,6 +255,21 @@ test('BUDGET · the rooming list: a guest billed in another room than the list h
   assert.match(C(world().out, 'D1').checks.map((c) => c.text).join(' '), /rooming list \(Rooms engine\) could not be read just now/);
 });
 
+test('BUDGET · THE OWNERS\' ASSIGNMENT (18 Nov 2026): a guest billed in room B whom the Owners placed in room A of the same category is the same booking — said as info, never a data warning; every amount stays what it was', () => {
+  const base = { ok: true, units: { 'wedstay/heritage-executive': [{ label: 'A', occupants: [{ guestId: 'GA1' }] }, { label: 'B', occupants: [] }], 'wedstay/grand-majestic': [{ label: 'A', occupants: [{ guestId: 'GB1' }, { guestId: 'GB2' }] }] } };
+  const placed = JSON.parse(JSON.stringify(base)); placed.units['wedstay/heritage-executive'][0].occupants.push({ guestId: 'GC1', placedFrom: ['B'], by: 'owners:BRIDE' });
+  const unplaced = JSON.parse(JSON.stringify(base)); unplaced.units['wedstay/heritage-executive'][0].occupants.push({ guestId: 'GC1' });
+  const p = world({ rooms: placed }).out, u = world({ rooms: unplaced }).out;
+  const t = C(p, 'D1').checks.map((c) => c.severity + ': ' + c.text);
+  assert.ok(t.includes('info: GC1 is billed in room B (Heritage Executive); the Owners placed them in room A of the same category — the booking and its amounts are unchanged'), t.join('\n'));
+  assert.ok(!t.some((x) => /^data: GC1 is billed in room B/.test(x)));
+  assert.ok(C(u, 'D1').checks.some((c) => c.severity === 'data' && /GC1 is billed in room B/.test(c.text)), 'without the Owners\' placement it stays a data warning');
+  assert.equal(C(p, 'D1').contribution.cents, C(u, 'D1').contribution.cents); assert.equal(C(p, 'D1').cost.cents, C(u, 'D1').cost.cents);
+  assert.equal(p.reconciliation.contributions.cents, u.reconciliation.contributions.cents);
+  const occ = p.roomPlan.find((s) => s.stay === 'D1').rooms.find((r) => r.key === 'wedstay/heritage-executive' && r.label === 'A').occupants.find((o) => o.guestId === 'GC1');
+  assert.deepEqual(occ.placedFrom, ['B'], 'the room overview names where the booking was made');
+});
+
 /* ---------------------------------------------------------------- the independent review's findings (17 Nov 2026) */
 
 test('BUDGET · bookings not counted keep their stay without a difference: a holder set aside names its stays; an unreadable one stops every difference', () => {

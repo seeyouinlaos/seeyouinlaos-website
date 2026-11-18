@@ -21,13 +21,14 @@ const SHOUT = /NOT PROVIDED|NOT ANSWERED/;
 test('seat labels · the same pure mapping as assets/seatlabels.js (every ceremony and dinner seat)', () => {
   const L = page({ auth: null }).SIYL_SEATLABELS;
   const ids = [];
-  for (const side of ['L', 'R']) for (let r = 1; r <= 10; r++) for (let c = 1; c <= 3; c++) ids.push('C-' + side + '-' + String(r).padStart(2, '0') + '-0' + c);
-  for (const run of ['T', 'B']) for (let n = 1; n <= 25; n++) ids.push('D-' + run + '-' + String(n).padStart(2, '0'));
+  for (const side of ['L', 'R']) for (let r = 1; r <= 12; r++) for (let c = 1; c <= 3; c++) ids.push('C-' + side + '-' + String(r).padStart(2, '0') + '-0' + c);
+  for (const run of ['T', 'B']) for (let n = 1; n <= 29; n++) ids.push('D-' + run + '-' + String(n).padStart(2, '0'));
   for (const id of ids) assert.equal(seatLabel(id), L.label(id), id);
   assert.equal(seatLabel('C-R-05-02'), 'E5'); assert.equal(seatLabel('D-T-05'), 'A5'); assert.equal(seatLabel('nope'), null);
-  /* the dinner is 48 seats (Owner, 24 Sep 2026 · OQ-03): no A13 / B13 in either mapping, nothing renumbered, B12 stays B12 */
+  /* the dinner is 54 seats (Owners, 18 Nov 2026): no A13 / B13 in either mapping, nothing renumbered, B12 stays B12; the ceremony 52 (A11, B11 — no D11) */
   assert.equal(seatLabel('D-T-13'), null); assert.equal(seatLabel('D-B-13'), null); assert.equal(seatLabel('D-B-12'), 'B12'); assert.equal(seatLabel('D-T-14'), 'A14');
-  assert.equal(ids.filter((id) => /^D-/.test(id) && seatLabel(id)).length, 48, 'forty-eight dinner labels');
+  assert.equal(ids.filter((id) => /^D-/.test(id) && seatLabel(id)).length, 54, 'fifty-four dinner labels');
+  assert.equal(ids.filter((id) => /^C-/.test(id) && seatLabel(id)).length, 52, 'fifty-two ceremony labels'); assert.equal(seatLabel('C-L-11-02'), 'B11'); assert.equal(seatLabel('C-R-11-01'), null);
   assert.equal(whenWords('2026-09-16T17:52:41.696Z'), '16 September 2026 · 19:52');
 });
 

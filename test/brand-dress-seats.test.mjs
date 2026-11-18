@@ -61,13 +61,13 @@ test('LAO TRADITIONAL DRESS RENTAL · the guest\'s own cost, paid at the shop; G
   assert.equal(inv.link, 'https://www.facebook.com/profile.php?id=61573790998776', 'the inventory records the same link');
 });
 
-test('WEDDING DINNER · 50 seats (Owner override, 25 Sep 2026): 25 per side, A1–A12 A14–A26 · B1–B12 B14–B26, no 13, no duplicate, B12 kept, nothing renumbered; no active surface still says 48 or 24', () => {
+test('WEDDING DINNER · 54 seats (Owners, 18 Nov 2026): 27 per side, A1–A12 A14–A28 · B1–B12 B14–B28, no 13, no duplicate, B12 kept, nothing renumbered; no active surface still says 48 or 24', () => {
   const d = S.seatsOf({ dinner: { sides: { T: [], B: [] } } }, 'dinner');
-  assert.equal(d.length, 50); assert.equal(new Set(d.map((x) => x.seatId)).size, 50);
-  assert.equal(d.filter((x) => x.side === 'T').length, 25); assert.equal(d.filter((x) => x.side === 'B').length, 25);
-  for (const id of ['D-T-26', 'D-B-26', 'D-B-12', 'D-T-14']) assert.ok(d.some((x) => x.seatId === id), id);
+  assert.equal(d.length, 54); assert.equal(new Set(d.map((x) => x.seatId)).size, 54);
+  assert.equal(d.filter((x) => x.side === 'T').length, 27); assert.equal(d.filter((x) => x.side === 'B').length, 27);
+  for (const id of ['D-T-26', 'D-B-26', 'D-T-27', 'D-T-28', 'D-B-27', 'D-B-28', 'D-B-12', 'D-T-14']) assert.ok(d.some((x) => x.seatId === id), id);
   assert.ok(!d.some((x) => /-13$/.test(x.seatId)));
-  assert.equal(S.CAPACITY.dinner.guestSeats, 50);
+  assert.equal(S.CAPACITY.dinner.guestSeats, 54);
   for (const f of ['wedding.html', 'wedding-preparation.html', 'voyage.html', 'assets/seating.js', 'assets/seatlabels.js', 'assets/wedding-dinner.js', 'assets/venue-data.js', 'src/seating.js', 'src/mail-templates.js']) {
     assert.doesNotMatch(src(f), /\b48 (guest )?seats\b|\b24 seats\b|forty-eight|twenty-four seats|A14–A25|B14–B25/i, f + ' carries no retired seat count');
   }

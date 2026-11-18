@@ -118,6 +118,10 @@
     budgetOpen: {},   /* which stays / routes of the budget comparison are open — kept across a redraw */
   };
   var root = null;
+  /* THE OWNERS' SEATING MANAGEMENT & ROOM ASSIGNMENTS (Owners, 18 Nov 2026): two more areas from assets/admin-assign.js — loaded
+     before this file, given this console's own helpers, drawn and wired by it; absent, the console is what it was */
+  var EXT = window.SIYL_ADMIN_EXT || null;
+  function extView(v) { return !!(EXT && EXT.views && EXT.views[v]); }
 
   function api(path, opts) {
     var a = auth();
@@ -136,6 +140,7 @@
     var m = /^holder=(INV-[A-Z0-9-]+)$/.exec(h);
     if (m) return { view: 'holder', id: m[1] };
     if (h === 'revenue' || h === 'rooms' || h === 'finance') return { view: h, id: null };
+    if (extView(h)) return { view: h, id: null };
     return { view: 'guests', id: null };
   }
   var hashEvents = true;
@@ -145,6 +150,7 @@
     S.panel = null; S.issue = null; S.send = null; S.pay = null; S.confirm = null; S.msg = ''; S.download = ''; S.owner = null; S.ownerMsg = ''; S.obForm = null;
     if (S.route.view === 'holder') loadHolder(S.route.id);
     else if (/^(revenue|rooms|finance)$/.test(S.route.view) && S.revenuePhase === 'idle') loadRevenue();
+    else if (extView(S.route.view) && EXT.enter) EXT.enter(S.route.view);
     draw();
     try { window.scrollTo(0, 0); } catch (e) {}
   }
@@ -1630,11 +1636,12 @@
     var o = S.overview, v = S.route.view;
     /* the page has <base href="/">: an in-page link names the page itself, or "#revenue" would leave for the home page */
     var tab = function (k, label, on) { return '<a href="/admin/billing#' + k + '" data-ab-tab="#' + k + '" class="' + (on ? 'on' : '') + '">' + label + '</a>'; };
-    var tabs = '<nav class="ab-tabs" aria-label="Sections">' + tab('guests', 'Guests', !/^(revenue|rooms|finance)$/.test(v)) + tab('rooms', 'Rooms &amp; rates', v === 'rooms') +
+    var tabs = '<nav class="ab-tabs" aria-label="Sections">' + tab('guests', 'Guests', !/^(revenue|rooms|finance)$/.test(v) && !extView(v)) +
+      (EXT && EXT.tabs ? EXT.tabs.map(function (t) { return tab(t[0], esc(t[1]), v === t[0]); }).join('') : '') + tab('rooms', 'Rooms &amp; rates', v === 'rooms') +
       tab('finance', 'Finance', v === 'finance') + tab('revenue', 'Revenue', v === 'revenue') +
       '<span class="ab-gate ' + (o.gate && o.gate.approved ? 'on' : 'open') + '">' + (o.gate && o.gate.approved ? 'Issue &amp; Publish enabled' : 'Activation Gate not approved') + '</span>' +
       '<span class="ab-who">Signed in · ' + esc(o.audience === 'BRIDE' ? 'Haruthai' : o.audience === 'GROOM' ? 'Suthep' : '') + '</span></nav>';
-    return tabs + (v === 'holder' ? holderView() : v === 'revenue' ? revenueView() : v === 'rooms' ? roomsTabView() : v === 'finance' ? financeTabView() : listView());
+    return tabs + (extView(v) ? EXT.views[v]() : v === 'holder' ? holderView() : v === 'revenue' ? revenueView() : v === 'rooms' ? roomsTabView() : v === 'finance' ? financeTabView() : listView());
   }
 
   /* --------------------------------------------------------------- actions */
@@ -1900,19 +1907,24 @@
       });
     });
     on('[data-ab-pay-cancel]', 'click', function () { S.pay = null; draw(); });
+    if (EXT && EXT.wire) EXT.wire(root, on);
   }
 
   /* ----------------------------------------------------------------- boot */
   function boot(el) {
     root = el || document.getElementById('admin');
     if (!root) return;
+    if (EXT && EXT.init) EXT.init({ api: api, esc: esc, draw: draw, go: go, csvDoc: csvDoc, csvSep: csvSep, saveText: saveText, when: when, day: day, nowStamp: nowStamp,
+      revenue: function () { return S.revenue; }, revenuePhase: function () { return S.revenuePhase; }, loadRevenue: loadRevenue });
     if (typeof window.addEventListener !== 'function') { hashEvents = false; start(); return; }
     window.addEventListener('hashchange', function () { if (S.phase === 'ready') onRoute(); });
+    /* an unsaved seating or room draft is never lost by leaving the page unawares — the browser asks */
+    window.addEventListener('beforeunload', function (e) { if (EXT && EXT.unsaved && EXT.unsaved()) { e.preventDefault(); e.returnValue = ''; } });
     /* signed out, or in as someone else, in another tab: everything held is dropped at once */
     window.addEventListener('storage', function (e) { if (e && e.key === 'siyl.auth') { S = Object.assign(S, { overview: null, status: {}, holder: null, revenue: null, revenuePhase: 'idle' }); start(); } });
     start();
   }
-  window.SIYL_ADMIN_BILLING = { boot: boot, state: function () { return S; }, page: page, matches: matches, review: review,
+  window.SIYL_ADMIN_BILLING = { boot: boot, state: function () { return S; }, page: page, matches: matches, review: review, ext: EXT,
     /* the exports as text, for the tests (nothing is downloaded by these) */
     csv: { cell: csvCell, guests: function (kind) { return guestCsv(kind || 'all'); }, rooming: function () { return roomingCsv(); }, finance: function (k) { return finCsv(k); }, receivables: function () { return receivablesCsv(); } } };
   var hasPage = function () { return typeof document.getElementById === 'function' && !!document.getElementById('admin'); };

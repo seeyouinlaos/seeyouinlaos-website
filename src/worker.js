@@ -126,7 +126,7 @@ export default {
       if (!env.ROOMS) return json({ ok: false, error: 'rooms unavailable' }, 503, corsHeaders(request));
       const op = url.pathname.replace(/^\/api\/rooms\/?/, '') || 'read';
       const headers = new Headers(request.headers);
-      headers.delete('x-gr-verified'); headers.delete('x-siyl-identity');   /* a client can never claim either */
+      headers.delete('x-gr-verified'); headers.delete('x-siyl-identity'); headers.delete('x-siyl-admin');   /* a client can never claim any — the Owners' operations come only through the admin console's routes */
       if (GR_ROOMS_OPS.includes(op)) {
         if (!env.GR_TOKEN) return json({ ok: false, error: 'rooms operations are not enabled' }, 503);
         if (!grAuthorised(request, env)) return json({ ok: false, error: 'unauthorised' }, 401);
@@ -298,7 +298,7 @@ export default {
       if (!env.SEATING) return json({ ok: false, error: 'seating unavailable' }, 503, corsHeaders(request));
       const op = url.pathname.replace(/^\/api\/seating\/?/, '') || 'read';
       const headers = new Headers(request.headers);
-      headers.delete('x-gr-verified'); headers.delete('x-siyl-identity'); headers.delete('x-siyl-couple');   /* a client can never claim any */
+      headers.delete('x-gr-verified'); headers.delete('x-siyl-identity'); headers.delete('x-siyl-couple'); headers.delete('x-siyl-admin');   /* a client can never claim any — the Owners' operations come only through the admin console's routes */
       /* THE COUPLE'S PLACES (Owner, 2 Oct 2026): the two ceremony places belong to the register's Bride and Groom — named for the ledger
          here, from the index's roles, never from a name or anything a client sent */
       try { const cp = await coupleOfIndex(env, url.origin); if (cp) headers.set('x-siyl-couple', JSON.stringify(cp)); } catch (e) { /* the places stay unnamed */ }
@@ -879,7 +879,15 @@ async function engineSeatView(env, who) {
 }
 async function engineSeats(env, who) {
   if (!env.SEATING || !who) return null;
-  try { const stub = env.SEATING.get(env.SEATING.idFromName('seating')); const r = await stub.fetch(new Request('https://seating/api/seating/mine?invitation=' + encodeURIComponent(who.invitationId), { headers: { 'x-siyl-identity': JSON.stringify(await withFirstName(env, who)) } })); const v = await r.json(); return v && v.mine ? v.mine : null; } catch (e) { return null; }
+  try { const stub = env.SEATING.get(env.SEATING.idFromName('seating')); const r = await stub.fetch(new Request('https://seating/api/seating/mine?invitation=' + encodeURIComponent(who.invitationId), { headers: { 'x-siyl-identity': JSON.stringify(await withFirstName(env, who)) } })); const v = await r.json(); return v && v.mine ? withPlaced(v.mine, v.placed) : null; } catch (e) { return null; }
+}
+/* THE OWNERS' PLACEMENT IS THEIRS, NOT THE GUEST'S (Owners, 18 Nov 2026): the engines name, beside a guest's seats and rooms, what the
+   guest held before each placement by the Owners. It rides on the view as a NON-ENUMERABLE property — never hashed into a
+   fingerprint, never stored with a record — read only by the comparison below (the engines answer it to a signed-in guest's
+   own read only). */
+function withPlaced(view, placed) {
+  if (view && typeof view === 'object' && placed && typeof placed === 'object' && Object.keys(placed).length) Object.defineProperty(view, 'placed', { value: placed, enumerable: false });
+  return view;
 }
 async function journeyFingerprint(env, who, draft) { return (await journeyFingerprints(env, who, draft)).v1; }
 /* THE CONTENT OF A TRIP (PRQ-01-06): what the guest chose and answered, without the stamps that record WHEN or BY WHOM an answer
@@ -1012,7 +1020,7 @@ async function submissionFor(env, who, draft, pre) {
   if (pre) { R0 = pre.rooms; S0 = pre.seats; } else { [R0, S0] = await Promise.all([engineRooms(env, who), engineSeats(env, who)]); }
   /* the one fingerprint this record is compared by (incident, 4 Oct 2026): the selection, else the content, else the historical one */
   const need = [record.selectionFingerprint ? 'v3' : record.contentFingerprint ? 'v2' : 'v1'];
-  const fpsOf = (dd, rr) => fingerprintsOf(dd, rr === undefined ? R0 : rr, S0, need);
+  const fpsOf = (dd, rr, ss) => fingerprintsOf(dd, rr === undefined ? R0 : rr, ss === undefined ? S0 : ss, need);
   const fps = await fpsOf(pre ? draft : (draft === undefined ? await storedDraft(env, who.invitationId) : draft));
   /* THE HOTEL MUSE REPLACEMENT (28 Sep 2026) is the website's, not the guest's: a trip sent naming the Siam Kempinski's room
      (or sent since, while this device still named it) is the same trip — the draft and the engine view in the other form */
@@ -1034,7 +1042,89 @@ async function submissionFor(env, who, draft, pre) {
     /* the first time a sent trip is read unchanged, its selection fingerprint is kept with it — from then on only a selection counts */
     if (!unsent && env.REG_KV && !pre) { try { record.selectionFingerprint = await canonicalV3(fps, R0, S0); await env.REG_KV.put('reg:' + who.invitationId, JSON.stringify(record), { metadata: { invitationId: who.invitationId, submittedAt: record.submittedAt, submissionId: record.submissionId, version: record.version, lastSentAt: record.lastSentAt } }); } catch (e) { /* compared again next time */ } }
   }
-  return submissionStateOf(record, unsent, conf);
+  /* AN OWNERS' PLACEMENT IS THE OWNERS', NOT THE GUEST'S (Owners, 18 Nov 2026 · the admin console's seating and room assignments):
+     a seat or a room of the same category the Owners gave the guest is not a change the guest made — the trip with the placement
+     undone (each seat / room put back where the guest held it before, the Bag's room label with it) reads as sent. A change the
+     guest made themselves after it (a new choice carries no placement) still reads as not sent. */
+  if (unsent) {
+    const match = (f) => (record.selectionFingerprint ? record.selectionFingerprint === f.v3 : !legacy(f));
+    for (const form of placementUndone(fps.d, R0, S0)) {
+      const f2 = await fpsOf(form.d, form.rooms === undefined ? undefined : form.rooms, form.seats);
+      if (match(f2)) { unsent = false; break; }
+      /* an older record (no selection fingerprint): the placement undone together with the website's own corrections */
+      if (!record.selectionFingerprint) {
+        const backs = [withoutGifts(form.d)]; for (let k = 1; k <= 3; k++) backs.push(beforeCorrection(form.d, k));
+        let hit = false; for (const back of backs.filter(Boolean)) if (match(await fpsOf(back, form.rooms === undefined ? undefined : form.rooms, form.seats))) { hit = true; break; }
+        if (hit) { unsent = false; break; }
+      }
+      let other = false;
+      for (const dir of ['canonical', 'legacy']) { const alt = replacedAs(form.d, form.rooms || R0, dir); if (alt && match(await fpsOf(alt.d, alt.rooms, form.seats))) { other = true; break; } }
+      if (other) { unsent = false; break; }
+    }
+  }
+  const state = submissionStateOf(record, unsent, conf);
+  /* the last send as the guest's pages read it: a room the Owners moved the guest to is the room of that send (the same category,
+     the same booking) — the line's label follows the placement, so the page never reads "not sent yet" for the Owners' own change */
+  if (state.sentSelections && R0 && R0.placed) state.sentSelections = sentWithPlacement(state.sentSelections, R0);
+  return state;
+}
+/* the forms of a trip with the Owners' placements undone — every combination of each placed seat or room put back where the guest
+   held it before (newest first), at most 63 forms; none when nothing was placed */
+function placementUndone(d, rooms, seats) {
+  const facets = [];
+  const sp = seats && seats.placed;
+  if (sp) for (const event of ['ceremony', 'dinner']) for (const [g, hist] of Object.entries(sp[event] || {})) {
+    if (!Array.isArray(hist) || !hist.length) continue;
+    facets.push({ kind: 'seat', event, guestId: g, options: [...new Set(hist.slice().reverse())] });
+  }
+  const rp = rooms && rooms.placed;
+  if (rp) for (const [stage, hist] of Object.entries(rp)) {
+    const cur = rooms[stage]; if (!cur || !cur.key || !Array.isArray(hist) || !hist.length) continue;
+    facets.push({ kind: 'room', stage, key: cur.key, options: [...new Set(hist.slice().reverse().map((h) => h && h.label).filter((l) => l && l !== cur.label))] });
+  }
+  const live = facets.filter((f) => f.options.length);
+  if (!live.length) return [];
+  /* the likeliest forms first (review, 18 Nov 2026): EVERY placement undone to the same depth (the guest's state before the
+     Owners' latest, then earlier, changes), then each placement alone undone, then the other combinations — at most 63 forms */
+  const depth = Math.max(...live.map((f) => f.options.length));
+  const seen = new Set(), combos = [];
+  const add = (c) => { const k = c.join(','); if (c.every((i) => i < 0) || seen.has(k) || combos.length >= 63) return; seen.add(k); combos.push(c); };
+  for (let k = 0; k < depth; k++) add(live.map((f) => Math.min(k, f.options.length - 1)));
+  live.forEach((f, n) => { for (let i = 0; i < f.options.length; i++) add(live.map((g, m) => (m === n ? i : -1))); });
+  const all = (n, acc) => { if (combos.length >= 63) return; if (n === live.length) { add(acc); return; } for (let i = -1; i < live[n].options.length; i++) all(n + 1, acc.concat([i])); };
+  all(0, []);
+  const out = [];
+  for (const c of combos) {
+    let sv = seats ? JSON.parse(JSON.stringify(seats)) : seats, rv = rooms, dd = d, roomsChanged = false;
+    c.forEach((i, n) => {
+      if (i < 0) return;
+      const f = live[n], v = f.options[i];
+      if (f.kind === 'seat') { sv = sv || { ceremony: {}, dinner: {} }; sv[f.event] = sv[f.event] || {}; if (v) sv[f.event][f.guestId] = v; else delete sv[f.event][f.guestId]; return; }
+      if (!roomsChanged) { rv = { ...rooms }; roomsChanged = true; }
+      rv[f.stage] = roomEntryOf({ key: f.key, label: v }, f.stage);
+      dd = withBagUnit(dd, f.key, v);
+    });
+    out.push({ d: dd, rooms: roomsChanged ? rv : undefined, seats: sv });
+  }
+  return out;
+}
+/* the draft with the Bag's line of one room product naming `label` (the field the guest's page keeps in line with the engine) */
+function withBagUnit(d, key, label) {
+  if (!d || !d.keys || typeof d.keys['siyl.bag'] !== 'string') return d;
+  let bag; try { bag = JSON.parse(d.keys['siyl.bag']); } catch (e) { return d; }
+  if (!Array.isArray(bag)) return d;
+  let changed = false;
+  const next = bag.map((l) => { if (l && typeof l === 'object' && l.room && !l.interest && canonicalKey(l.id + '/' + l.room) === key) { changed = true; return { ...l, unit: label, ...(l.unitName ? { unitName: 'Room ' + label } : {}) }; } return l; });
+  return changed ? { ...d, keys: { ...d.keys, 'siyl.bag': JSON.stringify(next) } } : d;
+}
+/* the sent lines, each room line the Owners moved (the sent label among the guest's earlier labels of that stay) read at its room now */
+function sentWithPlacement(lines, rooms) {
+  return lines.map((l) => {
+    if (!l || typeof l !== 'object' || !l.room || !l.unit || l.interest) return l;
+    const key = canonicalKey(l.id + '/' + l.room), stage = stageOf(key), cur = rooms[stage], hist = rooms.placed && rooms.placed[stage];
+    if (!cur || cur.key !== key || cur.label === l.unit || !Array.isArray(hist) || !hist.some((h) => h && h.label === l.unit)) return l;
+    return { ...l, unit: cur.label, ...(l.unitName ? { unitName: 'Room ' + cur.label } : {}) };
+  });
 }
 /* ONE TABLE FOR TWO (PRQ-07a-06, Window 007): the 1872 afternoon tea is one table for a party of two — when another member of the
    guest's own party already has it in their trip, the draft read says so (their first name only), and the page offers no second
@@ -1280,13 +1370,22 @@ async function grEngine(env, binding, name, path) {
   try { const r = await ns.get(ns.idFromName(name)).fetch(new Request('https://' + name + path, { headers: { 'x-gr-verified': 'yes' } })); const v = await r.json(); return v && v.ok ? v : null; } catch (e) { return null; }
 }
 /* the ledger's plan as every invitation's own seats { inv: { ceremony: { guestId: seatId }, dinner: { … } } } — the gr-mine projection */
-function seatsByInvitation(plan) {
-  const out = {};
+function seatsByInvitation(plan, invOfGuest) {
+  const out = {}, placed = {};
+  const mark = (inv, event, g, hist) => { if (!inv || !Array.isArray(hist) || !hist.length) return; const p = placed[inv] || (placed[inv] = {}); (p[event] = p[event] || {})[g] = hist; };
   for (const event of ['ceremony', 'dinner']) for (const s of ((plan.events && plan.events[event] && plan.events[event].seats) || [])) {
     if (!s || !s.guestId || !s.invitationId || s.state === 'family' || s.state === 'available') continue;
     const m = out[s.invitationId] || (out[s.invitationId] = { ceremony: {}, dinner: {} });
     m[event][s.guestId] = s.seatId;
+    mark(s.invitationId, event, s.guestId, s.placedFrom);
   }
+  /* a seat the Owners released: what the guest held before (the ledger's `placed`), for the guest's own invitation */
+  for (const [event, byG] of Object.entries((plan && plan.placed) || {})) for (const [g, hist] of Object.entries(byG || {})) {
+    const inv = invOfGuest ? invOfGuest[g] : null; if (!inv) continue;
+    if (!out[inv]) out[inv] = { ceremony: {}, dinner: {} };
+    mark(inv, event, g, hist);
+  }
+  for (const [inv, p] of Object.entries(placed)) withPlaced(out[inv], p);
   return out;
 }
 async function handleGrJourneys(request, env) {
@@ -1311,7 +1410,8 @@ async function handleGrJourneys(request, env) {
   /* the seat ledger ONCE: its plan gives every invitation's own seats (exactly the `gr-mine` projection — a chair of the plan, held,
      never a family chair) and the seat holders the joined union (readCohort) needs */
   const [roomsAll, seatPlan] = await Promise.all([grEngine(env, 'ROOMS', 'rooms', '/api/rooms/gr-mine'), grEngine(env, 'SEATING', 'seating', '/api/seating/plan')]);
-  const seatsAll = seatPlan ? { ok: true, byInvitation: seatsByInvitation(seatPlan) } : null;
+  const invOfGuest = {}; for (const e of Object.values(entries || {})) if (e && e.g && e.i) invOfGuest[e.g] = e.i;
+  const seatsAll = seatPlan ? { ok: true, byInvitation: seatsByInvitation(seatPlan, invOfGuest) } : null;
   /* 4 · each guest: the draft (its own actor), then what is already in hand */
   const out = new Array(list.length);
   await pool(list, 8, async (inv, n) => {
@@ -1486,7 +1586,10 @@ async function submissionIdOf(invitationId, submittedAt) {
 }
 const MAIL_FROM_NAME = 'See You In Laos — Guest Relations';
 /* what the billing routes borrow from this Worker: the one mail transport (the admin console's statement email) */
-const BILLING_DEPS = Object.freeze({ sendMail: (...a) => sendMail(...a) });
+const BILLING_DEPS = Object.freeze({ sendMail: (...a) => sendMail(...a),
+  /* the Owners' seating and room assignments (admin console, 18 Nov 2026): the Wedding Circle reads the seats again after a write;
+     no write while the clean reset sweeps the engines */
+  cohortStale: (env) => { if (env && env.REG_KV) cohortStale(env); }, resetLocked: (env) => resetLocked(env) });
 /* the email provider — the API key is a Worker secret, never in the repository:
  *   BREVO_API_KEY   → https://api.brevo.com/v3/smtp/email (sender = MAIL_FROM, a sender validated in Brevo)
  *   RESEND_API_KEY  → https://api.resend.com/emails       (sender = MAIL_FROM, a domain verified in Resend)
@@ -1573,15 +1676,19 @@ function roomsViewOf(v) {
     if (!v || !v.ok || !v.mine) return null;
     const out = {};
     /* a dedicated room (002 · W) is named as the guest's own room, the whole room */
-    const entry = (m, stage) => { m = { ...m, key: canonicalKey(m.key) }; const s = SEED[m.key]; const own = !!(s && (s.dedicated || []).some((d) => d.label === m.label)); return { stage, key: m.key, label: m.label, name: s ? s.name : m.key, stay: s && s.stay ? s.stay : null, room: s && s.unit === 'guest' ? s.name : own ? 'Own room · Room ' + m.label : 'Room ' + m.label }; };
-    for (const [stage, m] of Object.entries(v.mine)) out[stage] = entry(m, stage);
+    for (const [stage, m] of Object.entries(v.mine)) out[stage] = roomEntryOf(m, stage);
     /* THE WAITING LIST (Owner, 19 Sep 2026): a stage the guest waits for, with the position — no product, no amount */
     for (const [stage, w] of Object.entries(v.waitlist || {})) if (!out[stage]) out[stage] = { stage, waitlisted: true, position: w.position, since: w.at, size: w.size || 1 };
     /* THE PAID EXTENSION IS WITHDRAWN (Owner, 23 Sep 2026): the record carried a `stayext` component beside the stays. The
        self-service extension is gone, so nothing of the kind is written any more and no confirmation can name a hotel for
        extra nights; Guest Relations arranges those outside this engine. */
-    return out;
+    return withPlaced(out, v.placed);
   }
+}
+/* one stay of a guest's room view, exactly as the engine's `mine` entry reads (a dedicated room is named as the guest's own room) */
+function roomEntryOf(m, stage) {
+  m = { ...m, key: canonicalKey(m.key) }; const s = SEED[m.key]; const own = !!(s && (s.dedicated || []).some((d) => d.label === m.label));
+  return { stage, key: m.key, label: m.label, name: s ? s.name : m.key, stay: s && s.stay ? s.stay : null, room: s && s.unit === 'guest' ? s.name : own ? 'Own room · Room ' + m.label : 'Room ' + m.label };
 }
 /* both emails for one stored record — the content is the journey as sent, never an access code */
 async function sendJourneyMail(env, record, request, only) {
@@ -1757,8 +1864,9 @@ async function handleCommunity(request, env) {
    and the final act of the wedding night (the pool jump · the party at BARON). Read from the guest's SENT record — the answers the
    guest has sent — through the one questionnaire (src/questionnaire.js); asked of wedding guests only, so counted only for a guest
    who joins the wedding (the couple always). No other answer is ever read here. */
-/* THE WHOLE WEDDING (Owner, 2 Oct 2026 — supersedes the 52 of 27 Sep): FIFTY PEOPLE IN ALL, Haruthai and Suthep included — the same
-   fifty the ceremony (the couple's two places + 48 chairs) and the dinner (fifty chairs) hold; one constant, src/seating.js */
+/* THE WHOLE WEDDING (Owners, 18 Nov 2026 — supersedes the fifty of 2 Oct 2026): FIFTY-FOUR PEOPLE IN ALL, Haruthai and Suthep
+   included — the same fifty-four the ceremony (the couple's two places + 52 chairs) and the dinner (54 chairs) hold; one constant,
+   src/seating.js */
 const WEDDING_CAPACITY = WEDDING_PEOPLE;
 function socialAnswers(rec, hosts) {
   const reg = rec && rec.registration; if (!reg) return { music: [], after: null };
@@ -1812,7 +1920,8 @@ async function staysOf(env, cohort) {
   for (const o of occ) {
     const g = String(o.guestId), inv = cohort.invOf[g];
     if (!(g in sent)) sent[g] = sentStays(inv ? cohort.records[inv] : null);
-    const state = sent[g].has(o.key + '|' + o.label) ? 'sent' : 'held';
+    /* a room the Owners moved the guest to (the same category) is the room they sent — their placement, not a new choice */
+    const state = sent[g].has(o.key + '|' + o.label) || (Array.isArray(o.placedFrom) && o.placedFrom.some((l) => sent[g].has(o.key + '|' + l))) ? 'sent' : 'held';
     (byGuest[g] = byGuest[g] || []).push({ stage: stageOf(o.key), key: o.key, with: unit[o.key + '|' + o.label].filter((x) => x !== g), state });
     if (o.name && !names[g]) names[g] = String(o.name).slice(0, 24);
   }

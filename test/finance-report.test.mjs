@@ -304,3 +304,18 @@ test('012 · re-review 18 Nov: another surname is another person; a room whose r
     [row(2, 'Grand Exec', '301', '2031-02-31', '2031-03-01', ['Anna'])]);
   assert.match(d.units['W1|wed/exec|A'].verify.join(' '), /check-in date of room 301 is not readable/);
 });
+
+test('PURCHASE · THE OWNERS\' ASSIGNMENT (18 Nov 2026): guests billed in room F whom the Owners placed in room G of the same category keep their room confirmed — stay, item and guest the same, the billed label among where they were; the costs do not move', () => {
+  const moved = JSON.parse(JSON.stringify(PLAN));
+  const p1 = moved.find((s) => s.stay === 'P1');
+  p1.rooms[0] = unit('pre/exec', 'G', 'Grand Exec', 'P1-EXEC', [{ ...occ('GA1', 'Tomasz Ardent'), placedFrom: ['F'] }, { ...occ('GA2', 'Ulla Ardent'), placedFrom: ['F'] }]);
+  const lines = [L004(8, 'All Categories Rooms', 150, 7, 2, '2031-02-27|2031-03-01')];
+  const a = buy(lines), b = buy(lines, moved);
+  const addA = a.proposals.find((p) => p.kind === 'ADDITIONAL'), addB = b.proposals.find((p) => p.kind === 'ADDITIONAL');
+  assert.equal(addA.confirmed, true); assert.equal(addB.confirmed, true, 'the moved room is the booked room');
+  assert.equal(addB.label, 'G'); assert.equal(addB.total.cents, addA.total.cents);
+  assert.equal(b.notIn004.cents, a.notIn004.cents); assert.equal(b.pending.cents, a.pending.cents);
+  /* the label alone never confirms: another guest in G, nobody's billed label among where they were — held */
+  const other = JSON.parse(JSON.stringify(PLAN)); other.find((s) => s.stay === 'P1').rooms[0] = unit('pre/exec', 'G', 'Grand Exec', 'P1-EXEC', [{ ...occ('GZ9', 'Zed Other'), placedFrom: ['F'] }]);
+  assert.equal(buy(lines, other).proposals.find((p) => p.kind === 'ADDITIONAL').confirmed, false);
+});

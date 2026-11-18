@@ -1,6 +1,7 @@
-/* THE WHOLE WEDDING IS FIFTY PEOPLE, THE COUPLE INCLUDED · THE WEDDING CIRCLE IS THE SHARED VIEW (Owner, 2 Oct 2026).
-   Haruthai and Suthep are two of the fifty: the ceremony is their two fixed places at the front centre + 48 guest chairs, the dinner
-   fifty chairs, two of them theirs. Every signed-in participant sees who is joining, who sits where at both events and who stays
+/* THE WHOLE WEDDING IS FIFTY-FOUR PEOPLE, THE COUPLE INCLUDED (Owners, 18 Nov 2026 — superseding the fifty of 2 Oct 2026) · THE
+   WEDDING CIRCLE IS THE SHARED VIEW. Haruthai and Suthep are two of the fifty-four: the ceremony is their two fixed places at the
+   front centre + 52 guest chairs (left 11 rows × 2 — row 11 at the back — right 10 rows × 3), the dinner fifty-four chairs (A1–A28 ·
+   B1–B28 without 13), two of them theirs. Every signed-in participant sees who is joining, who sits where at both events and who stays
    where — never a code, an email, a phone number, an invitation id, a rate or a unit label. Seeing a seat never means changing it. */
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -36,45 +37,54 @@ async function live() {
 }
 const flat = (v) => v.ceremony.rows.flatMap((r) => r.seats);
 
-test('FIFTY · one definition everywhere: the wedding, the ceremony (48 guest chairs + the Bride + the Groom) and the dinner (50, the couple among them) — never 51, never 52', () => {
-  assert.equal(WEDDING_PEOPLE, 50);
-  assert.equal(CAPACITY.ceremony.guestSeats + CAPACITY.ceremony.couple, 50); assert.equal(CAPACITY.ceremony.totalPeople, 50); assert.equal(CAPACITY.ceremony.couple, RULES.ceremony.fixed.length);
-  assert.equal(CAPACITY.ceremony.left + CAPACITY.ceremony.right, CAPACITY.ceremony.guestSeats);
-  assert.equal(CAPACITY.dinner.guestSeats, 50); assert.equal(CAPACITY.dinner.totalPeople, 50);
+test('FIFTY-FOUR · one definition everywhere: the wedding, the ceremony (52 guest chairs + the Bride + the Groom) and the dinner (54, the couple among them) — never counted twice', () => {
+  assert.equal(WEDDING_PEOPLE, 54);
+  assert.equal(CAPACITY.ceremony.guestSeats + CAPACITY.ceremony.couple, 54); assert.equal(CAPACITY.ceremony.totalPeople, 54); assert.equal(CAPACITY.ceremony.couple, RULES.ceremony.fixed.length);
+  assert.equal(CAPACITY.ceremony.left + CAPACITY.ceremony.right, CAPACITY.ceremony.guestSeats); assert.deepEqual([CAPACITY.ceremony.left, CAPACITY.ceremony.right], [22, 30]);
+  assert.equal(CAPACITY.dinner.guestSeats, 54); assert.equal(CAPACITY.dinner.totalPeople, 54); assert.deepEqual([CAPACITY.dinner.top, CAPACITY.dinner.bottom], [27, 27]);
   const w = src('src/worker.js');
-  assert.match(w, /const WEDDING_CAPACITY = WEDDING_PEOPLE;/); assert.doesNotMatch(w, /WEDDING_CAPACITY = 5[12]/);
+  assert.match(w, /const WEDDING_CAPACITY = WEDDING_PEOPLE;/); assert.doesNotMatch(w, /WEDDING_CAPACITY = 5\d/);
   const c = seatsOf(validateGeometry(GRID).config, 'ceremony', {});
-  assert.equal(c.length + RULES.ceremony.fixed.length, 50, 'no hidden 51st or 52nd ceremony place');
+  assert.equal(c.length + RULES.ceremony.fixed.length, 54, 'the uploaded 50-grid is read as the 52 chairs + the couple, no hidden place');
+  assert.equal(seatsOf(validateGeometry(GRID).config, 'dinner', {}).length, 54);
 });
 
-test('THE LIVE PLAN · every one of the 29 held ceremony chairs keeps its id, its holder and its place; the two retired positions are unheld (A10, B10); the plan is 48 + the couple = 50', async () => {
+test('THE OWNERS\' EXTENSION · every one of the 29 held ceremony chairs keeps its id, its holder and its place; A10 and B10 return, A11 and B11 are the new back row of the left block; the plan is 52 + the couple = 54; the dinner 54 with A27 A28 B27 B28', async () => {
   const l = await live();
   const v = await call(l, 'read', null, { as: ADA }), seats = flat(v);
-  assert.equal(seats.length, 48); assert.equal(v.ceremony.couple.length, 2); assert.equal(v.ceremony.totalPeople, 50);
+  assert.equal(seats.length, 52); assert.equal(v.ceremony.couple.length, 2); assert.equal(v.ceremony.totalPeople, 54);
   for (const id of LIVE) { const s = seats.find((x) => x.seatId === id); assert.ok(s, id + ' is on the plan'); assert.equal(s.state, 'taken'); assert.ok(s.holder && s.name, id + ' is named'); }
-  assert.deepEqual([...retiredCeremony(await l.config(), Object.fromEntries(LIVE.map((id) => [id, {}])))].sort(), ['C-L-10-01', 'C-L-10-02']);
-  assert.ok(!seats.some((s) => s.seatId === 'C-L-10-01' || s.seatId === 'C-L-10-02'));
+  assert.equal(retiredCeremony(await l.config(), {}).size, 0, 'nothing is retired any more');
+  for (const id of ['C-L-10-01', 'C-L-10-02', 'C-L-11-01', 'C-L-11-02']) assert.equal(seats.find((s) => s.seatId === id).state, 'available', id);
+  assert.ok(!seats.some((s) => /^C-R-11-/.test(s.seatId)), 'the right block keeps its ten rows — no row is widened, nothing is added beside a block');
+  assert.deepEqual(v.ceremony.rows.filter((r) => r.row === 11).map((r) => [r.side, r.seats.length]), [['L', 2]]);
   assert.equal(seats.filter((s) => s.state === 'taken').length, 29, 'nothing moved, nothing lost');
-  /* a retired position cannot be held, by a guest or by Guest Relations */
-  assert.equal((await call(l, 'select', { invitationId: ADA.invitationId, guestId: ADA.guestId, event: 'ceremony', seatId: 'C-L-10-01' }, { as: ADA })).status, 404);
-  assert.equal((await call(l, 'assign', { invitationId: ADA.invitationId, guestId: ADA.guestId, event: 'ceremony', seatId: 'C-L-10-02' }, { gr: true })).status, 404);
+  /* the new chairs are ordinary chairs: a guest may take one, Guest Relations may allocate one */
+  assert.equal((await call(l, 'select', { invitationId: ADA.invitationId, guestId: ADA.guestId, event: 'ceremony', seatId: 'C-L-11-01' }, { as: ADA })).ok, true);
+  assert.equal((await call(l, 'assign', { invitationId: BEN.invitationId, guestId: BEN.guestId, event: 'ceremony', seatId: 'C-L-10-02' }, { gr: true })).ok, true);
   const plan = await call(l, 'plan', null, { gr: true });
-  assert.equal(plan.events.ceremony.guestSeats, 48); assert.equal(plan.events.ceremony.capacity.totalPeople, 50);
+  assert.equal(plan.events.ceremony.guestSeats, 52); assert.equal(plan.events.ceremony.capacity.totalPeople, 54);
   assert.deepEqual(plan.events.ceremony.couple.map((c) => [c.position, c.guestId]), [['BRIDE', 'G048'], ['GROOM', 'G049']]);
-  assert.equal(plan.events.dinner.seats.length, 50); assert.equal(plan.events.dinner.held, 2, 'the couple\'s two dinner chairs, inside the fifty');
+  assert.equal(plan.events.dinner.seats.length, 54); assert.equal(plan.events.dinner.held, 2, 'the couple\'s two dinner chairs, inside the fifty-four');
+  for (const id of ['D-T-27', 'D-T-28', 'D-B-27', 'D-B-28']) assert.ok(plan.events.dinner.seats.some((s) => s.seatId === id), id);
+  assert.ok(!plan.events.dinner.seats.some((s) => /-13$/.test(s.seatId)), 'never a 13');
 });
 
-test('NEVER AN OCCUPIED CHAIR · a hold that sits on a retirement candidate keeps it: the next unheld position is retired instead, the guest keeps chair, name and `mine`; re-uploading the grid keeps every hold', async () => {
+test('NEVER A LOST CHAIR · a hold on a returned or new chair stays; re-uploading the grid of 13 Sep 2026 (ten left rows) keeps every hold, row 11 included; an upload naming one event never clears the other', async () => {
   const l = await live();
   l.st.m.set('hold:ceremony:C-L-10-01', { invitationId: 'INV-G300', guestId: 'G300', partyId: 'INV-G300', name: 'Late', state: 'held' });
+  l.st.m.set('hold:ceremony:C-L-11-02', { invitationId: 'INV-G301', guestId: 'G301', partyId: 'INV-G301', name: 'Later', state: 'held' });
+  l.st.m.set('hold:dinner:D-T-28', { invitationId: 'INV-G301', guestId: 'G301', partyId: 'INV-G301', name: 'Later', state: 'held' });
   const me = ID('G300', 'INV-G300', 'Late');
   const v = await call(l, 'read', null, { as: me }), seats = flat(v);
-  assert.equal(seats.length, 48, 'still 48 guest chairs'); assert.equal(seats.find((s) => s.seatId === 'C-L-10-01').state, 'yours');
+  assert.equal(seats.length, 52); assert.equal(seats.find((s) => s.seatId === 'C-L-10-01').state, 'yours');
   assert.equal(v.mine.ceremony.G300, 'C-L-10-01', 'the fingerprint source keeps the chair');
-  assert.ok(!seats.some((s) => s.seatId === 'C-L-10-02' || s.seatId === 'C-R-10-03'), 'B10 and F10 retired instead');
   assert.equal((await call(l, 'config', GRID, { gr: true })).ok, true);
-  assert.equal(l.st.m.get('hold:ceremony:C-L-10-01').guestId, 'G300', 're-uploading the grid deletes no hold');
-  for (const id of LIVE) assert.ok(l.st.m.has('hold:ceremony:' + id), id);
+  for (const id of ['C-L-10-01', 'C-L-11-02', ...LIVE]) assert.ok(l.st.m.has('hold:ceremony:' + id), id + ' survives the re-upload');
+  assert.ok(l.st.m.has('hold:dinner:D-T-28'));
+  assert.equal((await call(l, 'config', { ceremony: GRID.ceremony }, { gr: true })).ok, true, 'a ceremony-only upload');
+  assert.ok((await l.config()).dinner, 'the dinner plan is kept'); assert.ok(l.st.m.has('hold:dinner:D-T-28'), 'and its holds');
+  assert.equal(flat(await call(l, 'read', null, { as: me })).length, 52);
 });
 
 test('THE COUPLE\'S PLACES · fixed, theirs, never anyone else\'s: nobody selects BRIDE / GROOM; the couple cannot take an ordinary ceremony chair (by themselves or by Guest Relations); their dinner chair is chosen like everyone\'s', async () => {
@@ -95,7 +105,7 @@ test('SUTHEP AND HARUTHAI SEE THE WHOLE CEREMONY · their own place marked as th
     const v = await call(l, 'read', null, { as: me });
     const c = Object.fromEntries(v.ceremony.couple.map((x) => [x.position, x]));
     assert.equal(c[own].state, 'yours'); assert.equal(c[own].holder, me.guestId); assert.equal(c[other].state, 'party');
-    assert.equal(flat(v).length, 48); assert.equal(flat(v).filter((s) => s.name && s.holder).length, 29, me.firstName + ' sees who sits where');
+    assert.equal(flat(v).length, 52); assert.equal(flat(v).filter((s) => s.name && s.holder).length, 29, me.firstName + ' sees who sits where');
   }
   /* `mine` (the source of every journey fingerprint and seat ticket) is untouched: the couple's places are not ledger holds */
   assert.deepEqual(JSON.parse(JSON.stringify((await call(l, 'read', null, { as: GROOM_ID })).mine)), { ceremony: {}, dinner: { G049: 'D-B-11' } });
@@ -152,7 +162,7 @@ test('WHO STAYS WHERE (Worker) · by guest id — two guests who share a first n
     put('contact:INV-G101', JSON.stringify({ email: 'ada@example.org', phone: '+66 1', firstName: 'Ada' }));
   });
   assert.deepEqual(asked, [['/api/rooms/gr-occupants', 'yes']], 'one internal, verified read of the engine');
-  assert.equal(d.capacity, 50); assert.equal(d.staysKnown, true);
+  assert.equal(d.capacity, 54); assert.equal(d.staysKnown, true);
   const P = Object.fromEntries(d.people.map((p) => [p.id, p]));
   assert.deepEqual(P.G101.stays.map((s) => [s.stage, s.key, s.with, s.state]), [['ljg', 'ljg/snow-mountain-viewing', ['G102'], 'sent'], ['kempinski', 'kempinski/jatu-room', [], 'held']], 'a different unit than the one sent is not "sent"');
   assert.deepEqual(P.G102.stays.map((s) => [s.with, s.state]), [[['G101'], 'held']], 'Ben (G102) sent unit B, holds unit A — held, sharing with Ada');
@@ -163,6 +173,20 @@ test('WHO STAYS WHERE (Worker) · by guest id — two guests who share a first n
   assert.deepEqual(d.others.map((o) => [o.id, o.name, o.stays.length]), [['G107', 'Cleo', 1]], 'a holder whose trip is not sent yet is still on the map');
   const raw = JSON.stringify(d);
   assert.doesNotMatch(raw, /INV-|@|\+66|"label"|"unit"|"rate"|"price"|SYL-|"contact/, 'no invitation, code, contact, rate or unit label');
+});
+
+test('WHO STAYS WHERE (Worker) · the Owners moved a guest to another room of the same category: still "sent" — their placement, not a new choice; a guest\'s own different room stays "Selected"', async () => {
+  const occupants = [
+    { guestId: 'G101', key: 'ljg/snow-mountain-viewing', label: 'B', name: 'Ada', placedFrom: ['A'] },   /* the Owners moved Ada A → B */
+    { guestId: 'G102', key: 'ljg/snow-mountain-viewing', label: 'C', name: 'Ben' },                       /* Ben chose C himself */
+  ];
+  const { d } = await stayHarness(occupants, (put) => {
+    put('reg:INV-G101', rec('INV-G101', 'G101', { name: 'Ada', lines: [{ id: 'ljg', room: 'snow-mountain-viewing', unit: 'A' }] }));
+    put('reg:INV-G102', rec('INV-G102', 'G102', { name: 'Ben', lines: [{ id: 'ljg', room: 'snow-mountain-viewing', unit: 'A' }] }));
+  });
+  const P = Object.fromEntries(d.people.map((p) => [p.id, p]));
+  assert.equal(P.G101.stays[0].state, 'sent'); assert.equal(P.G102.stays[0].state, 'held');
+  assert.doesNotMatch(JSON.stringify(d), /placedFrom/, 'no placement history leaves the server');
 });
 
 test('WHO STAYS WHERE (Worker) · an unreadable engine is said as unknown — never as "nobody stays anywhere"', async () => {
@@ -183,7 +207,7 @@ test('THE ROOM ENGINE · the occupants read is Guest Relations-verified only (a 
   assert.equal((await ask(false)).status, 401);
   const v = await ask(true);
   assert.deepEqual(v.occupants, [{ guestId: 'G101', key: 'ljg/snow-mountain-viewing', label: 'A', name: 'Ada' }]);
-  assert.match(src('src/worker.js'), /headers\.delete\('x-gr-verified'\); headers\.delete\('x-siyl-identity'\);   \/\* a client can never claim either \*\//);
+  assert.match(src('src/worker.js'), /headers\.delete\('x-gr-verified'\); headers\.delete\('x-siyl-identity'\); headers\.delete\('x-siyl-admin'\);   \/\* a client can never claim any/);
 });
 
 /* ------------------------------------------------------------------------------------------------ THE CIRCLE (the page) */
@@ -195,7 +219,7 @@ function view(couple) {
   return { named: true, ceremony: { rows, couple }, dinner: { sides: { T: side('T'), B: side('B') } } };
 }
 function seat(v, id, holder, name, state) { const s = v.ceremony.rows.flatMap((r) => r.seats).concat(v.dinner.sides.T, v.dinner.sides.B).find((x) => x.seatId === id); Object.assign(s, { holder, name, state: state || 'taken' }); }
-const DATA = { ok: true, capacity: 50, joining: 5, couple: 2, staysKnown: true, music: { responses: 0, leaders: [], ranking: [] }, after: { responses: 0 },
+const DATA = { ok: true, capacity: 54, joining: 5, couple: 2, staysKnown: true, music: { responses: 0, leaders: [], ranking: [] }, after: { responses: 0 },
   people: [{ id: 'g-haruthai', name: 'Haruthai', role: 'Bride', photo: false, stays: [{ stage: 'wedstay', key: 'wedstay/heritage-executive', with: ['g-suthep'], state: 'sent' }] },
     { id: 'g-suthep', name: 'Suthep', role: 'Groom', photo: false, stays: [{ stage: 'wedstay', key: 'wedstay/heritage-executive', with: ['g-haruthai'], state: 'sent' }] },
     { id: 'g-peggy', name: 'Peggy', photo: false, nationality: 'Swiss', joinedAt: '2026-09-20', stays: [{ stage: 'ljg', key: 'ljg/snow-mountain-viewing', with: ['G2'], state: 'held' }, { stage: 'prewed', key: 'prewed/heritage', with: [], state: 'sent' }] },
@@ -215,21 +239,21 @@ async function circle(auth, me, seatOfMine) {
   return w.SIYL_PULSE.circleHtml({ guestId: me }, !!auth.hosts);
 }
 
-test('THE CIRCLE · X / 50 with the couple inside; the couple are two seats of the ceremony plan (never a separate pill); Suthep and Haruthai each see their own place and the whole plan, a guest sees everyone too', async () => {
+test('THE CIRCLE · X / 54 with the couple inside; the couple are two seats of the ceremony plan (never a separate pill); Suthep and Haruthai each see their own place and the whole plan, a guest sees everyone too', async () => {
   for (const [auth, me, role] of [[SUTHEP, 'g-suthep', 'Groom'], [HARUTHAI, 'g-haruthai', 'Bride']]) {
     const h = await circle(auth, me, { dinner: me === 'g-suthep' ? 'D-B-11' : 'D-B-12' });
-    assert.match(h, /<b>5<\/b><span class="pl-of">\/ 50<\/span>/); assert.doesNotMatch(h, /\/ 52|pl-couple|Bride · Groom/);
+    assert.match(h, /<b>5<\/b><span class="pl-of">\/ 54<\/span>/); assert.doesNotMatch(h, /\/ 5[0-3]\b|\/ 5[5-9]\b|pl-couple|Bride · Groom/);
     assert.match(h, new RegExp('<span>Your seat</span> <b>' + role + '</b><span>Front centre</span>'));
     assert.match(h, new RegExp('data-pl-place="' + role.toUpperCase() + '"><i class="pl-c is-me"></i><small>' + role + '</small>'));
     assert.match(h, /data-pl-roster/); assert.match(h, /<span class="pl-rk">Front centre<\/span><ul class="pl-rs"><li[^>]*><span class="pl-seatno">Bride<\/span> <span class="pl-fn" data-i18n-skip>Haruthai<\/span><\/li><li[^>]*><span class="pl-seatno">Groom<\/span> <span class="pl-fn" data-i18n-skip>Suthep<\/span>/);
     assert.match(h, /<span class="pl-seatno">B3<\/span> <span class="pl-fn" data-i18n-skip>Peggy<\/span>/, me + ' sees who sits where');
-    assert.match(h, /aria-label="Vow Ceremony seating plan · 50 places/);
+    assert.match(h, /aria-label="Vow Ceremony seating plan · \d+ places/);
   }
   const g = await circle(PEGGY, 'g-peggy', { ceremony: 'C-L-03-02', dinner: 'D-T-12' });
   assert.match(g, /data-pl-place="BRIDE"><i class="pl-c is-held"><\/i>/); assert.match(g, /<span>Your seat<\/span> <b>B3<\/b>/);
   assert.match(g, /<span class="pl-seatno">D5<\/span> <span class="pl-fn" data-i18n-skip>Ben<\/span>/, 'the other Ben, in his own seat');
-  /* the dinner: fifty, the couple's chairs among them, no 13 anywhere */
-  assert.match(g, /One long table · <b>50<\/b> <span>seats<\/span>/); assert.match(g, /<span class="pl-seatno">B11<\/span> <span class="pl-fn" data-i18n-skip>Suthep<\/span>/);
+  /* the dinner: the couple's chairs among them, no 13 anywhere */
+  assert.match(g, /One long table · <b>\d+<\/b> <span>seats<\/span>/); assert.match(g, /<span class="pl-seatno">B11<\/span> <span class="pl-fn" data-i18n-skip>Suthep<\/span>/);
   assert.doesNotMatch(g, /pl-seatno">[A-F]13</, 'no seat 13 is ever guest-facing');
   assert.doesNotMatch(g, /data-seat=|<form|<select|data-hold|data-select/, 'seeing is not changing');
 });
@@ -252,25 +276,21 @@ test('THE CIRCLE · every person opens on the four answers; WHO STAYS WHERE by s
 test('THAI · every line the Wedding Circle and the plan add has its authored Thai', async () => {
   const core = (await import('../src/i18n-core.js')).default, dict = JSON.parse(src('src/i18n-th.json')), T = core.translator(dict);
   for (const en of ['Who sits where', 'Who stays where', 'Sharing with', 'Not selected yet', 'No seat yet', 'Free', 'Side A', 'Side B', 'Selected', 'Sent to us', 'Front centre', 'Bride', 'Groom', 'places', 'taken', 'Stays',
-    'Row 1', 'Row 10', 'Where everyone stays could not be read just now.', 'Nobody has chosen a stay yet.', 'Could not be read just now.', 'Vow Ceremony seating plan · 50 places · the Bride and the Groom at the front',
-    'Ceremony seating plan: 50 places — the Bride and the Groom at the front centre, then a left block of two seats and a right block of three seats per row, a centre aisle', 'Ceremony, the Groom’s place at the front centre, Suthep',
+    'Row 1', 'Row 10', 'Row 11', 'Where everyone stays could not be read just now.', 'Nobody has chosen a stay yet.', 'Could not be read just now.', 'Vow Ceremony seating plan · 54 places · the Bride and the Groom at the front',
+    'Wedding Dinner · one long table · 54 seats', 'One long table · 54 seats', 'Side A · 27 seats · poolside', 'Side B · 27 seats · facing the pool', 'Left block · 22 seats', 'Right block · 30 seats',
+    'Ceremony seating plan: 54 places — the Bride and the Groom at the front centre, then a left block of two seats and a right block of three seats per row, a centre aisle', 'Ceremony, the Groom’s place at the front centre, Suthep',
     'Your place is fixed at the front centre of the plan. Below is the whole ceremony — who sits where. Your dinner seat is chosen below, like everyone else’s.']) {
     const th = T.tr(en); assert.ok(th && th !== en && /[฀-๿]/.test(th), 'Thai for ' + en);
   }
 });
 
 /* ------------------------------------------------------------------------------------------------ the second review (Codex, 2 Oct 2026) */
-test('RETIREMENT NEVER LEAVES 52 · were every preferred candidate held, two other free grid positions leave the plan; with fewer than two free, nothing held is ever retired', async () => {
+test('NO RETIREMENT · the rule is dormant (RULES.ceremony.retire = 0): whatever is held, every chair of the 52 stays on the plan', async () => {
   const cfg = validateGeometry(GRID).config;
-  const holds = {}; for (const id of ['C-L-10-01', 'C-L-10-02', 'C-R-10-03', 'C-R-09-03', 'C-R-10-02', 'C-R-09-02', 'C-L-09-01', 'C-L-09-02']) holds[id] = { guestId: id };
-  const gone = retiredCeremony(cfg, holds);
-  assert.equal(gone.size, 2); for (const id of gone) assert.ok(!holds[id], id + ' is free');
-  assert.equal(seatsOf(cfg, 'ceremony', holds).length + 2, 50, 'still 48 + the couple');
-  const all = {}; for (const s of cfg.ceremony.rows.flatMap((r) => r.seats)) all[s.seatId] = { guestId: s.seatId };
-  delete all['C-R-01-01'];
-  const one = retiredCeremony(cfg, all);
-  assert.deepEqual([...one], ['C-R-01-01'], 'one free position: only it retires; every held chair stays');
-  assert.equal(seatsOf(cfg, 'ceremony', all).length, 49);
+  assert.equal(RULES.ceremony.retire, 0);
+  const holds = {}; for (const id of ['C-L-10-01', 'C-L-10-02', 'C-R-10-03']) holds[id] = { guestId: id };
+  assert.equal(retiredCeremony(cfg, holds).size, 0); assert.equal(retiredCeremony(cfg, {}).size, 0);
+  assert.equal(seatsOf(cfg, 'ceremony', holds).length, 52);
 });
 
 test('A CHAIR KEEPS ITS COLUMN · beside a retired position the plan leaves a gap (the SVG and the circle map), it never slides a chair into another column', () => {
@@ -314,16 +334,15 @@ test('SENT MEANS EXACTLY WHAT WAS SENT · the record\'s room snapshot decides; a
   assert.equal(P.G102.stays[0].state, 'held', 'unverifiable: not "sent"');
 });
 
-test('FORTY-EIGHT GUEST CHAIRS, NEVER MORE · the 48th chair is the last a guest can take; after it the ceremony is full and no retired position opens', async () => {
+test('FIFTY-TWO GUEST CHAIRS, NEVER MORE · the 52nd chair is the last a guest can take; after it the ceremony is full', async () => {
   const l = await live();
   const free = flat(await call(l, 'read', null, { as: ADA })).filter((s) => s.state === 'available').map((s) => s.seatId);
-  assert.equal(free.length, 19, '48 − 29');
-  free.slice(0, 18).forEach((id, i) => l.st.m.set('hold:ceremony:' + id, { invitationId: 'INV-G4' + two(i), guestId: 'G4' + two(i), name: 'X', state: 'held' }));
-  assert.equal((await call(l, 'select', { invitationId: ADA.invitationId, guestId: ADA.guestId, event: 'ceremony', seatId: free[18] }, { as: ADA })).ok, true, 'the 48th chair');
+  assert.equal(free.length, 23, '52 − 29');
+  free.slice(0, 22).forEach((id, i) => l.st.m.set('hold:ceremony:' + id, { invitationId: 'INV-G4' + two(i), guestId: 'G4' + two(i), name: 'X', state: 'held' }));
+  assert.equal((await call(l, 'select', { invitationId: ADA.invitationId, guestId: ADA.guestId, event: 'ceremony', seatId: free[22] }, { as: ADA })).ok, true, 'the 52nd chair');
   const v = await call(l, 'read', null, { as: BEN });
-  assert.equal(flat(v).length, 48); assert.equal(flat(v).filter((s) => s.state === 'available').length, 0);
-  for (const id of ['C-L-10-01', 'C-L-10-02']) assert.equal((await call(l, 'select', { invitationId: BEN.invitationId, guestId: BEN.guestId, event: 'ceremony', seatId: id }, { as: BEN })).status, 404, id + ' never opens');
-  assert.match(src('src/seating.js'), /the ceremony is full/, 'and a defensive cap refuses a 49th new hold whatever the grid');
+  assert.equal(flat(v).length, 52); assert.equal(flat(v).filter((s) => s.state === 'available').length, 0);
+  assert.match(src('src/seating.js'), /the ceremony is full/, 'and a defensive cap refuses a 53rd new hold whatever the grid');
 });
 
 /* ------------------------------------------------------------------------------------------------ THE CANONICAL JOINED UNION (Owner, 2 Oct 2026) */
@@ -368,7 +387,7 @@ test('JOINED · the cohort ∪ the seat holders, by guest id, each person once: 
   assert.deepEqual(ids.slice(0, 2), ['G048', 'G049'], 'the Bride and the Groom, once each, first');
   assert.deepEqual(ids.slice().sort(), ['G048', 'G049', 'G101', 'G102', 'G103', 'G104', 'G105', 'G106'], 'Ada (no seat) · Ben (ceremony) · Cleo (dinner) · Dora (both) · two more Bens — never Gus (declined, no seat), never Zed (cancelled)');
   assert.equal(new Set(ids).size, ids.length, 'nobody twice');
-  assert.equal(d.joining, ids.length, 'the numerator IS the union'); assert.equal(d.joining, 8); assert.equal(d.capacity, 50);
+  assert.equal(d.joining, ids.length, 'the numerator IS the union'); assert.equal(d.joining, 8); assert.equal(d.capacity, 54);
   assert.deepEqual(d.people.filter((p) => p.name === 'Ben').map((p) => p.id).sort(), ['G102', 'G105', 'G106'], 'the same first name, three people');
   assert.equal(d.people.find((p) => p.id === 'G102').joinedAt, '2026-09-25', 'joined on the day the seat was taken');
   /* the invariant: every active seat holder is a joined person */
@@ -390,9 +409,9 @@ test('JOINED · giving a seat back: a guest of the cohort stays joined; a guest 
   assert.equal(t13.d.joining, 2, 'the couple');
 });
 
-test('JOINED · the denominator is fifty and the count is the truth: the couple inside it once each, nobody truncated, no booking refused by the count', async () => {
+test('JOINED · the denominator is fifty-four and the count is the truth: the couple inside it once each, nobody truncated, no booking refused by the count', async () => {
   const { d } = await unionHarness(() => {}, (hold) => { for (let n = 1; n <= 7; n++) { hold('dinner', 'D-T-' + two(n), 'G1' + two(n), 'T' + n); } hold('dinner', 'D-T-08', 'G188', 'X'); hold('dinner', 'D-B-11', 'G049', 'Suthep'); hold('dinner', 'D-B-12', 'G048', 'Haruthai'); });
-  assert.equal(d.capacity, 50); assert.equal(d.joining, 9, 'the 7 registered seat holders + the couple, who hold dinner chairs and count once; G188 is no invitation of the register');
+  assert.equal(d.capacity, 54); assert.equal(d.joining, 9, 'the 7 registered seat holders + the couple, who hold dinner chairs and count once; G188 is no invitation of the register');
   assert.equal(d.people.filter((p) => p.role).length, 2);
   assert.doesNotMatch(src('src/seating.js'), /the dinner is full/, 'the joined count never changes who may book');
 });

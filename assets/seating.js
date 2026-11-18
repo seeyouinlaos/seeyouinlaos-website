@@ -13,13 +13,14 @@
      13 Sep 2026 configures none — every guest, the couple included, holds a
      chair through the same ledger, and the legend never lists a state that
      no chair on the plan can have)
-   The ceremony is FIFTY PLACES, the couple included (Owner, 2 Oct 2026): the
-   Bride's and the Groom's fixed places at the FRONT CENTRE are drawn as seats
+   The ceremony is FIFTY-FOUR PLACES, the couple included (Owners, 18 Nov 2026):
+   the Bride's and the Groom's fixed places at the FRONT CENTRE are drawn as seats
    of the same plan — the same chair, held, named — never selectable, never a
-   seat label; and 48 guest chairs. The dinner is fifty bookable chairs at one long
-   table — side A and side B, 24 each; the two seats numbered 13 were removed
-   (Owner, 24 Sep 2026) and nothing was renumbered — and the couple hold two of
-   them like every other guest. Every count in the words is read from the plan.
+   seat label; and 52 guest chairs (the left block has an 11th row at the back).
+   The dinner is fifty-four bookable chairs at one long table — side A and side B,
+   27 each; the two seats numbered 13 do not exist (Owner, 24 Sep 2026) and nothing
+   was renumbered — and the couple hold two of them like every other guest. Every
+   count in the words is read from the plan.
 
    Until Guest Relations has configured the geometry and opened seating, the
    guest sees SEATING NOT OPEN YET, and this file draws nothing.
@@ -85,14 +86,14 @@
     /* ---------------------------------------------------------- drawing
      * Pure: geometry + states in, SVG out. Nothing here invents a chair:
      * rows and positions come from the configuration exactly as given. The
-     * guest sees airline-style labels (A1 … F10 · A1 … B25, assets/seatlabels.js);
+     * guest sees airline-style labels (A1 … B11 / F10 · A1 … B28, assets/seatlabels.js);
      * the ledger id stays inside data-seat and never reaches the words. */
     STATES: { available: 'Available', selected: 'Selected by you', yours: 'Your seat', party: 'Travelling with you', family: 'Reserved for family', taken: 'Taken' },
     LABELS: window.SIYL_SEATLABELS || null,
     /* the guest-facing label of a ledger id (E4, A17) */
     label: function (seatId) { var L = S.LABELS; return L ? (L.label(seatId) || '') : ''; },
     /* THE COUNTS ARE THE PLAN'S (PRQ-05-06): how many seats an event — or one side of the dinner table — has, read from the
-       configured plan, never typed into a sentence (48 · 24 today) */
+       configured plan, never typed into a sentence (52 · 27 today) */
     count: function (event, v) {
       v = v || view; if (!v || !v[event]) return 0;
       if (event === 'ceremony') return (v.ceremony.rows || []).reduce(function (n, r) { return n + (r.seats || []).length; }, 0);
@@ -204,7 +205,7 @@
       }
 
       /* the long table, seen from above: side A along the top, side B along the
-       * bottom — fifty seats (25 + 25, Owner 25 Sep 2026), no fixed position for anyone, poolside. THE
+       * bottom — fifty-four seats (27 + 27, Owners 18 Nov 2026), no fixed position for anyone, poolside. THE
        * POOL is the landmark: SIDE A is the poolside side (Owner, 15 Sep 2026,
        * source of truth from the venue plan; the geometry may record 'B' if
        * the venue ever changes the layout). The water is drawn as water —
@@ -224,7 +225,7 @@
       var RN = (S.LABELS && S.LABELS.RUNS) || { T: 'A', B: 'B' };
       var other = poolSide === 'B' ? 'T' : 'B', lenOf = { T: top2s.length, B: bottom.length };
       var planWords = 'Wedding Dinner seating plan: one long table by the pool, with side ' + RN[poolSide] + ' of ' + lenOf[poolSide] + ' seats along the pool and side ' + RN[other] + ' of ' + lenOf[other] + ' seats facing it';
-      /* THE FIFTY (Owner, 25 Sep 2026): on a phone and a tablet the chairs keep a real tapping size and the plan scrolls sideways
+      /* THE LONG TABLE (Owner, 25 Sep 2026 · 54 since 18 Nov 2026): on a phone and a tablet the chairs keep a real tapping size and the plan scrolls sideways
          (the page says so); from 900 px the whole table fits the column — prep.css reads the width as --plan-min */
       var h2 = '<svg class="p-seatmap p-seatmap-table" viewBox="0 0 ' + W2 + ' ' + H2 + '" style="--plan-min:' + Math.round(W2 * 1.15) + 'px" role="group" aria-label="' + esc(planWords) + '">';
       h2 += '<defs><linearGradient id="siyl-water" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#DCE5E2"/><stop offset="1" stop-color="#CCD9D5"/></linearGradient></defs>';
@@ -245,8 +246,8 @@
                '<text x="' + cx + '" y="' + (y + POOL_H / 2 + 3) + '" text-anchor="middle" font-family="' + FONT + '" font-size="9" letter-spacing="3" fill="#3E5A54">Swimming pool</text></g>';
       }
       if (poolSide === 'T') h2 += pool(44);
-      /* each chair's column is its RANK among the numbers of its side (1 … 12, 14 … 25 → columns 1 … 24): the order and the
-         labels are the ledger's, the retired 13 leaves no gap and nothing is drawn beyond the table; 14 … 26 → columns 13 … 25 */
+      /* each chair's column is its RANK among the numbers of its side (1 … 12, 14 … 28 → columns 1 … 27): the order and the
+         labels are the ledger's, the retired 13 leaves no gap and nothing is drawn beyond the table */
       var numOf = function (s) { var m = /-(\d\d)$/.exec(s.seatId || ''); return m ? Number(m[1]) : 0; };
       var rankIn = function (list) { var nums = list.map(numOf).sort(function (a, b) { return a - b; }); return function (s, j) { var k = nums.indexOf(numOf(s)); return k >= 0 ? k : j; }; };
       var placeT = rankIn(top2s), placeB = rankIn(bottom);

@@ -5,17 +5,18 @@
    sees airline-style labels and nothing else:
 
      CEREMONY   left block  A B  · centre aisle (column C is the aisle, so it
-                does not exist) · right block  D E F  · rows 1–10
+                does not exist) · right block  D E F  · left rows 1–11 (row 11
+                at the back — the Owners' extension, 18 Nov 2026), right rows 1–10
                 C-L-rr-01 → A rr    C-L-rr-02 → B rr
                 C-R-rr-01 → D rr    C-R-rr-02 → E rr    C-R-rr-03 → F rr
                 BRIDE and GROOM are front-centre positions with no seat label.
-     DINNER     the two sides of the one long table, 25 seats each (Owner,
-                25 Sep 2026, superseding the 48 of OQ-03): 13 is never a seat and
-                NOTHING is renumbered — A1–A12, A14–A26 · B1–B12, B14–B26
+     DINNER     the two sides of the one long table, 27 seats each (Owners,
+                18 Nov 2026, superseding the 25 of 25 Sep 2026): 13 is never a seat
+                and NOTHING is renumbered — A1–A12, A14–A28 · B1–B12, B14–B28
                 D-T-nn → A nn (side A)       D-B-nn → B nn (side B)
 
    The mapping is a pure function both ways, identical in the browser and in
-   Node (the tests pin every pair: 50 ceremony + 50 dinner), so a displayed
+   Node (the tests pin every pair: 52 ceremony + 54 dinner), so a displayed
    label can never point at a different ledger seat. A hold that still names a
    retired 13 stays readable through retiredLabel() — it is never re-pointed.
 
@@ -50,10 +51,12 @@
   var EVENT_DATE = 'Sunday, 28 February 2027';
 
   /* internal id → guest-facing label; null for anything that is not a seat */
+  /* the rows of each ceremony block (Owners, 18 Nov 2026): left 1–11, right 1–10 · the dinner's last number on each side: 28 */
+  var ROWS = { L: 11, R: 10 }, LAST = 28;
   function label(seatId) {
-    var c = /^C-([LR])-(0[1-9]|10)-(0[1-3])$/.exec(seatId || '');
-    if (c) { var col = COLS[c[1]][Number(c[3]) - 1]; return col && !retired(seatId) ? col + Number(c[2]) : null; }
-    var d = /^D-([TB])-(0[1-9]|1[0-9]|2[0-6])$/.exec(seatId || '');
+    var c = /^C-([LR])-(0[1-9]|1[01])-(0[1-3])$/.exec(seatId || '');
+    if (c) { var col = COLS[c[1]][Number(c[3]) - 1]; return col && Number(c[2]) <= ROWS[c[1]] && !retired(seatId) ? col + Number(c[2]) : null; }
+    var d = /^D-([TB])-(0[1-9]|1[0-9]|2[0-8])$/.exec(seatId || '');
     if (d) return retired(seatId) ? null : RUNS[d[1]] + Number(d[2]);
     return null;
   }
@@ -64,14 +67,14 @@
     var n = Number(m[2]);
     if (n === NEVER) return null;   /* D-29: there is no seat 13 */
     if (event === 'ceremony') {
-      if (n < 1 || n > 10) return null;
+      if (n < 1) return null;
       var pad2 = (n < 10 ? '0' : '') + n;
-      if (m[1] === 'A' || m[1] === 'B') return 'C-L-' + pad2 + '-0' + (m[1] === 'A' ? 1 : 2);
-      if (m[1] === 'D' || m[1] === 'E' || m[1] === 'F') return 'C-R-' + pad2 + '-0' + ({ D: 1, E: 2, F: 3 })[m[1]];
+      if ((m[1] === 'A' || m[1] === 'B') && n <= ROWS.L) return 'C-L-' + pad2 + '-0' + (m[1] === 'A' ? 1 : 2);
+      if ((m[1] === 'D' || m[1] === 'E' || m[1] === 'F') && n <= ROWS.R) return 'C-R-' + pad2 + '-0' + ({ D: 1, E: 2, F: 3 })[m[1]];
       return null;   /* C is the aisle */
     }
     if (event === 'dinner') {
-      if (n < 1 || n > 26 || (m[1] !== 'A' && m[1] !== 'B')) return null;   /* A1–A26 · B1–B26, never 13 (Owner, 25 Sep 2026) */
+      if (n < 1 || n > LAST || (m[1] !== 'A' && m[1] !== 'B')) return null;   /* A1–A28 · B1–B28, never 13 (Owners, 18 Nov 2026) */
       var id = 'D-' + (m[1] === 'A' ? 'T' : 'B') + '-' + (n < 10 ? '0' : '') + n;
       return retired(id) ? null : id;
     }

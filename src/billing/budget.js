@@ -493,7 +493,11 @@ function roomingCheck(c, guest, items, rooms) {
     if (!unit) out.push({ severity: 'data', text: (g.personName || g.person) + ' is billed in room ' + g.unitLabel + ' (' + g.itemName + '), which the rooming list does not have' });
     else if (g.person && !held.includes(g.person)) {
       const where = asArray(rooms.units[key]).filter((u) => asArray(u.occupants).some((o) => clean(o.guestId) === g.person)).map((u) => u.label);
-      out.push({ severity: 'data', text: (g.personName || g.person) + ' is billed in room ' + g.unitLabel + ' (' + g.itemName + '); the rooming list holds them ' + (where.length ? 'in room ' + where.join(', ') : 'in no room of it') });
+      /* THE OWNERS' ASSIGNMENT (18 Nov 2026): a guest the Owners moved from the billed room to another room of the same category is the
+         same booking — said as such; the booking, its billed room and its amounts are unchanged */
+      const placed = asArray(rooms.units[key]).find((u) => asArray(u.occupants).some((o) => clean(o.guestId) === g.person && asArray(o.placedFrom).map(clean).includes(clean(g.unitLabel))));
+      if (placed) out.push({ severity: 'info', text: (g.personName || g.person) + ' is billed in room ' + g.unitLabel + ' (' + g.itemName + '); the Owners placed them in room ' + placed.label + ' of the same category — the booking and its amounts are unchanged' });
+      else out.push({ severity: 'data', text: (g.personName || g.person) + ' is billed in room ' + g.unitLabel + ' (' + g.itemName + '); the rooming list holds them ' + (where.length ? 'in room ' + where.join(', ') : 'in no room of it') });
     }
   }
   for (const k of keys) for (const u of asArray(rooms.units[k])) for (const o of asArray(u.occupants)) {
@@ -710,7 +714,9 @@ export function buildBudgetComparison(input) {
     const persons = (src.names && src.names.persons) || {};
     return { stay: c.id, place: c.place, from: c.from, to: c.to, rooms: keys.flatMap((key) => asArray(src.rooms && src.rooms.units && src.rooms.units[key]).map((u) => ({
       key, label: u.label, name: u.name, type: (src.rooms.units[key] && SEED_NAME(key)) || key, places: u.places, extraBeds: u.extraBeds || 0, item: asArray(c.items).find((id) => clean(items[id] && items[id].Site_Product_Key).split(/[,|]/)[0] === key) || null,
-      occupants: asArray(u.occupants).map((o) => (o.guestId ? { guestId: o.guestId, name: persons[o.guestId] || clean(o.name) || null, bed: !!o.bed } : { kept: true })) }))) };
+      /* a place kept for a party (guest id "~…") is not a person; a room the Owners moved a guest to names the rooms they held before
+         (placedFrom — the same booking, Owners' assignments, 18 Nov 2026) */
+      occupants: asArray(u.occupants).map((o) => (o.guestId && !clean(o.guestId).startsWith('~') ? { guestId: o.guestId, name: persons[o.guestId] || clean(o.name) || null, bed: !!o.bed, ...(Array.isArray(o.placedFrom) && o.placedFrom.length ? { placedFrom: o.placedFrom.map(clean) } : {}) } : { kept: true })) }))) };
   });
   /* the hotel contracts' cost per room night by stay (budget-map VENDORS · roomContract) — the rate list's purchase side */
   const contractVendor = VENDORS.find((v) => v.roomContract) || null;

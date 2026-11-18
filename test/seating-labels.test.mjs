@@ -28,46 +28,47 @@ const cfg = validateGeometry(GEO).config;
 const CEREMONY = cfg.ceremony.rows.flatMap((r) => r.seats.map((s) => s.seatId));
 const DINNER = [...cfg.dinner.sides.T, ...cfg.dinner.sides.B].map((s) => s.seatId);
 
-test('LABELS · ceremony: A/B | aisle | D/E/F × rows 1–10 = 50 unique labels, no column C, Bride and Groom unlabelled', () => {
-  assert.equal(CEREMONY.length, 50);
+test('LABELS · ceremony: A/B × rows 1–11 | aisle | D/E/F × rows 1–10 = 52 unique labels, no column C, Bride and Groom unlabelled (Owners, 18 Nov 2026)', () => {
+  assert.equal(CEREMONY.length, 52);
   const labels = CEREMONY.map((id) => L.label(id));
   assert.ok(labels.every(Boolean), 'every ledger seat has a label');
-  assert.equal(new Set(labels).size, 50, '50 unique labels');
+  assert.equal(new Set(labels).size, 52, '52 unique labels');
   const expected = [];
   for (let r = 1; r <= 10; r++) for (const c of ['A', 'B', 'D', 'E', 'F']) expected.push(c + r);
-  assert.deepEqual([...labels].sort(), [...expected].sort(), 'exactly A/B + D/E/F × 1–10');
+  expected.push('A11', 'B11');
+  assert.deepEqual([...labels].sort(), [...expected].sort(), 'exactly A/B × 1–11 + D/E/F × 1–10');
   assert.ok(!labels.some((l) => /^C\d/.test(l)), 'column C is the aisle: never a label');
   assert.deepEqual(L.COLS, { L: ['A', 'B'], R: ['D', 'E', 'F'] });
   /* left block = A, B (aisle side is B); right block = D, E, F (aisle side is D) */
   assert.equal(L.label('C-L-04-01'), 'A4'); assert.equal(L.label('C-L-04-02'), 'B4');
   assert.equal(L.label('C-R-04-01'), 'D4'); assert.equal(L.label('C-R-04-02'), 'E4'); assert.equal(L.label('C-R-04-03'), 'F4');
-  assert.equal(L.label('C-L-10-01'), 'A10'); assert.equal(L.label('C-R-10-03'), 'F10');
+  assert.equal(L.label('C-L-10-01'), 'A10'); assert.equal(L.label('C-R-10-03'), 'F10'); assert.equal(L.label('C-L-11-01'), 'A11'); assert.equal(L.label('C-L-11-02'), 'B11'); assert.equal(L.label('C-R-11-01'), null, 'no D11');
   /* the couple's positions are not seats and carry no label */
   assert.deepEqual(RULES.ceremony.fixed, ['BRIDE', 'GROOM']);
   assert.equal(L.label('BRIDE'), null); assert.equal(L.label('GROOM'), null);
   assert.equal(L.seatId('ceremony', 'BRIDE'), null);
 });
 
-test('LABELS · dinner (Owner override, 25 Sep 2026): 50 seats — A1–A12, A14–A26 along side A (top), B1–B12, B14–B26 along side B (bottom); never a 13, NOTHING renumbered; B12 stays B12', () => {
-  assert.equal(DINNER.length, 50, 'one long table · 50 seats');
-  assert.equal(cfg.dinner.sides.T.length, 25, 'side A · 25 seats'); assert.equal(cfg.dinner.sides.B.length, 25, 'side B · 25 seats');
+test('LABELS · dinner (Owners, 18 Nov 2026): 54 seats — A1–A12, A14–A28 along side A (top), B1–B12, B14–B28 along side B (bottom); never a 13, NOTHING renumbered; B12 stays B12', () => {
+  assert.equal(DINNER.length, 54, 'one long table · 54 seats');
+  assert.equal(cfg.dinner.sides.T.length, 27, 'side A · 27 seats'); assert.equal(cfg.dinner.sides.B.length, 27, 'side B · 27 seats');
   assert.ok(!DINNER.includes('D-T-13') && !DINNER.includes('D-B-13'), 'the retired 13s are not on the plan');
   const labels = DINNER.map((id) => L.label(id));
-  assert.equal(new Set(labels).size, 50);
+  assert.equal(new Set(labels).size, 54);
   const expected = [];
-  for (let n = 1; n <= 26; n++) if (n !== 13) expected.push('A' + n, 'B' + n);
+  for (let n = 1; n <= 28; n++) if (n !== 13) expected.push('A' + n, 'B' + n);
   assert.deepEqual([...labels].sort(), [...expected].sort());
   assert.ok(!labels.includes('A13') && !labels.includes('B13'), 'no A13, no B13');
   assert.ok(!labels.some((l) => /^[AB]1[23][AB]$/.test(l)), 'no A12A / B12B');
   /* nothing renumbered: every surviving seat keeps its number — the neighbours of 13 and the Bride's B12 above all */
-  for (let n = 1; n <= 26; n++) if (n !== 13) { const p2 = (n < 10 ? '0' : '') + n; assert.equal(L.label('D-T-' + p2), 'A' + n); assert.equal(L.label('D-B-' + p2), 'B' + n); }
+  for (let n = 1; n <= 28; n++) if (n !== 13) { const p2 = (n < 10 ? '0' : '') + n; assert.equal(L.label('D-T-' + p2), 'A' + n); assert.equal(L.label('D-B-' + p2), 'B' + n); }
   assert.equal(L.label('D-B-12'), 'B12'); assert.equal(L.seatId('dinner', 'B12'), 'D-B-12', 'B12 unchanged');
   assert.equal(L.label('D-T-14'), 'A14'); assert.equal(L.label('D-B-14'), 'B14');
   assert.equal(L.label('D-T-13'), null); assert.equal(L.label('D-B-13'), null); assert.equal(L.seatId('dinner', 'A13'), null); assert.equal(L.seatId('dinner', 'B13'), null);
   assert.equal(L.retiredLabel('D-B-13'), 'B13', 'a kept hold on a retired 13 is still readable — never re-pointed'); assert.equal(L.retiredLabel('D-B-12'), null);
-  assert.equal(L.label('D-T-01'), 'A1'); assert.equal(L.label('D-T-25'), 'A25'); assert.equal(L.label('D-B-01'), 'B1'); assert.equal(L.label('D-B-25'), 'B25'); assert.equal(L.label('D-T-26'), 'A26'); assert.equal(L.label('D-B-26'), 'B26'); assert.equal(L.label('D-T-27'), null);
+  assert.equal(L.label('D-T-01'), 'A1'); assert.equal(L.label('D-T-25'), 'A25'); assert.equal(L.label('D-B-01'), 'B1'); assert.equal(L.label('D-B-25'), 'B25'); assert.equal(L.label('D-T-26'), 'A26'); assert.equal(L.label('D-B-26'), 'B26'); assert.equal(L.label('D-T-27'), 'A27'); assert.equal(L.label('D-B-28'), 'B28'); assert.equal(L.label('D-T-29'), null);
   assert.deepEqual(L.RUNS, { T: 'A', B: 'B' });
-  assert.deepEqual([RULES.dinner.guestSeats, RULES.dinner.perSide], [50, 25]);
+  assert.deepEqual([RULES.dinner.guestSeats, RULES.dinner.perSide], [54, 27]);
 });
 
 test('LABELS · the mapping is a bijection over the ledger, in both directions, and refuses what is not a seat', () => {
@@ -75,16 +76,16 @@ test('LABELS · the mapping is a bijection over the ledger, in both directions, 
   for (const id of DINNER) assert.equal(L.seatId('dinner', L.label(id)), id, id);
   /* every label resolves to exactly one ledger seat and no other */
   const all = [...CEREMONY.map((id) => 'ceremony:' + L.label(id)), ...DINNER.map((id) => 'dinner:' + L.label(id))];
-  assert.equal(new Set(all).size, 100, '50 ceremony + 50 dinner');
-  for (const bad of ['C4', 'G1', 'A0', 'A11', 'E11', 'A4B', '', null]) assert.equal(L.seatId('ceremony', bad), null, String(bad));
+  assert.equal(new Set(all).size, 106, '52 ceremony + 54 dinner');
+  for (const bad of ['C4', 'G1', 'A0', 'A12', 'D11', 'E11', 'F11', 'A4B', '', null]) assert.equal(L.seatId('ceremony', bad), null, String(bad));
+  assert.equal(L.seatId('ceremony', 'A11'), 'C-L-11-01'); assert.equal(L.seatId('ceremony', 'B11'), 'C-L-11-02');
   assert.equal(L.seatId('ceremony', 'a4'), 'C-L-04-01', 'case and spaces are forgiven, the seat is the same');
-  for (const bad of ['C1', 'A0', 'A27', 'B27', 'D1']) assert.equal(L.seatId('dinner', bad), null, String(bad));
-  assert.equal(L.seatId('dinner', 'A26'), 'D-T-26'); assert.equal(L.seatId('dinner', 'B26'), 'D-B-26');
-  for (const bad of ['C-L-00-01', 'C-L-11-01', 'C-L-04-03', 'C-R-04-04', 'D-T-00', 'D-T-27', 'D-X-01', 'X', null]) assert.equal(L.label(bad), null, String(bad));
+  for (const bad of ['C1', 'A0', 'A29', 'B29', 'D1']) assert.equal(L.seatId('dinner', bad), null, String(bad));
+  assert.equal(L.seatId('dinner', 'A26'), 'D-T-26'); assert.equal(L.seatId('dinner', 'B26'), 'D-B-26'); assert.equal(L.seatId('dinner', 'A28'), 'D-T-28'); assert.equal(L.seatId('dinner', 'B27'), 'D-B-27');
+  for (const bad of ['C-L-00-01', 'C-L-12-01', 'C-R-11-01', 'C-L-04-03', 'C-R-04-04', 'D-T-00', 'D-T-29', 'D-X-01', 'X', null]) assert.equal(L.label(bad), null, String(bad));
   /* the same ids drawn by the Worker's rules are the ids the labels know */
-  /* the plan is the grid less the two retired, unheld positions (Owner, 2 Oct 2026 · 48 chairs + the couple = 50): A10 and B10 */
-  const drawn = seatsOf(cfg, 'ceremony', {}).map((s) => s.seatId); assert.deepEqual(drawn.sort(), [...CEREMONY].filter((id) => !/^C-L-10-0[12]$/.test(id)).sort());
-  assert.deepEqual(CEREMONY.filter((id) => !drawn.includes(id)).map((id) => L.label(id)).sort(), ['A10', 'B10']);
+  /* the plan is the code's 52 (Owners, 18 Nov 2026 · 52 chairs + the couple = 54): nothing retired, the left block's row 11 included */
+  const drawn = seatsOf(cfg, 'ceremony', {}).map((s) => s.seatId); assert.deepEqual(drawn.sort(), [...CEREMONY].sort());
   const drawnD = seatsOf(cfg, 'dinner').map((s) => s.seatId); assert.deepEqual(drawnD.sort(), [...DINNER].sort());
   /* words: label first, then the place — no ledger id anywhere */
   assert.equal(L.describe('C-R-04-02'), 'Right block · row 4'); assert.equal(L.describe('C-L-02-01'), 'Left block · row 2'); assert.equal(L.describe('D-T-17'), 'Long table · side A · poolside'); assert.equal(L.describe('D-B-03'), 'Long table · side B · facing the pool');   /* TO-01959 · TO-00355: the seat label carries the number, the words carry the side */
