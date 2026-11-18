@@ -507,7 +507,8 @@ test('REVENUE AND BUDGET UI · Accommodation and Transportation side by side, tr
   const budget = budgetFixture();
   assert.equal(budget.available, true);
   const revenue = { ok: true, asOf: '2026-11-17', counts: {}, bookedRevenue: { cents: 24500, amount: 245, complete: true }, quotaUtilisation: [{ Item_ID: 'D1-X', Quota_Unit: 'ROOM', Quota: 2, used: 1, remaining: 1 }], budget };
-  const { root, calls } = load({ 'admin/overview': OVERVIEW, 'admin/status': statusAnswer, revenue }, { hash: '#revenue' });
+  /* Owners' review, 18 Nov 2026: the line-by-line comparison is part of Finance (its "Budget detail"); Revenue is guest revenue only */
+  const { root, calls } = load({ 'admin/overview': OVERVIEW, 'admin/status': statusAnswer, revenue }, { hash: '#finance' });
   await tick(30);
   const h = root.innerHTML;
   assert.match(h, /Revenue and budget — 004_Budget_Finance/);
@@ -525,21 +526,29 @@ test('REVENUE AND BUDGET UI · Accommodation and Transportation side by side, tr
   assert.match(h, /Outstanding to suppliers \(007 total less counted payments\)/); assert.match(h, /data-l="Outstanding"/);
   const supTable = h.slice(h.indexOf('Supplier (007)'));
   assert.match(supTable, /data-l="Outstanding"[^>]*>(<[^>]+>)*USD 300\.00/, 'nothing paid yet: the whole typed total is owed');
-  assert.match(h, /data-ab-inventory/); assert.match(h, /Quota utilisation/, 'the existing quota panel stays as it was');
-  /* every cell of the comparison carries its label for the phone layout */
-  const sec = h.slice(h.indexOf('data-ab-budget'), h.indexOf('data-ab-rev-rooms'));
-  assert.ok((sec.match(/<td(?![^>]*data-l=)/g) || []).length === 0, 'a table cell without data-l');
-  assert.ok(calls.every((c) => c.method === 'GET'), 'the Revenue tab only reads');
+  assert.match(h, /data-ab-inventory/);
+  /* every cell of the report — the comparison included — carries its label for the phone layout */
+  const sec = h.slice(h.indexOf('data-ab-exec'), h.indexOf('data-ab-bd="fin-progress"'));
+  assert.ok(sec.length > 1000 && (sec.match(/<td(?![^>]*data-l=)/g) || []).length === 0, 'a table cell without data-l');
+  assert.ok(calls.every((c) => c.method === 'GET'), 'Finance only reads');
   assert.ok(calls.some((c) => /\/api\/billing\/revenue/.test(c.url)));
+  /* the Revenue tab keeps the quota panel and no longer repeats the budget */
+  const rv = load({ 'admin/overview': OVERVIEW, 'admin/status': statusAnswer, revenue }, { hash: '#revenue' });
+  await tick(30);
+  assert.match(rv.root.innerHTML, /Quota utilisation/, 'the existing quota panel stays as it was');
+  assert.doesNotMatch(rv.root.innerHTML, /data-ab-budget-main|Revenue and budget — 004_Budget_Finance/, 'one figure, one place');
 });
 
 test('REVENUE AND BUDGET UI · a comparison that could not be built is said in its place; the quota table stays', async () => {
   const revenue = { ok: true, asOf: '2026-11-17', counts: {}, quotaUtilisation: [{ Item_ID: 'D1-X', Quota_Unit: 'ROOM', Quota: 2, used: 1, remaining: 1 }],
     budget: { available: false, gap: 'The budget tabs (004, 007, 002, 009, 006) could not be read from Google just now — every revenue figure above stands as it is' } };
-  const { root } = load({ 'admin/overview': OVERVIEW, 'admin/status': statusAnswer, revenue }, { hash: '#revenue' });
+  const { root } = load({ 'admin/overview': OVERVIEW, 'admin/status': statusAnswer, revenue }, { hash: '#finance' });
   await tick(30);
   assert.match(root.innerHTML, /could not be read from Google just now — every revenue figure above stands as it is/);
-  assert.match(root.innerHTML, /Quota utilisation/); assert.doesNotMatch(root.innerHTML, /data-ab-budget-main/);
+  assert.doesNotMatch(root.innerHTML, /data-ab-budget-main/);
+  const rv = load({ 'admin/overview': OVERVIEW, 'admin/status': statusAnswer, revenue }, { hash: '#revenue' });
+  await tick(30);
+  assert.match(rv.root.innerHTML, /Quota utilisation/);
 });
 
 test('REVENUE AND BUDGET UI 1.1 · outstanding, possible duplicates, nights without a line and a summary cell\'s range are said as the server says them — the nights listed apart from the difference', async () => {
@@ -554,7 +563,7 @@ test('REVENUE AND BUDGET UI 1.1 · outstanding, possible duplicates, nights with
     { what: 'the positive lines', cell: 'A5', sheet: usd(3138854), lines: usd(3208454), equal: false, formula: '=SUMIF(K8:K87, ">0")', range: { from: 8, to: 87 }, outside: [{ row: 88, amount: usd(69600) }], carries: null },
     { what: 'the positive lines less the planned guest contributions', cell: 'J5', sheet: usd(2730854), lines: usd(2800454), equal: false, formula: '=A5-G5', range: null, outside: [], carries: ['A5'] }];
   const revenue = { ok: true, asOf: '2026-11-17', counts: {}, bookedRevenue: { cents: 24500, amount: 245, complete: true }, quotaUtilisation: [{ Item_ID: 'D1-X', Quota_Unit: 'ROOM', Quota: 2, used: 1, remaining: 1 }], budget };
-  const { root, calls } = load({ 'admin/overview': OVERVIEW, 'admin/status': statusAnswer, revenue }, { hash: '#revenue' });
+  const { root, calls } = load({ 'admin/overview': OVERVIEW, 'admin/status': statusAnswer, revenue }, { hash: '#finance' });
   await tick(30);
   const h = root.innerHTML;
   assert.match(h, /not stated: payments B16, B25 recorded in 007 but not counted \(dated 03\.09\.2031, after today — not counted as paid\)/);
@@ -567,4 +576,87 @@ test('REVENUE AND BUDGET UI 1.1 · outstanding, possible duplicates, nights with
   assert.match(h, /its formula sums rows 8–87; row 88 \(USD 696\.00\) outside it\./);
   assert.match(h, /J5 is =A5-G5 and carries A5(&#39;|')s difference\./);
   assert.ok(calls.every((c) => c.method === 'GET'), 'still read only');
+});
+
+/* ---- THE OWNERS' REVIEW (18 Nov 2026): Guests with their rooms and a CSV, Rooms & rates by hotel and period, Finance as a report
+   A–E, Revenue as guest revenue only — every figure the server's, read only ---- */
+const { financeReportOf } = await import('../src/billing/finance-report.js');
+function reviewRevenue() {
+  const usd = (cents) => ({ currency: 'USD', cents, amount: cents / 100, display: 'USD ' + (cents / 100).toFixed(2) });
+  const plan = [{ stay: 'W1', place: 'Hotel Alpha · wedding stay', from: '2031-02-27', to: '2031-03-01', rooms: [
+    { key: 'wed/exec', label: 'F', type: 'Grand Exec', item: 'W1-EXEC', places: 2, extraBeds: 1, occupants: [{ guestId: 'GT1', name: 'Guest 1', bed: false }, { guestId: 'GT2', name: 'Guest 2', bed: false }, { guestId: 'GT3', name: 'Guest 3', bed: true }] },
+    { key: 'wed/exec', label: 'G', type: 'Grand Exec', item: 'W1-EXEC', places: 2, extraBeds: 0, occupants: [] }] }];
+  const centres = [{ id: 'W1', place: 'Hotel Alpha · wedding stay', status: 'COMPLETE', missing: [], rooms: [{ label: 'F', item: 'W1-EXEC', lines: [
+    { person: 'GT1', amount: usd(29000), statement: 'S-T1-0001', rateSource: '002' }, { person: 'GT2', amount: usd(0), complimentaryNights: 2, rateSource: '009' }, { person: 'GT3', amount: usd(7500), rateSource: '009' }] }] }];
+  const contracts = [{ stay: 'W1', items: '*', ratePerRoomNight: 150 }];
+  const dashboard = { costs: { original: usd(500000), forecast: usd(560000), adjustments: [] }, position: { stated: true, projectedOwnerFunded: usd(523500), coverageProjected: 6.5 } };
+  const report = financeReportOf({ budget: { totals: { totalBudget: 4000, totalBudgetCell: 'A2' }, lines: [{ row: 8, item: 'Rooms', vendor: 'Hotel Alpha', category: 'Accommodation', budget: 5000, paid: null }] },
+    suppliers: [{ vendor: 'Sky Bakery', stages: [], contract: { currency: 'THB', cents: 3000000, amount: 30000 }, payments: [] }], centres, plan, contracts, dashboard,
+    roomContractMeta: { supplement: { perRoomNight: 60, source: 'agreement' } }, revenue: { booked: { cents: 36500, complete: true } }, receipts: { cashCollected: { cents: 0, complete: true } },
+    list012: [{ row: 2, building: 'C', roomType: 'Grand Exec (Twin)', roomNo: '203', checkIn: '27.02.2031', checkOut: '01.03.2031', guests: ['Guest', 'Guest', 'Guest'] }] });
+  for (const u of plan[0].rooms) { u.room012 = report.rooms012.units['W1|' + u.key + '|' + u.label] || null; u.hotelCost = usd(30000); }
+  return { ok: true, asOf: '2026-11-18', calculatedAt: '2026-11-18T08:00:00.000Z', counts: {}, bookedRevenue: usd(36500), issuedRevenue: usd(39000), notYetInvoiced: usd(7500), changedSinceIssue: usd(-10000),
+    invoicedNotBooked: usd(0), outstanding: usd(39000), cashCollected: usd(0), overdue: usd(0), paymentsReported: usd(0),
+    holders: [{ Holder_ID: 'INV-T1', Settlement_ID: 'S-T1-0001', revision: 1, issueDate: '2026-10-07', dueDate: '2026-10-28', issued: usd(39000), cashCollected: usd(0), outstanding: usd(39000), overdue: usd(0), paymentStatus: 'UNPAID', changedSinceIssue: usd(-10000), invoicedNotBooked: usd(0) }],
+    budget: { available: true, version: 'billing-budget/1.2.0', asOf: '2026-11-18', dashboard, report, roomPlan: plan, roomContracts: contracts, centres, categories: [], suppliers: [], checks: [], questions: [], reconciliation: {} } };
+}
+
+test('REVIEW · Guests: each guest\'s stay, room, 012 number, extra bed and complimentary nights; CSV of all or the filter — BOM, chosen delimiter, no formula, no code', async () => {
+  const revenue = reviewRevenue();
+  const { root, A, calls } = load({ 'admin/overview': OVERVIEW, 'admin/status': statusAnswer, 'admin/readiness': { ok: true, rows: [] }, revenue });
+  await tick(60);
+  const h = root.innerHTML;
+  assert.match(h, /<th>Stays &amp; rooms<\/th>/);
+  const row = (id) => h.split('data-ab-open="' + id + '"')[1].split('</tr>')[0];
+  assert.match(row('INV-T1'), /Grand Exec · Room F<\/span> · no\. <b data-i18n-skip>203<\/b>/); assert.match(row('INV-T1'), /invoiced/);
+  assert.match(row('INV-T2'), /2 nights complimentary/); assert.match(row('INV-T3'), /extra bed/);
+  assert.match(row('INV-T5'), /no room/);
+  assert.match(row('INV-T1'), /GT1 · INV-T1/, 'the Guest ID beside the invitation'); assert.match(row('INV-T1'), /S-T1-0001/, 'the statement number');
+  assert.match(h, /data-ab-csv="guests-all"/); assert.match(h, /data-ab-csv="guests-shown"/);
+  assert.ok(calls.every((c) => c.method === 'GET'), 'the list only reads');
+  const csv = A.csv.guests('all');
+  assert.equal(csv.charCodeAt(0), 0xFEFF); assert.match(csv, /\r\n/);
+  const sep = csv.indexOf('Guest ID;') >= 0 ? ';' : ',';
+  assert.ok(csv.indexOf(['Guest ID', 'Guest', 'Invitation'].join(sep)) > 0);
+  assert.ok(csv.split('\r\n').some((l) => l.startsWith(['GT1', 'Guest 1', 'INV-T1', 'Hotel Alpha · wedding stay', '2031-02-27', '2031-03-01', '2'].join(sep))));
+  assert.doesNotMatch(csv, /bearer|token|invite=/i);
+  assert.equal(A.csv.cell('=SUM(A1)', ','), '\'=SUM(A1)'); assert.equal(A.csv.cell(-5, ','), '-5'); assert.equal(A.csv.cell(1234.5, ';'), '1234,5');
+  assert.equal(A.csv.cell('a;b', ';'), '"a;b"'); assert.equal(A.csv.cell('say "x"', ','), '"say ""x"""');
+});
+
+test('REVIEW · Rooms & rates: by hotel and period, room no. from 012, occupancy, nights, purchase and sale per room, subtotals, rooming list', async () => {
+  const revenue = reviewRevenue();
+  const { root, A } = load({ 'admin/overview': OVERVIEW, 'admin/status': statusAnswer, revenue }, { hash: '#rooms' });
+  await tick(40);
+  const h = root.innerHTML;
+  assert.match(h, /data-ab-rooms="W1"/); assert.match(h, /Room F<span class="ab-id">no\. <b data-i18n-skip>203<\/b>/);
+  assert.match(h, /data-l="Occupancy" class="num">3 \/ 2/); assert.match(h, /data-l="Nights" class="num">2</);
+  assert.match(h, /data-l="Hotel cost \(purchase\)" class="num"><span data-i18n-skip>USD 300\.00/); assert.match(h, /data-l="Guest revenue \(sale\)" class="num"><span data-i18n-skip>USD 365\.00/);
+  assert.match(h, /class="ab-total"/); assert.match(h, /Rooms without guests — Grand Exec: G/);
+  assert.match(h, /data-ab-csv="rooming"/);
+  const csv = A.csv.rooming(); const sep = csv.indexOf('Stay;') >= 0 ? ';' : ',';
+  assert.ok(csv.split('\r\n').some((l) => l.startsWith(['W1', 'Hotel Alpha · wedding stay', '2031-02-27', '2031-03-01', '2', 'F', '203'].join(sep))));
+  assert.ok((h.match(/<td(?![^>]*data-l=)/g) || []).length === 0, 'every cell named for the phone');
+});
+
+test('REVIEW · Finance: A executive summary, B budget vs actual, C revenue, D hotels, E exceptions; print and CSVs; Revenue keeps guest revenue only', async () => {
+  const revenue = reviewRevenue();
+  const { root, A, calls } = load({ 'admin/overview': OVERVIEW, 'admin/status': statusAnswer, revenue }, { hash: '#finance' });
+  await tick(40);
+  const h = root.innerHTML;
+  for (const t of ['Executive summary', 'Budget vs actual and forecast', 'Guest revenue and receivables', 'Hotel financial performance', 'Reconciliation and exceptions']) assert.ok(h.indexOf(t) > 0, t);
+  assert.ok(h.indexOf('Executive summary') < h.indexOf('Budget vs actual') && h.indexOf('Hotel financial performance') < h.indexOf('Reconciliation and exceptions'), 'the report\'s order');
+  assert.match(h, /Approved budget<\/p><p class="t-h1" data-i18n-skip>USD 4,000\.00/); assert.match(h, /Budget variance<\/p><p class="t-h1" data-i18n-skip>\+USD 1,600\.00/);
+  assert.match(h, /THB 30,000\.00/); assert.doesNotMatch(h, /USD 30,000|THB.*≈ USD [0-9,.]+<\/p><p class="t-h1"/, 'THB never inside a USD figure');
+  assert.match(h, /Your decisions/); assert.match(h, /Triple occupancy/); assert.match(h, /Forecast if accepted: USD 5,720\.00/);
+  assert.match(h, /data-ab-print/); assert.match(h, /data-ab-csv="finance-summary"/); assert.match(h, /data-ab-csv="budget-vs-actual"/);
+  assert.match(h, /class="ab-print-head"/);
+  assert.ok(calls.every((c) => c.method === 'GET'), 'Finance only reads');
+  const fin = A.csv.finance('finance-summary'); assert.match(fin, /Approved budget/); assert.match(fin, /Data as of/); assert.match(fin, /Currency/);
+  const bva = A.csv.finance('budget-vs-actual'); assert.match(bva, /Approved budget \(004 A2, total only\)/);
+  const rv = load({ 'admin/overview': OVERVIEW, 'admin/status': statusAnswer, revenue }, { hash: '#revenue' });
+  await tick(40);
+  assert.match(rv.root.innerHTML, /data-ab-receivables/); assert.match(rv.root.innerHTML, /S-T1-0001 · V1/); assert.match(rv.root.innerHTML, /data-ab-csv="receivables"/);
+  assert.doesNotMatch(rv.root.innerHTML, /Executive summary|Approved budget/, 'costs and budget stay in Finance');
+  assert.match(rv.A.csv.receivables(), /INV-T1/);
 });

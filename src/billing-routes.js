@@ -1171,17 +1171,18 @@ async function adminRevenue(env, identity, url, cors) {
   }
   if (unresolved.length) overview.incompleteKpis = [...new Set([...(overview.incompleteKpis || []), ...KPI_KEYS])];
   if (unresolved.length && overview.breakdown) { overview.breakdown.incomplete = true; overview.breakdown.complete = false; }
-  /* REVENUE AND BUDGET: built from the final figures above, beside them — every key above is exactly what it was without it */
-  const budget = await budgetBesideRevenue(env, budgetReads, { overview, src, asOf, indexEntries, unresolved, couple });
-  /* the extra bed of a room the guests booked themselves (17 Nov 2026): a room holding more persons than its own places says so */
-  extraBedsBeyondPlaces(overview.breakdown, src.items);
-  /* where every active guest stands — only CONFIRMED bookings are revenue above; the rest is named here, never as money */
-  let progress; try { progress = await bookingProgress(env, indexEntries, { ownerRecords: recorded.length > 0 }); } catch (e) { progress = { error: clean(e && e.message).slice(0, 200) || 'not readable' }; }
   /* the project's exchange-rate reference (Owners, 17 Nov 2026): the day of the first issued statement and the 011 rates in effect */
   let fxReference = null;
   /* the first issued statement's day from the ledger listing already read (no further request) */
   const issuedDays = ledgerHolders.map((h) => clean(h.Issue_Date || (h.settlement && h.settlement.Issue_Date))).filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d)).sort();
   try { const day = issuedDays[0] || asOf; const fx = freezeFx(resolveFx(src.configRows, day)); fxReference = { day, FX_USD_THB: fx.FX_USD_THB, FX_USD_EUR: fx.FX_USD_EUR, gaps: fx.gaps || [], firstIssued: day !== asOf || null }; } catch (e) { fxReference = { error: 'not readable just now' }; }
+  /* REVENUE AND BUDGET: built from the final figures above, beside them — the exchange-rate reference rides along for an
+     indicative note only (Owners' review, 18 Nov 2026: no reporting rate is approved, so it is never added to a figure) */
+  const budget = await budgetBesideRevenue(env, budgetReads, { overview, src, asOf, indexEntries, unresolved, couple, fx: fxReference && !fxReference.error ? fxReference : null });
+  /* the extra bed of a room the guests booked themselves (17 Nov 2026): a room holding more persons than its own places says so */
+  extraBedsBeyondPlaces(overview.breakdown, src.items);
+  /* where every active guest stands — only CONFIRMED bookings are revenue above; the rest is named here, never as money */
+  let progress; try { progress = await bookingProgress(env, indexEntries, { ownerRecords: recorded.length > 0 }); } catch (e) { progress = { error: clean(e && e.message).slice(0, 200) || 'not readable' }; }
   return jsonRes({ ok: true, ...overview, unresolved, calculatedAt: new Date().toISOString(), bookingProgress: progress, fxReference,
     population: { holders: ids.length, withSettlement: withSettlement.length, withConfirmation: confirmed.length, withDrift: withDrift.length,
       withOwnerBookings: recorded.length, cancelled: holders.filter((h) => h.cancelled).length, couple: couple.length }, couple, budget }, 200, cors);
@@ -1221,7 +1222,7 @@ function budgetNames(entries, register) {
 
 /* the revenue figures never wait long on the comparison: reads still out after this are a named gap (review, 17 Nov 2026) */
 const BUDGET_WAIT_MS = 8000;
-async function budgetBesideRevenue(env, reads, { overview, src, asOf, indexEntries, unresolved, couple }) {
+async function budgetBesideRevenue(env, reads, { overview, src, asOf, indexEntries, unresolved, couple, fx }) {
   const gap = (why) => ({ available: false, gap: why + ' — every revenue figure above stands as it is' });
   try {
     let timer;
@@ -1251,7 +1252,7 @@ async function budgetBesideRevenue(env, reads, { overview, src, asOf, indexEntri
       /* the Revenue Report's paying-guest figures for the financial dashboard (Owners, 17 Nov 2026) — read, never recomputed */
       revenue: { invoiced: kpi(overview.issuedRevenue), booked: kpi(overview.bookedRevenue), notYetInvoiced: kpi(overview.notYetInvoiced),
         changedSinceIssue: kpi(overview.changedSinceIssue), invoicedNotBooked: kpi(overview.invoicedNotBooked) },
-      couple: couple || null,
+      couple: couple || null, fx: fx || null,
       roomList012: list012 && list012.status === 'fulfilled' && Array.isArray(list012.value) ? parseRoomList012(list012.value[0]) : null,
     });
   } catch (e) {

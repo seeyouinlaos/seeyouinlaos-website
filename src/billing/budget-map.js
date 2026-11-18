@@ -24,7 +24,7 @@
               of the supplier, never split between stays).
    ========================================================================== */
 
-export const BUDGET_MAP_VERSION = 'budget-map/1.0.0';
+export const BUDGET_MAP_VERSION = 'budget-map/1.1.0';
 
 export const STAGES = Object.freeze({
   A2: { place: 'U Sathorn Bangkok' },
@@ -75,7 +75,11 @@ export const VENDORS = Object.freeze([
   { vendor: /^souphattra\s+heritage\b/i, stages: ['C', 'D1'], coversAll: 'the hotel agreement: 26 rooms, 54 room nights, USD 150 per room night, USD 8,100 (Owners, 17 Nov 2026)',
     /* the rooms that agreement buys, at its rate per room night: every room of the wedding stay (D1, 27.02–01.03) and the
        Presidential suite of 25–27.02 (004 row 23) — the rate list's hotel cost per room comes from here, nowhere else */
-    roomContract: { ratePerRoomNight: 150, rooms: { D1: '*', C: ['C-SOUPHATTRA-PRESIDENTIAL'] } } },
+    roomContract: { ratePerRoomNight: 150, rooms: { D1: '*', C: ['C-SOUPHATTRA-PRESIDENTIAL'] },
+      /* the agreement's room policy (31 Aug 2026, page 2): "Triple occupancy supplement: USD 60 net per room/night including
+         breakfast". NOT an Owner order: shown only as a decision (what it would add), never in any cost or forecast */
+      supplement: { perRoomNight: 60, when: 'a third person in the room', source: 'the hotel agreement of 31 Aug 2026, room policies: triple occupancy supplement USD 60 net per room/night incl. breakfast' },
+      agreementDates: 'The hotel agreement (31 Aug 2026) writes check-out "29/02/2027", a date 2027 does not have; 012 and the bookings say 01.03.2027.' } },
   { vendor: /^u\s*sathorn\b/i, stages: ['A2'] },
   { vendor: /^yifangju\b/i, stages: ['F'] },
   { vendor: /^luye\s+baisha\b/i, stages: ['H'] },
@@ -100,3 +104,21 @@ export function roomScopeOf(details) {
   const d = String(details || '');
   return ROOM_SCOPES.find((s) => s.words.test(d)) || null;
 }
+
+/* WHICH 004 CATEGORY A 007 SUPPLIER SERVES (Owners' review, 18 Nov 2026): 007 names suppliers, 004 plans by category — this table
+   only places each 007 column beside the 004 category of the lines it pays (read from 004's own Vendor / Item / Category); a
+   supplier no entry names stays "Unassigned" in the report, never dropped and never guessed. */
+export const SUPPLIER_CATEGORY = Object.freeze([
+  { vendor: /^souphattra\s+heritage\b/i, category: 'Accommodation', lines: '004 Souphattra Heritage room lines' },
+  { vendor: /^u\s*sathorn\b/i, category: 'Accommodation', lines: '004 U Sathorn Bangkok' },
+  { vendor: /^yifangju\b/i, category: 'Accommodation', lines: '004 Yifangju Designer Courtyard' },
+  { vendor: /^luye\s+baisha\b/i, category: 'Accommodation', lines: '004 Luye Baisha' },
+  { vendor: /^sky\s+bakery\b/i, category: 'Food & Beverage', lines: '004 Wedding Cake (Sky Bakery)' },
+  { vendor: /^prompt\s*interprint\b/i, category: 'Guest Experience', lines: '004 Paper Bag (Promptinterprint)' },
+  { vendor: /^tops\s+supermarket\b/i, category: 'Guest Experience', lines: '004 Snack lines' },
+  { vendor: /^your\s+smile\b/i, category: 'Photography & Video', lines: '004 Photography B / Videography (Your Smile)' },
+  { vendor: /^vinz\b/i, category: 'Photography & Video', lines: '004 Photography A (Vinz BKK)' },
+  { vendor: /^sammy\b/i, category: 'Miscellaneous', lines: '004 Hair and Make-up' },
+  { vendor: /^bloom\s+and\s+bite\b/i, category: 'Flower & Decoration', lines: '004 Ceremony Decoration and Flowers (Bloom and Bite)' },
+  { vendor: /^canva\s+stand\b/i, category: 'Flower & Decoration', lines: '004 Art Display Stand / Canvas (signage)' },
+]);

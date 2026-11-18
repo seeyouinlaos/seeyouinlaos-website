@@ -41,8 +41,9 @@ import { nightsBetween } from './budget-source.js';
 import { matchSpecialRate } from './engine.js';
 import { nightsOfItem } from './source.js';
 import { toCents } from './model.js';
+import { financeReportOf, unitId } from './finance-report.js';
 
-export const BUDGET_VERSION = 'billing-budget/1.1.0';
+export const BUDGET_VERSION = 'billing-budget/1.2.0';
 
 const clean = (v) => String(v == null ? '' : v).trim();
 const norm = (v) => clean(v).replace(/\s+/g, ' ').toLowerCase();
@@ -879,22 +880,37 @@ export function buildBudgetComparison(input) {
   if (out.some((c) => c.lines004.some((x) => x.insideBlock))) used.add('A-5');
   const rank = { blocking: 0, data: 1, info: 2 };
   const dashboard = dashboardOf({ grossLines: reconciliation.grossLines, suppliers, categories, revenue: src.revenue || null, couple: src.couple || null });
+  /* THE ROOM OVERVIEW (Owners, 17 Nov 2026): every room of every stay as the Rooms engine holds it — its occupants (held, sent or
+     confirmed alike), the extra bed's attribution, the 006 name — beside the confirmed lines above; read, never a second source */
+  const roomPlan = out.filter((c) => c.kind === 'STAY').map((c) => {
+    const keys = [...new Set(asArray(c.items).map((id) => clean(items[id] && items[id].Site_Product_Key).split(/[,|]/)[0]).filter((k) => k.includes('/')))];
+    const persons = (src.names && src.names.persons) || {};
+    return { stay: c.id, place: c.place, from: c.from, to: c.to, rooms: keys.flatMap((key) => asArray(src.rooms && src.rooms.units && src.rooms.units[key]).map((u) => ({
+      key, label: u.label, name: u.name, type: (src.rooms.units[key] && SEED_NAME(key)) || key, places: u.places, extraBeds: u.extraBeds || 0, item: asArray(c.items).find((id) => clean(items[id] && items[id].Site_Product_Key).split(/[,|]/)[0] === key) || null,
+      occupants: asArray(u.occupants).map((o) => (o.guestId ? { guestId: o.guestId, name: persons[o.guestId] || clean(o.name) || null, bed: !!o.bed } : { kept: true })) }))) };
+  });
+  /* the hotel contracts' cost per room night by stay (budget-map VENDORS · roomContract) — the rate list's purchase side */
+  const roomContracts = VENDORS.filter((v) => v.roomContract).flatMap((v) => Object.entries(v.roomContract.rooms).map(([stay, items]) =>
+    ({ stay, items: items === '*' ? '*' : [...items], ratePerRoomNight: v.roomContract.ratePerRoomNight, source: v.coversAll })));
+  /* each room's hotel cost where an agreement buys it (its rate per room night × the stay's nights) — before, and apart from, the report */
+  for (const s of roomPlan) {
+    const k = roomContracts.find((x) => x.stay === s.stay), n = nightsBetween(s.from, s.to).length;
+    for (const u of s.rooms) { const covered = !!(k && (k.items === '*' || k.items.includes(u.item))); u.hotelCost = covered && n ? amt(k.ratePerRoomNight * n * 100) : null; u.room012 = null; }
+  }
+  /* THE FINANCE REPORT (Owners' review, 18 Nov 2026) — beside everything above, never changing it; a failure names itself */
+  let report;
+  try {
+    report = financeReportOf({ budget: src.budget, suppliers, centres: out, plan: roomPlan, contracts: roomContracts,
+      roomContractMeta: (VENDORS.find((v) => v.roomContract) || {}).roomContract || null, dashboard, rates009: src.rates009, revenue: src.revenue || null,
+      receipts: src.receipts || null, fx: src.fx || null, list012: src.roomList012 || null });
+    /* each room carries its 012 room number (verify-marked where uncertain) */
+    for (const s of roomPlan) for (const u of s.rooms) u.room012 = report.rooms012.units[unitId(s.stay, u)] || null;
+  } catch (e) { report = { version: null, error: 'the finance report could not be built just now' }; }
   return {
-    available: true, version: BUDGET_VERSION, mapVersion: BUDGET_MAP_VERSION, asOf, dashboard,
+    available: true, version: BUDGET_VERSION, mapVersion: BUDGET_MAP_VERSION, asOf, dashboard, report,
     /* Google 012 (the Owners' room number and rate list), parsed for reconciliation only — never a source of any figure */
     roomList012: src.roomList012 || null,
-    /* THE ROOM OVERVIEW (Owners, 17 Nov 2026): every room of every stay as the Rooms engine holds it — its occupants (held, sent or
-       confirmed alike), the extra bed's attribution, the 006 name — beside the confirmed lines above; read, never a second source */
-    roomPlan: out.filter((c) => c.kind === 'STAY').map((c) => {
-      const keys = [...new Set(asArray(c.items).map((id) => clean(items[id] && items[id].Site_Product_Key).split(/[,|]/)[0]).filter((k) => k.includes('/')))];
-      const persons = (src.names && src.names.persons) || {};
-      return { stay: c.id, place: c.place, from: c.from, to: c.to, rooms: keys.flatMap((key) => asArray(src.rooms && src.rooms.units && src.rooms.units[key]).map((u) => ({
-        key, label: u.label, name: u.name, type: (src.rooms.units[key] && SEED_NAME(key)) || key, places: u.places, extraBeds: u.extraBeds || 0, item: asArray(c.items).find((id) => clean(items[id] && items[id].Site_Product_Key).split(/[,|]/)[0] === key) || null,
-        occupants: asArray(u.occupants).map((o) => (o.guestId ? { guestId: o.guestId, name: persons[o.guestId] || clean(o.name) || null, bed: !!o.bed } : { kept: true })) }))) };
-    }),
-    /* the hotel contracts' cost per room night by stay (budget-map VENDORS · roomContract) — the rate list's purchase side */
-    roomContracts: VENDORS.filter((v) => v.roomContract).flatMap((v) => Object.entries(v.roomContract.rooms).map(([stay, items]) =>
-      ({ stay, items: items === '*' ? '*' : [...items], ratePerRoomNight: v.roomContract.ratePerRoomNight, source: v.coversAll }))),
+    roomPlan, roomContracts,
     currencies: 'Currencies are kept apart: no approved reporting conversion exists (011 holds the statement rate only).',
     categories, centres: out, suppliers, noGuestService, inventory,
     checks: checks.sort((x, y) => rank[x.severity] - rank[y.severity]),
