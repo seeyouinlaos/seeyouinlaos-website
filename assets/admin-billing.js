@@ -35,6 +35,45 @@
     return cur + ' ' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
   function usd(n) { return money('USD', n); }
+  /* a signed amount: "−USD 2,920.00" / "+USD 3,600.00" (a variance or a surplus says its direction) */
+  function signed(m) { if (!m || m.amount == null) return '—'; var n = Number(m.amount); return (n < 0 ? '−' : n > 0 ? '+' : '') + money(m.currency || 'USD', Math.abs(n)); }
+
+  /* ------------------------------------------------- exports (Owners' review, 18 Nov 2026)
+     CSV for Excel: UTF-8 with a BOM, CRLF, ISO dates, plain numbers without thousands separators; the delimiter is chosen on the
+     page ("," — Excel international · ";" with a decimal comma — Excel in Europe; first guessed from this device's number
+     format, kept for this visit only — the console stores nothing); a text cell never starts a formula. Every report names what
+     it is, when it was made, the data it shows, its currency and its basis. No invitation code, bearer or token is ever exported. */
+  function csvSep() {
+    if (S.csvSep === ';' || S.csvSep === ',') return S.csvSep;
+    try { return (1.5).toLocaleString().indexOf(',') >= 0 ? ';' : ','; } catch (e) { return ','; }
+  }
+  function csvCell(v, sep) {
+    if (v == null) return '';
+    if (typeof v === 'number') { if (!isFinite(v)) return ''; var t = String(Math.round(v * 100) / 100); return sep === ';' ? t.replace('.', ',') : t; }
+    var s = String(v);
+    if (/^[=+\-@\t\r]/.test(s)) s = '\'' + s;
+    return s.indexOf(sep) >= 0 || /["\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  }
+  function csvDoc(title, meta, head, rows) {
+    var sep = csvSep(), line = function (r) { return r.map(function (v) { return csvCell(v, sep); }).join(sep); };
+    return '﻿' + [line([title])].concat(meta.map(line), [''], [line(head)], rows.map(line)).join('\r\n') + '\r\n';
+  }
+  function saveText(name, text) {
+    if (typeof Blob === 'undefined' || typeof URL === 'undefined' || !URL.createObjectURL) return false;
+    var url = URL.createObjectURL(new Blob([text], { type: 'text/csv;charset=utf-8' })), a = document.createElement('a');
+    a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.parentNode.removeChild(a);
+    setTimeout(function () { try { URL.revokeObjectURL(url); } catch (e) {} }, 60000);
+    return true;
+  }
+  function nowStamp() { return new Date().toISOString().slice(0, 16).replace('T', ' ') + ' UTC'; }
+  function num(m) { return m && m.cents != null ? m.cents / 100 : (m && m.amount != null && isFinite(Number(m.amount)) ? Number(m.amount) : null); }
+  function curOf(list, cur) { var m = (list || []).filter(function (x) { return x && x.currency === cur; })[0]; return m ? num(m) : null; }
+  function exportBar(items, extra) {
+    var sep = csvSep();
+    return '<div class="ab-export" data-ab-export>' + (extra || '') + items.map(function (x) { return '<button type="button" class="ab-filter" data-ab-csv="' + esc(x[0]) + '">' + esc(x[1]) + '</button>'; }).join('') +
+      '<label class="ab-sep"><span class="ab-mute">CSV for</span> <select data-ab-csvsep aria-label="CSV format"><option value=","' + (sep === ',' ? ' selected' : '') + '>Excel · comma</option>' +
+      '<option value=";"' + (sep === ';' ? ' selected' : '') + '>Excel Europe · semicolon</option></select></label></div>';
+  }
   function day(iso) {
     if (!iso) return '—';
     var d = new Date(String(iso).slice(0, 10) + 'T12:00:00Z');
@@ -132,7 +171,7 @@
     S.checking = true; S.statusError = '';
     function next() {
       if (mine !== generation) return;                 /* a newer read of the list took over */
-      if (i >= ids.length) { S.checking = false; draw(); checkReady(mine); return; }
+      if (i >= ids.length) { S.checking = false; draw(); checkReady(mine); if (S.revenuePhase === 'idle') loadRevenue(); return; }
       var part = ids.slice(i, i + size);
       api('admin/status?ids=' + encodeURIComponent(part.join(','))).then(function (x) {
         if (mine !== generation) return;
@@ -303,6 +342,85 @@
     if (!m.channel) return '<span class="ab-chip open">To state</span>';
     return esc(METHOD[m.channel] || m.channel);
   }
+  /* WHERE EACH GUEST SLEEPS (Owners' review, 18 Nov 2026): the Rooms engine's room plan (held, sent or confirmed alike) with
+     the room's 012 number and the guest's own booked line for it — from the revenue calculation, read once, never recomputed */
+  function nightsBetweenDays(from, to) { var a = Date.parse(from), b = Date.parse(to); return a && b && b > a ? Math.round((b - a) / 86400000) : null; }
+  function guestRooms() {
+    var R = S.revenue, BG = R && R.budget;
+    if (!BG || BG.available === false || !BG.roomPlan) return null;
+    if (S.roomsOf && S.roomsOf.src === R) return S.roomsOf.map;
+    var lines = {}, map = {};
+    (BG.centres || []).forEach(function (c) { (c.rooms || []).forEach(function (r) { (r.lines || []).forEach(function (l) { lines[c.id + '|' + (r.item || l.item) + '|' + r.label + '|' + l.person] = l; }); }); });
+    (BG.roomPlan || []).forEach(function (p) {
+      var n = nightsBetweenDays(p.from, p.to);
+      (p.rooms || []).forEach(function (u) {
+        (u.occupants || []).forEach(function (o) {
+          if (!o.guestId) return;
+          (map[o.guestId] = map[o.guestId] || []).push({ stay: p.stay, place: p.place, from: p.from, to: p.to, nights: n, label: u.label, type: u.type, room012: u.room012 || null,
+            bed: !!o.bed, line: lines[p.stay + '|' + u.item + '|' + u.label + '|' + o.guestId] || null });
+        });
+      });
+    });
+    S.roomsOf = { src: R, map: map };
+    return map;
+  }
+  /* complimentary, in words: the couple's own rooms, a named rate of USD 0, hosted nights */
+  function compWords(h, x) {
+    if (h && h.billingAdmin) return 'complimentary · the couple';
+    var l = x && x.line; if (!l) return '';
+    var n = (Number(l.complimentaryNights) || 0) + (Number(l.hostedNights) || 0);
+    if (n) return n + ' night' + (n === 1 ? '' : 's') + ' complimentary';
+    return l.amount && l.amount.cents === 0 ? 'complimentary' : '';
+  }
+  function roomStatus(x) { return x.line ? (x.line.statement ? 'invoiced' : 'confirmed') : 'held, not confirmed'; }
+  function stayCell(h) {
+    var idx = guestRooms();
+    if (!idx) return S.revenuePhase === 'error' ? '<span class="ab-mute">rooms not readable just now</span>' : S.revenuePhase === 'ready' ? '<span class="ab-mute">rooms not available: ' + esc((S.revenue && S.revenue.budget && S.revenue.budget.gap) || 'the room plan could not be read') + '</span>' : '<span class="ab-mute">…</span>';
+    var list = idx[h.guestId] || [];
+    if (!list.length) return '<span class="ab-mute">no room</span>';
+    return list.map(function (x) {
+      var no = x.room012 && x.room012.roomNo ? ' · no. <b data-i18n-skip>' + esc(x.room012.roomNo) + '</b>' + (x.room012.status === 'VERIFY' ? ' <span class="ab-chip" title="' + esc((x.room012.verify || []).join('; ')) + '">verify in 012</span>' : '') : '';
+      var cw = compWords(h, x);
+      return '<span class="ab-stay"><span class="ab-stay-h" data-i18n-skip>' + esc(x.place) + ' · ' + esc(dmy(x.from)) + ' – ' + esc(dmy(x.to)) + (x.nights ? ' · ' + x.nights + ' night' + (x.nights === 1 ? '' : 's') : '') + '</span>' +
+        '<span data-i18n-skip>' + esc(x.type) + ' · Room ' + esc(x.label) + '</span>' + no + ' <span class="ab-mute">· ' + esc(roomStatus(x)) + '</span>' +
+        (x.bed ? ' <span class="ab-chip">extra bed</span>' : '') + (cw ? ' <span class="ab-chip on">' + esc(cw) + '</span>' : '') + '</span>';
+    }).join('');
+  }
+  /* THE COMPLETE GUEST LIST as CSV: one row per guest and stay (a guest without a room: one row); every figure the server's */
+  var GL_HEAD = ['Guest ID', 'Guest', 'Invitation', 'Stay', 'Arrival', 'Departure', 'Nights', 'Room', 'Hotel room no. (012)', 'Room no. check', 'Room category',
+    'Extra bed', 'Complimentary', 'Room amount USD', 'Room status', 'Booking stage', 'Confirmation', 'Statement', 'Statement no.', 'Issued', 'Due',
+    'Statement total USD', 'Booked value USD', 'Paid USD', 'Outstanding USD', 'Payment status', 'Overdue', 'Review'];
+  function guestCsvRows(list) {
+    var idx = guestRooms() || {};
+    var out = [];
+    list.forEach(function (h) {
+      var st = S.status[h.Holder_ID] || {}, s = h.settlement || {}, p = h.payment, g = stage(h), b = st.booked;
+      var conf = CONF[st.confirmation && st.confirmation.state];
+      var tail = [g ? g.words : '', conf ? conf[0] : (st.error ? 'not readable' : ''), stmtWords(h), s.Settlement_ID || '', s.issueDate || '', s.dueDate || '',
+        s.issuedRevision ? Number(s.issuedTotal) : null, b && !b.error && b.selected ? Number(b.total) : null,
+        p ? Number(p.ist) : null, p ? Math.max(0, Number(p.balance) || 0) : null, p ? (PAY[p.status] || p.status || '') : '', p && p.overdue ? 'yes' : '', review(h).join(' · ')];
+      var head = [h.guestId || '', h.name ? h.name.full : '', h.Holder_ID];
+      var rooms = idx[h.guestId] || [];
+      /* the invitation's own figures stand on its first row only — a sum in Excel never counts them twice */
+      var blank = tail.map(function (v) { return typeof v === 'number' ? null : v; });
+      if (!rooms.length) out.push(head.concat(['', '', '', '', '', '', '', '', '', '', null, ''], tail));
+      rooms.forEach(function (x, i) {
+        out.push(head.concat([x.place, x.from || '', x.to || '', x.nights, x.label, x.room012 ? x.room012.roomNo : '', x.room012 ? (x.room012.status === 'VERIFY' ? 'verify: ' + (x.room012.verify || []).join('; ') : 'ok') : '',
+          x.type, x.bed ? 'yes' : '', compWords(h, x), x.line && x.line.amount ? num(x.line.amount) : null, roomStatus(x)], i === 0 ? tail : blank));
+      });
+    });
+    return out;
+  }
+  function guestCsv(kind) {
+    var o = S.overview, rows = o.holders.filter(function (h) { return kind === 'all' || (matches(h, S.filter) && searchHit(h, S.q)); });
+    var label = kind === 'all' ? 'all guests' : 'filter "' + ((FILTERS.filter(function (f) { return f[0] === S.filter; })[0] || [])[1] || S.filter) + '"' + (S.q ? ', search "' + S.q + '"' : '');
+    var R = S.revenue || {};
+    return csvDoc('See You In Laos — Complete Guest List', [['Generated', nowStamp()], ['Guests', rows.length + ' of ' + o.holders.length + ' invitations in the register (' + label + ')'],
+      ['Data as of', 'register ' + (o.asOf || '') + ' · rooms ' + (R.calculatedAt ? R.calculatedAt.slice(0, 16).replace('T', ' ') + ' UTC' : 'not loaded')], ['Currency', 'USD'],
+      ['Rooms', guestRooms() ? 'read' : 'not available — ' + ((R.budget && R.budget.gap) || (S.revenuePhase === 'error' ? S.revenueError : 'not loaded yet'))],
+      ['Basis', 'one row per guest and stay — the invitation\'s amounts (statement total, booked value, paid, outstanding) on its first row only; rooms: the Rooms engine (held, sent or confirmed); room numbers: Google 012 (read only, matched by name — "verify" where uncertain); amounts: the Billing Engine and the issued statements']],
+      GL_HEAD, guestCsvRows(rows));
+  }
   function listView() {
     var o = S.overview, rows = o.holders;
     var counts = {}; FILTERS.forEach(function (f) { counts[f[0]] = rows.filter(function (h) { return matches(h, f[0]); }).length; });
@@ -314,15 +432,17 @@
         esc(f[1]) + ' <span class="ab-n">' + counts[f[0]] + (partial ? '+' : '') + '</span></button>';
     }).join('');
     var progress = done ? '' : '<p class="t-b2 ab-progress" role="status">Checking confirmations and booked values · ' + S.checked + ' / ' + rows.length + '</p>';
-    var head = '<tr><th>Guest</th><th>Guest Relations</th><th class="num">Booked value</th><th>Statement</th><th>Issued · due</th><th class="num">Statement total</th><th class="num">Paid</th><th class="num">Outstanding</th><th>Method</th><th>Review</th></tr>';
+    var idx = guestRooms(), withRoom = idx ? rows.filter(function (h) { return (idx[h.guestId] || []).length; }).length : null;
+    var head = '<tr><th>Guest</th><th>Stays &amp; rooms</th><th>Guest Relations</th><th class="num">Booked value</th><th>Statement</th><th>Issued · due</th><th class="num">Statement total</th><th class="num">Paid</th><th class="num">Outstanding</th><th>Method</th><th>Review</th></tr>';
     var body = shown.map(function (h) {
       var s = h.settlement || {}, p = h.payment, rv = review(h);
       var out = p ? (p.overdue ? '<span class="ab-chip open">Overdue</span> ' : '') + '<span data-i18n-skip>' + esc(usd(Math.max(0, Number(p.balance) || 0))) + '</span>' : '<span class="ab-mute">—</span>';
       return '<tr data-ab-open="' + esc(h.Holder_ID) + '" tabindex="0">' +
-        '<td data-l="Guest"><span class="ab-name">' + esc(h.name ? h.name.full : '(no 006 name)') + '</span><span class="ab-id">' + esc(h.Holder_ID) + (h.billingAdmin ? ' · admin' : '') + '</span></td>' +
+        '<td data-l="Guest"><span class="ab-name">' + esc(h.name ? h.name.full : '(no 006 name)') + '</span><span class="ab-id">' + esc((h.guestId ? h.guestId + ' · ' : '') + h.Holder_ID) + (h.billingAdmin ? ' · admin' : '') + '</span></td>' +
+        '<td data-l="Stays &amp; rooms">' + stayCell(h) + '</td>' +
         '<td data-l="Guest Relations">' + confChip(S.status[h.Holder_ID]) + (stage(h) ? '<br><span class="ab-mute" data-ab-stage="' + stage(h).key + '">' + esc(stage(h).words) + '</span>' : '') + readyWords(h) + '</td>' +
         '<td data-l="Booked value" class="num">' + bookedCell(h) + '</td>' +
-        '<td data-l="Statement">' + esc(stmtWords(h)) + (p ? '<br><span class="ab-mute">' + esc(PAY[p.status] || p.status || '') + (p.pendingCount ? ' · ' + p.pendingCount + ' reported' : '') + '</span>' : '') + '</td>' +
+        '<td data-l="Statement">' + esc(stmtWords(h)) + (s.Settlement_ID ? '<span class="ab-id" data-i18n-skip>' + esc(s.Settlement_ID) + '</span>' : '') + (p ? (s.Settlement_ID ? '' : '<br>') + '<span class="ab-mute">' + esc(PAY[p.status] || p.status || '') + (p.pendingCount ? ' · ' + p.pendingCount + ' reported' : '') + '</span>' : '') + '</td>' +
         '<td data-l="Issued · due">' + (s.issueDate ? esc(day(s.issueDate)) + '<br><span class="ab-mute">due ' + esc(day(s.dueDate)) + '</span>' : '<span class="ab-mute">—</span>') + '</td>' +
         '<td data-l="Statement total" class="num">' + totalCell(h) + '</td>' +
         '<td data-l="Paid" class="num">' + (p ? '<span data-i18n-skip>' + esc(usd(p.ist)) + '</span>' : '<span class="ab-mute">—</span>') + '</td>' +
@@ -331,11 +451,14 @@
         '<td data-l="Review">' + (rv.length ? '<span class="ab-chip open">' + esc(rv.join(' · ')) + '</span>' : '<span class="ab-mute">—</span>') + '</td></tr>';
     }).join('');
     return '<section class="ab-sec" aria-label="Guests">' +
-      '<div class="ab-tools"><label class="ab-search"><span class="t-l1">Search</span><input type="search" placeholder="Name or INV-…" value="' + esc(S.q) + '" data-ab-q autocomplete="off"></label>' +
+      '<div class="ab-tools"><label class="ab-search"><span class="t-l1">Search</span><input type="search" placeholder="Name, G… or INV-…" value="' + esc(S.q) + '" data-ab-q autocomplete="off"></label>' +
       '<div class="ab-filters" role="group" aria-label="Filter">' + chips + '</div></div>' + progress +
+      exportBar([['guests-all', 'CSV · complete guest list (' + rows.length + ')'], ['guests-shown', 'CSV · this filter (' + shown.length + ')']]) +
       (shown.length ? '<div class="ab-table-wrap"><table class="ab-table"><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>'
         : '<p class="t-b1 ab-empty">No guest matches this filter.</p>') +
-      '<p class="t-b2 ab-foot">' + rows.length + ' invitations of the register · as of ' + esc(day(o.asOf)) + '<br>' +
+      '<p class="t-b2 ab-foot">' + shown.length + ' shown · ' + rows.length + ' invitations of the register (the couple included)' +
+      (withRoom != null ? ' · ' + withRoom + ' with a room' : S.revenuePhase === 'loading' ? ' · reading the rooms…' : '') + ' · as of ' + esc(day(o.asOf)) + '<br>' +
+      '<b>Stays &amp; rooms</b> — the room each guest holds (held, sent or confirmed), its hotel room number from Google 012 ("verify in 012" where the names or dates differ), extra bed and complimentary nights. ' +
       '<b>Booked value</b> — what the guest has selected now, priced by the Billing Engine now; it is not a statement and does not make anyone issuable. ' +
       '<b>Ready to issue</b> / <b>Blocked</b> — what Issue would say now for a confirmed booking (the same checks as Preview), never an issue. ' +
       '<b>Statement total</b>, <b>Paid</b> and <b>Outstanding</b> — the issued, immutable statement only. All in USD.</p></section>';
@@ -864,33 +987,6 @@
     if ((c.checks || []).length) b += '<p class="t-l1">Checks</p><ul class="t-b2">' + c.checks.map(function (x) { return li(x.text); }).join('') + '</ul>';
     return '<details class="ab-bd" data-ab-bd="' + esc(c.id) + '"' + (open ? ' open' : '') + '>' + head + '<div class="ab-bd-body">' + b + '</div></details>';
   }
-  /* THE FINANCIAL DASHBOARD (Owners, 17 Nov 2026): 004's costs (gross), 007's commitments and payments, the Revenue Report's
-     paying-guest revenue and the owner-funded position — derived by the server (src/billing/budget.js · dashboardOf), shown as is */
-  function dashboardView(D) {
-    if (!D) return '';
-    var C = D.costs || {}, R = D.revenue || {}, P = D.position || {};
-    var row = function (label, v, note) { return '<tr><td data-l="">' + esc(label) + '</td><td data-l="USD" class="num"><span data-i18n-skip>' + (v == null ? '—' : esc(v)) + '</span></td><td data-l="">' + (note ? '<span class="ab-mute">' + esc(note) + '</span>' : '') + '</td></tr>'; };
-    var list = function (ms) { return (ms || []).map(cash).join(' · ') || '—'; };
-    var adj = (C.adjustments || []).map(function (a) { return a.vendor + ': 004 rows ' + (a.rows || []).join(', ') + ' ' + money2(a.planned004) + ' → contract ' + money2(a.contract) + ' (' + (a.difference.cents >= 0 ? '+' : '') + money2(a.difference) + ') — ' + a.coversAll; });
-    var pos = P.stated ? row('Owner-funded now (forecast − invoiced revenue)', money2(P.currentOwnerFunded)) + row('Owner-funded projected (forecast − expected revenue)', money2(P.projectedOwnerFunded)) +
-        row('Revenue coverage — invoiced', P.coverageInvoiced == null ? null : P.coverageInvoiced + ' %') + row('Revenue coverage — projected', P.coverageProjected == null ? null : P.coverageProjected + ' %')
-      : '<tr><td colspan="3"><span class="ab-mute">' + esc(P.why || 'not stated just now') + '</span></td></tr>';
-    var cats = (R.byCategory || []).map(function (c) {
-      return '<tr><td data-l="Category">' + esc(c.category) + '</td><td data-l="004 cost" class="num"><span data-i18n-skip>' + money2(c.planned004) + '</span></td><td data-l="Forecast cost" class="num"><span data-i18n-skip>' + money2(c.forecast) + '</span></td>' +
-        '<td data-l="Expected revenue" class="num"><span data-i18n-skip>' + money2(c.expected) + '</span></td><td data-l="Contribution" class="num"><span data-i18n-skip>' + money2(c.contribution) + '</span></td></tr>';
-    }).join('');
-    return '<div class="p-card ab-panel" data-ab-dashboard><p class="t-l1">Financial position · USD</p><p class="t-b2 ab-mute">' + esc(D.note || '') + '</p>' +
-      '<div class="ab-table-wrap"><table class="ab-table"><tbody>' +
-      '<tr><td colspan="3" data-l=""><b>Costs (004 · 007)</b></td></tr>' + row('Original planned costs (004, every row)', money2(C.original)) + row('Current forecast costs', money2(C.forecast), adj.join(' · ')) +
-      row('Variance (forecast − original)', money2(C.variance)) + row('Committed (007 contracts, as typed)', list(C.committed)) + row('Paid to suppliers (007, counted)', list(C.paid)) +
-      row('004 planned guest contributions', money2(C.plannedContributions004), C.plannedContributionsNote) +
-      '<tr><td colspan="3" data-l=""><b>Revenue (paying guests · the Revenue Report)</b></td></tr>' + row('Invoiced', money2(R.invoiced)) + row('Expected in total (the bookings as they stand)', money2(R.expectedTotal)) +
-      row('Expected, not yet invoiced', money2(R.expectedNotYetInvoiced), 'not yet invoiced ' + money2(R.notYetInvoiced) + ' · revisions due ' + money2(R.revisionsDue)) +
-      (R.why ? '<tr><td colspan="3"><span class="ab-mute">' + esc(R.why) + '</span></td></tr>' : '') +
-      '<tr><td colspan="3" data-l=""><b>Position</b></td></tr>' + pos + '</tbody></table></div>' +
-      (cats ? '<div class="ab-table-wrap"><table class="ab-table"><thead><tr><th>Category</th><th class="num">004 cost</th><th class="num">Forecast cost</th><th class="num">Expected revenue</th><th class="num">Contribution</th></tr></thead><tbody>' + cats + '</tbody></table></div>' : '') +
-      '</div>';
-  }
   /* STATEMENTS TO REVISE (Owners, 17 Nov 2026): issued statements whose amounts no longer match the bookings, and the couple's own
      statements (complimentary now) — the issued amounts stand until the Owners issue a revision; nothing is changed here */
   function revisionsView(R) {
@@ -950,7 +1046,7 @@
   function rateListView(BG) {
     var stays = (BG.centres || []).filter(function (c) { return c.kind === 'STAY' && (c.rooms || []).some(function (r) { return (r.lines || []).length; }); });
     if (!stays.length) return '';
-    if (!S.rl) { S.rl = {}; stays.forEach(function (c) { api('admin/rate-list?stay=' + encodeURIComponent(c.id)).then(function (x) { S.rl[c.id] = x.ok ? x.j : { error: x.j.error || 'not readable' }; if (S.route.view === 'revenue') draw(); }); }); }
+    if (!S.rl) { S.rl = {}; stays.forEach(function (c) { api('admin/rate-list?stay=' + encodeURIComponent(c.id)).then(function (x) { S.rl[c.id] = x.ok ? x.j : { error: x.j.error || 'not readable' }; if (S.route.view === 'rooms') draw(); }); }); }
     return '<div class="p-card ab-panel" data-ab-ratelist><p class="t-l1">Hotel room rate list — from the bookings, 002 and 009</p>' +
       '<p class="t-b2 ab-mute">Generated, never typed. Google 012 is compared, never used as a source. Contractual inclusions (e.g. breakfast) are not held by 002 and are not listed.</p>' +
       stays.map(function (c) {
@@ -1076,56 +1172,272 @@
     if (S.revenuePhase === 'error') return '<div class="p-card"><p class="t-b1">' + esc(S.revenueError) + '</p><div class="p-actions"><button type="button" class="p-link" data-ab-rev-reload>Try again</button></div></div>';
     return null;
   }
-  /* FINANCE: the position, the reconciliation of booked and invoiced, receivables and receipts, the exchange-rate reference, the
-     statements to revise, the couple, the booking progress */
+  /* ===================================================== FINANCE (Owners' review, 18 Nov 2026)
+     One report in the order the Owners read it: A the executive summary, B budget against forecast, commitments and payments,
+     C guest revenue and receivables, D each hotel's purchase, sale and surplus, E what needs a decision or a correction — the
+     line-by-line detail below, closed. Every figure is the server's (src/billing/finance-report.js · budget.js · revenue.js);
+     budget, cash, revenue and surplus are never mixed, and another currency is never added to USD. */
+  function kpiBox(label, valueHtml, def, flag, cls) {
+    return '<div class="p-card ab-kpi' + (cls ? ' ' + cls : '') + '"><p class="t-l1">' + esc(label) + '</p><p class="t-h1" data-i18n-skip>' + valueHtml + '</p>' +
+      (flag ? '<p class="ab-flag">' + esc(flag) + '</p>' : '') + '<p class="ab-def">' + esc(def) + '</p></div>';
+  }
+  function kd(x) { return x && x.cents != null ? money(x.currency || 'USD', x.cents / 100) : (x && x.display ? x.display : '—'); }
+  function curList(list) { return (list || []).length ? list.map(cash).join(' · ') : '—'; }
+  function secH(letter, title, note) { return '<h2 class="ab-sec-h"><span class="ab-sec-n">' + letter + '</span> ' + esc(title) + (note ? ' <span class="ab-mute">' + esc(note) + '</span>' : '') + '</h2>'; }
+  function finSummary(R, rep, D) {
+    var P = (D && D.position) || {}, cashv = rep.cash || {};
+    var incomplete = rep.forecastComplete === false ? (rep.forecastGaps || []).length + ' cost' + ((rep.forecastGaps || []).length === 1 ? '' : 's') + ' not yet known — see E' : '';
+    return [
+      ['approved', 'Approved budget', rep.approved ? esc(usd(rep.approved.amount)) : '—', '004 · TOTAL BUDGET (' + ((rep.approved && rep.approved.cell) || 'A2') + '), the approved frame incl. its reserve', rep.approved ? '' : (rep.approvedWhy || '')],
+      ['forecast', 'Current forecast', esc(kd(rep.forecast)), '004 planned lines (' + kd(rep.planned) + '), the Souphattra agreement in place of its 004 lines', incomplete],
+      ['variance', 'Budget variance', esc(signed(rep.varianceToApproved)), 'forecast − approved budget', rep.varianceToApproved && rep.varianceToApproved.cents > 0 ? 'above the approved budget' : ''],
+      ['committed', 'Committed costs', esc(curList(rep.committed)), '007 · supplier contracts as typed; THB is never converted', ''],
+      ['paid', 'Paid to suppliers', esc(curList(rep.paid)), '007 · supplier payments counted (dated, typed)', ''],
+      ['booked', 'Confirmed guest revenue', esc(kd(R.bookedRevenue)), 'paying guests\' confirmed bookings, priced by the Billing Engine (the couple excluded)', R.bookedRevenue && R.bookedRevenue.complete === false ? 'partial' : ''],
+      ['invoiced', 'Invoiced revenue', esc(kd(R.issuedRevenue)), 'issued statements (frozen as issued)', ''],
+      ['received', 'Payments received', esc(kd(R.cashCollected)), 'verified receipts (008); reported payments are not counted', ''],
+      ['outstanding', 'Outstanding receivables', esc(kd(R.outstanding)), 'issued, not yet paid', R.overdue && R.overdue.cents ? kd(R.overdue) + ' overdue' : ''],
+      ['owner', 'Owner cash still to provide', esc(kd(cashv.ownerStillToProvide)), cashv.formula || '', cashv.complete === false ? 'incomplete: ' + (cashv.why || []).join('; ') : ''],
+      ['position', 'Projected net cost to H&S', P.stated ? esc(kd(P.projectedOwnerFunded)) : '—', 'forecast − confirmed guest revenue' + (P.coverageProjected != null ? ' · guests cover ' + P.coverageProjected + ' %' : '') +
+        (P.stated ? '; today, against invoiced revenue only: ' + kd(P.currentOwnerFunded) + (P.coverageInvoiced != null ? ' (' + P.coverageInvoiced + ' %)' : '') : ''), P.stated ? (incomplete ? 'rests on an incomplete forecast' : '') : (P.why || '')],
+    ];
+  }
+  function finCsv(kind) {
+    var R = S.revenue, BG = R.budget || {}, rep = BG.report || {}, D = BG.dashboard || {};
+    var meta = [['Generated', nowStamp()], ['Data as of', (R.calculatedAt || '').slice(0, 16).replace('T', ' ') + ' UTC'], ['Currency', 'USD; other currencies named, never converted'],
+      ['Basis', 'costs: Google 004 (planned) and 007 (committed, paid); forecast: 004 with the Souphattra agreement in place of its lines; revenue: the Billing Engine, the issued statements and 008 (paying guests; the couple excluded)']];
+    if (kind === 'finance-summary') {
+      return csvDoc('See You In Laos — Financial Summary', meta, ['Figure', 'USD', 'THB', 'Definition', 'Note'], finSummary(R, rep, D).map(function (k) {
+        var m = { approved: rep.approved, forecast: rep.forecast, variance: rep.varianceToApproved, committed: null, paid: null, booked: R.bookedRevenue, invoiced: R.issuedRevenue, received: R.cashCollected,
+          outstanding: R.outstanding, owner: (rep.cash || {}).ownerStillToProvide, position: (D.position || {}).projectedOwnerFunded }[k[0]];
+        var usdv = k[0] === 'committed' ? curOf(rep.committed, 'USD') : k[0] === 'paid' ? curOf(rep.paid, 'USD') : num(m);
+        var thb = k[0] === 'committed' ? curOf(rep.committed, 'THB') : k[0] === 'paid' ? curOf(rep.paid, 'THB') : null;
+        return [k[1], usdv, thb, k[3], k[4]];
+      }));
+    }
+    var rows = (rep.byCategory || []).map(function (c) { return [c.category, num(c.planned), num(c.forecast), num(c.variance), curOf(c.committed, 'USD'), curOf(c.committed, 'THB'), curOf(c.paid, 'USD'), curOf(c.paid, 'THB'), (c.suppliers || []).join(', ')]; });
+    rows.push(['Total', num(rep.planned), num(rep.forecast), rep.forecast && rep.planned ? (rep.forecast.cents - rep.planned.cents) / 100 : null, curOf(rep.committed, 'USD'), curOf(rep.committed, 'THB'), curOf(rep.paid, 'USD'), curOf(rep.paid, 'THB'), '']);
+    rows.push(['Approved budget (004 ' + ((rep.approved && rep.approved.cell) || 'A2') + ', total only)', num(rep.approved), null, rep.varianceToApproved ? num(rep.varianceToApproved) : null, null, null, null, null, 'variance = forecast − approved']);
+    return csvDoc('See You In Laos — Budget vs Actual / Forecast', meta.concat([['Actual', 'paid to suppliers (007); 004 "Actual USD" repeats the budget by formula and is not used']]),
+      ['004 category', 'Planned USD (004)', 'Forecast USD', 'Variance USD (forecast − planned)', 'Committed USD (007)', 'Committed THB (007)', 'Paid USD (007)', 'Paid THB (007)', '007 suppliers'], rows);
+  }
+  function budgetTable(rep) {
+    var cell = function (label, v, n) { return '<td data-l="' + esc(label) + '"' + (n ? ' class="num"' : '') + '>' + v + '</td>'; };
+    var rows = (rep.byCategory || []).map(function (c) {
+      return '<tr>' + cell('Category', esc(c.category) + (c.suppliers && c.suppliers.length ? '<span class="ab-id" data-i18n-skip>' + esc(c.suppliers.join(', ')) + '</span>' : '')) +
+        cell('Planned (004)', '<span data-i18n-skip>' + esc(kd(c.planned)) + '</span>', 1) + cell('Forecast', '<span data-i18n-skip>' + esc(kd(c.forecast)) + '</span>', 1) +
+        cell('Variance', '<span data-i18n-skip class="' + (c.variance && c.variance.cents > 0 ? 'ab-neg' : '') + '">' + esc(c.variance && c.variance.cents ? signed(c.variance) : '—') + '</span>', 1) +
+        cell('Committed (007)', '<span data-i18n-skip>' + esc(curList(c.committed)) + '</span>' + (c.committedAboveForecast ? ' <span class="ab-chip open">above the forecast by ' + esc(kd(c.committedAboveForecast)) + '</span>' : ''), 1) +
+        cell('Paid (007)', '<span data-i18n-skip>' + esc(curList(c.paid)) + '</span>', 1) + '</tr>';
+    }).join('');
+    var tv = rep.forecast && rep.planned ? { currency: 'USD', amount: (rep.forecast.cents - rep.planned.cents) / 100 } : null;
+    rows += '<tr class="ab-total">' + cell('Category', '<b>All categories</b>') + cell('Planned (004)', '<b data-i18n-skip>' + esc(kd(rep.planned)) + '</b>', 1) + cell('Forecast', '<b data-i18n-skip>' + esc(kd(rep.forecast)) + '</b>', 1) +
+      cell('Variance', '<b data-i18n-skip>' + esc(signed(tv)) + '</b>', 1) + cell('Committed (007)', '<b data-i18n-skip>' + esc(curList(rep.committed)) + '</b>', 1) + cell('Paid (007)', '<b data-i18n-skip>' + esc(curList(rep.paid)) + '</b>', 1) + '</tr>';
+    rows += '<tr>' + cell('Category', 'Approved budget <span class="ab-id">004 ' + esc((rep.approved && rep.approved.cell) || 'A2') + ' · set as a total only</span>') + cell('Planned (004)', '<span data-i18n-skip>' + esc(rep.approved ? usd(rep.approved.amount) : '—') + '</span>', 1) +
+      cell('Forecast', '<span class="ab-mute">planned ' + esc(signed(rep.plannedVsApproved)) + '</span>', 1) + cell('Variance', '<span data-i18n-skip class="ab-neg">' + esc(signed(rep.varianceToApproved)) + '</span>', 1) + cell('Committed (007)', '', 1) + cell('Paid (007)', '', 1) + '</tr>';
+    return '<div class="ab-table-wrap"><table class="ab-table ab-fin"><thead><tr><th>004 category</th><th class="num">Planned (004)</th><th class="num">Forecast</th><th class="num">Variance</th><th class="num">Committed (007)</th><th class="num">Paid (007)</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      '<p class="t-b2 ab-mute">Variance per category = forecast − planned; on the last row, forecast − approved. ' + (rep.budgetLeftSheet ? '004 ' + esc(rep.budgetLeftSheet.cell || 'F2') + ' "Budget left" states ' + esc(signed(rep.budgetLeftSheet)) + '. ' : '') +
+      'Actual = paid to suppliers (007); 004 "Actual USD" repeats the budget by formula and is not used. ' + (rep.indicative ? esc(rep.indicative.words) + ': THB committed ≈ ' + esc(kd(rep.indicative.committedOtherUsd)) + ', paid ≈ ' + esc(kd(rep.indicative.paidOtherUsd)) + '.' : '') + '</p>';
+  }
+  function revenueSummary(R) {
+    var row = function (label, v, cls, sign) { return '<tr' + (cls ? ' class="' + cls + '"' : '') + '><td data-l="">' + esc(label) + '</td><td data-l="USD" class="num"><span data-i18n-skip>' + esc(sign && v && v.cents ? signed({ currency: 'USD', amount: v.cents / 100 }) : kd(v)) + '</span></td></tr>'; };
+    var rep = R.paymentsReported || {};
+    var coupleReports = (R.couple || []).reduce(function (t, c) { return t + (c.journal || []).filter(function (x) { return x.status === 'REPORTED'; }).length; }, 0);
+    return '<div class="ab-table-wrap"><table class="ab-table ab-fin"><tbody>' +
+      row('Confirmed bookings (booked)', R.bookedRevenue, 'ab-total') + row('· invoiced (issued statements)', R.issuedRevenue) + row('· booked, not yet invoiced', R.notYetInvoiced) +
+      row('· changed since issue (a revision is due)', R.changedSinceIssue, '', true) + row('· invoiced, no longer booked', R.invoicedNotBooked, '', true) +
+      row('Payments reported by guests, not verified', rep) + row('Payments received (verified)', R.cashCollected, 'ab-total') + row('Outstanding receivables', R.outstanding) + row('· of which overdue', R.overdue) +
+      '</tbody></table></div><p class="t-b2 ab-mute">Booked = invoiced + not yet invoiced + changes since issue − invoiced, no longer booked; nothing is adjusted to make them meet. Reported payments are never counted as received' +
+      (coupleReports ? '; the couple\'s own ' + coupleReports + ' payment report' + (coupleReports === 1 ? '' : 's') + ' stay with their statement (E), apart from the guests' : '') +
+      '. ' + (R.fxReference && !R.fxReference.error && R.fxReference.day ? 'Statements are issued at the project\'s exchange-rate reference (011 on ' + dmy(R.fxReference.day) + ': USD/THB ' + R.fxReference.FX_USD_THB + ', USD/EUR ' + R.fxReference.FX_USD_EUR + ') and keep the rates they were issued with. ' : '') +
+      '<a href="/admin/billing#revenue" data-ab-tab="#revenue">Each guest\'s statement and payments → Revenue</a></p>';
+  }
+  function hotelTable(rep) {
+    var cell = function (label, v, n) { return '<td data-l="' + esc(label) + '"' + (n ? ' class="num"' : '') + '>' + v + '</td>'; };
+    var tc = 0, tr = 0, ts = 0, allKnown = true;
+    var rows = (rep.hotel || []).map(function (h) {
+      tr += h.revenue ? h.revenue.cents : 0;
+      if (h.cost) tc += h.cost.cents;
+      if (h.surplus) ts += h.surplus.cents; else allKnown = false;
+      var costWords = h.cost ? esc(kd(h.cost)) + (h.costComplete ? '' : '<span class="ab-why">+ ' + h.uncontracted.length + ' room' + (h.uncontracted.length === 1 ? '' : 's') + ' with guests not in the agreement — no cost agreed</span>')
+        : '<span class="ab-mute">' + (h.costBasis === 'SUPPLIER_TOTAL_UNSTATED' ? '007: ' + esc(h.suppliers.map(function (x) { return cash(x.contract); }).join(' · ')) + ' — what it covers is not stated' : 'no contract') + '</span>';
+      return '<tr>' + cell('Hotel', '<span data-i18n-skip>' + esc(h.place) + '</span><span class="ab-id" data-i18n-skip>' + esc(dmy(h.from)) + ' – ' + esc(dmy(h.to)) + (h.nights ? ' · ' + h.nights + ' night' + (h.nights === 1 ? '' : 's') : '') + '</span>') +
+        cell('Rooms', esc(h.roomsBought != null ? h.roomsOccupied + ' of ' + h.roomsBought + ' bought' : h.roomsOccupied + ' with guests') + (h.rate ? '<span class="ab-id" data-i18n-skip>' + esc(kd(h.rate)) + ' per room night</span>' : ''), 1) +
+        cell('Guests', esc(h.guests), 1) + cell('Hotel cost (purchase)', costWords, 1) + cell('Guest revenue (sale)', '<span data-i18n-skip>' + esc(kd(h.revenue)) + '</span>', 1) +
+        cell('Surplus', '<span data-i18n-skip class="' + (h.surplus && h.surplus.cents < 0 ? 'ab-neg' : '') + '">' + esc(h.surplus ? signed(h.surplus) : '—') + '</span>', 1) + '</tr>';
+    }).join('');
+    rows += '<tr class="ab-total">' + cell('Hotel', '<b>All stays</b>') + cell('Rooms', '', 1) + cell('Guests', '', 1) + cell('Hotel cost (purchase)', '<b data-i18n-skip>' + esc(usd(tc / 100)) + '</b><span class="ab-why">stated costs only</span>', 1) +
+      cell('Guest revenue (sale)', '<b data-i18n-skip>' + esc(usd(tr / 100)) + '</b>', 1) + cell('Surplus', '<b data-i18n-skip>' + esc(signed({ currency: 'USD', amount: ts / 100 })) + '</b><span class="ab-why">' + (allKnown ? 'every stay' : 'stays with a complete cost only') + '</span>', 1) + '</tr>';
+    return '<div class="ab-table-wrap"><table class="ab-table ab-fin"><thead><tr><th>Hotel and period</th><th class="num">Rooms</th><th class="num">Guests</th><th class="num">Hotel cost (purchase)</th><th class="num">Guest revenue (sale)</th><th class="num">Surplus</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      '<p class="t-b2 ab-mute">Hotel cost = what a hotel agreement charges for every room it buys (occupied or not) — only where an agreement states it, never estimated. Guest revenue = the booked room lines of the stay (the couple\'s own rooms at USD 0). Surplus = revenue − cost, stated only where the cost is complete.</p>';
+  }
+  var EX_KIND = [['DECISION', 'Your decisions', 'open'], ['DATA', 'Data to complete or correct', ''], ['INFO', 'For information', '']];
+  function exceptionsView(R, rep) {
+    var list = rep.exceptions || [];
+    var groups = EX_KIND.map(function (k) {
+      var xs = list.filter(function (e) { return e.kind === k[0]; });
+      return xs.length ? '<p class="t-l1 ab-bd-h">' + esc(k[1]) + ' · ' + xs.length + '</p><ul class="ab-ex">' + xs.map(function (e) {
+        return '<li><span class="ab-chip ' + k[2] + '">' + esc(e.area) + '</span><span data-i18n-skip>' + esc(e.text) + '</span>' +
+          (e.ifAccepted ? ' <span class="ab-mute">Forecast if accepted: ' + esc(kd(e.ifAccepted)) + '.</span>' : '') + '</li>';
+      }).join('') + '</ul>' : '';
+    }).join('');
+    return groups + revisionsView(R);
+  }
+  /* one detail that cannot be shown says so in its place — the report around it stands */
+  function guarded(fn, fallback) { try { return fn(); } catch (e) { return fallback !== undefined ? fallback : '<p class="t-b2 ab-mute">This detail could not be shown just now.</p>'; } }
   function financeTabView() {
     var g = revenueGate(); if (g) return g;
-    var R = S.revenue, k = function (x) { return x && x.display ? x.display : (x && x.cents != null ? usd(x.cents / 100) : '—'); };
+    var R = S.revenue, BG = R.budget || {}, rep = BG.report || {}, D = BG.dashboard || {};
+    if (BG.available === false || !rep.version) {
+      return '<section class="ab-sec" aria-label="Finance"><div class="p-card ab-panel"><p class="t-b2">' + esc(BG.gap || rep.error || 'The finance report is not available just now.') + '</p></div>' +
+        '<p class="t-l1 ab-bd-h">Guest revenue and receivables</p>' + revenueSummary(R) + revisionsView(R) + progressView(R.bookingProgress) + '</section>';
+    }
+    var asOf = (R.calculatedAt || '').slice(0, 16).replace('T', ' ');
+    var kpis = finSummary(R, rep, D).map(function (k) { return kpiBox(k[1], k[2], k[3], k[4], k[0] === 'variance' && rep.varianceToApproved && rep.varianceToApproved.cents > 0 ? 'ab-kpi-warn' : ''); }).join('');
     var fx = R.fxReference || {};
-    var recon = '<div class="p-card ab-panel" data-ab-fin-recon><p class="t-l1">Booked and invoiced · paying guests</p><div class="ab-table-wrap"><table class="ab-table"><tbody>' +
-      [['Booked (the confirmed bookings as they stand)', R.bookedRevenue], ['= Invoiced (issued statements, frozen)', R.issuedRevenue], ['+ Booked, not yet invoiced (new lines)', R.notYetInvoiced],
-       ['+ Changed since issue (a revision is due)', R.changedSinceIssue], ['− Invoiced, no longer booked', R.invoicedNotBooked]].map(function (x) {
-        return '<tr><td data-l="">' + esc(x[0]) + '</td><td data-l="USD" class="num"><span data-i18n-skip>' + esc(k(x[1])) + '</span></td></tr>'; }).join('') +
-      '<tr><td data-l="">Receivable (issued, unpaid or part-paid)</td><td data-l="USD" class="num"><span data-i18n-skip>' + esc(k(R.outstanding)) + '</span></td></tr>' +
-      '<tr><td data-l="">Payments received (verified)</td><td data-l="USD" class="num"><span data-i18n-skip>' + esc(k(R.cashCollected)) + '</span></td></tr></tbody></table></div>' +
-      '<p class="t-b2 ab-mute">Booked − invoiced is the sum of the two lines below it: new lines not yet invoiced, and changes to lines already invoiced (each named under "Statements to revise"). Nothing is adjusted to make them meet.</p>' +
-      '<p class="t-b2">Exchange-rate reference: ' + (fx.error ? esc(fx.error) : 'USD/THB ' + esc(fx.FX_USD_THB) + ' · USD/EUR ' + esc(fx.FX_USD_EUR) + ' — Google 011, in effect on ' + esc(day(fx.day)) + (fx.firstIssued ? ' (the project\'s first issued statement)' : '')) + '. Every statement keeps the rates it was issued with.</p></div>';
-    return '<section class="ab-sec" aria-label="Finance">' + (R.budget && R.budget.dashboard ? dashboardView(R.budget.dashboard) : '<div class="p-card ab-panel"><p class="t-b2">' + esc((R.budget && R.budget.gap) || 'The budget is not available just now.') + '</p></div>') +
-      recon + revisionsView(R) + progressView(R.bookingProgress) + '</section>';
+    var sources = [
+      'Costs: Google 004_Budget_Finance — ' + (BG.reconciliation && BG.reconciliation.budget004 ? BG.reconciliation.budget004.readable + ' of ' + BG.reconciliation.budget004.lines + ' lines read' : 'read') + '; approved budget = 004 TOTAL BUDGET; planned = every positive 004 line.',
+      'Forecast: planned, with the Souphattra agreement (USD 8,100: 26 rooms, 54 room nights, USD 150) in place of its 004 lines; nothing else is assumed.',
+      'Commitments and supplier payments: Google 007 as typed (a payment counts when dated and typed); THB is never converted.',
+      'Categories of 007 suppliers: ' + (rep.byCategory || []).filter(function (c) { return (c.suppliers || []).length; }).map(function (c) { return c.category + ' — ' + c.suppliers.join(', '); }).join('; ') + '.',
+      'Guest revenue, receivables and receipts: the Billing Engine (002/009), the issued statements and 008 — paying guests only; the couple\'s own bookings are complimentary.',
+      'Hotel cost per room: the agreement\'s rate per room night × the stay\'s nights; room numbers: Google 012 (read only, matched by the guests\' names).',
+      'Statements keep the exchange rates they were issued with; the project reference is 011 on the first issued statement' + (fx.day ? ' (' + dmy(fx.day) + ': USD/THB ' + fx.FX_USD_THB + ', USD/EUR ' + fx.FX_USD_EUR + ')' : '') + '.',
+      (BG.version || '') + ' · ' + (rep.version || '') + ' · engine ' + (R.engineVersion || '') + ' · calculated ' + asOf + ' UTC'];
+    var open = function (id) { return S.budgetOpen && S.budgetOpen[id] ? ' open' : ''; };
+    var inv = guarded(function () { return inventoryView(R); }, null);
+    return '<section class="ab-sec ab-report" aria-label="Finance">' +
+      '<div class="ab-print-head"><p class="t-l1">See You In Laos · Financial Summary</p><p class="t-b2">Printed ' + esc(nowStamp()) + ' · data as of ' + esc(asOf) + ' UTC · USD (THB named, never converted) · costs 004/007, revenue Billing Engine and issued statements</p></div>' +
+      exportBar([['finance-summary', 'CSV · financial summary'], ['budget-vs-actual', 'CSV · budget vs actual / forecast']], '<button type="button" class="ab-filter" data-ab-print>Print / save as PDF</button>') +
+      '<p class="t-b2 ab-mute">Calculated live ' + esc(asOf) + ' UTC · all amounts USD unless named · <button type="button" class="p-link" data-ab-rev-reload>Recalculate now</button></p>' +
+      secH('A', 'Executive summary') + '<div class="ab-kpis ab-exec" data-ab-exec>' + kpis + '</div>' +
+      secH('B', 'Budget vs actual and forecast', 'by 004 category') + '<div data-ab-budget-vs>' + budgetTable(rep) + '</div>' +
+      secH('C', 'Guest revenue and receivables') + '<div data-ab-fin-revenue>' + revenueSummary(R) + '</div>' +
+      secH('D', 'Hotel financial performance', 'purchase · sale · surplus') + '<div data-ab-hotels>' + hotelTable(rep) + '</div>' +
+      secH('E', 'Reconciliation and exceptions') + '<div data-ab-exceptions>' + exceptionsView(R, rep) + '</div>' +
+      '<p class="t-l1 ab-bd-h">Detail</p>' +
+      '<details class="ab-bd" data-ab-bd="fin-budget"' + open('fin-budget') + '><summary><b>Budget detail</b> <span class="ab-mute">· 004 and 007 line by line, per stay and route</span></summary><div class="ab-bd-body">' + guarded(function () { return budgetView(BG); }) + '</div></details>' +
+      (inv != null ? '<details class="ab-bd" data-ab-bd="fin-inventory"' + open('fin-inventory') + '><summary><b>Inventory beside the budget</b> <span class="ab-mute">· counted bookings and 004\'s planned quantities</span></summary><div class="ab-bd-body"><div data-ab-inventory>' + inv + '</div></div></details>' : '') +
+      '<details class="ab-bd" data-ab-bd="fin-progress"' + open('fin-progress') + '><summary><b>Booking progress</b> <span class="ab-mute">· ' + esc(((R.bookingProgress || {}).confirmed || []).length) + ' of ' + esc((R.bookingProgress || {}).guests || '—') + ' guests confirmed</span></summary><div class="ab-bd-body">' + progressView(R.bookingProgress) + '</div></details>' +
+      '<details class="ab-bd" data-ab-bd="fin-sources"' + open('fin-sources') + '><summary><b>Sources and definitions</b></summary><div class="ab-bd-body"><ul class="t-b2 ab-mute">' + sources.map(li).join('') + '</ul></div></details>' +
+      '</section>';
   }
-  /* ROOMS & RATES: every room of every stay — its guests (held, sent or confirmed), the extra bed, the hotel's cost where a contract
-     buys the room, what its guests pay, the surplus and each statement — then the guests' rate list for the hotel */
+  /* ===================================================== ROOMS & RATES (Owners' review, 18 Nov 2026)
+     Per hotel and period: every room with guests — its hotel room number (012), category, guests and their status, check-in,
+     check-out, nights, the hotel's cost where an agreement buys it, what its guests pay and the surplus; subtotals; the rooms
+     without guests; then the hotel's rate list (unchanged: generated, approved by version, its own CSV). */
+  var RM_HEAD = ['Stay', 'Hotel', 'Arrival', 'Departure', 'Nights', 'Room', 'Hotel room no. (012)', 'Room no. check', 'Room category', 'Guest ID', 'Guest', 'Extra bed', 'Status', 'Complimentary'];
+  function roomingCsv() {
+    var R = S.revenue, BG = R.budget || {}, rows = [];
+    var hs = {}; ((S.overview && S.overview.holders) || []).forEach(function (h) { hs[h.guestId] = h; });
+    var idx = guestRooms() || {};
+    (BG.roomPlan || []).forEach(function (p) {
+      (p.rooms || []).forEach(function (u) {
+        (u.occupants || []).forEach(function (o) {
+          if (!o.guestId) return;
+          var x = (idx[o.guestId] || []).filter(function (y) { return y.stay === p.stay && y.label === u.label && y.type === u.type; })[0] || { line: null };
+          rows.push([p.stay, p.place, p.from || '', p.to || '', nightsBetweenDays(p.from, p.to), u.label, u.room012 ? u.room012.roomNo : '', u.room012 ? (u.room012.status === 'VERIFY' ? 'verify: ' + (u.room012.verify || []).join('; ') : 'ok') : '',
+            u.type, o.guestId, o.name || '', o.bed ? 'yes' : '', roomStatus(x), compWords(hs[o.guestId], x)]);
+        });
+      });
+    });
+    return csvDoc('See You In Laos — Hotel Rooming List', [['Generated', nowStamp()], ['Data as of', (R.calculatedAt || '').slice(0, 16).replace('T', ' ') + ' UTC'], ['Currency', 'none (rooming only)'],
+      ['Basis', 'the Rooms engine (held, sent or confirmed alike); room numbers from Google 012 (read only, matched by the guests\' names — "verify" where names or dates differ)']], RM_HEAD, rows);
+  }
   function roomsTabView() {
     var g = revenueGate(); if (g) return g;
     var BG = S.revenue.budget || {};
     if (BG.available === false) return '<div class="p-card ab-panel"><p class="t-b2">' + esc(BG.gap || 'Not available just now.') + '</p></div>';
-    var plans = BG.roomPlan || [];
-    var html = plans.map(function (p) {
+    var rep = BG.report || {}, perf = {}; (rep.hotel || []).forEach(function (h) { perf[h.stay] = h; });
+    var m012 = rep.rooms012 || {};
+    var hs = {}; ((S.overview && S.overview.holders) || []).forEach(function (h) { hs[h.guestId] = h; });
+    var html = (BG.roomPlan || []).map(function (p) {
       var c = (BG.centres || []).filter(function (x) { return x.id === p.stay; })[0] || { rooms: [] };
-      var lines = {}; (c.rooms || []).forEach(function (r) { (r.lines || []).forEach(function (l) { lines[r.label + '|' + l.person] = l; }); });
-      var sums = {}; roomSummary(c, BG.roomContracts).forEach(function (x) { sums[x.label] = x; });
-      var mine = (BG.roomContracts || []).filter(function (x) { return x.stay === p.stay; })[0], n = nightsOfStay(p);
-      var rows = p.rooms.filter(function (r) { return r.occupants.length; }).map(function (r) {
-        var covered = mine && (mine.items === '*' || mine.items.indexOf(r.item) >= 0), cost = covered && n ? mine.ratePerRoomNight * n : null;
+      var lines = {}; (c.rooms || []).forEach(function (r) { (r.lines || []).forEach(function (l) { lines[(r.item || l.item) + '|' + r.label + '|' + l.person] = l; }); });
+      var h = perf[p.stay] || {}, n = nightsBetweenDays(p.from, p.to);
+      var sumCost = 0, sumSale = 0, costKnown = true, guests = 0;
+      var occ = p.rooms.filter(function (r) { return r.occupants.some(function (o) { return o.guestId; }); });
+      var rows = occ.map(function (r) {
         var sale = 0, who = r.occupants.map(function (o) {
           if (o.kept) return '<span class="ab-mute">a place kept for a party</span>';
-          var l = lines[r.label + '|' + o.guestId]; if (l && l.amount) sale += l.amount.cents;
-          var st = l ? (l.statement ? 'invoiced ' + l.statement : 'confirmed') + ' · ' + (l.rate ? usd(l.rate.cents / 100) : '') + (l.rateSource ? ' (' + l.rateSource + ')' : '') + (l.complimentaryNights || l.hostedNights ? ' · ' + ((l.complimentaryNights || 0) + (l.hostedNights || 0)) + ' night(s) complimentary' : '') : 'held, not confirmed';
-          return esc(o.name || o.guestId) + ' <span class="ab-mute">(' + esc(o.guestId) + (o.bed ? ' · extra bed' : '') + ' · ' + esc(st) + ')</span>';
-        }).join('<br>');
-        return '<tr><td data-l="Room">' + esc(r.label) + '</td><td data-l="Room type">' + esc(r.type || r.item || '') + '</td><td data-l="Places" class="num">' + esc(r.places) + (r.extraBeds ? ' + ' + esc(r.extraBeds) + ' extra bed' : '') + '</td>' +
-          '<td data-l="Guests">' + who + '</td><td data-l="Hotel cost (purchase)" class="num"><span data-i18n-skip>' + (cost == null ? '<span class="ab-mute">no contract</span>' : esc(usd(cost))) + '</span></td>' +
-          '<td data-l="Guest revenue (sale)" class="num"><span data-i18n-skip>' + esc(usd(sale / 100)) + '</span></td><td data-l="Surplus" class="num"><span data-i18n-skip>' + (cost == null ? '—' : esc(usd(sale / 100 - cost))) + '</span></td></tr>';
+          guests++;
+          var l = lines[r.item + '|' + r.label + '|' + o.guestId]; if (l && l.amount) sale += l.amount.cents;
+          var x = { line: l || null }, cw = compWords(hs[o.guestId], x);
+          return '<span class="ab-stay"><span data-i18n-skip>' + esc(o.name || o.guestId) + '</span> <span class="ab-id" data-i18n-skip>' + esc(o.guestId) + '</span>' +
+            '<span class="ab-mute"> ' + esc(roomStatus(x)) + (l && l.statement ? ' · ' + esc(l.statement) : '') + (l && l.amount ? ' · ' + esc(usd(l.amount.cents / 100)) + (l.rateSource ? ' (' + esc(l.rateSource) + ')' : '') : '') + '</span>' +
+            (o.bed ? ' <span class="ab-chip">extra bed</span>' : '') + (cw ? ' <span class="ab-chip on">' + esc(cw) + '</span>' : '') + '</span>';
+        }).join('');
+        var cost = r.hotelCost ? r.hotelCost.cents : null;
+        if (cost == null) costKnown = false; else sumCost += cost;
+        sumSale += sale;
+        var no = r.room012 && r.room012.roomNo ? '<b data-i18n-skip>' + esc(r.room012.roomNo) + '</b>' + (r.room012.status === 'VERIFY' ? ' <span class="ab-chip" title="' + esc((r.room012.verify || []).join('; ')) + '">verify</span>' : '') : '<span class="ab-mute">—</span>';
+        var places = r.occupants.filter(function (o) { return o.guestId; }).length;
+        return '<tr><td data-l="Room">Room ' + esc(r.label) + '<span class="ab-id">no. ' + no + '</span></td><td data-l="Category" data-i18n-skip>' + esc(r.type || r.item || '') + '</td>' +
+          '<td data-l="Occupancy" class="num">' + esc(places + ' / ' + r.places) + (r.extraBeds ? ' <span class="ab-id">+ ' + esc(r.extraBeds) + ' extra bed</span>' : '') + '</td>' +
+          '<td data-l="Guests">' + who + '</td><td data-l="Check-in" data-i18n-skip>' + esc(dmy(p.from)) + '</td><td data-l="Check-out" data-i18n-skip>' + esc(dmy(p.to)) + '</td><td data-l="Nights" class="num">' + esc(n == null ? '—' : n) + '</td>' +
+          '<td data-l="Hotel cost (purchase)" class="num"><span data-i18n-skip>' + (cost == null ? '<span class="ab-mute">no contract</span>' : esc(usd(cost / 100))) + '</span></td>' +
+          '<td data-l="Guest revenue (sale)" class="num"><span data-i18n-skip>' + esc(usd(sale / 100)) + '</span></td>' +
+          '<td data-l="Surplus" class="num"><span data-i18n-skip class="' + (cost != null && sale < cost ? 'ab-neg' : '') + '">' + (cost == null ? '—' : esc(signed({ currency: 'USD', amount: (sale - cost) / 100 }))) + '</span></td></tr>';
       }).join('');
-      var byType = {}; p.rooms.filter(function (r) { return !r.occupants.length; }).forEach(function (r) { (byType[r.type || r.key] = byType[r.type || r.key] || []).push(r.label); });
+      var sub = rows ? '<tr class="ab-total"><td data-l="Room"><b>' + occ.length + ' room' + (occ.length === 1 ? '' : 's') + ' with guests</b></td><td data-l="Category"></td><td data-l="Occupancy" class="num"><b>' + guests + '</b></td><td data-l="Guests"></td><td data-l="Check-in"></td><td data-l="Check-out"></td><td data-l="Nights"></td>' +
+        '<td data-l="Hotel cost (purchase)" class="num"><b data-i18n-skip>' + esc(usd(sumCost / 100)) + '</b>' + (costKnown ? '' : '<span class="ab-why">rooms with a contract</span>') + '</td><td data-l="Guest revenue (sale)" class="num"><b data-i18n-skip>' + esc(usd(sumSale / 100)) + '</b></td>' +
+        '<td data-l="Surplus" class="num"><b data-i18n-skip>' + (costKnown ? esc(signed({ currency: 'USD', amount: (sumSale - sumCost) / 100 })) : '—') + '</b></td></tr>' : '';
+      var byType = {}; p.rooms.filter(function (r) { return !r.occupants.some(function (o) { return o.guestId; }); }).forEach(function (r) { (byType[r.type || r.key] = byType[r.type || r.key] || []).push(r.label + (r.occupants.length ? ' (a place kept for a party)' : '')); });
       var empty = Object.keys(byType).map(function (t) { return t + ': ' + byType[t].join(', '); });
-      return '<details data-ab-rooms="' + esc(p.stay) + '"' + (/^D1$|^C$/.test(p.stay) ? ' open' : '') + '><summary class="t-b1">' + esc(p.place || p.stay) + ' · ' + esc(day(p.from)) + ' – ' + esc(day(p.to)) + (n ? ' · ' + n + ' night' + (n === 1 ? '' : 's') : '') + '</summary>' +
-        (rows ? '<div class="ab-table-wrap"><table class="ab-table"><thead><tr><th>Room</th><th>Room type</th><th class="num">Places</th><th>Guests · status · sale price</th><th class="num">Hotel cost (purchase)</th><th class="num">Guest revenue (sale)</th><th class="num">Surplus</th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '<p class="t-b2">No guests yet.</p>') +
-        (empty.length ? '<p class="t-b2 ab-mute">Rooms without guests — ' + esc(empty.join(' · ')) + (mine && mine.items === '*' ? ' — bought by the hotel contract all the same (USD ' + mine.ratePerRoomNight + ' per room night).' : '') + '</p>' : '') + '</details>';
+      /* the room type as 012 is matched (src/billing/finance-report.js · roomTypeKey): "The", "(…)" and "Suite" aside */
+      var typeKey = function (t) { return String(t || '').trim().toLowerCase().replace(/\([^)]*\)/g, ' ').replace(/^the\s+/, '').replace(/\bsuite\b/g, ' ').replace(/\s+/g, ' ').trim(); };
+      var free012 = (m012.free || []).filter(function (f) { return Object.keys(byType).some(function (t) { return typeKey(t) === f.roomType; }); });
+      var notes = (m012.notIn012 || []).concat(m012.ambiguous || []).filter(function (x) { return x.stay === p.stay; }).map(function (x) { return 'Room ' + x.label + ' (' + x.guests.join(', ') + '): ' + ((m012.ambiguous || []).indexOf(x) >= 0 ? 'more than one 012 row fits' : 'not in 012'); });
+      var head = esc(p.place || p.stay) + ' · ' + esc(dmy(p.from)) + ' – ' + esc(dmy(p.to)) + (n ? ' · ' + n + ' night' + (n === 1 ? '' : 's') : '') +
+        ' <span class="ab-mute">· ' + occ.length + (h.roomsBought != null ? ' of ' + h.roomsBought + ' rooms bought' : ' room' + (occ.length === 1 ? '' : 's')) + ' · ' + guests + ' guest' + (guests === 1 ? '' : 's') +
+        (h.cost ? ' · hotel ' + esc(kd(h.cost)) : '') + ' · guests ' + esc(kd(h.revenue)) + (h.surplus ? ' · surplus ' + esc(signed(h.surplus)) : '') + '</span>';
+      return '<details class="ab-bd" data-ab-rooms="' + esc(p.stay) + '"' + (S.budgetOpen && S.budgetOpen['rooms-' + p.stay] != null ? (S.budgetOpen['rooms-' + p.stay] ? ' open' : '') : (/^D1$|^C$/.test(p.stay) ? ' open' : '')) + ' data-ab-bd="rooms-' + esc(p.stay) + '"><summary data-i18n-skip>' + head + '</summary><div class="ab-bd-body">' +
+        (rows ? '<div class="ab-table-wrap"><table class="ab-table"><thead><tr><th>Room · no. (012)</th><th>Category</th><th class="num">Occupancy</th><th>Guests · status · sale price</th><th>Check-in</th><th>Check-out</th><th class="num">Nights</th><th class="num">Hotel cost (purchase)</th><th class="num">Guest revenue (sale)</th><th class="num">Surplus</th></tr></thead><tbody>' + rows + sub + '</tbody></table></div>' : '<p class="t-b2">No guests yet.</p>') +
+        (h.emptyBought ? '<p class="t-b2">The agreement also buys ' + h.emptyBought + ' room' + (h.emptyBought === 1 ? '' : 's') + ' without guests (' + esc(usd(h.emptyBought * (h.rate ? h.rate.amount : 0) * (n || 0))) + '); the stay\'s hotel cost ' + esc(kd(h.cost)) + ' counts every room it buys.</p>' : '') +
+        (h.uncontracted && h.uncontracted.length && h.roomsBought != null ? '<p class="t-b2 ab-flag">' + h.uncontracted.length + ' room' + (h.uncontracted.length === 1 ? '' : 's') + ' with guests the agreement does not buy for these nights (' + esc(h.uncontracted.map(function (u) { return u.roomNo || ('room ' + u.label); }).join(', ')) + ') — their hotel cost is not agreed; see Finance · E.</p>' : '') +
+        (empty.length ? '<p class="t-b2 ab-mute">Rooms without guests — ' + esc(empty.join(' · ')) + (free012.length ? ' · free in 012: ' + esc(free012.map(function (f) { return f.label + ' ' + f.roomNos.join(', '); }).join(' · ')) : '') + '</p>' : '') +
+        (notes.length ? '<p class="t-b2 ab-flag">012: ' + esc(notes.join(' · ')) + '</p>' : '') + '</div></details>';
     }).join('');
-    return '<section class="ab-sec" aria-label="Rooms and rates"><div class="p-card ab-panel" data-ab-rooms-all><p class="t-l1">Rooms · guests · purchase and sale</p>' +
-      '<p class="t-b2 ab-mute">Hotel cost = what the hotel contract charges for the room (purchase price). Guest revenue = what its guests pay (sale price, Billing Engine: 002 / 009; the couple\'s own room is complimentary). They are never mixed.</p>' + html + '</div>' +
+    return '<section class="ab-sec" aria-label="Rooms and rates">' +
+      exportBar([['rooming', 'CSV · hotel rooming list (all stays)']]) +
+      '<div class="p-card ab-panel" data-ab-rooms-all><p class="t-l1">Rooms by hotel and period · guests · purchase and sale</p>' +
+      '<p class="t-b2 ab-mute">Hotel cost = what the hotel agreement charges for the room (purchase price); guest revenue = what its guests pay (sale price, Billing Engine 002 / 009; the couple\'s own room is complimentary); they are never mixed. Room numbers: Google 012, read only.</p>' + html + '</div>' +
       rateListView(BG) + '</section>';
+  }
+  /* RECEIVABLES BY GUEST (Owners' review, 18 Nov 2026): every issued statement of a paying guest — invoiced, received, open,
+     due, overdue and a revision due — as the Revenue Report states it per invitation (the couple's own statements are in Finance) */
+  function receivableRows(R) {
+    var names = {}; ((S.overview && S.overview.holders) || []).forEach(function (h) { if (h.name && h.name.full) names[h.Holder_ID] = h.name.full; });
+    return (R.holders || []).filter(function (h) { return h.issued && h.issued.cents; }).sort(function (a, b) { return String(a.dueDate || '').localeCompare(String(b.dueDate || '')) || String(a.Holder_ID).localeCompare(String(b.Holder_ID)); })
+      .map(function (h) {
+        var rev = (h.changedSinceIssue ? h.changedSinceIssue.cents : 0) - (h.invoicedNotBooked ? h.invoicedNotBooked.cents : 0);
+        return { h: h, name: names[h.Holder_ID] || '', rev: rev };
+      });
+  }
+  function receivablesView(R) {
+    var rows = receivableRows(R), ti = 0, tc = 0, to = 0;
+    var body = rows.map(function (x) {
+      var h = x.h; ti += h.issued.cents; tc += h.cashCollected ? h.cashCollected.cents : 0; to += h.outstanding ? h.outstanding.cents : 0;
+      return '<tr>' + td('Guest', '<span class="ab-name" data-i18n-skip>' + esc(x.name || h.Holder_ID) + '</span><span class="ab-id" data-i18n-skip>' + esc(h.Holder_ID) + '</span>') +
+        td('Statement', '<span data-i18n-skip>' + esc((h.Settlement_ID || '—') + (h.revision ? ' · V' + h.revision : '')) + '</span>') + td('Issued · due', '<span data-i18n-skip>' + esc(dmy(h.issueDate)) + '<br><span class="ab-mute">due ' + esc(dmy(h.dueDate)) + '</span></span>') +
+        td('Invoiced', '<span data-i18n-skip>' + esc(kd(h.issued)) + '</span>', 1) + td('Received', '<span data-i18n-skip>' + esc(kd(h.cashCollected)) + '</span>', 1) +
+        td('Outstanding', (h.overdue && h.overdue.cents ? '<span class="ab-chip open">Overdue</span> ' : '') + '<span data-i18n-skip>' + esc(kd(h.outstanding)) + '</span>', 1) +
+        td('Status', esc(PAY[h.paymentStatus] || h.paymentStatus || '—') + (h.pendingVerification ? '<span class="ab-id">' + esc(h.pendingVerification) + ' reported, to verify</span>' : '')) +
+        td('Revision due', x.rev ? '<span data-i18n-skip>' + esc(signed({ currency: 'USD', amount: x.rev / 100 })) + '</span>' : '<span class="ab-mute">—</span>', 1) + '</tr>';
+    }).join('');
+    if (rows.length) body += '<tr class="ab-total">' + td('Guest', '<b>' + rows.length + ' statements</b>') + td('Statement', '') + td('Issued · due', '') + td('Invoiced', '<b data-i18n-skip>' + esc(usd(ti / 100)) + '</b>', 1) +
+      td('Received', '<b data-i18n-skip>' + esc(usd(tc / 100)) + '</b>', 1) + td('Outstanding', '<b data-i18n-skip>' + esc(usd(to / 100)) + '</b>', 1) + td('Status', '') + td('Revision due', '', 1) + '</tr>';
+    return '<div class="p-card ab-panel" data-ab-receivables><p class="t-l1">Receivables by guest · paying guests\' issued statements</p>' +
+      (rows.length ? '<div class="ab-table-wrap"><table class="ab-table"><thead><tr><th>Guest</th><th>Statement</th><th>Issued · due</th><th class="num">Invoiced</th><th class="num">Received</th><th class="num">Outstanding</th><th>Status</th><th class="num">Revision due</th></tr></thead><tbody>' + body + '</tbody></table></div>'
+        : '<p class="t-b2">No statement is issued yet.</p>') +
+      '<p class="t-b2 ab-mute">Received = verified payments only. A revision due is the change of the bookings since the statement was issued; the statement stays as issued until you issue a revision.</p></div>';
+  }
+  function receivablesCsv() {
+    var R = S.revenue;
+    return csvDoc('See You In Laos — Revenue & Outstanding Receivables', [['Generated', nowStamp()], ['Data as of', (R.calculatedAt || '').slice(0, 16).replace('T', ' ') + ' UTC'], ['Currency', 'USD'],
+      ['Basis', 'issued statements of paying guests (the couple excluded); received = verified in 008; booked ' + kd(R.bookedRevenue) + ', invoiced ' + kd(R.issuedRevenue) + ', received ' + kd(R.cashCollected) + ', outstanding ' + kd(R.outstanding)]],
+      ['Invitation', 'Guest', 'Statement', 'Version', 'Issued', 'Due', 'Invoiced USD', 'Received USD', 'Outstanding USD', 'Overdue USD', 'Payment status', 'Reported, to verify', 'Revision due USD'],
+      receivableRows(R).map(function (x) { var h = x.h; return [h.Holder_ID, x.name, h.Settlement_ID || '', h.revision || '', h.issueDate || '', h.dueDate || '', num(h.issued), num(h.cashCollected), num(h.outstanding), num(h.overdue), PAY[h.paymentStatus] || h.paymentStatus || '', h.pendingVerification || 0, x.rev ? x.rev / 100 : 0]; }));
   }
   function revenueView() {
     if (S.revenuePhase === 'loading' || S.revenuePhase === 'idle') return '<p class="t-b2 ab-progress" role="status">Calculating the revenue overview with the Billing Engine…</p>';
@@ -1174,13 +1486,13 @@
         '<td data-l="Utilisation" class="num">' + esc(u.utilisation != null ? u.utilisation + ' %' : '—') + (u.overQuota ? ' <span class="ab-chip open">over</span>' : '') + '</td></tr>';
     }).join('');
     var counts = R.counts || {}, pop = R.population || {};
-    var inventory = inventoryView(R);
     return '<section class="ab-sec" aria-label="Revenue"><div class="ab-kpis" data-ab-rev-main>' + cards + '</div>' +
       '<p class="t-b2 ab-foot"><button type="button" class="p-link" data-ab-rev-reload>Recalculate now</button> · Calculated live from the confirmed bookings · ' + esc(when(R.calculatedAt || '')) + ' · ' + esc(pop.holders || 0) + ' paying invitation' + (pop.holders === 1 ? '' : 's') + ' (' + esc(pop.withOwnerBookings || 0) + ' with bookings you recorded' + (pop.cancelled ? ', ' + esc(pop.cancelled) + ' no longer on the list' : '') + ') · ' +
         esc(counts.issuedRevisions || 0) + ' statements · as of ' + esc(day(R.asOf)) + ' · engine ' + esc(R.engineVersion || '') + ' · ' + esc(R.revenueVersion || '') + '</p>' +
       '<p class="t-b2"><a href="/admin/billing#finance" data-ab-tab="#finance">Finance</a> · <a href="/admin/billing#rooms" data-ab-tab="#rooms">Rooms &amp; rates</a></p>' +
       (notes.length ? '<div class="p-card ab-panel" data-ab-rev-notes><p class="t-l1">To look at</p><ul class="t-b2">' + notes.map(function (n) { return '<li>' + esc(n) + '</li>'; }).join('') + '</ul></div>' : '') +
-      budgetView(R.budget) +
+      exportBar([['receivables', 'CSV · revenue & outstanding receivables']]) +
+      receivablesView(R) +
       '<div class="p-card ab-panel" data-ab-rev-rooms><p class="t-l1">Accommodation by room category</p>' + cat + '</div>' +
       '<div class="p-card ab-panel" data-ab-rev-units><p class="t-l1">Accommodation by room</p>' + units + '</div>' +
       '<div class="p-card ab-panel" data-ab-rev-extras><p class="t-l1">Extra services</p>' + extras + '</div>' +
@@ -1188,7 +1500,7 @@
       '<div class="p-card ab-panel" data-ab-rev-payments><p class="t-l1">Payments, by method</p>' + pay + '</div>' +
       '<div class="ab-kpis ab-kpis-more">' + more + '</div>' +
       '<div class="p-card ab-panel"><p class="t-l1">Quota utilisation</p>' + (q ? '<div class="ab-table-wrap"><table class="ab-table"><thead><tr><th>Item</th><th>Unit</th><th class="num">Quota</th><th class="num">Used</th><th class="num">Remaining</th><th class="num">Utilisation</th></tr></thead><tbody>' + q + '</tbody></table></div>' : '<p class="t-b2">No quota is in use yet.</p>') + '</div>' +
-      (inventory != null ? '<div class="p-card ab-panel" data-ab-inventory><p class="t-l1">Inventory beside the budget — counted bookings and 004\'s planned quantities</p>' + inventory + '</div>' : '') + '</section>';
+      '<p class="t-b2 ab-mute">Costs, budget, supplier payments and the financial position are in <a href="/admin/billing#finance" data-ab-tab="#finance">Finance</a>; this tab is guest revenue only.</p></section>';
   }
 
   /* --------------------------------------------------------------- the page */
@@ -1373,6 +1685,15 @@
   }
 
   /* ---------------------------------------------------------------- wiring */
+  /* PRINT / PDF: every closed detail opens for the paper and closes again after; the browser's own print saves a PDF */
+  function printReport() {
+    if (typeof window.print !== 'function') return;
+    var closed = Array.prototype.filter.call(root.querySelectorAll('details'), function (d) { return !d.open; });
+    closed.forEach(function (d) { d.open = true; });
+    var restore = function () { closed.forEach(function (d) { d.open = false; }); window.removeEventListener('afterprint', restore); };
+    if (window.addEventListener) window.addEventListener('afterprint', restore);
+    window.print();
+  }
   function on(sel, ev, fn) { Array.prototype.forEach.call(root.querySelectorAll(sel), function (el) { el['on' + ev] = function (e) { fn(el, e); }; }); }
   function wire() {
     on('[data-ab-retry]', 'click', function () { start(); });
@@ -1429,6 +1750,16 @@
     on('[data-ob-add]', 'click', function () { var f = S.obForm || {}; ownerWrite({ action: 'add', entry: { personId: f.personId, itemId: f.itemId, room: f.room, extraBed: !!f.extraBed, note: f.note } }); });
     on('[data-ob-remove]', 'click', function (el) { ownerWrite({ action: 'remove', entryId: el.getAttribute('data-ob-remove') }); });
     on('[data-ob-confirm]', 'click', function () { ownerWrite({ action: 'confirm' }); });
+    on('[data-ab-csvsep]', 'change', function (el) { S.csvSep = el.value === ';' ? ';' : ','; draw(); });
+    on('[data-ab-csv]', 'click', function (el) {
+      var k = el.getAttribute('data-ab-csv'), today = new Date().toISOString().slice(0, 10), doc = null, name = '';
+      if (k === 'guests-all' || k === 'guests-shown') { doc = guestCsv(k === 'guests-all' ? 'all' : 'shown'); name = 'guest-list-' + (k === 'guests-all' ? 'complete' : 'filtered') + '-' + today + '.csv'; }
+      else if (S.revenue && k === 'rooming') { doc = roomingCsv(); name = 'hotel-rooming-list-' + today + '.csv'; }
+      else if (S.revenue && (k === 'finance-summary' || k === 'budget-vs-actual')) { doc = finCsv(k); name = k + '-' + today + '.csv'; }
+      else if (S.revenue && k === 'receivables') { doc = receivablesCsv(); name = 'revenue-receivables-' + today + '.csv'; }
+      if (doc) saveText(name, doc);
+    });
+    on('[data-ab-print]', 'click', function () { printReport(); });
     on('[data-ab-rl-csv]', 'click', function (el) {
       var id = el.getAttribute('data-ab-rl-csv'), BG = S.revenue && S.revenue.budget, c = BG && (BG.centres || []).filter(function (x) { return x.id === id; })[0];
       if (!c || typeof Blob === 'undefined') return;
@@ -1468,7 +1799,9 @@
     window.addEventListener('storage', function (e) { if (e && e.key === 'siyl.auth') { S = Object.assign(S, { overview: null, status: {}, holder: null, revenue: null, revenuePhase: 'idle' }); start(); } });
     start();
   }
-  window.SIYL_ADMIN_BILLING = { boot: boot, state: function () { return S; }, page: page, matches: matches, review: review };
+  window.SIYL_ADMIN_BILLING = { boot: boot, state: function () { return S; }, page: page, matches: matches, review: review,
+    /* the exports as text, for the tests (nothing is downloaded by these) */
+    csv: { cell: csvCell, guests: function (kind) { return guestCsv(kind || 'all'); }, rooming: function () { return roomingCsv(); }, finance: function (k) { return finCsv(k); }, receivables: function () { return receivablesCsv(); } } };
   var hasPage = function () { return typeof document.getElementById === 'function' && !!document.getElementById('admin'); };
   if (document.readyState !== 'loading') { if (hasPage()) boot(); }
   else if (document.addEventListener) document.addEventListener('DOMContentLoaded', function () { if (hasPage()) boot(); });

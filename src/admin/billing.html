@@ -89,6 +89,26 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 .ab-bd-body ul,.ab-panel ul.t-b2{margin:6px 0 10px 18px}
 .ab-table td ul{margin:0;padding-left:16px;text-align:left}
 .ab-table td ul li+li{margin-top:6px}
+/* the report grammar (Owners' review, 18 Nov 2026): lettered sections, KPI cards with their definition, right-aligned tabular
+   figures, subtotal rows, named directions, the exports' bar, the guest's stays */
+.ab-sec-h{font-family:'PP Editorial Old',serif;font-weight:200;font-size:23px;line-height:1.2;margin:30px 0 12px;padding-top:14px;border-top:1px solid #DAD9D7}
+.ab-sec-h .ab-sec-n{display:inline-block;min-width:1.4em;color:#8A5A55}
+.ab-sec-h .ab-mute{font-family:'Hanken Grotesk',Helvetica,Arial,sans-serif;font-size:12px;letter-spacing:.2px}
+.ab-kpis.ab-exec{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
+.ab-exec .ab-kpi .t-h1{font-size:22px;line-height:1.25;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.ab-kpi-warn{border-color:#74070E}
+.ab-def{font-size:11.5px;color:#6B6964;line-height:1.4;margin-top:6px}
+.ab-flag{font-size:12px;color:#74070E;line-height:1.4;margin-top:4px}
+.ab-neg{color:#74070E}
+.ab-why{display:block;font-size:11.5px;color:#6B6964;line-height:1.35;white-space:normal}
+.ab-table tr.ab-total td{border-top:1px solid #313131;background:#F7F3EC}
+.ab-table.ab-fin td:first-child{min-width:180px}
+.ab-export{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:4px 0 14px}
+.ab-export .ab-sep{display:inline-flex;align-items:center;gap:6px;font-size:12px}
+.ab-export select{border:1px solid #DAD9D7;background:#fff;font:inherit;font-size:12.5px;padding:8px;min-height:40px;color:#313131}
+.ab-stay{display:block}.ab-stay+.ab-stay{margin-top:8px}.ab-stay-h{display:block;font-size:11.5px;color:#6B6964}
+.ab-ex{list-style:none;margin:6px 0 10px;padding:0}.ab-ex li{padding:9px 0;border-bottom:1px solid #EDEBE7;line-height:1.5}.ab-ex .ab-chip{margin-right:8px}
+.ab-print-head{display:none}
 /* phones: every table row becomes a card, each cell named */
 @media(max-width:759px){
   .ab-main{padding:16px 16px 56px}
@@ -104,6 +124,45 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
   .ab-act{max-width:none;flex:1 1 100%}
   .ab-kv .t-l1{min-width:0;display:block}
   .ab-gate{margin-left:0}
+  .ab-table.ab-fin td:first-child{min-width:0}
+  .ab-table td:empty{display:none}
+  .ab-table tr.ab-total{background:#F7F3EC}
+  .ab-table tr.ab-total td{border-top:0;background:none}
+  .ab-table td .ab-stay{text-align:left}
+  .ab-table td[data-l="Stays & rooms"],.ab-table td[data-l="Guests"]{text-align:left}
+  .ab-table td[data-l="Stays & rooms"]::before,.ab-table td[data-l="Guests"]::before{float:none;display:block;margin-bottom:2px}
+  .ab-sec-h{font-size:21px}
+  /* the executive summary stays compact on a phone: two figures a row */
+  .ab-kpis.ab-exec{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .ab-exec .ab-kpi{padding:12px}
+  .ab-exec .ab-kpi .t-h1{font-size:17px}
+  .ab-exec .ab-kpi .t-l1{font-size:9.5px;letter-spacing:1.2px}
+  .ab-exec .ab-def,.ab-exec .ab-flag{font-size:11px}
+}
+/* PAPER (Print / save as PDF): the report alone, landscape, every table a table again — never the phone's card layout */
+@media print{
+  @page{size:A4 landscape;margin:12mm}
+  body{background:#fff;font-size:10.5px}
+  .hd,.ab-tabs,.ab-export,.ab-tools,.ab-sub,.ab-main>h1,button,select,.p-actions{display:none!important}
+  .ab-main{max-width:none;padding:0}
+  .ab-print-head{display:block;margin-bottom:10px;border-bottom:1px solid #313131;padding-bottom:6px}
+  .p-card{border:0;padding:0;margin:0 0 10px;background:none;box-shadow:none}
+  .ab-kpis.ab-exec{grid-template-columns:repeat(4,1fr);gap:8px}
+  .ab-exec .ab-kpi{border:1px solid #DAD9D7;padding:8px}
+  .ab-exec .ab-kpi .t-h1{font-size:16px}
+  .ab-sec-h{font-size:17px;margin:14px 0 6px;break-after:avoid}
+  .ab-table-wrap{overflow:visible;border:0;background:none}
+  .ab-table{display:table!important;width:100%;font-size:9.5px}
+  .ab-table thead{display:table-header-group!important}
+  .ab-table tbody{display:table-row-group!important}
+  .ab-table tr{display:table-row!important;border:0;margin:0;padding:0;background:none;break-inside:avoid}
+  .ab-table th,.ab-table td{display:table-cell!important;position:static;padding:3px 5px;border-bottom:1px solid #DAD9D7;text-align:left}
+  .ab-table .num{text-align:right}
+  .ab-table td::before{content:none!important}
+  .ab-id,.ab-why,.ab-def,.ab-flag{font-size:9px}
+  .t-b2{font-size:10px;line-height:1.45}
+  details>summary{list-style:none}
+  details{border:0!important}
 }
 </style>
 <link rel="stylesheet" href="assets/prep.css?v=0a6eb26a">
@@ -111,5 +170,5 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <header class="hd"><a class="bd" href="/">see you in laos<span class="dot">.</span></a><span class="ab-title">Guest Settlement · H&amp;S</span></header>
 <main class="ab-main"><h1>Guest Settlement</h1><p class="t-b2 ab-sub">Statements, payments and revenue — for Haruthai and Suthep. Nothing here happens without your confirmation.</p>
 <div id="admin" aria-live="polite"></div></main>
-<script src="assets/admin-billing.js?v=b093c0d0"></script>
+<script src="assets/admin-billing.js?v=df6582db"></script>
 </body></html>
