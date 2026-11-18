@@ -216,7 +216,7 @@ test('BUDGET · suppliers: only typed 007 figures count, a payment dated after t
   assert.deepEqual(acc.verified.map((m) => [m.currency, m.cents]), [['USD', 100000]]);
   assert.deepEqual(acc.paid.map((m) => [m.currency, m.cents]), [['USD', 25000]]); assert.deepEqual(acc.paidNotCounted.map((m) => [m.currency, m.cents]), [['USD', 25000]]);
   assert.equal(s.contractVsPlan.cents, 100000 - 120000, 'the typed contract against the 004 lines of its stays');
-  assert.match(out.currencies, /no approved reporting conversion/);
+  assert.match(out.currencies, /own currency; a USD equivalent at the Owners' reporting reference rates .* labelled/);
   /* without the formula read nothing counts as typed */
   const blind = world({ noFormulas: true }).out.suppliers.find((x) => /^Souphattra/.test(x.vendor));
   assert.equal(blind.contract, null); assert.ok(blind.payments.every((p) => !p.counted));
@@ -514,11 +514,11 @@ test('DASHBOARD · costs are 004 gross (never reduced by revenue); the forecast 
   const positive = out.centres.flatMap((c) => c.lines004).concat(out.noGuestService.flatMap((x) => x.lines)).filter((l) => l.budget.cents > 0);
   assert.equal(D.costs.original.cents, gross.lines.cents, 'original = every positive 004 line');
   assert.ok(D.costs.original.cents >= positive.reduce((t, l) => t + l.budget.cents, 0) - 0, 'never less than the positive lines the comparison places');
-  const s = SOUP(out);
-  if (s.contract && s.contract.currency === 'USD' && s.planned004) {
-    assert.equal(D.costs.adjustments.length, 1); assert.equal(D.costs.adjustments[0].difference.cents, s.contract.cents - s.planned004.cents);
-    assert.equal(D.costs.forecast.cents, gross.lines.cents + s.contract.cents - s.planned004.cents);
-  } else assert.equal(D.costs.forecast.cents, gross.lines.cents);
+  /* the Owners' order (18 Nov 2026): the agreement's hotel is never replaced by its 007 total — without the room plan nothing is added,
+     004 stays as written and the report names the gap */
+  assert.ok(SOUP(out).coversAll); assert.equal(D.costs.adjustments.length, 0, 'no room plan: no hotel adjustment');
+  assert.equal(D.costs.forecast.cents, gross.lines.cents);
+  assert.ok(out.report.forecastGaps.some((g) => /purchase costs could not be set beside 004/.test(g.text)), 'the missing room plan is a named gap');
   assert.equal(D.costs.variance.cents, D.costs.forecast.cents - D.costs.original.cents);
   assert.deepEqual([D.revenue.invoiced.cents, D.revenue.expectedTotal.cents, D.revenue.expectedNotYetInvoiced.cents], [30000, 45000, 15000], 'invoiced counted once inside the expected total');
   assert.deepEqual([D.position.stated, D.position.currentOwnerFunded.cents, D.position.projectedOwnerFunded.cents], [true, D.costs.forecast.cents - 30000, D.costs.forecast.cents - 45000]);
@@ -527,6 +527,21 @@ test('DASHBOARD · costs are 004 gross (never reduced by revenue); the forecast 
   /* an incomplete Revenue Report states no position */
   const half = buildBudgetComparison({ ...w.input, revenue: { ...REV(30000, 45000), booked: { cents: 45000, complete: false } } }).dashboard;
   assert.deepEqual([half.position.stated, half.revenue.invoiced], [false, null]);
+  /* with the room plan: the agreement's rooms (4 here, 2 nights) against 004's two blocks of one night each — held, nothing added */
+  const rooms = { ok: true, units: {
+    'wedstay/heritage-executive': [{ label: 'A', occupants: [{ guestId: 'GA1' }, { guestId: 'GA2' }] }, { label: 'B', occupants: [{ guestId: 'GC1' }] }, { label: 'C', occupants: [] }],
+    'wedstay/grand-majestic': [{ label: 'A', occupants: [{ guestId: 'GB1' }, { guestId: 'GB2' }] }] } };
+  const withRooms = buildBudgetComparison({ ...world({ rooms }).input, revenue: REV(30000, 45000) });
+  const hp = withRooms.report.purchase, a0 = withRooms.dashboard.costs.adjustments[0];
+  assert.deepEqual([hp.available, hp.totals.contract.cents, hp.recorded.contract.cents, hp.notIn004.cents], [true, 4 * 2 * 15000, 120000, 0]);
+  assert.deepEqual(hp.rows004.map((r) => r.role), ['CONTRACT', 'CONTRACT'], 'one block per night');
+  assert.deepEqual([a0.basis, a0.difference.cents, withRooms.dashboard.costs.forecast.cents], ['BOOKINGS', 0, withRooms.reconciliation.grossLines.cents]);
+  assert.ok(withRooms.report.exceptions.some((e) => /the agreement buys 26 rooms, the room plan holds 4/.test(e.text)), 'the agreement\'s own count against the plan');
+  assert.equal(withRooms.roomPlan.find((p) => p.stay === 'D1').rooms.find((u) => u.label === 'C').hotelCostBasis, 'CONTRACT', 'an empty room the agreement buys');
+  /* a set row keeps every check that is not a "counted twice" reading: the 002 quota check of a block of 5 rooms stays */
+  const five = buildBudgetComparison({ ...world({ rooms, lines004: [{ ...BLOCK27, Qty: 5, 'Budget USD': 750 }, { ...BLOCK28, Qty: 5, 'Budget USD': 750 }, TRAIN, VAN, CHINA, CAKE, PLAN] }).input, revenue: REV(30000, 45000) });
+  assert.deepEqual(five.report.purchase.rows004.map((r) => r.role), ['CONTRACT', 'CONTRACT']);
+  assert.ok(C(five, 'D1').checks.some((c) => /holds 5 rooms; the 002 quotas of this stay add up to 4 rooms/.test(c.text)), 'the quota check stays');
   /* the hotel contracts' rooms for the rate list: the whole wedding stay and the suite of 25–27.02, at USD 150 per room night */
   assert.deepEqual(out.roomContracts.map((x) => [x.stay, x.items, x.ratePerRoomNight]).sort((a, b) => (a[0] < b[0] ? -1 : 1)), [['C', ['C-SOUPHATTRA-PRESIDENTIAL'], 150], ['D1', '*', 150]]);
 });

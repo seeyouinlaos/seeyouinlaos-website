@@ -7,21 +7,28 @@
 
      · approved      — 004's own TOTAL BUDGET (the approved budget, incl. its reserve), beside the planned lines and the forecast
      · byCategory    — 004 planned per category · forecast · 007 committed and paid (in their own currencies) · variance
-     · cash          — supplier payments made, guest receipts still to come, and what the Owners still provide (USD; payments in
-                       another currency are named, never converted without an approved reporting rate)
-     · hotel         — per hotel and period: rooms the contract buys, rooms occupied, hotel cost (purchase), guest revenue (sale),
-                       surplus — a cost only where a contract states it, never estimated
-     · rooms012      — Google 012 (read only) matched to the rooms by their guests' names, for the room number; every
-                       uncertain match says "verify", a tie or a missing row gives no number
-     · exceptions    — the Owners' decisions, data gaps and differences, each named with its source
+     · cash          — supplier payments made, guest receipts still to come, and what the Owners still provide (USD; an amount in
+                       another currency keeps its own currency and is shown beside its USD equivalent at the Owners' reporting
+                       reference rates — labelled, never a transaction rate)
+     · purchase      — THE HOTEL'S PURCHASE COST FROM THE BOOKINGS (Owners' order, 18 Nov 2026): every booked room of the agreement's
+                       hotel — the agreement's rooms, additional room nights, the additional-person charge — set beside 004 row by
+                       row: what 004 already holds, what it does not (proposed additions, never written), text corrections
+     · hotel         — per hotel and period: rooms bought, rooms occupied, hotel cost (purchase), guest revenue (sale), surplus —
+                       a cost only where an agreement or an Owner-confirmed rate states it, never estimated
+     · rooms012      — Google 012 (a historical template, read only) matched to the rooms by their guests' names: a REFERENCE room
+                       number only, never required, never a source of any figure, never above the bookings
+     · exceptions    — data gaps and differences, each named with its source
+
+   The booking system decides what guests booked and owe; 004 holds the project's recorded costs; 009 never overrides a confirmed
+   booking price (a note beside it is not a difference).
 
    A figure whose inputs are incomplete carries complete:false and its named gaps — never a silent partial total.
    ========================================================================== */
-import { SUPPLIER_CATEGORY } from './budget-map.js';
+import { SUPPLIER_CATEGORY, REPORTING_FX, roomScopeOf } from './budget-map.js';
 import { BILLING_ADMINS } from './admin.js';
 import { parseDate } from './budget-source.js';
 
-export const REPORT_VERSION = 'finance-report/1.0.0';
+export const REPORT_VERSION = 'finance-report/1.1.0';
 const COUPLE = new Set(BILLING_ADMINS.map((a) => a.guestId));
 const clean = (v) => String(v == null ? '' : v).trim();
 const asArray = (v) => (Array.isArray(v) ? v : []);
@@ -156,16 +163,244 @@ export function match012(plan, list) {
   return out;
 }
 
+/* ------------------------------------------------- the hotel's purchase cost */
+
+const SUPPLEMENT_WORDS = /supplement|extra[\s-]*(bed|person)|third\s+person|triple|additional[\s-]+person/i;
+const firstName = (n) => tokens(n)[0] || null;
+const overlaps = (period, s) => !!(period && period.from && period.to && period.from < s.to && period.to > s.from);
+const dmyRange = (from, to) => (from && to ? dmy(from).slice(0, 5) + '–' + dmy(to) : '');
+
+/**
+ * THE HOTEL'S PURCHASE COST FROM THE BOOKINGS, BESIDE 004 (Owners' order, 18 Nov 2026).
+ *
+ * Every room of the agreement's stays as the Rooms engine holds it (held, sent or confirmed alike):
+ *   · the agreement's rooms (every night of their stay, occupied or not) at its rate per room night;
+ *   · every other booked room of those stays: additional room nights at the Owners' confirmed purchase rate;
+ *   · a third person in a room: the hotel's additional-person charge per room per night (charged once per room, never per guest).
+ * Purchase prices only — never a guest's selling price, never divided per guest.
+ *
+ * Then 004's rows of the hotel (category + item of its budget rule) are set against those costs, one row at a time, in a fixed order:
+ *   (1) a block of every room ("All Categories", no booked guest named) → the agreement of the stay it meets (by its period, else the
+ *       one stay whose agreement buys several rooms); a Qty other than the rooms bought is named, never turned into another cost;
+ *   (2) a row naming booked guests (their first names, exactly) → the one room they sleep in, rooms a block already holds aside: an
+ *       agreement room records the agreement, another room its additional nights, an additional-person row (its words) the charge —
+ *       up to what is still open, the rest named; a row naming guests whose rooms 004 already holds is a duplicate;
+ *   (3) any other row of the hotel → an agreement room of the category it names, else the open additional nights (or charges) of the
+ *       stay its period meets (a row with no period: any stay), room by room in label order, up to its amount — the rest named; a row
+ *       whose period meets no stay of the agreement is set against nothing.
+ * A room's booked cost governs: what 004 does not hold of a CONFIRMED booking (the additional-person charge: of a confirmed extra
+ * person) is a proposed addition (in the forecast); of a booking only held, pending (listed, not in the forecast). A row that matches
+ * nothing, or holds more than its rooms cost, stays in 004 as written and is named — never removed, never added again. Nothing here
+ * writes to 004.
+ */
+export function hotelPurchaseOf({ plan, roomContract, contracts, lines004, rule, centres, couple, vendor }) {
+  const out = { available: false, why: null, lines: [], rows004: [], totals: null, confirmed: null, pending: null, recorded: null, notIn004: null, notIn004Parts: null,
+    proposals: [], included: [], corrections: [], checks: [], gaps: [], unsettled: [] };
+  if (!roomContract || !roomContract.rooms) { out.why = 'no hotel agreement is recorded'; return out; }
+  if (!rule || !rule.item) { out.why = 'the hotel\'s 004 rows cannot be told apart (no budget rule)'; return out; }
+  const stays = Object.keys(roomContract.rooms);
+  const P = asArray(plan).filter((s) => stays.includes(s.stay)).sort((a, b) => String(a.from).localeCompare(String(b.from)));
+  if (!P.length || !P.some((s) => asArray(s.rooms).length)) { out.why = 'the room plan (Rooms engine) is not readable just now'; return out; }
+  const cents = (x) => (Number.isFinite(Number(x)) ? Math.round(Number(x) * 100) : null);
+  const rate = cents(roomContract.ratePerRoomNight);
+  const addRate = roomContract.additional ? cents(roomContract.additional.ratePerRoomNight) : null;
+  const supRate = roomContract.supplement && roomContract.supplement.confirmed ? cents(roomContract.supplement.perRoomNight) : null;
+  const hosts = couple instanceof Set ? couple : couple ? new Set(asArray(couple)) : COUPLE;
+  const check = (text, extra) => out.checks.push({ kind: 'DATA', text, ...(extra || {}) });
+
+  /* the bookings: a guest with a booked (confirmed) line for this very room, or the couple's own place, is confirmed */
+  const bookedIn = new Set();
+  for (const c of asArray(centres)) for (const r of asArray(c.rooms)) for (const l of asArray(r.lines)) bookedIn.add(c.id + '|' + (r.item || l.item) + '|' + r.label + '|' + l.person);
+  for (const s of P) {
+    const k = asArray(contracts).find((x) => x.stay === s.stay), n = nightsOf(s.from, s.to) || 0;
+    if (!n) { const t = s.place + ': the stay states no nights — its rooms have no hotel cost here'; out.gaps.push({ text: t }); check(t + '.'); }
+    for (const u of asArray(s.rooms)) {
+      const occ = asArray(u.occupants), guests = occ.filter((o) => o && o.guestId), kept = occ.filter((o) => o && o.kept).length;
+      const covered = !!(k && (k.items === '*' || asArray(k.items).includes(u.item)));
+      const isConf = (o) => hosts.has(o.guestId) || bookedIn.has(s.stay + '|' + u.item + '|' + u.label + '|' + o.guestId);
+      const conf = guests.filter(isConf);
+      const booked = guests.length > 0 || kept > 0;
+      /* a third person: the guest the extra bed is attributed to, else every person (a kept place too) beyond the room's places */
+      const places = Number(u.places) || guests.length + kept;
+      const beds = guests.filter((o) => o.bed);
+      const extra = booked ? Math.max(beds.length, guests.length + kept - places) : 0;
+      const extraGuests = beds.length ? beds : guests.length > places ? guests.slice(places) : [];
+      /* the charge (once per room) is confirmed only when its extra person is a confirmed guest — never a kept place alone */
+      const supStatus = !extra ? null : beds.length ? (beds.every(isConf) ? 'CONFIRMED' : 'HELD') : conf.length > places ? 'CONFIRMED' : 'HELD';
+      if (extra > 1) check(s.place + ' · room ' + u.label + ' holds ' + extra + ' persons above its places; the hotel\'s additional-person charge is stated per room per night and is counted once.');
+      out.lines.push({ id: unitId(s.stay, u), stay: s.stay, place: s.place, from: s.from, to: s.to, nights: n, key: u.key, label: u.label, type: u.type, item: u.item, places: u.places,
+        guests: guests.map((o) => ({ guestId: o.guestId, name: o.name || null, bed: !!o.bed, confirmed: conf.includes(o) })), kept,
+        status: !booked ? 'EMPTY' : conf.length ? 'CONFIRMED' : 'HELD', supplementStatus: supStatus, covered,
+        contractNights: covered ? n : 0, additionalNights: !covered && booked ? n : 0, extraPersons: extra, extraGuests: extraGuests.map((o) => o.guestId),
+        cost: { contract: covered ? rate * n : 0, additional: !covered && booked ? (addRate == null ? null : addRate * n) : 0, supplement: extra ? (supRate == null ? null : supRate * n) : 0 },
+        recorded: { contract: 0, additional: 0, supplement: 0 }, rows: { contract: [], additional: [], supplement: [] } });
+    }
+  }
+  const L = out.lines;
+  const stayOf = (id) => P.find((s) => s.stay === id);
+  /* a cost of the line is in the forecast when its booking is confirmed: the agreement always, additional nights with a confirmed
+     guest, the additional-person charge with a confirmed extra person */
+  const counts = (l, k) => (k === 'contract' ? true : k === 'additional' ? l.status === 'CONFIRMED' : l.supplementStatus === 'CONFIRMED');
+
+  /* what the agreement states against the room plan — a different count is named, never adjusted */
+  const A = roomContract.agreement || {};
+  for (const s of P) {
+    const want = A.rooms && A.rooms[s.stay], have = L.filter((l) => l.stay === s.stay && l.covered).length;
+    if (Number.isFinite(want) && want !== have) check(s.place + ': the agreement buys ' + want + ' room' + (want === 1 ? '' : 's') + ', the room plan holds ' + have + ' — the room plan and the agreement differ.');
+  }
+  const contractAll = sum(L.map((l) => l.cost.contract));
+  if (Number.isFinite(A.total) && contractAll !== Math.round(A.total * 100)) check('The rooms the agreement buys at its rate come to ' + usdText(contractAll) + ', its total is ' + usdText(Math.round(A.total * 100)) + ' — the room plan and the agreement differ.');
+  for (const s of asArray(plan)) if (!stays.includes(s.stay) && vendor && vendor.test(clean(s.place)) && asArray(s.rooms).some((u) => asArray(u.occupants).some((o) => o && o.guestId))) {
+    const t = s.place + ' ' + dmyRange(s.from, s.to) + ': rooms with guests at the agreement\'s hotel outside the agreement\'s stays — their additional room nights have no purchase cost here yet';
+    check(t + '.'); out.gaps.push({ text: t });
+  }
+
+  /* 004's rows of the hotel */
+  const rows = asArray(lines004).filter((l) => l && l.readable !== false && Number.isFinite(l.budget) && l.budget > 0 &&
+    (!rule.category || clean(l.category).toLowerCase() === String(rule.category).toLowerCase()) && rule.item.test(clean(l.item)))
+    .map((l) => { const text = clean(l.item) + ' ' + clean(l.details); return { l, row: l.row, cents: Math.round(l.budget * 100), text, toks: new Set(tokens(text)),
+      supp: SUPPLEMENT_WORDS.test(text), scope: roomScopeOf(l.details), period: l.period && l.period.from && l.period.to ? l.period : null, role: null, lines: [], rest: 0, why: null }; });
+  const named = (r, l) => l.guests.some((g) => r.toks.has(firstName(g.name)));
+  const open = (l, kind) => (l.cost[kind] || 0) - l.recorded[kind];
+  const take = (r, l, kind, c) => { l.recorded[kind] += c; if (!l.rows[kind].includes(r.row)) l.rows[kind].push(r.row); if (!r.lines.includes(l)) r.lines.push(l); };
+
+  /* (1) blocks of every room the agreement buys in a stay — as many as the stay has nights (one per night or one for all) */
+  const blockOf = new Map();   /* stay → { rows: [004 rows], nights: nights they state } */
+  const inBlock = (l) => !!(blockOf.has(l.stay) && l.rows.contract.some((x) => blockOf.get(l.stay).rows.includes(x)));
+  const multi = P.filter((s) => L.filter((l) => l.stay === s.stay && l.covered).length > 1);
+  const blockStay = (r) => { if (r.supp || !(r.scope && r.scope.all) || L.some((l) => named(r, l))) return null; const pick = r.period ? multi.filter((s) => overlaps(r.period, s)) : multi; return pick.length === 1 ? pick[0] : null; };
+  const fits = (r) => { const st = blockStay(r); return !!st && Number(r.l.qty) === L.filter((l) => l.stay === st.stay && l.covered).length; };
+  /* a row whose Qty is the agreement's own number of rooms is its block before a row whose Qty differs */
+  for (const r of rows.filter(fits).concat(rows.filter((x) => !fits(x)))) {
+    const s = blockStay(r);
+    if (!s) continue;
+    const n = nightsOf(s.from, s.to) || 0;
+    const b = blockOf.get(s.stay) || { rows: [], nights: 0 };
+    if (b.rows.length && b.nights + (Number(r.l.mult) || n) > n) { r.role = 'DUPLICATE'; r.why = 'another block of every room of ' + s.place + ' beside 004 row' + (b.rows.length === 1 ? ' ' : 's ') + b.rows.join(', ') + ', more nights than the stay has'; continue; }
+    const cov = L.filter((l) => l.stay === s.stay && l.covered);
+    b.rows.push(r.row); b.nights += Number(r.l.mult) || n; blockOf.set(s.stay, b); r.role = 'CONTRACT';
+    let left = r.cents; cov.forEach((l, i) => { const c = i === cov.length - 1 ? left : Math.round(r.cents / cov.length); left -= c; take(r, l, 'contract', c); });
+    if (Number(r.l.qty) !== cov.length) check('004 row ' + r.row + ' buys ' + (r.l.qty == null ? 'no stated number of' : r.l.qty) + ' rooms; the agreement buys ' + cov.length + ' rooms of ' + s.place + ' — it is read as the agreement\'s block, its amount as written.');
+    if (!Number(r.l.mult)) check('004 row ' + r.row + ' states no nights for its rooms.');
+    else if (r.cents !== cov.length * Number(r.l.mult) * rate) check('004 row ' + r.row + ' states ' + usdText(r.cents) + ' for ' + cov.length + ' rooms × ' + r.l.mult + ' nights; at the agreement\'s rate that is ' + usdText(cov.length * Number(r.l.mult) * rate) + '.');
+  }
+
+  /* (2) rows naming booked guests: the one room they sleep in, up to what is still open */
+  for (const r of rows.filter((x) => !x.role)) {
+    const kind = (l) => (r.supp ? 'supplement' : l.covered ? 'contract' : 'additional');
+    const all = L.filter((l) => named(r, l));
+    if (!all.length) continue;
+    let cands = all.filter((l) => (r.supp ? l.extraPersons > 0 : true) && !(l.covered && !r.supp && inBlock(l)));
+    if (!cands.length) {
+      r.role = r.supp ? 'UNMATCHED' : 'DUPLICATE';
+      r.why = r.supp ? 'the guests it names sleep in no room with a third person' : 'the guests it names sleep in rooms 004 already holds (row ' + [...new Set(all.flatMap((l) => l.rows.contract))].join(', ') + ')';
+      continue;
+    }
+    if (cands.length > 1) { const near = cands.filter((l) => overlaps(r.period, stayOf(l.stay))); if (near.length) cands = near; }
+    if (cands.length > 1) { const free = cands.filter((l) => open(l, kind(l)) > 0); if (free.length) cands = free; }
+    if (cands.length !== 1) { r.role = 'AMBIGUOUS'; r.why = 'the guests it names sleep in ' + cands.length + ' rooms of the hotel (' + cands.map((l) => l.stay + ' room ' + l.label).join(', ') + ')'; continue; }
+    const l = cands[0], k = kind(l), o = open(l, k);
+    if (!(o > 0)) {
+      if (!l.cost[k]) { r.role = 'UNMATCHED'; r.why = 'room ' + l.label + ' (' + l.stay + ') has no hotel cost to set here (its stay states no nights or no rate)'; continue; }
+      r.role = 'DUPLICATE'; r.why = 'room ' + l.label + ' (' + l.stay + ') is already recorded by 004 row ' + l.rows[k].join(', '); continue;
+    }
+    const c = Math.min(o, r.cents);
+    r.role = k.toUpperCase(); take(r, l, k, c); r.rest = r.cents - c;
+  }
+
+  /* (3) every other row of the hotel: an agreement room of the category it names, else the open additional nights (or charges) of the
+     stay its period meets, room by room */
+  for (const r of rows.filter((x) => !x.role)) {
+    const k = r.supp ? 'supplement' : 'additional';
+    const typeOk = (l) => !r.scope || r.scope.all || r.scope.words.test(clean(l.type));
+    const meets = (l) => !r.period || overlaps(r.period, stayOf(l.stay));
+    if (r.period && !P.some((s) => overlaps(r.period, s))) { r.role = 'UNMATCHED'; r.why = 'its period (' + clean(r.l.periodText) + ') meets no stay of the agreement'; continue; }
+    /* an agreement room named by its category and not yet recorded (a suite written without names) comes first */
+    if (!r.supp && r.scope && !r.scope.all) {
+      const suite = L.filter((l) => l.covered && typeOk(l) && meets(l) && open(l, 'contract') > 0 && !inBlock(l));
+      if (suite.length === 1) {
+        const c = Math.min(open(suite[0], 'contract'), r.cents); r.role = 'CONTRACT'; take(r, suite[0], 'contract', c); r.rest = r.cents - c;
+        continue;
+      }
+    }
+    const pool = L.filter((l) => (!l.covered || k === 'supplement') && typeOk(l) && meets(l) && open(l, k) > 0)
+      .sort((a, b) => String(a.from).localeCompare(String(b.from)) || String(a.label).localeCompare(String(b.label)));
+    let left = r.cents;
+    for (const l of pool) { if (left <= 0) break; const c = Math.min(left, open(l, k)); take(r, l, k, c); left -= c; }
+    r.rest = left;
+    r.role = r.lines.length ? k.toUpperCase() : 'UNMATCHED';
+    if (!r.lines.length) r.why = 'it meets no booked room of the hotel that 004 does not already hold';
+  }
+  /* a room 004 holds for less than it costs, once every row is set: the booking governs, the difference is proposed */
+  for (const l of L) for (const k of ['contract', 'additional', 'supplement']) {
+    if (!(l.recorded[k] > 0) || !(l.cost[k] > l.recorded[k]) || (k === 'contract' && inBlock(l))) continue;
+    check('004 row' + (l.rows[k].length === 1 ? ' ' : 's ') + l.rows[k].join(', ') + ' state' + (l.rows[k].length === 1 ? 's ' : ' ') + usdText(l.recorded[k]) + ' for room ' + l.label + ' (' + l.place + ', ' + dmyRange(l.from, l.to) + '); booked, it costs ' + usdText(l.cost[k]) + ' — the booking governs; the difference is a proposed addition.');
+  }
+  for (const r of rows) {
+    if (r.role === 'UNMATCHED' || r.role === 'AMBIGUOUS' || r.role === 'DUPLICATE') check('004 row ' + r.row + ' (' + clean(r.l.details || r.l.item) + ', ' + usdText(r.cents) + ') is not set against a booked room: ' + r.why + ' — it stays in 004 as written; check it before adding a proposed entry.', { row: r.row, amount: amt(r.cents) });
+    else if (r.rest > 0) check('004 row ' + r.row + ' (' + clean(r.l.details || r.l.item) + ') states ' + usdText(r.cents) + '; the open booked rooms it meets cost ' + usdText(r.cents - r.rest) + ' — ' + usdText(r.rest) + ' more than the bookings, kept in 004 as written.', { row: r.row, amount: amt(r.rest) });
+    /* the row's own period against the booked nights it records (a text correction — no amount) */
+    if (r.lines.length && ['CONTRACT', 'ADDITIONAL', 'SUPPLEMENT'].includes(r.role)) {
+      const from = r.lines.map((l) => l.from).sort()[0], to = r.lines.map((l) => l.to).sort().slice(-1)[0];
+      /* a block of one night of a longer stay is checked against the stay's window only, never asked to span it */
+      const partial = r.role === 'CONTRACT' && r.lines.length > 1 && Number(r.l.mult) > 0 && Number(r.l.mult) < (nightsOf(from, to) || 0);
+      const off = !r.period || (partial ? r.period.from < from || r.period.to > to : r.period.from !== from || r.period.to !== to);
+      if (off && from && to) out.corrections.push({ row: r.row, field: 'Date or period', reads: r.l.periodText || '', booked: dmy(from) + '–' + dmy(to), from, to, nights: nightsOf(from, to),
+        text: '004 row ' + r.row + ' "Date or period" reads "' + (r.l.periodText || '') + '"; the booked ' + (r.role === 'CONTRACT' ? 'rooms of the agreement' : 'room') + ' it records ' + (r.lines.length > 1 ? 'are' : 'is') + ' ' + dmy(from) + '–' + dmy(to) + ' (' + nightsOf(from, to) + ' nights). Text only — no amount changes.' });
+    }
+    out.rows004.push({ row: r.row, item: clean(r.l.item), details: clean(r.l.details), periodText: r.l.periodText || null, rate: r.l.rate, qty: r.l.qty, nights: r.l.mult, amount: amt(r.cents),
+      role: r.role, rooms: r.lines.map((l) => ({ stay: l.stay, label: l.label, type: l.type })), rest: r.rest ? amt(r.rest) : null, why: r.why });
+  }
+
+  /* what 004 does not hold: the agreement per stay (one entry), a room's additional nights and its charge (one entry each) */
+  const tot = (pick, k) => sum(L.filter(pick).map((l) => l.cost[k] || 0));
+  out.totals = { contract: amt(tot(() => true, 'contract')), additional: amt(tot(() => true, 'additional')), supplement: amt(tot(() => true, 'supplement')) };
+  out.totals.total = amt(out.totals.contract.cents + out.totals.additional.cents + out.totals.supplement.cents);
+  out.confirmed = { additional: amt(tot((l) => counts(l, 'additional'), 'additional')), supplement: amt(tot((l) => counts(l, 'supplement'), 'supplement')) };
+  out.recorded = { contract: amt(sum(L.map((l) => l.recorded.contract))), additional: amt(sum(L.map((l) => l.recorded.additional))), supplement: amt(sum(L.map((l) => l.recorded.supplement))) };
+  const period = (l) => dmy(l.from).slice(0, 5) + '-' + dmy(l.to);
+  const who = (gs) => gs.map((g) => (firstName(g.name) ? g.name.trim().split(/\s+/)[0] : g.guestId));
+  for (const s of P) {
+    const cov = L.filter((l) => l.stay === s.stay && l.covered), o = sum(cov.map((l) => Math.max(0, open(l, 'contract'))));
+    if (o > 0) out.proposals.push({ kind: 'CONTRACT', stay: s.stay, place: s.place, from: s.from, to: s.to, nights: nightsOf(s.from, s.to), rooms: cov.length, type: cov.length > 1 ? 'every room of the agreement' : clean(cov[0].type),
+      guests: [], rate: amt(rate), total: amt(o), existing004: [...new Set(cov.flatMap((l) => l.rows.contract))], status: cov.some((l) => l.rows.contract.length) ? 'RAISE' : 'NEW', confirmed: true,
+      suggested: { item: 'Souphattra Heritage', category: 'Accommodation', details: cov.length > 1 ? 'All Categories Rooms' : clean(cov[0].type), rate: rate / 100, qty: cov.length, nights: nightsOf(s.from, s.to), budget: o / 100, period: dmy(s.from).slice(0, 5) + '-' + dmy(s.to) } });
+  }
+  for (const l of L) for (const k of ['additional', 'supplement']) {
+    const o = open(l, k); if (!(o > 0)) continue;
+    const gs = k === 'supplement' ? l.guests.filter((g) => l.extraGuests.includes(g.guestId)) : l.guests;
+    out.proposals.push({ kind: k === 'additional' ? 'ADDITIONAL' : 'SUPPLEMENT', stay: l.stay, place: l.place, from: l.from, to: l.to, nights: l.nights, rooms: 1, label: l.label, type: l.type,
+      guests: gs.map((g) => ({ guestId: g.guestId, name: g.name })), rate: amt(k === 'additional' ? addRate : supRate), total: amt(o), existing004: l.rows[k], status: l.rows[k].length ? 'RAISE' : 'NEW', confirmed: counts(l, k),
+      suggested: { item: 'Souphattra Heritage', category: 'Accommodation',
+        details: k === 'additional' ? clean(l.type) + ' Room ' + l.label + ' (' + who(gs).join(' + ') + ')' : 'Additional-person charge, ' + clean(l.type) + ' Room ' + l.label + (gs.length ? ' (' + who(gs).join(' + ') + ')' : ''),
+        rate: (k === 'additional' ? addRate : supRate) / 100, qty: 1, nights: l.nights, budget: o / 100, period: period(l) } });
+  }
+  for (const l of L) for (const k of ['contract', 'additional', 'supplement']) if (l.recorded[k] > 0 && !(k === 'contract' && inBlock(l))) {
+    out.included.push({ kind: k.toUpperCase(), stay: l.stay, place: l.place, from: l.from, to: l.to, label: l.label, type: l.type, guests: l.guests.map((g) => ({ guestId: g.guestId, name: g.name })), rows: l.rows[k], recorded: amt(l.recorded[k]), cost: amt(l.cost[k]) });
+  }
+  for (const [stay, b] of blockOf) { const cov = L.filter((l) => l.stay === stay && l.covered); out.included.push({ kind: 'CONTRACT', stay, place: stayOf(stay).place, from: stayOf(stay).from, to: stayOf(stay).to, label: null, type: 'every room of the agreement (' + cov.length + ')', guests: [], rows: b.rows.slice(), recorded: amt(sum(cov.map((l) => l.recorded.contract))), cost: amt(sum(cov.map((l) => l.cost.contract))) }); }
+  const inForecast = out.proposals.filter((p) => p.confirmed);
+  const part = (kind) => amt(sum(inForecast.filter((p) => p.kind === kind).map((p) => p.total.cents)));
+  out.notIn004 = amt(sum(inForecast.map((p) => p.total.cents)));
+  out.notIn004Parts = { contract: part('CONTRACT'), additional: part('ADDITIONAL'), supplement: part('SUPPLEMENT') };
+  out.pending = amt(sum(out.proposals.filter((p) => !p.confirmed).map((p) => p.total.cents)));
+  out.unsettled = out.rows004.filter((r) => ['UNMATCHED', 'AMBIGUOUS', 'DUPLICATE'].includes(r.role) || r.rest);
+  if (L.some((l) => l.cost.additional == null || l.cost.supplement == null)) { const t = 'A booked room\'s additional nights or additional-person charge has no confirmed purchase rate — not in any figure'; check(t + '.'); out.gaps.push({ text: t }); }
+  out.available = true;
+  return out;
+}
+
 /* ------------------------------------------------------------- the hotels */
 
 /**
- * Per stay of the room plan: the rooms a hotel contract buys (roomContracts), the rooms occupied, the hotel's cost (rate per
- * room night × the stay's nights, every room the contract buys — occupied or not), the guests' revenue for its rooms (the
- * booked room lines of that stay) and the surplus. A room with guests no contract buys has no cost here: the stay's cost is
- * then incomplete and no surplus is stated.
+ * Per stay of the room plan: the rooms bought, the rooms occupied, the hotel's cost (purchase), the guests' revenue for its rooms
+ * (the booked room lines of that stay) and the surplus. At the agreement's hotel the cost is the purchase above (the agreement's rooms,
+ * the confirmed rooms' additional nights and additional-person charges; a room only held is named apart, not counted); elsewhere a
+ * cost exists only where an agreement states it — the stay's cost is then incomplete and no surplus is stated.
  */
-export function hotelPerformance({ plan, contracts, centres, suppliers, rooms012 }) {
+export function hotelPerformance({ plan, contracts, centres, suppliers, rooms012, purchase }) {
   const byStay = new Map(asArray(centres).map((c) => [c.id, c]));
+  const hp = purchase && purchase.available ? purchase : null;
   return asArray(plan).map((s) => {
     const n = nightsOf(s.from, s.to);
     const k = asArray(contracts).find((x) => x.stay === s.stay) || null;
@@ -173,13 +408,27 @@ export function hotelPerformance({ plan, contracts, centres, suppliers, rooms012
     const units = asArray(s.rooms);
     const occupied = units.filter((u) => asArray(u.occupants).some((o) => o && o.guestId));
     const bought = k ? units.filter(covered) : [];
-    const cost = k && n ? bought.length * k.ratePerRoomNight * n * 100 : null;
-    const uncontracted = occupied.filter((u) => !covered(u)).map((u) => ({ label: u.label, type: u.type, roomNo: (rooms012 && rooms012.units[unitId(s.stay, u)] || {}).roomNo || null,
-      guests: u.occupants.filter((o) => o && o.guestId).length, nights: n }));
     const c = byStay.get(s.stay);
     const revenue = sum(asArray(c && c.rooms).flatMap((r) => asArray(r.lines)).map((l) => (l.amount ? l.amount.cents : 0)));
     const guests = sum(occupied.map((u) => u.occupants.filter((o) => o && o.guestId).length));
     const sup = asArray(suppliers).filter((x) => asArray(x.stages).includes(s.stay)).map((x) => ({ vendor: x.vendor, contract: x.contract, covers: x.coversAll || null }));
+    const mine = hp ? hp.lines.filter((l) => l.stay === s.stay) : [];
+    if (k && mine.length) {
+      const part = (list, key) => sum(list.map((l) => l.cost[key] || 0));
+      const contract = part(mine, 'contract'), additional = part(mine.filter((l) => l.status === 'CONFIRMED'), 'additional'), supplement = part(mine.filter((l) => l.supplementStatus === 'CONFIRMED'), 'supplement');
+      const unknown = mine.some((l) => (l.status === 'CONFIRMED' && l.cost.additional == null) || (l.supplementStatus === 'CONFIRMED' && l.cost.supplement == null));
+      const held = mine.filter((l) => (!l.covered && l.status === 'HELD') || l.supplementStatus === 'HELD');
+      const cost = contract + additional + supplement;
+      return { stay: s.stay, place: s.place, from: s.from, to: s.to, nights: n, rate: amt(k.ratePerRoomNight * 100),
+        roomsBought: bought.length, roomsAdditional: mine.filter((l) => !l.covered && l.status !== 'EMPTY').length, roomsOccupied: occupied.length, guests,
+        cost: amt(cost), costParts: { contract: amt(contract), additional: amt(additional), supplement: amt(supplement) },
+        held: held.map((l) => ({ label: l.label, type: l.type, cost: amt((!l.covered && l.status === 'HELD' ? l.cost.additional || 0 : 0) + (l.supplementStatus === 'HELD' ? l.cost.supplement || 0 : 0)) })),
+        costBasis: 'AGREEMENT', costComplete: !unknown, uncontracted: [], suppliers: sup, revenue: amt(revenue), surplus: unknown ? null : amt(revenue - cost),
+        emptyBought: bought.filter((u) => !occupied.includes(u)).length };
+    }
+    const cost = k && n ? bought.length * k.ratePerRoomNight * n * 100 : null;
+    const uncontracted = occupied.filter((u) => !covered(u)).map((u) => ({ label: u.label, type: u.type, roomNo: (rooms012 && rooms012.units[unitId(s.stay, u)] || {}).roomNo || null,
+      guests: u.occupants.filter((o) => o && o.guestId).length, nights: n }));
     const complete = !!(k && n && !uncontracted.length);
     return {
       stay: s.stay, place: s.place, from: s.from, to: s.to, nights: n, rate: k ? amt(k.ratePerRoomNight * 100) : null,
@@ -191,23 +440,38 @@ export function hotelPerformance({ plan, contracts, centres, suppliers, rooms012
   });
 }
 
+/* ------------------------------------------------------- reference currency */
+
+/** An amount kept in its own currency beside its USD equivalent at the Owners' reporting reference rates (a reference only). */
+export function usdEquivalentOf(list, fxRef) {
+  const F = fxRef || REPORTING_FX;
+  const per = { USD: 1, THB: F.USD_THB, EUR: F.USD_EUR };
+  const parts = asArray(list).filter((m) => m && Number.isFinite(m.cents)).map((m) => ({ currency: m.currency, original: amt(m.cents, m.currency),
+    usd: per[m.currency] > 0 ? amt(m.cents / per[m.currency]) : null }));
+  const known = parts.every((p) => p.usd);
+  return { parts, total: known ? amt(sum(parts.map((p) => p.usd.cents))) : null, converted: parts.some((p) => p.currency !== 'USD'),
+    words: 'USD equivalent at the reporting reference rates (1 USD = ' + F.USD_THB + ' THB · 1 USD = ' + F.USD_EUR + ' EUR) — a reference conversion, not a transaction rate' };
+}
+
 /* ------------------------------------------------------------- the report */
 
-export function financeReportOf({ budget, suppliers, centres, plan, contracts, roomContractMeta, dashboard, rates009, revenue, receipts, fx, list012 }) {
+export function financeReportOf({ budget, suppliers, centres, plan, contracts, roomContractMeta, dashboard, rates009, revenue, receipts, fx, list012, purchase, rule, vendor }) {
   const D = dashboard || {}, C = D.costs || {};
   const T = (budget && budget.totals) || {};
   const forecast = C.forecast ? C.forecast.cents : null, planned = C.original ? C.original.cents : null;
   const approved = Number.isFinite(T.totalBudget) ? Math.round(T.totalBudget * 100) : null;
   const rooms012 = safe(() => match012(plan, list012), { available: false, units: {}, ambiguous: [], notIn012: [], notBooked: [], free: [], dates: [], error: 'not readable just now' });
-  const hotel = safe(() => hotelPerformance({ plan, contracts, centres, suppliers, rooms012 }), []);
+  const hp = purchase || safe(() => hotelPurchaseOf({ plan, roomContract: roomContractMeta, contracts, lines004: budget && budget.lines, rule, centres, couple: COUPLE, vendor }),
+    { available: false, why: 'the hotel\'s purchase costs could not be set beside 004 just now', lines: [], rows004: [], proposals: [], included: [], corrections: [], checks: [], unsettled: [] });
+  const hotel = safe(() => hotelPerformance({ plan, contracts, centres, suppliers, rooms012, purchase: hp }), []);
   const contractStays = new Set(asArray(contracts).map((x) => x.stay));
 
-  /* ---- what the forecast does not hold yet: guest services without a supplier cost, rooms no contract buys ---- */
+  /* ---- what the forecast does not hold yet: guest services without a supplier cost, the hotel's purchase not set beside 004 ---- */
   const gaps = [];
-  for (const h of hotel) if (contractStays.has(h.stay) && h.uncontracted.length) {
-    gaps.push({ centre: h.stay, place: h.place, text: h.uncontracted.length + ' room' + (h.uncontracted.length === 1 ? '' : 's') + ' with guests the hotel agreement does not buy (' +
-      h.uncontracted.map((u) => 'room ' + u.label + (u.roomNo ? ' · ' + u.roomNo : '')).join(', ') + ', ' + dmy(h.from) + ' – ' + dmy(h.to) + '): no hotel cost agreed' });
-  }
+  const hotelGap = (text) => gaps.push({ centre: [...contractStays].join(' + '), place: 'Souphattra Heritage', text, hotel: true });
+  if (roomContractMeta && !hp.available) hotelGap('the hotel\'s purchase costs could not be set beside 004 (' + (hp.why || 'not readable') + ') — 004 is counted as written');
+  for (const r of asArray(hp.unsettled)) hotelGap('004 row ' + r.row + ' (' + usdText((r.rest || r.amount).cents) + ') is not set against a booked room — it may already hold a proposed addition');
+  for (const g of asArray(hp.gaps)) hotelGap(g.text);
   for (const c of asArray(centres)) if (!contractStays.has(c.id) && c.status === 'NOT_COMPLETE' && asArray(c.missing).length) gaps.push({ centre: c.id, place: c.place, text: asArray(c.missing).join(' · ') });
 
   /* ---- 004 planned, forecast, 007 committed and paid — per 004 category ---- */
@@ -216,102 +480,64 @@ export function financeReportOf({ budget, suppliers, centres, plan, contracts, r
     const cats = new Map();
     const row = (name) => { if (!cats.has(name)) cats.set(name, { category: name, planned: 0, adjust: 0, committed: [], paid: [], suppliers: [] }); return cats.get(name); };
     for (const l of lines) row(l.category || '(no category)').planned += Math.round(l.budget * 100);
-    const catOf = (vendor) => (SUPPLIER_CATEGORY.find((m) => m.vendor.test(clean(vendor))) || {}).category || null;
+    const catOf = (v) => (SUPPLIER_CATEGORY.find((m) => m.vendor.test(clean(v))) || {}).category || null;
     for (const s of asArray(suppliers)) {
       const r = row(catOf(s.vendor) || 'Unassigned');
       r.suppliers.push(s.vendor);
       if (s.contract) r.committed.push(s.contract);
       for (const p of asArray(s.payments)) if (p.counted && p.amount) r.paid.push(p.amount);
     }
-    for (const a of asArray(C.adjustments)) { const r = row(catOf(a.vendor) || 'Unassigned'); r.adjust += a.difference ? a.difference.cents : 0; }
+    for (const a of asArray(C.adjustments)) { const r = row(a.category || catOf(a.vendor) || 'Unassigned'); r.adjust += a.difference ? a.difference.cents : 0; }
     const list = [...cats.values()].map((r) => {
       const committed = perCurrency(r.committed), paid = perCurrency(r.paid);
       const usdCommitted = (committed.find((m) => m.currency === 'USD') || {}).cents || 0;
       return { category: r.category, planned: amt(r.planned), forecast: amt(r.planned + r.adjust), variance: amt(r.adjust), committed, paid, suppliers: r.suppliers,
+        committedUsd: usdEquivalentOf(committed), paidUsd: usdEquivalentOf(paid),
         committedAboveForecast: usdCommitted > r.planned + r.adjust ? amt(usdCommitted - (r.planned + r.adjust)) : null };
     }).sort((a, b) => (a.category === 'Unassigned') - (b.category === 'Unassigned') || b.planned.cents - a.planned.cents);
     return list;
   }, []);
   const committedAll = perCurrency(asArray(suppliers).map((s) => s.contract).filter(Boolean));
   const paidAll = perCurrency(asArray(suppliers).flatMap((s) => asArray(s.payments).filter((p) => p.counted && p.amount).map((p) => p.amount)));
+  const committedUsd = usdEquivalentOf(committedAll), paidUsd = usdEquivalentOf(paidAll);
 
-  /* ---- the cash still to move (USD; another currency is named, never converted) ---- */
+  /* ---- the cash still to move (USD; a payment in another currency at its USD equivalent, labelled) ---- */
   const R = revenue || {};
   const expected = R.booked && R.booked.complete !== false && Number.isFinite(R.booked.cents) ? R.booked.cents : null;
   const received = receipts && receipts.cashCollected && receipts.cashCollected.complete !== false && Number.isFinite(receipts.cashCollected.cents) ? receipts.cashCollected.cents : null;
-  const paidUsd = (paidAll.find((m) => m.currency === 'USD') || {}).cents || 0;
-  const paidOther = paidAll.filter((m) => m.currency !== 'USD');
-  const remainingSupplier = forecast == null ? null : forecast - paidUsd;
+  const paidEq = paidUsd.total ? paidUsd.total.cents : null;
+  const remainingSupplier = forecast == null || paidEq == null ? null : forecast - paidEq;
   const remainingGuests = expected == null || received == null ? null : expected - received;
-  const indicative = fx && Number(fx.FX_USD_THB) > 0 ? { rate: Number(fx.FX_USD_THB), day: fx.day || null,
-    paidOtherUsd: amt(sum(paidOther.filter((m) => m.currency === 'THB').map((m) => m.cents / Number(fx.FX_USD_THB)))),
-    committedOtherUsd: amt(sum(committedAll.filter((m) => m.currency === 'THB').map((m) => m.cents / Number(fx.FX_USD_THB)))),
-    words: 'indicative only — THB at USD/THB ' + fx.FX_USD_THB + ' (011, the day of the first issued statement' + (fx.day ? ', ' + dmy(fx.day) : '') + '); no reporting rate is approved, so it is never added to a figure' } : null;
+  const reportingFx = { USD_THB: REPORTING_FX.USD_THB, USD_EUR: REPORTING_FX.USD_EUR, source: REPORTING_FX.source,
+    statementReference: fx && (fx.FX_USD_THB || fx.FX_USD_EUR) ? { day: fx.day || null, USD_THB: Number(fx.FX_USD_THB) || null, USD_EUR: Number(fx.FX_USD_EUR) || null } : null };
   const cash = {
-    paidToSuppliers: paidAll, remainingSupplierPaymentsUsd: amt(remainingSupplier), guestReceiptsToCome: amt(remainingGuests), received: amt(received), expected: amt(expected),
+    paidToSuppliers: paidAll, paidToSuppliersUsd: paidUsd, remainingSupplierPaymentsUsd: amt(remainingSupplier), guestReceiptsToCome: amt(remainingGuests), received: amt(received), expected: amt(expected),
     ownerStillToProvide: remainingSupplier == null || remainingGuests == null ? null : amt(remainingSupplier - remainingGuests),
-    complete: !!(remainingSupplier != null && remainingGuests != null && !paidOther.length && !gaps.length),
-    why: [paidOther.length ? 'payments made in ' + paidOther.map((m) => m.currency + ' ' + (m.cents / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })).join(' and ') + ' are not deducted (no approved reporting rate)' : null,
-      gaps.length ? 'the forecast does not hold ' + gaps.length + ' cost' + (gaps.length === 1 ? '' : 's') + ' yet (see "Costs not yet in the forecast")' : null,
+    complete: !!(remainingSupplier != null && remainingGuests != null && !gaps.length),
+    why: [gaps.length ? 'the forecast does not hold ' + gaps.length + ' cost' + (gaps.length === 1 ? '' : 's') + ' yet (see "Costs not yet in the forecast")' : null,
       remainingGuests == null ? 'the guest figures are not complete just now' : null].filter(Boolean),
-    formula: 'forecast cost − supplier payments made in USD − (expected guest revenue − guest payments received)',
+    formula: 'forecast cost − supplier payments made (USD equivalent at the reference rates) − (booked guest revenue − guest payments received)',
   };
 
-  /* ---- the exceptions: decisions, data, differences ---- */
+  /* ---- the exceptions: data and differences (the Owners' order of 18 Nov 2026 decided the agreement, the additional nights, the
+     additional-person charge, the reporting rates, 009 and 012 — none of them is asked again) ---- */
   const ex = [];
   const add = (kind, area, text, extra) => ex.push({ kind, area, text, ...(extra || {}) });
   /* each check on its own: one that cannot be made is named, the others stand */
   const check = (what, fn) => { try { fn(); } catch (e) { add('DATA', 'Report', 'The check of ' + what + ' could not be made just now.'); } };
-  check('the agreement against 004', () => {
-    for (const a of asArray(C.adjustments)) {
-      const s = asArray(suppliers).find((x) => x.vendor === a.vendor) || {};
-      const nights = asArray(s.stays).flatMap((st) => asArray(st.uncovered).filter((u) => !asArray(u.others).length).map((u) => dmy(u.night) + ' (' + st.stage + ')'));
-      const dup = s.possibleDuplicates && asArray(s.possibleDuplicates.partlyRows).concat(asArray(s.possibleDuplicates.rows));
-      add('DECISION', 'Budget 004', a.vendor + ': 004 rows ' + asArray(a.rows).join(', ') + ' plan ' + usdText(a.planned004.cents) + '; the agreement is ' + usdText(a.contract.cents) +
-        '. The forecast uses the agreement (' + (a.difference.cents >= 0 ? '+' : '−') + usdText(Math.abs(a.difference.cents)) + '); 004 itself is unchanged' +
-        (nights.length ? ' — it has no line for the night' + (nights.length === 1 ? ' ' : 's ') + nights.join(', ') : '') +
-        (dup && dup.length ? '; 004 row' + (dup.length === 1 ? ' ' : 's ') + dup.join(', ') + ' may lie inside the agreement' : '') + '. Update 004?', { amount: a.difference });
-      /* the agreement's own total against the rooms it buys at its rate (every room, every night of its stays) */
-      const stays = new Set(asArray(contracts).map((k) => k.stay));
-      const bought = sum(hotel.filter((h) => stays.has(h.stay) && h.cost).map((h) => h.cost.cents));
-      if (bought && bought !== a.contract.cents) add('DATA', 'Hotel agreement', 'The rooms the agreement buys at its rate come to ' + usdText(bought) + ', its total is ' + usdText(a.contract.cents) + ' — the room plan and the agreement differ.');
+  check('the hotel\'s purchase against 004', () => {
+    if (roomContractMeta && !hp.available) add('DATA', 'Hotel purchase', 'The hotel\'s purchase costs could not be set beside 004: ' + (hp.why || 'not readable') + '. 004 is counted as written.');
+    for (const c of asArray(hp.checks)) add('DATA', 'Hotel purchase', c.text, c.amount ? { amount: c.amount } : null);
+    const s = asArray(suppliers).find((x) => vendor && vendor.test(clean(x.vendor)));
+    if (hp.available && s && s.contract && s.contract.currency === 'USD' && hp.totals && hp.totals.contract.cents !== s.contract.cents) {
+      add('DATA', 'Hotel purchase', s.vendor + ': 007 states ' + usdText(s.contract.cents) + ' for the agreement; its rooms at its rate come to ' + usdText(hp.totals.contract.cents) + '.');
     }
   });
-  check('triple occupancy', () => {
-    const sup = roomContractMeta && roomContractMeta.supplement;
-    if (!sup) return;
-    const over = [];
-    for (const s of asArray(plan)) {
-      const k = asArray(contracts).find((x) => x.stay === s.stay); if (!k) continue;
-      const n = nightsOf(s.from, s.to);
-      for (const u of asArray(s.rooms)) {
-        if (!(k.items === '*' || asArray(k.items).includes(u.item))) continue;
-        const occ = asArray(u.occupants).filter((o) => o && o.guestId).length;
-        if (occ > u.places && n) over.push({ stay: s.stay, label: u.label, roomNo: (rooms012.units[unitId(s.stay, u)] || {}).roomNo || null, extra: occ - u.places, nights: n });
-      }
+  check('the reporting rates', () => {
+    const r = reportingFx.statementReference;
+    if (r && ((r.USD_THB && r.USD_THB !== REPORTING_FX.USD_THB) || (r.USD_EUR && r.USD_EUR !== REPORTING_FX.USD_EUR))) {
+      add('DATA', 'Currency', '011 holds USD/THB ' + r.USD_THB + ', USD/EUR ' + r.USD_EUR + '; the reports use the approved reference rates ' + REPORTING_FX.USD_THB + ' and ' + REPORTING_FX.USD_EUR + '. Statements keep the rate they were issued with.');
     }
-    if (!over.length) return;
-    const cents = sum(over.map((o) => o.extra * o.nights * sup.perRoomNight * 100));
-    add('DECISION', 'Hotel agreement', 'Triple occupancy: ' + over.map((o) => 'room ' + o.label + (o.roomNo ? ' (' + o.roomNo + ')' : '') + ' ' + o.stay + ', ' + o.nights + ' night' + (o.nights === 1 ? '' : 's')).join('; ') +
-      ' — a third person each. The agreement states USD ' + sup.perRoomNight + ' net per room night for it: ' + usdText(cents) + ' if the hotel charges it. Not in 004 and not in the forecast until you confirm it.',
-      { amount: amt(cents), ifAccepted: forecast == null ? null : amt(forecast + cents), source: sup.source });
-  });
-  check('rooms the agreement does not buy', () => {
-    for (const h of hotel) if (contractStays.has(h.stay) && h.uncontracted.length) {
-      add('DECISION', 'Hotel agreement', h.place + ' ' + dmy(h.from) + ' – ' + dmy(h.to) + ': ' + h.uncontracted.length + ' room' + (h.uncontracted.length === 1 ? '' : 's') + ' with guests (' +
-        h.uncontracted.map((u) => u.roomNo || ('room ' + u.label)).join(', ') + ') are not bought by the agreement for these nights. Their hotel cost is not agreed — no figure is assumed; their guests\' payments are counted.');
-    }
-  });
-  check('the currencies', () => {
-    if (paidOther.length || committedAll.some((m) => m.currency !== 'USD')) {
-      add('DECISION', 'Currency', '007 holds commitments and payments in THB (' + committedAll.filter((m) => m.currency !== 'USD').map((m) => m.currency + ' ' + (m.cents / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })).join(', ') +
-        ' committed). They are shown in THB and never added to a USD figure: no reporting rate is approved.' + (indicative ? ' At the statements\' reference rate (' + indicative.rate + ') they would be about ' + usdText(indicative.committedOtherUsd.cents) + ' committed, ' + usdText(indicative.paidOtherUsd.cents) + ' paid.' : '') + ' Approve a reporting rate?');
-    }
-  });
-  check('009', () => {
-    if (!(rates009 && rates009.ok)) return;
-    const rows = asArray(rates009.rows).filter((r) => COUPLE.has(clean(r.Person_ID)) && Number(String(r.Rate_Per_Person_Night).replace(/,/g, '')) > 0);
-    if (rows.length) add('INFO', '009', '009 rows ' + rows.map((r) => r.row).join(', ') + ' still state a rate for the couple; the couple\'s own bookings are complimentary, so they are not charged. Set them to 0 on your order only.');
   });
   check('004', () => {
     for (const l of asArray(budget && budget.lines)) if (Number.isFinite(l.paid) && l.paid > 0) {
@@ -323,20 +549,13 @@ export function financeReportOf({ budget, suppliers, centres, plan, contracts, r
     if (unread.length) add('DATA', 'Budget 004', '004 row' + (unread.length === 1 ? ' ' : 's ') + unread.map((l) => l.row).join(', ') + (unread.length === 1 ? ' is' : ' are') + ' not readable and not in any category above.');
     const catSum = sum(byCategory.filter((c) => c.planned).map((c) => c.planned.cents));
     if (planned != null && byCategory.length && catSum !== planned) add('DATA', 'Budget 004', 'The 004 categories add up to ' + usdText(catSum) + ', the planned lines to ' + usdText(planned) + '.');
+    if (planned != null && Number.isFinite(T.totalPlanned) && Math.round(T.totalPlanned * 100) !== planned) add('DATA', 'Budget 004', '004 ' + (T.totalPlannedCell || 'J2') + ' (TOTAL PLANNED BUDGET) states ' + usdText(Math.round(T.totalPlanned * 100)) + '; its positive lines add up to ' + usdText(planned) + ' — the report uses the lines.');
   });
-  check('012', () => {
-    if (!rooms012.available) add('DATA', '012', 'Google 012 could not be read just now: no room numbers are shown.');
-    for (const u of rooms012.notIn012) add('DATA', '012', u.place + ' · room ' + u.label + ' (' + u.type + ', ' + u.guests.join(', ') + '): booked, but not in 012.');
-    for (const u of rooms012.ambiguous) add('DATA', '012', u.place + ' · room ' + u.label + ' (' + u.guests.join(', ') + '): more than one 012 row fits — no room number until 012 is clear.');
-    for (const r of rooms012.notBooked) add('DATA', '012', '012 room ' + r.roomNo + ' (' + r.roomType + ') lists ' + r.guests.join(', ') + ' — no booked room matches.');
-    for (const d of rooms012.dates) add('DATA', '012', '012 room ' + d.roomNo + ': ' + d.what + ' ' + dmy(d.in012) + ' in 012, ' + dmy(d.booked) + ' as booked.');
-    const said = new Set();
-    for (const u of Object.values(rooms012.units)) for (const v of u.verify.filter((x) => /date/.test(x))) if (!said.has(v)) { said.add(v); add('DATA', '012', v.charAt(0).toUpperCase() + v.slice(1) + '.'); }
-  });
-  check('costs not yet in the forecast', () => { for (const g of gaps.filter((x) => !contractStays.has(x.centre))) add('DATA', 'Costs not yet in the forecast', g.place + ': ' + g.text); });
+  check('costs not yet in the forecast', () => { for (const g of gaps.filter((x) => !x.hotel && !contractStays.has(x.centre))) add('DATA', 'Costs not yet in the forecast', g.place + ': ' + g.text); });
   if (roomContractMeta && roomContractMeta.agreementDates) add('INFO', 'Hotel agreement', roomContractMeta.agreementDates);
 
   const approvedM = amt(approved);
+  const P = D.position || {};
   return {
     version: REPORT_VERSION,
     approved: approvedM ? { ...approvedM, cell: T.totalBudgetCell || null } : null,
@@ -346,7 +565,10 @@ export function financeReportOf({ budget, suppliers, centres, plan, contracts, r
     varianceToApproved: approved != null && forecast != null ? amt(forecast - approved) : null,
     plannedVsApproved: approved != null && planned != null ? amt(planned - approved) : null,
     budgetLeftSheet: Number.isFinite(T.budgetLeft) ? { ...amt(Math.round(T.budgetLeft * 100)), cell: T.budgetLeftCell || null } : null,
-    committed: committedAll, paid: paidAll, byCategory, cash, indicative, hotel, rooms012,
+    committed: committedAll, paid: paidAll, committedUsd, paidUsd, reportingFx, byCategory, cash, purchase: hp, hotel, rooms012,
+    /* the projected financial position: booked guest revenue − forecast project cost (negative: what the Owners fund) */
+    position: P.stated ? { stated: true, net: amt(-P.projectedOwnerFunded.cents), today: P.currentOwnerFunded ? amt(-P.currentOwnerFunded.cents) : null, coverage: P.coverageProjected,
+      complete: !gaps.length, formula: 'booked guest revenue − forecast project cost' } : { stated: false, why: P.why || 'not stated just now' },
     exceptions: ex,
   };
 }
