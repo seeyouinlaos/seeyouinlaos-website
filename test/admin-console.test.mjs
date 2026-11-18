@@ -17,6 +17,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
+import zlibSync from 'node:zlib';
 import { register } from 'node:module';
 import { pathToFileURL } from 'node:url';
 import path from 'node:path';
@@ -72,8 +73,15 @@ function doState() {
   };
 }
 const kv = (o) => ({ get: async (k) => (o[k] === undefined ? null : (typeof o[k] === 'string' ? o[k] : JSON.stringify(o[k]))) });
+/* the approved payment codes the document store holds (synthetic, 1 × 1): the first render of a statement embeds its method's code */
+const QR_PNG = (() => {
+  const crc = (b) => { let c, x = 0xffffffff; for (let n = 0; n < b.length; n++) { c = (x ^ b[n]) & 0xff; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; x = (x >>> 8) ^ c; } return (x ^ 0xffffffff) >>> 0; };
+  const chunk = (t, d) => { const l = Buffer.alloc(4); l.writeUInt32BE(d.length); const td = Buffer.concat([Buffer.from(t), d]); const c = Buffer.alloc(4); c.writeUInt32BE(crc(td)); return Buffer.concat([l, td, c]); };
+  const ih = Buffer.alloc(13); ih.writeUInt32BE(1, 0); ih.writeUInt32BE(1, 4); ih[8] = 8; ih[9] = 6;
+  return Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), chunk('IHDR', ih), chunk('IDAT', zlibSync.deflateSync(Buffer.from([0, 0, 0, 0, 255]))), chunk('IEND', Buffer.alloc(0))]);
+})();
 function r2() {
-  const map = new Map(); let puts = 0;
+  const map = new Map([['billing/qr/paypal-eur.png', new Uint8Array(QR_PNG)], ['billing/qr/promptpay-thb.jpg', new Uint8Array([0xff, 0xd8, 0xff, 0xc0, 0x00, 0x11, 0x08, 0x00, 0x01, 0x00, 0x01, 0x03, 0x01, 0x22, 0x00, 0x02, 0x11, 0x01, 0x03, 0x11, 0x01, 0xff, 0xd9])]]); let puts = 0;
   return { _puts: () => puts, put: async (k, v) => { puts++; map.set(k, new Uint8Array(v)); },
     get: async (k) => { if (!map.has(k)) return null; const b = map.get(k); return { body: b, arrayBuffer: async () => b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength) }; } };
 }
@@ -1303,4 +1311,51 @@ test('THE GUEST\'S OWN WORD · the console overview reads the registration only 
   assert.equal(o.status, 200);
   assert.deepEqual(seen.filter((k) => /^(reg|contact):/.test(k)).sort(), ['contact:INV-T2', 'reg:INV-T2']);
   assert.equal(o.j.holders.find((x) => x.Holder_ID === 'INV-T2').method.channel, 'PROMPTPAY_THB');
+});
+
+/* ------------------------------------------------------------ the complete statement (Owners, 18 Nov 2026) */
+test('PDF 1.2 · the first render carries the payment section from the authoritative source (method frozen with the revision, amount at its frozen rate, recipient, reference, the approved payment code); guest and admin get the very same bytes; an existing original is never rendered again', async () => {
+  const zlib = await import('node:zlib');
+  const crc = (b) => { let c, x = 0xffffffff; for (let n = 0; n < b.length; n++) { c = (x ^ b[n]) & 0xff; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; x = (x >>> 8) ^ c; } return (x ^ 0xffffffff) >>> 0; };
+  const chunk = (t, d) => { const l = Buffer.alloc(4); l.writeUInt32BE(d.length); const td = Buffer.concat([Buffer.from(t), d]); const c = Buffer.alloc(4); c.writeUInt32BE(crc(td)); return Buffer.concat([l, td, c]); };
+  const ih = Buffer.alloc(13); ih.writeUInt32BE(2, 0); ih.writeUInt32BE(2, 4); ih[8] = 8; ih[9] = 6;
+  const QR = Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), chunk('IHDR', ih), chunk('IDAT', zlib.deflateSync(Buffer.from([0, 0, 0, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 255, 0, 0, 0, 0]))), chunk('IEND', Buffer.alloc(0))]);
+  const W = world(); await approveGate(W.st);
+  await W.docs.put('billing/qr/paypal-eur.png', QR);   /* this test's own code (2 × 2) replaces the default one — one put */
+  const h = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+  assert.equal((await hit(W, GROOM, 'issue', { holderId: 'INV-T1', expectedProposal: h.j.preview.proposalHash })).status, 200);
+  const sid = (await hit(W, GROOM, 'admin/holder?holder=INV-T1')).j.issued.Settlement_ID;
+  const a = await hit(W, GROOM, 'pdf?holder=INV-T1&rev=1'), g = await hit(W, GUEST, 'pdf?rev=1');
+  assert.equal(a.status, 200); assert.deepEqual(g.bytes, a.bytes, 'the guest and the Owners: the very same file');
+  const t = Buffer.from(a.bytes).toString('latin1');
+  assert.match(t, /\/Producer \(guest-settlement-pdf\/1\.2\)/);
+  for (const s of ['(How to pay)', '(PayPal, in euros \\(EUR\\) \\(as issued\\))', '(Recipient)', '(Suthep)', '(Reference no.)', '(' + sid + ')', '(Statement amount)', '(EUR 347.10  \\(USD 390.00 at this statement\'s frozen rate\\))']) assert.ok(t.includes(s), s);
+  assert.match(t, /\/Subtype \/Image \/Width 2 \/Height 2 \/ColorSpace \/DeviceRGB/); assert.match(t, /\/Im1 Do Q/);
+  assert.doesNotMatch(t, /\(1 night\)/, 'the train is a seat, never a night');
+  assert.equal(W.docs._puts(), 2, 'the code once, the PDF once — write-once');
+  /* AN ORIGINAL ALREADY PRODUCED stays the file it is — never rendered again by a later writer */
+  const W2 = world(); await approveGate(W2.st);
+  const h2 = await hit(W2, GROOM, 'admin/holder?holder=INV-T1');
+  await hit(W2, GROOM, 'issue', { holderId: 'INV-T1', expectedProposal: h2.j.preview.proposalHash });
+  const sid2 = (await hit(W2, GROOM, 'admin/holder?holder=INV-T1')).j.issued.Settlement_ID;
+  const ORIGINAL = new Uint8Array(Buffer.from('%PDF-1.4\n% the original as first issued (writer 1.1)\n%%EOF\n', 'latin1'));
+  await W2.docs.put('settlements/' + sid2 + '/V1.pdf', ORIGINAL);
+  const o = await hit(W2, GROOM, 'pdf?holder=INV-T1&rev=1');
+  assert.deepEqual(o.bytes, ORIGINAL, 'byte for byte the original'); assert.deepEqual((await hit(W2, GUEST, 'pdf?rev=1')).bytes, ORIGINAL);
+  assert.equal(W2.docs._puts(), 1, 'nothing re-rendered, nothing overwritten');
+});
+
+test('PDF 1.2 · FAIL CLOSED: when the approved payment code cannot be read just now, no incomplete original is frozen — the download says "try again", nothing is stored; once it can be read, the complete original is produced', async () => {
+  const W = world(); await approveGate(W.st);
+  const h = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+  await hit(W, GROOM, 'issue', { holderId: 'INV-T1', expectedProposal: h.j.preview.proposalHash });
+  const realGet = W.docs.get;
+  W.docs.get = async (k) => (k === 'billing/qr/paypal-eur.png' ? null : realGet(k));
+  const r = await hit(W, GROOM, 'pdf?holder=INV-T1&rev=1');
+  assert.equal(r.status, 503, 'not produced — try again');
+  assert.equal(W.docs._puts(), 0, 'nothing stored');
+  W.docs.get = realGet;
+  const ok = await hit(W, GROOM, 'pdf?holder=INV-T1&rev=1');
+  assert.equal(ok.status, 200); assert.match(Buffer.from(ok.bytes).toString('latin1'), /\/Subtype \/Image/);
+  assert.equal(W.docs._puts(), 1);
 });

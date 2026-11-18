@@ -61,6 +61,17 @@
    stored for an issued Revision is never rendered again (billing-routes.js ·
    issuedPdf reads the write-once object), so it keeps the bytes it was issued
    with; its /Producer names the writer version that made it.
+
+   LAYOUT 1.2 (Owners, 18 Nov 2026). (1) THE UNIT OF A LINE IS ITS OWN: nights
+   only where the rate is per night (accommodation, an extra bed or additional
+   person priced per night); every other line — a temple offering, a train
+   seat, a one-time service — shows its quantity, never "night". (2) HOW TO PAY:
+   the payment section the guest's statement page shows — method, the amount in
+   the payment currency at this statement's frozen rate, the due date, the
+   payee, the bank account or the approved payment code (QR), the reference —
+   printed VERBATIM from what the caller read from the authoritative payment
+   source (src/billing-routes.js · paymentForPdf); this module still writes no
+   payment detail of its own. A PDF already produced keeps its bytes.
    ========================================================================== */
 
 import {
@@ -356,8 +367,22 @@ function labelFor(map, id, fallback) {
   return name || key || fallback;
 }
 
-/** Nights and quantity exactly as the engine recorded them on the line. */
+/** The line's own unit (layout 1.2): what the engine multiplied by — nights where the charge is per night (a nightly basis, or a
+ *  named rate that carries payable nights), otherwise the quantity exactly as the line holds it; never "night" for a temple
+ *  offering, a train seat or a one-time service. */
+const PER_NIGHT = /PER_NIGHT$/;
 function unitsOf(line) {
+  const basis = clean(line.Rate_Basis);
+  if (!PER_NIGHT.test(basis)) {
+    /* a line without a basis or an amount (a review line) shows no figure; never an invented one */
+    if (!basis || line.amountCents == null) return '';
+    const q = line.quantity != null && Number.isFinite(Number(line.quantity)) && Number(line.quantity) > 0 ? Number(line.quantity) : null;
+    /* a named (009) rate on a product that is not per night is charged rate × payable nights × quantity (engine) — the figure is
+       that multiplier, the word is never "night" (Owners: a temple offering is a quantity, never nights) */
+    const pn = line.payableNights != null && Number.isFinite(Number(line.payableNights)) ? Number(line.payableNights) : null;
+    if (clean(line.rateSource) === 'SPECIAL_RATE' && pn != null) return String(Math.round(pn * (q == null ? 1 : q) * 1000) / 1000);
+    return q == null ? '' : String(q);
+  }
   const bits = [];
   const payable = Number(line.payableNights);
   const nights = Number(line.nights);
@@ -681,6 +706,76 @@ function reviewSection(doc) {
   doc.y = top - height - 14;
 }
 
+/* HOW TO PAY (layout 1.2 · Owners, 18 Nov 2026): the caller's payment facts, printed as given — the guest page's own words */
+const PAY_HEADING = 'How to pay';
+const PAY_WORDS = Object.freeze({
+  SEPA_EUR: { method: 'Bank transfer (SEPA), in euros (EUR)', how: 'Transfer the amount to pay by SEPA bank transfer, and add your reference to the transfer.', payee: 'Account holder' },
+  PAYPAL_EUR: { method: 'PayPal, in euros (EUR)', how: 'Scan the code with the PayPal app and send the amount to pay. Please add your reference as a note.', payee: 'Recipient' },
+  PROMPTPAY_THB: { method: 'PromptPay, in Thai baht (THB)', how: 'Scan the code with your banking app (PromptPay) and send the amount to pay.', payee: 'Recipient' },
+});
+const PAY_PROFILE = 'My Profile always shows this statement\'s current balance and the current way to pay; a payment counts once Guest Relations has verified it.';
+function money2(cur, n) { return cur + ' ' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function paymentSection(doc, p) {
+  if (!p || typeof p !== 'object') return;
+  const c = doc.col, w = PAY_WORDS[clean(p.method)];
+  const rows = [];
+  /* a version replaced by a later one, or a statement with nothing payable: no instruction to pay — said in one sentence */
+  const only = p.supersededBy ? 'This version was replaced by version ' + clean(p.supersededBy) + '. My Profile shows the current statement and how to pay it.'
+    : p.nothingDue ? 'Nothing is payable on this statement.' : null;
+  if (only) {
+    ensure(doc, 40);
+    drawText(doc, c.left, doc.y, PAY_HEADING, BOLD, 9); doc.y -= 13;
+    drawParagraph(doc, c.left, only, c.width, REG, 8.5, 11, INK); doc.y -= 12;
+    return;
+  }
+  if (!w) {
+    ensure(doc, 40);
+    drawText(doc, c.left, doc.y, PAY_HEADING, BOLD, 9); doc.y -= 13;
+    drawParagraph(doc, c.left, 'Guest Relations will tell you how to pay this statement.', c.width, REG, 8.5, 11, INK); doc.y -= 12;
+    return;
+  }
+  /* the method frozen with this revision, the statement's own amount at its frozen rate — a frozen document never states a balance */
+  rows.push(['Payment method', w.method + ' (as issued)']);
+  if (p.amount && Number.isFinite(Number(p.amount.amount)) && clean(p.amount.currency)) rows.push(['Statement amount', money2(clean(p.amount.currency), p.amount.amount) + (p.totalUsd != null ? '  (' + money2(ACCOUNTING_CURRENCY, p.totalUsd) + ' at this statement\'s frozen rate)' : '')]);
+  if (clean(p.dueDate)) rows.push(['Pay by', clean(p.dueDate)]);
+  if (clean(p.recipient)) rows.push([w.payee, clean(p.recipient)]);
+  if (clean(p.method) === 'SEPA_EUR') rows.push(['IBAN', clean(p.iban) ? clean(p.iban).replace(/\s+/g, '').replace(/(.{4})/g, '$1 ').trim() : 'shown in My Profile, under Your statement']);
+  if (clean(p.reference)) rows.push(['Reference no.', clean(p.reference)]);
+  const img = p.qr && p.qr.width > 0 && p.qr.height > 0 && p.qr.data ? p.qr : null;
+  const wantsQr = clean(p.method) === 'PAYPAL_EUR' || clean(p.method) === 'PROMPTPAY_THB';
+  /* a size a phone reads from the screen and from an A4 print: the PayPal code alone, the PromptPay slip with its code */
+  let qrW = clean(p.method) === 'PROMPTPAY_THB' ? 175 : 140, qrH = img ? Math.round(qrW * img.height / img.width) : 0;
+  /* never taller than a page can hold: a tall image is scaled down as a whole, never cut */
+  const maxH = Math.max(120, doc.page.h - 260);
+  if (qrH > maxH) { qrW = Math.round(qrW * maxH / qrH); qrH = maxH; }
+  const textH = 13 + rows.length * 12 + 4 + wrapText(w.how, REG, 8.5, c.width).length * 11 + 6 + wrapText(PAY_PROFILE, REG, 8, c.width).length * 10;
+  ensure(doc, textH + (img ? qrH + 10 : wantsQr ? 14 : 0) + 8);
+  drawText(doc, c.left, doc.y, PAY_HEADING, BOLD, 9);
+  doc.y -= 13;
+  for (const [k, v] of rows) {
+    drawText(doc, c.left, doc.y, k, REG, 8.5, SOFT);
+    drawText(doc, c.left + 110, doc.y, fitText(v, k === 'IBAN' || k === 'Reference no.' ? MONO : REG, 8.5, c.width - 110), k === 'IBAN' || k === 'Reference no.' ? MONO : REG, 8.5);
+    doc.y -= 12;
+  }
+  doc.y -= 4;
+  drawParagraph(doc, c.left, w.how, c.width, REG, 8.5, 11, INK);
+  doc.y -= 6;
+  if (img) {
+    /* the approved payment code, as the statement page shows it — the caller's image, never one made here */
+    doc.images = doc.images || [];
+    if (!doc.images.includes(img)) doc.images.push(img);
+    const name = 'Im' + (doc.images.indexOf(img) + 1);
+    (doc.pageImages = doc.pageImages || new Map()).set(doc.ops, (doc.pageImages.get(doc.ops) || new Set()).add(name));
+    put(doc, 'q ' + num(qrW) + ' 0 0 ' + num(qrH) + ' ' + num(c.left) + ' ' + num(doc.y - qrH) + ' cm /' + name + ' Do Q');
+    doc.y -= qrH + 10;
+  } else if (wantsQr) {
+    drawText(doc, c.left, doc.y, 'The payment code is shown in My Profile, under Your statement.', REG, 8.5, SOFT);
+    doc.y -= 14;
+  }
+  drawParagraph(doc, c.left, PAY_PROFILE, c.width, REG, 8, 10, SOFT);
+  doc.y -= 12;
+}
+
 /** Caller-supplied paragraphs (payment instructions, for instance). They are
  *  printed verbatim: this module never writes a payment detail of its own. */
 function notesSection(doc, o) {
@@ -718,7 +813,7 @@ function footers(doc) {
 
 /* ------------------------------------------------------------ the PDF file */
 
-export const PDF_WRITER_VERSION = 'guest-settlement-pdf/1.1';
+export const PDF_WRITER_VERSION = 'guest-settlement-pdf/1.2';
 
 /* FNV-1a over the document body, four times from four offsets, which gives the
  * 32 hex digits the trailer /ID wants. It is a fingerprint of this document
@@ -767,12 +862,22 @@ function assemble(doc, meta) {
   objects[4] = fontObject('Helvetica-Bold');
   objects[5] = fontObject('Courier');
   objects[6] = infoObject(meta);
+  /* the images (layout 1.2: the payment code) follow the pages; binary data as single bytes, like every character of the file */
+  const images = doc.images || [], FIRST_IMAGE_OBJ = FIRST_PAGE_OBJ + pageCount * 2;
+  images.forEach((img, k) => {
+    let data = '';
+    for (let i = 0; i < img.data.length; i += 8192) data += String.fromCharCode.apply(null, img.data.subarray ? img.data.subarray(i, i + 8192) : img.data.slice(i, i + 8192));
+    objects[FIRST_IMAGE_OBJ + k] = '<< /Type /XObject /Subtype /Image /Width ' + img.width + ' /Height ' + img.height + ' /ColorSpace /' + (img.colorSpace === 'DeviceGray' ? 'DeviceGray' : 'DeviceRGB') +
+      ' /BitsPerComponent 8 /Filter /' + (img.filter === 'DCTDecode' ? 'DCTDecode' : img.filter === 'RunLengthDecode' ? 'RunLengthDecode' : 'FlateDecode') + ' /Length ' + data.length + ' >>\nstream\n' + data + '\nendstream';
+  });
 
   for (let i = 0; i < pageCount; i++) {
     const pageObj = FIRST_PAGE_OBJ + i * 2;
     const streamObj = pageObj + 1;
+    const used = doc.pageImages && doc.pageImages.get(doc.pages[i]);
+    const xobj = used && used.size ? ' /XObject << ' + [...used].map((n) => '/' + n + ' ' + (FIRST_IMAGE_OBJ + Number(n.slice(2)) - 1) + ' 0 R').join(' ') + ' >>' : '';
     objects[pageObj] = '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ' + num(w) + ' ' + num(h) + '] ' +
-      '/Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents ' + streamObj + ' 0 R >>';
+      '/Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >>' + xobj + ' >> /Contents ' + streamObj + ' 0 R >>';
     /* uncompressed, so the stream length is the operator text itself and the
      * file stays inspectable with nothing but a text editor */
     const stream = doc.pages[i].join('\n');
@@ -809,7 +914,10 @@ function assemble(doc, meta) {
  * `snapshot` is the object src/billing/settlement.js · buildSnapshot returns.
  * Every figure on the page is read from it; nothing is derived here.
  *
- * `opts` carries display text only, never money:
+ * `opts` carries display text only — never a figure of its own making:
+ *   payment       { method, amount, totalUsd, dueDate, recipient, iban, reference, qr } — the payment section (layout 1.2), read
+ *                 by the caller from the authoritative payment source and the server's own conversion (settlement.js ·
+ *                 inPreferredCurrency at the Snapshot's frozen rate); printed as given
  *   persons       { Person_ID: 'name' }  — the Snapshot holds ids, not names
  *   items         { Item_ID: 'name' }
  *   notes         [ 'paragraph', ... ]   — printed verbatim, e.g. how to pay
@@ -856,6 +964,7 @@ export function renderSettlementPdf(snapshot, opts) {
   if (totalMissing || amountMissing) reviewSection(doc);
   blockBSection(doc, blockB, snapshot, o);
   fxSection(doc, snapshot);
+  paymentSection(doc, o.payment);
   notesSection(doc, o);
   footers(doc);
 

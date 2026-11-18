@@ -683,3 +683,34 @@ test('REVIEW · Finance: A executive summary, B budget vs actual, C revenue, D h
   assert.doesNotMatch(rv.root.innerHTML, /Executive summary|Approved budget/, 'costs and budget stay in Finance');
   assert.match(rv.A.csv.receivables(), /INV-T1/);
 });
+
+/* ---------------------------------------------------------------- DOWNLOAD ORIGINAL PDF (Owners, 18 Nov 2026) */
+test('ADMIN UI · Download Original PDF: in a guest\'s row (the current version, the row is not opened) and per version in the guest view (current and superseded originals) — the guest\'s own file from /api/billing/pdf, nothing issued or sent', async () => {
+  const pdfs = [];
+  const answers = { 'admin/overview': OVERVIEW, 'admin/status': statusAnswer, 'admin/readiness': { ok: true, rows: [] },
+    pdf: (url) => { pdfs.push(url); return { ok: true, status: 200, json: async () => ({}), blob: async () => ({ size: 1 }) }; } };
+  const L1 = load(answers);
+  await tick();
+  const b = el(L1.root, 'data-ab-row-pdf', 'INV-T1');
+  assert.ok(b, 'the row of the issued statement offers its original'); assert.equal(b.getAttribute('data-ab-pdf-rev'), '1');
+  assert.match(L1.root.innerHTML, /Download Original PDF · V1/);
+  assert.equal((L1.root.innerHTML.match(/data-ab-row-pdf=/g) || []).length, 1, 'only issued statements');
+  let stopped = false;
+  b.onclick({ stopPropagation: () => { stopped = true; } }); await tick();
+  assert.equal(stopped, true, 'the row itself is not opened');
+  assert.match(pdfs[0], /^\/api\/billing\/pdf\?holder=INV-T1&rev=1$/);
+  /* the guest view: every version, each its own original */
+  const issued = HOLDER({ issued: { Settlement_ID: 'S-T2-0001', revision: 2, issueDate: '2026-10-09', dueDate: '2026-10-30', total: 245, hostedValue: 0, lines: [], fx: { FX_USD_EUR: 0.89, FX_USD_THB: 33.68 }, method: 'PAYPAL_EUR', currency: 'EUR' },
+    settlement: { Settlement_ID: 'S-T2-0001', state: 'ISSUED', latestRevision: 2, revisions: [
+      { Revision: 1, Revision_State: 'SUPERSEDED', Issue_Date: '2026-10-07', Due_Date: '2026-10-28', total: 230, issuedAt: '2026-10-07T10:00:00Z', issuedBy: 'GROOM', supersededAt: '2026-10-09T10:00:00Z' },
+      { Revision: 2, Revision_State: 'ISSUED', Issue_Date: '2026-10-09', Due_Date: '2026-10-30', total: 245, issuedAt: '2026-10-09T10:00:00Z', issuedBy: 'BRIDE', supersededAt: null }] } });
+  const L2 = load({ ...answers, 'admin/holder': issued, 'admin/owner-bookings': { ok: true, entries: [] } }, { hash: '#holder=INV-T2' });
+  await tick();
+  el(L2.root, 'data-ab-act', 'view').onclick({}); await tick();
+  const h = L2.root.innerHTML;
+  assert.match(h, /data-ab-act="download"[^>]*>Download Original PDF</);
+  assert.match(h, /V1 · superseded \(historical original\)[\s\S]*?Download Original PDF · V1/); assert.match(h, /V2 · current[\s\S]*?Download Original PDF · V2/);
+  el(L2.root, 'data-ab-pdf', '1').onclick({}); await tick();
+  assert.ok(pdfs.some((u) => u === '/api/billing/pdf?holder=INV-T2&rev=1'), 'the superseded original, by its own version');
+  assert.ok(!L1.calls.concat(L2.calls).some((c) => c.method === 'POST'), 'a download writes nothing');
+});
