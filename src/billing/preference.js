@@ -19,10 +19,21 @@
      3. the guest register: Google 006_Guestlist, column "Nationality", for the
         person the invitation names (auth index · c = the 006 ID). No
         billing-specific nationality field exists or is created.
+     4. THE GUEST'S OWN WORD (Owners, 18 Nov 2026 — "Registrierung nutzen"):
+        where the person's 006 row holds NO nationality, the nationality the
+        guest stated in their own SENT registration routes — read in the order
+        Guest Relations' e-mail reads it (registration.personal, then
+        guestRecord.contact, then registration.contact) and with a stricter
+        rule than the register's (registrationNationalityKind: free text).
+        006 always wins where it holds one; a person 006 does not hold is not
+        routed by it; Thai beside any other word, a word not recognised, the
+        guest's current contact naming another nationality, or a store that
+        cannot be read, stay undetermined.
 
-   WHAT IS NEVER GUESSED. A blank nationality, a person the register does not
-   hold, and a mixed entry that includes Thai leave the route UNDETERMINED
-   unless an explicit person-level decision covers it (the couple; INV-G023):
+   WHAT IS NEVER GUESSED. A blank nationality (in 006 and in the guest's own sent
+   registration), a person the register does not hold, and a mixed entry that
+   includes Thai leave the route UNDETERMINED unless an explicit person-level
+   decision covers it (the couple; INV-G023):
    nothing is chosen for the guest and the statement cannot be issued until a
    BILLING_ADMIN states the method. A mixed entry WITHOUT Thai is non-Thai.
 
@@ -106,7 +117,7 @@ export function nationalityKind(nationality) {
  * The approved route of one Holder: { route, default, options, basis } or
  * { route: null, reason } when it cannot be determined without a guess.
  */
-export function routeFor({ holderId, nationality }) {
+export function routeFor({ holderId, nationality, stated }) {
   const id = clean(holderId);
   const admin = BILLING_ADMINS.find((a) => a.invitationId === id);
   if (admin && ROLE_ROUTE[admin.role]) return { ...PAYMENT_ROUTE[ROLE_ROUTE[admin.role]], basis: 'OWNER_ROLE' };
@@ -114,7 +125,74 @@ export function routeFor({ holderId, nationality }) {
   const nat = nationalityKind(nationality);
   if (nat.kind === 'THAI') return { ...PAYMENT_ROUTE.THB, basis: 'NATIONALITY_THAI' };
   if (nat.kind === 'NON_THAI') return { ...PAYMENT_ROUTE.EUR, basis: 'NATIONALITY_NON_THAI' };
+  /* 4 · the person's 006 row is there but holds no nationality: the guest's own sent registration (Owners, 18 Nov 2026) */
+  if (nat.reason === 'NATIONALITY_MISSING' && stated) {
+    if (!stated.found) {
+      const why = clean(stated.reason);
+      return { route: null, default: null, options: [], basis: null, reason: /^REGISTRATION_/.test(why) ? why : nat.reason };
+    }
+    const own = registrationNationalityKind(stated.value);
+    if (own.kind === 'THAI') return { ...PAYMENT_ROUTE.THB, basis: 'REGISTRATION_THAI' };
+    if (own.kind === 'NON_THAI') return { ...PAYMENT_ROUTE.EUR, basis: 'REGISTRATION_NON_THAI' };
+    return { route: null, default: null, options: [], basis: null, reason: own.reason };
+  }
   return { route: null, default: null, options: [], basis: null, reason: nat.reason };
+}
+
+/* THE GUEST'S FREE TEXT (Owners, 18 Nov 2026): stricter than the register's spellings — THB only for a word that IS "Thai"
+   (English, German or Thai script); undetermined when a Thai word stands beside anything else; EUR only for a plain
+   Latin-script nationality that names no Thai and is no placeholder; anything else (another script, a code, "-", "n/a") is
+   not routed: Guest Relations states the method. */
+const THAI_WORDS = new Set(['thai', 'thailand', 'thailändisch', 'thailaendisch', 'thailänder', 'thailaender', '\u0e44\u0e17\u0e22', '\u0e2a\u0e31\u0e0d\u0e0a\u0e32\u0e15\u0e34\u0e44\u0e17\u0e22']);
+const PLACEHOLDER = /^(n\/?a|na|none|nil|null|unknown|unbekannt|tbd|tba|kein|keine|no|-+|\?+|\.+)$/i;
+export function registrationNationalityKind(value) {
+  const raw = clean(value);
+  if (!raw || PLACEHOLDER.test(raw)) return { kind: null, reason: 'NATIONALITY_MISSING' };
+  const parts = raw.toLowerCase().split(/[\s,\/;&+\-()\[\]]+|\band\b|\bund\b|\u0e41\u0e25\u0e30/).map(clean).filter(Boolean);
+  if (!parts.length) return { kind: null, reason: 'NATIONALITY_MISSING' };
+  const thai = parts.filter((p) => THAI_WORDS.has(p)).length;
+  if (thai === parts.length) return { kind: 'THAI', reason: null };
+  if (thai > 0 || /thai|\u0e44\u0e17\u0e22/i.test(raw)) return { kind: null, reason: 'NATIONALITY_MIXED_WITH_THAI' };
+  /* Thai in another language or as a code (Thaï, Tailandés, Tailandese, THA, Siamese) is never read as non-Thai */
+  if (/thai|tailand|\btha\b|siam/i.test(raw.normalize('NFD').replace(/\p{M}/gu, ''))) return { kind: null, reason: 'REGISTRATION_NATIONALITY_UNRECOGNISED' };
+  if (!/^[A-Za-z\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u00ff'.\s,\/;&+\-()]+$/.test(raw) || parts.some((p) => PLACEHOLDER.test(p) || /\d/.test(p))
+      || !parts.some((p) => /[a-z\u00e0-\u00ff]{3,}/.test(p))) {
+    return { kind: null, reason: 'REGISTRATION_NATIONALITY_UNRECOGNISED' };
+  }
+  return { kind: 'NON_THAI', reason: null };
+}
+
+/**
+ * THE GUEST'S OWN WORD, read from what the guest SENT (Owners, 18 Nov 2026): the sent registration record (`reg:<invitation>`)
+ * and the contact under the same invitation (`contact:<invitation>`), both as stored — for the person this invitation names
+ * only. Answers { found, value } or { found: false, reason } — never a guess:
+ *   a store that cannot be read → REGISTRATION_UNREADABLE · no sent registration → NOT_SENT · a record of another person →
+ *   REGISTRATION_OTHER_PERSON · the current contact naming another nationality → REGISTRATION_NATIONALITY_CONFLICT ·
+ *   nothing stated → NATIONALITY_MISSING. The contact is a check only; the value is always the one SENT.
+ */
+export function statedNationality({ record, contact, guestId, contactId, unreadable }) {
+  if (unreadable) return { found: false, value: null, reason: 'REGISTRATION_UNREADABLE' };
+  const reg = record && record.registration && typeof record.registration === 'object' ? record.registration : null;
+  if (!reg || !clean(record.submissionId)) return { found: false, value: null, reason: 'NOT_SENT' };
+  const g = clean(guestId), cid = clean(contactId);
+  const personal = reg.personal && typeof reg.personal === 'object' ? reg.personal : {};
+  const ids = [record.guestId, reg.guestId, personal.guestId].map(clean).filter(Boolean);
+  if (!g || !ids.length || ids.some((x) => x !== g) || (clean(reg.contactId) && cid && clean(reg.contactId) !== cid)) {
+    return { found: false, value: null, reason: 'REGISTRATION_OTHER_PERSON' };
+  }
+  /* what was SENT, in the order Guest Relations' e-mail reads it (src/mail-templates.js) */
+  const gr = reg.guestRecord && typeof reg.guestRecord === 'object' ? reg.guestRecord : {};
+  const gc = gr.contact && typeof gr.contact === 'object' ? gr.contact : {};
+  const rc = reg.contact && typeof reg.contact === 'object' ? reg.contact : {};
+  const sent = clean(personal.nationality) || clean(gc.nationality) || clean(rc.nationality);
+  if (!sent) return { found: false, value: null, reason: 'NATIONALITY_MISSING' };
+  /* the guest's current contact is a check, never a source: naming another nationality now, it leaves the route to Guest Relations */
+  const now = contact && typeof contact === 'object' && (!clean(contact.guestId) || clean(contact.guestId) === g) ? clean(contact.nationality) : '';
+  if (now) {
+    const a = registrationNationalityKind(sent), b = registrationNationalityKind(now);
+    if (a.kind !== b.kind || a.reason !== b.reason) return { found: false, value: null, reason: 'REGISTRATION_NATIONALITY_CONFLICT' };
+  }
+  return { found: true, value: sent, reason: null };
 }
 
 /**
