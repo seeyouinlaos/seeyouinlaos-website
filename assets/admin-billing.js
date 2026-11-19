@@ -1266,15 +1266,23 @@
       }));
     }
     if (kind === 'reconciliation-004') return reconCsv(meta);
-    var rows = (rep.byCategory || []).map(function (c) { return [c.category, num(c.gross), num(c.neutralising), num(c.planned), num(c.forecast), num(c.variance), curOf(c.committed, 'USD'), curOf(c.committed, 'THB'), c.committedUsd && c.committedUsd.total ? num(c.committedUsd.total) : null,
-      curOf(c.paid, 'USD'), curOf(c.paid, 'THB'), c.paidUsd && c.paidUsd.total ? num(c.paidUsd.total) : null, (c.suppliers || []).join(', ')]; });
-    rows.push(['The wedding (total)', num(rep.plannedGross), num(rep.plannedNeutralising), num(rep.planned), num(rep.forecast), rep.forecast && rep.planned ? (rep.forecast.cents - rep.planned.cents) / 100 : null, curOf(rep.committed, 'USD'), curOf(rep.committed, 'THB'),
-      rep.committedUsd && rep.committedUsd.total ? num(rep.committedUsd.total) : null, curOf(rep.paid, 'USD'), curOf(rep.paid, 'THB'), rep.paidUsd && rep.paidUsd.total ? num(rep.paidUsd.total) : null, '']);
-    rows.push(['Approved budget (004 ' + ((rep.approved && rep.approved.cell) || 'A2') + ', total only)', null, null, num(rep.approved), null, rep.varianceToApproved ? num(rep.varianceToApproved) : null, null, null, null, null, null, null, 'variance = forecast − approved']);
+    /* the row kind first (HS-012.2): a column is summed over CATEGORY rows only — a HOTEL row is part of the category above it */
+    var csvRow = function (kind, label, c) { return [kind, label, num(c.gross), num(c.neutralising), num(c.planned), num(c.forecast), num(c.variance), curOf(c.committed, 'USD'), curOf(c.committed, 'THB'), c.committedUsd && c.committedUsd.total ? num(c.committedUsd.total) : null,
+      curOf(c.paid, 'USD'), curOf(c.paid, 'THB'), c.paidUsd && c.paidUsd.total ? num(c.paidUsd.total) : null, (c.suppliers || []).join(', '),
+      c.revenue ? num(c.revenue.booked) : null, c.revenue ? num(c.revenue.invoiced) : null, c.revenue ? num(c.revenue.received) : null, c.revenue ? num(c.revenue.outstanding) : null]; };
+    var split = hotelsUsable(rep), rows = [];
+    (rep.byCategory || []).forEach(function (c) {
+      rows.push(csvRow('CATEGORY', c.category, c));
+      if (c.category === 'Accommodation' && split) rep.byHotel.wedding.forEach(function (h) { rows.push(csvRow('HOTEL (part of the category above)', h.label + (h.rowsText ? ' · 004 rows ' + h.rowsText : ''), h)); });
+    });
+    rows.push(['TOTAL', 'The wedding (total)', num(rep.plannedGross), num(rep.plannedNeutralising), num(rep.planned), num(rep.forecast), rep.forecast && rep.planned ? (rep.forecast.cents - rep.planned.cents) / 100 : null, curOf(rep.committed, 'USD'), curOf(rep.committed, 'THB'),
+      rep.committedUsd && rep.committedUsd.total ? num(rep.committedUsd.total) : null, curOf(rep.paid, 'USD'), curOf(rep.paid, 'THB'), rep.paidUsd && rep.paidUsd.total ? num(rep.paidUsd.total) : null, '', null, null, null, null]);
+    rows.push(['APPROVED', 'Approved budget (004 ' + ((rep.approved && rep.approved.cell) || 'A2') + ', total only)', null, null, num(rep.approved), null, rep.varianceToApproved ? num(rep.varianceToApproved) : null, null, null, null, null, null, null, 'variance = forecast − approved', null, null, null, null]);
     var CH = rep.china || {}, c4 = CH.costs004 || {};
-    rows.push(['China / private travel (outside the wedding budget)', num(c4.gross), num(c4.neutralising), num(c4.net), null, null, curOf(CH.committed, 'USD'), curOf(CH.committed, 'THB'), null, curOf(CH.paid, 'USD'), curOf(CH.paid, 'THB'), CH.paidUsd && CH.paidUsd.total ? num(CH.paidUsd.total) : null, (CH.suppliers || []).join(', ')]);
+    rows.push(['CHINA', 'China / private travel (outside the wedding budget)', num(c4.gross), num(c4.neutralising), num(c4.net), null, null, curOf(CH.committed, 'USD'), curOf(CH.committed, 'THB'), null, curOf(CH.paid, 'USD'), curOf(CH.paid, 'THB'), CH.paidUsd && CH.paidUsd.total ? num(CH.paidUsd.total) : null, (CH.suppliers || []).join(', '), null, null, null, null]);
+    if (split) (rep.byHotel.china || []).forEach(function (h) { rows.push(csvRow('HOTEL (China trip, part of the row above)', h.label + (h.rowsText ? ' · 004 rows ' + h.rowsText : ''), h)); });
     return csvDoc('See You In Laos — Budget vs Actual / Forecast', meta.concat([['Actual', 'paid to suppliers (007); 004 "Actual USD" repeats the budget by formula and is not used'], ['Signs', 'gross = 004\'s positive lines; neutralised = its negative lines; planned = net, as 004\'s J2 adds them']]),
-      ['004 category', 'Gross USD (004)', 'Neutralised USD (004)', 'Planned, net USD (004)', 'Forecast USD', 'Variance USD (forecast − planned)', 'Committed USD (007)', 'Committed THB (007)', 'Committed, USD equivalent (reference rate)', 'Paid USD (007)', 'Paid THB (007)', 'Paid, USD equivalent (reference rate)', '007 suppliers'], rows);
+      ['Row', '004 category · hotel', 'Gross USD (004)', 'Neutralised USD (004)', 'Planned, net USD (004)', 'Forecast USD', 'Variance USD (forecast − planned)', 'Committed USD (007)', 'Committed THB (007)', 'Committed, USD equivalent (reference rate)', 'Paid USD (007)', 'Paid THB (007)', 'Paid, USD equivalent (reference rate)', '007 suppliers', 'Guest revenue booked USD', 'Guest revenue invoiced USD', 'Guest revenue received USD', 'Guest revenue outstanding USD'], rows);
   }
   /* 004 RECONCILIATION & PROPOSED ADDITIONS (Owners' order, 18 Nov 2026): 004's hotel rows beside the booked rooms, then every exact
      entry 004 does not hold yet — for the Owners' approval; nothing is written to 004 from here */
@@ -1296,31 +1304,70 @@
     (hp.corrections || []).forEach(function (c) { rows.push(['Proposed text correction', c.row, 'Date or period', 'text only — no amount', '', '', '', '', '', c.from, c.to, c.nights, null, null, null, '', '', c.booked, c.text]); });
     return csvDoc('See You In Laos — 004 Reconciliation & Proposed Additions (Souphattra Heritage)', meta.concat([['Totals', hp.available ? 'booked purchase ' + kd(hp.totals.total) + ' (agreement ' + kd(hp.totals.contract) + ' · additional nights ' + kd(hp.totals.additional) + ' · additional-person charge ' + kd(hp.totals.supplement) + '); not yet in 004 ' + kd(hp.notIn004) + '; pending ' + kd(hp.pending) : (hp.why || 'not available')]]), RC_HEAD, rows);
   }
+  /* SECTION B, EACH HOTEL ON ITS OWN (Owners, 19 Nov 2026 · HS-012.2): Accommodation is one row (one card on a phone) per hotel, its
+     sub-total under them; the China trip's hotels follow the China row. Where the split is not there or does not add up, the category
+     row stands as before — Accommodation never drops out of the table. */
+  function hotelsUsable(rep) { var H = rep && rep.byHotel; return !!(H && H.wedding && H.wedding.length && H.reconciliation && H.reconciliation.rawAgree); }
+  function hotelRevenue(h) {
+    var r = h.revenue;
+    if (!r) return '<span class="ab-mute">no booked guest stay</span>';
+    return '<span data-i18n-skip>booked ' + esc(kd(r.booked)) + '<br>invoiced ' + esc(kd(r.invoiced)) + '<br>received ' + esc(kd(r.received)) + '<br>outstanding ' + esc(kd(r.outstanding)) + '</span>' +
+      (r.notSplit ? '<span class="ab-why">received and outstanding leave out ' + r.notSplit + ' statement' + (r.notSplit === 1 ? '' : 's') + ' not split by class (E)</span>' : '');
+  }
   function budgetTable(rep) {
     var cell = function (label, v, n) { return '<td data-l="' + esc(label) + '"' + (n ? ' class="num"' : '') + '>' + v + '</td>'; };
     var sk = function (v) { return '<span data-i18n-skip>' + esc(kd(v)) + '</span>'; };
-    var rows = (rep.byCategory || []).map(function (c) {
-      return '<tr>' + cell('Category', esc(c.category) + (c.suppliers && c.suppliers.length ? '<span class="ab-id" data-i18n-skip>' + esc(c.suppliers.join(', ')) + '</span>' : '')) +
-        cell('Gross (004)', sk(c.gross), 1) + cell('Neutralised (004)', '<span data-i18n-skip>' + esc(c.neutralising && c.neutralising.cents ? kd(c.neutralising) : '—') + '</span>', 1) +
-        cell('Planned, net (004)', sk(c.planned), 1) + cell('Forecast', sk(c.forecast), 1) +
+    var rev = function (v) { return cell('Guest revenue', v || '', 1); };
+    var costCells = function (c) {
+      return cell('Gross (004)', sk(c.gross), 1) + cell('Neutralised (004)', '<span data-i18n-skip>' + esc(c.neutralising && c.neutralising.cents ? kd(c.neutralising) : '—') + '</span>', 1) +
+        cell('Planned, net (004)', sk(c.planned), 1);
+    };
+    var flow = function (c, noSupplier) {
+      return cell('Committed (007)', '<span data-i18n-skip>' + esc(noSupplier ? 'no 007 supplier' : curList(c.committed)) + '</span>' + (c.committedAboveForecast ? ' <span class="ab-chip open">above the gross forecast by ' + esc(kd(c.committedAboveForecast)) + '</span>' : '') +
+          (c.committedUsd && c.committedUsd.converted && c.committedUsd.total ? '<span class="ab-why" data-i18n-skip>≈ ' + esc(kd(c.committedUsd.total)) + '</span>' : ''), 1) +
+        cell('Paid (007)', '<span data-i18n-skip>' + esc(noSupplier ? 'no 007 supplier' : curList(c.paid)) + '</span>' +
+          (c.paidUsd && c.paidUsd.converted && c.paidUsd.total ? '<span class="ab-why" data-i18n-skip>≈ ' + esc(kd(c.paidUsd.total)) + '</span>' : ''), 1);
+    };
+    var catRow = function (c, label, cls) {
+      return '<tr' + (cls ? ' class="' + cls + '"' : '') + '>' + cell('Category', label || (esc(c.category) + (c.suppliers && c.suppliers.length ? '<span class="ab-id" data-i18n-skip>' + esc(c.suppliers.join(', ')) + '</span>' : ''))) +
+        costCells(c) + cell('Forecast', sk(c.forecast), 1) +
         cell('Variance', '<span data-i18n-skip class="' + (c.variance && c.variance.cents > 0 ? 'ab-neg' : '') + '">' + esc(c.variance && c.variance.cents ? signed(c.variance) : '—') + '</span>', 1) +
-        cell('Committed (007)', '<span data-i18n-skip>' + esc(curList(c.committed)) + '</span>' + (c.committedAboveForecast ? ' <span class="ab-chip open">above the gross forecast by ' + esc(kd(c.committedAboveForecast)) + '</span>' : ''), 1) +
-        cell('Paid (007)', '<span data-i18n-skip>' + esc(curList(c.paid)) + '</span>', 1) + '</tr>';
+        flow(c) + rev('') + '</tr>';
+    };
+    var hotelRow = function (h) {
+      var where = 'Accommodation' + (h.rowsText ? ' · 004 row' + (h.rows.length === 1 ? ' ' : 's ') + h.rowsText : ' · no 004 row') + (h.location ? '' : ' · location not recorded');
+      return '<tr data-ab-hotel="' + esc(h.id) + '">' + cell('Category', '<b data-i18n-skip>' + esc(h.label) + '</b><span class="ab-id">' + esc(where) + '</span>') + costCells(h) +
+        (h.china ? cell('Forecast', '<span class="ab-mute">not in the wedding forecast</span>', 1) + cell('Variance', '', 1)
+          : cell('Forecast', sk(h.forecast), 1) + cell('Variance', '<span data-i18n-skip class="' + (h.variance && h.variance.cents > 0 ? 'ab-neg' : '') + '">' + esc(h.variance && h.variance.cents ? signed(h.variance) : '—') + '</span>', 1)) +
+        flow(h, !h.hasSupplier) + rev(hotelRevenue(h)) + '</tr>';
+    };
+    var split = hotelsUsable(rep), H = rep.byHotel || {};
+    var rows = (rep.byCategory || []).map(function (c) {
+      if (c.category !== 'Accommodation' || !split) return catRow(c);
+      return H.wedding.map(hotelRow).join('') +
+        catRow(c, '<b>Accommodation · all hotels</b><span class="ab-id">the hotel rows above added up — not a hotel of its own</span>', 'ab-subtotal');
     }).join('');
     var tv = rep.forecast && rep.planned ? { currency: 'USD', amount: (rep.forecast.cents - rep.planned.cents) / 100 } : null;
     rows += '<tr class="ab-total">' + cell('Category', '<b>The wedding</b>') + cell('Gross (004)', '<b>' + sk(rep.plannedGross) + '</b>', 1) + cell('Neutralised (004)', '<b>' + sk(rep.plannedNeutralising) + '</b>', 1) +
       cell('Planned, net (004)', '<b>' + sk(rep.planned) + '</b>', 1) + cell('Forecast', '<b>' + sk(rep.forecast) + '</b>', 1) +
-      cell('Variance', '<b data-i18n-skip>' + esc(signed(tv)) + '</b>', 1) + cell('Committed (007)', '<b data-i18n-skip>' + esc(curList(rep.committed)) + '</b>', 1) + cell('Paid (007)', '<b data-i18n-skip>' + esc(curList(rep.paid)) + '</b>', 1) + '</tr>';
+      cell('Variance', '<b data-i18n-skip>' + esc(signed(tv)) + '</b>', 1) + cell('Committed (007)', '<b data-i18n-skip>' + esc(curList(rep.committed)) + '</b>', 1) + cell('Paid (007)', '<b data-i18n-skip>' + esc(curList(rep.paid)) + '</b>', 1) + rev('') + '</tr>';
     rows += '<tr>' + cell('Category', 'Approved budget <span class="ab-id">004 ' + esc((rep.approved && rep.approved.cell) || 'A2') + ' · set as a total only</span>') + cell('Gross (004)', '', 1) + cell('Neutralised (004)', '', 1) + cell('Planned, net (004)', '<span data-i18n-skip>' + esc(rep.approved ? usd(rep.approved.amount) : '—') + '</span>', 1) +
-      cell('Forecast', '<span class="ab-mute">planned ' + esc(signed(rep.plannedVsApproved)) + '</span>', 1) + cell('Variance', '<span data-i18n-skip class="ab-neg">' + esc(signed(rep.varianceToApproved)) + '</span>', 1) + cell('Committed (007)', '', 1) + cell('Paid (007)', '', 1) + '</tr>';
+      cell('Forecast', '<span class="ab-mute">planned ' + esc(signed(rep.plannedVsApproved)) + '</span>', 1) + cell('Variance', '<span data-i18n-skip class="ab-neg">' + esc(signed(rep.varianceToApproved)) + '</span>', 1) + cell('Committed (007)', '', 1) + cell('Paid (007)', '', 1) + rev('') + '</tr>';
     if ((rep.committedUsd && rep.committedUsd.converted) || (rep.paidUsd && rep.paidUsd.converted)) rows += '<tr>' + cell('Category', 'USD equivalent <span class="ab-id">at the reporting reference rates — a reference, not a transaction rate</span>') + cell('Gross (004)', '', 1) + cell('Neutralised (004)', '', 1) + cell('Planned, net (004)', '', 1) + cell('Forecast', '', 1) + cell('Variance', '', 1) +
-      cell('Committed (007)', rep.committedUsd && rep.committedUsd.converted ? '<span data-i18n-skip>≈ ' + esc(kd(rep.committedUsd.total)) + '</span>' : '', 1) + cell('Paid (007)', rep.paidUsd && rep.paidUsd.converted ? '<span data-i18n-skip>≈ ' + esc(kd(rep.paidUsd.total)) + '</span>' : '', 1) + '</tr>';
+      cell('Committed (007)', rep.committedUsd && rep.committedUsd.converted ? '<span data-i18n-skip>≈ ' + esc(kd(rep.committedUsd.total)) + '</span>' : '', 1) + cell('Paid (007)', rep.paidUsd && rep.paidUsd.converted ? '<span data-i18n-skip>≈ ' + esc(kd(rep.paidUsd.total)) + '</span>' : '', 1) + rev('') + '</tr>';
     var CH = rep.china || {}, c4 = CH.costs004 || {};
     rows += '<tr>' + cell('Category', 'China / private travel <span class="ab-id">outside the wedding budget · ' + esc((CH.suppliers || []).join(', ') || 'no 007 supplier') + '</span>') + cell('Gross (004)', sk(c4.gross), 1) + cell('Neutralised (004)', sk(c4.neutralising), 1) +
       cell('Planned, net (004)', sk(c4.net), 1) + cell('Forecast', '<span class="ab-mute">not in the wedding forecast</span>', 1) + cell('Variance', '', 1) +
-      cell('Committed (007)', '<span data-i18n-skip>' + esc(curList(CH.committed)) + '</span>', 1) + cell('Paid (007)', '<span data-i18n-skip>' + esc(curList(CH.paid)) + '</span>' + (CH.paidUsd && CH.paidUsd.converted ? '<span class="ab-why" data-i18n-skip>≈ ' + esc(kd(CH.paidUsd.total)) + '</span>' : ''), 1) + '</tr>';
-    return '<div class="ab-table-wrap"><table class="ab-table ab-fin"><thead><tr><th>004 category</th><th class="num">Gross (004)</th><th class="num">Neutralised (004)</th><th class="num">Planned, net (004)</th><th class="num">Forecast</th><th class="num">Variance</th><th class="num">Committed (007)</th><th class="num">Paid (007)</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
-      '<p class="t-b2 ab-mute">004 is read with its signs: gross = its positive lines; neutralised = its negative lines (004\'s own entries for a cost the hosts do not carry — a guest\'s own room or ticket, a private trip); planned = net, as 004\'s J2 adds them. Variance per category = forecast − planned; on the approved row, forecast − approved. ' +
+      cell('Committed (007)', '<span data-i18n-skip>' + esc(curList(CH.committed)) + '</span>', 1) + cell('Paid (007)', '<span data-i18n-skip>' + esc(curList(CH.paid)) + '</span>' + (CH.paidUsd && CH.paidUsd.converted ? '<span class="ab-why" data-i18n-skip>≈ ' + esc(kd(CH.paidUsd.total)) + '</span>' : ''), 1) + rev('') + '</tr>';
+    if (split && H.china && H.china.length) rows += H.china.map(function (h) { return hotelRow(h).replace('<span class="ab-id">', '<span class="ab-id">China trip — outside the wedding budget · '); }).join('');
+    var X = H.reconciliation || {};
+    var recon = !rep.byHotel ? 'The split of Accommodation by hotel is not available just now — the category stands. '
+      : !split ? 'The hotels\' 004 lines do not add up to the Accommodation category just now, so the category is shown, not the hotels (E). '
+      : 'The hotel rows add up to "Accommodation · all hotels"' + (X.netResidualCents ? ' apart from ' + esc(usd(Math.abs(X.netResidualCents) / 100)) + ' (each hotel is rounded to the cent, the category once)' : ' to the cent') +
+        (X.revenueAgree === false ? '; their guest revenue differs from the accommodation classes (E)' : '; their guest revenue is the Revenue tab\'s, by property') + '. ';
+    return '<div class="ab-table-wrap"><table class="ab-table ab-fin"><thead><tr><th>004 category · hotel</th><th class="num">Gross (004)</th><th class="num">Neutralised (004)</th><th class="num">Planned, net (004)</th><th class="num">Forecast</th><th class="num">Variance</th><th class="num">Committed (007)</th><th class="num">Paid (007)</th><th class="num">Guest revenue</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      '<p class="t-b2 ab-mute">' + recon + '004 is read with its signs: gross = its positive lines; neutralised = its negative lines (004\'s own entries for a cost the hosts do not carry — a guest\'s own room or ticket, a private trip); planned = net, as 004\'s J2 adds them. Variance per category = forecast − planned; on the approved row, forecast − approved. ' +
+      'A hotel\'s neutralised 004 lines and its guest revenue can describe the same guests\' rooms — never subtract both. Guests are counted per hotel; a guest who stays in two hotels is in both. ' +
       (rep.budgetLeftSheet ? '004 ' + esc(rep.budgetLeftSheet.cell || 'F2') + ' "Budget left" states ' + esc(signed(rep.budgetLeftSheet)) + '. ' : '') +
       'Actual = paid to suppliers (007); 004 "Actual USD" repeats the budget by formula and is not used. Forecast = planned + the hotel costs of the confirmed bookings 004 does not hold yet (E). A 007 commitment is set against the gross forecast. The China trip and its return (Kunming, Lijiang, their flights and Hotel Muse) are outside the wedding budget. ' +
       (rep.reportingFx ? 'THB and EUR stay in their own currency; their USD equivalent uses the reporting reference rates (1 USD = ' + esc(rep.reportingFx.USD_THB) + ' THB · 1 USD = ' + esc(rep.reportingFx.USD_EUR) + ' EUR).' : '') + '</p>';
@@ -1521,7 +1568,7 @@
       exportBar([['finance-summary', 'CSV · financial summary'], ['budget-vs-actual', 'CSV · budget vs actual / forecast'], ['reconciliation-004', 'CSV · 004 reconciliation & proposed additions']], '<button type="button" class="ab-filter" data-ab-print>Print / save as PDF</button>') +
       '<p class="t-b2 ab-mute">Calculated live ' + esc(asOf) + ' UTC · all amounts USD unless named · <button type="button" class="p-link" data-ab-rev-reload>Recalculate now</button></p>' +
       secH('A', 'Executive summary') + '<div class="ab-kpis ab-exec" data-ab-exec>' + kpis + '</div>' +
-      secH('B', 'Budget vs actual and forecast', 'by 004 category') + '<div data-ab-budget-vs>' + budgetTable(rep) + '</div>' +
+      secH('B', 'Budget vs actual and forecast', 'by 004 category · each hotel on its own') + '<div data-ab-budget-vs>' + budgetTable(rep) + '</div>' +
       secH('C', 'Guest billing by class, revenue and receivables') + '<div data-ab-fin-classes>' + guarded(function () { return classesTable(gb(rep), R); }) + '</div>' + '<div data-ab-fin-revenue>' + revenueSummary(R) + '</div>' +
       secH('D', 'Souphattra Heritage – Financial Performance', 'accommodation revenue · hotel purchase cost · the difference') + '<div data-ab-hotels>' + guarded(function () { return souphattraPerformance(rep); }) +
         '<p class="t-l1 ab-bd-h">Per hotel and period</p>' + hotelTable(rep) + '</div>' +
