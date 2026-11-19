@@ -186,7 +186,9 @@ export class BillingLedger {
     const b = body || {}, clip = (v, n) => clean(v).slice(0, n || 160);
     const layout = clean(b.pdfLayout);
     if (!ISSUE_LAYOUTS.includes(layout)) return { error: 'the issue must name a PDF layout that prints the recipient (' + ISSUE_LAYOUTS.join(', ') + ')', reason: 'PDF_LAYOUT_NOT_STATED', status: 400 };
-    if (issueDate != null && !(clean(issueDate) >= ISSUE_RULES.floor)) return { error: 'no statement is dated before ' + ISSUE_RULES.floor, reason: 'ISSUE_DATE_TOO_EARLY' };
+    /* a corrected version is never dated before 21 November 2026 (Owners, HS-PROMPT-013 Nr. 12) */
+    const isCorrection = !!(b.correction && typeof b.correction === 'object' && clean(b.correction.replaces));
+    if (isCorrection && issueDate != null && !(clean(issueDate) >= ISSUE_RULES.floor)) return { error: 'no corrected statement is dated before ' + ISSUE_RULES.floor, reason: 'ISSUE_DATE_TOO_EARLY' };
     const r = b.recipient && typeof b.recipient === 'object' ? b.recipient : null;
     if (!r || !/^[A-Z][A-Z0-9-]{1,30}$/.test(clean(r.Person_ID)) || !/\S+ \S+/.test(clean(r.name))) return { error: 'the issue names no recipient with a full name', reason: 'RECIPIENT_INCOMPLETE' };
     if (holderId != null && clean(r.Holder_ID) !== clean(holderId)) return { error: 'the recipient is not this statement\'s holder', reason: 'RECIPIENT_INCOMPLETE' };

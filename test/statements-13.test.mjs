@@ -116,14 +116,17 @@ test('LAYOUT 1.2 · GOLDEN: the frozen writer renders a fixed statement byte for
   assert.equal(crypto.createHash('sha256').update(render12(snap, { payment })).digest('hex'), 'f2ffcf6e6ebe35a7b5f3782bf1405ff661b6395d57a7ed1228ed68b91eb779e5');
 });
 
-test('ISSUE DATE · no statement of the new layout before 21 Nov 2026 (the ledger refuses it before anything is written)', async () => {
+test('ISSUE DATE · no corrected statement before 21 Nov 2026 (the ledger refuses it before anything is written); a first statement is not held back', async () => {
   const { ISSUE_RULES } = await import('../src/billing/pdf-layouts.js');
   const was = { ...ISSUE_RULES };
   try {
     Object.assign(ISSUE_RULES, { floor: '2026-11-21' });
     const draft = { lines: [{ Person_ID: 'GT1', Item_ID: 'T-A' }] };
-    const body = { pdfLayout: CURRENT_LAYOUT, recipient: { Holder_ID: 'INV-T1', Person_ID: 'GT1', name: 'Alex Example' }, personNames: { GT1: 'Alex Example' }, itemWords: { 'T-A': { name: 'Stay A' } } };
+    const body = { pdfLayout: CURRENT_LAYOUT, recipient: { Holder_ID: 'INV-T1', Person_ID: 'GT1', name: 'Alex Example' }, personNames: { GT1: 'Alex Example' }, itemWords: { 'T-A': { name: 'Stay A' } },
+      correction: { replaces: 'V1', replacesIssued: '2026-10-11', reason: 'recipient and product names added' } };
     assert.equal(BillingLedger.frozenIssueFields(body, draft, '2026-11-20', 'INV-T1').reason, 'ISSUE_DATE_TOO_EARLY');
+    const { correction, ...first } = body;
+    assert.equal(BillingLedger.frozenIssueFields(first, draft, '2026-11-20', 'INV-T1').error, undefined, 'a first statement keeps the day it is issued');
     assert.equal(BillingLedger.frozenIssueFields(body, draft, '2026-11-21', 'INV-T1').error, undefined);
     assert.equal(BillingLedger.frozenIssueFields(body, draft, '2026-11-21', 'INV-T9').reason, 'RECIPIENT_INCOMPLETE', 'the recipient is the holder of this statement');
     assert.equal(BillingLedger.frozenIssueFields({ ...body, paymentOptions: ['PROMPTPAY_THB'], expectedPaymentPreference: 'PAYPAL_EUR' }, draft, '2026-11-21', 'INV-T1').reason, 'PAYMENT_OPTIONS_MISMATCH');

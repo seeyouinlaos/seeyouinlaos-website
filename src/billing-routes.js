@@ -1033,8 +1033,8 @@ async function assessIssue(env, holderId, src, asOf, origin, opts) {
   const statementBlockers = [...names.reasons];
   if (words.missing.length) statementBlockers.push('ITEM_NAME_MISSING: ' + words.missing.join(', ') + ' — the statement has no name for this product');
   for (const m of paymentOptions) { const d = destinationOf(m, env); if (!d || !d.complete) statementBlockers.push('PAYMENT_DESTINATION_INCOMPLETE: ' + m + ' has no configured account'); }
-  /* no statement dated before 21 November 2026 (Owners, HS-PROMPT-013 Nr. 12) */
-  if (!(clean(asOf) >= ISSUE_RULES.floor)) statementBlockers.push('ISSUE_DATE_TOO_EARLY: no statement is dated before ' + ISSUE_RULES.floor);
+  /* no corrected statement dated before 21 November 2026 (Owners, HS-PROMPT-013 Nr. 12) */
+  if (state.issuedRevision && !(clean(asOf) >= ISSUE_RULES.floor)) statementBlockers.push('ISSUE_DATE_TOO_EARLY: no corrected statement is dated before ' + ISSUE_RULES.floor);
   reasons.push(...statementBlockers);
 
   const hash = await sourceHash({ items: src.items, specialRates: src.specialRates });

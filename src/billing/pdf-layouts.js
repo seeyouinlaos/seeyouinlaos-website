@@ -14,7 +14,7 @@ export const ISSUE_LAYOUTS = Object.freeze([LAYOUT_13]);
 export const LEGACY_LAYOUT = LAYOUT_12;
 /* what a revision issued from now on is stamped with */
 export const CURRENT_LAYOUT = LAYOUT_13;
-/* THE ISSUE DATE (Owners, HS-PROMPT-013 Nr. 12): no statement of this layout is dated before 21 November 2026 and none is backdated.
+/* THE ISSUE DATE (Owners, HS-PROMPT-013 Nr. 12): no corrected statement is dated before 21 November 2026, and no statement is backdated.
    `floor` and `today` are read at every issue (the ledger and the route); the test suites move them to issue their synthetic
    statements on the days those are set. */
 export const ISSUE_RULES = { floor: '2026-11-21', today: () => new Date().toISOString().slice(0, 10) };
