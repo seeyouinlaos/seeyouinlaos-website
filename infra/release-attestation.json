@@ -2,15 +2,17 @@
  "about": "Signed by src/release-attest.mjs on the release machine; verified by src/release-verify.cjs in the build. Not the Owner's consent — a record that these checks passed for exactly this tree.",
  "payload": {
   "v": 1,
-  "tree": "c28c8c388af29486f1810f546edadbddd90d7a47",
-  "pricingRef": "fe2657bd0663",
+  "tree": "9bade6692c3f57d0e0112418f722d9ccb94d5deb",
+  "pricingRef": "2e2a483b9063",
   "keyId": "d02a1256537ec29e",
-  "at": "2026-11-19T04:55:06.437Z",
-  "base": "7742aa6331db0bdb4bed70a693fd60ff9d89a579",
-  "markers": {},
+  "at": "2026-11-19T07:47:05.130Z",
+  "base": "38ed477cf4cbf24c19ef58b2351f0e8620313b1d",
+  "markers": {
+   "OWNER_PRICING_CHANGE": "Owners' order 19 Nov 2026: U Sathorn Bangkok guest selling price USD 0, whole stay, three named guests (009 rows 41-43) [ref 2e2a483b9063]"
+  },
   "checks": {
    "npmTest": {
-    "pass": 1060,
+    "pass": 1072,
     "fail": 0
    },
    "releaseCheck": {
@@ -23,5 +25,5 @@
    }
   }
  },
- "signature": "3jnT/+M36nHKZQBeYK7Qfvtq0w7zqyaPHvBldAXALxVrSSHzuYUg44e2F2hkMLd3+7KK3LoiJUBOI15yuNVCCg=="
+ "signature": "Rl+r4VOvQORVIQt9Jy369IB3nNQmZczwYtF++1aJOGUAXfhaTFsjkh7I/zd4m4Nc6GTsJJiv4t+/4KrAE4qJBw=="
 }

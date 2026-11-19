@@ -415,3 +415,30 @@ export function parseSpecialRateRows(grid) {
   }
   return { ok: true, problems: [], rows };
 }
+
+/* ------------------------------------- 004 · a negative row and the row it neutralises */
+
+/**
+ * THE NEUTRALISING ENTRIES OF 004 (Owners' consolidated order, 19 Nov 2026): 004 records a cost the hosts do not carry — a guest's
+ * own room, a guest's ticket, a private trip — as a positive row AND its mirror with a negative quantity, so its net total (J2)
+ * leaves it out. Each negative row is paired ONE-TO-ONE with the positive row it mirrors: the same Item, Vendor, Category and
+ * Details, the same |Rate| and the same |Budget USD| — the nearest such row above it first, a row used once only. A negative row
+ * without such a row is returned unpaired (named on the console, never guessed).
+ * @returns {{ pairs: Array<{ negative: number, positive: number|null }>, mirrorOf: Map<number, number>, neutralisedBy: Map<number, number> }}
+ */
+export function mirrorPairs(lines) {
+  const L = (Array.isArray(lines) ? lines : []).filter((l) => l && l.readable !== false && Number.isFinite(l.budget));
+  const key = (l) => [l.item, l.vendor, l.category, l.details].map((x) => clean(x).toLowerCase().replace(/\s+/g, ' ')).join('|');
+  const cents = (n) => Math.round(Math.abs(n) * 100);
+  const used = new Set(), pairs = [], mirrorOf = new Map(), neutralisedBy = new Map();
+  for (const neg of L.filter((l) => l.budget < 0).sort((a, b) => a.row - b.row)) {
+    const cands = L.filter((p) => p.budget > 0 && !used.has(p.row) && key(p) === key(neg) && cents(p.budget) === cents(neg.budget) &&
+      (p.rate == null || neg.rate == null || cents(p.rate) === cents(neg.rate)));
+    const above = cands.filter((p) => p.row < neg.row).sort((a, b) => b.row - a.row);
+    const below = cands.filter((p) => p.row > neg.row).sort((a, b) => a.row - b.row);
+    const hit = above[0] || below[0] || null;
+    if (hit) { used.add(hit.row); mirrorOf.set(neg.row, hit.row); neutralisedBy.set(hit.row, neg.row); }
+    pairs.push({ negative: neg.row, positive: hit ? hit.row : null });
+  }
+  return { pairs, mirrorOf, neutralisedBy };
+}

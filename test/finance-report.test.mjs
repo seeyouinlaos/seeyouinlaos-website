@@ -12,6 +12,11 @@ import { buildBudgetComparison } from '../src/billing/budget.js';
 
 const usd = (cents) => ({ currency: 'USD', cents, amount: cents / 100 });
 const thb = (cents) => ({ currency: 'THB', cents, amount: cents / 100 });
+/* the guests' billing by class as revenue-classes hands it over (synthetic) */
+const part3 = (b, i, r) => ({ booked: usd(b), invoiced: usd(i), received: usd(r), outstanding: usd(i - r) });
+const CLASSES = { version: 'revenue-classes/1.0.0', complete: true, classes: { SOUPHATTRA_ACCOMMODATION: part3(80000, 50000, 10000), OTHER_ACCOMMODATION: part3(20000, 2000, 0),
+  PASS_THROUGH: part3(10000, 10000, 0), NOT_CLASSIFIED: part3(0, 0, 0) }, china: part3(5000, 5000, 0), totalGuestBilling: part3(115000, 67000, 10000),
+  otherAccommodation: [{ stage: 'K1', property: 'Lodge Beta', china: false, booked: usd(20000), invoiced: usd(2000) }], passThrough: [{ Item_ID: 'T-OFFER', stage: null, china: false, booked: usd(10000), invoiced: usd(10000) }], notClassified: [] };
 const occ = (id, name, bed) => ({ guestId: id, name, bed: !!bed });
 const unit = (key, label, type, item, occupants, places) => ({ key, label, type, item, places: places || 2, extraBeds: 0, occupants });
 const row = (r, type, no, ci, co, guests) => ({ row: r, building: 'X', roomType: type, roomNo: no, checkIn: ci, checkOut: co, guests });
@@ -99,7 +104,7 @@ test('HOTELS · the agreement\'s cost for every room it buys (occupied or not); 
   assert.equal(w.cost.cents + p.cost.cents, 7 * 2 * 15000 + 2 * 15000, 'the agreement total: every room of the wedding stay and the suite');
 });
 
-test('REPORT · approved = 004 TOTAL BUDGET; the forecast is the dashboard\'s; THB keeps THB beside a labelled USD equivalent; gaps named; nothing guessed', () => {
+test('REPORT · approved = 004 TOTAL BUDGET; planned = 004 net + the hotel purchase not in 004 (1.2.0); THB keeps THB beside a labelled USD equivalent; gaps named; nothing guessed', () => {
   const budget = { totals: { totalBudget: 2000, totalBudgetCell: 'A2', budgetLeft: -500, budgetLeftCell: 'F2' }, lines: [
     { row: 8, item: 'Rooms', vendor: 'Hotel Alpha', category: 'Accommodation', budget: 1500, paid: null },
     { row: 9, item: 'Cake', vendor: 'Sweet Co', category: 'Food & Beverage', budget: 800, paid: null },
@@ -112,8 +117,8 @@ test('REPORT · approved = 004 TOTAL BUDGET; the forecast is the dashboard\'s; T
     { vendor: 'Mystery Vendor', stages: [], contract: thb(100000), payments: [] }];
   const rep = financeReportOf({ budget, suppliers, centres: CENTRES, plan: PLAN, contracts: CONTRACTS, dashboard,
     rates009: { ok: true, rows: [{ row: 6, Person_ID: 'G048', Rate_Per_Person_Night: 75 }] },
-    revenue: { booked: { cents: 110000, complete: true } }, receipts: { cashCollected: { cents: 10000, complete: true } }, fx: { day: '2030-10-07', FX_USD_THB: 33.68, FX_USD_EUR: 0.89 }, list012: LIST });
-  assert.deepEqual([rep.approved.cents, rep.approved.cell, rep.planned.cents, rep.forecast.cents], [200000, 'A2', 250000, 262000], 'the forecast is the dashboard\'s');
+    revenue: { booked: { cents: 110000, complete: true }, classes: CLASSES }, receipts: { cashCollected: { cents: 10000, complete: true } }, fx: { day: '2030-10-07', FX_USD_THB: 33.68, FX_USD_EUR: 0.89 }, list012: LIST });
+  assert.deepEqual([rep.approved.cents, rep.approved.cell, rep.planned.cents, rep.forecast.cents], [200000, 'A2', 250000, 262000], '004 net (no negative line here) + the hotel purchase not in 004');
   assert.deepEqual([rep.varianceToApproved.cents, rep.plannedVsApproved.cents, rep.budgetLeftSheet.cents], [62000, 50000, -50000]);
   const cat = (n) => rep.byCategory.find((c) => c.category === n);
   assert.deepEqual([cat('Accommodation').planned.cents, cat('Accommodation').forecast.cents, cat('Accommodation').variance.cents], [170000, 182000, 12000]);
@@ -122,15 +127,16 @@ test('REPORT · approved = 004 TOTAL BUDGET; the forecast is the dashboard\'s; T
   assert.ok(cat('Unassigned').suppliers.includes('Mystery Vendor'), 'an unmapped supplier is listed, never dropped');
   assert.deepEqual(rep.paid, [usd(105000), thb(1500000)]);
   assert.equal(rep.paidUsd.total.cents, 105000 + Math.round(1500000 / 33.68)); assert.match(rep.paidUsd.words, /reference conversion, not a transaction rate/);
-  assert.equal(rep.cash.ownerStillToProvide.cents, (262000 - rep.paidUsd.total.cents) - (110000 - 10000));
+  assert.equal(rep.cash.ownerStillToProvide.cents, (262000 - rep.paidUsd.total.cents) - (110000 - 10000), 'gross: the wedding\'s forecast − its supplier payments − (its guest billing − what those guests paid)');
   assert.equal(rep.cash.complete, false, 'the forecast still misses costs'); assert.match(rep.cash.formula, /USD equivalent at the reference rates/);
   assert.deepEqual([rep.reportingFx.USD_THB, rep.reportingFx.USD_EUR], [33.68, 0.89]);
-  assert.deepEqual([rep.position.stated, rep.position.net.cents, rep.position.today.cents], [true, -152000, -200000], 'booked guest revenue − forecast cost');
+  assert.deepEqual([rep.position.stated, rep.position.net.cents, rep.position.today.cents], [true, -152000, -200000], 'the wedding\'s guest billing (China apart) − the gross forecast cost');
+  assert.deepEqual([rep.position.souphattra.cents, rep.position.otherCollections.cents, rep.position.net004.cents, rep.position.differenceTo004.cents], [80000, 30000, 80000 - 262000, 30000], 'the 004 net view and the difference beside it');
   assert.equal(rep.forecastComplete, false); assert.ok(rep.forecastGaps.some((g) => g.centre === 'K1'));
   assert.ok(!rep.forecastGaps.some((g) => g.centre === 'W1' || g.centre === 'P1'), 'the agreement\'s stays are no service gap');
   const texts = rep.exceptions.map((e) => e.kind + ' ' + e.area + ' ' + e.text).join('\n');
   assert.doesNotMatch(texts, /DECISION|Update 004|Approve a reporting rate|Triple occupancy|009 rows|DATA 012/, 'the Owners decided these on 18 Nov 2026');
-  assert.match(texts, /DATA Budget 004 004 row 10 \(Cottage, Cottage Co\) records USD 20\.00 paid on 01\.08\.2030 — not in 007; not counted/);
+  assert.match(texts, /DATA Budget 004 004 row 10 \(Cottage, Cottage Co\) records USD 20\.00 paid on 01\.08\.2030 — 007 has no column for this supplier, so it is not counted/);
   assert.ok(rep.hotel.length === 3 && rep.rooms012.available);
   /* 011 holding another rate than the reference is named — the reference stays */
   const other = financeReportOf({ budget, suppliers, centres: [], plan: [], contracts: [], dashboard, fx: { FX_USD_THB: 34, FX_USD_EUR: 0.89 } });
