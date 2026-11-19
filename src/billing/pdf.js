@@ -631,10 +631,13 @@ function blockACells(c, line, o) {
   const basis = wrapText(basisOf(line), REG, 8, c.wBasis - 6, ROW_LINES_MAX);
   const units = wrapText(second ? '2 nights' : unitsOf(line), REG, 8, c.wUnits - 6, ROW_LINES_MAX);
   const rate = wrapText(rateOf(line), MONO, 7.5, c.wBasis - 6, ROW_LINES_MAX);
-  const agreed = clean(line.rateSource) === 'SPECIAL_RATE' ? clean(line.specialRateRef) : '';
-  /* the rate was decided by name (Freeze · F), so the line says which
-   * agreement it came from instead of looking like a standard price */
-  const agreedNote = agreed ? wrapText(agreed, REG, 7.5, c.wItem - 6, ROW_LINES_MAX) : [];
+  /* the rate was decided by name (Freeze · F): the basis says "your agreed rate". A 009 row with its own billing category is a booking
+     Haruthai & Suthep paid — its note is the Owners' words to the guest ("Haruthai has already paid this hotel booking for you … please
+     repay …") and is printed. Every other 009 note is the Owners' working text (who, package, rule overrides): it stays in the ledger
+     snapshot and is never printed on the guest's statement (HS-004.14) */
+  const agreed = clean(line.rateSource) === 'SPECIAL_RATE';
+  const paidWords = (clean(line.Category_Override_From) || line.categoryOverride) ? clean(line.specialRateRef) : '';
+  const agreedNote = paidWords ? wrapText(paidWords, REG, 7.5, c.wItem - 6, ROW_LINES_MAX) : [];
   const named = agreed ? wrapText(SPECIAL_RATE_NOTE, REG, 7.5, c.wBasis - 6) : [];
   const lines = Math.max(1, person.length + personId.length, item.length + agreedNote.length, basis.length + rate.length + named.length, units.length);
   return { person, personId, item, itemDetailFrom, agreedNote, basis, rate, named, units, height: rowHeight(lines) };
