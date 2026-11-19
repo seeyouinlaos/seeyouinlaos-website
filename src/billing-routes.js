@@ -50,7 +50,11 @@ import {
 import { loadConfirmedBookings, unmappedProducts, siteKeyOfSelection, nightsOf, selectionLinesOf, registrationState } from './billing/bookings.js';
 import { OWNER_BOOKING_STATE, obkKey, OBK_INDEX_KEY, readRecord, stateOf as ownerStateOf, stageOf, keyStage, holdPlan, applyAction, toBookings, occupancy, problemsOf, combinedConfirmation } from './billing/owner-bookings.js';
 import { canonicalLines, canonicalKey } from './legacy-keys.js';
-import { renderSettlementPdf, PDF_WRITER_VERSION } from './billing/pdf.js';
+import { isPrintable } from './billing/pdf.js';
+import { CURRENT_LAYOUT, LAYOUT_12, layoutOfRevision } from './billing/pdf-layouts.js';
+import { pdfOptionsFor, renderIssuedPdf } from './billing/pdf-writers.js';
+import { recipientOfIssue } from './billing/recipient.js';
+import { isGermanNationality, wordsForIssue, paymentOptionsFor, optionView, correctionOf } from './billing/statement-inputs.js';
 import { qrImageOf } from './billing/pdf-image.js';
 import { buildRevenueOverview } from './billing/revenue.js';
 import { buildBudgetComparison } from './billing/budget.js';
@@ -199,7 +203,7 @@ function stateOfView(v, holderId) {
     throw new LedgerContractError('the billing ledger returned no holder view for ' + holderId);
   }
   const s = v.settlement && typeof v.settlement === 'object' ? v.settlement : null;
-  let issuedRevision = null;
+  let issuedRevision = null, issuedRecord = null;
   if (s && s.issuedRevision != null) {
     const rec = v.issued && typeof v.issued === 'object' ? v.issued : null;
     const snap = rec && rec.snapshot && typeof rec.snapshot === 'object' ? rec.snapshot : null;
@@ -210,6 +214,8 @@ function stateOfView(v, holderId) {
         ' is named as issued but the ledger holds no matching immutable snapshot');
     }
     issuedRevision = Object.freeze({ ...snap, Revision_State: rec.Revision_State, snapshot: snap });
+    issuedRecord = Object.freeze({ Pdf_Layout: rec.Pdf_Layout || null, Recipient: rec.Recipient || null, Person_Names: rec.Person_Names || null,
+      Item_Words: rec.Item_Words || null, Payment_Options: rec.Payment_Options || null, Correction: rec.Correction || null });
   }
   return {
     Holder_ID: v.Holder_ID,
@@ -218,6 +224,8 @@ function stateOfView(v, holderId) {
     settlement: s,
     latestRevision: s ? Number(s.latestRevision) || 0 : 0,
     issuedRevision,
+    /* what the issued revision froze beside its snapshot (layout, names, words, ways to pay — HS-004) */
+    issuedRecord,
     /* the Holder's stored payment method record (or null): see preferenceOf */
     paymentPreference: v.paymentPreference && typeof v.paymentPreference === 'object' ? v.paymentPreference : null,
     /* not held by this ledger; the booking loader uses its own defaults */
@@ -301,12 +309,17 @@ async function preferenceOf(env, origin, holderId, state, src, register) {
   const who = await holderIdentity(env, origin, holderId);
   const reg = register || await loadGuestNationalities(env, src.cfg);
   const nat = nationalityOf(reg, who.contactId);
-  const route = routeFor({ holderId, nationality: nat, stated: await statedOf(env, holderId, who, nat) });
+  const stated = await statedOf(env, holderId, who, nat);
+  const route = routeFor({ holderId, nationality: nat, stated });
   const pref = effectivePreference({ record: state.paymentPreference, route });
+  /* a German guest is offered the SEPA bank transfer first and PayPal (HS-004.16): the same sources, the same order (006, else the
+     guest's own sent registration) */
+  const german = isGermanNationality(nat && nat.found ? nat.value : (stated && stated.found ? stated.value : ''));
   const verified = firstVerifiedPayment(src.journalRows, state.Settlement_ID);
   return {
     ...pref,
     locked: pref.locked || !!verified,
+    german,
     lockedBy: (state.paymentPreference && state.paymentPreference.lockedBy) || (verified ? clean(verified.Payment_ID) : null),
     verifiedPaymentId: verified ? clean(verified.Payment_ID) : null,
   };
@@ -773,12 +786,19 @@ async function issuedPdf(env, holderId, askedRevision) {
        and frozen into the write-once PDF; an existing PDF is never rendered again (above) */
     /* a version already replaced carries no instruction to pay (it points to the current one) */
     const current = Number(state.issuedRevision && state.issuedRevision.Revision) || null;
-    const payment = current && rev !== current ? { supersededBy: 'V' + current } : await paymentForPdf(env, snapshot);
+    /* THE LAYOUT OF THIS REVISION (HS-004.7): its own — a revision issued before layouts were recorded is the frozen 1.2 writer's,
+       exactly as before; a layout this build does not know is never guessed */
+    const layout = layoutOfRevision(one);
+    if (!layout) return { status: 500, error: 'the revision names a PDF layout this build cannot render; nothing was produced' };
+    if (layout !== LAYOUT_12 && !(one.Recipient && one.Person_Names && one.Item_Words)) return { status: 500, error: 'the revision carries no frozen recipient; nothing was produced' };
+    const payment = current && rev !== current ? { supersededBy: 'V' + current }
+      : layout === LAYOUT_12 ? await paymentForPdf(env, snapshot) : await paymentOptionsForPdf(env, snapshot, one.Payment_Options);
     /* FAIL CLOSED: a payment section that cannot be read completely just now (the code, the account) is never frozen into the
        original — nothing is stored, the request is answered "try again", the e-mail records NOT_SENT */
     if (payment.incomplete) return { status: 503, error: 'the statement cannot be prepared just now (' + payment.incomplete + '); please try again in a moment' };
-    const bytes = renderSettlementPdf(snapshot, { payment });
-    await env.DOCS.put(key, bytes, { httpMetadata: { contentType: 'application/pdf' }, customMetadata: { writer: PDF_WRITER_VERSION, method: clean(payment.method) || '', qrSha256: payment.qrSha256 || '' } });
+    const bytes = renderIssuedPdf(layout, snapshot, pdfOptionsFor(layout, one, payment));
+    await env.DOCS.put(key, bytes, { httpMetadata: { contentType: 'application/pdf' }, customMetadata: { writer: layout,
+      method: clean(payment.method || (payment.options || []).map((o) => o.method).join('+')) || '', qrSha256: payment.qrSha256 || '' } });
     obj = await env.DOCS.get(key);
     if (!obj) return { status: 503, error: 'the statement could not be stored' };
   }
@@ -812,9 +832,36 @@ async function paymentForPdf(env, snapshot) {
     dueDate: clean(snapshot.Due_Date) || null, recipient: dest.recipient || null, iban: dest.iban || null, reference: clean(snapshot.Settlement_ID) || null, qr, qrSha256 };
 }
 
+/* LAYOUT 1.3 · every way to pay the revision froze (HS-004.16), each read completely or the PDF is not produced (fail closed) */
+async function paymentOptionsForPdf(env, snapshot, frozenOptions) {
+  const total = Number(snapshot && snapshot.Total_Payable_Cents);
+  if (!Number.isFinite(total) || total <= 0) return { nothingDue: Number.isFinite(total) && total <= 0, options: [] };
+  const channel = clean(snapshot && snapshot.Payment_Preference);
+  if (!isChannel(channel) || (clean(snapshot.Payment_Currency) && clean(snapshot.Payment_Currency) !== CHANNEL_CURRENCY[channel])) return { method: null, options: [] };
+  const methods = (Array.isArray(frozenOptions) && frozenOptions.length ? frozenOptions : [channel]).map(clean).filter(isChannel);
+  const fx = { FX_USD_THB: snapshot.FX_USD_THB, FX_USD_EUR: snapshot.FX_USD_EUR };
+  const options = [], shas = [];
+  for (const m of methods) {
+    const dest = destinationOf(m, env) || {};
+    if (m === 'SEPA_EUR' && !dest.iban) return { incomplete: 'the bank account is not configured' };
+    let qr = null;
+    if (QR_KEYS[m]) {
+      if (!env.DOCS) return { incomplete: 'the document store is not reachable' };
+      let raw = null;
+      try { const obj = await env.DOCS.get(QR_KEYS[m]); raw = obj ? new Uint8Array(await obj.arrayBuffer()) : null; } catch (e) { raw = null; }
+      if (!raw) return { incomplete: 'the approved payment code cannot be read' };
+      qr = await qrImageOf(raw);
+      if (!qr) return { incomplete: 'the approved payment code cannot be embedded' };
+      shas.push([...new Uint8Array(await crypto.subtle.digest('SHA-256', raw))].map((x) => x.toString(16).padStart(2, '0')).join(''));
+    }
+    options.push(optionView(m, total, fx, dest, qr));
+  }
+  return { options, totalUsd: fromCents(total), dueDate: clean(snapshot.Due_Date) || null, reference: clean(snapshot.Settlement_ID) || null, qrSha256: shas.join('+') };
+}
+
 async function pdfStateOf(env, sid, x) {
   if (!sid || !(x.Revision_State === 'ISSUED' || x.Revision_State === 'SUPERSEDED') || !env.DOCS || typeof env.DOCS.head !== 'function') return null;
-  try { const h = await env.DOCS.head(pdfKey(sid, x.Revision)); return h ? { produced: true, writer: (h.customMetadata && h.customMetadata.writer) || 'guest-settlement-pdf/1.1 or earlier' } : { produced: false }; } catch (e) { return null; }
+  try { const h = await env.DOCS.head(pdfKey(sid, x.Revision)); return h ? { produced: true, writer: (h.customMetadata && h.customMetadata.writer) || 'guest-settlement-pdf/1.1 or earlier' } : { produced: false, layout: layoutOfRevision(x) }; } catch (e) { return null; }
 }
 
 async function servePdf(env, identity, url, cors) {
@@ -924,6 +971,18 @@ async function fxReferenceDay(env, day) {
   return day;
 }
 
+/* the names the statement will carry (HS-004.6): the served index and the 006 register — read once per request */
+async function namesForIssue(env, origin, holderId, src, lines) {
+  let entries = {};
+  try { entries = await loadIndex(env, origin, false); } catch (e) { entries = {}; }
+  let register = src && src.register;
+  if (!register) {
+    try { register = await loadGuestRegister(env, await prefetchTabs(env, cfgOf(env), ['guestlist'])); } catch (e) { register = null; }
+    if (register && src && Object.isExtensible(src)) src.register = register;
+  }
+  return recipientOfIssue({ entries, register, holderId, lines, printable: isPrintable });
+}
+
 async function assessIssue(env, holderId, src, asOf, origin, opts) {
   const o = opts || {};
   /* THE WHAT-IF of the confirmation dialog (admin/confirm GET): the sent version as if confirmed — never issued from */
@@ -966,6 +1025,14 @@ async function assessIssue(env, holderId, src, asOf, origin, opts) {
   reasons.push(...await extraBedReasons(env, current, src, asOf).catch(() => ['EXTRA_BED_UNCHECKED: the room list could not be read just now — the extra bed of this statement cannot be checked']));
   if (!verdict.allowed) reasons.push(...verdict.reasons);
   if (gateNow && !gateNow.approved) reasons.push(...gateNow.open.map((o) => 'GATE_NOW: ' + o));
+  /* THE RECIPIENT (HS-004.6 · critical): every statement names its recipient and every person on its lines in full — missing,
+     ambiguous or unprintable names block the issue; the product words (HS-004.9) and the ways to pay (HS-004.16) likewise */
+  const names = await namesForIssue(env, origin, holderId, src, current.result.lines);
+  reasons.push(...names.reasons);
+  const words = wordsForIssue(current.result.lines, src.items);
+  if (words.missing.length) reasons.push('ITEM_NAME_MISSING: ' + words.missing.join(', ') + ' — the statement has no name for this product');
+  const paymentOptions = paymentOptionsFor(pref);
+  for (const m of paymentOptions) { const d = destinationOf(m, env); if (!d || !d.complete) reasons.push('PAYMENT_DESTINATION_INCOMPLETE: ' + m + ' has no configured account'); }
 
   const hash = await sourceHash({ items: src.items, specialRates: src.specialRates });
   const proposal = pref.channel ? buildSnapshot({
@@ -978,13 +1045,17 @@ async function assessIssue(env, holderId, src, asOf, origin, opts) {
   const issuedNow = state.issuedRevision || null;
   const substance = (x) => (x ? stableJson({ lines: x.lines, total: x.Total_Payable_Cents, method: x.Payment_Preference,
     fx: [x.FX_USD_THB, x.FX_USD_EUR], blockB: x.Block_B_Informational, hosted: x.Hosted_Value_Cents }) : null);
-  if (issuedNow && proposal && substance(proposal) === substance(issuedNow)) {
+  /* what the new version freezes beside its snapshot; a version of an earlier layout (no names) is corrected by a new one */
+  const frozen = { layout: CURRENT_LAYOUT, recipient: names.recipient, persons: names.personNames, words: words.words, options: paymentOptions.length ? paymentOptions : null };
+  const frozenOf = (r) => (r ? { layout: r.Pdf_Layout || null, recipient: r.Recipient || null, persons: r.Person_Names || null, words: r.Item_Words || null, options: r.Payment_Options || null } : null);
+  const correction = issuedNow && proposal ? correctionOf(issuedNow, proposal, words.words) : null;
+  if (issuedNow && proposal && substance(proposal) === substance(issuedNow) && stableJson(frozenOf(state.issuedRecord)) === stableJson(frozen)) {
     reasons.push('NO_CHANGE: revision ' + issuedNow.Revision + ' already holds exactly this statement');
   }
   /* the hash binds the statement AND the settlement it was previewed on: after any issue or new revision it no longer
      matches, so one preview issues at most once */
   const proposalHash = proposal && !confirmation.assumed
-    ? await sha256Hex(stableJson({ proposal: { ...proposal, calculated_at: null }, confirmedVersion: confirmation.version ?? null,
+    ? await sha256Hex(stableJson({ proposal: { ...proposal, calculated_at: null }, frozen, correction, confirmedVersion: confirmation.version ?? null,
       ownerRecorded: confirmation.ownerRecorded ? { state: confirmation.ownerRecorded.state, rev: confirmation.ownerRecorded.rev } : null,
       settlement: { id: state.Settlement_ID || null, latestRevision: Number(state.latestRevision) || 0, issuedRevision: issuedNow ? issuedNow.Revision : null } }))
     : null;
@@ -992,6 +1063,7 @@ async function assessIssue(env, holderId, src, asOf, origin, opts) {
     asOf, fx, sourceGaps, state, pref, destination, current, confirmation, gateCheck, currentDrifts, drifts,
     gate: { stored: gate.approved, now: gateNow ? { approved: gateNow.approved, open: gateNow.open || [] } : null },
     allowed: reasons.length === 0, reasons, proposal, proposalHash, sourceHash: hash,
+    names, words, paymentOptions, correction, frozen,
   };
 }
 
@@ -1114,6 +1186,9 @@ async function adminIssue(env, identity, request, cors) {
 
   /* an existing revision: the as-sent check comes last, right before it is issued */
   if (asked != null) { const unseen = await unseenDifference(); if (unseen) return unseen; }
+  /* NO STATEMENT WITHOUT ITS RECIPIENT (HS-004.6), on both paths */
+  const unnamed = [...a.names.reasons, ...(a.words.missing.length ? ['ITEM_NAME_MISSING: ' + a.words.missing.join(', ')] : [])];
+  if (unnamed.length) return jsonRes({ ok: false, error: 'Issue & Publish is blocked', reasons: unnamed }, 409, cors);
   const issued = await ledgerCall(env, 'revision-issue', {
     holderId, revision, by,
     items: src.items, specialRates: src.specialRates, fx, sourceGaps,
@@ -1123,6 +1198,10 @@ async function adminIssue(env, identity, request, cors) {
     paymentPreference: pref.channel, paymentPreferenceSource: pref.source, paymentPreferenceBasis: pref.basis || null,
     /* the ledger freezes this exact method or refuses: its destination is the one checked above */
     expectedPaymentPreference: pref.channel,
+    /* frozen beside the snapshot (HS-004): the layout, the recipient and the persons by name, the product words, the ways to pay,
+       the correction note */
+    pdfLayout: CURRENT_LAYOUT, recipient: a.names.recipient, personNames: a.names.personNames, itemWords: a.words.words,
+    paymentOptions: a.paymentOptions, correction: a.correction,
     gateCheck, currentDrifts,
   });
   const snapshot = issued && issued.ok === true && issued.snapshot && typeof issued.snapshot === 'object' ? issued.snapshot : null;
@@ -1858,8 +1937,8 @@ async function adminHolder(env, identity, url, cors) {
       destinationComplete: !!(a.destination && a.destination.complete) }
       : { channel: issued ? issued.Payment_Preference : null, currency: issued ? issued.Payment_Currency : null, determined: !!issued, source: issued ? 'ISSUED_REVISION' : null, reason: previewError },
     settlement: { Settlement_ID: sid, state: state.state || null, latestRevision: state.latestRevision || 0,
-      /* the writer a PDF not produced yet is made with on its first download (layout 1.3 since 19 Nov 2026) */
-      pdfWriter: PDF_WRITER_VERSION,
+      /* the layout a revision issued from now on is stamped with; an unproduced revision reports its own (pdf.layout) */
+      newRevisionLayout: CURRENT_LAYOUT,
       revisions: await Promise.all((view.holder.revisions || []).map(async (x) => ({ Revision: x.Revision, Revision_State: x.Revision_State, Issue_Date: x.Issue_Date,
         Due_Date: x.Due_Date, total: x.Total_Payable_Cents == null ? null : fromCents(x.Total_Payable_Cents), issuedAt: x.issuedAt,
         issuedBy: x.issuedBy, supersededAt: x.supersededAt,
@@ -1872,6 +1951,9 @@ async function adminHolder(env, identity, url, cors) {
       fx: { FX_USD_THB: a.fx.FX_USD_THB, FX_USD_EUR: a.fx.FX_USD_EUR, gaps: a.fx.gaps || [] },
       inCurrency: a.pref.channel ? inPreferredCurrency(r.totalPayableCents, a.pref.channel, a.fx) : null,
       issuable: a.allowed, reasons: a.reasons, proposalHash: a.allowed ? a.proposalHash : null,
+      /* what the issue freezes beside the snapshot (HS-004): shown before the click */
+      recipient: a.names ? a.names.recipient : null, personNames: a.names ? a.names.personNames : null, itemWords: a.words ? a.words.words : null,
+      paymentOptions: a.paymentOptions || [], correction: a.correction || null,
       gate: a.gate, drifts: a.drifts.filter((d) => !d.resolved).map((d) => ({ code: d.code, detail: d.detail || '' })),
     },
     issued: issued ? {
