@@ -160,6 +160,17 @@ function toLatin1(value) {
 
 /** PDF string syntax. Everything outside printable ASCII becomes an octal escape,
  *  so the finished file is 7-bit clean and cannot be broken by a stray byte. */
+/** Whether every character of a text can be set by this writer (base-14 fonts, WinAnsi) — the issue gate refuses a name that would
+ *  print a "?" (HS-004.6). */
+export function isPrintable(value) {
+  const s = String(value == null ? '' : value);
+  for (const ch of s) {
+    if (TRANSLIT[ch] !== undefined) continue;
+    const c = ch.codePointAt(0);
+    if (!((c >= 32 && c <= 126) || (c >= 0xa1 && c <= 0xff))) return false;
+  }
+  return true;
+}
 function pdfText(value) {
   const s = toLatin1(value);
   let out = '';
