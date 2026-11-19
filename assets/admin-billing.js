@@ -123,6 +123,8 @@
   var EXT = window.SIYL_ADMIN_EXT || null;
   function extView(v) { return !!(EXT && EXT.views && EXT.views[v]); }
 
+  /* the hosting platform refused the request for its resource limit (HS-032): said as such, never as a missing guest */
+  var BUSY_WORDS = 'The server is limiting heavy requests just now (Cloudflare resource limit). Nothing is lost — please wait a few minutes and open the guest again.';
   function api(path, opts) {
     var a = auth();
     var o = opts || {};
@@ -218,7 +220,7 @@
     return api('admin/holder?holder=' + encodeURIComponent(id)).then(function (x) {
       if (S.route.id !== id) return;
       if (x.status === 403) { S.phase = 'denied'; draw(); return; }
-      if (!x.ok) { S.holderPhase = 'error'; S.holderError = x.j.error || 'This guest could not be read.'; draw(); return; }
+      if (!x.ok) { S.holderPhase = 'error'; S.holderError = x.j.error || (x.status === 503 ? BUSY_WORDS : 'This guest could not be read.'); draw(); return; }
       S.holder = x.j; S.holderPhase = 'ready'; draw();
     }).then(function () { if (S.route.id === id) return loadOwner(id); });
   }
@@ -456,7 +458,8 @@
         '<td data-l="Booked value" class="num">' + bookedCell(h) + '</td>' +
         '<td data-l="Statement">' + esc(stmtWords(h)) + (s.Settlement_ID ? '<span class="ab-id" data-i18n-skip>' + esc(s.Settlement_ID) + '</span>' : '') + (p ? (s.Settlement_ID ? '' : '<br>') + '<span class="ab-mute">' + esc(PAY[p.status] || p.status || '') + (p.pendingCount ? ' · ' + p.pendingCount + ' reported' : '') + '</span>' : '') + '</td>' +
         '<td data-l="Issued · due">' + (s.issueDate ? esc(day(s.issueDate)) + '<br><span class="ab-mute">due ' + esc(day(s.dueDate)) + '</span>' : '<span class="ab-mute">—</span>') +
-          (s.Settlement_ID && s.issuedRevision ? '<br><button type="button" class="p-link" data-ab-row-pdf="' + esc(h.Holder_ID) + '" data-ab-pdf-sid="' + esc(s.Settlement_ID) + '" data-ab-pdf-rev="' + esc(s.issuedRevision) + '">Download Original PDF · V' + esc(s.issuedRevision) + '</button>' : '') + '</td>' +
+          (s.Settlement_ID && s.issuedRevision ? '<br><button type="button" class="p-link" data-ab-row-pdf="' + esc(h.Holder_ID) + '" data-ab-pdf-sid="' + esc(s.Settlement_ID) + '" data-ab-pdf-rev="' + esc(s.issuedRevision) + '">Download Original PDF · V' + esc(s.issuedRevision) + '</button>' +
+            '<br><button type="button" class="p-link" data-ab-row-preview="' + esc(h.Holder_ID) + '" data-ab-pdf-sid="' + esc(s.Settlement_ID) + '">Corrected PDF · preview</button>' : '') + '</td>' +
         '<td data-l="Statement total" class="num">' + totalCell(h) + '</td>' +
         '<td data-l="Paid" class="num">' + (p ? '<span data-i18n-skip>' + esc(usd(p.ist)) + '</span>' : '<span class="ab-mute">—</span>') + '</td>' +
         '<td data-l="Outstanding" class="num">' + out + '</td>' +
@@ -686,6 +689,7 @@
       (pv.blockB && pv.blockB.length ? '<p class="t-l1">Block B · informational, never in the total</p>' + linesTable(pv.blockB, false, pv.itemWords) : '') +
       (pv.manualReview && pv.manualReview.length ? '<p class="t-b2 ab-why">Manual review: ' + esc(pv.manualReview.join(', ')) + '</p>' : '') +
       (pv.unmapped && pv.unmapped.length ? '<p class="t-b2 ab-why">Products without an 002 item: ' + esc(pv.unmapped.join(', ')) + '</p>' : '') +
+      (pv.recipient ? '<p class="t-b2"><button type="button" class="p-link" data-ab-row-preview="' + esc(H.Holder_ID) + '" data-ab-pdf-sid="' + esc((H.settlement && H.settlement.Settlement_ID) || '') + '">Open the PDF this issue would produce · preview</button></p>' : '') +
       (pv.issuable ? '<p class="t-b2 ab-ok">The server would issue exactly this statement now.</p>' : '<p class="t-l1 open">Not issuable now</p><ul class="t-b2 ab-reasons">' + reasons + '</ul>') +
       '</section>';
   }
@@ -1949,6 +1953,26 @@
         S.downloading = false; S.download = ''; draw();
       })['catch'](function () { S.downloading = false; S.download = 'The PDF could not be downloaded just now. Please try again.'; draw(); });
   }
+  /* THE CORRECTED PDF BEFORE IT IS ISSUED (Owners, HS-PROMPT-032): the server renders what Issue would freeze, marked PREVIEW; nothing
+     is stored, issued or sent, and the issued originals stay exactly as they are */
+  function previewPdf(holderId, settlementId) {
+    if (!holderId || S.downloading) return;
+    S.downloading = true; S.download = 'Preparing the corrected PDF (preview)' + (settlementId ? ' of ' + settlementId : '') + '…'; draw();
+    var a = auth();
+    fetch('/api/billing/admin/preview-pdf?holder=' + encodeURIComponent(holderId), { headers: { 'x-siyl-auth': a ? a.bearer : '' }, cache: 'no-store' })
+      .then(function (r) {
+        if (r.ok) return r.blob();
+        return r.json().then(function (j) { throw new Error((j && (j.error + (j.reasons && j.reasons.length ? ': ' + j.reasons.join(' · ') : ''))) || 'pdf ' + r.status); },
+          function () { throw new Error(r.status === 503 ? BUSY_WORDS : 'pdf ' + r.status); });
+      })
+      .then(function (blob) {
+        var url = URL.createObjectURL(blob), el = document.createElement('a');
+        el.href = url; el.download = 'Statement-' + (settlementId || holderId) + '-PREVIEW.pdf';
+        document.body.appendChild(el); el.click(); el.remove();
+        setTimeout(function () { try { URL.revokeObjectURL(url); } catch (e) {} }, 60000);
+        S.downloading = false; S.download = ''; draw();
+      })['catch'](function (e) { S.downloading = false; S.download = 'The corrected PDF could not be prepared: ' + String(e && e.message || e); draw(); });
+  }
   function issueNow() {
     var H = S.holder, I = S.issue; if (!H || !I || !I.checked || I.busy) return;
     var hash = H.preview && H.preview.proposalHash;
@@ -2200,6 +2224,7 @@
     /* the original PDF of a version (holder view) and of the current version (a guest's row — the row itself is not opened) */
     on('[data-ab-pdf]', 'click', function (el) { download(S.holder && S.holder.Holder_ID, el.getAttribute('data-ab-pdf-sid'), el.getAttribute('data-ab-pdf')); });
     on('[data-ab-row-pdf]', 'click', function (el, e) { if (e && e.stopPropagation) e.stopPropagation(); download(el.getAttribute('data-ab-row-pdf'), el.getAttribute('data-ab-pdf-sid'), el.getAttribute('data-ab-pdf-rev')); });
+    on('[data-ab-row-preview]', 'click', function (el, e) { if (e && e.stopPropagation) e.stopPropagation(); previewPdf(el.getAttribute('data-ab-row-preview'), el.getAttribute('data-ab-pdf-sid')); });
     if (EXT && EXT.wire) EXT.wire(root, on);
   }
 

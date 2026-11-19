@@ -1857,6 +1857,30 @@ async function adminStatus(env, identity, url, cors) {
   return jsonRes({ ok: true, asOf, source: { at: new Date(src.at).toISOString(), cached: src.cached }, rows }, 200, cors);
 }
 
+/** GET admin/preview-pdf?holder=INV — THE CORRECTED STATEMENT BEFORE IT IS ISSUED (Owners, HS-PROMPT-032): the very version Issue would
+ *  freeze — layout 1.3, the recipient and names, the product words, the ways to pay, the correction note — rendered for the Owners to
+ *  open, marked as a preview. Nothing is stored, issued or sent; the issued originals are not touched. A correction carries the first
+ *  day it may be issued (21 Nov 2026), as it will when the Owners issue it. */
+async function adminPreviewPdf(env, identity, url, cors) {
+  const holderId = clean(url.searchParams.get('holder'));
+  if (!INVITATION_RE.test(holderId)) return jsonRes({ ok: false, error: 'holder required' }, 400, cors);
+  const held = await holderState(env, holderId);
+  const today = utcDay();
+  const asOf = held.issuedRevision && today < ISSUE_RULES.floor ? ISSUE_RULES.floor : today;
+  const src = await loadSource(env, asOf, { register: true });
+  const a = await assessIssue(env, holderId, src, asOf, url.origin);
+  if (!a.proposal) return jsonRes({ ok: false, error: 'no statement can be previewed for this guest just now', reasons: a.reasons }, 409, cors);
+  if (a.names.reasons.length || a.words.missing.length) return jsonRes({ ok: false, error: 'the statement cannot name its recipient or products', reasons: a.statementBlockers }, 409, cors);
+  const revision = (Number(a.state.latestRevision) || 0) + 1;
+  const snapshot = { ...a.proposal, Settlement_ID: a.state.Settlement_ID || 'not issued yet', Revision: revision, Holder_ID: holderId };
+  const rec = { Recipient: a.names.recipient, Person_Names: a.names.personNames, Item_Words: a.words.words, Payment_Options: a.paymentOptions, Correction: a.correction };
+  const payment = await paymentOptionsForPdf(env, snapshot, a.paymentOptions);
+  if (payment.incomplete) return jsonRes({ ok: false, error: 'the preview cannot be prepared just now (' + payment.incomplete + '); please try again in a moment' }, 503, cors);
+  const bytes = renderIssuedPdf(CURRENT_LAYOUT, snapshot, { ...pdfOptionsFor(CURRENT_LAYOUT, rec, payment), preview: true });
+  return new Response(bytes, { status: 200, headers: { ...cors, 'content-type': 'application/pdf', 'cache-control': 'no-store',
+    'content-disposition': 'inline; filename="Statement-' + snapshot.Settlement_ID + '-V' + revision + '-PREVIEW.pdf"' } });
+}
+
 /** GET admin/holder?holder=INV — one guest in full: identity, preview, the issued statement, payments, e-mail log. */
 async function adminHolder(env, identity, url, cors) {
   const holderId = clean(url.searchParams.get('holder'));
@@ -2860,6 +2884,7 @@ export async function handleBilling(request, env, url, cors, deps) {
       case 'admin/status': return await adminStatus(env, identity, url, cors);
       case 'admin/readiness': return await adminReadiness(env, identity, url, cors);
       case 'admin/holder': return await adminHolder(env, identity, url, cors);
+      case 'admin/preview-pdf': return await adminPreviewPdf(env, identity, url, cors);
       case 'admin/send':
         return request.method === 'POST' ? await adminSendPost(env, identity, request, url, cors, deps) : await adminSendGet(env, identity, url, cors);
       /* Confirm booking: a BILLING_ADMIN confirms the submitted booking, as Guest Relations would (Owner, 7 Oct 2026) */
