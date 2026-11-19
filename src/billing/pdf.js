@@ -897,13 +897,17 @@ function paymentSection(doc, p) {
     const how = wrapText(k.w.how, REG, 8.3, textW - 10);
     const vals = k.rows.map(([kk, v]) => [kk, wrapText(v, /^(IBAN|Reference)/.test(kk) ? MONO : REG, 8.5, textW - 120, 3)]);
     const textH = 13 + vals.reduce((t, [, l]) => t + l.length * 12, 0) + how.length * 10.5 + 4 + (!k.img && k.o.method !== 'SEPA_EUR' ? 14 : 0);
-    return { ...k, codeW, codeH, textW, how, vals, h: Math.max(textH, codeH) + 10 };
+    return { ...k, codeW, codeH, textW, how, vals, textH, h: Math.max(textH, codeH) + 10 };
   })() : null;
   const firstH = col ? Math.max(col[0].h, col[1].h) + 8 + wrapText(PAY_PROFILE, REG, 8, c.width).length * 10 : one ? one.h + wrapText(PAY_PROFILE, REG, 8, c.width).length * 10 : sized[0].height;
-  ensure(doc, headH + firstH);
+  /* ONE way to pay: its code stands at the right beside the whole section — the heading, the amount due and the way to pay run down
+     the left — so a tall payment code (the PromptPay slip) does not push the section onto a page of its own (HS-004.13) */
+  const profileH = wrapText(PAY_PROFILE, REG, 8, c.width).length * 10;
+  ensure(doc, one ? Math.max(headH + one.textH, one.codeH) + 10 + profileH : headH + firstH);
+  const sectionTop = doc.y, leftW = one ? one.textW : c.width;
   drawText(doc, c.left, doc.y, PAY_HEADING, BOLD, 9);
   doc.y -= 14;
-  if (due) { drawText(doc, c.left, doc.y, 'Amount due', REG, 8.5, SOFT); drawText(doc, c.left + 110, doc.y, fitText(due, BOLD, 8.5, c.width - 110), BOLD, 8.5); doc.y -= 12; }
+  if (due) { drawText(doc, c.left, doc.y, 'Amount due', REG, 8.5, SOFT); drawText(doc, c.left + 110, doc.y, fitText(due, BOLD, 8.5, leftW - 110), BOLD, 8.5); doc.y -= 12; }
   if (clean(p.dueDate)) { drawText(doc, c.left, doc.y, 'Pay by', REG, 8.5, SOFT); drawText(doc, c.left + 110, doc.y, longDate(p.dueDate), REG, 8.5); doc.y -= 12; }
   doc.y -= 6;
   /* TWO WAYS TO PAY side by side (HS-004.13/.16): the bank transfer on the left, PayPal with its code on the right — one look, half the
@@ -920,8 +924,8 @@ function paymentSection(doc, p) {
     }
     for (const t of one.how) { drawText(doc, c.left + 10, y, t, REG, 8.3, INK); y -= 10.5; }
     if (!one.img && one.o.method !== 'SEPA_EUR') { y -= 4; drawText(doc, c.left + 10, y, 'The payment code is shown in My Profile, under Your statement.', REG, 8.3, SOFT); y -= 10; }
-    if (one.img) placeImage(doc, one.img, c.right - one.codeW, top + 8 - one.codeH, one.codeW, one.codeH);
-    doc.y = Math.min(y, top + 8 - one.codeH) - 10;
+    if (one.img) placeImage(doc, one.img, c.right - one.codeW, sectionTop + 8 - one.codeH, one.codeW, one.codeH);
+    doc.y = Math.min(y, sectionTop + 8 - one.codeH) - 10;
     drawParagraph(doc, c.left, PAY_PROFILE, c.width, REG, 8, 10, SOFT);
     doc.y -= 12;
     return;
