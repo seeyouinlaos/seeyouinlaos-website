@@ -59,7 +59,7 @@ const BOOKING_OF = { 'bkk-stay': 'self', prewed: 'bride-groom', wedstay: 'bride-
 const PREPAID_WORDS = 'Already paid for you by Haruthai · you repay Haruthai & Suthep through your statement';
 export const BOOKING_WORDS = { prepaid: PREPAID_WORDS + '.', self: 'Guest will book by themselves.', 'bride-groom': 'Will be booked by the bride & groom. It is settled within 21 days after your statement is issued.',
   /* HS-031.8 (Owners, 19 Nov 2026): a stay settled through the guest's statement (src/gifts.js · statement) */
-  statement: 'Settled through your statement to Haruthai & Suthep — please do not pay the hotel directly.' };
+  statement: 'Settled through your statement to Haruthai & Suthep. Please do not pay the hotel directly.' };
 /* DATE ORDER (PRQ-04-11): the Guest House (27 February – 1 March) stands between the Pre-Wedding Stay and the Wedding Stay */
 const ORDER_OF = Object.assign({}, ...STAGES.map((id, i) => ({ [id]: i })), { guesthouse: STAGES.indexOf('wedstay') - 0.5 });
 const EVENTS = [

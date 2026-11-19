@@ -133,15 +133,17 @@
   var PREPAID_WORDS = 'Already paid for you by Haruthai · you repay Haruthai & Suthep through your statement';
   var BOOKING_WORDS = { prepaid: PREPAID_WORDS + '.', self: 'Guest will book by themselves.', 'bride-groom': 'Will be booked by the bride & groom. It is settled within 21 days after your statement is issued.',
     /* HS-031.8 (Owners, 19 Nov 2026): this guest's stay is settled through their statement (src/gifts.js · statement) */
-    statement: 'Settled through your statement to Haruthai & Suthep — please do not pay the hotel directly.' };
+    statement: 'Settled through your statement to Haruthai & Suthep. Please do not pay the hotel directly.' };
   /* THE STAY SETTLED THROUGH THE STATEMENT (HS-031.8): the guest's own entry says so (src/gifts.js · statement) and the server prices it
      as an H&S amount — on the room shown, else the room of this window in the bag. Nothing else changes: the amount is the server's. */
   function viaStatementIn(at, slug) {
     if (!at) return false;
     var s = slug;
     if (!s) { var B = window.SIYL_BAG, line = B && B.get ? B.get().filter(function (x) { return x && x.id === at.win.id; })[0] : null; if (line && line.room) s = line.room; }
-    var g = s ? giftFor(at.win.id, s) : null;
-    return !!(g && g.kind === 'statement') && serverAnswer(at.win.id, s).state === 'amount';
+    /* no room named and none in the bag: any room of the stay that the entry names (as prepaidQuoteIn does) */
+    var slugs = s ? [s] : (at.stay && at.stay.rooms || []).map(function (r) { return r.slug; });
+    for (var i = 0; i < slugs.length; i++) { var g = giftFor(at.win.id, slugs[i]); if (g && g.kind === 'statement' && serverAnswer(at.win.id, slugs[i]).state === 'amount') return true; }
+    return false;
   }
   /* no leading zero in a date: "06 – 08 March 2027" → "6 – 8 March 2027" */
   function unpad(t) { return String(t == null ? '' : t).replace(/(^|[^\d])0(\d)(?!\d)/g, '$1$2'); }

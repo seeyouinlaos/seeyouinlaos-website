@@ -82,7 +82,8 @@ export function verifiedLines(lines, gifts) {
   return lines.map((l) => {
     if (!l || typeof l !== 'object' || !(l.gift || l.personal)) return l;
     const e = entryFor(gifts, l);
-    if (e) {
+    /* a statement entry carries no charge (HS-031.8): it never touches a sent line's amount */
+    if (e && e.kind !== 'statement') {
       const out = { ...l, price: e.charge };
       if ((e.kind || 'gift') === 'gift') { out.gift = e.by || 'bride-groom'; delete out.personal; } else { out.personal = e.kind; delete out.gift; }
       return out;

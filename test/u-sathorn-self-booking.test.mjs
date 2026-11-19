@@ -85,9 +85,9 @@ test('HS-031.8 · G007 (CON010) only: her U Sathorn stay is settled through her 
   const P = page({ auth: { ...PEGGY, guestId: 'G007' }, quotes: payable, seed: { 'siyl.gifts': { guestId: 'G007', gifts: own, at: Date.now() } } }).SIYL_PRICE;
   const q = P.quote('bkk-stay', 'u-sathorn-superior-garden');
   assert.equal(q.total, 203.42, 'the server\'s amount, unchanged'); assert.equal(q.priceState, 'amount');
-  assert.deepEqual([q.booking, q.bookingUrl, q.bookingWords], ['statement', '', 'Settled through your statement to Haruthai & Suthep — please do not pay the hotel directly.']);
+  assert.deepEqual([q.booking, q.bookingUrl, q.bookingWords], ['statement', '', 'Settled through your statement to Haruthai & Suthep. Please do not pay the hotel directly.']);
   assert.equal(q.personal, undefined, 'no personal rate'); assert.equal(q.gift, undefined, 'no gift');
-  assert.equal(JSON.stringify(P.bookingOf('bkk-stay', 'u-sathorn-superior-garden')), JSON.stringify({ method: 'statement', url: '', words: 'Settled through your statement to Haruthai & Suthep — please do not pay the hotel directly.' }));
+  assert.equal(JSON.stringify(P.bookingOf('bkk-stay', 'u-sathorn-superior-garden')), JSON.stringify({ method: 'statement', url: '', words: 'Settled through your statement to Haruthai & Suthep. Please do not pay the hotel directly.' }));
   /* the same entry while the server says she books it herself (Block B) changes nothing: the words follow the server's amount */
   const selfQ = page({ auth: { ...PEGGY, guestId: 'G007' }, quotes: { 'bkk-stay/u-sathorn-superior-garden': { total: 0, block: 'B', rateSource: 'GUEST_SELF_BOOKING', listRate: 67.805 } }, seed: { 'siyl.gifts': { guestId: 'G007', gifts: own, at: Date.now() } } }).SIYL_PRICE.quote('bkk-stay', 'u-sathorn-superior-garden');
   assert.equal(selfQ.booking, 'self');
@@ -101,4 +101,12 @@ test('HS-031.8 · G007 (CON010) only: her U Sathorn stay is settled through her 
   const m = journeyModel({ guestId: 'G007', registration: { guestId: 'G007', selections: [{ ...line, viaStatement: true, meta: '21 – 24 February 2027 · Superior Garden' }], totalUsd: 203.42 } });
   const s = (m.stays || []).find((x) => x.id === 'bkk-stay');
   assert.equal(s.booking, 'statement'); assert.equal(s.price, 203.42, 'her amount unchanged');
+  /* a statement entry never touches a sent line's amount, whatever the line claims */
+  for (const claim of [{ personal: 'special' }, { personal: 'prepaid' }, { gift: 'bride-groom' }]) {
+    const v = verifiedLines([{ ...line, ...claim }], own)[0];
+    assert.notEqual(v.price, null, JSON.stringify(claim)); assert.notEqual(v.personal, 'statement');
+  }
+  /* the journeys page asks without a room and with an empty bag: still the statement words, no hotel link */
+  const J = page({ auth: { ...PEGGY, guestId: 'G007' }, quotes: payable, seed: { 'siyl.gifts': { guestId: 'G007', gifts: own, at: Date.now() } } }).SIYL_PRICE;
+  assert.equal(J.bookingOf('bkk-stay').method, 'statement');
 });
