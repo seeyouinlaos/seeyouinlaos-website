@@ -1034,7 +1034,7 @@ async function assessIssue(env, holderId, src, asOf, origin, opts) {
   if (words.missing.length) statementBlockers.push('ITEM_NAME_MISSING: ' + words.missing.join(', ') + ' — the statement has no name for this product');
   for (const m of paymentOptions) { const d = destinationOf(m, env); if (!d || !d.complete) statementBlockers.push('PAYMENT_DESTINATION_INCOMPLETE: ' + m + ' has no configured account'); }
   /* no corrected statement dated before 21 November 2026 (Owners, HS-PROMPT-013 Nr. 12) */
-  if (state.issuedRevision && !(clean(asOf) >= ISSUE_RULES.floor)) statementBlockers.push('ISSUE_DATE_TOO_EARLY: no corrected statement is dated before ' + ISSUE_RULES.floor);
+  if (state.issuedRevision && !(clean(asOf) >= ISSUE_RULES.floor)) statementBlockers.push('ISSUE_DATE_TOO_EARLY: no corrected statement is dated before ' + ISSUE_RULES.floor + ' (UTC; 07:00 in Vientiane)');
   reasons.push(...statementBlockers);
 
   const hash = await sourceHash({ items: src.items, specialRates: src.specialRates });
@@ -1968,6 +1968,9 @@ async function adminHolder(env, identity, url, cors) {
       method: issued.Payment_Preference, currency: issued.Payment_Currency, recipient: issued.Payment_Recipient,
       inCurrency: issued.Payment_Preference ? inPreferredCurrency(issued.Total_Payable_Cents, issued.Payment_Preference, issuedFx) : null,
       engineVersion: issued.Engine_Version, evidence: issued.Evidence_Status,
+      /* what this revision froze beside its snapshot (HS-004) — none for a revision of the earlier layout */
+      itemWords: state.issuedRecord ? state.issuedRecord.Item_Words : null, recipientName: state.issuedRecord && state.issuedRecord.Recipient ? state.issuedRecord.Recipient.name : null,
+      paymentOptions: state.issuedRecord ? state.issuedRecord.Payment_Options : null, correction: state.issuedRecord ? state.issuedRecord.Correction : null,
     } : null,
     payment: issued ? { status: pay.status, soll: pay.soll, ist: pay.ist, balance: pay.balance, flags: pay.flags || [],
       pendingCount: pay.pendingCount || 0, overdue: (pay.flags || []).includes('OVERDUE') } : null,
@@ -2214,6 +2217,9 @@ async function adminSendGet(env, identity, url, cors) {
     recipientName: ctx.fullName, firstName: ctx.firstName, email: ctx.recipient.email, emailSource: ctx.recipient.source,
     Settlement_ID: ctx.issued.Settlement_ID, revision: ctx.issued.Revision, totalPayable: fromCents(ctx.issued.Total_Payable_Cents),
     dueDate: ctx.issued.Due_Date, issueDate: ctx.issued.Issue_Date, inCurrency: ctx.inCurrency, method: methodWordsOf(ctx),
+    /* the name the PDF prints (frozen at issue) and the correction note the e-mail names */
+    frozenRecipient: ctx.state.issuedRecord && ctx.state.issuedRecord.Recipient ? ctx.state.issuedRecord.Recipient.name : null,
+    correction: ctx.state.issuedRecord ? ctx.state.issuedRecord.Correction : null,
     attempts: log && log.ok === true ? log.attempts : null, open: log && log.ok === true ? log.open : null }, 200, cors);
 }
 

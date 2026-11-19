@@ -182,13 +182,17 @@ export class BillingLedger {
   }
 
   /* the fields a new issue freezes beside its snapshot (HS-004.6/.7/.9/.16): validated before any write */
-  static frozenIssueFields(body, draft, issueDate, holderId) {
+  static frozenIssueFields(body, draft, issueDate, holderId, replacing) {
     const b = body || {}, clip = (v, n) => clean(v).slice(0, n || 160);
     const layout = clean(b.pdfLayout);
     if (!ISSUE_LAYOUTS.includes(layout)) return { error: 'the issue must name a PDF layout that prints the recipient (' + ISSUE_LAYOUTS.join(', ') + ')', reason: 'PDF_LAYOUT_NOT_STATED', status: 400 };
     /* a corrected version is never dated before 21 November 2026 (Owners, HS-PROMPT-013 Nr. 12) */
-    const isCorrection = !!(b.correction && typeof b.correction === 'object' && clean(b.correction.replaces));
-    if (isCorrection && issueDate != null && !(clean(issueDate) >= ISSUE_RULES.floor)) return { error: 'no corrected statement is dated before ' + ISSUE_RULES.floor, reason: 'ISSUE_DATE_TOO_EARLY' };
+    /* the ledger's own state decides whether this replaces an issued version — never only what the caller sends */
+    const replaces = Number(replacing) || null;
+    const k0 = b.correction && typeof b.correction === 'object' ? b.correction : null;
+    if (replaces && (!k0 || clean(k0.replaces) !== 'V' + replaces)) return { error: 'a new version of an issued statement names the version it replaces (V' + replaces + ')', reason: 'CORRECTION_NOT_STATED' };
+    const isCorrection = !!replaces || !!(k0 && clean(k0.replaces));
+    if (isCorrection && issueDate != null && !(clean(issueDate) >= ISSUE_RULES.floor)) return { error: 'no corrected statement is dated before ' + ISSUE_RULES.floor + ' (UTC)', reason: 'ISSUE_DATE_TOO_EARLY' };
     const r = b.recipient && typeof b.recipient === 'object' ? b.recipient : null;
     if (!r || !/^[A-Z][A-Z0-9-]{1,30}$/.test(clean(r.Person_ID)) || !/\S+ \S+/.test(clean(r.name))) return { error: 'the issue names no recipient with a full name', reason: 'RECIPIENT_INCOMPLETE' };
     if (holderId != null && clean(r.Holder_ID) !== clean(holderId)) return { error: 'the recipient is not this statement\'s holder', reason: 'RECIPIENT_INCOMPLETE' };
@@ -703,7 +707,7 @@ export class BillingLedger {
         /* THE RECIPIENT AND THE LAYOUT, FROZEN WITH THE REVISION (Owners, 19 Nov 2026 · HS-004.6/.7) — checked here, in the same turn
            and before anything is written: a new issue names a layout that prints the names, the recipient by full name, and a name
            for every person on its lines; the product words and the ways to pay are frozen with it */
-        const frozen = BillingLedger.frozenIssueFields(body, draft, clean(body.issueDate) || at.slice(0, 10), clean(body.holderId));
+        const frozen = BillingLedger.frozenIssueFields(body, draft, clean(body.issueDate) || at.slice(0, 10), holderId, s.issuedRevision);
         if (frozen.error) return json({ ok: false, review: MANUAL_REVIEW_REQUIRED, reasons: [frozen.reason], error: frozen.error }, frozen.status || 409);
         const snapshot = buildSnapshot({
           settlementId: s.Settlement_ID, revision: n, holderId,

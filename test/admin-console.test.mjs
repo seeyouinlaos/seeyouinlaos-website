@@ -1420,3 +1420,23 @@ test('HS-004.16 · a German guest whose 006 row holds no nationality is offered 
     assert.deepEqual(h.j.preview.paymentOptions, want, nat);
   }
 });
+
+test('HS-PROMPT-013 Nr. 12 · the route: a correction before 21 Nov 2026 is shown as blocked and refused; a backdated issue is refused', async () => {
+  const { ISSUE_RULES } = await import('../src/billing/pdf-layouts.js');
+  const was = { ...ISSUE_RULES };
+  try {
+    const W = world(); await approveGate(W.st);
+    const h = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+    assert.equal((await hit(W, GROOM, 'issue', { holderId: 'INV-T1', expectedProposal: h.j.preview.proposalHash })).status, 200);
+    /* the next version of this issued statement, before the floor */
+    Object.assign(ISSUE_RULES, { floor: '2999-01-01' });
+    const h2 = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+    assert.ok((h2.j.preview.reasons || []).some((r) => /^ISSUE_DATE_TOO_EARLY/.test(r)), (h2.j.preview.reasons || []).join(' | '));
+    const r2 = await hit(W, GROOM, 'issue', { holderId: 'INV-T1' });
+    assert.equal(r2.status, 409); assert.ok((r2.j.reasons || []).some((r) => /^ISSUE_DATE_TOO_EARLY|NO_CHANGE/.test(r)), (r2.j.reasons || []).join(' | '));
+    /* backdated: an asOf before today is refused before anything is judged */
+    Object.assign(ISSUE_RULES, { floor: '2000-01-01', today: () => '2026-11-21' });
+    const r3 = await hit(W, GROOM, 'issue', { holderId: 'INV-T1', asOf: '2026-11-20' });
+    assert.equal(r3.status, 409); assert.deepEqual(r3.j.reasons, ['ISSUE_BACKDATED']);
+  } finally { Object.assign(ISSUE_RULES, was); }
+});

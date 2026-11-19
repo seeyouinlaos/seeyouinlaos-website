@@ -68,5 +68,6 @@ export function correctionOf(issued, proposal, words, opts) {
   const sig = (x) => ((x && x.lines) || []).map((l) => [clean(l.Person_ID), clean(l.Item_ID), l.block, l.amountCents].join('|')).sort().join(';');
   if (changes.length === (o.legacy !== false ? 1 : 0) && sig(issued) !== sig(proposal)) changes.push('booked items updated');
   if (!changes.length) changes.push('statement updated');
-  return { replaces: 'V' + issued.Revision, replacesIssued: clean(issued.Issue_Date) || null, reason: [...new Set(changes)].join('; ') };
+  /* never longer than the ledger keeps it (200): what is shown and hashed is exactly what is frozen */
+  return { replaces: 'V' + issued.Revision, replacesIssued: clean(issued.Issue_Date) || null, reason: [...new Set(changes)].join('; ').slice(0, 200) };
 }

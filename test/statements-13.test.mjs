@@ -167,3 +167,19 @@ test('PDF 1.3 · the couple\'s names never break across lines; a long recipient 
   const img = /\/Im3 Do Q/.test(raw) ? /q ([\d.]+) 0 0 ([\d.]+) [\d.]+ [\d.]+ cm \/Im3 Do Q/.exec(raw) : null;
   assert.ok(img && +img[1] <= 92 && +img[2] <= 92, 'a wide code stays inside its 92 × 92 box');
 });
+
+test('ISSUE RULES · the shipped values: no corrected statement before 21 Nov 2026, today is the real UTC day', async () => {
+  const { ISSUE_RULES: R } = await import('../src/billing/pdf-layouts.js?shipped');
+  assert.equal(R.floor, '2026-11-21');
+  assert.equal(R.today(), new Date().toISOString().slice(0, 10));
+});
+
+test('LEDGER · a new version of an issued statement must name the version it replaces — the ledger\'s own state decides, never only the body', () => {
+  const draft = { lines: [{ Person_ID: 'GT1', Item_ID: 'T-A' }] };
+  const body = { pdfLayout: CURRENT_LAYOUT, recipient: { Holder_ID: 'INV-T1', Person_ID: 'GT1', name: 'Alex Example' }, personNames: { GT1: 'Alex Example' }, itemWords: { 'T-A': { name: 'Stay A' } } };
+  assert.equal(BillingLedger.frozenIssueFields(body, draft, '2026-11-25', 'INV-T1', 3).reason, 'CORRECTION_NOT_STATED');
+  assert.equal(BillingLedger.frozenIssueFields({ ...body, correction: { replaces: 'V2', reason: 'x' } }, draft, '2026-11-25', 'INV-T1', 3).reason, 'CORRECTION_NOT_STATED');
+  assert.equal(BillingLedger.frozenIssueFields({ ...body, correction: { replaces: 'V3', reason: 'x' } }, draft, '2026-11-25', 'INV-T1', 3).error, undefined);
+  assert.equal(BillingLedger.frozenIssueFields(body, draft, '2026-11-19', 'INV-T1', null).error, undefined, 'a first statement: no correction, no floor');
+  assert.ok(correctionOf({ Revision: 1, Issue_Date: '2026-10-11', Total_Payable_Cents: 1, lines: [] }, { Total_Payable_Cents: 2, lines: [] }, {}).reason.length <= 200);
+});
