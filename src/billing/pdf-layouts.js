@@ -17,7 +17,9 @@ export const CURRENT_LAYOUT = LAYOUT_13;
 /* THE ISSUE DATE (Owners, HS-PROMPT-013 Nr. 12): no corrected statement is dated before 21 November 2026, and no statement is backdated.
    `floor` and `today` are read at every issue (the ledger and the route); the test suites move them to issue their synthetic
    statements on the days those are set. */
-export const ISSUE_RULES = { floor: '2026-11-21', today: () => new Date().toISOString().slice(0, 10) };
+/* Owners, HS-PROMPT-034 (19 Nov 2026): the 21 Nov floor is lifted — a correction is issued with the actual day of its issue; no
+   statement is ever backdated (today) */
+export const ISSUE_RULES = { floor: '', today: () => new Date().toISOString().slice(0, 10) };
 
 const clean = (v) => String(v == null ? '' : v).trim();
 /** The layout a stored revision record renders with: its own; none recorded → 1.2; anything else → null (refused, never the newest). */
