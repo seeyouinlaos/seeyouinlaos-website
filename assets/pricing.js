@@ -268,18 +268,6 @@
     return null;
   }
   function prepaidIn(at, slug) { return !!prepaidQuoteIn(at, slug); }
-  /* A STAY THE BRIDE & GROOM GIVE THIS GUEST (USD 0 · the server's named rate, else the guest's own gift entry where the server states no
-     figure): on the room shown, else the room of this window in the bag */
-  function giftedIn(at, slug) {
-    if (!billingReady() || !at) return false;
-    var s = slug;
-    if (!s) { var B = window.SIYL_BAG, line = B && B.get ? B.get().filter(function (x) { return x && x.id === at.win.id; })[0] : null; if (line && line.room) s = line.room; }
-    if (!s) return false;
-    var a = serverAnswer(at.win.id, s), q = a.quote;
-    if (a.state === 'amount') return !!(q && q.rateSource === 'SPECIAL_RATE' && q.total === 0 && !q.paidByHS);
-    var g = giftFor(at.win.id, s);
-    return !!(g && (g.kind || 'gift') === 'gift');
-  }
   /* the words where there is no amount yet (never "USD 0") */
   function pendingWords() { return billingFailed() ? 'Price unavailable' : 'Price pending'; }
   /* a flat product's amount (the train, a flight class, a menu, the Sangkhathan …): the server's for a key it prices, the
@@ -425,9 +413,6 @@
       q.booking = at.win.booking || ''; q.bookingUrl = at.win.bookingUrl || ''; q.bookingWords = BOOKING_WORDS[q.booking] || '';
       /* a stay H&S already paid for this guest is not the guest's to book: no hotel link, the words say who paid */
       if (sq && sq.paidByHS) { q.booking = 'prepaid'; q.bookingUrl = ''; q.bookingWords = BOOKING_WORDS.prepaid; }
-      /* a stay the guest would book themselves that the Bride & Groom give this guest (USD 0, Owners 19 Nov 2026) is not the guest's to
-         book: no hotel link, no "book by themselves" — the amount line says who gives it */
-      else if (q.gift && q.booking === 'self') { q.booking = ''; q.bookingUrl = ''; q.bookingWords = ''; }
       return q;
     },
 
@@ -670,8 +655,6 @@
     bookingOf: function (windowId, slug) {
       var at = locate(windowId); var w = at && at.win; if (!w || !w.booking) return null;
       if (prepaidIn(at, slug)) return { method: 'prepaid', url: '', words: BOOKING_WORDS.prepaid };
-      /* a self-booked stay the Bride & Groom give this guest: nobody asks the guest to book it (no link, no words) */
-      if (w.booking === 'self' && giftedIn(at, slug)) return null;
       return { method: w.booking, url: w.bookingUrl || '', words: BOOKING_WORDS[w.booking] || '' };
     },
     BOOKING_WORDS: BOOKING_WORDS,

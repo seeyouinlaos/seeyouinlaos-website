@@ -66,6 +66,7 @@ const usd = (c) => (c == null ? '—' : 'USD ' + (c / 100).toFixed(2));
 const utcDay = () => new Date().toISOString().slice(0, 10);
 const PAYABLE = 'GUEST_SETTLEMENT_REQUIRED';
 const PROVIDER_SETTLED = ['GUEST_SELF_PAYMENT', 'GUEST_SELF_BOOKING'];
+const SELF_BOOKING = 'GUEST_SELF_BOOKING';   /* a 009 row: this named person books and pays the provider directly (engine 2.5.0) */
 const BASES = ['PER_PERSON_PER_NIGHT', 'PER_PERSON', 'PER_ROOM', 'PER_HOLDER', 'FLAT'];
 
 export class Unavailable extends Error {}
@@ -109,6 +110,14 @@ export async function invariants() {
   const a = calculate([booking('PE', 'F1-STAY', 2)], { items, specialRates: named, asOf: day }).lines[0];
   const b = calculate([booking('PF', 'F1-STAY', 2)], { items, specialRates: named, asOf: day }).lines[0];
   if (a.amountCents !== 13000 || a.rateSource !== 'SPECIAL_RATE' || b.amountCents !== 26000 || b.rateSource !== 'STANDARD_RATE') problems.push('the named 009 rate does not beat 002 for exactly the person it names');
+
+  /* a named person's own arrangement on an item settled through H&S (engine 2.5.0): Block B, USD 0, never paid by H&S; the person
+     beside them keeps 002 */
+  const own = [row('PG', 'F1-STAY', 0, 2, { Billing_Category: 'GUEST_SELF_BOOKING' })];
+  const g = calculate([booking('PG', 'F1-STAY', 2)], { items, specialRates: own, asOf: day }).lines[0];
+  const hNext = calculate([booking('PH', 'F1-STAY', 2)], { items, specialRates: own, asOf: day }).lines[0];
+  if (g.block !== 'B' || g.amountCents !== 0 || g.rateSource !== 'GUEST_SELF_BOOKING' || g.categoryOverride || g.review) problems.push('a named own arrangement (GUEST_SELF_BOOKING) is not the guest\'s own Block B line at USD 0: ' + [g.block, g.amountCents, g.rateSource, g.reviewReason || ''].join(' · '));
+  if (hNext.amountCents !== 26000 || hNext.rateSource !== 'STANDARD_RATE') problems.push('a named own arrangement changed the charge of a person it does not name');
 
   /* the website: once the server has answered, its amount — the prepaid stay's USD 109, never the listing's 18.17 × 3 */
   const { page, PEGGY } = await import('../test/sandbox.mjs');
@@ -192,7 +201,7 @@ function unitsOf(rec) {
 export async function codeAgainstGoogle({ source, g002, g009 }, asOf) {
   const problems = [], info = [];
   const items = raw002(g002), rows = raw009(g009);
-  const stats = { products: 0, priced: 0, listed: 0, website: 0, dated: 0, named: 0, provider: 0 };
+  const stats = { products: 0, priced: 0, listed: 0, website: 0, dated: 0, named: 0, provider: 0, selfBooking: 0 };
   const { page, PEGGY } = await import('../test/sandbox.mjs');
   const W = page({ auth: PEGGY, billing: 'failed' }), P = W.SIYL_PRICE;   /* the website's own figures: what it shows without the server */
   const displayGaps = [], listedKeys = new Set(), unmatchedKeys = [];
@@ -255,6 +264,7 @@ export async function codeAgainstGoogle({ source, g002, g009 }, asOf) {
   for (const r of live) {
     const name = '009 row ' + r.row + ' · ' + r.Item_ID;
     const rate = num(r.Rate_Per_Person_Night);
+    if (rate == null && clean(r.Billing_Category) === SELF_BOOKING) { problems.push(name + ': a GUEST_SELF_BOOKING row carries no rate — it must state 0 (the engine asks for review)'); continue; }
     if (rate == null) { info.push(name + ': no price yet (PRICE REQUIRED)'); continue; }
     if (count[whoOf(r)] > 1) { info.push(name + ': two approved rows name the same person and item — the engine asks for review'); continue; }
     const it = source.items[r.Item_ID];
@@ -270,6 +280,14 @@ export async function codeAgainstGoogle({ source, g002, g009 }, asOf) {
     if (COUPLE_PERSONS.includes(clean(r.Person_ID))) {
       if (!(q.hosted && centsOf(q.total) === 0)) problems.push(name + ': names the couple — their own booking must be hosted (USD 0); the engine charges ' + usd(centsOf(q.total)) + ' (' + (q.rateSource || '') + ')');
       else { stats.couple = (stats.couple || 0) + 1; info.push(name + ': names the couple — hosted by the complimentary rule (Owners, 17 Nov 2026); the row\'s ' + rate + ' is not charged'); }
+      continue;
+    }
+    /* THE GUEST'S OWN ARRANGEMENT BY NAME (engine 2.5.0, Owners 19 Nov 2026): on an item settled through H&S, a GUEST_SELF_BOOKING row
+       makes this one person's line Block B at USD 0 — never an H&S charge, never "paid by H&S", never a gift */
+    if (clean(r.Billing_Category) === SELF_BOOKING) {
+      if (clean(it.Billing_Category) !== PAYABLE) { problems.push(name + ': a GUEST_SELF_BOOKING row on a ' + (clean(it.Billing_Category) || 'category-less') + ' product — the engine asks for review'); continue; }
+      if (!(q.block === 'B' && centsOf(q.total) === 0 && q.rateSource === SELF_BOOKING && !q.paidByHS)) problems.push(name + ': the person books and pays the provider directly, but the engine says ' + (q.block || '-') + ' · ' + usd(centsOf(q.total)) + ' (' + (q.rateSource || q.manualReview || 'no amount') + (q.paidByHS ? ', paid by H&S' : '') + ')');
+      else stats.selfBooking++;
       continue;
     }
     const category = r.Billing_Category === PAYABLE ? PAYABLE : clean(it.Billing_Category);
@@ -419,6 +437,17 @@ export function acceptPlan({ committed, detail, now, expect, order, bootstrap, i
 
 /* ---------------------------------------------- --live · the deployed Worker */
 
+/** A live line of a named own arrangement (009 GUEST_SELF_BOOKING, engine 2.5.0): Block B, GUEST_SELF_BOOKING, USD 0, never in review,
+ *  never "paid by H&S" — anything else is named (a line in review is a failure here, never a silent pass). */
+export function selfBookingLineProblem(l) {
+  if (!l) return 'no line';
+  if (l.review) return 'the line is in review (' + l.review + ') — the person books and pays the provider directly';
+  if (l.block !== 'B' || l.rateSource !== SELF_BOOKING) return 'the person books and pays the provider directly, but the line says ' + (l.block || '-') + ' · ' + (l.rateSource || '-');
+  if (l.paidByHS) return 'the line says paid by H&S';
+  if (l.amount != null && centsOf(l.amount) !== 0) return 'the line charges ' + usd(centsOf(l.amount));
+  return null;
+}
+
 async function liveChecks(google, asOf) {
   const problems = [], info = [], stats = { listed: 0, booked: 0, holders: 0, rows: 0, rowsChecked: 0 };
   const infra = JSON.parse(fs.readFileSync(path.join(ROOT, 'infra/PRODUCTION.json'), 'utf8'));
@@ -463,7 +492,9 @@ async function liveChecks(google, asOf) {
     const d = await get('/api/billing/admin/holder?holder=' + encodeURIComponent(holder));
     if (d.status !== 200 || !d.j) { problems.push('live holder of 009 row ' + list[0].row + ': admin view answered ' + d.status); continue; }
     stats.holders++;
-    const lines = [...((d.j.booked && d.j.booked.items) || []), ...((d.j.preview && d.j.preview.lines) || [])];
+    /* Block B too (engine 2.5.0): a named own arrangement lives there, and only there */
+    const lines = [...((d.j.booked && d.j.booked.items) || []), ...((d.j.booked && d.j.booked.blockB) || []),
+      ...((d.j.preview && d.j.preview.lines) || []), ...((d.j.preview && d.j.preview.blockB) || [])];
     for (const r of list) {
       const it = google.source.items[r.Item_ID]; if (!it) continue;
       const mine = lines.filter((l) => l && l.Person_ID === r.Person_ID && l.Item_ID === r.Item_ID);
@@ -474,6 +505,7 @@ async function liveChecks(google, asOf) {
         stats.booked++;
         const name = 'live 009 row ' + r.row + ' · ' + r.Item_ID;
         if (COUPLE_PERSONS.includes(clean(r.Person_ID))) { if (l.amount != null && centsOf(l.amount) !== 0) problems.push(name + ': the couple\'s own booking was charged ' + usd(centsOf(l.amount)) + ' — it is complimentary'); continue; }
+        if (clean(r.Billing_Category) === SELF_BOOKING) { const why = selfBookingLineProblem(l); if (why) problems.push(name + ': ' + why); continue; }
         if (category !== PAYABLE) { if (l.amount != null && centsOf(l.amount) !== 0) problems.push(name + ': a ' + category + ' product became an H&S charge of ' + usd(centsOf(l.amount))); continue; }
         if (/^\d+$/.test(rule) && Number(l.payableNights) !== Number(rule)) problems.push(name + ': ' + l.payableNights + ' payable nights, 009 says ' + rule);
         const units = (/^\d+$/.test(rule) ? Number(rule) : num(l.nights)) * (Number(l.quantity) || 1);
@@ -541,7 +573,7 @@ async function main(argv) {
   for (const p of problems) console.log('FAIL ' + p);
   const s = code.stats;
   const summary = s.products + ' products (' + s.priced + ' priced, ' + s.listed + ' listed, ' + s.website + ' website figures, ' + s.dated + ' dated) · ' +
-    s.named + ' named 009 charges, ' + s.provider + ' named rates the guest pays the provider · baseline ref ' + ((committed && committed.ref) || 'none') +
+    s.named + ' named 009 charges, ' + s.provider + ' named rates the guest pays the provider' + (s.selfBooking ? ', ' + s.selfBooking + ' named own arrangement' + (s.selfBooking === 1 ? '' : 's') + ' (GUEST_SELF_BOOKING)' : '') + ' · baseline ref ' + ((committed && committed.ref) || 'none') +
     (liveStats ? ' · live: ' + liveStats.listed + ' listed rates, ' + liveStats.rowsChecked + ' of ' + liveStats.rows + ' approved 009 rows charged (' + liveStats.booked + ' lines, ' + liveStats.holders + ' holders)' : '');
   console.log(problems.length ? 'PRICING SOURCE OF TRUTH: BLOCKED — ' + problems.length + ' difference(s) · ' + summary : 'PRICING SOURCE OF TRUTH: INTACT — ' + summary);
   return problems.length ? 1 : 0;

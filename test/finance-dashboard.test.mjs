@@ -17,7 +17,7 @@ const ITEMS = { 'T-SUITE': { Item_ID: 'T-SUITE', Billing_Category: 'GUEST_SETTLE
 const bk = (person) => ({ Booking_ID: 'BK·INV-' + person + '·' + person + '·T-SUITE·g1', Holder_ID: 'INV-' + person, Person_ID: person, Item_ID: 'T-SUITE', State: 'CONFIRMED', Nights: 2, Quantity: 1 });
 
 test('COUPLE · the couple\'s own bookings are hosted at USD 0 whatever 009 names for them; a guest beside them pays; the couple are the Billing Admins', () => {
-  assert.equal(ENGINE_VERSION, 'billing-engine/2.4.0');
+  assert.equal(ENGINE_VERSION, 'billing-engine/2.5.0');
   assert.deepEqual([...COUPLE_PERSONS], BILLING_ADMINS.map((a) => a.guestId));
   const rates = [{ Holder_ID: 'INV-G048', Person_ID: 'G048', Item_ID: 'T-SUITE', Rate_Per_Person_Night: 75, Nights_Rule: '2', Rate_Status: 'ACTIVE', Approved_By: 'synthetic' }];
   const r = calculate([bk('G048'), bk('G049'), bk('GX01')], { items: ITEMS, specialRates: rates, asOf: '2026-11-17' });

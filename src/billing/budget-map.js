@@ -24,7 +24,7 @@
               of the supplier, never split between stays).
    ========================================================================== */
 
-export const BUDGET_MAP_VERSION = 'budget-map/1.3.0';
+export const BUDGET_MAP_VERSION = 'budget-map/1.4.0';
 
 export const STAGES = Object.freeze({
   A2: { place: 'U Sathorn Bangkok' },
@@ -147,6 +147,18 @@ export const SUPPLIER_CATEGORY = Object.freeze([
   { vendor: /^bloom\s+and\s+bite\b/i, category: 'Flower & Decoration', lines: '004 Ceremony Decoration and Flowers (Bloom and Bite)' },
   { vendor: /^canva\s+stand\b/i, category: 'Flower & Decoration', lines: '004 Art Display Stand / Canvas (signage)' },
 ]);
+
+/* THE HOTELS, EACH ON ITS OWN (Owners, 19 Nov 2026 · HS-012.2): one entry per property for Finance section B — `id` is the RULES entry
+   that marks its 004 lines, `stages` the stays it serves, `vendor` its own 007 supplier column (none: the property has no 007 column),
+   `location` the place to show where 004's own Location column states none. No figure lives here. */
+export const HOTELS = Object.freeze([
+  { id: 'SOUPHATTRA', name: 'Souphattra Heritage', location: 'Vientiane', stages: ['C', 'D1'], vendor: /^souphattra\s+heritage\b/i },
+  { id: 'U-SATHORN', name: 'U Sathorn', location: 'Bangkok', stages: ['A2'], vendor: /^u\s*sathorn\b/i },
+  { id: 'GUEST-HOUSE', name: 'Guest House', location: null, stages: ['D2'], vendor: null },
+  { id: 'YIFANGJU', name: 'Yifangju Designer Courtyard', location: 'Kunming', stages: ['F'], vendor: /^yifangju\b/i },
+  { id: 'LUYE-BAISHA', name: 'Luye Baisha', location: 'Lijiang', stages: ['H'], vendor: /^luye\s+baisha\b/i },
+  { id: 'MUSE', name: 'Hotel Muse', location: 'Bangkok', stages: ['J'], vendor: /^(hotel\s+)?muse\b/i },
+].map((h) => Object.freeze({ ...h, stages: Object.freeze(h.stages), china: h.stages.every((x) => CHINA_STAGES.includes(x)) })));
 
 /* THE INTERNAL REPORTING REFERENCE RATES (Owners, 18 Nov 2026): 1 USD = 33.68 THB, 1 USD = 0.89 EUR. Used only to show a USD
    equivalent BESIDE an amount kept in its own currency — labelled as a reference conversion, never the rate a transaction was made

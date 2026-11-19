@@ -36,7 +36,7 @@ import {
 /* 2.2.1 (5 Oct 2026): approved, person-scoped, unambiguous named rates only; a charge rounded once
    2.3.0 (7 Oct 2026): a booking H&S booked and paid for a guest is payable — named by a person-scoped 009 row
    2.4.0 (17 Nov 2026): the couple's own bookings are complimentary — hosted, USD 0, never guest revenue */
-export const ENGINE_VERSION = 'billing-engine/2.4.0';
+export const ENGINE_VERSION = 'billing-engine/2.5.0';
 /* THE COUPLE (Owners, 17 Nov 2026): Haruthai and Suthep organise the wedding; what they book for their own use is hosted —
    USD 0, its value shown as hosted value — whatever the product or rate. Their real costs are Google 004's. The persons are the
    verified identities of the Billing Admin allowlist (src/billing/admin.js), never a room or a party. */
@@ -130,11 +130,31 @@ function chargeCents(rate, units) {
   return Math.round(r * u * 100);
 }
 
-/** A 009 row that marks this person's booking as paid by H&S without counting as engine input yet. */
-function pendingPaidByHS(specialRates, holderId, personId, itemId) {
-  return (Array.isArray(specialRates) ? specialRates : []).some((r) => r && clean(r.Billing_Category) &&
-    clean(r.Item_ID) === itemId && clean(r.Person_ID) === personId && (!clean(r.Holder_ID) || clean(r.Holder_ID) === holderId) &&
-    clean(r.Rate_Status) !== RATE_STATUS.RETIRED);
+/** The category of a 009 row that classifies this person's booking (paid by H&S, or the guest's own) without counting as engine
+ *  input yet — null where there is none. */
+function pendingRowCategory(specialRates, holderId, personId, itemId) {
+  const r = (Array.isArray(specialRates) ? specialRates : []).find((x) => x && clean(x.Billing_Category) &&
+    clean(x.Item_ID) === itemId && clean(x.Person_ID) === personId && (!clean(x.Holder_ID) || clean(x.Holder_ID) === holderId) &&
+    clean(x.Rate_Status) !== RATE_STATUS.RETIRED);
+  return r ? clean(r.Billing_Category) : null;
+}
+
+/* THE GUEST'S OWN ARRANGEMENT BY NAME (Owners, 19 Nov 2026 · engine 2.5.0 · HS-031.2). An item otherwise settled through H&S
+   (GUEST_SETTLEMENT_REQUIRED) that ONE named person books and pays directly with the provider: an approved, ACTIVE, in-date 009 row
+   naming that PERSON, Billing_Category GUEST_SELF_BOOKING, no price of its own (Rate_Per_Person_Night 0). The line is then that
+   person's own arrangement — Block B, "you book and pay this yourself", USD 0 to H&S, no revenue, no receivable — exactly as every
+   self-booked item; it is NOT a gift, NOT hosted and NOT paid by H&S (no categoryOverride, no paidByHS). A USD 0 named rate WITHOUT
+   this category keeps its own meaning (Freeze · F). Anything this rule does not cover goes to review, never guessed. */
+function selfBookingRowProblem({ special, match, item, line, personId, asOf }) {
+  if (!match.personScoped) return 'a 009 GUEST_SELF_BOOKING row must name the person whose own arrangement it is, not only the holder';
+  if (COUPLE_PERSONS.includes(clean(personId))) return 'the couple\'s own booking is hosted — a 009 GUEST_SELF_BOOKING row cannot name them';
+  if (line.Billing_Category !== PAYABLE_BY_ROW) return '009 Billing_Category ' + BILLING_CATEGORY.GUEST_SELF_BOOKING + ' is not one the engine applies to a ' + (line.Billing_Category || 'category-less') + ' item (only to an item settled through H&S)';
+  const basis = clean(item.Rate_Basis);
+  if (basis !== RATE_BASIS.PER_PERSON_PER_NIGHT && basis !== RATE_BASIS.PER_PERSON) return 'a 009 GUEST_SELF_BOOKING row on a ' + (basis || 'basis-less') + ' item — only a per-person item can be one person\'s own arrangement';
+  if (!itemIsActiveOn(item, asOf)) return 'a 009 GUEST_SELF_BOOKING row cannot open an item that is not ACTIVE';
+  const raw = clean(special.Rate_Per_Person_Night);
+  if (raw === '' || Number(raw.replace(/[, ]/g, '')) !== 0) return 'a 009 GUEST_SELF_BOOKING row carries no price — its Rate_Per_Person_Night must be 0';
+  return null;
 }
 
 /* --------------------------------------------------------------- one line */
@@ -242,15 +262,22 @@ export function computeLine(booking, ctx) {
   const rowCategory = special ? clean(special.Billing_Category) : '';
   /* a row that says so but does not count yet (DRAFT, unapproved, out of its dates) never lets the line fall back to
      the guest's own arrangement: the statement waits for it. A RETIRED row is a withdrawal and is read as none. */
-  if (!rowCategory && pendingPaidByHS(specialRates, holderId, personId, itemId)) {
+  const pendingCategory = rowCategory ? null : pendingRowCategory(specialRates, holderId, personId, itemId);
+  if (pendingCategory) {
     line.review = MANUAL_REVIEW_REQUIRED;
-    line.reviewReason = 'a 009 row marks this booking as paid by H&S but is not ACTIVE, approved and in date';
+    line.reviewReason = pendingCategory === BILLING_CATEGORY.GUEST_SELF_BOOKING
+      ? 'a 009 row marks this booking as the guest\'s own arrangement but is not ACTIVE, approved and in date'
+      : 'a 009 row marks this booking as paid by H&S but is not ACTIVE, approved and in date';
     return line;
   }
-  if (rowCategory) {
+  if (rowCategory === BILLING_CATEGORY.GUEST_SELF_BOOKING) {
+    const why = selfBookingRowProblem({ special, match, item, line, personId, asOf });
+    if (why) { line.review = MANUAL_REVIEW_REQUIRED; line.reviewReason = why; return line; }
+    line.Billing_Category = BILLING_CATEGORY.GUEST_SELF_BOOKING;
+  } else if (rowCategory) {
     if (rowCategory !== PAYABLE_BY_ROW) {
       line.review = MANUAL_REVIEW_REQUIRED;
-      line.reviewReason = '009 Billing_Category ' + rowCategory + ' is not one the engine applies (only ' + PAYABLE_BY_ROW + ')';
+      line.reviewReason = '009 Billing_Category ' + rowCategory + ' is not one the engine applies (only ' + PAYABLE_BY_ROW + ' or ' + BILLING_CATEGORY.GUEST_SELF_BOOKING + ')';
       return line;
     }
     if (!match.personScoped) {

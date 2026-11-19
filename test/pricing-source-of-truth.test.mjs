@@ -20,7 +20,7 @@ import { loadItems, loadSpecialRates, RANGE } from '../src/billing/source.js';
 import { composeGuestMail, composeOwnerMail } from '../src/mail-templates.js';
 import { markPaidByHS } from '../src/worker.js';
 import { clearCatalogueCache } from '../src/billing/catalogue-cache.js';
-import { invariants, codeAgainstGoogle, snapshotOf, diffSnapshots, raw009, digestsOf, baselineVerdict, markerVerdict, acceptPlan, committedValid } from '../src/pricing-guard.mjs';
+import { invariants, codeAgainstGoogle, snapshotOf, diffSnapshots, raw009, digestsOf, baselineVerdict, markerVerdict, acceptPlan, committedValid, selfBookingLineProblem } from '../src/pricing-guard.mjs';
 import fs from 'node:fs';
 
 const DAY = '2026-10-08';
@@ -269,4 +269,28 @@ test('PORTABLE BASELINE · only an OWNER-PRICING-CHANGE naming the ref may chang
     if (RELEASE_TOOLS.includes(file)) { for (const m of text.matchAll(/pricing-baseline\.json'\), 'utf8'\)\)(\.\w+)/g)) assert.equal(m[1], '.ref', file); continue; }
     assert.doesNotMatch(text, /pricing-baseline/, file);
   }
+});
+
+test('OWN ARRANGEMENT BY NAME (engine 2.5.0, HS-031.6) · gate F1 proves a 009 GUEST_SELF_BOOKING row on an item settled through H&S: Block B, USD 0, never paid by H&S — live too', async () => {
+  const label = (l, ...cells) => [l, ...cells];
+  const g002 = [label('Item_ID', 'T-HOTEL'), label('Site_Product_Key', 'bkk-stay/u-sathorn-superior-garden'), label('Billing_Category', PAYABLE),
+    label('Rate_Status', 'ACTIVE'), label('Rate_Basis', 'PER_PERSON_PER_NIGHT'), label('Standard_Rate', 67.805), label('Currency', 'USD'), label('Number of Nights', 3),
+    label('Max_Pax', 2), ...['Effective_From', 'Effective_To', 'Quota', 'Quota_Unit', 'Change_Cutoff', 'Cancellation_Cutoff', 'Modifiers'].map((l) => label(l, ''))];
+  const head = ['Holder_ID', 'Person_ID', 'Item_ID', 'Rate_Per_Person_Night', 'Nights_Rule', 'Visibility', 'Rate_Status', 'Effective_From', 'Effective_To', 'Approved_By', 'Approved_At', 'Note', 'Billing_Category'];
+  const g009 = (rate, cat) => [head, ['INV-GA', 'GA', 'T-HOTEL', rate, '3', 'GUEST', 'ACTIVE', '', '', 'Haruthai & Suthep', DAY, 'Guest books and pays directly to the hotel', cat]];
+  const load = async (a, b) => {
+    const cfg = { spreadsheetId: 'test', asOf: DAY, grids: { [RANGE.ACCOMMODATION_DETAILS]: a, [RANGE.SPECIAL_RATES]: b } };
+    return { source: { items: await loadItems({}, cfg), specialRates: await loadSpecialRates({}, cfg) }, g002: a, g009: b };
+  };
+  const ok = await codeAgainstGoogle(await load(g002, g009(0, 'GUEST_SELF_BOOKING')), DAY);
+  assert.deepEqual(ok.problems, []); assert.equal(ok.stats.selfBooking, 1); assert.equal(ok.stats.named, 0);
+  const blank = await codeAgainstGoogle(await load(g002, g009('', 'GUEST_SELF_BOOKING')), DAY);
+  assert.ok(blank.problems.some((p) => /GUEST_SELF_BOOKING row carries no rate/.test(p)), blank.problems.join(' | '));
+  const selfPay = await codeAgainstGoogle(await load(g002.map((r) => (r[0] === 'Billing_Category' ? ['Billing_Category', 'GUEST_SELF_PAYMENT'] : r)), g009(0, 'GUEST_SELF_BOOKING')), DAY);
+  assert.ok(selfPay.problems.some((p) => /GUEST_SELF_BOOKING row on a GUEST_SELF_PAYMENT product/.test(p)), selfPay.problems.join(' | '));
+  /* live: a line of the admin view is judged as it is — Block B passes; a line in review, a Block A line or "paid by H&S" fails */
+  assert.equal(selfBookingLineProblem({ block: 'B', rateSource: 'GUEST_SELF_BOOKING', amount: 0, paidByHS: null, review: null }), null);
+  assert.match(selfBookingLineProblem({ block: null, rateSource: null, amount: null, review: '009 Billing_Category GUEST_SELF_BOOKING is not one the engine applies' }), /in review/);
+  assert.match(selfBookingLineProblem({ block: 'A', rateSource: 'SPECIAL_RATE', amount: 0 }), /line says A/);
+  assert.match(selfBookingLineProblem({ block: 'B', rateSource: 'GUEST_SELF_BOOKING', amount: 0, paidByHS: 'GUEST_SETTLEMENT_REQUIRED' }), /paid by H&S/);
 });

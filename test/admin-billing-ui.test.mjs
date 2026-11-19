@@ -666,6 +666,42 @@ test('REVIEW · Rooms & rates: by hotel and period, hotel room no. and building 
   assert.ok((h.match(/<td(?![^>]*data-l=)/g) || []).length === 0, 'every cell named for the phone');
 });
 
+test('FINANCE B · each hotel on its own (HS-012.2): a row (a card on a phone) per hotel with its guest revenue, the Accommodation sub-total under them, the category alone where the split is not there; the CSV names each row\'s kind', async () => {
+  const revenue = reviewRevenue();
+  const H = revenue.budget.report.byHotel;
+  assert.ok(H && H.reconciliation.rawAgree, 'the report splits Accommodation by hotel');
+  const { root, A } = load({ 'admin/overview': OVERVIEW, 'admin/status': statusAnswer, revenue }, { hash: '#finance' });
+  await tick(40);
+  const h = root.innerHTML;
+  const b = h.split('data-ab-budget-vs')[1].split('</table>')[0];
+  assert.match(b, /<th class="num">Guest revenue<\/th>/);
+  assert.match(b, /data-ab-hotel="SOUPHATTRA"><td data-l="Category"><b data-i18n-skip>Souphattra Heritage · Vientiane<\/b>/);
+  assert.match(b, /data-ab-hotel="SOUPHATTRA">.*data-l="Guest revenue" class="num"><span data-i18n-skip>booked USD 365\.00<br>invoiced USD 390\.00<br>received USD 0\.00<br>outstanding USD 390\.00/);
+  assert.match(b, /data-ab-hotel="NO-HOTEL"><td data-l="Category"><b data-i18n-skip>Accommodation — no hotel stated<\/b><span class="ab-id">Accommodation · 004 rows 8–9 · location not recorded/);
+  assert.match(b, /class="ab-subtotal"><td data-l="Category"><b>Accommodation · all hotels<\/b>/);
+  assert.ok(b.indexOf('data-ab-hotel="SOUPHATTRA"') < b.indexOf('ab-subtotal'), 'the hotels first, their sub-total under them');
+  assert.doesNotMatch(b, /<td data-l="Category">Accommodation<span/, 'no combined Accommodation row on its own');
+  assert.match(h, /The hotel rows add up to "Accommodation · all hotels"/);
+  assert.ok((b.match(/<td(?![^>]*data-l=)/g) || []).length === 0, 'every cell named for the phone');
+  const csv = A.csv.finance('budget-vs-actual');
+  assert.match(csv, /Row,004 category · hotel,Gross USD \(004\)/);
+  assert.match(csv, /CATEGORY,Accommodation,/); assert.match(csv, /HOTEL \(part of the category above\),Souphattra Heritage · Vientiane,/);
+  assert.match(csv, /TOTAL,The wedding \(total\)/); assert.match(csv, /Guest revenue booked USD/);
+  assert.match(b, /data-ab-hotel="SOUPHATTRA">.*3 guests · 1 room · 2 room nights/, 'guests, rooms and room nights per hotel, as the Revenue tab counts them');
+  { const r3 = reviewRevenue(); r3.budget.report.byHotel = { ...H, revenueAvailable: false };
+    const L3 = load({ 'admin/overview': OVERVIEW, 'admin/status': statusAnswer, revenue: r3 }, { hash: '#finance' }); await tick(40);
+    assert.match(L3.root.innerHTML, /data-ab-hotel="SOUPHATTRA">.*guest revenue not available just now/); assert.doesNotMatch(L3.root.innerHTML.split('data-ab-budget-vs')[1].split('</table>')[0], /no booked guest stay/); }
+  /* the split not there, or not adding up: the category row stands, as before */
+  for (const bad of [null, { ...H, reconciliation: { ...H.reconciliation, rawAgree: false } }]) {
+    const r2 = reviewRevenue(); r2.budget.report.byHotel = bad;
+    const L = load({ 'admin/overview': OVERVIEW, 'admin/status': statusAnswer, revenue: r2 }, { hash: '#finance' });
+    await tick(40);
+    const b2 = L.root.innerHTML.split('data-ab-budget-vs')[1].split('</table>')[0];
+    assert.match(b2, /<td data-l="Category">Accommodation/); assert.doesNotMatch(b2, /data-ab-hotel=/);
+    assert.match(L.A.csv.finance('budget-vs-actual'), /CATEGORY,Accommodation,/); assert.doesNotMatch(L.A.csv.finance('budget-vs-actual'), /HOTEL \(part/);
+  }
+});
+
 test('REVIEW · Finance: A executive summary, B budget vs actual, C guest billing by class, D Souphattra financial performance, E exceptions; print and CSVs; Revenue keeps guest revenue only', async () => {
   const revenue = reviewRevenue();
   const { root, A, calls } = load({ 'admin/overview': OVERVIEW, 'admin/status': statusAnswer, revenue }, { hash: '#finance' });
