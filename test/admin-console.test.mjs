@@ -1440,3 +1440,18 @@ test('HS-PROMPT-013 Nr. 12 · the route: a correction before 21 Nov 2026 is show
     assert.equal(r3.status, 409); assert.deepEqual(r3.j.reasons, ['ISSUE_BACKDATED']);
   } finally { Object.assign(ISSUE_RULES, was); }
 });
+
+test('HS-PROMPT-032 · admin/preview-pdf: the corrected version as Issue would freeze it, marked PREVIEW — nothing stored, issued or sent; the issued original untouched', async () => {
+  const W = world(); await approveGate(W.st);
+  const h = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+  assert.equal((await hit(W, GROOM, 'issue', { holderId: 'INV-T1', expectedProposal: h.j.preview.proposalHash })).status, 200);
+  const sid = (await hit(W, GROOM, 'admin/holder?holder=INV-T1')).j.issued.Settlement_ID;
+  const puts = W.docs._puts(), keys = [...(await W.st.storage.list()).keys()].length;
+  const p = await hit(W, GROOM, 'admin/preview-pdf?holder=INV-T1');
+  assert.equal(p.status, 200, JSON.stringify(p.j));
+  const t = Buffer.from(p.bytes).toString('latin1');
+  assert.match(t, /\(PREVIEW \\267 not issued/); assert.match(t, /\(STATEMENT FOR\)/); assert.ok(t.includes('(' + sid + ' \\267 Revision V2)'));
+  assert.match(t, /Corrected version \\267 replaces V1/);
+  assert.equal(W.docs._puts(), puts, 'nothing stored'); assert.equal([...(await W.st.storage.list()).keys()].length, keys, 'the ledger untouched');
+  assert.equal((await hit(W, GUEST, 'admin/preview-pdf?holder=INV-T1')).status, 403, 'billing administration only');
+});

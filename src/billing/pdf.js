@@ -538,6 +538,8 @@ function masthead(doc, snapshot, o) {
   doc.y -= 15;
   drawText(doc, c.left, doc.y, doc.meta.idLine, REG, 9.5, SOFT);
   /* a corrected version names the version it replaces and its own date (HS-004.8) */
+  /* a preview the Owners open before they issue (HS-PROMPT-032): said on the page itself */
+  if (opts.preview) { doc.y -= 12; drawText(doc, c.left, doc.y, 'PREVIEW \u00b7 not issued \u00b7 the statement is issued by Haruthai & Suthep', BOLD, 8.5, SOFT); }
   const k = opts.correction && typeof opts.correction === 'object' ? opts.correction : null;
   if (k && clean(k.replaces)) {
     for (const t of wrapText('Corrected version · replaces ' + clean(k.replaces) + (clean(k.replacesIssued) ? ' issued ' + longDate(k.replacesIssued) : '') +
