@@ -636,7 +636,8 @@ function blockACells(c, line, o) {
      repay …") and is printed. Every other 009 note is the Owners' working text (who, package, rule overrides): it stays in the ledger
      snapshot and is never printed on the guest's statement (HS-004.14) */
   const agreed = clean(line.rateSource) === 'SPECIAL_RATE';
-  const paidWords = (clean(line.Category_Override_From) || line.categoryOverride) ? clean(line.specialRateRef) : '';
+  const paidRef = (clean(line.Category_Override_From) || line.categoryOverride) ? clean(line.specialRateRef) : '';
+  const paidWords = paidRef && paidRef !== 'named special rate' ? paidRef : '';   /* the engine's fallback is never printed as the Owners' words */
   const agreedNote = paidWords ? wrapText(paidWords, REG, 7.5, c.wItem - 6, ROW_LINES_MAX) : [];
   const named = agreed ? wrapText(SPECIAL_RATE_NOTE, REG, 7.5, c.wBasis - 6) : [];
   const lines = Math.max(1, person.length + personId.length, item.length + agreedNote.length, basis.length + rate.length + named.length, units.length);
@@ -875,7 +876,7 @@ function paymentSection(doc, p) {
     const height = 14 + rows.length * 12 + howLines.length * 10.5 + 6 + (img ? qrH + 10 : o.method !== 'SEPA_EUR' ? 14 : 0) + 10;
     return { o, w, rows, img, qrW, qrH, howLines, height };
   });
-  const headH = 14 + (due ? 12 : 0) + (clean(p.dueDate) ? 12 : 0) + 6;
+  let headH = 14 + (due ? 12 : 0) + (clean(p.dueDate) ? 12 : 0) + 6;
   const gap = 16, codeCol = 96;
   /* the bank transfer's column is the wider one: its IBAN is never broken */
   const colWs = [(c.width - codeCol - 2 * gap) * 0.6, (c.width - codeCol - 2 * gap) * 0.4];
@@ -903,11 +904,15 @@ function paymentSection(doc, p) {
   /* ONE way to pay: its code stands at the right beside the whole section — the heading, the amount due and the way to pay run down
      the left — so a tall payment code (the PromptPay slip) does not push the section onto a page of its own (HS-004.13) */
   const profileH = wrapText(PAY_PROFILE, REG, 8, c.width).length * 10;
+  /* the amount due is never shortened: beside a code it may take a second line */
+  const leftW = one ? one.textW : c.width;
+  const dueLines = due ? wrapText(due, BOLD, 8.5, leftW - 110) : [];
+  headH += Math.max(0, dueLines.length - 1) * 12;
   ensure(doc, one ? Math.max(headH + one.textH, one.codeH) + 10 + profileH : headH + firstH);
-  const sectionTop = doc.y, leftW = one ? one.textW : c.width;
+  const sectionTop = doc.y;
   drawText(doc, c.left, doc.y, PAY_HEADING, BOLD, 9);
   doc.y -= 14;
-  if (due) { drawText(doc, c.left, doc.y, 'Amount due', REG, 8.5, SOFT); drawText(doc, c.left + 110, doc.y, fitText(due, BOLD, 8.5, leftW - 110), BOLD, 8.5); doc.y -= 12; }
+  if (dueLines.length) { drawText(doc, c.left, doc.y, 'Amount due', REG, 8.5, SOFT); dueLines.forEach((t) => { drawText(doc, c.left + 110, doc.y, t, BOLD, 8.5); doc.y -= 12; }); }
   if (clean(p.dueDate)) { drawText(doc, c.left, doc.y, 'Pay by', REG, 8.5, SOFT); drawText(doc, c.left + 110, doc.y, longDate(p.dueDate), REG, 8.5); doc.y -= 12; }
   doc.y -= 6;
   /* TWO WAYS TO PAY side by side (HS-004.13/.16): the bank transfer on the left, PayPal with its code on the right — one look, half the

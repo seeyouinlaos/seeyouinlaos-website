@@ -192,3 +192,20 @@ test('PDF 1.3 · a named 009 rate shows "your agreed rate" — the 009 row\'s ow
   const t = text(renderSettlementPdf(snap, { recipient: { Person_ID: 'GT1', name: 'Tess Example' }, persons: { GT1: 'Tess Example' }, items: { 'T-WED': { name: 'Hotel · Room', detail: 'Wedding Stay' } } }));
   assert.ok(t.includes('your agreed rate')); assert.ok(!t.includes('internal working note') && !t.includes('overrides'));
 });
+
+test('PDF 1.3 · a booking Haruthai & Suthep paid keeps the Owners\' words to the guest (its 009 note); a long amount due wraps, never shortened', () => {
+  const L = (o) => ({ Booking_ID: 'B', Bill_To_Holder_ID: 'INV-T1', Room_Unit_ID: null, Billing_Category: 'GUEST_SETTLEMENT_REQUIRED', modifiers: [], block: 'A', Currency: 'USD', ...o });
+  const base = { Settlement_ID: 'S-T-0004', Revision: 2, Holder_ID: 'INV-T1', Issue_Date: '2026-11-21', Due_Date: '2026-11-30', Currency: 'USD', FX_USD_THB: 33.68, FX_USD_EUR: 0.89,
+    Engine_Version: 'e', Source_Hash: 'h', Block_B_Informational: [], Payment_Preference: 'PROMPTPAY_THB' };
+  const paid = L({ Person_ID: 'GT1', Item_ID: 'T-H', Rate_Basis: 'PER_PERSON_PER_NIGHT', rateCents: 10000, nights: 2, payableNights: 2, amountCents: 20000, rateSource: 'SPECIAL_RATE',
+    Category_Override_From: 'GUEST_SELF_PAYMENT', specialRateRef: 'Haruthai has already paid this hotel booking for you. Please repay Haruthai & Suthep through this settlement.' });
+  const t = text(renderSettlementPdf({ ...base, Total_Payable_Cents: 20000, Block_A_Total_Cents: 20000, lines: [paid] }, { recipient: { Person_ID: 'GT1', name: 'Tess Example' }, persons: { GT1: 'Tess Example' }, items: { 'T-H': { name: 'Hotel', detail: '' } } }));
+  assert.ok(t.replace(/\n/g, ' ').includes('Haruthai has already paid this hotel booking for you.'));
+  const fallback = text(renderSettlementPdf({ ...base, Total_Payable_Cents: 20000, Block_A_Total_Cents: 20000, lines: [{ ...paid, specialRateRef: 'named special rate' }] }, { items: { 'T-H': { name: 'Hotel', detail: '' } } }));
+  assert.ok(!fallback.includes('named special rate'));
+  const big = 100000000;   /* USD 1,000,000.00 beside a tall slip */
+  const slip = { width: 4, height: 6, colorSpace: 'DeviceRGB', filter: 'RunLengthDecode', data: new Uint8Array([71, ...new Array(72).fill(0), 128]) };
+  const huge = text(renderSettlementPdf({ ...base, Total_Payable_Cents: big, Block_A_Total_Cents: big, lines: [{ ...paid, amountCents: big }] },
+    { payment: { options: [optionView('PROMPTPAY_THB', big, base, { recipient: 'Payee' }, slip)], totalUsd: 1000000, dueDate: '2026-11-30', reference: 'S-T-0004' }, items: { 'T-H': { name: 'Hotel', detail: '' } } }));
+  assert.ok(huge.replace(/\n/g, ' ').includes('(1 USD = 33.68 THB)'), 'the rate in full'); assert.ok(!huge.includes('...'));
+});
