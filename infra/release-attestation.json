@@ -2,17 +2,15 @@
  "about": "Signed by src/release-attest.mjs on the release machine; verified by src/release-verify.cjs in the build. Not the Owner's consent — a record that these checks passed for exactly this tree.",
  "payload": {
   "v": 1,
-  "tree": "129a6748d55db9e1a3f7a0638a9ffc82d2c6e8e6",
+  "tree": "a9054419beacd0b382312eeb84f80de9525589f6",
   "pricingRef": "327be7b554f5",
   "keyId": "d02a1256537ec29e",
-  "at": "2026-11-19T11:46:35.109Z",
-  "base": "f32892383df6163b1af7199d76fa36d50cf7c36c",
-  "markers": {
-   "OWNER_PRICING_CHANGE": "Owners 19 Nov 2026 (HS-031.6 per HS-PROMPT-006): A2-U-SATHORN for G001, G002, G003 is booked and paid by the guest directly with the hotel; 009 rows 41-43 GUEST_SELF_BOOKING, Note without complimentary; G007 unchanged [ref 327be7b554f5]"
-  },
+  "at": "2026-11-19T12:40:03.457Z",
+  "base": "d31c86e6f38a9d1493f995d5f7100fd179fab92b",
+  "markers": {},
   "checks": {
    "npmTest": {
-    "pass": 1081,
+    "pass": 1082,
     "fail": 0
    },
    "releaseCheck": {
@@ -25,5 +23,5 @@
    }
   }
  },
- "signature": "QxDUs3U88DPb4PiU8UIhVivMjf2noi16vhm26PcCdOuyg5XFId11fSIJmLm8p4/cTrcrZj0YiHnIXF03v4R9CA=="
+ "signature": "uE70qGk2ZkabbcHuVwqfL5TLNxw7zAFAmS+Y8UZNUFwe9XYRFSnIKBrDD5qDpCRFaYsUop1Qe/cO6ThKXTujCQ=="
 }
