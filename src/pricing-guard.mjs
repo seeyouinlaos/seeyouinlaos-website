@@ -264,6 +264,7 @@ export async function codeAgainstGoogle({ source, g002, g009 }, asOf) {
   for (const r of live) {
     const name = '009 row ' + r.row + ' · ' + r.Item_ID;
     const rate = num(r.Rate_Per_Person_Night);
+    if (rate == null && clean(r.Billing_Category) === SELF_BOOKING) { problems.push(name + ': a GUEST_SELF_BOOKING row carries no rate — it must state 0 (the engine asks for review)'); continue; }
     if (rate == null) { info.push(name + ': no price yet (PRICE REQUIRED)'); continue; }
     if (count[whoOf(r)] > 1) { info.push(name + ': two approved rows name the same person and item — the engine asks for review'); continue; }
     const it = source.items[r.Item_ID];
@@ -436,6 +437,17 @@ export function acceptPlan({ committed, detail, now, expect, order, bootstrap, i
 
 /* ---------------------------------------------- --live · the deployed Worker */
 
+/** A live line of a named own arrangement (009 GUEST_SELF_BOOKING, engine 2.5.0): Block B, GUEST_SELF_BOOKING, USD 0, never in review,
+ *  never "paid by H&S" — anything else is named (a line in review is a failure here, never a silent pass). */
+export function selfBookingLineProblem(l) {
+  if (!l) return 'no line';
+  if (l.review) return 'the line is in review (' + l.review + ') — the person books and pays the provider directly';
+  if (l.block !== 'B' || l.rateSource !== SELF_BOOKING) return 'the person books and pays the provider directly, but the line says ' + (l.block || '-') + ' · ' + (l.rateSource || '-');
+  if (l.paidByHS) return 'the line says paid by H&S';
+  if (l.amount != null && centsOf(l.amount) !== 0) return 'the line charges ' + usd(centsOf(l.amount));
+  return null;
+}
+
 async function liveChecks(google, asOf) {
   const problems = [], info = [], stats = { listed: 0, booked: 0, holders: 0, rows: 0, rowsChecked: 0 };
   const infra = JSON.parse(fs.readFileSync(path.join(ROOT, 'infra/PRODUCTION.json'), 'utf8'));
@@ -480,7 +492,9 @@ async function liveChecks(google, asOf) {
     const d = await get('/api/billing/admin/holder?holder=' + encodeURIComponent(holder));
     if (d.status !== 200 || !d.j) { problems.push('live holder of 009 row ' + list[0].row + ': admin view answered ' + d.status); continue; }
     stats.holders++;
-    const lines = [...((d.j.booked && d.j.booked.items) || []), ...((d.j.preview && d.j.preview.lines) || [])];
+    /* Block B too (engine 2.5.0): a named own arrangement lives there, and only there */
+    const lines = [...((d.j.booked && d.j.booked.items) || []), ...((d.j.booked && d.j.booked.blockB) || []),
+      ...((d.j.preview && d.j.preview.lines) || []), ...((d.j.preview && d.j.preview.blockB) || [])];
     for (const r of list) {
       const it = google.source.items[r.Item_ID]; if (!it) continue;
       const mine = lines.filter((l) => l && l.Person_ID === r.Person_ID && l.Item_ID === r.Item_ID);
@@ -491,7 +505,7 @@ async function liveChecks(google, asOf) {
         stats.booked++;
         const name = 'live 009 row ' + r.row + ' · ' + r.Item_ID;
         if (COUPLE_PERSONS.includes(clean(r.Person_ID))) { if (l.amount != null && centsOf(l.amount) !== 0) problems.push(name + ': the couple\'s own booking was charged ' + usd(centsOf(l.amount)) + ' — it is complimentary'); continue; }
-        if (clean(r.Billing_Category) === SELF_BOOKING) { if ((l.amount != null && centsOf(l.amount) !== 0) || (l.block && l.block !== 'B') || l.paidByHS) problems.push(name + ': the person books and pays the provider directly, but the line says ' + (l.block || '-') + ' · ' + usd(centsOf(l.amount)) + (l.paidByHS ? ' · paid by H&S' : '')); continue; }
+        if (clean(r.Billing_Category) === SELF_BOOKING) { const why = selfBookingLineProblem(l); if (why) problems.push(name + ': ' + why); continue; }
         if (category !== PAYABLE) { if (l.amount != null && centsOf(l.amount) !== 0) problems.push(name + ': a ' + category + ' product became an H&S charge of ' + usd(centsOf(l.amount))); continue; }
         if (/^\d+$/.test(rule) && Number(l.payableNights) !== Number(rule)) problems.push(name + ': ' + l.payableNights + ' payable nights, 009 says ' + rule);
         const units = (/^\d+$/.test(rule) ? Number(rule) : num(l.nights)) * (Number(l.quantity) || 1);

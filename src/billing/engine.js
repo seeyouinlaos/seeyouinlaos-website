@@ -274,11 +274,10 @@ export function computeLine(booking, ctx) {
     const why = selfBookingRowProblem({ special, match, item, line, personId, asOf });
     if (why) { line.review = MANUAL_REVIEW_REQUIRED; line.reviewReason = why; return line; }
     line.Billing_Category = BILLING_CATEGORY.GUEST_SELF_BOOKING;
-    line.selfBookingRow = true;
   } else if (rowCategory) {
     if (rowCategory !== PAYABLE_BY_ROW) {
       line.review = MANUAL_REVIEW_REQUIRED;
-      line.reviewReason = '009 Billing_Category ' + rowCategory + ' is not one the engine applies (only ' + PAYABLE_BY_ROW + ')';
+      line.reviewReason = '009 Billing_Category ' + rowCategory + ' is not one the engine applies (only ' + PAYABLE_BY_ROW + ' or ' + BILLING_CATEGORY.GUEST_SELF_BOOKING + ')';
       return line;
     }
     if (!match.personScoped) {
