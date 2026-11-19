@@ -37,12 +37,6 @@ export const GIFTS = Object.freeze([
      night). Their personal rate only: the public pre-wedding Heritage Executive rate is unchanged (assets/rooms-data.js). */
   E('CON003', 'prewed', 'heritage-executive', 'special', 130),
   E('CON004', 'prewed', 'heritage-executive', 'special', 130),
-  /* A2 · U Sathorn Bangkok (21 – 24 February 2027) · three guests (the Owners' binding order, 19 Nov 2026): the guest's charge for the
-     whole stay is USD 0 — complimentary from the Bride & Groom. The same order names them in 009 (A2-U-SATHORN, USD 0, all 3 nights), so
-     the Billing Engine charges them nothing for it; the hotel's rate stays for everyone else, the hotel's purchase cost is unchanged. */
-  E('CON003', 'bkk-stay', 'u-sathorn-superior-garden', 'gift', 0),
-  E('CON004', 'bkk-stay', 'u-sathorn-superior-garden', 'gift', 0),
-  E('CON005', 'bkk-stay', 'u-sathorn-superior-garden', 'gift', 0),
 ]);
 
 /* the entries of one person, in the form the guest's own pages read (never the person id) */
