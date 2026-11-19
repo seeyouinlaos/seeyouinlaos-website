@@ -717,7 +717,7 @@
       linesTable(x.lines, false) +
       (revs.length ? '<p class="t-l1">Statement versions · each the original PDF the guest received</p><ul class="t-b2 ab-revs" data-ab-versions>' + revs.map(function (r) {
         var issued = r.Revision_State === 'ISSUED' || r.Revision_State === 'SUPERSEDED';
-        var made = r.pdf ? (r.pdf.produced ? ' · original produced (' + esc(String(r.pdf.writer || '').replace('guest-settlement-pdf/', 'layout ')) + ')' : ' · not produced yet (produced on first download, layout 1.2)') : '';
+        var made = r.pdf ? (r.pdf.produced ? ' · original produced (' + esc(String(r.pdf.writer || '').replace('guest-settlement-pdf/', 'layout ')) + ')' : ' · not produced yet (produced on first download, ' + esc(String((S.holder.settlement && S.holder.settlement.pdfWriter) || 'the current layout').replace('guest-settlement-pdf/', 'layout ')) + ')') : '';
         return '<li>V' + esc(r.Revision) + ' · ' + esc(r.Revision_State === 'ISSUED' ? 'current' : r.Revision_State === 'SUPERSEDED' ? 'superseded (historical original)' : r.Revision_State) + (r.total != null ? ' · ' + esc(usd(r.total)) : '') +
           (r.Issue_Date ? ' · issued ' + esc(day(r.Issue_Date)) : r.issuedAt ? ' · issued ' + esc(when(r.issuedAt)) : '') + (r.Due_Date ? ' · due ' + esc(day(r.Due_Date)) : '') + (r.issuedBy ? ' · by ' + esc(r.issuedBy) : '') + made +
           (issued ? ' · <button type="button" class="p-link" data-ab-pdf="' + esc(r.Revision) + '" data-ab-pdf-sid="' + esc(x.Settlement_ID) + '">Download Original PDF · V' + esc(r.Revision) + '</button>' : '') + '</li>';

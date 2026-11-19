@@ -1858,6 +1858,8 @@ async function adminHolder(env, identity, url, cors) {
       destinationComplete: !!(a.destination && a.destination.complete) }
       : { channel: issued ? issued.Payment_Preference : null, currency: issued ? issued.Payment_Currency : null, determined: !!issued, source: issued ? 'ISSUED_REVISION' : null, reason: previewError },
     settlement: { Settlement_ID: sid, state: state.state || null, latestRevision: state.latestRevision || 0,
+      /* the writer a PDF not produced yet is made with on its first download (layout 1.3 since 19 Nov 2026) */
+      pdfWriter: PDF_WRITER_VERSION,
       revisions: await Promise.all((view.holder.revisions || []).map(async (x) => ({ Revision: x.Revision, Revision_State: x.Revision_State, Issue_Date: x.Issue_Date,
         Due_Date: x.Due_Date, total: x.Total_Payable_Cents == null ? null : fromCents(x.Total_Payable_Cents), issuedAt: x.issuedAt,
         issuedBy: x.issuedBy, supersededAt: x.supersededAt,

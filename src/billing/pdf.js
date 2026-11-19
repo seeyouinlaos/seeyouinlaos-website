@@ -72,11 +72,19 @@
    printed VERBATIM from what the caller read from the authoritative payment
    source (src/billing-routes.js · paymentForPdf); this module still writes no
    payment detail of its own. A PDF already produced keeps its bytes.
+
+   LAYOUT 1.3 (Owners, 19 Nov 2026 — the wedding's own branding). The first page opens on the approved "see you in laos." logo with its
+   red final period: the original image itself (src/billing/pdf-brand.js, built from assets/brand/see-you-in-laos-email.png — never
+   redrawn, recoloured or set in another typeface; the base-14 fonts cannot set its own), laid on a band of its own paper colour across
+   the top of the page, with the couple's names and the wedding beside it. Below the band the statement is exactly 1.2's: not one
+   figure, word, payment detail, code or bank datum changes; further pages keep their "continued" line. A PDF already produced keeps its
+   bytes (its /Producer names its writer).
    ========================================================================== */
 
 import {
   BILLING_CATEGORY, MODIFIER, RATE_BASIS, ACCOUNTING_CURRENCY, formatUSD,
 } from './model.js';
+import { BRAND_LOGO, BRAND_PAPER_RGB } from './pdf-brand.js';
 
 const clean = (v) => String(v == null ? '' : v).trim();
 
@@ -256,6 +264,15 @@ function drawText(doc, x, y, value, font, size, grey) {
 
 function drawRight(doc, xRight, y, value, font, size, grey) {
   drawText(doc, xRight - textWidth(value, font, size), y, value, font, size, grey);
+}
+
+/** an image XObject on the current page: registered once per document, named on the pages that show it */
+function placeImage(doc, img, x, y, w, h) {
+  doc.images = doc.images || [];
+  if (!doc.images.includes(img)) doc.images.push(img);
+  const name = 'Im' + (doc.images.indexOf(img) + 1);
+  (doc.pageImages = doc.pageImages || new Map()).set(doc.ops, (doc.pageImages.get(doc.ops) || new Set()).add(name));
+  put(doc, 'q ' + num(w) + ' 0 0 ' + num(h) + ' ' + num(x) + ' ' + num(y) + ' cm /' + name + ' Do Q');
 }
 
 function drawRule(doc, y, x1, x2, weight, grey) {
@@ -446,6 +463,29 @@ function visibleLines(snapshot) {
     else if (line.block === 'B') blockB.push(line);
   }
   return { blockA, blockB };
+}
+
+/* ------------------------------------------------------- the brand band */
+/* LAYOUT 1.3: the first page only. The band runs edge to edge in the logo's own paper colour (its background pixel), so the approved
+ * image sits on it as it is; the couple's names never break. Under the band image lies a plain fill of the same colour (written to four
+ * decimals, which meets the 8-bit pixel exactly), so a viewer that softens the edge of a scaled one-pixel image shows no seam either. */
+const BAND_H = 92, LOGO_H = 31;
+const COUPLE_LINE = 'Haruthai & Suthep';
+const WEDDING_LINE = 'Wedding \u00b7 Vientiane \u00b7 28 February 2027';
+const BAND_GREY = 0.35;     /* a touch darker than SOFT: the wedding line stays legible on the paper colour */
+/* the band itself is an image of one pixel of the logo's paper — the same rendering path as the logo, so no printer or viewer draws a
+   seam between a vector fill and the image laid on it */
+const BAND_PIXEL = Object.freeze({ width: 1, height: 1, colorSpace: 'DeviceRGB', filter: 'RunLengthDecode', data: new Uint8Array([2, ...BRAND_PAPER_RGB, 128]) });
+function brandBand(doc) {
+  const { w, h } = doc.page, c = doc.col;
+  put(doc, 'q ' + BRAND_PAPER_RGB.map((v) => (v / 255).toFixed(4)).join(' ') + ' rg 0 ' + num(h - BAND_H) + ' ' + num(w) + ' ' + num(BAND_H) + ' re f Q');
+  placeImage(doc, BAND_PIXEL, 0, h - BAND_H, w, BAND_H);
+  const logoW = LOGO_H * BRAND_LOGO.width / BRAND_LOGO.height;
+  const mid = h - BAND_H / 2;
+  placeImage(doc, BRAND_LOGO, c.left, mid - LOGO_H / 2, logoW, LOGO_H);
+  drawRight(doc, c.right, mid + 2, COUPLE_LINE, BOLD, 10.5);
+  drawRight(doc, c.right, mid - 11, WEDDING_LINE, REG, 8, BAND_GREY);
+  doc.y = h - BAND_H - 18;
 }
 
 /* ------------------------------------------------------------- the masthead */
@@ -762,11 +802,7 @@ function paymentSection(doc, p) {
   doc.y -= 6;
   if (img) {
     /* the approved payment code, as the statement page shows it — the caller's image, never one made here */
-    doc.images = doc.images || [];
-    if (!doc.images.includes(img)) doc.images.push(img);
-    const name = 'Im' + (doc.images.indexOf(img) + 1);
-    (doc.pageImages = doc.pageImages || new Map()).set(doc.ops, (doc.pageImages.get(doc.ops) || new Set()).add(name));
-    put(doc, 'q ' + num(qrW) + ' 0 0 ' + num(qrH) + ' ' + num(c.left) + ' ' + num(doc.y - qrH) + ' cm /' + name + ' Do Q');
+    placeImage(doc, img, c.left, doc.y - qrH, qrW, qrH);
     doc.y -= qrH + 10;
   } else if (wantsQr) {
     drawText(doc, c.left, doc.y, 'The payment code is shown in My Profile, under Your statement.', REG, 8.5, SOFT);
@@ -813,7 +849,7 @@ function footers(doc) {
 
 /* ------------------------------------------------------------ the PDF file */
 
-export const PDF_WRITER_VERSION = 'guest-settlement-pdf/1.2';
+export const PDF_WRITER_VERSION = 'guest-settlement-pdf/1.3';
 
 /* FNV-1a over the document body, four times from four offsets, which gives the
  * 32 hex digits the trailer /ID wants. It is a fingerprint of this document
@@ -959,6 +995,7 @@ export function renderSettlementPdf(snapshot, opts) {
   const totalMissing = !Number.isFinite(snapshot.Total_Payable_Cents);
   const amountMissing = blockA.some((l) => amountOf(l) == null);
 
+  brandBand(doc);
   masthead(doc, snapshot);
   blockASection(doc, blockA, snapshot, o);
   if (totalMissing || amountMissing) reviewSection(doc);

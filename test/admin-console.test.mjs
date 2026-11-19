@@ -1328,9 +1328,9 @@ test('PDF 1.2 · the first render carries the payment section from the authorita
   const a = await hit(W, GROOM, 'pdf?holder=INV-T1&rev=1'), g = await hit(W, GUEST, 'pdf?rev=1');
   assert.equal(a.status, 200); assert.deepEqual(g.bytes, a.bytes, 'the guest and the Owners: the very same file');
   const t = Buffer.from(a.bytes).toString('latin1');
-  assert.match(t, /\/Producer \(guest-settlement-pdf\/1\.2\)/);
+  assert.match(t, /\/Producer \(guest-settlement-pdf\/1\.3\)/);
   for (const s of ['(How to pay)', '(PayPal, in euros \\(EUR\\) \\(as issued\\))', '(Recipient)', '(Suthep)', '(Reference no.)', '(' + sid + ')', '(Statement amount)', '(EUR 347.10  \\(USD 390.00 at this statement\'s frozen rate\\))']) assert.ok(t.includes(s), s);
-  assert.match(t, /\/Subtype \/Image \/Width 2 \/Height 2 \/ColorSpace \/DeviceRGB/); assert.match(t, /\/Im1 Do Q/);
+  assert.match(t, /\/Subtype \/Image \/Width 2 \/Height 2 \/ColorSpace \/DeviceRGB/); assert.match(t, /\/Im2 Do Q/); assert.match(t, /\/Im3 Do Q/, 'the band, the logo and the payment code, each its own image');
   assert.doesNotMatch(t, /\(1 night\)/, 'the train is a seat, never a night');
   assert.equal(W.docs._puts(), 2, 'the code once, the PDF once — write-once');
   /* AN ORIGINAL ALREADY PRODUCED stays the file it is — never rendered again by a later writer */

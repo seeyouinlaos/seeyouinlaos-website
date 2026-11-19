@@ -76,7 +76,8 @@ const CASES = [['ordinary', ORDINARY, {}], ['three pages', LONG, LONG_OPTS], ['l
 /* the content streams as drawn: text runs and rules */
 function read(bytes) {
   const s = Buffer.from(bytes).toString('latin1');
-  return [...s.matchAll(/stream\n([\s\S]*?)\nendstream/g)].map((m) => {
+  /* the pages' own content streams (an image's binary stream is not a page) */
+  return [...s.matchAll(/<< \/Length \d+ >>\nstream\n([\s\S]*?)\nendstream/g)].map((m) => {
     const texts = [], rules = [];
     for (const line of m[1].split('\n')) {
       let t = /^BT \/(F\d) ([\d.]+) Tf 1 0 0 1 ([-\d.]+) ([-\d.]+) Tm \((.*)\) Tj ET$/.exec(line);
@@ -171,8 +172,8 @@ test('PDF LINES · layout only — every figure, rate, date, FX row and sentence
 test('PDF LINES · the same Snapshot gives the same bytes, and the file names this layout\'s writer', () => {
   const a = renderSettlementPdf(LONG, LONG_OPTS), b = renderSettlementPdf(LONG, LONG_OPTS);
   assert.deepEqual(a, b);
-  assert.equal(PDF_WRITER_VERSION, 'guest-settlement-pdf/1.2');
-  assert.match(Buffer.from(a).toString('latin1'), /\/Producer \(guest-settlement-pdf\/1\.2\)/);
+  assert.equal(PDF_WRITER_VERSION, 'guest-settlement-pdf/1.3');
+  assert.match(Buffer.from(a).toString('latin1'), /\/Producer \(guest-settlement-pdf\/1\.3\)/);
 });
 
 test('PDF LINES · layout only — every cell is still printed: persons, bases, rates, nights, named rates, markers, notes, sentences', () => {
@@ -309,7 +310,8 @@ test('PDF 1.2 · THE PAYMENT CODE is the caller\'s image, embedded once as an im
   const a = renderSettlementPdf(s, opts), b = renderSettlementPdf(s, opts), r = raw(a);
   assert.deepEqual(a, b);
   assert.match(r, /\/Subtype \/Image \/Width 2 \/Height 3 \/ColorSpace \/DeviceRGB \/BitsPerComponent 8 \/Filter \/FlateDecode \/Length 11 >>\nstream\n/);
-  assert.match(r, /\/XObject << \/Im1 \d+ 0 R >>/); assert.match(r, /\/Im1 Do Q/);
+  /* layout 1.3: the band (Im1) and the logo (Im2) open the first page, the payment code is its own image (Im3) — all named in the page's resources */
+  assert.match(r, /\/XObject << \/Im1 \d+ 0 R \/Im2 \d+ 0 R \/Im3 \d+ 0 R >>/); assert.match(r, /\/Im3 Do Q/);
   const at = r.lastIndexOf('\nxref\n') + 1, xref = r.slice(at).split('\n'), size = Number(xref[1].split(' ')[1]);
   for (let n = 1; n < size; n++) { const off = Number(xref[2 + n].slice(0, 10)); assert.equal(r.slice(off, off + String(n).length + 6), n + ' 0 obj', 'object ' + n); }
   assert.equal(Number(r.slice(r.lastIndexOf('startxref\n') + 10).split('\n')[0]), at);
