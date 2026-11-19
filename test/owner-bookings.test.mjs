@@ -49,6 +49,8 @@ const ITEMS = {
     Currency: 'USD', Site_Product_Key: 'wedstay/heritage-executive', 'Number of Nights': 2, Modifiers: 'SECOND_NIGHT_COMPLIMENTARY' },
   'T-PRE': { Item_ID: 'T-PRE', Billing_Category: 'GUEST_SETTLEMENT_REQUIRED', Rate_Status: 'ACTIVE', Rate_Basis: 'PER_PERSON_PER_NIGHT', Standard_Rate: 112.5, Quota: 5, Quota_Unit: 'ROOM', Max_Pax: 2,
     Currency: 'USD', Site_Product_Key: 'prewed/heritage', 'Number of Nights': 2, Modifiers: '' },
+  'T-PRES': { Item_ID: 'T-PRES', Billing_Category: 'GUEST_SETTLEMENT_REQUIRED', Rate_Status: 'ACTIVE', Rate_Basis: 'PER_PERSON_PER_NIGHT', Standard_Rate: 750, Quota: 1, Quota_Unit: 'ROOM', Max_Pax: 2,
+    Currency: 'USD', Site_Product_Key: 'wedstay/souphattra-presidential', 'Number of Nights': 2, Modifiers: '' },
   'T-OLD': { Item_ID: 'T-OLD', Billing_Category: 'GUEST_SETTLEMENT_REQUIRED', Rate_Status: 'RETIRED', Rate_Basis: 'PER_PERSON', Standard_Rate: 10, Currency: 'USD', Site_Product_Key: 'old', 'Number of Nights': 1 },
 };
 /* the payer and four family members (two parents in room A; the payer, a sibling and an extra bed in room B) */
@@ -176,6 +178,24 @@ async function recordFamily(env) {
   }
   return rev;
 }
+
+test('ROUTE admin/owner-bookings · THE COUPLE\'S SUITE (Owners, 19 Nov 2026): the Presidential is recorded for nobody but Haruthai and Suthep — refused when it is added, with or without a room, nothing written', async () => {
+  const env = routeEnv();
+  await withSheets(workbook(FAMILY_RATES), async () => {
+    for (const room of ['A', undefined]) {
+      const r = await hit(env, GROOM, 'admin/owner-bookings', { holderId: PAYER, expectedRev: 0, action: 'add', entry: { personId: P.mum, itemId: 'T-PRES', ...(room ? { room } : {}), note: 'synthetic' } });
+      assert.equal(r.status, 409, JSON.stringify(r.j)); assert.deepEqual(r.j.reasons, ['COUPLE_SUITE: wedstay/souphattra-presidential']);
+    }
+    const g = await hit(env, GROOM, 'admin/owner-bookings?holder=' + PAYER);
+    assert.equal(g.j.rev, 0, 'nothing was written'); assert.deepEqual(g.j.entries, []);
+    assert.equal((g.j.units['wedstay/souphattra-presidential'] || [])[0].couple, true, 'the form marks the suite as the couple\'s');
+    /* an entry recorded for someone else BEFORE the rule — room or not — is never confirmed */
+    await env.REG_KV.put('obk:' + PAYER, JSON.stringify({ rev: 1, nextId: 2, entries: [{ id: 'E1', personId: P.mum, itemId: 'T-PRES', note: 'synthetic', recordedBy: 'GROOM', recordedAt: '2026-11-01T00:00:00Z' }], confirmed: null, log: [] }));
+    const c = await hit(env, GROOM, 'admin/owner-bookings', { holderId: PAYER, expectedRev: 1, action: 'confirm' });
+    assert.equal(c.status, 409, JSON.stringify(c.j)); assert.deepEqual(c.j.reasons, ['COUPLE_SUITE: ' + P.mum]);
+    assert.equal(JSON.parse(env.REG_KV._m.get('obk:' + PAYER)).confirmed, null, 'nothing confirmed');
+  });
+});
 
 test('ROUTE admin/owner-bookings · the Owners record a family\'s rooms; the screen shows each person\'s named rate, nights, amount, the rooms and the total', async () => {
   const env = routeEnv();

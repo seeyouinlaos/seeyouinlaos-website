@@ -28,6 +28,12 @@
    Bride & Groom, the family or anyone else in advance; no "fixed allocation" exists: every unit is available until a guest
    actually books a place in it, and the couple book their own places like every other guest. Capacity is units × places,
    never a separate counter, and only real bookings consume it. Planning names in the Operations Master are never bookings.
+   ONE EXCEPTION BY OWNER ORDER — THE COUPLE'S SUITE (19 Nov 2026): the Souphattra Presidential (one suite, one unit of two places —
+   src/inventory-seed.js `couple`) is the couple's alone. Every guest still SEES it as the
+   room it is (held by the couple, never free to them), but nobody else may join it, be placed, assigned or migrated into it, or
+   have a party place kept in it (mayJoin, the join path, the Owners' assignments, Guest Relations' assign/migrate). The couple
+   are the Billing Admin allowlist (src/billing/admin.js) — the verified identity for a join, the register ids for a write.
+   A clean reset clears their places like everyone's; they take them again themselves.
    ONE EXCEPTION BY OWNER ORDER — AN EXTRA BED (17 Nov 2026): a room the seed gives `extraBeds` has one more sleeping place
    beyond its own — the room's capacity, open to every signed-in guest like its other places, nothing held in advance. The
    bed is a guest's own seat — never a place kept for a party member; the guest whose booking takes it is marked `bed`.
@@ -47,6 +53,8 @@
 import { SEED } from './inventory-seed.js';
 import { canonicalKey } from './legacy-keys.js';
 import { COMPLIMENTARY, deadlineState } from './stay-plan.js';
+import { BILLING_ADMINS, isBillingAdmin } from './billing/admin.js';
+import { checkHotelRooms, HOTEL_ROOMS_VERSION } from './hotel-rooms.js';
 
 export const PLACES = 2;
 const OCC = 'occ:';
@@ -72,6 +80,17 @@ const LOG = 'log:';
 const LOG_KEEP = 1000;
 const HISTORY_KEEP = 6;
 const ADMIN_ROLES = ['BRIDE', 'GROOM'];
+/* THE COUPLE'S SUITE (Owners, 19 Nov 2026): who may hold a place in a `couple` unit — the verified identity of a guest's own join
+   (strict: hosts === true AND the allowlisted invitation + guest), or, for a write that names persons (Guest Relations, the Owners'
+   bookings), the register ids themselves: the allowlisted invitation AND guest id together */
+export function isCouple(identity) { return isBillingAdmin(identity); }
+export function isCouplePerson(o) {
+  const g = String((o && o.guestId) || ''), inv = String((o && o.invitationId) || '');
+  return BILLING_ADMINS.some((a) => a.guestId === g && a.invitationId === inv);
+}
+export const COUPLE_GUESTS = Object.freeze(BILLING_ADMINS.map((a) => a.guestId));
+/* the Owners' hotel room numbers of the Souphattra's units (src/hotel-rooms.js) — the engine's own store, beside the places */
+const HOTEL = 'hotelrooms';
 /* the fields of an occupancy that record WHO placed it — carried on by every rewrite of the same place (join again, extra bed) */
 function placementOf(o) {
   return o ? { ...(o.by ? { by: o.by } : {}), ...(o.placedAt ? { placedAt: o.placedAt } : {}), ...(Array.isArray(o.placedFrom) ? { placedFrom: o.placedFrom } : {}) } : {};
@@ -112,6 +131,7 @@ export function unitsOf(key) {
          whole occupancy (honourOccupancy — the Penang suite, 27 Sep 2026) has that many */
       places: s.occupancy === 1 ? 1 : s.honourOccupancy ? s.occupancy : PLACES,
       reservedFor: null,
+      ...(s.couple ? { couple: true } : {}),
       ...(bed && Number(bed.beds) > 0 ? { extraBeds: Number(bed.beds) } : {}) });
   }
   /* A DEDICATED ROOM (002 · W · Owner, 29 Sep 2026): one more unit of the same category, for one register id only — its own
@@ -147,6 +167,8 @@ export function bedsFor(unit) {
 export function mayJoin(unit, identity) {
   if (!unit) return { ok: false, error: 'unknown room' };
   if (!identity) return { ok: false, error: 'unauthorised' };
+  /* the couple's suite (Owners, 19 Nov 2026): Haruthai's and Suthep's alone */
+  if (unit.couple && !isCouple(identity)) return { ok: false, error: 'the couple\'s suite' };
   return { ok: true };
 }
 
@@ -159,7 +181,8 @@ export function availabilityOf(key, list) {
   const remainingPlaces = list.reduce((n, u) => n + u.free, 0), remainingRooms = list.filter((u) => u.free > 0).length;
   /* THE COUNTING GRAMMAR (PRQ-03-09): an EMPTY room is one nobody holds a place in; a SHARED free place is a free place
      inside a room someone already holds — "rooms left" counts the first, never a half-held room */
-  const emptyRooms = list.filter((u) => u.taken === 0).length;
+  /* a room is empty only where a place is free to this viewer — the couple's suite is never an empty room to a guest */
+  const emptyRooms = list.filter((u) => u.taken === 0 && u.free > 0).length;
   const sharedFree = list.filter((u) => u.taken > 0).reduce((n, u) => n + u.free, 0);
   return {
     units: list.length, places: sourcePlaces,
@@ -273,6 +296,12 @@ export class Rooms {
     const map = await this.storage.list({ prefix: LOG });
     return [...map.values()].sort((a, b) => String(b.at).localeCompare(String(a.at)) || (b.n || 0) - (a.n || 0)).slice(0, limit || 300);
   }
+  /* the Owners' hotel room numbers: { version, at, by, note, rooms: { '<key>|<label>': ['105'] } } — version 0 while none is stored */
+  async hotelRooms() {
+    const h = await this.storage.get(HOTEL);
+    return h && typeof h === 'object' ? { version: h.version || 0, at: h.at || null, by: h.by || null, note: h.note || null, rooms: h.rooms || {}, list: HOTEL_ROOMS_VERSION }
+      : { version: 0, at: null, by: null, note: null, rooms: {}, list: HOTEL_ROOMS_VERSION };
+  }
   async logWrites(entries) {
     const at = new Date().toISOString(), puts = {}, dels = [];
     /* a key of its own for every entry — two confirmed writes in the same millisecond never overwrite each other's log */
@@ -310,9 +339,12 @@ export class Rooms {
         const elig = !identity ? { ok: false } : mayJoin(u, identity);
         /* the room's extra bed, the same for everyone (Owners, 17 Nov 2026) */
         const beds = bedsFor(u);
+        /* the couple's suite is seen as the room it is — and never as a free place by anyone but the couple (Owners, 19 Nov 2026) */
+        const closed = !!u.couple && !isCouple(identity);
         return { key, label: u.label, name: u.name, kind: u.kind, places: u.places, reservedFor: null, ...(u.dedicatedTo ? { dedicated: true, rate: u.rate } : {}),
+                 ...(u.couple ? { couple: true } : {}),
                  ...(beds ? { extraBeds: beds } : {}),
-                 eligible: elig.ok, occupants, taken, free: Math.max(0, u.places + beds - taken), full: taken >= u.places + beds };
+                 eligible: elig.ok, occupants, taken, free: closed ? 0 : Math.max(0, u.places + beds - taken), full: closed || taken >= u.places + beds };
       });
     }
     if (identity) for (const o of occ) if (!o.placeholder && o.guestId === identity.guestId) mine[stageOf(o.key)] = { key: o.key, label: o.label };
@@ -465,7 +497,8 @@ export class Rooms {
         const need = unit.dedicatedTo ? 1 : capNeed(identity, stageOf(key), Math.max(1, Math.min(6, parseInt(body && body.need, 10) || 1)));
         const partyHere = identity.partyId ? occ.filter((o) => o.key === key && o.label === label && myParty(o) && o.guestId !== guestId).length : 0;
         const freeForMe = unit.places - others;
-        const catUnits = unitsOf(key);
+        /* only the units this guest may see and take: never a dedicated room of someone else, never the couple's suite */
+        const catUnits = unitsFor(key, identity).filter((u) => mayJoin(u, identity).ok);
         const freeIn = (u) => u.places - occ.filter((o) => o.key === key && o.label === u.label && o.guestId !== guestId && !(o.placeholder && myParty(o))).length;
         /* the party in a unit of the category: its members (not this guest) and the places kept for it — except the places kept
            in a unit this guest is about to leave alone (they move with the guest) */
@@ -559,12 +592,12 @@ export class Rooms {
         const fin = (await this.storage.get('final')) || null;
         const units = {};
         for (const key of Object.keys(SEED)) {
-          units[key] = unitsOf(key).map((u) => ({ label: u.label, name: u.name, kind: u.kind, places: u.places, extraBeds: u.extraBeds || 0, dedicated: !!u.dedicatedTo,
+          units[key] = unitsOf(key).map((u) => ({ label: u.label, name: u.name, kind: u.kind, places: u.places, extraBeds: u.extraBeds || 0, dedicated: !!u.dedicatedTo, ...(u.couple ? { couple: true } : {}),
             kept: occ.filter((o) => o.placeholder && o.key === key && o.label === u.label).length,
             occupants: realOf(occ, key, u.label).map((o) => ({ guestId: o.guestId, invitationId: o.invitationId || null, partyId: o.partyId || null, name: shownName(o, names), at: o.at || null,
               ...(o.bed ? { bed: true } : {}), ...(o.by ? { by: o.by } : {}), ...(o.placedAt ? { placedAt: o.placedAt } : {}), ...(Array.isArray(o.placedFrom) ? { placedFrom: o.placedFrom } : {}) })) }));
         }
-        return json({ ok: true, units, waitlist: await this.waitlist(), digest: d.digest,
+        return json({ ok: true, units, waitlist: await this.waitlist(), digest: d.digest, hotelRooms: await this.hotelRooms(),
           final: fin ? { version: fin.version, at: fin.at, by: fin.by, digest: fin.digest, rows: fin.rows, active: fin.active !== false, withdrawnAt: fin.withdrawnAt || null, current: fin.active !== false && fin.digest === d.digest } : null,
           log: (await this.logOf(300)) });
       }
@@ -591,6 +624,8 @@ export class Rooms {
             const unit = unitOf(p.key, p.label);
             if (!unit) { problems.push({ unit: p.k, reason: 'UNKNOWN_ROOM' }); continue; }
             if (unit.dedicatedTo) problems.push({ unit: p.k, reason: 'DEDICATED' });
+            /* the couple's suite takes the couple alone (Owners, 19 Nov 2026) */
+            if (unit.couple && target[p.k].some((g) => !COUPLE_GUESTS.includes(String(g)))) problems.push({ unit: p.k, reason: 'COUPLE_ONLY' });
             const real = realOf(occ, p.key, p.label), kept = occ.filter((o) => o.placeholder && o.key === p.key && o.label === p.label).length;
             if (JSON.stringify(sorted(real.map((o) => o.guestId))) !== JSON.stringify(sorted(expect[p.k].map(String)))) problems.push({ unit: p.k, reason: 'CHANGED', now: sorted(real.map((o) => o.guestId)) });
             if (kept) problems.push({ unit: p.k, reason: 'KEPT_PLACES' });
@@ -653,6 +688,38 @@ export class Rooms {
           return json({ ok: true, final: { version: rec.version, at: rec.at, by: rec.by, digest: rec.digest, active: rec.active !== false, withdrawnAt: rec.withdrawnAt || null } });
         });
       }
+
+      /* THE HOTEL ROOM NUMBERS (Owners, 18 / 19 Nov 2026): which Souphattra unit is which room of the house — the Owners'
+         assignment, checked against the official list (src/hotel-rooms.js) as a whole before anything is written: official
+         numbers of the category's own types, a suite as all its numbers in ONE unit, no number twice in one window. A unit's
+         number never moves a guest, never changes a place, a booking, a rate or a cost; a clean reset leaves it standing. */
+      if (op === 'admin-hotel-rooms') {
+        const body = await safeJson(request);
+        const set = body && body.set && typeof body.set === 'object' && !Array.isArray(body.set) ? body.set : null;
+        if (!set || !Object.keys(set).length || Object.keys(set).length > 80) return json({ ok: false, error: 'a change names 1 to 80 rooms', reason: 'INVALID' }, 400);
+        return await this.state.blockConcurrencyWhile(async () => {
+          const cur = await this.hotelRooms();
+          if (Number(body.expectVersion) !== cur.version) return json({ ok: false, error: 'the hotel room numbers changed since they were read — read them again', reason: 'CONFLICT', version: cur.version }, 409);
+          const rooms = { ...cur.rooms }, changed = [];
+          for (const [unit, nos] of Object.entries(set)) {
+            const i = unit.lastIndexOf('|'), k = i > 0 ? canonicalKey(unit.slice(0, i)) + '|' + unit.slice(i + 1).toUpperCase() : unit;
+            const before = rooms[k] ? rooms[k].join(' + ') : null;
+            if (nos === null) delete rooms[k]; else rooms[k] = Array.isArray(nos) ? nos.map((n) => String(n).trim()).sort() : nos;
+            const after = rooms[k] ? [].concat(rooms[k]).join(' + ') : null;
+            if (before !== after) changed.push({ unit: k, from: before, to: after });
+          }
+          const check = checkHotelRooms(rooms, unitsOf);
+          if (!check.ok) return json({ ok: false, error: 'the hotel room numbers do not fit the official list — nothing was written', reason: 'REFUSED', problems: check.problems }, 409);
+          if (body.dryRun === true || !changed.length) return json({ ok: true, dryRun: body.dryRun === true, unchanged: !changed.length, changed, hotelRooms: cur });
+          const rec = { version: cur.version + 1, at: new Date().toISOString(), by: admin, note: String(body.note || '').slice(0, 300) || null, rooms };
+          const lw = await this.logWrites([{ type: 'HOTEL_ROOMS', version: rec.version, by: admin, status: 'SET', changed: changed.length, note: rec.note }]);
+          const writes = [this.storage.put(HOTEL, rec)];
+          for (const [k, v] of Object.entries(lw.puts)) writes.push(this.storage.put(k, v));
+          for (const k of lw.dels) writes.push(this.storage.delete(k));
+          await Promise.all(writes);
+          return json({ ok: true, changed, hotelRooms: await this.hotelRooms() });
+        });
+      }
       return json({ ok: false, error: 'unknown rooms operation' }, 404);
     }
 
@@ -676,7 +743,7 @@ export class Rooms {
 
     if (op === 'plan') {
       const occ = await this.occupancies();
-      const out = { ok: true, places: PLACES, units: {}, waitlist: await this.waitlist() };
+      const out = { ok: true, places: PLACES, units: {}, waitlist: await this.waitlist(), hotelRooms: await this.hotelRooms() };
       for (const key of Object.keys(SEED)) {
         out.units[key] = unitsOf(key).map((u) => ({ ...u, occupants: occ.filter((o) => o.key === key && o.label === u.label).map((o) => ({ invitationId: o.invitationId, guestId: o.guestId, partyId: o.partyId, name: o.name, at: o.at, ...(o.bed ? { bed: true } : {}),
           ...(Array.isArray(o.placedFrom) && o.placedFrom.length ? { placedFrom: o.placedFrom, by: o.by || null } : {}) })) }));
@@ -694,6 +761,8 @@ export class Rooms {
           if (!unit || !guestId || !o.invitationId) { refused.push({ ...o, error: 'invalid' }); continue; }
           /* a dedicated room is assigned to its own guest only (the register id must be named) */
           if (unit.dedicatedTo && o.contactId !== unit.dedicatedTo) { refused.push({ ...o, error: 'dedicated room' }); continue; }
+          /* the couple's suite is the couple's alone — before any capacity rule, `force` included (Owners, 19 Nov 2026) */
+          if (unit.couple && !isCouplePerson({ guestId, invitationId: o.invitationId })) { refused.push({ ...o, error: 'the couple\'s suite' }); continue; }
           const occ = await this.occupancies();
           const others = occ.filter((x) => x.key === key && x.label === label && x.guestId !== guestId).length;
           /* the room's extra bed counts like its places (Owners, 17 Nov 2026); beyond it only the Owners' force */

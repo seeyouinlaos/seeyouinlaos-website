@@ -37,6 +37,10 @@ function engine() {
 }
 /* the Worker names the guest to the engine (PRQ-GAP-02): identity.firstName — the body's name is never trusted */
 const asId = (s) => ({ invitationId: s.invitationId, guestId: s.guestId, partyId: s.partyId, hosts: !!s.hosts, firstName: String(s.preferredName || '').split(/\s+/)[0] });
+/* THE COUPLE OF THE ALLOWLIST (src/billing/admin.js): the persons the couple's suite is for (Owners, 19 Nov 2026) — the sandbox hosts
+   (g-haruthai / g-suthep) are NOT on it: hosts === true alone opens nothing */
+const BRIDE = { invitationId: 'INV-G048', guestId: 'G048', partyId: 'INV-DEMO-001', hosts: true, preferredName: 'Haruthai' };
+const GROOM = { invitationId: 'INV-G049', guestId: 'G049', partyId: 'INV-DEMO-001', hosts: true, preferredName: 'Suthep' };
 const join = (E, s, key, label) => E.call('join', { invitationId: s.invitationId, guestId: s.guestId, key, label, name: s.preferredName }, asId(s));
 const other = (id, name) => ({ ...LIN, guestId: 'g-' + id, invitationId: 'INV-g-' + id, preferredName: name || 'Lin' });
 
@@ -53,15 +57,31 @@ test('NO RESERVATIONS, NO FIXED ARRANGEMENT (Owner, 15 Sep 2026 · reaffirmed 19
   /* the units: reservedFor is null everywhere; mayJoin asks only for an identity — a guest, a host, anyone signed in */
   for (const key of Object.keys(SEED)) for (const u of unitsOf(key)) {
     assert.equal(u.reservedFor, null, key + ' ' + u.label + ' is reserved for nobody');
-    for (const who of [PEGGY, LIN, HARUTHAI, SUTHEP]) assert.equal(mayJoin(u, asId(who)).ok, true, key + ' ' + u.label + ' is open to ' + who.preferredName);
+    /* THE ONE EXCEPTION (Owners, 19 Nov 2026): the couple's suite — the allowlisted couple only */
+    if (u.couple) {
+      for (const who of [PEGGY, LIN, HARUTHAI, SUTHEP]) assert.equal(mayJoin(u, asId(who)).ok, false, key + ' ' + u.label + ' is the couple\'s suite, not ' + who.guestId + '\'s');
+      for (const who of [BRIDE, GROOM]) assert.equal(mayJoin(u, asId(who)).ok, true, key + ' ' + u.label + ' is ' + who.preferredName + '\'s');
+    } else for (const who of [PEGGY, LIN, HARUTHAI, SUTHEP]) assert.equal(mayJoin(u, asId(who)).ok, true, key + ' ' + u.label + ' is open to ' + who.preferredName);
     assert.equal(mayJoin(u, null).ok, false, 'nobody joins without an identity');
   }
+  assert.deepEqual(Object.keys(SEED).filter((k) => SEED[k].couple), ['prewed/souphattra-presidential', 'wedstay/souphattra-presidential'], 'the couple\'s suite is the only room kept for anyone');
   assert.equal(mayJoin(null, asId(PEGGY)).ok, false, 'no unit, no place');
   /* the former Bride & Groom rooms: nobody's before a booking; the first guest to choose them has them; the hosts hold nothing there */
   const E = engine();
   const v0 = await E.call('read', null, asId(HARUTHAI));
   assert.deepEqual(v0.mine, {}, 'the hosts start at zero'); assert.deepEqual(v0.waitlist, {});
-  for (const key of ['bkk-stay/u-sathorn-superior-garden', 'prewed/souphattra-presidential', 'wedstay/souphattra-presidential']) {
+  /* THE COUPLE'S SUITE (Owners, 19 Nov 2026): every guest sees it as the room it is — never free to them; Peggy is refused and nothing
+     is written; the couple take its two places; it stays ONE room of the house */
+  for (const key of ['prewed/souphattra-presidential', 'wedstay/souphattra-presidential']) {
+    const a = v0.units[key][0];
+    assert.equal(a.taken, 0); assert.equal(a.couple, true); assert.equal(a.eligible, false); assert.equal(a.free, 0); assert.equal(a.full, true); assert.equal(a.reservedFor, null);
+    assert.equal(v0.summary[key].soldOut, true, key); assert.equal(v0.summary[key].sourceRooms, 1, key + ' is one room'); assert.equal(v0.summary[key].emptyRooms, 0, key + ' is never an empty room to a guest');
+    const p = await join(E, PEGGY, key, 'A'); assert.equal(p.status, 403, key + ' is not Peggy\'s'); assert.equal(p.error, 'the couple\'s suite');
+    assert.deepEqual(p.units[key][0].occupants, [], 'nothing was written');
+    assert.equal((await join(E, BRIDE, key, 'A')).status, 200); const g = await join(E, GROOM, key, 'A'); assert.equal(g.status, 200);
+    assert.equal(g.units[key][0].full, true, 'two places, both the couple\'s — no third'); assert.equal(g.units[key][0].places, 2);
+  }
+  for (const key of ['bkk-stay/u-sathorn-superior-garden']) {
     const a = v0.units[key][0];
     assert.equal(a.taken, 0, key + ' Room A is nobody\'s before a booking'); assert.deepEqual(a.occupants, []); assert.equal(a.full, false); assert.equal(a.eligible, true); assert.equal(a.reservedFor, null);
     assert.equal(v0.summary[key].reserved, 0, key); assert.equal(v0.summary[key].reservedFor, null); assert.equal(v0.summary[key].ownerReservedRooms, 0); assert.equal(v0.summary[key].ownerReservedPlaces, 0);
@@ -216,9 +236,9 @@ test('CHANGE · atomic: the new place is held first, the old one released only t
   assert.equal(again.units[key][2].taken, 2); assert.equal(again.units[key][2].full, true);
 });
 
-test('PRESETS · the approved rooms come from the open inventory; the Presidential is a room like any other', () => {
+test('PRESETS · the approved rooms come from the open inventory; the price presets know no reservation (the couple\'s suite is the room engine\'s rule, Owners 19 Nov 2026 — never a price)', () => {
   const { P } = priceWith(PEGGY);
-  assert.equal(P.premium('prewed').slug, 'souphattra-presidential', 'the dearest room a guest may take is the Presidential — nothing is held back');
+  assert.equal(P.premium('prewed').slug, 'souphattra-presidential', 'the dearest room of the catalogue is the Presidential — whether a guest may take it is the room engine\'s answer (mayJoin), never the price module\'s');
   assert.ok(P.approved('prewed').slug); assert.ok(P.cheapest('prewed').slug);
 });
 
@@ -228,7 +248,9 @@ test('THE WORDS · category lines are derived from the physical rooms the engine
   /* real bookings by other guests: the Heritage A half taken, B full; the Presidential full; Steffie (Peggy's party) in the Guest House */
   assert.equal((await join(E, HARUTHAI, 'wedstay/heritage', 'A')).status, 200);
   assert.equal((await join(E, LIN, 'wedstay/heritage', 'B')).status, 200); assert.equal((await join(E, NOOR, 'wedstay/heritage', 'B')).status, 200);
-  assert.equal((await join(E, ADA, 'wedstay/souphattra-presidential', 'A')).status, 200); assert.equal((await join(E, BEN, 'wedstay/souphattra-presidential', 'A')).status, 200);
+  /* the couple's suite (Owners, 19 Nov 2026): Ada is refused; the couple hold it */
+  assert.equal((await join(E, ADA, 'wedstay/souphattra-presidential', 'A')).status, 403);
+  assert.equal((await join(E, BRIDE, 'wedstay/souphattra-presidential', 'A')).status, 200); assert.equal((await join(E, GROOM, 'wedstay/souphattra-presidential', 'A')).status, 200);
   assert.equal((await join(E, STEFFIE, 'guesthouse/guest-house', 'A')).status, 200);
   /* the shipped client reads the shipped engine, as Peggy */
   const w = page({ auth: PEGGY, modules: ['assets/rooms-data.js', 'assets/pricing.js', 'assets/rooms.js'], fetch: await roomsFetch(E.R, asId(PEGGY)) });
@@ -243,7 +265,7 @@ test('THE WORDS · category lines are derived from the physical rooms the engine
   /* a category full of real bookings: SOLD OUT — remainingPlaces === 0 and nothing else; never RESERVED, never "booked" */
   assert.equal(U.label('wedstay', 'souphattra-presidential'), 'Sold out'); assert.equal(U.soldOut('wedstay', 'souphattra-presidential'), true); assert.equal(U.fits('wedstay', 'souphattra-presidential'), false); assert.equal(U.ctaWords('wedstay', 'souphattra-presidential'), 'Sold out');
   assert.equal(U.reserved('wedstay', 'souphattra-presidential'), false); assert.equal(U.reserved('bkk-stay', 'u-sathorn-superior-garden'), false);
-  assert.equal(U.unitWords(U.units('wedstay', 'souphattra-presidential')[0]), 'Ada and Ben · full');
+  assert.equal(U.unitWords(U.units('wedstay', 'souphattra-presidential')[0]), 'Haruthai and Suthep · full');
   /* U Sathorn: every room counts as available — Room A is nobody's */
   assert.equal(U.label('bkk-stay', 'u-sathorn-superior-garden'), '6 of 6 rooms left'); assert.equal(U.unitWords(U.units('bkk-stay', 'u-sathorn-superior-garden')[0]), 'empty · 2 places'); assert.equal(U.fits('bkk-stay', 'u-sathorn-superior-garden'), true); assert.equal(U.ctaWords('bkk-stay', 'u-sathorn-superior-garden'), '');
   assert.deepEqual(plain(U.count('bkk-stay', 'u-sathorn-superior-garden')), { rooms: 6, places: 12, reserved: 0, free: 12, open: 6, empty: 6, shared: 0 });

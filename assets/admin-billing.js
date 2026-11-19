@@ -349,7 +349,7 @@
     return esc(METHOD[m.channel] || m.channel);
   }
   /* WHERE EACH GUEST SLEEPS (Owners' review, 18 Nov 2026): the Rooms engine's room plan (held, sent or confirmed alike) with
-     the room's 012 number and the guest's own booked line for it — from the revenue calculation, read once, never recomputed */
+     the room's hotel room number (the official list, as the Owners assigned it) and the guest's own booked line for it — from the revenue calculation, read once, never recomputed */
   function nightsBetweenDays(from, to) { var a = Date.parse(from), b = Date.parse(to); return a && b && b > a ? Math.round((b - a) / 86400000) : null; }
   function guestRooms() {
     var R = S.revenue, BG = R && R.budget;
@@ -362,7 +362,7 @@
       (p.rooms || []).forEach(function (u) {
         (u.occupants || []).forEach(function (o) {
           if (!o.guestId) return;
-          (map[o.guestId] = map[o.guestId] || []).push({ stay: p.stay, place: p.place, from: p.from, to: p.to, nights: n, label: u.label, type: u.type, room012: u.room012 || null,
+          (map[o.guestId] = map[o.guestId] || []).push({ stay: p.stay, place: p.place, from: p.from, to: p.to, nights: n, label: u.label, type: u.type, hotelRoom: u.hotelRoom || null,
             bed: !!o.bed, line: lines[p.stay + '|' + u.item + '|' + u.label + '|' + o.guestId] || null });
         });
       });
@@ -385,16 +385,21 @@
     var list = idx[h.guestId] || [];
     if (!list.length) return '<span class="ab-mute">no room</span>';
     return list.map(function (x) {
-      /* 012 is a historical template (Owners, 18 Nov 2026): its room number is a reference, shown only where it is certain */
-      var no = x.room012 && x.room012.roomNo ? ' · no. <b data-i18n-skip>' + esc(x.room012.roomNo) + '</b> <span class="ab-mute">(012 ref.)</span>' : '';
+      /* the room of the house (Owners, 18 / 19 Nov 2026): the official number beside the allocation label, never in its place */
+      var no = hotelWords(x.hotelRoom);
       var cw = compWords(h, x);
       return '<span class="ab-stay"><span class="ab-stay-h" data-i18n-skip>' + esc(x.place) + ' · ' + esc(dmy(x.from)) + ' – ' + esc(dmy(x.to)) + (x.nights ? ' · ' + x.nights + ' night' + (x.nights === 1 ? '' : 's') : '') + '</span>' +
         '<span data-i18n-skip>' + esc(x.type) + ' · Room ' + esc(x.label) + '</span>' + no + ' <span class="ab-mute">· ' + esc(roomStatus(x, h)) + '</span>' +
         (x.bed ? ' <span class="ab-chip">extra bed</span>' : '') + (cw ? ' <span class="ab-chip on">' + esc(cw) + '</span>' : '') + '</span>';
     }).join('');
   }
+  /* THE HOTEL ROOM NUMBER of a unit, in words: " · hotel room 105 · building C" — a suite "suite 210 + 211"; nothing where none is assigned */
+  function hotelWords(hr) {
+    if (!hr) return '';
+    return ' · ' + (hr.suite ? 'suite' : 'hotel room') + ' <b data-i18n-skip>' + esc(hr.display) + '</b> <span class="ab-mute" data-i18n-skip>· building ' + esc(hr.building) + '</span>';
+  }
   /* THE COMPLETE GUEST LIST as CSV: one row per guest and stay (a guest without a room: one row); every figure the server's */
-  var GL_HEAD = ['Guest ID', 'Guest', 'Invitation', 'Stay', 'Arrival', 'Departure', 'Nights', 'Room', 'Hotel room no. (012 reference)', 'Room category',
+  var GL_HEAD = ['Guest ID', 'Guest', 'Invitation', 'Stay', 'Arrival', 'Departure', 'Nights', 'Room', 'Hotel room no.', 'Building', 'Room category',
     'Extra bed', 'Complimentary', 'Room amount USD', 'Room status', 'Booking stage', 'Confirmation', 'Statement', 'Statement no.', 'Issued', 'Due',
     'Statement total USD', 'Booked value USD', 'Paid USD', 'Outstanding USD', 'Payment status', 'Overdue', 'Review'];
   function guestCsvRows(list) {
@@ -410,9 +415,9 @@
       var rooms = idx[h.guestId] || [];
       /* the invitation's own figures stand on its first row only — a sum in Excel never counts them twice */
       var blank = tail.map(function (v) { return typeof v === 'number' ? null : v; });
-      if (!rooms.length) out.push(head.concat(['', '', '', '', '', '', '', '', '', null, ''], tail));
+      if (!rooms.length) out.push(head.concat(['', '', '', '', '', '', '', '', '', '', null, ''], tail));
       rooms.forEach(function (x, i) {
-        out.push(head.concat([x.place, x.from || '', x.to || '', x.nights, x.label, x.room012 ? x.room012.roomNo : '',
+        out.push(head.concat([x.place, x.from || '', x.to || '', x.nights, x.label, x.hotelRoom ? x.hotelRoom.display : '', x.hotelRoom ? x.hotelRoom.building : '',
           x.type, x.bed ? 'yes' : '', compWords(h, x), x.line && x.line.amount ? num(x.line.amount) : null, roomStatus(x, h)], i === 0 ? tail : blank));
       });
     });
@@ -425,7 +430,7 @@
     return csvDoc('See You In Laos — Complete Guest List', [['Generated', nowStamp()], ['Guests', rows.length + ' of ' + o.holders.length + ' invitations in the register (' + label + ')'],
       ['Data as of', 'register ' + (o.asOf || '') + ' · rooms ' + (R.calculatedAt ? R.calculatedAt.slice(0, 16).replace('T', ' ') + ' UTC' : 'not loaded')], ['Currency', 'USD'],
       ['Rooms', guestRooms() ? 'read' : 'not available — ' + ((R.budget && R.budget.gap) || (S.revenuePhase === 'error' ? S.revenueError : 'not loaded yet'))],
-      ['Basis', 'one row per guest and stay — the invitation\'s amounts (statement total, booked value, paid, outstanding) on its first row only; rooms: the Rooms engine (held, sent or confirmed); hotel room numbers: Google 012, a historical template — a reference only, shown where the guests\' names match it with certainty; amounts: the Billing Engine and the issued statements']],
+      ['Basis', 'one row per guest and stay — the invitation\'s amounts (statement total, booked value, paid, outstanding) on its first row only; rooms: the Rooms engine (held, sent or confirmed); hotel room numbers: the Souphattra Heritage\'s official room list, assigned to its rooms by the Owners (a suite of two numbers is one room; other hotels have supplied no numbers); amounts: the Billing Engine and the issued statements']],
       GL_HEAD, guestCsvRows(rows));
   }
   function listView() {
@@ -467,7 +472,7 @@
         : '<p class="t-b1 ab-empty">No guest matches this filter.</p>') +
       '<p class="t-b2 ab-foot">' + shown.length + ' shown · ' + rows.length + ' invitations of the register (the couple included)' +
       (withRoom != null ? ' · ' + withRoom + ' with a room' : S.revenuePhase === 'loading' ? ' · reading the rooms…' : '') + ' · as of ' + esc(day(o.asOf)) + '<br>' +
-      '<b>Stays &amp; rooms</b> — the room each guest holds (held, sent or confirmed), its hotel room number where Google 012 (a historical template, for reference only) names it with certainty, extra bed and complimentary nights. ' +
+      '<b>Stays &amp; rooms</b> — the room each guest holds (held, sent or confirmed), its hotel room number and building (the Souphattra Heritage\'s official room list, as you assigned it — a suite of two numbers is one room), extra bed and complimentary nights. ' +
       '<b>Booked value</b> — what the guest has selected now, priced by the Billing Engine now; it is not a statement and does not make anyone issuable. ' +
       '<b>Ready to issue</b> / <b>Blocked</b> — what Issue would say now for a confirmed booking (the same checks as Preview), never an issue. ' +
       '<b>Statement total</b>, <b>Paid</b> and <b>Outstanding</b> — the issued, immutable statement only. All in USD.</p></section>';
@@ -1021,9 +1026,10 @@
       '<div class="ab-table-wrap"><table class="ab-table"><thead><tr><th>Guest</th><th class="num">Issued</th><th class="num">Change</th><th></th></tr></thead><tbody>' + rows + '</tbody></table></div></div>';
   }
   /* THE HOTEL ROOM RATE LIST (Owners, 17 Nov 2026): per stay, one row per guest and room — generated from the server's own per-room
-     lines (bookings · 002 · 009 · the Rooms engine), never typed; Google 012 is matched for reconciliation only. The Owners approve
+     lines (bookings · 002 · 009 · the Rooms engine), never typed; the hotel room number is the official list's as the Owners assigned
+     it; Google 012 is matched for reconciliation only. The Owners approve
      a version (admin/rate-list freezes it with who, when and its SHA-256) and download it as CSV for the hotel. */
-  var RL_HEAD = ['Guest', 'Room', 'Hotel room (012)', 'Room type', 'Arrival', 'Departure', 'Rate per night USD', 'Rate source', 'Nights', 'Charged nights', 'Complimentary nights', 'Extra bed', 'Amount USD', 'Statement', 'Reconciliation (012)'];
+  var RL_HEAD = ['Guest', 'Room', 'Hotel room no.', 'Room type', 'Arrival', 'Departure', 'Rate per night USD', 'Rate source', 'Nights', 'Charged nights', 'Complimentary nights', 'Extra bed', 'Amount USD', 'Statement', 'Reconciliation (012)'];
   function rateRows(c, list012) {
     var first = function (n) { return String(n || '').trim().split(/\s+/)[0].toLowerCase(); };
     var out = [];
@@ -1035,7 +1041,7 @@
         var rec = !f ? 'no name' : same.length === 1 ? 'in 012, room ' + same[0].roomNo : same.length > 1 ? 'in 012 more than once (' + same.map(function (x) { return x.roomNo; }).join(', ') + ')'
           : hit.length ? '012 lists ' + hit.map(function (x) { return x.roomType + ' ' + x.roomNo; }).join(', ') + ' — room type differs' : 'not in 012';
         var comp = (Number(l.hostedNights) || 0) + (Number(l.complimentaryNights) || 0);
-        out.push([l.personName || l.person, r.label, same.length === 1 ? same[0].roomNo : '', l.itemName || l.item, c.from || '', c.to || '',
+        out.push([l.personName || l.person, r.label, r.hotelRoom ? r.hotelRoom.display : '', l.itemName || l.item, c.from || '', c.to || '',
           l.rate ? (l.rate.cents / 100).toFixed(2) : '', l.rateSource || '', l.nights != null ? l.nights : '', l.chargedNights != null ? l.chargedNights : (l.payableNights != null ? l.payableNights : ''),
           comp, l.extraBed ? 'yes' : '', l.amount ? (l.amount.cents / 100).toFixed(2) : '', l.statement || '', rec]);
       });
@@ -1397,7 +1403,7 @@
       'Commitments and supplier payments: Google 007 as typed (a payment counts when dated and typed), each in its own currency.',
       'Categories of 007 suppliers: ' + (rep.byCategory || []).filter(function (c) { return (c.suppliers || []).length; }).map(function (c) { return c.category + ' — ' + c.suppliers.join(', '); }).join('; ') + '.',
       'Guest revenue, receivables and receipts: the booking system — the Billing Engine with the confirmed booked prices exactly as stored, the issued statements and 008; paying guests only; the couple\'s own bookings are complimentary. 009 never overrides a confirmed booking price; no revenue comes from a Google sheet.',
-      'Hotel cost per room: the agreement\'s rate, or additional nights at the confirmed purchase rate, × the stay\'s nights; the additional-person charge per room per night; hotel room numbers: Google 012, a historical template — a reference only, never required, never above the bookings.',
+      'Hotel cost per room: the agreement\'s rate, or additional nights at the confirmed purchase rate, × the stay\'s nights; the additional-person charge per room per night; hotel room numbers: the Souphattra Heritage\'s official room list, assigned to its rooms by the Owners (a suite of two numbers is one room; other hotels have supplied no numbers) — never above the bookings.',
       'Currencies: amounts keep their own currency; a USD equivalent at the reporting reference rates (1 USD = ' + ((rep.reportingFx || {}).USD_THB || 33.68) + ' THB · 1 USD = ' + ((rep.reportingFx || {}).USD_EUR || 0.89) + ' EUR) is shown beside them, labelled. Statements keep the exchange rates they were issued with' + (fx.day ? ' (011 on ' + dmy(fx.day) + ': USD/THB ' + fx.FX_USD_THB + ', USD/EUR ' + fx.FX_USD_EUR + ')' : '') + '.',
       (BG.version || '') + ' · ' + (rep.version || '') + ' · engine ' + (R.engineVersion || '') + ' · calculated ' + asOf + ' UTC'];
     var open = function (id) { return S.budgetOpen && S.budgetOpen[id] ? ' open' : ''; };
@@ -1419,13 +1425,13 @@
       '</section>';
   }
   /* ===================================================== ROOMS & RATES (Owners' review, 18 Nov 2026)
-     Per hotel and period: every room with guests — its hotel room number (012), category, guests and their status, check-in,
+     Per hotel and period: every room with guests — its hotel room number (the official list), category, guests and their status, check-in,
      check-out, nights, the hotel's cost where an agreement buys it, what its guests pay and the surplus; subtotals; the rooms
      without guests; then the hotel's rate list (unchanged: generated, approved by version, its own CSV). */
   /* THE OPERATIONAL ROOMING LIST (Owners' order, 18 Nov 2026): live from the booking system — one row per guest and stay; the room's
      hotel purchase (agreement or additional nights, the additional-person charge, the 004 row holding it) on the room's first guest
      row only, so a sum in Excel never counts a room twice; the guest's own booked line beside it. No code, no token. */
-  var RM_HEAD = ['Stay', 'Hotel', 'Room', 'Room category', 'Hotel room no. (012 reference)', 'Guest ID', 'Guest', 'Invitation', 'Booking ID', 'Booking status',
+  var RM_HEAD = ['Stay', 'Hotel', 'Room', 'Room category', 'Hotel room no.', 'Building', 'Guest ID', 'Guest', 'Invitation', 'Booking ID', 'Booking status',
     'Check-in', 'Check-out', 'Nights', 'Extra bed', 'Agreement nights (room)', 'Additional nights (room)', 'Hotel purchase rate USD per room night', 'Hotel purchase cost USD (room)',
     'Additional-person charge USD (room)', 'Hotel cost in 004 (room)', 'Guest rate USD per night', 'Guest booked amount USD', 'Complimentary', 'Statement no.', 'Invoice status', 'Payment status'];
   /* where 004 holds a room's hotel cost, in words: its row, or "not in 004" (a proposed addition — Finance · E) */
@@ -1451,7 +1457,7 @@
           var l = x.line, h = hs[o.guestId] || {}, payer = l && byInv[l.payer], pay = payer && payer.payment;
           var room = first ? [N.contract != null ? N.contract : '', N.additional != null ? N.additional : '', u.hotelCost && n ? u.hotelCost.cents / 100 / n : null, u.hotelCost ? num(u.hotelCost) : null,
             u.hotelSupplement ? num(u.hotelSupplement) : null, in004Words(u)] : ['', '', null, null, null, ''];
-          rows.push([p.stay, p.place, u.label, u.type, u.room012 ? u.room012.roomNo : '', o.guestId, o.name || '', h.Holder_ID || '', l && l.bookingId ? l.bookingId : '', h.billingAdmin ? 'the couple\'s own room' : l ? 'confirmed' : 'held, not confirmed',
+          rows.push([p.stay, p.place, u.label, u.type, u.hotelRoom ? u.hotelRoom.display : '', u.hotelRoom ? u.hotelRoom.building : '', o.guestId, o.name || '', h.Holder_ID || '', l && l.bookingId ? l.bookingId : '', h.billingAdmin ? 'the couple\'s own room' : l ? 'confirmed' : 'held, not confirmed',
             p.from || '', p.to || '', n, o.bed ? 'yes' : ''].concat(room, [l && l.rate && l.rateBasis === 'PER_PERSON_PER_NIGHT' ? num(l.rate) : null, l && l.amount ? num(l.amount) : null, compWords(h, x),
             l && l.statement ? l.statement : '', l ? (l.statement ? 'invoiced' : 'not yet invoiced') : '', pay ? (PAY[pay.status] || pay.status || '') : '']));
           first = false;
@@ -1459,7 +1465,7 @@
       });
     });
     return csvDoc('See You In Laos — Hotel Rooming List', [['Generated', nowStamp()], ['Data as of', (R.calculatedAt || '').slice(0, 16).replace('T', ' ') + ' UTC'], ['Currency', 'USD'],
-      ['Basis', 'the booking system, live: the Rooms engine (held, sent or confirmed alike) and the Billing Engine\'s booked lines; hotel purchase = the hotel agreement (USD 150 per room night) or additional room nights at the Owners\' confirmed purchase rate, and the additional-person charge — on the room\'s first guest row only; the guest columns are the guest\'s own booked line (selling price), never the purchase; 012 room numbers are a reference only']], RM_HEAD, rows);
+      ['Basis', 'the booking system, live: the Rooms engine (held, sent or confirmed alike) and the Billing Engine\'s booked lines; hotel purchase = the hotel agreement (USD 150 per room night) or additional room nights at the Owners\' confirmed purchase rate, and the additional-person charge — on the room\'s first guest row only; the guest columns are the guest\'s own booked line (selling price), never the purchase; Room = the booking system\'s allocation label; hotel room no. and building: the Souphattra Heritage\'s official room list, assigned to its rooms by the Owners (a suite of two numbers is one room; other hotels have supplied no numbers)']], RM_HEAD, rows);
   }
   function roomsTabView() {
     var g = revenueGate(); if (g) return g;
@@ -1495,9 +1501,9 @@
         var basis = r.hotelCostBasis === 'CONTRACT' ? 'agreement · ' + (N.contract || n) + ' nights × ' + usd(rate) : r.hotelCostBasis === 'ADDITIONAL' ? 'additional · ' + (N.additional || n) + ' nights × ' + usd(rate) : '';
         var costHtml = cost == null ? '<span class="ab-mute">no purchase rate</span>' : esc(usd(cost / 100)) + '<span class="ab-why">' + esc(basis) + (r.hotelSupplement ? ' · + ' + esc(usd(r.hotelSupplement.cents / 100)) + ' additional-person charge' : '') + '</span>' +
           '<span class="ab-why">' + esc(in004Words(r)) + '</span>' + (held ? ' <span class="ab-chip open">pending</span>' : '');
-        var no = r.room012 && r.room012.roomNo ? '<b data-i18n-skip>' + esc(r.room012.roomNo) + '</b> <span class="ab-mute">012 ref.</span>' : '<span class="ab-mute">—</span>';
+        var hr = r.hotelRoom, no = hr ? (hr.suite ? 'suite ' : 'hotel room ') + '<b data-i18n-skip>' + esc(hr.display) + '</b> <span class="ab-mute" data-i18n-skip>· building ' + esc(hr.building) + '</span>' : '<span class="ab-mute">—</span>';
         var places = r.occupants.filter(function (o) { return o.guestId; }).length;
-        return '<tr><td data-l="Room">Room ' + esc(r.label) + '<span class="ab-id">no. ' + no + '</span></td><td data-l="Category" data-i18n-skip>' + esc(r.type || r.item || '') + '</td>' +
+        return '<tr><td data-l="Room">Room ' + esc(r.label) + '<span class="ab-id">' + no + '</span></td><td data-l="Category" data-i18n-skip>' + esc(r.type || r.item || '') + '</td>' +
           '<td data-l="Occupancy" class="num">' + esc(places + ' / ' + r.places) + (r.extraBeds ? ' <span class="ab-id">+ ' + esc(r.extraBeds) + ' extra bed</span>' : '') + '</td>' +
           '<td data-l="Guests">' + who + '</td><td data-l="Check-in" data-i18n-skip>' + esc(dmy(p.from)) + '</td><td data-l="Check-out" data-i18n-skip>' + esc(dmy(p.to)) + '</td><td data-l="Nights" class="num">' + esc(n == null ? '—' : n) + '</td>' +
           '<td data-l="Hotel cost (purchase)" class="num"><span data-i18n-skip>' + costHtml + '</span></td>' +
@@ -1517,7 +1523,7 @@
         ' <span class="ab-mute">· ' + occ.length + ' room' + (occ.length === 1 ? '' : 's') + ' with guests' + (h.roomsBought != null ? ' · ' + h.roomsBought + ' in the agreement' + (h.roomsAdditional ? ' + ' + h.roomsAdditional + ' additional' : '') : '') + ' · ' + guests + ' guest' + (guests === 1 ? '' : 's') +
         (h.cost ? ' · hotel ' + esc(kd(h.cost)) : '') + ' · guests ' + esc(kd(h.revenue)) + (h.surplus ? ' · surplus ' + esc(signed(h.surplus)) : '') + '</span>';
       return '<details class="ab-bd" data-ab-rooms="' + esc(p.stay) + '"' + (S.budgetOpen && S.budgetOpen['rooms-' + p.stay] != null ? (S.budgetOpen['rooms-' + p.stay] ? ' open' : '') : (/^D1$|^C$/.test(p.stay) ? ' open' : '')) + ' data-ab-bd="rooms-' + esc(p.stay) + '"><summary data-i18n-skip>' + head + '</summary><div class="ab-bd-body">' +
-        (rows ? '<div class="ab-table-wrap"><table class="ab-table"><thead><tr><th>Room · no. (012 ref.)</th><th>Category</th><th class="num">Occupancy</th><th>Guests · status · sale price</th><th>Check-in</th><th>Check-out</th><th class="num">Nights</th><th class="num">Hotel cost (purchase)</th><th class="num">Guest revenue (sale)</th><th class="num">Surplus</th></tr></thead><tbody>' + rows + sub + '</tbody></table></div>' : '<p class="t-b2">No guests yet.</p>') +
+        (rows ? '<div class="ab-table-wrap"><table class="ab-table"><thead><tr><th>Room · hotel room no.</th><th>Category</th><th class="num">Occupancy</th><th>Guests · status · sale price</th><th>Check-in</th><th>Check-out</th><th class="num">Nights</th><th class="num">Hotel cost (purchase)</th><th class="num">Guest revenue (sale)</th><th class="num">Surplus</th></tr></thead><tbody>' + rows + sub + '</tbody></table></div>' : '<p class="t-b2">No guests yet.</p>') +
         (h.emptyBought ? '<p class="t-b2">The agreement also buys ' + h.emptyBought + ' room' + (h.emptyBought === 1 ? '' : 's') + ' without guests (' + esc(usd(h.emptyBought * (h.rate ? h.rate.amount : 0) * (n || 0))) + '); the stay\'s hotel cost ' + esc(kd(h.cost)) + ' counts every room it buys.</p>' : '') +
         (h.uncontracted && h.uncontracted.length && h.roomsBought != null ? '<p class="t-b2 ab-flag">' + h.uncontracted.length + ' room' + (h.uncontracted.length === 1 ? '' : 's') + ' with guests the agreement does not buy for these nights (' + esc(h.uncontracted.map(function (u) { return 'room ' + u.label; }).join(', ')) + ') — no purchase rate is set for them.</p>' : '') +
         (h.held && h.held.length ? '<p class="t-b2 ab-flag">Held, not confirmed: ' + esc(h.held.map(function (u) { return 'room ' + u.label + ' (' + usd(u.cost.cents / 100) + ')'; }).join(', ')) + ' — their additional hotel cost is pending, not in the forecast.</p>' : '') +
@@ -1526,7 +1532,7 @@
     return '<section class="ab-sec" aria-label="Rooms and rates">' +
       exportBar([['rooming', 'CSV · hotel rooming list (all stays)']]) +
       '<div class="p-card ab-panel" data-ab-rooms-all><p class="t-l1">Rooms by hotel and period · guests · purchase and sale</p>' +
-      '<p class="t-b2 ab-mute">Live from the booking system. Hotel cost = what the hotel charges H&amp;S for the room (purchase price): the agreement\'s rooms at its rate, every other booked room night at the Owners\' confirmed purchase rate, and the additional-person charge for a third person — with the 004 row that holds it, or "not in 004 — proposed" (Finance · E). Guest revenue = what its guests booked (selling price, Billing Engine 002 / 009; the couple\'s own room is complimentary); the two are never mixed. Hotel room numbers: Google 012, a historical template — a reference only.</p>' + html + '</div>' +
+      '<p class="t-b2 ab-mute">Live from the booking system. Hotel cost = what the hotel charges H&amp;S for the room (purchase price): the agreement\'s rooms at its rate, every other booked room night at the Owners\' confirmed purchase rate, and the additional-person charge for a third person — with the 004 row that holds it, or "not in 004 — proposed" (Finance · E). Guest revenue = what its guests booked (selling price, Billing Engine 002 / 009; the couple\'s own room is complimentary); the two are never mixed. Room = the booking system\'s allocation label; hotel room numbers: the Souphattra Heritage\'s official room list, assigned to its rooms by the Owners (a suite of two numbers is one room; other hotels have supplied no numbers).</p>' + html + '</div>' +
       rateListView(BG) + '</section>';
   }
   /* RECEIVABLES BY GUEST (Owners' review, 18 Nov 2026): every issued statement of a paying guest — invoiced, received, open,

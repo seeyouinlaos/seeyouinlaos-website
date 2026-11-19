@@ -58,7 +58,7 @@ test('nothing is reserved for anyone in the seed (Owner, 19 Sep 2026 · no fixed
   const guest = identity(PEGGY), host = identity(HARUTHAI, true);
   assert.deepEqual(mayJoin(unitOf('bkk-stay/u-sathorn-superior-garden', 'A'), null), { ok: false, error: 'unauthorised' });
   assert.deepEqual(mayJoin(unitOf('bkk-stay/u-sathorn-superior-garden', 'A'), guest), { ok: true }, 'U Sathorn\'s Room A is open to a guest');
-  assert.deepEqual(mayJoin(unitOf('wedstay/souphattra-presidential', 'A'), guest), { ok: true }, 'the Presidential is open to a guest');
+  assert.deepEqual(mayJoin(unitOf('wedstay/souphattra-presidential', 'A'), guest), { ok: false, error: 'the couple\'s suite' }, 'the Presidential is the couple\'s suite (Owners, 19 Nov 2026), not a guest\'s');
   assert.deepEqual(mayJoin(unitOf('bkk-stay/u-sathorn-superior-garden', 'A'), host), { ok: true }, 'a host books like every guest');
   assert.deepEqual(mayJoin(null, host), { ok: false, error: 'unknown room' });
   /* the seed is the only place a number lives; nothing there names anyone as a reservation; the arranged script is gone */
@@ -66,7 +66,8 @@ test('nothing is reserved for anyone in the seed (Owner, 19 Sep 2026 · no fixed
   assert.match(seedSrc, /export const FIXED = \[\];/);
   assert.ok(!/heldFor:/.test(seedSrc), 'no seed entry carries heldFor');
   assert.ok(!existsSync(join(ROOT, 'assets/arranged.js')), 'assets/arranged.js is deleted');
-  assert.match(readFileSync(join(ROOT, 'src/rooms.js'), 'utf8'), /export function mayJoin\(unit, identity\) \{\s*if \(!unit\) return \{ ok: false, error: 'unknown room' \};\s*if \(!identity\) return \{ ok: false, error: 'unauthorised' \};\s*return \{ ok: true \};/, 'mayJoin asks for an identity and nothing else');
+  /* mayJoin asks for an identity and nothing else — but for the couple's suite, which asks for the allowlisted couple (Owners, 19 Nov 2026) */
+  assert.match(readFileSync(join(ROOT, 'src/rooms.js'), 'utf8'), /export function mayJoin\(unit, identity\) \{\s*if \(!unit\) return \{ ok: false, error: 'unknown room' \};\s*if \(!identity\) return \{ ok: false, error: 'unauthorised' \};\s*\/\*[^*]*\*\/\s*if \(unit\.couple && !isCouple\(identity\)\) return \{ ok: false, error: 'the couple\\'s suite' \};\s*return \{ ok: true \};/, 'mayJoin asks for an identity and nothing else — the couple\'s suite for the couple');
 });
 
 test('a party consumes rooms, not seats — ceil(guests ÷ occupancy)', () => {
@@ -359,9 +360,9 @@ test('the hosts have no special room and the Bag carries only actual selections 
   assert.equal(G.party().hosts, true, 'the host flag is explicit');
   const v = U.view();
   assert.deepEqual(plain(v.mine), {}, 'nothing is held before booking'); assert.equal(v.fixed, undefined, 'the view knows no fixed arrangement');
-  assert.ok(Object.values(v.units).every((list) => list.every((u) => u.eligible === true && u.reservedFor === null && u.taken === 0)), 'every unit of every category is open to the hosts, none is theirs in advance');
+  assert.ok(Object.values(v.units).every((list) => list.every((u) => u.eligible === !u.couple && u.reservedFor === null && u.taken === 0)), 'every unit of every category is open to the hosts, none is theirs in advance — the couple\'s suite only to the allowlisted couple (a host flag alone opens nothing)');
   assert.deepEqual(plain(v.units['bkk-stay/u-sathorn-superior-garden'].map((u) => [u.label, u.free])), [['A', 2], ['B', 2], ['C', 2], ['D', 2], ['E', 2], ['F', 2]]);
-  assert.equal(v.summary['bkk-stay/u-sathorn-superior-garden'].ownerReservedRooms, 0); assert.equal(v.summary['wedstay/souphattra-presidential'].reservedFor, null); assert.equal(v.summary['wedstay/souphattra-presidential'].free, 2);
+  assert.equal(v.summary['bkk-stay/u-sathorn-superior-garden'].ownerReservedRooms, 0); assert.equal(v.summary['wedstay/souphattra-presidential'].reservedFor, null); assert.equal(v.summary['wedstay/souphattra-presidential'].free, 0, 'never free to anyone but the allowlisted couple');
   /* the inert names of the old rule */
   assert.equal(U.fixed(), false); assert.equal(U.fixedUnit(), null); assert.deepEqual(plain(U.fixedStages()), []); assert.equal(U.reserved(), false);
   assert.equal(ST.fixed(), false); assert.equal(ST.fixedSlug(), ''); assert.equal(w.SIYL_ARRANGED, undefined); assert.equal(w.SIYL_PRICE.reservedFor(), null);

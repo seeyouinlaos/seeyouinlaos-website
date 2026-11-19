@@ -42,6 +42,7 @@ import { matchSpecialRate } from './engine.js';
 import { nightsOfItem } from './source.js';
 import { toCents } from './model.js';
 import { financeReportOf, unitId, hotelPurchaseOf } from './finance-report.js';
+import { hotelRoomOf } from '../hotel-rooms.js';
 
 export const BUDGET_VERSION = 'billing-budget/1.3.0';
 
@@ -714,10 +715,19 @@ export function buildBudgetComparison(input) {
     const persons = (src.names && src.names.persons) || {};
     return { stay: c.id, place: c.place, from: c.from, to: c.to, rooms: keys.flatMap((key) => asArray(src.rooms && src.rooms.units && src.rooms.units[key]).map((u) => ({
       key, label: u.label, name: u.name, type: (src.rooms.units[key] && SEED_NAME(key)) || key, places: u.places, extraBeds: u.extraBeds || 0, item: asArray(c.items).find((id) => clean(items[id] && items[id].Site_Product_Key).split(/[,|]/)[0] === key) || null,
+      /* the room of the house the Owners assigned this unit (src/hotel-rooms.js, Owners 18 / 19 Nov 2026) — a suite of two numbers is
+         still this ONE room: every count and every cost stays per unit */
+      ...(u.couple ? { couple: true } : {}), hotelRoom: hotelRoomOf(key, u.label, src.rooms.hotelRooms && src.rooms.hotelRooms.rooms),
       /* a place kept for a party (guest id "~…") is not a person; a room the Owners moved a guest to names the rooms they held before
          (placedFrom — the same booking, Owners' assignments, 18 Nov 2026) */
       occupants: asArray(u.occupants).map((o) => (o.guestId && !clean(o.guestId).startsWith('~') ? { guestId: o.guestId, name: persons[o.guestId] || clean(o.name) || null, bed: !!o.bed, ...(Array.isArray(o.placedFrom) && o.placedFrom.length ? { placedFrom: o.placedFrom.map(clean) } : {}) } : { kept: true })) }))) };
   });
+  /* the rate list's rooms carry the same hotel room as the room plan — by the product's own key and the unit's label, never by which
+     item of a key came first (review, 19 Nov 2026) */
+  for (const c of out.filter((x) => x.kind === 'STAY')) for (const r of asArray(c.rooms)) {
+    const key = clean(items[r.item] && items[r.item].Site_Product_Key).split(/[,|]/)[0];
+    r.hotelRoom = key && r.label ? hotelRoomOf(key, r.label, src.rooms && src.rooms.hotelRooms && src.rooms.hotelRooms.rooms) : null;
+  }
   /* the hotel contracts' cost per room night by stay (budget-map VENDORS · roomContract) — the rate list's purchase side */
   const contractVendor = VENDORS.find((v) => v.roomContract) || null;
   const roomContracts = VENDORS.filter((v) => v.roomContract).flatMap((v) => Object.entries(v.roomContract.rooms).map(([stay, its]) =>

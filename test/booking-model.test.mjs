@@ -76,7 +76,7 @@ test('E/F · 2 GUEST HOUSE: USD 0, complimentary, four shared places — one lin
 test('G/H · D1 full for the party → the waiting list is the guest\'s own choice, an answered stage at USD 0; D2 / D3 remain the guest\'s alternatives — nobody is moved', async () => {
   const rooms = new Rooms(doState()), c = call(rooms), hold = holdAs(c);
   /* every place of every room — a room's extra bed too (The Heritage D, Owners 17 Nov 2026) */
-  let n = 0; for (const s of SOUPHATTRA) for (const u of unitsOf('wedstay/' + s)) for (let i = 0; i < u.places + (u.extraBeds || 0); i++) assert.equal((await hold(other(++n), 'wedstay/' + s, u.label, 1)).status, 200);
+  let n = 0; for (const s of SOUPHATTRA) for (const u of unitsOf('wedstay/' + s)) for (let i = 0; i < u.places + (u.extraBeds || 0); i++) if (!u.couple) assert.equal((await hold(other(++n), 'wedstay/' + s, u.label, 1)).status, 200);   /* the couple's suite is never a guest's (Owners, 19 Nov 2026) */
   const w = wedding(page({ auth: PEGGY, fetch: await roomsFetch(rooms, identity(PEGGY)) })); await w.SIYL_UNITS.load(true);
   const J = w.SIYL_JOURNEY, U = w.SIYL_UNITS, G = w.SIYL_GUEST, B = w.SIYL_BAG;
   for (const s of SOUPHATTRA) assert.equal(U.soldOut('wedstay', s), true, s + ' sold out');

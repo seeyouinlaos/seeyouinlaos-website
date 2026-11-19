@@ -66,17 +66,24 @@ test('ROOMS · 1 room = 2 places; 5 rooms = 10 places; units are persistent labe
   assert.equal(allUnits().length, Object.keys(SEED).reduce((n, k) => n + (SEED[k].unit === 'guest' ? 1 : SEED[k].capacity + (SEED[k].dedicated || []).length), 0), 'a dedicated room (002 · W) is one more unit');
 });
 
-test('ROOMS · nothing is reserved (Owner, 19 Sep 2026): no unit is anyone\'s in advance, mayJoin asks only for an identity, the hosts are ordinary guests, every room of every stay is open to every authenticated guest; nobody without an identity', () => {
+test('ROOMS · nothing is reserved (Owner, 19 Sep 2026): no unit is anyone\'s in advance, mayJoin asks only for an identity, the hosts are ordinary guests, every room of every stay is open to every authenticated guest; nobody without an identity — ONE exception, the couple\'s suite (Owners, 19 Nov 2026)', () => {
   assert.deepEqual(FIXED, [], 'no fixed allocation exists — an empty export');
   for (const [key, s] of Object.entries(SEED)) { assert.equal(s.held, 0, key + ' holds nothing in advance'); assert.equal(s.heldFor, undefined, key + ' is held for nobody'); }
   assert.ok(allUnits().every((u) => u.reservedFor === null), 'every unit of every category is open');
-  /* the Presidential: no Bride & Groom reservation — a guest, a host, anyone with an identity */
-  const pres = unitsOf('wedstay/souphattra-presidential')[0];
-  assert.equal(pres.reservedFor, null);
-  assert.equal(mayJoin(pres, HAR).ok, true); assert.equal(mayJoin(pres, SUT).ok, true); assert.equal(mayJoin(pres, PEG).ok, true, 'the Presidential is open to Peggy'); assert.equal(mayJoin(pres, LIN).ok, true);
-  assert.deepEqual(mayJoin(pres, null), { ok: false, error: 'unauthorised' }, 'nobody without an identity');
+  /* THE COUPLE'S SUITE (Owners, 19 Nov 2026): the Presidential is the couple's alone — the allowlisted
+     couple (src/billing/admin.js: invitation + guest + hosts === true), nobody else; still ONE unit of TWO places */
+  const pres = unitsOf('wedstay/souphattra-presidential');
+  assert.equal(pres.length, 1, 'one suite, one unit — 210 and 211 are never two rooms'); assert.equal(pres[0].places, 2, 'two places, no third');
+  assert.equal(pres[0].reservedFor, null); assert.equal(pres[0].couple, true);
+  assert.deepEqual(unitsOf('prewed/souphattra-presidential').map((u) => [u.label, u.places, u.couple]), [['A', 2, true]]);
+  assert.equal(mayJoin(pres[0], HAR).ok, true); assert.equal(mayJoin(pres[0], SUT).ok, true);
+  assert.deepEqual(mayJoin(pres[0], PEG), { ok: false, error: 'the couple\'s suite' }, 'not Peggy'); assert.equal(mayJoin(pres[0], LIN).ok, false);
+  assert.equal(mayJoin(pres[0], { ...HAR, hosts: false }).ok, false, 'the allowlist is strict: hosts === true');
+  assert.equal(mayJoin(pres[0], { ...HAR, invitationId: 'INV-G001' }).ok, false, 'the invitation and the guest together');
+  assert.deepEqual(mayJoin(pres[0], null), { ok: false, error: 'unauthorised' }, 'nobody without an identity');
+  assert.ok(allUnits().filter((u) => u.couple).every((u) => /\/souphattra-presidential$/.test(u.key)), 'the suite is the only room kept for anyone');
   assert.deepEqual(mayJoin(null, PEG), { ok: false, error: 'unknown room' });
-  assert.deepEqual(mayJoin(pres, { guestId: 'G999' }), { ok: true }, 'an identity is all a unit asks for — no hosts flag, no party');
+  assert.deepEqual(mayJoin(unitsOf('wedstay/heritage')[0], { guestId: 'G999' }), { ok: true }, 'an identity is all an ordinary unit asks for — no hosts flag, no party');
   const fam = unitsOf('wedstay/grand-majestic');
   assert.deepEqual(fam.map((u) => u.reservedFor), [null, null]); assert.equal(mayJoin(fam[0], HAR).ok, true); assert.equal(mayJoin(fam[0], LIN).ok, true);
   assert.equal(mayJoin(unitsOf('wedstay/heritage')[0], LIN).ok, true);
@@ -181,14 +188,15 @@ test('ROOMS · a write is the identity\'s own: another guest, another invitation
   assert.equal(r.status, 403);
   r = await call(rooms, 'join', { invitationId: PEG.invitationId, guestId: PEG.guestId, key: 'wedstay/heritage', label: 'A', name: 'x' }, null);
   assert.equal(r.status, 401);
-  /* the Presidential is open to anyone now — no Bride & Groom reservation (Owner, 19 Sep 2026) */
+  /* THE COUPLE'S SUITE (Owners, 19 Nov 2026): Peggy is refused and nothing is written; the couple take its two places, no third */
   r = await call(rooms, 'join', { invitationId: PEG.invitationId, guestId: PEG.guestId, key: 'wedstay/souphattra-presidential', label: 'A', name: 'Peggy' }, PEG);
-  assert.equal(r.status, 200, 'Peggy takes a place in the Presidential'); assert.deepEqual(r.d.mine.wedstay, { key: 'wedstay/souphattra-presidential', label: 'A' });
+  assert.equal(r.status, 403, 'the Presidential is not Peggy\'s'); assert.equal(r.d.error, 'the couple\'s suite'); assert.equal(r.d.mine.wedstay, undefined);
+  assert.equal(unit(r.d, 'wedstay/souphattra-presidential', 'A').taken, 0, 'nothing written'); assert.equal(unit(r.d, 'wedstay/souphattra-presidential', 'A').free, 0, 'never a free place to a guest');
   r = await call(rooms, 'join', { invitationId: HAR.invitationId, guestId: HAR.guestId, key: 'wedstay/souphattra-presidential', label: 'A', name: 'Haruthai' }, HAR);
-  assert.equal(r.status, 200, 'a host books like every guest — the second place of the same room'); assert.equal(unit(r.d, 'wedstay/souphattra-presidential', 'A').full, true);
-  assert.deepEqual(unit(r.d, 'wedstay/souphattra-presidential', 'A').occupants.map((o) => o.name).sort(), ['Haruthai', 'Peggy']);
+  assert.equal(r.status, 200, 'the Bride takes her place'); assert.equal(unit(r.d, 'wedstay/souphattra-presidential', 'A').full, false);
   r = await call(rooms, 'join', { invitationId: SUT.invitationId, guestId: SUT.guestId, key: 'wedstay/souphattra-presidential', label: 'A', name: 'Suthep' }, SUT);
-  assert.equal(r.status, 409, 'a full room refuses a host like anyone'); assert.equal(r.d.error, 'full'); assert.equal(r.d.mine.wedstay, undefined);
+  assert.equal(r.status, 200, 'the Groom the second'); assert.equal(unit(r.d, 'wedstay/souphattra-presidential', 'A').full, true);
+  assert.deepEqual(unit(r.d, 'wedstay/souphattra-presidential', 'A').occupants.map((o) => o.name).sort(), ['Haruthai', 'Suthep']);
   r = await call(rooms, 'join', { invitationId: HAR.invitationId, guestId: HAR.guestId, key: 'wedstay/grand-majestic', label: 'A', name: 'x' }, HAR);
   assert.equal(r.status, 200, 'the Grand Majestic is open to everyone (Owner, Edit 5 · 18 Sep 2026)'); assert.equal(unit(r.d, 'wedstay/souphattra-presidential', 'A').taken, 1, 'one place per stage: her Presidential place goes');
   /* U Sathorn: Room A is nobody's in advance — Peggy takes it; nothing reserved, twelve places, eleven free */
@@ -330,7 +338,9 @@ test('WAITING LIST · a place held resolves the line: a join clears the guest\'s
   assert.equal(r.d.ok, true); assert.equal(r.d.dryRun, false); assert.equal(r.d.cleared, 2); assert.equal(r.d.waitlistCleared, 1); assert.equal(r.d.remaining, 0); assert.equal(r.d.waitlistRemaining, 0); assert.equal(r.d.fixed, 0);
   r = await call(rooms, 'read', null, LIN);
   assert.deepEqual(r.d.mine, {}); assert.deepEqual(r.d.waitlist, {}); assert.deepEqual(r.d.waiting, {});
-  assert.ok(Object.values(r.d.summary).every((s) => s.free === s.places && s.soldOut === false), 'every place of every category is free again — nothing was held in advance, so nothing remains');
+  assert.ok(Object.entries(r.d.summary).every(([k, s]) => (SEED[k].couple ? s.free === 0 && s.soldOut === true : s.free === s.places && s.soldOut === false)), 'every place of every category is free again — nothing was held in advance, so nothing remains; the couple\'s suite is never free to a guest');
+  r = await call(rooms, 'read', null, HAR);
+  assert.ok(Object.entries(r.d.summary).every(([, s]) => s.free === s.places && s.soldOut === false), 'to the couple every place is free again, their suite included');
   assert.equal((await call(rooms, 'plan', null, null, true)).d.waitlist.length, 0);
 });
 

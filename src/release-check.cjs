@@ -49,6 +49,7 @@ gate(2, 'Inventory display decision recorded',
 {
   const seed = read('src/inventory-seed.js');
   const engine = read('src/rooms.js');
+  const routes = read('src/billing-routes.js');   /* the Owners' booking form: the couple's suite (19 Nov 2026) */
   const worker = read('src/worker.js');
   const client = read('assets/rooms.js');
   const stay = read('assets/stay.js');
@@ -73,6 +74,21 @@ gate(2, 'Inventory display decision recorded',
   if (!/const partyHere = identity\.partyId \? occ\.filter/.test(engine)) inv.push('a party member already in the unit does not count for the party');
   if (!/op === 'wait' \|\| op === 'unwait'/.test(engine) || !/wl:/.test(engine) || !/r\.position = pos\[r\.stage\];/.test(engine)) inv.push('the engine has no waiting list with deterministic positions');
   if (!/await this\.resolveWait\(stage, guestId\);/.test(engine)) inv.push('a place held does not resolve the waiting-list entry');
+  /* THE ONE EXCEPTION (Owners, 19 Nov 2026): the couple's suite — the Presidential only, one unit of two places, the
+     allowlisted couple only, on every write path (a guest's join, Guest Relations' assign / migrate before `force`, the Owners'
+     assignments) and never a party place kept where the guest may not join */
+  /* every code line (comments aside) that marks a room the couple's must be one of the two Presidential entries — whatever follows on it */
+  const seedCode = seed.replace(/\/\*[\s\S]*?\*\//g, '').split('\n');
+  const coupleLines = seedCode.filter((l) => /\bcouple\s*:\s*true\b/.test(l));
+  const coupleKeys = coupleLines.map((l) => (/^\s*'([a-z-]+\/[a-z0-9-]+)'\s*:/.exec(l) || [])[1] || '?').sort();
+  if (coupleKeys.join() !== 'prewed/souphattra-presidential,wedstay/souphattra-presidential') inv.push('a room other than the Presidential is kept for the couple, or the suite is not: ' + coupleKeys.join(', '));
+  if (coupleLines.some((l) => !/capacity: 1,/.test(l) || !/occupancy: 2,/.test(l))) inv.push('the couple\'s suite is not one unit of two places');
+  if (!/const closed = !!u\.couple && !isCouple\(identity\);/.test(engine)) inv.push('a guest is shown the couple\'s suite as free');
+  if (!/'COUPLE_SUITE: ' \+ key/.test(routes) || !/'COUPLE_SUITE: ' \+ clean\(e\.personId\)/.test(routes)) inv.push('the Owners\' booking form can record someone else into the couple\'s suite');
+  if (!/if \(unit\.couple && !isCouple\(identity\)\) return \{ ok: false, error: 'the couple\\'s suite' \};/.test(engine)) inv.push('a guest can join the couple\'s suite');
+  if (!/if \(unit\.couple && !isCouplePerson\(\{ guestId, invitationId: o\.invitationId \}\)\) \{ refused\.push/.test(engine)) inv.push('Guest Relations can assign someone into the couple\'s suite');
+  if (!/reason: 'COUPLE_ONLY'/.test(engine)) inv.push('the Owners\' assignments can place someone into the couple\'s suite');
+  if (!/const catUnits = unitsFor\(key, identity\)\.filter\(\(u\) => mayJoin\(u, identity\)\.ok\);/.test(engine)) inv.push('a party place can be kept in a room the guest may not join');
   if (!/for \(const k of wmap\.keys\(\)\) await this\.storage\.delete\(k\);/.test(engine)) inv.push('the clean reset does not clear the waiting list');
   /* ONE CANONICAL AVAILABILITY OBJECT (Owner, 16 Sep 2026 · final quickfix): source − Owner reservations − real bookings; soldOut = remainingPlaces === 0; the client renders it, never recomputes */
   if (!/export function availabilityOf\(key, list\)/.test(engine) || !/remainingRooms, remainingPlaces, soldOut: remainingPlaces === 0,/.test(engine)) inv.push('the engine has no canonical availability object');
@@ -101,7 +117,7 @@ gate(2, 'Inventory display decision recorded',
     inv.length === 0,
     inv.length ? inv.join(' · ')
       : 'one Durable Object engine ("rooms") serialises every place; ' + keys +
-        ' categories seeded from Accommodation_Details; full answers 409; a change holds the new place before the old one goes; the client holds no capacity of its own; an extra bed only where the seed names it, for the guests it names (17 Nov 2026).');
+        ' categories seeded from Accommodation_Details; full answers 409; a change holds the new place before the old one goes; the client holds no capacity of its own; an extra bed only where the seed names it, for the guests it names (17 Nov 2026); the Presidential the couple\'s suite alone on every write path (19 Nov 2026).');
 }
 
 /* Gate 3 — production lookup: encrypted bundle, no demo data, no plaintext PII */

@@ -284,18 +284,18 @@ test('CART · one guest sees only their own cart; remove updates the authoritati
   const B = w.SIYL_BAG, P = w.SIYL_PRICE, T = w.SIYL_TEMPLE, ST = w.SIYL_STAY, G = w.SIYL_GUEST;
   P.items('train').forEach((it) => { it.qty = 1; B.put(it); });
   T.setAttendance('g-haruthai', 'yes'); T.setOffering('g-haruthai', 'yes');
-  const r = await ST.select('wedstay', 'souphattra-presidential');
-  assert.equal(r.ok, true, 'the hosts may take the Bride & Groom suite');
-  assert.equal(B.get().length, 3); assert.equal(B.total(), 100 + 15 + P.quote('wedstay', 'souphattra-presidential').total);
+  const r = await ST.select('wedstay', 'souphattra-majestic');
+  assert.equal(r.ok, true, 'the hosts take a suite like any guest (the Presidential is the allowlisted couple\'s alone — Owners, 19 Nov 2026; test/rooms.test.mjs)');
+  assert.equal(B.get().length, 3); assert.equal(B.total(), 100 + 15 + P.quote('wedstay', 'souphattra-majestic').total);
   /* Suthep, separately, sees Haruthai in Room A and joins the same room */
   const w2 = await livePage(SUTHEP, rooms);
-  const u = w2.SIYL_UNITS.units('wedstay', 'souphattra-presidential')[0];
+  const u = w2.SIYL_UNITS.units('wedstay', 'souphattra-majestic')[0];
   deq(u.occupants.map((o) => [o.name, o.party]), [['Haruthai', true]]);
-  assert.equal(w2.SIYL_UNITS.suggest('wedstay', 'souphattra-presidential').label, 'A', 'the room a party member is in is suggested');
-  const r2 = await w2.SIYL_STAY.select('wedstay', 'souphattra-presidential');
+  assert.equal(w2.SIYL_UNITS.suggest('wedstay', 'souphattra-majestic').label, 'A', 'the room a party member is in is suggested');
+  const r2 = await w2.SIYL_STAY.select('wedstay', 'souphattra-majestic');
   assert.equal(r2.ok, true); assert.equal(r2.unit, 'A');
   assert.equal(w2.SIYL_BAG.get().length, 1, 'his cart is his own');
-  assert.equal(w2.SIYL_BAG.total(), P.quote('wedstay', 'souphattra-presidential').total);
+  assert.equal(w2.SIYL_BAG.total(), P.quote('wedstay', 'souphattra-majestic').total);
   await w.SIYL_UNITS.load(true);
   assert.equal(ST.unitWords(ST.line('wedstay')), 'Room A · you and Suthep · full'); /* TO-01214: names joined with “and”, lower-case state */
   /* Haruthai removes her stay: the place is released, the stage needs attention */

@@ -560,3 +560,20 @@ test('DASHBOARD · costs are 004 gross (never reduced by revenue); the forecast 
   /* the hotel contracts' rooms for the rate list: the whole wedding stay and the suite of 25–27.02, at USD 150 per room night */
   assert.deepEqual(out.roomContracts.map((x) => [x.stay, x.items, x.ratePerRoomNight]).sort((a, b) => (a[0] < b[0] ? -1 : 1)), [['C', ['C-SOUPHATTRA-PRESIDENTIAL'], 150], ['D1', '*', 150]]);
 });
+
+test('BUDGET · THE HOTEL\'S OWN ROOMS (Owners, 18 / 19 Nov 2026): a unit of the room plan carries the room of the house the Owners assigned it — beside its label; every count and every cost stays per unit, so a number (or a suite of two) never doubles a room or its purchase', () => {
+  const units = { 'wedstay/heritage-executive': [{ label: 'A', occupants: [{ guestId: 'GA1' }, { guestId: 'GA2' }] }, { label: 'B', occupants: [{ guestId: 'GC1' }] }, { label: 'C', occupants: [] }],
+    'wedstay/grand-majestic': [{ label: 'A', occupants: [{ guestId: 'GB1' }, { guestId: 'GB2' }] }] };
+  const plain = { ok: true, units };
+  const numbered = { ok: true, units, hotelRooms: { version: 1, rooms: { 'wedstay/heritage-executive|A': ['304'], 'wedstay/grand-majestic|A': ['201'] } } };
+  const a = buildBudgetComparison({ ...world({ rooms: plain }).input, revenue: REV(30000, 45000) });
+  const b = buildBudgetComparison({ ...world({ rooms: numbered }).input, revenue: REV(30000, 45000) });
+  const d1 = (x) => x.roomPlan.find((p) => p.stay === 'D1').rooms;
+  const he = d1(b).find((u) => u.key === 'wedstay/heritage-executive' && u.label === 'A'), gm = d1(b).find((u) => u.key === 'wedstay/grand-majestic');
+  assert.deepEqual([he.hotelRoom.display, he.hotelRoom.building, he.hotelRoom.type], ['304', 'D', 'Heritage Executive (Twin)']);
+  assert.deepEqual([gm.hotelRoom.display, gm.hotelRoom.building], ['201', 'B']);
+  assert.equal(d1(b).find((u) => u.label === 'B').hotelRoom, null, 'not assigned: nothing, never a guess');
+  assert.equal(d1(a).length, d1(b).length, 'the same units'); assert.deepEqual(d1(a).map((u) => u.hotelCost), d1(b).map((u) => u.hotelCost), 'the same cost per room');
+  assert.equal(a.report.purchase.totals.contract.cents, b.report.purchase.totals.contract.cents, 'the purchase never changes by a number');
+  assert.equal(a.dashboard.costs.forecast.cents, b.dashboard.costs.forecast.cents);
+});
