@@ -61,7 +61,7 @@ import { confirmationStands, writeConfirmation, CONFIRMATION_ROLE } from './conf
 import { identify, owns, loadIndex } from './auth.js';
 import { authIdOf } from '../register/crypto.mjs';   /* the one-way derivation the register's index is keyed by (the guest's own document read) */
 import { MEDIA_SIZES } from './media-sizes.js';
-import { giftsFor, verifiedLines } from './gifts.js';   /* the Bride & Groom's hospitality: one guest's own charge (Owner, 28 Sep 2026) */   /* every film's size, written at build time (src/build-media-sizes.cjs) */
+import { giftsFor, verifiedLines, statementLines } from './gifts.js';   /* the Bride & Groom's hospitality: one guest's own charge (Owner, 28 Sep 2026) */   /* every film's size, written at build time (src/build-media-sizes.cjs) */
 import { SEED } from './inventory-seed.js';
 import { canonicalKey, canonicalLines, lineAs, viewAs } from './legacy-keys.js';   /* the replaced Kempinski room read as Hotel Muse Bangkok's Jatu Room (28 Sep 2026) */
 import { stageOf, dedicatedStages } from './rooms.js';
@@ -699,7 +699,7 @@ async function handleRegister(request, env) {
     /* a line of the former Kempinski room is written as its successor (only the canonical key is ever written) */
     const canon = canonicalLines(registration.selections);
     const claimedPrepaid = new Set((canon || []).filter((l) => l && l.personal === 'prepaid').map((l) => siteKeyOfSelection(l)));
-    registration.selections = verifiedLines(canon, giftsFor(person && person.contactId));
+    { const own = giftsFor(person && person.contactId); registration.selections = statementLines(verifiedLines(canon, own), own); }
     registration.selections = await markPaidByHS(env, who, registration.selections, claimedPrepaid);
   }
   /* THE ONE VALIDATOR (Owner, 21 Sep 2026 · the global My Trip rebuild): the same graph the pages read decides here whether the
