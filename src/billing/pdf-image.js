@@ -17,7 +17,9 @@ async function inflate(bytes) {
 }
 /* PackBits / PDF RunLengthDecode — written here, so the same image always gives the same bytes on every runtime */
 export function runLength(src) {
-  const out = new Uint8Array(src.length + Math.ceil(src.length / 128) + 2); let o = 0, i = 0;
+  /* a safe bound: this encoder's worst case is about 4n/3 + 2 (a one-byte literal before every pair), more than the n + n/128 a flat
+     payment code ever needed; 2n + 2 always holds. Only the scratch buffer grows — the bytes written are the same as before */
+  const out = new Uint8Array(2 * src.length + 2); let o = 0, i = 0;
   const push = (...v) => { for (const x of v) out[o++] = x; };
   while (i < src.length) {
     let run = 1; while (i + run < src.length && run < 128 && src[i + run] === src[i]) run++;

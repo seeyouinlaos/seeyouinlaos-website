@@ -24,6 +24,8 @@ export async function resolve(specifier, context, next) {
 }`));
 
 const { handleBilling } = await import('../src/billing-routes.js');
+/* this suite's statements are dated by its own days: the Owners' issue-date rules are moved here only (proved in statements-13) */
+Object.assign((await import('../src/billing/pdf-layouts.js')).ISSUE_RULES, { floor: '2000-01-01', today: () => '2000-01-01' });
 const { BillingLedger } = await import('../src/billing-ledger.js');
 const { Rooms } = await import('../src/rooms.js');
 const { calculate } = await import('../src/billing/engine.js');

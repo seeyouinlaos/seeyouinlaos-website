@@ -13,7 +13,7 @@
    ========================================================================== */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { renderSettlementPdf, PDF_WRITER_VERSION } from '../src/billing/pdf.js';
+import { renderSettlementPdf, PDF_WRITER_VERSION } from '../src/billing/pdf-layout-12.js';
 import { formatUSD } from '../src/billing/model.js';
 
 const L = (o) => ({ Billing_Category: 'GUEST_SETTLEMENT_REQUIRED', rateSource: 'STANDARD', quantity: 1, modifiers: [], block: 'A', ...o });

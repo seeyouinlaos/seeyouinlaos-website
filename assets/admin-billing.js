@@ -479,11 +479,13 @@
   }
 
   /* -------------------------------------------------------- the guest view */
-  function linesTable(lines, withReview) {
+  function linesTable(lines, withReview, words) {
     if (!lines || !lines.length) return '<p class="t-b2">No billable lines.</p>';
     return '<div class="ab-table-wrap"><table class="ab-table ab-lines"><thead><tr><th>Person</th><th>Item</th><th>Category</th><th class="num">Nights</th><th class="num">Qty</th><th class="num">Rate</th><th class="num">Amount</th><th>Block</th>' + (withReview ? '<th>Review</th>' : '') + '</tr></thead><tbody>' +
       lines.map(function (l) {
-        return '<tr><td data-l="Person">' + esc(l.person || l.Person_ID || '—') + '</td><td data-l="Item"><span data-i18n-skip>' + esc(l.Item_ID || '—') + '</span>' + (l.Room_Unit_ID ? '<br><span class="ab-mute">' + esc(l.Room_Unit_ID) + '</span>' : '') + '</td>' +
+        /* the names this table's own statement prints: the preview's, or the ones an issued revision froze — never borrowed */
+        var word = words && words[l.Item_ID];
+        return '<tr><td data-l="Person">' + esc(l.person || l.Person_ID || '—') + '</td><td data-l="Item">' + (word ? '<span data-i18n-skip>' + esc(word.name) + '</span><br><span class="ab-mute" data-i18n-skip>' + esc(l.Item_ID || '') + '</span>' : '<span data-i18n-skip>' + esc(l.Item_ID || '—') + '</span>') + (l.Room_Unit_ID ? '<br><span class="ab-mute">' + esc(l.Room_Unit_ID) + '</span>' : '') + '</td>' +
           '<td data-l="Category">' + esc(l.Billing_Category || '—') + (l.hosted ? ' · hosted' : '') +
             (l.paidByHS ? '<br><span class="ab-mute" data-ab-paid>' + esc(l.paidNote || 'Haruthai has already paid this booking for the guest. It is repaid to Haruthai & Suthep through the settlement.') +
               ' · payable to H&amp;S</span>' : '') + '</td>' +
@@ -655,6 +657,22 @@
       (b.blockB && b.blockB.length ? '<p class="t-l1">Block B · settled with the provider, never in the booked value</p>' + linesTable(b.blockB, false) : '') +
       (b.unmapped && b.unmapped.length ? '<p class="t-b2 ab-why">Selected products without an 002 item: ' + esc(b.unmapped.join(', ')) + '</p>' : '') + '</section>';
   }
+  /* WHAT THE STATEMENT PRINTS (HS-004.6/.8/.16): the recipient, everyone else on it, the ways to pay in their order, the correction
+     note — exactly the fields the issue freezes */
+  function waysToPay(list) {
+    var l = (list || []).filter(function (m) { return METHOD[m]; });
+    if (l.length > 1) return l.map(function (m, i) { return 'Option ' + (i + 1) + ' · ' + METHOD[m]; }).join(' · ');
+    return l.length ? METHOD[l[0]] : '—';
+  }
+  function printsView(pv) {
+    var r = pv.recipient, others = [];
+    Object.keys(pv.personNames || {}).forEach(function (pid) { if (!r || pid !== r.Person_ID) others.push(pv.personNames[pid] + ' (' + pid + ')'); });
+    var k = pv.correction;
+    return '<div class="ab-grid2" data-ab-prints>' + kv('Statement for', r ? '<b data-i18n-skip>' + esc(r.name) + '</b> <span class="ab-mute" data-i18n-skip>' + esc(r.Person_ID) + '</span>' : '<span class="ab-err">no recipient — not issuable</span>') +
+      kv('Also on this statement', others.length ? '<span data-i18n-skip>' + esc(others.join(', ')) + '</span>' : '—') +
+      kv('Ways to pay', esc(waysToPay(pv.paymentOptions))) +
+      kv('Correction', k ? esc('replaces ' + k.replaces + (k.replacesIssued ? ' issued ' + day(k.replacesIssued) : '') + ' · ' + k.reason) : '—') + '</div>';
+  }
   function previewView() {
     var H = S.holder, pv = H.preview || {};
     var reasons = (pv.reasons || []).map(function (r) { var w = reasonWords(r); return '<li>' + esc(w) + (w !== r ? ' <span class="ab-mute" data-i18n-skip>' + esc(String(r).split(' — ')[0]) + '</span>' : '') + '</li>'; }).join('');
@@ -663,8 +681,9 @@
       '<div class="ab-grid2">' + kv('Issue date if issued now', esc(day(pv.issueDate))) + kv('Due date', esc(day(pv.dueDate))) +
       kv('In the payment currency', pv.inCurrency ? '<span data-i18n-skip>' + esc(money(pv.inCurrency.currency, pv.inCurrency.amount)) + '</span> <span class="ab-mute">at ' + esc(pv.inCurrency.rate) + '</span>' : '—') +
       kv('Hosted value', '<span data-i18n-skip>' + esc(usd(pv.hostedValue)) + '</span> <span class="ab-mute">· informational</span>') + '</div>' +
-      linesTable(pv.lines, true) +
-      (pv.blockB && pv.blockB.length ? '<p class="t-l1">Block B · informational, never in the total</p>' + linesTable(pv.blockB, false) : '') +
+      printsView(pv) +
+      linesTable(pv.lines, true, pv.itemWords) +
+      (pv.blockB && pv.blockB.length ? '<p class="t-l1">Block B · informational, never in the total</p>' + linesTable(pv.blockB, false, pv.itemWords) : '') +
       (pv.manualReview && pv.manualReview.length ? '<p class="t-b2 ab-why">Manual review: ' + esc(pv.manualReview.join(', ')) + '</p>' : '') +
       (pv.unmapped && pv.unmapped.length ? '<p class="t-b2 ab-why">Products without an 002 item: ' + esc(pv.unmapped.join(', ')) + '</p>' : '') +
       (pv.issuable ? '<p class="t-b2 ab-ok">The server would issue exactly this statement now.</p>' : '<p class="t-l1 open">Not issuable now</p><ul class="t-b2 ab-reasons">' + reasons + '</ul>') +
@@ -695,7 +714,8 @@
     if (I.done) return '<section class="p-card ab-panel ab-confirm" aria-label="Issued"><p class="t-l1 on">Issued</p><p class="t-b1">' + esc(I.done) + '</p></section>';
     var g = H.guest || {};
     return '<section class="p-card ab-panel ab-confirm" aria-label="Issue statement"><p class="t-l1 open">Issue statement · final</p>' +
-      '<p class="t-b1">You are issuing the statement for <b>' + esc(g.name ? g.name.full : H.Holder_ID) + '</b>: <b data-i18n-skip>' + esc(usd(pv.total)) + '</b>, due <b>' + esc(day(pv.dueDate)) + '</b>, payable by ' + esc(METHOD[H.method && H.method.channel] || '—') + '.</p>' +
+      '<p class="t-b1">You are issuing the statement for <b>' + esc(pv.recipient ? pv.recipient.name : (g.name ? g.name.full : H.Holder_ID)) + '</b>: <b data-i18n-skip>' + esc(usd(pv.total)) + '</b>, due <b>' + esc(day(pv.dueDate)) + '</b>, payable by ' + esc(pv.paymentOptions && pv.paymentOptions.length ? waysToPay(pv.paymentOptions) : (METHOD[H.method && H.method.channel] || '—')) + '.</p>' +
+      (pv.correction ? '<p class="t-b2">' + esc('Corrected version · replaces ' + pv.correction.replaces + (pv.correction.replacesIssued ? ' issued ' + day(pv.correction.replacesIssued) : '') + ' · ' + pv.correction.reason) + '</p>' : '') +
       '<p class="t-b2">An issued revision is immutable. The guest sees it in My Profile at once; nothing is e-mailed until you send it.</p>' +
       priceBlock(pdOf(H)) + (pdOf(H) && pdOf(H).material ? pricesTick(I.prices, I.busy, 'data-ab-issue-prices') : '') +
       '<label class="p-check t-b2"><input type="checkbox" data-ab-issue-check' + (I.checked ? ' checked' : '') + (I.busy ? ' disabled' : '') + '><span>I have checked the preview above and want to issue it.</span></label>' +
@@ -711,13 +731,14 @@
       '<h3 class="t-h1"><span data-i18n-skip>' + esc(x.Settlement_ID) + '</span> · version ' + esc(x.revision) + '</h3>' +
       '<div class="ab-grid2">' + kv('Issued', esc(day(x.issueDate))) + kv('Due', esc(day(x.dueDate))) + kv('Total', '<b data-i18n-skip>' + esc(usd(x.total)) + '</b>') +
       kv('In ' + (x.currency || '—'), x.inCurrency ? '<span data-i18n-skip>' + esc(money(x.inCurrency.currency, x.inCurrency.amount)) + '</span>' : '—') +
-      kv('Method', esc(METHOD[x.method] || x.method || '—') + (x.recipient ? ' → ' + esc(x.recipient) : '')) +
+      kv('Method', esc(x.paymentOptions && x.paymentOptions.length > 1 ? waysToPay(x.paymentOptions) : (METHOD[x.method] || x.method || '—')) + (x.recipient ? ' → ' + esc(x.recipient) : '')) +
       kv('Frozen FX', '<span data-i18n-skip>1 USD = ' + esc(x.fx.FX_USD_EUR) + ' EUR · ' + esc(x.fx.FX_USD_THB) + ' THB</span>') +
-      kv('Hosted value', '<span data-i18n-skip>' + esc(usd(x.hostedValue)) + '</span>') + kv('Engine', esc(x.engineVersion || '—')) + '</div>' +
-      linesTable(x.lines, false) +
+      kv('Hosted value', '<span data-i18n-skip>' + esc(usd(x.hostedValue)) + '</span>') + kv('Engine', esc(x.engineVersion || '—')) +
+      (x.recipientName ? kv('Statement for', '<b data-i18n-skip>' + esc(x.recipientName) + '</b>') : '') + '</div>' +
+      linesTable(x.lines, false, x.itemWords) +
       (revs.length ? '<p class="t-l1">Statement versions · each the original PDF the guest received</p><ul class="t-b2 ab-revs" data-ab-versions>' + revs.map(function (r) {
         var issued = r.Revision_State === 'ISSUED' || r.Revision_State === 'SUPERSEDED';
-        var made = r.pdf ? (r.pdf.produced ? ' · original produced (' + esc(String(r.pdf.writer || '').replace('guest-settlement-pdf/', 'layout ')) + ')' : ' · not produced yet (produced on first download, layout 1.2)') : '';
+        var made = r.pdf ? (r.pdf.produced ? ' · original produced (' + esc(String(r.pdf.writer || '').replace('guest-settlement-pdf/', 'layout ')) + ')' : ' · not produced yet (produced on first download, ' + esc(String(r.pdf.layout || 'its own layout').replace('guest-settlement-pdf/', 'layout ')) + ')') : '';
         return '<li>V' + esc(r.Revision) + ' · ' + esc(r.Revision_State === 'ISSUED' ? 'current' : r.Revision_State === 'SUPERSEDED' ? 'superseded (historical original)' : r.Revision_State) + (r.total != null ? ' · ' + esc(usd(r.total)) : '') +
           (r.Issue_Date ? ' · issued ' + esc(day(r.Issue_Date)) : r.issuedAt ? ' · issued ' + esc(when(r.issuedAt)) : '') + (r.Due_Date ? ' · due ' + esc(day(r.Due_Date)) : '') + (r.issuedBy ? ' · by ' + esc(r.issuedBy) : '') + made +
           (issued ? ' · <button type="button" class="p-link" data-ab-pdf="' + esc(r.Revision) + '" data-ab-pdf-sid="' + esc(x.Settlement_ID) + '">Download Original PDF · V' + esc(r.Revision) + '</button>' : '') + '</li>';
@@ -777,9 +798,10 @@
     }
     var okToGo = D.checked && (!reached.length || D.again) && !D.busy && !!c.email && !c.open;
     return '<section class="p-card ab-panel ab-confirm" aria-label="Send statement"><p class="t-l1 open">Send statement by e-mail</p>' +
-      '<div class="ab-grid2">' + kv('Recipient', esc(c.recipientName || '—')) + kv('E-mail', c.email ? '<b data-i18n-skip>' + esc(c.email) + '</b>' : '<span class="ab-chip open">Email unavailable</span>') +
+      '<div class="ab-grid2">' + kv('Recipient', esc(c.frozenRecipient || c.recipientName || '—')) + kv('E-mail', c.email ? '<b data-i18n-skip>' + esc(c.email) + '</b>' : '<span class="ab-chip open">Email unavailable</span>') +
       kv('Statement', '<span data-i18n-skip>' + esc(c.Settlement_ID) + '</span> · version ' + esc(c.revision)) + kv('Total', '<b data-i18n-skip>' + esc(usd(c.totalPayable)) + '</b>' + (c.inCurrency ? ' <span class="ab-mute">· ' + esc(money(c.inCurrency.currency, c.inCurrency.amount)) + '</span>' : '')) +
-      kv('Due date', '<b>' + esc(day(c.dueDate)) + '</b>') + '</div>' +
+      kv('Due date', '<b>' + esc(day(c.dueDate)) + '</b>') + kv('Ways to pay', esc(c.method || '—')) +
+      (c.correction && c.correction.replaces ? kv('Replaces', esc(c.correction.replaces + (c.correction.replacesIssued ? ' issued ' + day(c.correction.replacesIssued) : ''))) : '') + '</div>' +
       '<p class="t-b2">The e-mail carries the statement as a PDF attachment and points the guest to My Profile → Your statement. No link to the PDF is created.</p>' +
       (c.open ? '<p class="t-b1 ab-err">A send of this statement is in progress (' + esc(when(c.open.at)) + '). Wait a few minutes and open this again.</p>' : '') +
       (log ? '<p class="t-l1">Sent before</p><ul class="t-b2 ab-revs">' + log + '</ul>' : '') +

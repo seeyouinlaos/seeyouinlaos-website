@@ -28,6 +28,9 @@ export async function resolve(specifier, context, next) {
 }`));
 
 const { handleBilling } = await import('../src/billing-routes.js');
+/* the synthetic statements of this suite are dated by the test clock: the Owners' floor (no statement before 21 Nov 2026) is lowered
+   here only — test/statements-13.test.mjs proves the floor itself */
+Object.assign((await import('../src/billing/pdf-layouts.js')).ISSUE_RULES, { floor: '2000-01-01', today: () => '2000-01-01' });
 const { BillingLedger } = await import('../src/billing-ledger.js');
 const { calculate, computeLine, ENGINE_VERSION } = await import('../src/billing/engine.js');
 const { paymentPosition, journalPosition, paymentStatus, buildSnapshot } = await import('../src/billing/settlement.js');
@@ -331,7 +334,12 @@ const issueBody = (over) => ({
   items: ITEMS, specialRates: SPECIAL, sourceHash: 'h', issueDate: '2026-10-05',
   paymentPreference: 'PAYPAL_EUR', expectedPaymentPreference: 'PAYPAL_EUR',
   gateCheck: { caseResults: REFERENCE_CASES.map((c) => ({ id: c.id, matches: true })), siteKeyDuplicates: [], nightsGaps: [] },
-  currentDrifts: [], ...(over || {}),
+  currentDrifts: [],
+  /* frozen beside the snapshot (HS-004): the layout, the recipient and every person by full name, the product words — synthetic */
+  pdfLayout: 'guest-settlement-pdf/1.3', recipient: { Holder_ID: 'INV-T1', Person_ID: 'GT1', name: 'Tess Example' },
+  personNames: { GT1: 'Tess Example', GT2: 'Toni Example', GT9: 'Nine Example' },
+  itemWords: Object.fromEntries(Object.keys(ITEMS).map((id) => [id, { name: 'Product ' + id.toLowerCase(), detail: 'synthetic' }])),
+  ...(over || {}),
 });
 
 test('LEDGER · ISSUE freezes exactly the method whose destination was validated — a method changed in between is refused', async () => {

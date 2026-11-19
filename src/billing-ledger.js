@@ -91,6 +91,7 @@ import {
 } from './billing/settlement.js';
 import { evaluateGate, GATE_NOT_RUN } from './billing/activation-gate.js';
 import { isChannel, PREFERENCE_SOURCE } from './billing/preference.js';
+import { ISSUE_LAYOUTS, ISSUE_RULES } from './billing/pdf-layouts.js';
 
 const SEQ = 'seq:settlement';
 const GATE = 'gate';
@@ -180,11 +181,51 @@ export class BillingLedger {
     return out;
   }
 
+  /* the fields a new issue freezes beside its snapshot (HS-004.6/.7/.9/.16): validated before any write */
+  static frozenIssueFields(body, draft, issueDate, holderId, replacing) {
+    const b = body || {}, clip = (v, n) => clean(v).slice(0, n || 160);
+    const layout = clean(b.pdfLayout);
+    if (!ISSUE_LAYOUTS.includes(layout)) return { error: 'the issue must name a PDF layout that prints the recipient (' + ISSUE_LAYOUTS.join(', ') + ')', reason: 'PDF_LAYOUT_NOT_STATED', status: 400 };
+    /* a corrected version is never dated before 21 November 2026 (Owners, HS-PROMPT-013 Nr. 12) */
+    /* the ledger's own state decides whether this replaces an issued version — never only what the caller sends */
+    const replaces = Number(replacing) || null;
+    const k0 = b.correction && typeof b.correction === 'object' ? b.correction : null;
+    if (replaces && (!k0 || clean(k0.replaces) !== 'V' + replaces)) return { error: 'a new version of an issued statement names the version it replaces (V' + replaces + ')', reason: 'CORRECTION_NOT_STATED' };
+    const isCorrection = !!replaces || !!(k0 && clean(k0.replaces));
+    if (isCorrection && issueDate != null && !(clean(issueDate) >= ISSUE_RULES.floor)) return { error: 'no corrected statement is dated before ' + ISSUE_RULES.floor + ' (UTC)', reason: 'ISSUE_DATE_TOO_EARLY' };
+    const r = b.recipient && typeof b.recipient === 'object' ? b.recipient : null;
+    if (!r || !/^[A-Z][A-Z0-9-]{1,30}$/.test(clean(r.Person_ID)) || !/\S+ \S+/.test(clean(r.name))) return { error: 'the issue names no recipient with a full name', reason: 'RECIPIENT_INCOMPLETE' };
+    if (holderId != null && clean(r.Holder_ID) !== clean(holderId)) return { error: 'the recipient is not this statement\'s holder', reason: 'RECIPIENT_INCOMPLETE' };
+    const persons = [...new Set(((draft && draft.lines) || []).map((l) => clean(l && l.Person_ID)).filter(Boolean))];
+    const names = b.personNames && typeof b.personNames === 'object' ? b.personNames : {};
+    const missing = persons.filter((pid) => !/\S+ \S+/.test(clean(names[pid])));
+    if (missing.length) return { error: 'no full name for ' + missing.join(', ') + ' on this statement', reason: 'PERSON_NAME_MISSING' };
+    const itemIds = [...new Set(((draft && draft.lines) || []).map((l) => clean(l && l.Item_ID)).filter(Boolean))];
+    const words = b.itemWords && typeof b.itemWords === 'object' ? b.itemWords : {};
+    const unnamed = itemIds.filter((id) => !(words[id] && clean(words[id].name)));
+    if (unnamed.length) return { error: 'no product name for ' + unnamed.join(', '), reason: 'ITEM_NAME_MISSING' };
+    const options = Array.isArray(b.paymentOptions) ? b.paymentOptions.map(clean).filter(isChannel) : [];
+    /* the ways to pay include the method frozen with the statement, all in its currency */
+    const method = clean(b.expectedPaymentPreference || b.paymentPreference);
+    if (options.length && method && (!options.includes(method) || options.some((m) => m.slice(-3) !== method.slice(-3)))) return { error: 'the ways to pay do not match the statement\'s method', reason: 'PAYMENT_OPTIONS_MISMATCH' };
+    const fields = {
+      Pdf_Layout: layout,
+      Recipient: { Holder_ID: clip(r.Holder_ID, 40), Person_ID: clean(r.Person_ID), name: clip(r.name, 120) },
+      Person_Names: Object.fromEntries(persons.map((pid) => [pid, clip(names[pid], 120)])),
+      Item_Words: Object.fromEntries(itemIds.map((id) => [id, { name: clip(words[id].name, 160), detail: clip(words[id].detail, 160) }])),
+      Payment_Options: options.length ? [...new Set(options)] : null,
+    };
+    const k = b.correction && typeof b.correction === 'object' ? b.correction : null;
+    if (k && clean(k.replaces)) fields.Correction = { replaces: clip(k.replaces, 8), replacesIssued: clip(k.replacesIssued, 10), reason: clip(k.reason, 200) };
+    return { fields };
+  }
+
   /* a revision as the listing shows it: the state and the figures the snapshot
      already fixed, without carrying the whole snapshot in every response */
   static revisionSummary(rec) {
     if (!rec) return null;
     return {
+      Pdf_Layout: rec.Pdf_Layout || null, recipientName: rec.Recipient ? rec.Recipient.name || null : null, correction: rec.Correction || null,
       Settlement_ID: rec.Settlement_ID, Revision: rec.Revision,
       Revision_State: rec.Revision_State,
       hasSnapshot: !!rec.snapshot,
@@ -663,6 +704,11 @@ export class BillingLedger {
           return json({ ok: false, reasons: ['PAYMENT_PREFERENCE_CHANGED'],
             error: 'the payment method changed to ' + channel + ' after ' + expected + ' was validated; issue again' }, 409);
         }
+        /* THE RECIPIENT AND THE LAYOUT, FROZEN WITH THE REVISION (Owners, 19 Nov 2026 · HS-004.6/.7) — checked here, in the same turn
+           and before anything is written: a new issue names a layout that prints the names, the recipient by full name, and a name
+           for every person on its lines; the product words and the ways to pay are frozen with it */
+        const frozen = BillingLedger.frozenIssueFields(body, draft, clean(body.issueDate) || at.slice(0, 10), holderId, s.issuedRevision);
+        if (frozen.error) return json({ ok: false, review: MANUAL_REVIEW_REQUIRED, reasons: [frozen.reason], error: frozen.error }, frozen.status || 409);
         const snapshot = buildSnapshot({
           settlementId: s.Settlement_ID, revision: n, holderId,
           result: draft, items, specialRates: body.specialRates,
@@ -696,6 +742,7 @@ export class BillingLedger {
           });
         }
         rec.snapshot = snapshot;
+        Object.assign(rec, frozen.fields);
         rec.Revision_State = REVISION_STATE.ISSUED;
         rec.Issue_Date = snapshot.Issue_Date;
         rec.issueDateSource = clean(body.issueDate) ? 'request' : 'ledger clock';

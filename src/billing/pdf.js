@@ -72,11 +72,19 @@
    printed VERBATIM from what the caller read from the authoritative payment
    source (src/billing-routes.js · paymentForPdf); this module still writes no
    payment detail of its own. A PDF already produced keeps its bytes.
+
+   LAYOUT 1.3 (Owners, 19 Nov 2026 — the wedding's own branding). The first page opens on the approved "see you in laos." logo with its
+   red final period: the original image itself (src/billing/pdf-brand.js, built from assets/brand/see-you-in-laos-email.png — never
+   redrawn, recoloured or set in another typeface; the base-14 fonts cannot set its own), laid on a band of its own paper colour across
+   the top of the page, with the couple's names and the wedding beside it. Below the band the statement is exactly 1.2's: not one
+   figure, word, payment detail, code or bank datum changes; further pages keep their "continued" line. A PDF already produced keeps its
+   bytes (its /Producer names its writer).
    ========================================================================== */
 
 import {
   BILLING_CATEGORY, MODIFIER, RATE_BASIS, ACCOUNTING_CURRENCY, formatUSD,
 } from './model.js';
+import { BRAND_LOGO, BRAND_PAPER_RGB } from './pdf-brand.js';
 
 const clean = (v) => String(v == null ? '' : v).trim();
 
@@ -132,7 +140,7 @@ const TRANSLIT = Object.freeze({
   '\u2018': "'", '\u2019': "'", '\u201a': "'", '\u201b': "'",
   '\u201c': '"', '\u201d': '"', '\u201e': '"', '\u2032': "'", '\u2033': '"',
   '\u2026': '...', '\u2022': '\u00b7', '\u00a0': ' ', '\u00ad': '',
-  '\u20ac': 'EUR', '\u00a3': 'GBP', '\u0e3f': 'THB', '\u2122': 'TM', '\u2192': '->',
+  '\u20ac': 'EUR', '\u00a3': 'GBP', '\u0e3f': 'THB', '\u2122': 'TM', '\u2192': 'to',
   '\t': ' ', '\r': ' ', '\n': ' ',
 });
 
@@ -152,6 +160,17 @@ function toLatin1(value) {
 
 /** PDF string syntax. Everything outside printable ASCII becomes an octal escape,
  *  so the finished file is 7-bit clean and cannot be broken by a stray byte. */
+/** Whether every character of a text can be set by this writer (base-14 fonts, WinAnsi) — the issue gate refuses a name that would
+ *  print a "?" (HS-004.6). */
+export function isPrintable(value) {
+  const s = String(value == null ? '' : value);
+  for (const ch of s) {
+    if (TRANSLIT[ch] !== undefined) continue;
+    const c = ch.codePointAt(0);
+    if (!((c >= 32 && c <= 126) || (c >= 0xa1 && c <= 0xff))) return false;
+  }
+  return true;
+}
 function pdfText(value) {
   const s = toLatin1(value);
   let out = '';
@@ -213,7 +232,8 @@ function breakPoint(word, font, size, maxWidth) {
 function wrapText(value, font, size, maxWidth, maxLines) {
   const out = [];
   let cur = '';
-  for (const word of toLatin1(value).split(/\s+/).filter(Boolean)) {
+  /* "Haruthai & Suthep" never breaks across lines (the Owners' rule, everywhere) — one token for the wrap */
+  for (const word of toLatin1(value).replace(/Haruthai & Suthep/g, 'Haruthai\x01&\x01Suthep').split(/\s+/).filter(Boolean).map((w) => w.replace(/\x01/g, ' '))) {
     if (cur && textWidth(cur + ' ' + word, font, size) <= maxWidth) { cur += ' ' + word; continue; }
     if (cur) { out.push(cur); cur = ''; }
     let rest = word;
@@ -256,6 +276,15 @@ function drawText(doc, x, y, value, font, size, grey) {
 
 function drawRight(doc, xRight, y, value, font, size, grey) {
   drawText(doc, xRight - textWidth(value, font, size), y, value, font, size, grey);
+}
+
+/** an image XObject on the current page: registered once per document, named on the pages that show it */
+function placeImage(doc, img, x, y, w, h) {
+  doc.images = doc.images || [];
+  if (!doc.images.includes(img)) doc.images.push(img);
+  const name = 'Im' + (doc.images.indexOf(img) + 1);
+  (doc.pageImages = doc.pageImages || new Map()).set(doc.ops, (doc.pageImages.get(doc.ops) || new Set()).add(name));
+  put(doc, 'q ' + num(w) + ' 0 0 ' + num(h) + ' ' + num(x) + ' ' + num(y) + ' cm /' + name + ' Do Q');
 }
 
 function drawRule(doc, y, x1, x2, weight, grey) {
@@ -343,7 +372,7 @@ const FX_BODY =
   'These rates were frozen when this statement was issued and do not move afterwards. The settlement itself is ' +
   'kept in ' + ACCOUNTING_CURRENCY + '.';
 const OVERRIDE_NOTE = 'This due date was set by hand and replaces the standard schedule.';
-const SPECIAL_RATE_NOTE = 'named special rate';
+const SPECIAL_RATE_NOTE = 'your agreed rate';
 
 const BASIS_LABEL = Object.freeze({
   [RATE_BASIS.PER_PERSON_PER_NIGHT]: 'per person per night',
@@ -360,6 +389,35 @@ const CATEGORY_NOTE = Object.freeze({
 });
 
 /* ------------------------------------------------------------ line reading */
+
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+/** 2026-11-30 → "30 November 2026" (the Snapshot's own date string, never a clock) */
+function longDate(iso) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(clean(iso));
+  return m ? Number(m[3]) + ' ' + MONTHS[Number(m[2]) - 1] + ' ' + m[1] : clean(iso);
+}
+/* LAYOUT 1.3 · the person on a line: the full name frozen at issue, the guest id under it (HS-004.6); a person the record does not
+   name keeps the id alone */
+function personCell(c, line, o) {
+  const id = clean(line.Person_ID);
+  const name = o.persons && Object.prototype.hasOwnProperty.call(o.persons, id) ? clean(o.persons[id]) : '';
+  if (!name) return { name: wrapText(id || 'not stated', REG, 8.5, c.wPerson - 6, ROW_LINES_MAX), id: [] };
+  return { name: wrapText(name, REG, 8.5, c.wPerson - 6, ROW_LINES_MAX), id: id ? wrapText(id, REG, 7, c.wPerson - 6, 2) : [] };
+}
+/* LAYOUT 1.3 · the product as the guest knows it (HS-004.9): its name and its detail (stay and dates) frozen at issue — never the
+   technical key; a product the record does not name says so */
+function itemCell(c, itemId, o, width) {
+  const w = o.items && Object.prototype.hasOwnProperty.call(o.items, clean(itemId)) ? o.items[clean(itemId)] : null;
+  const name = w && clean(w.name) ? clean(w.name) : (o.items ? 'Item ' + clean(itemId) : clean(itemId) || 'not stated');
+  return { name: wrapText(name, REG, 8.5, width, ROW_LINES_MAX), detail: w && clean(w.detail) ? wrapText(clean(w.detail), REG, 7.5, width, ROW_LINES_MAX) : [] };
+}
+/* LAYOUT 1.3 · "1 of 2 nights" (HS-004.12): the wedding stay booked for two nights with the second night hosted — said in the
+   website's own approved words, only where exactly that is the case */
+const SECOND_NIGHT_WORDS = 'first night your cost \u00b7 second night complimentary, hosted by Haruthai & Suthep';
+function secondNightHosted(line) {
+  return clean(line.block) === 'A' && clean(line.Rate_Basis) === RATE_BASIS.PER_PERSON_PER_NIGHT && hasModifier(line, MODIFIER.SECOND_NIGHT_COMPLIMENTARY) &&
+    Number(line.nights) === 2 && Number(line.payableNights) === 1;
+}
 
 function labelFor(map, id, fallback) {
   const key = clean(id);
@@ -448,24 +506,69 @@ function visibleLines(snapshot) {
   return { blockA, blockB };
 }
 
+/* ------------------------------------------------------- the brand band */
+/* LAYOUT 1.3: the first page only. The band runs edge to edge in the logo's own paper colour (its background pixel), so the approved
+ * image sits on it as it is; the couple's names never break. Under the band image lies a plain fill of the same colour (written to four
+ * decimals, which meets the 8-bit pixel exactly), so a viewer that softens the edge of a scaled one-pixel image shows no seam either. */
+const BAND_H = 92, LOGO_H = 31;
+const COUPLE_LINE = 'Haruthai & Suthep';
+const WEDDING_LINE = 'Wedding \u00b7 Vientiane \u00b7 28 February 2027';
+const BAND_GREY = 0.35;     /* a touch darker than SOFT: the wedding line stays legible on the paper colour */
+/* the band itself is an image of one pixel of the logo's paper — the same rendering path as the logo, so no printer or viewer draws a
+   seam between a vector fill and the image laid on it */
+const BAND_PIXEL = Object.freeze({ width: 1, height: 1, colorSpace: 'DeviceRGB', filter: 'RunLengthDecode', data: new Uint8Array([2, ...BRAND_PAPER_RGB, 128]) });
+function brandBand(doc) {
+  const { w, h } = doc.page, c = doc.col;
+  put(doc, 'q ' + BRAND_PAPER_RGB.map((v) => (v / 255).toFixed(4)).join(' ') + ' rg 0 ' + num(h - BAND_H) + ' ' + num(w) + ' ' + num(BAND_H) + ' re f Q');
+  placeImage(doc, BAND_PIXEL, 0, h - BAND_H, w, BAND_H);
+  const logoW = LOGO_H * BRAND_LOGO.width / BRAND_LOGO.height;
+  const mid = h - BAND_H / 2;
+  placeImage(doc, BRAND_LOGO, c.left, mid - LOGO_H / 2, logoW, LOGO_H);
+  drawRight(doc, c.right, mid + 2, COUPLE_LINE, BOLD, 10.5);
+  drawRight(doc, c.right, mid - 11, WEDDING_LINE, REG, 8, BAND_GREY);
+  doc.y = h - BAND_H - 18;
+}
+
 /* ------------------------------------------------------------- the masthead */
 
-function masthead(doc, snapshot) {
-  const c = doc.col;
+function masthead(doc, snapshot, o) {
+  const c = doc.col, opts = o || {};
   doc.y -= 16;
   drawText(doc, c.left, doc.y, TITLE, BOLD, 21);
   doc.y -= 15;
   drawText(doc, c.left, doc.y, doc.meta.idLine, REG, 9.5, SOFT);
+  /* a corrected version names the version it replaces and its own date (HS-004.8) */
+  const k = opts.correction && typeof opts.correction === 'object' ? opts.correction : null;
+  if (k && clean(k.replaces)) {
+    for (const t of wrapText('Corrected version · replaces ' + clean(k.replaces) + (clean(k.replacesIssued) ? ' issued ' + longDate(k.replacesIssued) : '') +
+      (clean(k.reason) ? ' · ' + clean(k.reason) : ''), REG, 8.5, c.width, 3)) { doc.y -= 12; drawText(doc, c.left, doc.y, t, REG, 8.5, SOFT); }
+  }
   doc.y -= 11;
   drawRule(doc, doc.y, c.left, c.right, 0.8, INK);
-  doc.y -= 24;
+  doc.y -= 22;
 
-  /* Issue_Date and Due_Date are Snapshot fields (Freeze · P decided the due
-   * date before this file ever sees it; a hand override travels in the
-   * Snapshot and is stated as such). */
+  /* THE RECIPIENT AND THE HOSTS (HS-004.6): two blocks, clearly apart — the guest the statement is for, by full name, and
+     Haruthai & Suthep, who host the wedding and receive the payment */
+  const r = opts.recipient && typeof opts.recipient === 'object' ? opts.recipient : null;
+  const split = c.left + c.width * 0.62;
+  const top = doc.y;
+  let yl = top, yr = top;
+  drawText(doc, c.left, yl, 'STATEMENT FOR', REG, 7, SOFT); yl -= 15;
+  /* the full name, never shortened: a long one takes a second line */
+  for (const t of wrapText(r && clean(r.name) ? clean(r.name) : 'not stated', BOLD, 12.5, split - c.left - 12)) { drawText(doc, c.left, yl, t, BOLD, 12.5); yl -= 14; }
+  yl += 2;
+  if (r && clean(r.Person_ID)) { drawText(doc, c.left, yl, 'Guest ID ' + clean(r.Person_ID), REG, 7.5, SOFT); yl -= 11; }
+  const others = Object.entries(opts.persons || {}).filter(([pid]) => !r || pid !== clean(r.Person_ID)).map(([pid, n]) => clean(n) + ' (' + pid + ')');
+  if (others.length) for (const t of wrapText('Also on this statement: ' + others.join(', '), REG, 7.5, split - c.left - 12)) { drawText(doc, c.left, yl, t, REG, 7.5, SOFT); yl -= 10; }
+  drawText(doc, split, yr, 'FROM', REG, 7, SOFT); yr -= 15;
+  drawText(doc, split, yr, 'Haruthai & Suthep', BOLD, 10.5); yr -= 12;
+  drawText(doc, split, yr, 'Hosts of the wedding · payee', REG, 7.5, SOFT); yr -= 11;
+  doc.y = Math.min(yl, yr) - 14;
+
+  /* Issue_Date and Due_Date are Snapshot fields (Freeze · P decided the due date before this file ever sees it) */
   const cells = [
-    ['Issued', clean(snapshot.Issue_Date) || 'not stated'],
-    ['Due', clean(snapshot.Due_Date) || 'not stated'],
+    ['Issued', clean(snapshot.Issue_Date) ? longDate(snapshot.Issue_Date) : 'not stated'],
+    ['Due', clean(snapshot.Due_Date) ? longDate(snapshot.Due_Date) : 'not stated'],
     ['Currency', clean(snapshot.Currency) || ACCOUNTING_CURRENCY],
   ];
   const step = c.width / 3;
@@ -476,8 +579,14 @@ function masthead(doc, snapshot) {
   });
   doc.y -= 13 + 20;
 
-  drawParagraph(doc, c.left, TERMS_21_DAYS, c.width, REG, 8.8, 11, INK);
-  if (clean(snapshot.Due_Date_Override)) drawParagraph(doc, c.left, OVERRIDE_NOTE, c.width, REG, 8, 10, SOFT);
+  /* THE DUE DATE IN WORDS (HS-004.11): the date this statement is due — never a fixed number of days that the date contradicts */
+  const total = Number(snapshot.Total_Payable_Cents);
+  if (Number.isFinite(total)) {
+    const words = total > 0 && clean(snapshot.Due_Date) ? 'Please settle this statement by the due date above (' + longDate(snapshot.Due_Date) + ').'
+      : total <= 0 ? 'Nothing is payable on this statement.' : '';
+    if (words) drawParagraph(doc, c.left, words, c.width, REG, 8.8, 11, INK);
+  }
+  if (clean(snapshot.Due_Date_Override) && !k) drawParagraph(doc, c.left, OVERRIDE_NOTE, c.width, REG, 8, 10, SOFT);
   doc.y -= 12;
 }
 
@@ -516,32 +625,38 @@ const HEAD_DEPTH = 16;
 
 /** One Block A row, measured: every cell wrapped in full, and its height on the grid. */
 function blockACells(c, line, o) {
-  const person = wrapText(labelFor(o.persons, line.Person_ID, 'not stated'), REG, 8.5, c.wPerson - 6, ROW_LINES_MAX);
-  const item = wrapText(labelFor(o.items, line.Item_ID, 'not stated'), REG, 8.5, c.wItem - 6, ROW_LINES_MAX);
+  const pc = personCell(c, line, o), ic = itemCell(c, line.Item_ID, o, c.wItem - 6);
+  const second = secondNightHosted(line);
+  const person = pc.name, personId = pc.id, item = ic.name.concat(ic.detail, second ? wrapText(SECOND_NIGHT_WORDS, REG, 7.5, c.wItem - 6, ROW_LINES_MAX) : []), itemDetailFrom = ic.name.length;
   const basis = wrapText(basisOf(line), REG, 8, c.wBasis - 6, ROW_LINES_MAX);
-  const units = wrapText(unitsOf(line), REG, 8, c.wUnits - 6, ROW_LINES_MAX);
+  const units = wrapText(second ? '2 nights' : unitsOf(line), REG, 8, c.wUnits - 6, ROW_LINES_MAX);
   const rate = wrapText(rateOf(line), MONO, 7.5, c.wBasis - 6, ROW_LINES_MAX);
-  const agreed = clean(line.rateSource) === 'SPECIAL_RATE' ? clean(line.specialRateRef) : '';
-  /* the rate was decided by name (Freeze · F), so the line says which
-   * agreement it came from instead of looking like a standard price */
-  const agreedNote = agreed ? wrapText(agreed, REG, 7.5, c.wItem - 6, ROW_LINES_MAX) : [];
+  /* the rate was decided by name (Freeze · F): the basis says "your agreed rate". A 009 row with its own billing category is a booking
+     Haruthai & Suthep paid — its note is the Owners' words to the guest ("Haruthai has already paid this hotel booking for you … please
+     repay …") and is printed. Every other 009 note is the Owners' working text (who, package, rule overrides): it stays in the ledger
+     snapshot and is never printed on the guest's statement (HS-004.14) */
+  const agreed = clean(line.rateSource) === 'SPECIAL_RATE';
+  const paidRef = (clean(line.Category_Override_From) || line.categoryOverride) ? clean(line.specialRateRef) : '';
+  const paidWords = paidRef && paidRef !== 'named special rate' ? paidRef : '';   /* the engine's fallback is never printed as the Owners' words */
+  const agreedNote = paidWords ? wrapText(paidWords, REG, 7.5, c.wItem - 6, ROW_LINES_MAX) : [];
   const named = agreed ? wrapText(SPECIAL_RATE_NOTE, REG, 7.5, c.wBasis - 6) : [];
-  const lines = Math.max(1, person.length, item.length + agreedNote.length, basis.length + rate.length + named.length, units.length);
-  return { person, item, agreedNote, basis, rate, named, units, height: rowHeight(lines) };
+  const lines = Math.max(1, person.length + personId.length, item.length + agreedNote.length, basis.length + rate.length + named.length, units.length);
+  return { person, personId, item, itemDetailFrom, agreedNote, basis, rate, named, units, height: rowHeight(lines) };
 }
 
 /** One Block A row. `keep` is room held below it on the same page, so the
  *  last row never leaves the total to stand alone at the top of the next. */
 function blockARow(doc, line, o, keep) {
   const c = doc.col;
-  const { person, item, agreedNote, basis, rate, named, units, height } = blockACells(c, line, o);
+  const { person, personId, item, itemDetailFrom, agreedNote, basis, rate, named, units, height } = blockACells(c, line, o);
   const amount = amountOf(line);
   ensure(doc, height + (keep || 0), blockAHead);
 
   const top = doc.y;
   const at = (i) => top - i * LEAD;
   person.forEach((t, i) => drawText(doc, c.person, at(i), t, REG, 8.5));
-  item.forEach((t, i) => drawText(doc, c.item, at(i), t, REG, 8.5));
+  personId.forEach((t, i) => drawText(doc, c.person, at(person.length + i), t, REG, 7, SOFT));
+  item.forEach((t, i) => (i < itemDetailFrom ? drawText(doc, c.item, at(i), t, REG, 8.5) : drawText(doc, c.item, at(i), t, REG, 7.5, SOFT)));
   agreedNote.forEach((t, i) => drawText(doc, c.item, at(item.length + i), t, REG, 7.5, SOFT));
   basis.forEach((t, i) => drawText(doc, c.basis, at(i), t, REG, 8, SOFT));
   rate.forEach((t, i) => drawText(doc, c.basis, at(basis.length + i), t, MONO, 7.5, SOFT));
@@ -616,26 +731,28 @@ function blockBHead(doc) {
 }
 
 function blockBCells(c, line, o) {
-  const person = wrapText(labelFor(o.persons, line.Person_ID, 'not stated'), REG, 8.5, c.wPerson - 6, ROW_LINES_MAX);
-  const item = wrapText(labelFor(o.items, line.Item_ID, 'not stated'), REG, 8.5, c.wItem - 6, ROW_LINES_MAX);
+  const pc = personCell(c, line, o), ic = itemCell(c, line.Item_ID, o, c.wItem - 6);
+  const person = pc.name, personId = pc.id, item = ic.name.concat(ic.detail), itemDetailFrom = ic.name.length;
   const note = wrapText(basisOf(line), REG, 8, c.wNote - 6, ROW_LINES_MAX);
-  return { person, item, note, height: rowHeight(Math.max(1, person.length, item.length, note.length)) };
+  return { person, personId, item, itemDetailFrom, note, height: rowHeight(Math.max(1, person.length + personId.length, item.length, note.length)) };
 }
 
 /* a Block B item the Snapshot names without a line of its own */
 function namedCells(c, itemId, o) {
-  const item = wrapText(labelFor(o.items, itemId, 'not stated'), REG, 8.5, c.wItem - 6, ROW_LINES_MAX);
-  return { item, height: rowHeight(Math.max(1, item.length)) };
+  const ic = itemCell(c, itemId, o, c.wItem - 6);
+  const item = ic.name.concat(ic.detail);
+  return { item, itemDetailFrom: ic.name.length, height: rowHeight(Math.max(1, item.length)) };
 }
 
 function blockBRow(doc, line, o) {
   const c = doc.col;
-  const { person, item, note, height } = blockBCells(c, line, o);
+  const { person, personId, item, itemDetailFrom, note, height } = blockBCells(c, line, o);
   ensure(doc, height, blockBHead);
 
   const top = doc.y;
   person.forEach((t, i) => drawText(doc, c.person, top - i * LEAD, t, REG, 8.5));
-  item.forEach((t, i) => drawText(doc, c.item, top - i * LEAD, t, REG, 8.5));
+  personId.forEach((t, i) => drawText(doc, c.person, top - (person.length + i) * LEAD, t, REG, 7, SOFT));
+  item.forEach((t, i) => (i < itemDetailFrom ? drawText(doc, c.item, top - i * LEAD, t, REG, 8.5) : drawText(doc, c.item, top - i * LEAD, t, REG, 7.5, SOFT)));
   note.forEach((t, i) => drawText(doc, c.basis, top - i * LEAD, t, REG, 8, SOFT));
   doc.y = top - height;
 }
@@ -657,9 +774,9 @@ function blockBSection(doc, lines, snapshot, o) {
   } else {
     /* the Snapshot named the items but carries no line for them */
     for (const itemId of informational) {
-      const { item, height } = namedCells(c, itemId, o);
+      const { item, itemDetailFrom, height } = namedCells(c, itemId, o);
       ensure(doc, height, blockBHead);
-      item.forEach((t, i) => drawText(doc, doc.col.item, doc.y - i * LEAD, t, REG, 8.5));
+      item.forEach((t, i) => (i < itemDetailFrom ? drawText(doc, doc.col.item, doc.y - i * LEAD, t, REG, 8.5) : drawText(doc, doc.col.item, doc.y - i * LEAD, t, REG, 7.5, SOFT)));
       doc.y -= height;
     }
   }
@@ -676,16 +793,12 @@ function fxSection(doc, snapshot) {
   if (snapshot.FX_USD_EUR != null && Number.isFinite(eur)) rows.push('1 ' + ACCOUNTING_CURRENCY + ' = ' + eur + ' EUR');
   if (!rows.length) return;
 
-  /* the heading, its rates and its sentence stay together on one page */
-  ensure(doc, 13 + rows.length * 12 + 2 + wrapText(FX_BODY, REG, 8, c.width).length * 10);
-  drawText(doc, c.left, doc.y, FX_HEADING, BOLD, 9);
-  doc.y -= 13;
-  for (const row of rows) {
-    drawText(doc, c.left, doc.y, row, MONO, 8.5);
-    doc.y -= 12;
-  }
-  doc.y -= 2;
-  drawParagraph(doc, c.left, FX_BODY, c.width, REG, 8, 10, SOFT);
+  /* LAYOUT 1.3: the heading and its rates on one line, the sentence beneath — the same facts in less room */
+  ensure(doc, 12 + wrapText(FX_BODY, REG, 7.5, c.width).length * 9.5 + 4);
+  drawText(doc, c.left, doc.y, FX_HEADING + ':', BOLD, 9);
+  drawText(doc, c.left + textWidth(FX_HEADING + ':  ', BOLD, 9), doc.y, rows.join('  \u00b7  '), MONO, 8.5);
+  doc.y -= 12;
+  drawParagraph(doc, c.left, FX_BODY, c.width, REG, 7.5, 9.5, SOFT);
   doc.y -= 12;
 }
 
@@ -715,63 +828,163 @@ const PAY_WORDS = Object.freeze({
 });
 const PAY_PROFILE = 'My Profile always shows this statement\'s current balance and the current way to pay; a payment counts once Guest Relations has verified it.';
 function money2(cur, n) { return cur + ' ' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+/* LAYOUT 1.3 · HOW TO PAY (HS-004.15/.16): one look for every method. The amount due in USD and, for a payment in another currency,
+   the full amount in that currency at this statement's frozen rate; then each way to pay the guest may use — for a German guest the
+   SEPA bank transfer first and PayPal as the alternative, everyone else the method frozen with the statement. Every detail is the
+   caller's (src/billing-routes.js · paymentForPdf: the account, the approved code, the reference); nothing is made up here. */
+const OPTION_WORDS = Object.freeze({
+  SEPA_EUR: { title: 'Bank transfer (SEPA)', payee: 'Account holder', how: 'Please transfer the amount in euros and add the reference to your transfer.' },
+  PAYPAL_EUR: { title: 'PayPal', payee: 'Pay to', how: 'Scan the code with the PayPal app, send the amount in euros and add the reference as a note.' },
+  PROMPTPAY_THB: { title: 'PromptPay', payee: 'Recipient', how: 'Scan the code with your banking app (PromptPay) and send the amount in Thai baht.' },
+});
+function optionRows(o, p) {
+  const rows = [];
+  if (clean(o.recipient)) rows.push([OPTION_WORDS[o.method].payee, clean(o.recipient)]);
+  if (o.method === 'SEPA_EUR') rows.push(['IBAN', clean(o.iban) ? clean(o.iban).replace(/\s+/g, '').replace(/(.{4})/g, '$1 ').trim() : 'shown in My Profile, under Your statement']);
+  if (o.amount && Number.isFinite(Number(o.amount.amount)) && clean(o.amount.currency)) rows.push(['Amount', money2(clean(o.amount.currency), o.amount.amount)]);
+  if (clean(p.reference)) rows.push([o.method === 'SEPA_EUR' ? 'Reference' : 'Reference (note)', clean(p.reference)]);
+  return rows;
+}
 function paymentSection(doc, p) {
   if (!p || typeof p !== 'object') return;
-  const c = doc.col, w = PAY_WORDS[clean(p.method)];
-  const rows = [];
+  const c = doc.col;
   /* a version replaced by a later one, or a statement with nothing payable: no instruction to pay — said in one sentence */
   const only = p.supersededBy ? 'This version was replaced by version ' + clean(p.supersededBy) + '. My Profile shows the current statement and how to pay it.'
     : p.nothingDue ? 'Nothing is payable on this statement.' : null;
-  if (only) {
+  const options = (Array.isArray(p.options) && p.options.length ? p.options : (p.method ? [p] : [])).filter((o) => o && OPTION_WORDS[clean(o.method)])
+    .map((o) => ({ ...o, method: clean(o.method) }));
+  if (p.nothingDue && !p.supersededBy) return;   /* said once, under the dates: "Nothing is payable on this statement." */
+  if (only || !options.length) {
     ensure(doc, 40);
     drawText(doc, c.left, doc.y, PAY_HEADING, BOLD, 9); doc.y -= 13;
-    drawParagraph(doc, c.left, only, c.width, REG, 8.5, 11, INK); doc.y -= 12;
+    drawParagraph(doc, c.left, only || 'Guest Relations will tell you how to pay this statement.', c.width, REG, 8.5, 11, INK); doc.y -= 12;
     return;
   }
-  if (!w) {
-    ensure(doc, 40);
-    drawText(doc, c.left, doc.y, PAY_HEADING, BOLD, 9); doc.y -= 13;
-    drawParagraph(doc, c.left, 'Guest Relations will tell you how to pay this statement.', c.width, REG, 8.5, 11, INK); doc.y -= 12;
-    return;
-  }
-  /* the method frozen with this revision, the statement's own amount at its frozen rate — a frozen document never states a balance */
-  rows.push(['Payment method', w.method + ' (as issued)']);
-  if (p.amount && Number.isFinite(Number(p.amount.amount)) && clean(p.amount.currency)) rows.push(['Statement amount', money2(clean(p.amount.currency), p.amount.amount) + (p.totalUsd != null ? '  (' + money2(ACCOUNTING_CURRENCY, p.totalUsd) + ' at this statement\'s frozen rate)' : '')]);
-  if (clean(p.dueDate)) rows.push(['Pay by', clean(p.dueDate)]);
-  if (clean(p.recipient)) rows.push([w.payee, clean(p.recipient)]);
-  if (clean(p.method) === 'SEPA_EUR') rows.push(['IBAN', clean(p.iban) ? clean(p.iban).replace(/\s+/g, '').replace(/(.{4})/g, '$1 ').trim() : 'shown in My Profile, under Your statement']);
-  if (clean(p.reference)) rows.push(['Reference no.', clean(p.reference)]);
-  const img = p.qr && p.qr.width > 0 && p.qr.height > 0 && p.qr.data ? p.qr : null;
-  const wantsQr = clean(p.method) === 'PAYPAL_EUR' || clean(p.method) === 'PROMPTPAY_THB';
-  /* a size a phone reads from the screen and from an A4 print: the PayPal code alone, the PromptPay slip with its code */
-  let qrW = clean(p.method) === 'PROMPTPAY_THB' ? 175 : 140, qrH = img ? Math.round(qrW * img.height / img.width) : 0;
-  /* never taller than a page can hold: a tall image is scaled down as a whole, never cut */
-  const maxH = Math.max(120, doc.page.h - 260);
-  if (qrH > maxH) { qrW = Math.round(qrW * maxH / qrH); qrH = maxH; }
-  const textH = 13 + rows.length * 12 + 4 + wrapText(w.how, REG, 8.5, c.width).length * 11 + 6 + wrapText(PAY_PROFILE, REG, 8, c.width).length * 10;
-  ensure(doc, textH + (img ? qrH + 10 : wantsQr ? 14 : 0) + 8);
+  /* the amount due: USD, and every other currency the options settle in, at this statement's frozen rate */
+  const extra = [...new Map(options.filter((o) => o.amount && clean(o.amount.currency) && clean(o.amount.currency) !== ACCOUNTING_CURRENCY)
+    .map((o) => [clean(o.amount.currency), o.amount])).values()];
+  const due = (p.totalUsd != null ? money2(ACCOUNTING_CURRENCY, p.totalUsd) : '') + extra.map((a) => ' · ' + money2(clean(a.currency), a.amount) +
+    (clean(a.rate) ? ' (' + clean(a.rate) + ')' : ' at this statement\'s frozen rate')).join('');
+  /* each option's height, so the heading never stands without its first option (and that option's code) */
+  const sized = options.map((o) => {
+    const w = OPTION_WORDS[o.method], rows = optionRows(o, p);
+    const img = o.qr && o.qr.width > 0 && o.qr.height > 0 && o.qr.data ? o.qr : null;
+    let qrW = o.method === 'PROMPTPAY_THB' ? 140 : 125, qrH = img ? Math.round(qrW * img.height / img.width) : 0;
+    const maxH = Math.max(120, doc.page.h - 300);
+    if (qrH > maxH) { qrW = Math.round(qrW * maxH / qrH); qrH = maxH; }
+    const howLines = wrapText(w.how, REG, 8.3, c.width - 10);
+    const height = 14 + rows.length * 12 + howLines.length * 10.5 + 6 + (img ? qrH + 10 : o.method !== 'SEPA_EUR' ? 14 : 0) + 10;
+    return { o, w, rows, img, qrW, qrH, howLines, height };
+  });
+  let headH = 14 + (due ? 12 : 0) + (clean(p.dueDate) ? 12 : 0) + 6;
+  const gap = 16, codeCol = 96;
+  /* the bank transfer's column is the wider one: its IBAN is never broken */
+  const colWs = [(c.width - codeCol - 2 * gap) * 0.6, (c.width - codeCol - 2 * gap) * 0.4];
+  const col = sized.length === 2 ? sized.map(({ o, w, rows, img, qrW, qrH }, n) => {
+    const colW = colWs[n], lab = Math.ceil(Math.max(...rows.map(([k]) => textWidth(k, REG, 8)))) + 7;
+    const how = wrapText(w.how, REG, 8, colW - 4);
+    const vals = rows.map(([k, v]) => [k, k === 'IBAN' ? [v] : wrapText(v, /^Reference/.test(k) ? MONO : REG, 8.3, colW - lab, 3)]);
+    let ibanSize = 8.3; const iban = rows.find(([k]) => k === 'IBAN');
+    while (iban && ibanSize > 6.5 && textWidth(iban[1], MONO, ibanSize) > colW - lab) ibanSize -= 0.1;
+    const textH = 14 + vals.reduce((t, [, l]) => t + l.length * 11 + 1, 0) + how.length * 10 + 6;
+    return { o, w, vals, how, img, qrW, qrH, lab, ibanSize, h: Math.max(textH, img ? 96 : 0) };
+  }) : null;
+  /* ONE way to pay: its rows and words on the left, its code on the right (HS-004.13) — the same facts in less height */
+  const one = !col && sized.length === 1 ? (() => {
+    const k = sized[0], box = k.o.method === 'PROMPTPAY_THB' ? 128 : 100;
+    const f = k.img ? Math.min(box / k.img.width, (k.o.method === 'PROMPTPAY_THB' ? 190 : 100) / k.img.height) : 0;
+    const codeW = k.img ? Math.round(k.img.width * f) : 0, codeH = k.img ? Math.round(k.img.height * f) : 0;
+    const textW = c.width - (codeW ? codeW + 24 : 0);
+    const how = wrapText(k.w.how, REG, 8.3, textW - 10);
+    const vals = k.rows.map(([kk, v]) => [kk, wrapText(v, /^(IBAN|Reference)/.test(kk) ? MONO : REG, 8.5, textW - 120, 3)]);
+    const textH = 13 + vals.reduce((t, [, l]) => t + l.length * 12, 0) + how.length * 10.5 + 4 + (!k.img && k.o.method !== 'SEPA_EUR' ? 14 : 0);
+    return { ...k, codeW, codeH, textW, how, vals, textH, h: Math.max(textH, codeH) + 10 };
+  })() : null;
+  const firstH = col ? Math.max(col[0].h, col[1].h) + 8 + wrapText(PAY_PROFILE, REG, 8, c.width).length * 10 : one ? one.h + wrapText(PAY_PROFILE, REG, 8, c.width).length * 10 : sized[0].height;
+  /* ONE way to pay: its code stands at the right beside the whole section — the heading, the amount due and the way to pay run down
+     the left — so a tall payment code (the PromptPay slip) does not push the section onto a page of its own (HS-004.13) */
+  const profileH = wrapText(PAY_PROFILE, REG, 8, c.width).length * 10;
+  /* the amount due is never shortened: beside a code it may take a second line */
+  const leftW = one ? one.textW : c.width;
+  const dueLines = due ? wrapText(due, BOLD, 8.5, leftW - 110) : [];
+  headH += Math.max(0, dueLines.length - 1) * 12;
+  ensure(doc, one ? Math.max(headH + one.textH, one.codeH) + 10 + profileH : headH + firstH);
+  const sectionTop = doc.y;
   drawText(doc, c.left, doc.y, PAY_HEADING, BOLD, 9);
-  doc.y -= 13;
-  for (const [k, v] of rows) {
-    drawText(doc, c.left, doc.y, k, REG, 8.5, SOFT);
-    drawText(doc, c.left + 110, doc.y, fitText(v, k === 'IBAN' || k === 'Reference no.' ? MONO : REG, 8.5, c.width - 110), k === 'IBAN' || k === 'Reference no.' ? MONO : REG, 8.5);
-    doc.y -= 12;
-  }
-  doc.y -= 4;
-  drawParagraph(doc, c.left, w.how, c.width, REG, 8.5, 11, INK);
+  doc.y -= 14;
+  if (dueLines.length) { drawText(doc, c.left, doc.y, 'Amount due', REG, 8.5, SOFT); dueLines.forEach((t) => { drawText(doc, c.left + 110, doc.y, t, BOLD, 8.5); doc.y -= 12; }); }
+  if (clean(p.dueDate)) { drawText(doc, c.left, doc.y, 'Pay by', REG, 8.5, SOFT); drawText(doc, c.left + 110, doc.y, longDate(p.dueDate), REG, 8.5); doc.y -= 12; }
   doc.y -= 6;
-  if (img) {
-    /* the approved payment code, as the statement page shows it — the caller's image, never one made here */
-    doc.images = doc.images || [];
-    if (!doc.images.includes(img)) doc.images.push(img);
-    const name = 'Im' + (doc.images.indexOf(img) + 1);
-    (doc.pageImages = doc.pageImages || new Map()).set(doc.ops, (doc.pageImages.get(doc.ops) || new Set()).add(name));
-    put(doc, 'q ' + num(qrW) + ' 0 0 ' + num(qrH) + ' ' + num(c.left) + ' ' + num(doc.y - qrH) + ' cm /' + name + ' Do Q');
-    doc.y -= qrH + 10;
-  } else if (wantsQr) {
-    drawText(doc, c.left, doc.y, 'The payment code is shown in My Profile, under Your statement.', REG, 8.5, SOFT);
-    doc.y -= 14;
+  /* TWO WAYS TO PAY side by side (HS-004.13/.16): the bank transfer on the left, PayPal with its code on the right — one look, half the
+     height; each column keeps its own rows, words and code */
+  if (one) {
+    const top = doc.y;
+    let y = top;
+    drawText(doc, c.left, y, one.w.title, BOLD, 8.8); y -= 13;
+    for (const [label, lines] of one.vals) {
+      const mono = /^(IBAN|Reference)/.test(label);
+      drawText(doc, c.left + 10, y, label, REG, 8.3, SOFT);
+      lines.forEach((t, i) => drawText(doc, c.left + 120, y - i * 12, t, mono ? MONO : REG, 8.5));
+      y -= lines.length * 12;
+    }
+    for (const t of one.how) { drawText(doc, c.left + 10, y, t, REG, 8.3, INK); y -= 10.5; }
+    if (!one.img && one.o.method !== 'SEPA_EUR') { y -= 4; drawText(doc, c.left + 10, y, 'The payment code is shown in My Profile, under Your statement.', REG, 8.3, SOFT); y -= 10; }
+    if (one.img) placeImage(doc, one.img, c.right - one.codeW, sectionTop + 8 - one.codeH, one.codeW, one.codeH);
+    doc.y = Math.min(y, sectionTop + 8 - one.codeH) - 10;
+    drawParagraph(doc, c.left, PAY_PROFILE, c.width, REG, 8, 10, SOFT);
+    doc.y -= 12;
+    return;
   }
+  if (col) {
+    const top = doc.y;
+    col.forEach((k, n) => {
+      const x = c.left + (n === 0 ? 0 : colWs[0] + gap);
+      let y = top;
+      drawText(doc, x, y, (n === 0 ? 'Option 1 \u00b7 ' : 'Option 2 \u00b7 ') + k.w.title + (n > 0 ? ' (alternative)' : ''), BOLD, 8.8);
+      y -= 14;
+      for (const [label, lines] of k.vals) {
+        const mono = /^(IBAN|Reference)/.test(label);
+        drawText(doc, x, y, label, REG, 8, SOFT);
+        lines.forEach((t, i) => drawText(doc, x + k.lab, y - i * 11, t, mono ? MONO : REG, label === 'IBAN' ? k.ibanSize : 8.3));
+        y -= lines.length * 11 + 1;
+      }
+      for (const t of k.how) { drawText(doc, x, y, t, REG, 8, INK); y -= 10; }
+      y -= 6;
+      /* the code in its own column at the right edge, level with its option */
+      if (k.img) { const f = Math.min(92 / k.img.height, 92 / k.img.width), h = Math.round(k.img.height * f), w2 = Math.round(k.img.width * f);
+        placeImage(doc, k.img, c.right - w2, top + 4 - h, w2, h); y = Math.min(y, top + 4 - h - 6); }
+      k.end = y;
+    });
+    doc.y = Math.min(col[0].end, col[1].end) - 6;
+    drawParagraph(doc, c.left, PAY_PROFILE, c.width, REG, 8, 10, SOFT);
+    doc.y -= 12;
+    return;
+  }
+  sized.forEach(({ o, w, rows, img, qrW, qrH, howLines, height }, n) => {
+    const wantsQr = o.method !== 'SEPA_EUR';
+    /* an option and its code always stay on one page */
+    ensure(doc, height);
+    const label = (options.length > 1 ? (n === 0 ? 'Option 1 · ' : 'Option ' + (n + 1) + ' · ') : '') + w.title + (options.length > 1 && n > 0 ? ' (alternative)' : '');
+    drawText(doc, c.left, doc.y, label, BOLD, 8.8);
+    doc.y -= 13;
+    for (const [k, v] of rows) {
+      const mono = k === 'IBAN' || /^Reference/.test(k);
+      drawText(doc, c.left + 10, doc.y, k, REG, 8.3, SOFT);
+      drawText(doc, c.left + 120, doc.y, fitText(v, mono ? MONO : REG, 8.5, c.width - 120), mono ? MONO : REG, 8.5);
+      doc.y -= 12;
+    }
+    for (const t of howLines) { drawText(doc, c.left + 10, doc.y, t, REG, 8.3, INK); doc.y -= 10.5; }
+    doc.y -= 4;
+    if (img) {
+      /* the approved payment code, as the statement page shows it — the caller's image, never one made here */
+      placeImage(doc, img, c.left + 10, doc.y - qrH, qrW, qrH);
+      doc.y -= qrH + 10;
+    } else if (wantsQr) {
+      drawText(doc, c.left + 10, doc.y, 'The payment code is shown in My Profile, under Your statement.', REG, 8.3, SOFT);
+      doc.y -= 14;
+    }
+    doc.y -= 6;
+  });
   drawParagraph(doc, c.left, PAY_PROFILE, c.width, REG, 8, 10, SOFT);
   doc.y -= 12;
 }
@@ -806,14 +1019,13 @@ function footers(doc) {
     drawRule(doc, 78, c.left, c.right, 0.4, HAIR);
     drawText(doc, c.left, 68, fitText(doc.meta.documentLine, REG, 7, c.width - 60), REG, 7, SOFT);
     drawRight(doc, c.right, 68, 'page ' + (i + 1) + ' of ' + total, REG, 7, SOFT);
-    const provenance = 'Engine ' + doc.meta.engineVersion + ' \u00b7 Source hash ' + doc.meta.sourceHash;
-    drawText(doc, c.left, 57, fitText(provenance, MONO, 6.5, c.width), MONO, 6.5, SOFT);
+    /* the engine version and the source hash are audit facts, not the guest's (HS-004.14): the file's metadata carries them */
   }
 }
 
 /* ------------------------------------------------------------ the PDF file */
 
-export const PDF_WRITER_VERSION = 'guest-settlement-pdf/1.2';
+export const PDF_WRITER_VERSION = 'guest-settlement-pdf/1.3';
 
 /* FNV-1a over the document body, four times from four offsets, which gives the
  * 32 hex digits the trailer /ID wants. It is a fingerprint of this document
@@ -843,6 +1055,7 @@ function infoObject(meta) {
     '/Subject ' + pdfText(TITLE),
     '/Creator ' + pdfText(meta.engineVersion),
     '/Producer ' + pdfText(PDF_WRITER_VERSION),
+    '/Keywords ' + pdfText('engine ' + meta.engineVersion + ' \u00b7 source hash ' + meta.sourceHash),
   ];
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(meta.issueDate);
   if (m) parts.push('/CreationDate ' + pdfText('D:' + m[1] + m[2] + m[3] + '000000Z'));
@@ -959,7 +1172,8 @@ export function renderSettlementPdf(snapshot, opts) {
   const totalMissing = !Number.isFinite(snapshot.Total_Payable_Cents);
   const amountMissing = blockA.some((l) => amountOf(l) == null);
 
-  masthead(doc, snapshot);
+  brandBand(doc);
+  masthead(doc, snapshot, o);
   blockASection(doc, blockA, snapshot, o);
   if (totalMissing || amountMissing) reviewSection(doc);
   blockBSection(doc, blockB, snapshot, o);

@@ -43,6 +43,9 @@ export async function resolve(specifier, context, next) {
 }`));
 
 const { handleBilling } = await import('../src/billing-routes.js');
+/* the synthetic statements of this suite are dated by the test clock: the Owners' floor (no statement before 21 Nov 2026) is lowered
+   here only — test/statements-13.test.mjs proves the floor itself */
+Object.assign((await import('../src/billing/pdf-layouts.js')).ISSUE_RULES, { floor: '2000-01-01', today: () => '2000-01-01' });
 const { BillingLedger } = await import('../src/billing-ledger.js');
 const { PAYMENT_JOURNAL_COLUMNS } = await import('../src/billing/source.js');
 const { composeStatementMail } = await import('../src/mail-templates.js');
@@ -172,6 +175,8 @@ function world({ store, journal, drafts } = {}) {
       'contact:INV-T1': { email: 'Tess.Example@Example.invalid', firstName: 'Tess' },
     }),
     DOCS: docs,
+    /* the SEPA account a German guest's statement offers first (HS-004.16) — synthetic */
+    BILLING_SEPA_IBAN: 'XX00TEST0000000000000001',
   };
   const draftCalls = [];
   if (drafts) env.DRAFTS = draftsActor(drafts, draftCalls);
@@ -410,7 +415,7 @@ test('ADMIN · the statement e-mail: the issued figures, My Profile → Your sta
     dueDate: '2026-10-28', inCurrency: { currency: 'EUR', amount: 1098.71 }, method: 'PayPal (EUR)', profileUrl: 'https://stage.invalid/profile#statement' });
   assert.match(m.subject, /S-TEST-0001/);
   for (const t of [m.text, m.html]) {
-    assert.match(t, /S-TEST-0001/); assert.match(t, /USD 1,234\.50/); assert.match(t, /EUR 1,098\.71/); assert.match(t, /21 days after it is issued/);
+    assert.match(t, /S-TEST-0001/); assert.match(t, /USD 1,234\.50/); assert.match(t, /EUR 1,098\.71/); assert.match(t, /Please settle it by the due date above\./); assert.doesNotMatch(t, /21 days/);
     assert.doesNotMatch(t, /IBAN|bearer|invitation code is|\/api\//i);
   }
   assert.match(m.text, /My Profile → Your statement: https:\/\/stage\.invalid\/profile#statement/);
@@ -569,9 +574,9 @@ test('BOOKED VALUE · a changed selection is a change even at the same price; th
 });
 
 test('BOOKED VALUE · a line settled with the provider (Block B) is listed once, in its own table — never among the payable lines', async () => {
-  const W = world({ store: {}, drafts: { 'INV-T1': savedTrip([{ id: 'train', qty: 1 }, { id: 'selfstay', qty: 1 }]) } });
+  const W = world({ store: {}, drafts: { 'INV-T1': savedTrip([{ id: 'train', qty: 1 }, { id: 'mu9646', qty: 1 }]) } });
   W.workbook['002_Accommodation_Details'] = book()['002_Accommodation_Details'].map((row, i) => (i === 0 ? row : [...row, ({ Item_ID: 'T-SELF', Billing_Category: 'GUEST_SELF_PAYMENT', Rate_Status: 'ACTIVE',
-    Rate_Basis: 'PER_PERSON_PER_NIGHT', Currency: 'USD', Site_Product_Key: 'selfstay', 'Number of Nights': 2 })[row[0]] ?? '']));
+    Rate_Basis: 'PER_PERSON_PER_NIGHT', Currency: 'USD', Site_Product_Key: 'mu9646', 'Number of Nights': 2 })[row[0]] ?? '']));
   const h = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
   assert.deepEqual(h.j.booked.items.map((l) => l.Item_ID), ['T-TRAIN']);
   assert.deepEqual(h.j.booked.blockB.map((l) => l.Item_ID), ['T-SELF']);
@@ -582,12 +587,12 @@ test('BOOKED VALUE · a line settled with the provider (Block B) is listed once,
    A stay the guest would pay the hotel for, which Haruthai booked and paid for them: a 009 row naming the person with
    Billing_Category GUEST_SETTLEMENT_REQUIRED makes it payable to H&S at the price paid (engine 2.3). */
 test('PAID BY H&S · the hotel is payable in the admin preview; PRICE REQUIRED blocks the issue; with the price paid it is in the total, the issued statement, the PDF and the outstanding amount', async () => {
-  const sent = { ...SENT, registration: { guestId: 'GT1', selections: [...SENT.registration.selections, { id: 'selfstay', qty: 1 }] } };
+  const sent = { ...SENT, registration: { guestId: 'GT1', selections: [...SENT.registration.selections, { id: 'mu9646', qty: 1 }] } };
   const W = world({ store: { 'reg:INV-T1': sent, 'conf:INV-T1': { confirmedAt: '2026-10-02T09:00:00Z', version: 1 },
     'contact:INV-T1': { email: 'Tess.Example@Example.invalid', firstName: 'Tess' } } });
   await approveGate(W.st);
   W.workbook['002_Accommodation_Details'] = book()['002_Accommodation_Details'].map((row, i) => (i === 0 ? row : [...row, ({ Item_ID: 'T-SELF', Billing_Category: 'GUEST_SELF_PAYMENT', Rate_Status: 'ACTIVE',
-    Rate_Basis: 'PER_PERSON_PER_NIGHT', Standard_Rate: '18.16666667', Currency: 'USD', Site_Product_Key: 'selfstay', 'Number of Nights': 2 })[row[0]] ?? '']));
+    Rate_Basis: 'PER_PERSON_PER_NIGHT', Standard_Rate: '18.16666667', Currency: 'USD', Site_Product_Key: 'mu9646', 'Number of Nights': 2 })[row[0]] ?? '']));
   const rates = (price) => [['Holder_ID', 'Person_ID', 'Item_ID', 'Rate_Per_Person_Night', 'Nights_Rule', 'Rate_Status', 'Effective_From', 'Effective_To', 'Approved_By', 'Note', 'Billing_Category'],
     ['', 'GT9', 'T-STAY', 75, 'ALL', 'ACTIVE', '', '', 'Suthep', 'synthetic', ''],
     ['INV-T1', 'GT1', 'T-SELF', price, 'ALL', 'ACTIVE', '', '', 'Haruthai & Suthep', 'Booked and paid by Haruthai · reimbursed to Haruthai & Suthep', 'GUEST_SETTLEMENT_REQUIRED']];
@@ -624,7 +629,7 @@ test('PAID BY H&S · the hotel is payable in the admin preview; PRICE REQUIRED b
   /* AS SENT, AND TODAY (8 Oct 2026): the guest sent this stay as their own; it is now paid by H&S — the change is shown beside
      Issue (and in the holder view) and issued only with the digest of exactly this comparison */
   assert.equal(priced.j.submission.priceDifference.material, true);
-  const shown = priced.j.submission.priceDifference.lines.find((l) => l.key === 'selfstay');
+  const shown = priced.j.submission.priceDifference.lines.find((l) => l.key === 'mu9646');
   assert.deepEqual([shown.outcome, shown.sentPaidByHS, shown.enginePaidByHS, shown.engine], ['PAYER_CHANGED', false, true, 4000]);
   const unseen = await hit(W, GROOM, 'issue', { holderId: 'INV-T1', expectedProposal: priced.j.preview.proposalHash });
   assert.equal(unseen.status, 409); assert.deepEqual(unseen.j.reasons, ['PRICE_DIFFERENCE']);
@@ -642,7 +647,9 @@ test('PAID BY H&S · the hotel is payable in the admin preview; PRICE REQUIRED b
   assert.equal(after.j.payment.soll, 430); assert.equal(after.j.payment.balance, 430, 'outstanding until paid');
   const pdf = await hit(W, GROOM, 'pdf?holder=INV-T1&rev=1');
   const text = Buffer.from(pdf.bytes).toString('latin1');
-  for (const s of ['(T-SELF)', '(USD 40.00)', '(USD 430.00)', '(named special rate)']) assert.ok(text.includes(s), s + ' in the PDF');
+  /* layout 1.3: the product by its website name (HS-004.9), never its key; the agreed rate in the guest's words */
+  for (const s of ['(MU9646 \\267 Vientiane to Kunming)', '(USD 40.00)', '(USD 430.00)', '(your agreed rate)']) assert.ok(text.includes(s), s + ' in the PDF');
+  assert.ok(!text.includes('(T-SELF)'), 'never the product key');
   assert.ok(/Booked and paid by Haruthai/.test(text), 'the PDF says why');
   assert.ok(!text.includes('(Your own arrangements)'), 'no own-arrangements section: the hotel is payable');
   assert.equal(W.sent.length, 0, 'nothing e-mailed');
@@ -654,30 +661,30 @@ test('PAID BY H&S · at sending, the server marks the paid stay and gives it the
   const { markPaidByHS } = await import('../src/worker.js');
   const W = world();
   W.workbook['002_Accommodation_Details'] = book()['002_Accommodation_Details'].map((row, i) => (i === 0 ? row : [...row, ({ Item_ID: 'T-SELF', Billing_Category: 'GUEST_SELF_PAYMENT', Rate_Status: 'ACTIVE',
-    Rate_Basis: 'PER_PERSON_PER_NIGHT', Standard_Rate: '18.16666667', Currency: 'USD', Site_Product_Key: 'selfstay', 'Number of Nights': 3 })[row[0]] ?? '']));
+    Rate_Basis: 'PER_PERSON_PER_NIGHT', Standard_Rate: '18.16666667', Currency: 'USD', Site_Product_Key: 'mu9646', 'Number of Nights': 3 })[row[0]] ?? '']));
   W.workbook['009_Special_Rates'] = [['Holder_ID', 'Person_ID', 'Item_ID', 'Rate_Per_Person_Night', 'Nights_Rule', 'Rate_Status', 'Effective_From', 'Effective_To', 'Approved_By', 'Note', 'Billing_Category'],
     ['', 'GT9', 'T-STAY', 75, 'ALL', 'ACTIVE', '', '', 'Suthep', 'synthetic', ''],
     ['INV-T1', 'GT1', 'T-SELF', '36.33333333', '3', 'ACTIVE', '', '', 'Haruthai & Suthep', 'Haruthai has already paid this hotel booking for you.', 'GUEST_SETTLEMENT_REQUIRED']];
   const was = globalThis.fetch; globalThis.fetch = sheetsFetch(W.workbook, W.log);
   try {
-    const stay = { id: 'selfstay', stay: 'x', qty: 1, price: 99, rate: 33, pay: 3 };
+    const stay = { id: 'mu9646', stay: 'x', qty: 1, price: 99, rate: 33, pay: 3 };
     const paid = await paidByHSOf(W.env, 'INV-T1', 'GT1', [stay, { id: 'train', qty: 1 }]);
-    assert.deepEqual([...paid.entries()], [['selfstay', { total: 109 }]], 'the hotel, at the engine\'s USD 109.00 (36.33333333 × 3) — the train is no such stay');
+    assert.deepEqual([...paid.entries()], [['mu9646', { total: 109 }]], 'the hotel, at the engine\'s USD 109.00 (36.33333333 × 3) — the train is no such stay');
     assert.equal((await paidByHSOf(W.env, 'INV-T2', 'GT2', [stay])).size, 0, 'the party mate the row does not name');
-    const out = await markPaidByHS(W.env, { invitationId: 'INV-T1', guestId: 'GT1' }, [{ ...stay, paidByHS: true }, { id: 'train', qty: 1, paidByHS: true }], new Set(['selfstay', 'train']));
+    const out = await markPaidByHS(W.env, { invitationId: 'INV-T1', guestId: 'GT1' }, [{ ...stay, paidByHS: true }, { id: 'train', qty: 1, paidByHS: true }], new Set(['mu9646', 'train']));
     assert.deepEqual([out[0].paidByHS, out[0].price, out[1].paidByHS], [true, 109, undefined], 'the device\'s mark on the train is dropped');
     /* a trip whose device names no paid stay is never asked about: nothing read, every line as sent (a device mark dropped) */
     const reads = W.log.length;
     const none = await markPaidByHS(W.env, { invitationId: 'INV-T1', guestId: 'GT1' }, [{ ...stay, paidByHS: true }], new Set());
     assert.deepEqual([none[0].paidByHS, none[0].price, W.log.length], [undefined, 99, reads]);
-    const other = await markPaidByHS(W.env, { invitationId: 'INV-T2', guestId: 'GT2' }, [{ ...stay, paidByHS: true }], new Set(['selfstay']));
+    const other = await markPaidByHS(W.env, { invitationId: 'INV-T2', guestId: 'GT2' }, [{ ...stay, paidByHS: true }], new Set(['mu9646']));
     assert.equal(other[0].paidByHS, undefined, 'claimed by the device, not by the server: no mark');
   } finally { globalThis.fetch = was; }
   /* Google unreachable: the sending goes on; a stay the device called prepaid says neither */
   clearCatalogueCache();
   globalThis.fetch = async () => { throw new Error('offline'); };
   try {
-    const out = await markPaidByHS(W.env, { invitationId: 'INV-T1', guestId: 'GT1' }, [{ id: 'selfstay', stay: 'x', qty: 1 }, { id: 'ljg', stay: 'y', room: 'z', qty: 1 }], new Set(['selfstay']));
+    const out = await markPaidByHS(W.env, { invitationId: 'INV-T1', guestId: 'GT1' }, [{ id: 'mu9646', stay: 'x', qty: 1 }, { id: 'ljg', stay: 'y', room: 'z', qty: 1 }], new Set(['mu9646']));
     assert.deepEqual([out[0].prepaidUnverified, out[0].paidByHS, out[1].prepaidUnverified], [true, undefined, undefined]);
   } finally { globalThis.fetch = was; }
   /* Google hangs: the sending waits no longer than the limit, and says neither */
@@ -685,14 +692,14 @@ test('PAID BY H&S · at sending, the server marks the paid stay and gives it the
   globalThis.fetch = () => new Promise(() => {});
   try {
     const t0 = Date.now();
-    const out = await markPaidByHS(W.env, { invitationId: 'INV-T1', guestId: 'GT1' }, [{ id: 'selfstay', stay: 'x', qty: 1 }], new Set(['selfstay']), 50);
+    const out = await markPaidByHS(W.env, { invitationId: 'INV-T1', guestId: 'GT1' }, [{ id: 'mu9646', stay: 'x', qty: 1 }], new Set(['mu9646']), 50);
     assert.ok(Date.now() - t0 < 1000); assert.equal(out[0].prepaidUnverified, true);
   } finally { globalThis.fetch = was; clearCatalogueCache(); }
   /* a stay whose price paid is still asked for: marked, with no amount (the e-mail says "price to follow") */
   W.workbook['009_Special_Rates'][2][3] = '';
   globalThis.fetch = sheetsFetch(W.workbook, W.log);
   try {
-    const out = await markPaidByHS(W.env, { invitationId: 'INV-T1', guestId: 'GT1' }, [{ id: 'selfstay', stay: 'x', qty: 1, price: 54.5 }], new Set(['selfstay']));
+    const out = await markPaidByHS(W.env, { invitationId: 'INV-T1', guestId: 'GT1' }, [{ id: 'mu9646', stay: 'x', qty: 1, price: 54.5 }], new Set(['mu9646']));
     assert.deepEqual([out[0].paidByHS, out[0].price], [true, null]);
   } finally { globalThis.fetch = was; }
 });
@@ -1328,9 +1335,10 @@ test('PDF 1.2 · the first render carries the payment section from the authorita
   const a = await hit(W, GROOM, 'pdf?holder=INV-T1&rev=1'), g = await hit(W, GUEST, 'pdf?rev=1');
   assert.equal(a.status, 200); assert.deepEqual(g.bytes, a.bytes, 'the guest and the Owners: the very same file');
   const t = Buffer.from(a.bytes).toString('latin1');
-  assert.match(t, /\/Producer \(guest-settlement-pdf\/1\.2\)/);
-  for (const s of ['(How to pay)', '(PayPal, in euros \\(EUR\\) \\(as issued\\))', '(Recipient)', '(Suthep)', '(Reference no.)', '(' + sid + ')', '(Statement amount)', '(EUR 347.10  \\(USD 390.00 at this statement\'s frozen rate\\))']) assert.ok(t.includes(s), s);
-  assert.match(t, /\/Subtype \/Image \/Width 2 \/Height 2 \/ColorSpace \/DeviceRGB/); assert.match(t, /\/Im1 Do Q/);
+  assert.match(t, /\/Producer \(guest-settlement-pdf\/1\.3\)/);
+  /* LAYOUT 1.3 · the payment section: the amount due in USD and EUR at the frozen rate, the way(s) to pay with payee, amount and reference */
+  for (const s of ['(How to pay)', '(Amount due)', '(USD 390.00 \\267 EUR 347.10 \\(1 USD = 0.89 EUR\\))', '(Suthep)', '(' + sid + ')', '(EUR 347.10)']) assert.ok(t.includes(s), s);
+  assert.match(t, /\/Subtype \/Image \/Width 2 \/Height 2 \/ColorSpace \/DeviceRGB/); assert.match(t, /\/Im2 Do Q/); assert.match(t, /\/Im3 Do Q/, 'the band, the logo and the payment code, each its own image');
   assert.doesNotMatch(t, /\(1 night\)/, 'the train is a seat, never a night');
   assert.equal(W.docs._puts(), 2, 'the code once, the PDF once — write-once');
   /* AN ORIGINAL ALREADY PRODUCED stays the file it is — never rendered again by a later writer */
@@ -1358,4 +1366,77 @@ test('PDF 1.2 · FAIL CLOSED: when the approved payment code cannot be read just
   const ok = await hit(W, GROOM, 'pdf?holder=INV-T1&rev=1');
   assert.equal(ok.status, 200); assert.match(Buffer.from(ok.bytes).toString('latin1'), /\/Subtype \/Image/);
   assert.equal(W.docs._puts(), 1);
+});
+
+test('HS-004 · THE ISSUE FREEZES THE RECIPIENT AND THE LAYOUT: a missing surname blocks it (preview and issue); a new revision carries 1.3, the names and the words; a revision issued before layouts were recorded is still produced by the frozen 1.2 writer', async () => {
+  /* no surname in 006: blocked, said before the click and refused at the issue */
+  const W0 = world(); await approveGate(W0.st);
+  const reg = W0.workbook['006_Guestlist'];
+  W0.workbook['006_Guestlist'] = reg.map((r, i) => (i === 0 ? r : r.map((c, j) => (reg[0][j] === 'Surname' ? '' : c))));
+  const h0 = await hit(W0, GROOM, 'admin/holder?holder=INV-T1');
+  assert.equal(h0.j.preview.issuable, false);
+  assert.ok(h0.j.preview.reasons.some((x) => /^RECIPIENT_NAME_INCOMPLETE/.test(x)), h0.j.preview.reasons.join(' | '));
+  const r0 = await hit(W0, GROOM, 'issue', { holderId: 'INV-T1' });
+  assert.equal(r0.status, 409); assert.ok(r0.j.reasons.some((x) => /^RECIPIENT_NAME_INCOMPLETE/.test(x)));
+  /* with the names: issued with layout 1.3 and everything frozen beside the snapshot */
+  const W = world(); await approveGate(W.st);
+  const h = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+  assert.ok(h.j.preview.recipient && /\S+ \S+/.test(h.j.preview.recipient.name), 'the recipient shown before the click');
+  assert.equal((await hit(W, GROOM, 'issue', { holderId: 'INV-T1', expectedProposal: h.j.preview.proposalHash })).status, 200);
+  const sid = (await hit(W, GROOM, 'admin/holder?holder=INV-T1')).j.issued.Settlement_ID;
+  const key = 'revision:' + sid + ':1';
+  const rec = await W.st.storage.get(key);
+  assert.equal(rec.Pdf_Layout, 'guest-settlement-pdf/1.3'); assert.ok(rec.Recipient && rec.Recipient.name); assert.ok(Object.keys(rec.Person_Names).length >= 1);
+  assert.ok(Object.values(rec.Item_Words).every((w) => w.name && !/^[A-Z]\d?-/.test(w.name)), 'product words, never keys');
+  const pdf = Buffer.from((await hit(W, GROOM, 'pdf?holder=INV-T1&rev=1')).bytes).toString('latin1');
+  assert.match(pdf, /\/Producer \(guest-settlement-pdf\/1\.3\)/); assert.ok(pdf.includes('(' + rec.Recipient.name + ')'), 'the recipient by name');
+  assert.ok(pdf.includes('(STATEMENT FOR)') && pdf.includes('(Hosts of the wedding \\267 payee)'));
+  assert.doesNotMatch(pdf, /\(Engine |Source hash|within 21 days/);
+  assert.match(pdf, /\/Keywords \(engine billing-engine\//, 'the audit facts in the metadata');
+  /* the same revision as one issued before layouts were recorded: its first download is the frozen 1.2 writer's, unchanged */
+  const W2 = world(); await approveGate(W2.st);
+  const h2 = await hit(W2, GROOM, 'admin/holder?holder=INV-T1');
+  await hit(W2, GROOM, 'issue', { holderId: 'INV-T1', expectedProposal: h2.j.preview.proposalHash });
+  const sid2 = (await hit(W2, GROOM, 'admin/holder?holder=INV-T1')).j.issued.Settlement_ID;
+  const k2 = 'revision:' + sid2 + ':1', r2 = await W2.st.storage.get(k2);
+  const { Pdf_Layout, Recipient, Person_Names, Item_Words, Payment_Options, Correction, ...legacy } = r2;
+  await W2.st.storage.put(k2, legacy);
+  W2.docs.head = async (k) => (W2.docs._has && W2.docs._has(k) ? { customMetadata: {} } : null);   /* this test's R2 answers HEAD: nothing produced yet */
+  const state = (await hit(W2, GROOM, 'admin/holder?holder=INV-T1')).j.settlement.revisions.find((x) => x.Revision === 1);
+  assert.deepEqual(state.pdf, { produced: false, layout: 'guest-settlement-pdf/1.2' }, 'the console says which layout the first download will use');
+  delete W2.docs.head;
+  const old = Buffer.from((await hit(W2, GROOM, 'pdf?holder=INV-T1&rev=1')).bytes).toString('latin1');
+  assert.match(old, /\/Producer \(guest-settlement-pdf\/1\.2\)/); assert.doesNotMatch(old, /\(STATEMENT FOR\)/, 'the 1.2 original: exactly as it would have been');
+});
+
+test('HS-004.16 · a German guest whose 006 row holds no nationality is offered SEPA first by their own sent registration; another nationality keeps PayPal alone', async () => {
+  for (const [nat, want] of [['German', ['SEPA_EUR', 'PAYPAL_EUR']], ['Indian', ['PAYPAL_EUR']]]) {
+    const W = world({ store: {
+      'reg:INV-T1': { ...SENT, registration: { ...SENT.registration, personal: { guestId: 'GT1', nationality: nat } } },
+      'conf:INV-T1': { confirmedAt: '2026-10-02T09:00:00Z', version: 1 }, 'contact:INV-T1': { email: 'Tess.Example@Example.invalid', firstName: 'Tess' } } });
+    await approveGate(W.st);
+    W.workbook['006_Guestlist'] = W.workbook['006_Guestlist'].map((r) => (r[0] === 'CON-T1' ? [...r.slice(0, 4), ''] : r));
+    const h = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+    assert.deepEqual(h.j.preview.paymentOptions, want, nat);
+  }
+});
+
+test('HS-PROMPT-013 Nr. 12 · the route: a correction before 21 Nov 2026 is shown as blocked and refused; a backdated issue is refused', async () => {
+  const { ISSUE_RULES } = await import('../src/billing/pdf-layouts.js');
+  const was = { ...ISSUE_RULES };
+  try {
+    const W = world(); await approveGate(W.st);
+    const h = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+    assert.equal((await hit(W, GROOM, 'issue', { holderId: 'INV-T1', expectedProposal: h.j.preview.proposalHash })).status, 200);
+    /* the next version of this issued statement, before the floor */
+    Object.assign(ISSUE_RULES, { floor: '2999-01-01' });
+    const h2 = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+    assert.ok((h2.j.preview.reasons || []).some((r) => /^ISSUE_DATE_TOO_EARLY/.test(r)), (h2.j.preview.reasons || []).join(' | '));
+    const r2 = await hit(W, GROOM, 'issue', { holderId: 'INV-T1' });
+    assert.equal(r2.status, 409); assert.ok((r2.j.reasons || []).some((r) => /^ISSUE_DATE_TOO_EARLY|NO_CHANGE/.test(r)), (r2.j.reasons || []).join(' | '));
+    /* backdated: an asOf before today is refused before anything is judged */
+    Object.assign(ISSUE_RULES, { floor: '2000-01-01', today: () => '2026-11-21' });
+    const r3 = await hit(W, GROOM, 'issue', { holderId: 'INV-T1', asOf: '2026-11-20' });
+    assert.equal(r3.status, 409); assert.deepEqual(r3.j.reasons, ['ISSUE_BACKDATED']);
+  } finally { Object.assign(ISSUE_RULES, was); }
 });
