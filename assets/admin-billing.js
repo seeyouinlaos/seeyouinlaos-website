@@ -1307,12 +1307,15 @@
   /* SECTION B, EACH HOTEL ON ITS OWN (Owners, 19 Nov 2026 · HS-012.2): Accommodation is one row (one card on a phone) per hotel, its
      sub-total under them; the China trip's hotels follow the China row. Where the split is not there or does not add up, the category
      row stands as before — Accommodation never drops out of the table. */
-  function hotelsUsable(rep) { var H = rep && rep.byHotel; return !!(H && H.wedding && H.wedding.length && H.reconciliation && H.reconciliation.rawAgree); }
-  function hotelRevenue(h) {
+  function hotelsUsable(rep) { var H = rep && rep.byHotel, X = H && H.reconciliation; return !!(rep && rep.budget004 && H && H.wedding && H.wedding.length && X && X.read004 && X.rawAgree); }
+  function hotelRevenue(h, available) {
+    if (!available) return '<span class="ab-mute">guest revenue not available just now</span>';
     var r = h.revenue;
     if (!r) return '<span class="ab-mute">no booked guest stay</span>';
     return '<span data-i18n-skip>booked ' + esc(kd(r.booked)) + '<br>invoiced ' + esc(kd(r.invoiced)) + '<br>received ' + esc(kd(r.received)) + '<br>outstanding ' + esc(kd(r.outstanding)) + '</span>' +
-      (r.notSplit ? '<span class="ab-why">received and outstanding leave out ' + r.notSplit + ' statement' + (r.notSplit === 1 ? '' : 's') + ' not split by class (E)</span>' : '');
+      '<span class="ab-why">' + r.guests + ' guest' + (r.guests === 1 ? '' : 's') + ' · ' + r.rooms + ' room' + (r.rooms === 1 ? '' : 's') + ' · ' + r.roomNights + ' room night' + (r.roomNights === 1 ? '' : 's') + '</span>' +
+      (r.complete === false ? '<span class="ab-why">not complete just now (E)</span>' : '') +
+      (r.notSplit ? '<span class="ab-why">' + r.notSplit + ' statement' + (r.notSplit === 1 ? ' is' : 's are') + ' not split by class and in no hotel\'s received or outstanding (E)</span>' : '');
   }
   function budgetTable(rep) {
     var cell = function (label, v, n) { return '<td data-l="' + esc(label) + '"' + (n ? ' class="num"' : '') + '>' + v + '</td>'; };
@@ -1339,7 +1342,7 @@
       return '<tr data-ab-hotel="' + esc(h.id) + '">' + cell('Category', '<b data-i18n-skip>' + esc(h.label) + '</b><span class="ab-id">' + esc(where) + '</span>') + costCells(h) +
         (h.china ? cell('Forecast', '<span class="ab-mute">not in the wedding forecast</span>', 1) + cell('Variance', '', 1)
           : cell('Forecast', sk(h.forecast), 1) + cell('Variance', '<span data-i18n-skip class="' + (h.variance && h.variance.cents > 0 ? 'ab-neg' : '') + '">' + esc(h.variance && h.variance.cents ? signed(h.variance) : '—') + '</span>', 1)) +
-        flow(h, !h.hasSupplier) + rev(hotelRevenue(h)) + '</tr>';
+        flow(h, !h.hasSupplier) + rev(hotelRevenue(h, H.revenueAvailable !== false)) + '</tr>';
     };
     var split = hotelsUsable(rep), H = rep.byHotel || {};
     var rows = (rep.byCategory || []).map(function (c) {
@@ -1361,10 +1364,16 @@
       cell('Committed (007)', '<span data-i18n-skip>' + esc(curList(CH.committed)) + '</span>', 1) + cell('Paid (007)', '<span data-i18n-skip>' + esc(curList(CH.paid)) + '</span>' + (CH.paidUsd && CH.paidUsd.converted ? '<span class="ab-why" data-i18n-skip>≈ ' + esc(kd(CH.paidUsd.total)) + '</span>' : ''), 1) + rev('') + '</tr>';
     if (split && H.china && H.china.length) rows += H.china.map(function (h) { return hotelRow(h).replace('<span class="ab-id">', '<span class="ab-id">China trip — outside the wedding budget · '); }).join('');
     var X = H.reconciliation || {};
+    var COLS = { gross: 'gross', neutralising: 'neutralised', planned: 'planned', forecast: 'forecast' };
+    var off = Object.keys(COLS).filter(function (f) { return X.residualCents && X.residualCents[f]; }).map(function (f) { return COLS[f] + ' ' + usd(Math.abs(X.residualCents[f]) / 100); });
+    var flowOff = X.flowAgree && (!X.flowAgree.committed || !X.flowAgree.paid);
     var recon = !rep.byHotel ? 'The split of Accommodation by hotel is not available just now — the category stands. '
+      : !X.read004 ? '004 cannot be read just now, so no hotel is shown on its own — the category stands. '
+      : !(H.wedding || []).length ? 'No hotel of the wedding has a 004 line, a 007 supplier or a booked guest stay just now — the category stands. '
       : !split ? 'The hotels\' 004 lines do not add up to the Accommodation category just now, so the category is shown, not the hotels (E). '
-      : 'The hotel rows add up to "Accommodation · all hotels"' + (X.netResidualCents ? ' apart from ' + esc(usd(Math.abs(X.netResidualCents) / 100)) + ' (each hotel is rounded to the cent, the category once)' : ' to the cent') +
-        (X.revenueAgree === false ? '; their guest revenue differs from the accommodation classes (E)' : '; their guest revenue is the Revenue tab\'s, by property') + '. ';
+      : 'The hotel rows add up to "Accommodation · all hotels"' + (off.length ? ' apart from ' + esc(off.join(', ')) + ' (each hotel is rounded to the cent, the category once)' : ' to the cent in every column') +
+        (flowOff ? '; their 007 figures do not (E)' : '') +
+        (H.revenueAvailable === false ? '; guest revenue is not available just now' : X.revenueAgree === false ? '; their guest revenue differs from the accommodation classes (E)' : '; their guest revenue is the Revenue tab\'s, by property') + '. ';
     return '<div class="ab-table-wrap"><table class="ab-table ab-fin"><thead><tr><th>004 category · hotel</th><th class="num">Gross (004)</th><th class="num">Neutralised (004)</th><th class="num">Planned, net (004)</th><th class="num">Forecast</th><th class="num">Variance</th><th class="num">Committed (007)</th><th class="num">Paid (007)</th><th class="num">Guest revenue</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
       '<p class="t-b2 ab-mute">' + recon + '004 is read with its signs: gross = its positive lines; neutralised = its negative lines (004\'s own entries for a cost the hosts do not carry — a guest\'s own room or ticket, a private trip); planned = net, as 004\'s J2 adds them. Variance per category = forecast − planned; on the approved row, forecast − approved. ' +
       'A hotel\'s neutralised 004 lines and its guest revenue can describe the same guests\' rooms — never subtract both. Guests are counted per hotel; a guest who stays in two hotels is in both. ' +

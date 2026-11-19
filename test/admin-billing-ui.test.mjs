@@ -687,6 +687,10 @@ test('FINANCE B · each hotel on its own (HS-012.2): a row (a card on a phone) p
   assert.match(csv, /Row,004 category · hotel,Gross USD \(004\)/);
   assert.match(csv, /CATEGORY,Accommodation,/); assert.match(csv, /HOTEL \(part of the category above\),Souphattra Heritage · Vientiane,/);
   assert.match(csv, /TOTAL,The wedding \(total\)/); assert.match(csv, /Guest revenue booked USD/);
+  assert.match(b, /data-ab-hotel="SOUPHATTRA">.*3 guests · 1 room · 2 room nights/, 'guests, rooms and room nights per hotel, as the Revenue tab counts them');
+  { const r3 = reviewRevenue(); r3.budget.report.byHotel = { ...H, revenueAvailable: false };
+    const L3 = load({ 'admin/overview': OVERVIEW, 'admin/status': statusAnswer, revenue: r3 }, { hash: '#finance' }); await tick(40);
+    assert.match(L3.root.innerHTML, /data-ab-hotel="SOUPHATTRA">.*guest revenue not available just now/); assert.doesNotMatch(L3.root.innerHTML.split('data-ab-budget-vs')[1].split('</table>')[0], /no booked guest stay/); }
   /* the split not there, or not adding up: the category row stands, as before */
   for (const bad of [null, { ...H, reconciliation: { ...H.reconciliation, rawAgree: false } }]) {
     const r2 = reviewRevenue(); r2.budget.report.byHotel = bad;

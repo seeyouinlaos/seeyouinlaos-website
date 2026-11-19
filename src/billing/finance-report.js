@@ -478,7 +478,7 @@ const supplierCategoryOf = (v) => (SUPPLIER_CATEGORY.find((m) => m.vendor.test(c
  * The wedding's hotels and "no hotel stated" add up to the Accommodation category: the unrounded sums must agree (else the split is
  * incomplete and named); a cent apart is the rounding of each hotel to the cent and is stated as such. The China trip's hotels are apart.
  */
-export function hotelsOf({ s004Lines, budgetLines, suppliers, adjustments, stagesOfAdj, classes, isChinaSupplier }) {
+export function hotelsOf({ s004Lines, budgetLines, suppliers, adjustments, stagesOfAdj, classes, isChinaSupplier, category }) {
   const K = classes || null;
   const byRow = new Map(asArray(budgetLines).map((l) => [l.row, l]));
   const blank = (h) => ({ id: h.id, name: h.name, location: h.location || null, stages: asArray(h.stages), china: !!h.china, vendorRe: h.vendor || null,
@@ -499,10 +499,12 @@ export function hotelsOf({ s004Lines, budgetLines, suppliers, adjustments, stage
   }
   /* 007: the hotel's own column; another Accommodation supplier of the wedding is "no hotel stated" */
   for (const sp of asArray(suppliers)) {
-    const v = clean(sp.vendor);
-    let h = hotels.find((x) => x.vendorRe && x.vendorRe.test(v)) || null;
-    if (!h) { const st = asArray(sp.stages); const by = st.length ? hotels.filter((x) => st.every((s) => x.stages.includes(s))) : []; h = by.length === 1 ? by[0] : null; }
-    if (!h && supplierCategoryOf(v) === ACCOMMODATION && !(isChinaSupplier && isChinaSupplier(sp))) h = none;
+    const v = clean(sp.vendor), chinaSp = !!(isChinaSupplier && isChinaSupplier(sp));
+    /* a supplier belongs to a hotel of its own side only: the China trip's cards never take a wedding supplier (one without China stays
+       is the wedding's, exactly as the category table counts it) */
+    let h = hotels.find((x) => x.china === chinaSp && x.vendorRe && x.vendorRe.test(v)) || null;
+    if (!h) { const st = asArray(sp.stages); const by = st.length ? hotels.filter((x) => x.china === chinaSp && st.every((s) => x.stages.includes(s))) : []; h = by.length === 1 ? by[0] : null; }
+    if (!h && supplierCategoryOf(v) === ACCOMMODATION && !chinaSp) h = none;
     if (!h) continue;
     h.suppliers.push(v);
     if (sp.contract) h.committed.push(sp.contract);
@@ -512,8 +514,9 @@ export function hotelsOf({ s004Lines, budgetLines, suppliers, adjustments, stage
   for (const a of asArray(adjustments)) {
     if ((a.category || supplierCategoryOf(a.vendor)) !== ACCOMMODATION) continue;
     const st = asArray(stagesOfAdj ? stagesOfAdj(a) : a.stages);
-    let cand = st.length ? hotels.filter((x) => st.every((s) => x.stages.includes(s))) : [];
-    if (cand.length !== 1) cand = hotels.filter((x) => x.vendorRe && x.vendorRe.test(clean(a.vendor)));
+    /* the forecast's adjustments are the wedding's (the China trip's are filtered out before): never a China card */
+    let cand = st.length ? hotels.filter((x) => !x.china && st.every((s) => x.stages.includes(s))) : [];
+    if (cand.length !== 1) cand = hotels.filter((x) => !x.china && x.vendorRe && x.vendorRe.test(clean(a.vendor)));
     const h = cand.length === 1 ? cand[0] : none;
     h.adjust += a.difference ? a.difference.cents : 0;
   }
@@ -539,7 +542,7 @@ export function hotelsOf({ s004Lines, budgetLines, suppliers, adjustments, stage
       received: amt(sum(h.revenue.map((x) => cents(x.received)))), outstanding: amt(sum(h.revenue.map((x) => cents(x.outstanding)))),
       guests: sum(h.revenue.map((x) => x.guests || 0)), rooms: sum(h.revenue.map((x) => x.rooms || 0)), roomNights: sum(h.revenue.map((x) => x.roomNights || 0)),
       /* received / outstanding leave out what the class split cannot allocate (a partly paid statement, a statement whose lines do not add up) */
-      notSplit: unsplit.filter((x) => !!x.china === h.china).length,
+      notSplit: h.china ? unsplit.filter((x) => x.china).length : unsplit.length,
       complete: !!(K && K.complete !== false) } : null;
     const location = h.locations.size === 1 ? [...h.locations][0] : h.location;
     return { id: h.id, name: h.name, location: location || null, label: h.name + (location ? ' · ' + location : ''), china: h.china, stages: h.stages,
@@ -554,21 +557,27 @@ export function hotelsOf({ s004Lines, budgetLines, suppliers, adjustments, stage
   const keep = (x) => x.rows.length || x.suppliers.length || x.revenue || x._adjust;
   const wedding = all.filter((x) => !x.china && keep(x)).concat(keep(noHotel) ? [noHotel] : []);
   const china = all.filter((x) => x.china && keep(x));
-  /* reconciliation against the Accommodation category of section B */
+  /* reconciliation against the Accommodation row of section B itself, column by column: the unrounded 004 sums must agree; a cent apart
+     in a 004 column is each hotel rounded to the cent (stated); 007 and the guest billing must agree exactly */
+  const read004 = asArray(s004Lines).length > 0;
   const wRaw = sum(wedding.map((x) => x._raw));
-  const rawAgree = Math.abs(wRaw - catRaw) < 1e-6;
-  const catNet = sheetCents(catRaw), hotNet = sum(wedding.map((x) => x.planned ? x.planned.cents : 0));
-  const catGross = sheetCents(sum(asArray(s004Lines).filter((l) => l.cls === 'WEDDING' && clean(l.category) === ACCOMMODATION).map((l) => { const v = (byRow.get(l.row) || {}).budget; return Number.isFinite(v) && v > 0 ? v : 0; })));
-  const hotGross = sum(wedding.map((x) => x.gross ? x.gross.cents : 0));
+  const rawAgree = read004 && Math.abs(wRaw - catRaw) < 1e-6;
+  const C = category || null;
+  const colSum = (f) => sum(wedding.map((x) => (x[f] && Number.isFinite(x[f].cents) ? x[f].cents : 0)));
+  const residuals = {};
+  for (const f of ['gross', 'neutralising', 'planned', 'forecast']) residuals[f] = C && C[f] && Number.isFinite(C[f].cents) ? C[f].cents - colSum(f) : null;
+  const perCur = (list) => { const m = {}; for (const x of asArray(list)) if (x && Number.isFinite(x.cents)) m[x.currency] = (m[x.currency] || 0) + x.cents; return m; };
+  const sameCur = (a, b) => { const A = perCur(a), B = perCur(b); return [...new Set([...Object.keys(A), ...Object.keys(B)])].every((k) => (A[k] || 0) === (B[k] || 0)); };
+  const flowAgree = C ? { committed: sameCur(C.committed, wedding.flatMap((x) => x.committed)), paid: sameCur(C.paid, wedding.flatMap((x) => x.paid)) } : null;
   const S = K && K.classes ? K.classes.SOUPHATTRA_ACCOMMODATION : null, O = K && K.classes ? K.classes.OTHER_ACCOMMODATION : null;
   const revClass = K ? cents(S && S.booked) + cents(O && O.booked) : null, revHotels = sum(wedding.map((x) => (x.revenue ? x.revenue.booked.cents : 0)));
   const reconciliation = {
-    rawAgree, netResidualCents: catNet == null ? null : catNet - hotNet, grossResidualCents: catGross == null ? null : catGross - hotGross,
+    read004, rawAgree, residualCents: residuals, netResidualCents: residuals.planned, flowAgree,
     revenueAgree: revClass == null ? null : revClass === revHotels, revenueClassCents: revClass, revenueHotelsCents: revHotels, unmappedRevenue,
   };
   const strip = ({ _raw, _pos, _neg, _adjust, ...x }) => x;
-  return { version: REPORT_VERSION, wedding: wedding.map(strip), china: china.map(strip), reconciliation,
-    complete: rawAgree && reconciliation.revenueAgree !== false && !unmappedRevenue.length };
+  return { version: REPORT_VERSION, wedding: wedding.map(strip), china: china.map(strip), reconciliation, revenueAvailable: !!K,
+    complete: rawAgree && reconciliation.revenueAgree !== false && !unmappedRevenue.length && !(flowAgree && (!flowAgree.committed || !flowAgree.paid)) };
 }
 
 /* ------------------------------------------------- 004 with its signs (1.2.0) */
@@ -734,7 +743,7 @@ export function financeReportOf({ budget, suppliers, centres, plan, contracts, r
   const R = revenue || {};
   const K = R.classes && R.classes.version ? R.classes : null;
   /* ---- each hotel on its own (HS-012.2): section B's Accommodation, one card per hotel, reconciled to the category ---- */
-  const byHotel = safe(() => hotelsOf({ s004Lines: s004 && s004.lines, budgetLines: budget && budget.lines, suppliers, adjustments, stagesOfAdj, classes: K, isChinaSupplier }), null);
+  const byHotel = safe(() => hotelsOf({ s004Lines: s004 && s004.lines, budgetLines: budget && budget.lines, suppliers, adjustments, stagesOfAdj, classes: K, isChinaSupplier, category: byCategory.find((c) => c.category === ACCOMMODATION) || null }), null);
   const cc = (m) => (m && Number.isFinite(m.cents) ? m.cents : null);
   const part = (k) => (K && K.classes && K.classes[k]) || null;
   const SOU = part('SOUPHATTRA_ACCOMMODATION'), OTH = part('OTHER_ACCOMMODATION'), PAS = part('PASS_THROUGH'), NON = part('NOT_CLASSIFIED');
@@ -823,8 +832,11 @@ export function financeReportOf({ budget, suppliers, centres, plan, contracts, r
   check('each hotel on its own', () => {
     if (!byHotel) { if (s004) add('DATA', 'Hotels', 'The split of Accommodation by hotel is not available just now — section B shows the category.'); return; }
     const X = byHotel.reconciliation;
+    if (!X.read004) return;
     if (!X.rawAgree) add('DATA', 'Hotels', 'The hotels\' 004 lines do not add up to the Accommodation category — section B shows the category, not the hotels.');
-    else if (X.netResidualCents) add('INFO', 'Hotels', 'The hotels add up to the Accommodation category apart from ' + usdText(Math.abs(X.netResidualCents)) + ' — each hotel is rounded to the cent, the category once.');
+    else for (const [f, c] of Object.entries(X.residualCents || {})) if (c) add('INFO', 'Hotels', 'The hotels\' ' + ({ gross: 'gross', neutralising: 'neutralised', planned: 'planned (net)', forecast: 'forecast' })[f] + ' adds up to the Accommodation category apart from ' + usdText(Math.abs(c)) + ' — each hotel is rounded to the cent, the category once.');
+    if (X.flowAgree && !X.flowAgree.committed) add('DATA', 'Hotels', 'The hotels\' 007 commitments do not add up to the Accommodation category\'s.');
+    if (X.flowAgree && !X.flowAgree.paid) add('DATA', 'Hotels', 'The hotels\' 007 payments do not add up to the Accommodation category\'s.');
     if (X.revenueAgree === false) add('DATA', 'Hotels', 'The hotels\' guest billing (' + usdText(X.revenueHotelsCents) + ') differs from the accommodation classes (' + usdText(X.revenueClassCents) + ').');
     for (const u of X.unmappedRevenue) add('DATA', 'Hotels', 'Booked accommodation ' + (u.property || u.stage || '(no property)') + ' (' + usdText((u.booked && u.booked.cents) || 0) + ') is in no hotel card — in the totals, named here.');
   });

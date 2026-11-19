@@ -117,3 +117,27 @@ test('CONSOLE · the iPhone status bar: the header starts below it and a strip o
     assert.match(h, /body::before\{content:"";position:fixed;top:0;left:0;right:0;height:var\(--ab-sat,env\(safe-area-inset-top,0px\)\);background:#F3EEE7;z-index:60;pointer-events:none\}/);
   }
 });
+
+test('BY HOTEL · the review\'s edges: every column reconciled (a gross cent named while net agrees), a China hotel never takes a wedding supplier or adjustment, no cards without 004', () => {
+  /* gross residual while net agrees: 50.005 + 100.005 − 0.005 */
+  const lines = [line(10, 'U Sathorn Bangkok', 'Hotel', 'Accommodation', 50.005), line(20, 'Souphattra Heritage Vientiane', 'Souphattra Heritage', 'Accommodation', 100.005),
+    line(21, 'Souphattra Heritage Vientiane', 'Souphattra Heritage', 'Accommodation', -0.005)];
+  const r1 = financeReportOf({ budget: { lines, totals: {} }, suppliers: [], dashboard: { costs: { adjustments: [] } }, revenue: { classes: CLASSES } });
+  const X = r1.byHotel.reconciliation;
+  assert.equal(X.residualCents.gross, -1, 'the gross column is a cent apart'); assert.equal(X.residualCents.planned, 0);
+  assert.ok(r1.exceptions.some((e) => /gross adds up to the Accommodation category apart from USD 0\.01/.test(JSON.stringify(e))));
+  /* a Yifangju 007 column without China stays and a stage-less Yifangju adjustment are the wedding's, as the category table counts them */
+  const sup = [{ vendor: 'Yifangju Designer Courtyard', stages: [], contract: usd(5000), payments: [] }];
+  const adj = [{ vendor: 'Yifangju Designer Courtyard', category: 'Accommodation', stages: [], difference: usd(70000) }];
+  const r2 = financeReportOf({ budget: { lines: LINES, totals: {} }, suppliers: sup, dashboard: { costs: { adjustments: adj } }, revenue: { classes: CLASSES } });
+  const by2 = Object.fromEntries(r2.byHotel.wedding.concat(r2.byHotel.china).map((h) => [h.id, h]));
+  assert.deepEqual(by2['NO-HOTEL'].committed, [usd(5000)]); assert.equal(by2['NO-HOTEL'].variance.cents, 70000);
+  assert.ok(!by2.YIFANGJU || !by2.YIFANGJU.committed.length, 'never on the China card');
+  assert.deepEqual(r2.byHotel.reconciliation.flowAgree, { committed: true, paid: true });
+  assert.equal(r2.byHotel.reconciliation.residualCents.forecast, r2.byHotel.reconciliation.residualCents.planned, 'the forecast column reconciles too');
+  /* 004 unreadable: 007 alone draws no card */
+  const H3 = hotelsOf({ s004Lines: [], budgetLines: [], suppliers: SUPPLIERS, adjustments: [], classes: CLASSES });
+  assert.equal(H3.reconciliation.read004, false); assert.equal(H3.reconciliation.rawAgree, false);
+  /* no class split: every card says so instead of "no booked guest stay" */
+  assert.equal(report(null).byHotel.revenueAvailable, false);
+});
