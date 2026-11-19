@@ -170,7 +170,7 @@ test('PDF 1.3 · the couple\'s names never break across lines; a long recipient 
 
 test('ISSUE RULES · the shipped values: no corrected statement before 21 Nov 2026, today is the real UTC day', async () => {
   const { ISSUE_RULES: R } = await import('../src/billing/pdf-layouts.js?shipped');
-  assert.equal(R.floor, '2026-11-21');
+  assert.equal(R.floor, '', 'lifted by the Owners (HS-PROMPT-034): a correction carries its actual issue day');
   assert.equal(R.today(), new Date().toISOString().slice(0, 10));
 });
 
