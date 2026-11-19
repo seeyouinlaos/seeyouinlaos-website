@@ -577,3 +577,31 @@ test('BUDGET · THE HOTEL\'S OWN ROOMS (Owners, 18 / 19 Nov 2026): a unit of the
   assert.equal(a.report.purchase.totals.contract.cents, b.report.purchase.totals.contract.cents, 'the purchase never changes by a number');
   assert.equal(a.dashboard.costs.forecast.cents, b.dashboard.costs.forecast.cents);
 });
+
+/* ---- THE OWNERS' CONSOLIDATED ORDER (19 Nov 2026) — synthetic names ---- */
+test('SIGNS · a negative row mirroring a person-named row is 004\'s neutralising entry — "collected and passed on", never "disagree in sign" or "paid twice"; a zero-budget contribution keeps its role', () => {
+  const own = { ...BLOCK27, Item: 'Souphattra Heritage Vientiane, Alex', Details: 'Heritage Executive', Qty: 1, 'Budget USD': 150 };
+  const mirror = { ...own, Qty: -1, 'Budget USD': -150 };
+  const zero = { ...PLAN, Qty: 0, 'Budget USD': 0 };
+  const { out } = world({ lines004: [own, mirror, zero, TRAIN, VAN, CHINA], names: { persons: { GA1: 'Alex Example', GA2: 'Sam Example' }, holders: { 'INV-GA': 'Alex Example' } } });
+  const d1 = C(out, 'D1');
+  const neg = d1.lines004.find((l) => l.row === 6);
+  assert.deepEqual([neg.role, neg.mirrorOf], ['NEUTRALISING', 5]); assert.match(neg.why, /004's neutralising entry of row 5/);
+  assert.equal(d1.lines004.find((l) => l.row === 5).neutralisedBy, 6);
+  const texts = out.checks.map((c) => c.text).join('\n');
+  assert.doesNotMatch(texts, /disagree in sign/);
+  assert.match(texts, /Budget row 5 budgets Alex's own place and 004 row 6 neutralises it; Alex Example \(INV-GA\) is billed for Heritage Executive — collected and passed on, not a host cost/);
+  assert.doesNotMatch(texts, /Budget row 5 [^\n]*possibly paid twice/);
+  assert.equal(d1.lines004.find((l) => l.row === 7).role, 'PLANNED_CONTRIBUTION', 'a planned contribution of USD 0 stays a planned contribution');
+});
+
+test('CLASSES · the real overview splits the booked lines: every line in one part, the China trip apart, a service nobody named is "not classified" — the parts meet the booked figure', () => {
+  const { ov } = world();
+  const K = ov.classes;
+  assert.equal(K.version, 'revenue-classes/1.0.0');
+  assert.equal(K.reconciliation.booked.equal, true); assert.equal(K.totalGuestBilling.booked.cents, ov.bookedRevenue.cents);
+  assert.equal(K.classes.SOUPHATTRA_ACCOMMODATION.booked.cents, engineCents(['INV-GA', 'INV-GB', 'INV-GC'], ['D1-EXEC', 'D1-MAJ']));
+  assert.equal(K.china.booked.cents, engineCents(['INV-GA', 'INV-GB', 'INV-GC'], ['G-TRAIN']), 'the Kunming train is the China trip\'s');
+  assert.deepEqual(K.notClassified.map((x) => x.Item_ID + (x.china ? ' (China)' : '')).sort(), ['B-TRAIN', 'G-TRAIN (China)', 'X-TEMPLE'], 'only the products the Owners named are pass-through; the rest is named');
+  assert.equal(K.complete, false, 'a service not classified keeps the split incomplete');
+});

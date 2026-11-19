@@ -24,11 +24,11 @@
 
    A figure whose inputs are incomplete carries complete:false and its named gaps — never a silent partial total.
    ========================================================================== */
-import { SUPPLIER_CATEGORY, REPORTING_FX, roomScopeOf } from './budget-map.js';
+import { SUPPLIER_CATEGORY, REPORTING_FX, roomScopeOf, RULES, CHINA_STAGES, PASS_THROUGH } from './budget-map.js';
 import { BILLING_ADMINS } from './admin.js';
-import { parseDate } from './budget-source.js';
+import { parseDate, mirrorPairs } from './budget-source.js';
 
-export const REPORT_VERSION = 'finance-report/1.1.0';
+export const REPORT_VERSION = 'finance-report/1.2.0';
 const COUPLE = new Set(BILLING_ADMINS.map((a) => a.guestId));
 const clean = (v) => String(v == null ? '' : v).trim();
 const asArray = (v) => (Array.isArray(v) ? v : []);
@@ -456,18 +456,119 @@ export function usdEquivalentOf(list, fxRef) {
     words: 'USD equivalent at the reporting reference rates (1 USD = ' + F.USD_THB + ' THB · 1 USD = ' + F.USD_EUR + ' EUR) — a reference conversion, not a transaction rate' };
 }
 
+/* ------------------------------------------------- 004 with its signs (1.2.0) */
+
+/** Cents of a sheet amount, rounded the way the sheet shows it (half away from zero, on the decimal value — 4639.905 → 4,639.91). */
+export const sheetCents = (x) => (Number.isFinite(x) ? Math.sign(x) * Math.round(Number((Math.abs(x) * 100).toFixed(6))) : null);
+const CHINA_WORDS = /\b(kunming|lijiang|kmg|ljg|china|yunnan)\b/i;
+
+/**
+ * GOOGLE 004 AS SIGNED LINES (the Owners' consolidated order, 19 Nov 2026): every readable USD line with its sign. A positive line is
+ * a cost; a negative line is 004's own neutralising entry ("GUEST CONTRIBUTIONS") — the mirror of a positive row whose cost the
+ * hosts do not carry (a guest's own room or ticket, a private trip). Nothing is dropped, nothing is read from a colour.
+ *   class  WEDDING        — the wedding project;
+ *          CHINA          — a line of the China trip and its return (its RULE's stage is in CHINA_STAGES; a negative row takes the
+ *                           class of the row it mirrors) — outside the wedding budget, reported apart;
+ *   toCheck — a line no RULE reads whose words name the China trip: counted in WEDDING until the Owners say otherwise, and named.
+ * Sums are taken over the sheet's own values and rounded once, as the sheet rounds them — so they meet A5, G5 and J2/J5 exactly,
+ * or the difference is named.
+ */
+export function signed004Of(budget) {
+  const all = asArray(budget && budget.lines);
+  const T = (budget && budget.totals) || {};
+  const unread = all.filter((l) => l.readable === false || !Number.isFinite(l.budget));
+  const otherCurrency = all.filter((l) => l.readable !== false && Number.isFinite(l.budget) && clean(l.currency) && clean(l.currency).toUpperCase() !== 'USD');
+  const L = all.filter((l) => l.readable !== false && Number.isFinite(l.budget) && !otherCurrency.includes(l));
+  const { mirrorOf, neutralisedBy } = mirrorPairs(L);
+  const byRow = new Map(L.map((l) => [l.row, l]));
+  const ruleOf = (l) => RULES.find((r) => clean(r.category).toLowerCase() === clean(l.category).toLowerCase() && r.item.test(clean(l.item))) || null;
+  const china = (l) => { const r = ruleOf(l); return !!(r && r.stages.length && r.stages.every((x) => CHINA_STAGES.includes(x))); };
+  const lines = L.map((l) => {
+    const neg = l.budget < 0;
+    const mirror = neg ? (mirrorOf.get(l.row) || null) : (neutralisedBy.get(l.row) || null);
+    const basisLine = neg && mirror ? byRow.get(mirror) : l;
+    const isChina = china(basisLine);
+    const r = ruleOf(basisLine);
+    const toCheck = !isChina && !r && CHINA_WORDS.test([l.item, l.vendor, l.details, l.location].map(clean).join(' '));
+    return { row: l.row, item: l.item, vendor: l.vendor, category: l.category, details: l.details, raw: l.budget, budget: amt(sheetCents(l.budget)),
+      sign: neg ? 'NEUTRALISING' : 'COST', cls: isChina ? 'CHINA' : 'WEDDING', mirror, rule: r ? r.id : null,
+      stage: r && r.stages.length === 1 ? r.stages[0] : null, toCheck };
+  });
+  const tot = (list) => sheetCents(list.reduce((t, l) => t + l.raw, 0));
+  const part = (list) => ({ gross: amt(tot(list.filter((l) => l.raw > 0))), neutralising: amt(tot(list.filter((l) => l.raw < 0))), net: amt(tot(list)), lines: list.length });
+  const wedding = lines.filter((l) => l.cls === 'WEDDING'), chinaLines = lines.filter((l) => l.cls === 'CHINA');
+  const whole = part(lines);
+  const cell = (k, mine, what) => {
+    if (!Number.isFinite(T[k])) return null;
+    const sheet = sheetCents(T[k]);
+    return { cell: T[k + 'Cell'] || null, what, formula: T[k + 'Formula'] || null, sheet: amt(sheet), lines: amt(mine), equal: sheet === mine, difference: amt(mine - sheet) };
+  };
+  const checks = [
+    cell('grossCost', whole.gross.cents, 'the positive lines (gross project cost)'),
+    cell('guestContributions', -whole.neutralising.cents, 'the negative lines (neutralising entries), as a positive figure'),
+    cell('totalPlanned', whole.net.cents, 'every line with its sign (the net total)'),
+    cell('netHostCost', whole.net.cents, 'every line with its sign (the net host cost)'),
+  ].filter(Boolean);
+  return {
+    definition: 'Google 004, every readable USD line with its sign: positive = a cost, negative = 004\'s own neutralising entry of the row it mirrors; WEDDING and CHINA apart',
+    lines: lines.map(({ raw, ...x }) => x),
+    whole, wedding: part(wedding), china: part(chinaLines),
+    checks, reconciled: checks.length > 0 && checks.every((c) => c.equal),
+    unpaired: lines.filter((l) => l.sign === 'NEUTRALISING' && !l.mirror).map((l) => l.row),
+    toCheck: lines.filter((l) => l.toCheck).map((l) => l.row),
+    unread: unread.map((l) => l.row), otherCurrency: otherCurrency.map((l) => ({ row: l.row, currency: clean(l.currency).toUpperCase() })),
+  };
+}
+
+/* the wedding's neutralising entries beside what the guests actually booked for the same stay or service (the booking system is the
+   truth for what the guests pay): per group — a stay of a RULE (A2, B …) or a pass-through product 004 records apart (budget-map
+   PASS_THROUGH.item004). The difference is the gap between 004's plan and the bookings — named, never written to 004. */
+function collectionsBeside004(s004, classes) {
+  const groups = new Map();
+  const g = (k, label) => { if (!groups.has(k)) groups.set(k, { key: k, label, rows: [], neutralising: 0, booked: 0, invoiced: 0 }); return groups.get(k); };
+  const byRow = new Map(s004.lines.map((l) => [l.row, l]));
+  for (const l of s004.lines.filter((x) => x.cls === 'WEDDING' && x.sign === 'NEUTRALISING')) {
+    const base = l.mirror ? byRow.get(l.mirror) : l;
+    const pt = PASS_THROUGH.find((x) => x.item004 && x.item004.test(clean(base.item)));
+    /* a Souphattra room's neutralising entry: what its guests pay is Souphattra revenue (D), never a collection to set against it */
+    const soup = base.rule === 'SOUPHATTRA';
+    const key = soup ? 'SOUPHATTRA' : pt ? pt.itemId : (base.stage || base.rule || 'row ' + l.row);
+    const x = g(key, soup ? 'Souphattra Heritage — its guests\' payments are its accommodation revenue (D), not set against 004 here' : pt ? pt.itemId : (base.item || key));
+    x.rows.push(l.row); x.neutralising += -(l.budget ? l.budget.cents : 0);
+  }
+  const C = classes || {};
+  for (const p of asArray(C.otherAccommodation).filter((x) => !x.china)) { const x = g(p.stage || p.property, p.property); x.booked += (p.booked || {}).cents || 0; x.invoiced += (p.invoiced || {}).cents || 0; }
+  for (const p of asArray(C.passThrough).filter((x) => !x.china)) {
+    const key = groups.has(p.Item_ID) ? p.Item_ID : (p.stage && groups.has(p.stage) ? p.stage : p.Item_ID);
+    const x = g(key, p.Item_ID); x.booked += (p.booked || {}).cents || 0; x.invoiced += (p.invoiced || {}).cents || 0;
+  }
+  for (const p of asArray(C.notClassified).filter((x) => !x.china)) { const x = g(p.Item_ID, p.Item_ID + ' (not classified)'); x.booked += (p.booked || {}).cents || 0; x.invoiced += (p.invoiced || {}).cents || 0; }
+  return [...groups.values()].map((x) => ({ key: x.key, label: x.label, rows: x.rows, neutralising004: amt(x.neutralising), booked: x.key === 'SOUPHATTRA' ? null : amt(x.booked), invoiced: amt(x.invoiced),
+    difference: x.key === 'SOUPHATTRA' ? null : amt(x.booked - x.neutralising) })).sort((a, b) => (a.key < b.key ? -1 : 1));
+}
+
 /* ------------------------------------------------------------- the report */
 
 export function financeReportOf({ budget, suppliers, centres, plan, contracts, roomContractMeta, dashboard, rates009, revenue, receipts, fx, list012, purchase, rule, vendor }) {
   const D = dashboard || {}, C = D.costs || {};
   const T = (budget && budget.totals) || {};
-  const forecast = C.forecast ? C.forecast.cents : null, planned = C.original ? C.original.cents : null;
-  const approved = Number.isFinite(T.totalBudget) ? Math.round(T.totalBudget * 100) : null;
+  const approved = Number.isFinite(T.totalBudget) ? sheetCents(T.totalBudget) : null;
   const rooms012 = safe(() => match012(plan, list012), { available: false, units: {}, ambiguous: [], notIn012: [], notBooked: [], free: [], dates: [], error: 'not readable just now' });
   const hp = purchase || safe(() => hotelPurchaseOf({ plan, roomContract: roomContractMeta, contracts, lines004: budget && budget.lines, rule, centres, couple: COUPLE, vendor }),
     { available: false, why: 'the hotel\'s purchase costs could not be set beside 004 just now', lines: [], rows004: [], proposals: [], included: [], corrections: [], checks: [], unsettled: [] });
   const hotel = safe(() => hotelPerformance({ plan, contracts, centres, suppliers, rooms012, purchase: hp }), []);
   const contractStays = new Set(asArray(contracts).map((x) => x.stay));
+
+  /* ---- 004 WITH ITS SIGNS (1.2.0 · Owners, 19 Nov 2026): the wedding's planned cost is its net (004's own J2 view, the China trip
+     apart); its gross stays beside it. The forecast adds what the bookings cost at the agreement's hotel and 004 does not hold yet. */
+  const s004 = budget && asArray(budget.lines).length ? safe(() => signed004Of(budget), null) : null;
+  const isChinaSupplier = (sup) => { const st = asArray(sup && sup.stages); return st.length > 0 && st.every((x) => CHINA_STAGES.includes(x)); };
+  /* an adjustment's stays: its own, else its supplier's (dashboardOf names stages on the hotel's adjustment only) */
+  const stagesOfAdj = (a) => asArray(a.stages).length ? asArray(a.stages) : asArray((asArray(suppliers).find((x) => x.vendor === a.vendor) || {}).stages);
+  const adjustments = asArray(C.adjustments).filter((a) => { const st = stagesOfAdj(a); return !(st.length && st.every((x) => CHINA_STAGES.includes(x))); });
+  const adjustCents = adjustments.reduce((t, a) => t + (a.difference ? a.difference.cents : 0), 0);
+  const planned = s004 ? s004.wedding.net.cents : null, plannedGross = s004 ? s004.wedding.gross.cents : null;
+  const forecast = planned == null ? null : planned + adjustCents, forecastGross = plannedGross == null ? null : plannedGross + adjustCents;
 
   /* ---- what the forecast does not hold yet: guest services without a supplier cost, the hotel's purchase not set beside 004 ---- */
   const gaps = [];
@@ -475,55 +576,100 @@ export function financeReportOf({ budget, suppliers, centres, plan, contracts, r
   if (roomContractMeta && !hp.available) hotelGap('the hotel\'s purchase costs could not be set beside 004 (' + (hp.why || 'not readable') + ') — 004 is counted as written');
   for (const r of asArray(hp.unsettled)) hotelGap('004 row ' + r.row + ' (' + usdText((r.rest || r.amount).cents) + ') is not set against a booked room — it may already hold a proposed addition');
   for (const g of asArray(hp.gaps)) hotelGap(g.text);
-  for (const c of asArray(centres)) if (!contractStays.has(c.id) && c.status === 'NOT_COMPLETE' && asArray(c.missing).length) gaps.push({ centre: c.id, place: c.place, text: asArray(c.missing).join(' · ') });
+  for (const c of asArray(centres)) if (!contractStays.has(c.id) && c.status === 'NOT_COMPLETE' && asArray(c.missing).length) gaps.push({ centre: c.id, place: c.place, text: asArray(c.missing).join(' · '), china: CHINA_STAGES.includes(c.id) });
+  /* a China stay's missing price is the China trip's, never the wedding forecast's */
+  const weddingGaps = gaps.filter((g) => !g.china);
 
-  /* ---- 004 planned, forecast, 007 committed and paid — per 004 category ---- */
+  /* ---- 004 per category (WEDDING lines: gross, neutralising, net, forecast) · 007 committed and paid (the China trip's suppliers apart) ---- */
   const byCategory = safe(() => {
-    const lines = asArray(budget && budget.lines).filter((l) => l.readable !== false && Number.isFinite(l.budget) && l.budget > 0);
     const cats = new Map();
-    const row = (name) => { if (!cats.has(name)) cats.set(name, { category: name, planned: 0, adjust: 0, committed: [], paid: [], suppliers: [] }); return cats.get(name); };
-    for (const l of lines) row(l.category || '(no category)').planned += Math.round(l.budget * 100);
-    const catOf = (v) => (SUPPLIER_CATEGORY.find((m) => m.vendor.test(clean(v))) || {}).category || null;
-    for (const s of asArray(suppliers)) {
-      const r = row(catOf(s.vendor) || 'Unassigned');
-      r.suppliers.push(s.vendor);
-      if (s.contract) r.committed.push(s.contract);
-      for (const p of asArray(s.payments)) if (p.counted && p.amount) r.paid.push(p.amount);
+    const row = (name) => { if (!cats.has(name)) cats.set(name, { category: name, gross: 0, neutralising: 0, raw: 0, adjust: 0, committed: [], paid: [], suppliers: [] }); return cats.get(name); };
+    const rawOf = new Map(asArray(budget && budget.lines).map((l) => [l.row, l.budget]));
+    for (const l of asArray(s004 && s004.lines).filter((x) => x.cls === 'WEDDING')) {
+      const r = row(l.category || '(no category)'), v = rawOf.get(l.row) || 0;
+      r.raw += v; if (v > 0) r.gross += v; else r.neutralising += v;
     }
-    for (const a of asArray(C.adjustments)) { const r = row(a.category || catOf(a.vendor) || 'Unassigned'); r.adjust += a.difference ? a.difference.cents : 0; }
-    const list = [...cats.values()].map((r) => {
+    const catOf = (v) => (SUPPLIER_CATEGORY.find((m) => m.vendor.test(clean(v))) || {}).category || null;
+    for (const sp of asArray(suppliers).filter((x) => !isChinaSupplier(x))) {
+      const r = row(catOf(sp.vendor) || 'Unassigned');
+      r.suppliers.push(sp.vendor);
+      if (sp.contract) r.committed.push(sp.contract);
+      for (const p of asArray(sp.payments)) if (p.counted && p.amount) r.paid.push(p.amount);
+    }
+    for (const a of adjustments) { const r = row(a.category || catOf(a.vendor) || 'Unassigned'); r.adjust += a.difference ? a.difference.cents : 0; }
+    return [...cats.values()].map((r) => {
       const committed = perCurrency(r.committed), paid = perCurrency(r.paid);
       const usdCommitted = (committed.find((m) => m.currency === 'USD') || {}).cents || 0;
-      return { category: r.category, planned: amt(r.planned), forecast: amt(r.planned + r.adjust), variance: amt(r.adjust), committed, paid, suppliers: r.suppliers,
-        committedUsd: usdEquivalentOf(committed), paidUsd: usdEquivalentOf(paid),
-        committedAboveForecast: usdCommitted > r.planned + r.adjust ? amt(usdCommitted - (r.planned + r.adjust)) : null };
+      const net = sheetCents(r.raw), gross = sheetCents(r.gross);
+      return { category: r.category, gross: amt(gross), neutralising: amt(sheetCents(r.neutralising)), planned: amt(net), forecast: amt(net + r.adjust), forecastGross: amt(gross + r.adjust),
+        variance: amt(r.adjust), committed, paid, suppliers: r.suppliers, committedUsd: usdEquivalentOf(committed), paidUsd: usdEquivalentOf(paid),
+        /* a 007 commitment is gross: it is set against the category's gross forecast, never its net */
+        committedAboveForecast: usdCommitted > gross + r.adjust ? amt(usdCommitted - (gross + r.adjust)) : null };
     }).sort((a, b) => (a.category === 'Unassigned') - (b.category === 'Unassigned') || b.planned.cents - a.planned.cents);
-    return list;
   }, []);
-  const committedAll = perCurrency(asArray(suppliers).map((s) => s.contract).filter(Boolean));
-  const paidAll = perCurrency(asArray(suppliers).flatMap((s) => asArray(s.payments).filter((p) => p.counted && p.amount).map((p) => p.amount)));
+  const weddingSuppliers = asArray(suppliers).filter((x) => !isChinaSupplier(x)), chinaSuppliers = asArray(suppliers).filter(isChinaSupplier);
+  const paidOf = (list) => perCurrency(list.flatMap((sp) => asArray(sp.payments).filter((p) => p.counted && p.amount).map((p) => p.amount)));
+  const committedAll = perCurrency(weddingSuppliers.map((sp) => sp.contract).filter(Boolean));
+  const paidAll = paidOf(weddingSuppliers);
   const committedUsd = usdEquivalentOf(committedAll), paidUsd = usdEquivalentOf(paidAll);
+  const chinaPaid = paidOf(chinaSuppliers), chinaCommitted = perCurrency(chinaSuppliers.map((sp) => sp.contract).filter(Boolean));
 
-  /* ---- the cash still to move (USD; a payment in another currency at its USD equivalent, labelled) ---- */
+  /* ---- THE GUESTS' BILLING BY CLASS (revenue-classes): the Souphattra's accommodation revenue; other accommodation and
+     pass-through collections; the China trip apart ---- */
   const R = revenue || {};
-  const expected = R.booked && R.booked.complete !== false && Number.isFinite(R.booked.cents) ? R.booked.cents : null;
-  const received = receipts && receipts.cashCollected && receipts.cashCollected.complete !== false && Number.isFinite(receipts.cashCollected.cents) ? receipts.cashCollected.cents : null;
-  const paidEq = paidUsd.total ? paidUsd.total.cents : null;
-  const remainingSupplier = forecast == null || paidEq == null ? null : forecast - paidEq;
-  const remainingGuests = expected == null || received == null ? null : expected - received;
-  const reportingFx = { USD_THB: REPORTING_FX.USD_THB, USD_EUR: REPORTING_FX.USD_EUR, source: REPORTING_FX.source,
-    statementReference: fx && (fx.FX_USD_THB || fx.FX_USD_EUR) ? { day: fx.day || null, USD_THB: Number(fx.FX_USD_THB) || null, USD_EUR: Number(fx.FX_USD_EUR) || null } : null };
-  const cash = {
-    paidToSuppliers: paidAll, paidToSuppliersUsd: paidUsd, remainingSupplierPaymentsUsd: amt(remainingSupplier), guestReceiptsToCome: amt(remainingGuests), received: amt(received), expected: amt(expected),
-    ownerStillToProvide: remainingSupplier == null || remainingGuests == null ? null : amt(remainingSupplier - remainingGuests),
-    complete: !!(remainingSupplier != null && remainingGuests != null && !gaps.length),
-    why: [gaps.length ? 'the forecast does not hold ' + gaps.length + ' cost' + (gaps.length === 1 ? '' : 's') + ' yet (see "Costs not yet in the forecast")' : null,
-      remainingGuests == null ? 'the guest figures are not complete just now' : null].filter(Boolean),
-    formula: 'forecast cost − supplier payments made (USD equivalent at the reference rates) − (booked guest revenue − guest payments received)',
+  const K = R.classes && R.classes.version ? R.classes : null;
+  const cc = (m) => (m && Number.isFinite(m.cents) ? m.cents : null);
+  const part = (k) => (K && K.classes && K.classes[k]) || null;
+  const SOU = part('SOUPHATTRA_ACCOMMODATION'), OTH = part('OTHER_ACCOMMODATION'), PAS = part('PASS_THROUGH'), NON = part('NOT_CLASSIFIED');
+  const weddingParts = [SOU, OTH, PAS, NON].filter(Boolean);
+  const sumF = (list, f) => (list.length && list.every((x) => cc(x[f]) != null) ? sum(list.map((x) => cc(x[f]))) : null);
+  const classesOk = !!(K && K.complete !== false);
+  const weddingBooked = K ? sumF(weddingParts, 'booked') : null, weddingInvoiced = K ? sumF(weddingParts, 'invoiced') : null;
+  /* a partly paid statement's receipt is not split by class: it counts with the wedding in full, and is named */
+  const partlyPaid = K && K.unallocated ? sum(asArray(K.unallocated.statements).filter((x) => x.status === 'PARTIAL' && !x.china).map((x) => cc(x.received) || 0)) : 0;
+  const weddingReceived = K ? (sumF(weddingParts, 'received') == null ? null : sumF(weddingParts, 'received') + partlyPaid) : null;
+  const collections = K ? safe(() => collectionsBeside004(s004 || { lines: [] }, K), []) : [];
+
+  /* ---- THE PROJECTED WEDDING FINANCIAL POSITION (gross, the booking system's collections): what the guests booked for the wedding
+     (the Souphattra's accommodation, other accommodation and pass-through collections — the China trip apart) − the wedding's gross
+     forecast cost (004's positive lines + the hotel purchase not in 004 yet). Pass-through items are on both sides, so they add
+     nothing; the China trip is on neither. 004's own net view (its J2: the Souphattra revenue against the net cost) is shown beside
+     it, and the difference is exactly the collections against 004's neutralising entries, item by item. ---- */
+  const posComplete = classesOk && forecastGross != null && !weddingGaps.length;
+  const position = forecastGross == null || weddingBooked == null ? { stated: false, why: forecastGross == null ? '004 could not be read' : 'the guest billing by class is not available just now' } : {
+    stated: true,
+    net: amt(weddingBooked - forecastGross), today: weddingInvoiced == null ? null : amt(weddingInvoiced - forecastGross),
+    souphattra: amt(cc(SOU && SOU.booked)), otherCollections: amt(sumF([OTH, PAS, NON].filter(Boolean), 'booked')), forecastGross: amt(forecastGross),
+    coverage: forecastGross > 0 ? Math.round((weddingBooked / forecastGross) * 1000) / 10 : null,
+    net004: SOU && forecast != null ? amt(cc(SOU.booked) - forecast) : null,
+    differenceTo004: SOU && forecast != null ? amt((weddingBooked - forecastGross) - (cc(SOU.booked) - forecast)) : null,
+    complete: posComplete,
+    formula: 'the wedding\'s guest billing as booked (Souphattra accommodation + other accommodation + pass-through collections; the China trip apart) − the wedding\'s gross forecast cost (004 positive lines + the hotel purchase not in 004 yet)',
   };
 
-  /* ---- the exceptions: data and differences (the Owners' order of 18 Nov 2026 decided the agreement, the additional nights, the
-     additional-person charge, the reporting rates, 009 and 012 — none of them is asked again) ---- */
+  /* ---- the cash still to move (gross, USD; a payment in another currency at its USD equivalent, labelled) ---- */
+  const received = receipts && receipts.cashCollected && receipts.cashCollected.complete !== false && Number.isFinite(receipts.cashCollected.cents) ? receipts.cashCollected.cents : null;
+  const expected = R.booked && R.booked.complete !== false && Number.isFinite(R.booked.cents) ? R.booked.cents : null;
+  const paidEq = paidUsd.total ? paidUsd.total.cents : null;
+  const remainingSupplier = forecastGross == null || paidEq == null ? null : forecastGross - paidEq;
+  const remainingGuests = weddingBooked == null || weddingReceived == null ? null : weddingBooked - weddingReceived;
+  const reportingFx = { USD_THB: REPORTING_FX.USD_THB, USD_EUR: REPORTING_FX.USD_EUR, source: REPORTING_FX.source,
+    statementReference: fx && (fx.FX_USD_THB || fx.FX_USD_EUR) ? { day: fx.day || null, USD_THB: Number(fx.FX_USD_THB) || null, USD_EUR: Number(fx.FX_USD_EUR) || null } : null };
+  const chinaPaidUsd = usdEquivalentOf(chinaPaid);
+  const cash = {
+    paidToSuppliers: paidAll, paidToSuppliersUsd: paidUsd, remainingSupplierPaymentsUsd: amt(remainingSupplier), guestReceiptsToCome: amt(remainingGuests), received: amt(received), expected: amt(expected),
+    weddingReceived: amt(weddingReceived),
+    ownerStillToProvide: remainingSupplier == null || remainingGuests == null ? null : amt(remainingSupplier - remainingGuests),
+    complete: !!(remainingSupplier != null && remainingGuests != null && !weddingGaps.length && classesOk),
+    why: [weddingGaps.length ? 'the forecast does not hold ' + weddingGaps.length + ' cost' + (weddingGaps.length === 1 ? '' : 's') + ' yet (see "Costs not yet in the forecast")' : null,
+      remainingGuests == null ? 'the guest figures are not complete just now' : null, K && !classesOk ? 'the guest billing by class is not complete just now' : null,
+      partlyPaid ? 'a partly paid statement\'s receipt (' + usdText(partlyPaid) + ') counts with the wedding in full (statements without a China line)' : null,
+      K && asArray(K.unallocated && K.unallocated.statements).some((x) => x.status !== 'PARTIAL' || x.china) ? 'a receipt not split by class is not counted here (named in E)' : null].filter(Boolean),
+    formula: 'wedding gross forecast cost − supplier payments made to the wedding\'s suppliers (USD equivalent at the reference rates) − (the wedding\'s guest billing as booked − what those guests have paid); the China trip apart',
+    china: { paidToSuppliers: chinaPaid, paidToSuppliersUsd: chinaPaidUsd, committed: chinaCommitted, collectionsBooked: K ? K.china.booked : null, collectionsReceived: K ? K.china.received : null },
+  };
+
+  /* ---- the exceptions: data and differences ---- */
   const ex = [];
   const add = (kind, area, text, extra) => ex.push({ kind, area, text, ...(extra || {}) });
   /* each check on its own: one that cannot be made is named, the others stand */
@@ -531,9 +677,9 @@ export function financeReportOf({ budget, suppliers, centres, plan, contracts, r
   check('the hotel\'s purchase against 004', () => {
     if (roomContractMeta && !hp.available) add('DATA', 'Hotel purchase', 'The hotel\'s purchase costs could not be set beside 004: ' + (hp.why || 'not readable') + '. 004 is counted as written.');
     for (const c of asArray(hp.checks)) add('DATA', 'Hotel purchase', c.text, c.amount ? { amount: c.amount } : null);
-    const s = asArray(suppliers).find((x) => vendor && vendor.test(clean(x.vendor)));
-    if (hp.available && s && s.contract && s.contract.currency === 'USD' && hp.totals && hp.totals.contract.cents !== s.contract.cents) {
-      add('DATA', 'Hotel purchase', s.vendor + ': 007 states ' + usdText(s.contract.cents) + ' for the agreement; its rooms at its rate come to ' + usdText(hp.totals.contract.cents) + '.');
+    const sp = asArray(suppliers).find((x) => vendor && vendor.test(clean(x.vendor)));
+    if (hp.available && sp && sp.contract && sp.contract.currency === 'USD' && hp.totals && hp.totals.contract.cents !== sp.contract.cents) {
+      add('DATA', 'Hotel purchase', sp.vendor + ': 007 states ' + usdText(sp.contract.cents) + ' for the agreement; its rooms at its rate come to ' + usdText(hp.totals.contract.cents) + '.');
     }
   });
   check('the reporting rates', () => {
@@ -544,34 +690,60 @@ export function financeReportOf({ budget, suppliers, centres, plan, contracts, r
   });
   check('004', () => {
     for (const l of asArray(budget && budget.lines)) if (Number.isFinite(l.paid) && l.paid > 0) {
-      const in007 = asArray(suppliers).some((s) => clean(s.vendor) && clean(l.vendor) && clean(s.vendor).toLowerCase() === clean(l.vendor).toLowerCase());
-      add('DATA', 'Budget 004', '004 row ' + l.row + ' (' + l.item + (l.vendor ? ', ' + l.vendor : '') + ') records ' + usdText(Math.round(l.paid * 100)) + ' paid' + (l.payDateText ? ' on ' + l.payDateText : '') +
-        (in007 ? ' — its supplier is in 007, where payments are counted.' : ' — not in 007; not counted as a supplier payment.'), { amount: amt(Math.round(l.paid * 100)) });
+      const in007 = asArray(suppliers).some((x) => clean(x.vendor) && clean(l.vendor) && clean(x.vendor).toLowerCase() === clean(l.vendor).toLowerCase());
+      add('DATA', 'Budget 004', '004 row ' + l.row + ' (' + l.item + (l.vendor ? ', ' + l.vendor : '') + ') records ' + usdText(sheetCents(l.paid)) + ' paid' + (l.payDateText ? ' on ' + l.payDateText : '') +
+        (in007 ? ' — its supplier is in 007, where payments are counted.' : ' — 007 has no column for this supplier, so it is not counted as a supplier payment; a row in 007 would count it.'), { amount: amt(sheetCents(l.paid)) });
     }
-    const unread = asArray(budget && budget.lines).filter((l) => l.readable === false);
-    if (unread.length) add('DATA', 'Budget 004', '004 row' + (unread.length === 1 ? ' ' : 's ') + unread.map((l) => l.row).join(', ') + (unread.length === 1 ? ' is' : ' are') + ' not readable and not in any category above.');
-    const catSum = sum(byCategory.filter((c) => c.planned).map((c) => c.planned.cents));
-    if (planned != null && byCategory.length && catSum !== planned) add('DATA', 'Budget 004', 'The 004 categories add up to ' + usdText(catSum) + ', the planned lines to ' + usdText(planned) + '.');
-    if (planned != null && Number.isFinite(T.totalPlanned) && Math.round(T.totalPlanned * 100) !== planned) add('DATA', 'Budget 004', '004 ' + (T.totalPlannedCell || 'J2') + ' (TOTAL PLANNED BUDGET) states ' + usdText(Math.round(T.totalPlanned * 100)) + '; its positive lines add up to ' + usdText(planned) + ' — the report uses the lines.');
+    if (!s004) { if (budget && asArray(budget.lines).length) add('DATA', 'Budget 004', '004 could not be read with its signs just now.'); return; }
+    if (s004.unread.length) add('DATA', 'Budget 004', '004 row' + (s004.unread.length === 1 ? ' ' : 's ') + s004.unread.join(', ') + (s004.unread.length === 1 ? ' is' : ' are') + ' not readable and in no figure.');
+    for (const o of s004.otherCurrency) add('DATA', 'Budget 004', '004 row ' + o.row + ' is in ' + o.currency + ' — never converted, in no USD figure.');
+    for (const c of s004.checks) if (!c.equal) add('DATA', 'Budget 004', '004 ' + c.cell + ' states ' + usdText(c.sheet.cents) + '; ' + c.what + ' add up to ' + usdText(c.lines.cents) + (c.formula ? ' (the cell is ' + c.formula + ')' : '') + '.');
+    for (const r of s004.unpaired) add('DATA', 'Budget 004', '004 row ' + r + ' is a negative (neutralising) row without a positive row it mirrors — counted with its sign, its purpose to be stated.');
+    for (const r of s004.toCheck) add('DATA', 'Budget 004', '004 row ' + r + ' names the China trip but no rule reads it — counted in the wedding until you say it belongs to the China trip.');
+    const catSum = sum(byCategory.map((c) => c.planned ? c.planned.cents : 0));
+    if (planned != null && byCategory.length && catSum !== planned) add('DATA', 'Budget 004', 'The 004 categories add up to ' + usdText(catSum) + ' net, the wedding lines to ' + usdText(planned) + ' (rounding per category).');
   });
-  check('costs not yet in the forecast', () => { for (const g of gaps.filter((x) => !x.hotel && !contractStays.has(x.centre))) add('DATA', 'Costs not yet in the forecast', g.place + ': ' + g.text); });
+  check('the guests\' collections against 004\'s neutralising entries', () => {
+    for (const g of collections) if (g.difference && g.difference.cents && (g.neutralising004.cents || g.booked.cents)) {
+      add('DATA', 'Collections vs 004', g.label + ': the guests booked ' + usdText(g.booked.cents) + '; 004 neutralises ' + usdText(g.neutralising004.cents) + (g.rows.length ? ' (row' + (g.rows.length === 1 ? ' ' : 's ') + g.rows.join(', ') + ')' : ' (no 004 row)') +
+        ' — a difference of ' + (g.difference.cents > 0 ? '+' : '−') + usdText(Math.abs(g.difference.cents)) + '. The position counts the bookings; 004 is not changed.', { amount: g.difference });
+    }
+  });
+  check('the Souphattra revenue', () => {
+    const fromStays = sum(hotel.filter((h) => contractStays.has(h.stay)).map((h) => (h.revenue ? h.revenue.cents : 0)));
+    if (SOU && cc(SOU.booked) != null && hotel.some((h) => contractStays.has(h.stay)) && fromStays !== cc(SOU.booked)) {
+      add('DATA', 'Souphattra revenue', 'The Souphattra\'s room lines per stay add up to ' + usdText(fromStays) + '; its accommodation revenue by class is ' + usdText(cc(SOU.booked)) + '.');
+    }
+    if (K && !classesOk) add('DATA', 'Guest billing by class', 'The split of the guests\' billing by class is not complete just now' + (K.error ? ': ' + K.error : '') + ' — the position and the Souphattra figures are not stated as complete.');
+    for (const x of asArray(K && K.notClassified)) add('DATA', 'Guest billing by class', x.Item_ID + ' (' + usdText(cc(x.booked) || 0) + ' booked) is a guest service not yet classified — named in the wedding\'s collections until you say what it is.');
+    for (const x of asArray(K && K.withoutProduct)) add('DATA', 'Guest billing by class', 'Booked lines of ' + x.Item_ID + ' (' + usdText(cc(x.booked) || 0) + ') carry no product key — in the total, in no part.');
+    for (const x of asArray(K && K.unallocated && K.unallocated.statements)) add('DATA', 'Guest billing by class', x.Holder_ID + (x.Settlement_ID ? ' (' + x.Settlement_ID + ')' : '') + ': ' + x.why + '.');
+  });
+  check('costs not yet in the forecast', () => { for (const g of gaps.filter((x) => !x.hotel && !contractStays.has(x.centre))) add('DATA', g.china ? 'China trip — costs not stated' : 'Costs not yet in the forecast', g.place + ': ' + g.text); });
   if (roomContractMeta && roomContractMeta.agreementDates) add('INFO', 'Hotel agreement', roomContractMeta.agreementDates);
 
   const approvedM = amt(approved);
-  const P = D.position || {};
   return {
     version: REPORT_VERSION,
     approved: approvedM ? { ...approvedM, cell: T.totalBudgetCell || null } : null,
     approvedWhy: approvedM ? null : '004 states no TOTAL BUDGET just now',
-    planned: amt(planned), forecast: amt(forecast),
-    forecastComplete: !gaps.length, forecastGaps: gaps,
+    /* the wedding's planned cost: 004 net (its J2 view, the China trip apart); its gross and its neutralising entries beside it */
+    planned: amt(planned), plannedGross: amt(plannedGross), plannedNeutralising: s004 ? s004.wedding.neutralising : null,
+    forecast: amt(forecast), forecastGross: amt(forecastGross),
+    forecastComplete: !weddingGaps.length, forecastGaps: weddingGaps, chinaGaps: gaps.filter((g) => g.china),
     varianceToApproved: approved != null && forecast != null ? amt(forecast - approved) : null,
     plannedVsApproved: approved != null && planned != null ? amt(planned - approved) : null,
-    budgetLeftSheet: Number.isFinite(T.budgetLeft) ? { ...amt(Math.round(T.budgetLeft * 100)), cell: T.budgetLeftCell || null } : null,
+    remainingBudget: approved != null && forecast != null ? amt(approved - forecast) : null,
+    budgetLeftSheet: Number.isFinite(T.budgetLeft) ? { ...amt(sheetCents(T.budgetLeft)), cell: T.budgetLeftCell || null } : null,
+    budget004: s004,
     committed: committedAll, paid: paidAll, committedUsd, paidUsd, reportingFx, byCategory, cash, purchase: hp, hotel, rooms012,
-    /* the projected financial position: booked guest revenue − forecast project cost (negative: what the Owners fund) */
-    position: P.stated ? { stated: true, net: amt(-P.projectedOwnerFunded.cents), today: P.currentOwnerFunded ? amt(-P.currentOwnerFunded.cents) : null, coverage: P.coverageProjected,
-      complete: !gaps.length, formula: 'booked guest revenue − forecast project cost' } : { stated: false, why: P.why || 'not stated just now' },
+    /* the guests' billing by class, as the Revenue Report split it (revenue-classes) — the Finance tab's own figures */
+    guestBilling: K ? { complete: classesOk, souphattra: SOU, other: OTH, passThrough: PAS, notClassified: NON, china: K.china, total: K.totalGuestBilling,
+      wedding: { booked: amt(weddingBooked), invoiced: amt(weddingInvoiced), received: amt(weddingReceived) } } : null,
+    collectionsBeside004: collections,
+    china: { label: 'China trip and its return — outside the wedding budget', stages: CHINA_STAGES, costs004: s004 ? s004.china : null,
+      committed: chinaCommitted, paid: chinaPaid, paidUsd: chinaPaidUsd, collections: K ? K.china : null, suppliers: chinaSuppliers.map((x) => x.vendor) },
+    position,
     exceptions: ex,
   };
 }

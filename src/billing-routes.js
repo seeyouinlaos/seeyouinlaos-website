@@ -41,7 +41,7 @@ import { GoogleSheetsUnavailable, batchReadRanges } from './google-sheets.js';
 import { calculate, perPerson, matchSpecialRate, COUPLE_PERSONS } from './billing/engine.js';
 import { unitOf as roomUnitOf, COUPLE_GUESTS } from './rooms.js';
 import { SEED as ROOM_SEED } from './inventory-seed.js';
-import { ASSIGNMENTS_VERSION, EVENTS as ASSIGNMENT_EVENTS, coupleOfEntries, guestsOfIndex, personName, attendanceOf, rosterOf, staysOf, hotelRoomsMeta, hotelChecksOf, seatChangeOf, roomChangeOf, roomMovesOf, sentRoomLines } from './billing/assignments.js';
+import { ASSIGNMENTS_VERSION, EVENTS as ASSIGNMENT_EVENTS, coupleOfEntries, guestsOfIndex, personName, attendanceOf, rosterOf, staysOf, occupancyOf, hotelRoomsMeta, hotelChecksOf, seatChangeOf, roomChangeOf, roomMovesOf, sentRoomLines } from './billing/assignments.js';
 import { priceDifference } from './billing/price-difference.js';
 import {
   buildSnapshot, canIssue, dueDateFor, freezeFx, inPreferredCurrency,
@@ -55,6 +55,7 @@ import { qrImageOf } from './billing/pdf-image.js';
 import { buildRevenueOverview } from './billing/revenue.js';
 import { buildBudgetComparison } from './billing/budget.js';
 import { BUDGET_TABS, rangeOfTab, parseBudget004, parseVendors007, parseItemDisplay, parseSpecialRateRows, parseRoomList012 } from './billing/budget-source.js';
+import { VENDORS } from './billing/budget-map.js';
 import { detectDrift, blockingOf, monitoringSignals, proposeRevisionDraft, reconciliationReport } from './billing/reconciliation.js';
 import { REFERENCE_CASES, evaluateGate, runReferenceCases, GATE_NOT_RUN } from './billing/activation-gate.js';
 import { PAYMENT_CHANNEL, CHANNEL_CURRENCY, RECORD_STATUS, ENTRY_TYPE, REVISION_STATE, toCents, fromCents } from './billing/model.js';
@@ -1227,6 +1228,8 @@ async function adminRevenue(env, identity, url, cors) {
   }
   if (unresolved.length) overview.incompleteKpis = [...new Set([...(overview.incompleteKpis || []), ...KPI_KEYS])];
   if (unresolved.length && overview.breakdown) { overview.breakdown.incomplete = true; overview.breakdown.complete = false; }
+  /* the split by class covers only the holders read: incomplete, named (2.5.0) */
+  if (unresolved.length && overview.classes && overview.classes.version) { overview.classes.complete = false; overview.classes.unresolved = unresolved.map((u) => u.Holder_ID); }
   /* the project's exchange-rate reference (Owners, 17 Nov 2026): the day of the first issued statement and the 011 rates in effect */
   let fxReference = null;
   /* the first issued statement's day from the ledger listing already read (no further request) */
@@ -1306,7 +1309,7 @@ async function budgetBesideRevenue(env, reads, { overview, src, asOf, indexEntri
         source: '008_Payment_Journal — the verified receipts and the refunds due, as the overview above counts them' },
       unresolved, readProblems,
       /* the Revenue Report's paying-guest figures for the financial dashboard (Owners, 17 Nov 2026) — read, never recomputed */
-      revenue: { invoiced: kpi(overview.issuedRevenue), booked: kpi(overview.bookedRevenue), notYetInvoiced: kpi(overview.notYetInvoiced),
+      revenue: { classes: overview.classes || null, invoiced: kpi(overview.issuedRevenue), booked: kpi(overview.bookedRevenue), notYetInvoiced: kpi(overview.notYetInvoiced),
         changedSinceIssue: kpi(overview.changedSinceIssue), invoicedNotBooked: kpi(overview.invoicedNotBooked) },
       couple: couple || null, fx: fx || null,
       roomList012: list012 && list012.status === 'fulfilled' && Array.isArray(list012.value) ? parseRoomList012(list012.value[0]) : null,
@@ -2301,11 +2304,14 @@ async function adminAssignments(env, identity, url, cors) {
   if (!seat.j.ok || !room.j.ok) return jsonRes({ ok: false, retry: true, error: 'the seating ledger or the room engine could not be read just now' }, 503, cors);
   const seedNames = Object.fromEntries(Object.keys(ROOM_SEED).map((k) => [k, ROOM_SEED[k].name]));
   const roster = rosterOf({ entries, register: src.register, records: kv.records, confs: kv.confs, seating: seat.j, rooms: room.j, couple });
+  const stays = staysOf({ rooms: room.j, seedNames, datesOf: src.datesOf });
   return jsonRes({ ok: true, version: ASSIGNMENTS_VERSION, at: new Date().toISOString(), audience: admin, events: ASSIGNMENT_EVENTS,
     people: seat.j.people, capacity: seat.j.capacity,
     seating: { open: seat.j.open, frozen: seat.j.frozen, events: seat.j.events, log: seat.j.log },
-    rooms: { stays: staysOf({ rooms: room.j, seedNames, datesOf: src.datesOf }), digest: room.j.digest, final: room.j.final, waitlist: room.j.waitlist || [], log: room.j.log,
-      hotelRooms: hotelRoomsMeta(room.j.hotelRooms), hotelChecks: hotelChecksOf(roster) },
+    rooms: { stays, digest: room.j.digest, final: room.j.final, waitlist: room.j.waitlist || [], log: room.j.log,
+      hotelRooms: hotelRoomsMeta(room.j.hotelRooms), hotelChecks: hotelChecksOf(roster),
+      /* per hotel, each person once (Owners' consolidated order, 19 Nov 2026) — beside the stays, never instead of them */
+      occupancy: occupancyOf(stays, room.j.waitlist || [], (VENDORS.find((v) => v.roomContract) || {}).roomContract || null) },
     roster, gaps: src.gaps }, 200, cors);
 }
 

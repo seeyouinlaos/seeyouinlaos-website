@@ -58,14 +58,19 @@ test('THE LIST · one person (the register id, never a name), one window, one ro
     { contactId: 'CON001', window: 'wedstay', room: 'souphattra-presidential', kind: 'special', charge: 150, nights: 'both' },
     { contactId: 'CON002', window: 'wedstay', room: 'souphattra-presidential', kind: 'special', charge: 150, nights: 'both' },
     { contactId: 'CON003', window: 'prewed', room: 'heritage-executive', kind: 'special', charge: 130 },
-    { contactId: 'CON004', window: 'prewed', room: 'heritage-executive', kind: 'special', charge: 130 }]);
+    { contactId: 'CON004', window: 'prewed', room: 'heritage-executive', kind: 'special', charge: 130 },
+    /* U Sathorn Bangkok, the whole stay (Owners, 19 Nov 2026) */
+    { contactId: 'CON003', window: 'bkk-stay', room: 'u-sathorn-superior-garden', kind: 'gift', charge: 0, by: 'bride-groom' },
+    { contactId: 'CON004', window: 'bkk-stay', room: 'u-sathorn-superior-garden', kind: 'gift', charge: 0, by: 'bride-groom' },
+    { contactId: 'CON005', window: 'bkk-stay', room: 'u-sathorn-superior-garden', kind: 'gift', charge: 0, by: 'bride-groom' }]);
   assert.deepEqual(giftsFor('CON005'), [
     { window: 'prewed', room: 'heritage-executive', kind: 'special', charge: 225 },
     { window: 'wedstay', room: 'heritage-executive', kind: 'gift', charge: 0, by: 'bride-groom' },
-    { window: 'kempinski', room: 'jatu-room', kind: 'employee', charge: 232, per: 'room' }]);
+    { window: 'kempinski', room: 'jatu-room', kind: 'employee', charge: 232, per: 'room' },
+    { window: 'bkk-stay', room: 'u-sathorn-superior-garden', kind: 'gift', charge: 0, by: 'bride-groom' }]);
   assert.deepEqual(giftsFor('CON010'), [
     { window: 'prewed', room: 'heritage-executive', kind: 'special', charge: 225 },
-    { window: 'wedstay', room: 'heritage-executive', kind: 'gift', charge: 0, by: 'bride-groom' }], 'the employee rate is one person\'s alone');
+    { window: 'wedstay', room: 'heritage-executive', kind: 'gift', charge: 0, by: 'bride-groom' }], 'the employee rate is one person\'s alone; the room mate at U Sathorn keeps the hotel rate');
   assert.deepEqual(giftsFor('CON006'), [], 'the party mate'); assert.deepEqual(giftsFor(''), []); assert.deepEqual(giftsFor(null), []);
   const g = giftsFor('CON005'), he = (id) => ({ ...heritage(0), id, room: 'heritage-executive' });
   assert.equal(isGift(g, he('wedstay')), true); assert.equal(isGift(g, heritage(0)), false, 'The Heritage is not the entitled room'); assert.equal(isGift(g, he('prewed')), false, 'a special rate is not a gift');
@@ -126,7 +131,7 @@ test('THE WORKER · GET /api/gifts answers the signed-in guest with their own gi
     const read = async (b) => (await h.w.fetch(req('/api/gifts', b ? { 'x-siyl-auth': b } : {}), h.env));
     let r = await read(h.giftee); assert.equal(r.status, 200); assert.equal(r.headers.get('cache-control'), 'no-store');
     assert.deepEqual(await r.json(), { ok: true, guestId: 'G901', gifts: giftsFor('CON005') });
-    assert.equal(giftsFor('CON005').length, 3);
+    assert.equal(giftsFor('CON005').length, 4);
     assert.deepEqual(await (await read(h.mate)).json(), { ok: true, guestId: 'G902', gifts: [] });
     assert.deepEqual(await (await read(h.other)).json(), { ok: true, guestId: 'G903', gifts: [] });
     assert.equal((await read(null)).status, 401);
@@ -194,7 +199,8 @@ test('THE FIRST VISIT · a gift that arrives after the page is drawn redraws the
 });
 
 test('PEGGY & STEFFIE (Owner, 3 Oct 2026 · 002 E21) · one Heritage Executive room before the wedding, both guests, both nights: USD 260 in all — USD 130 each, never per night; the public rate is unchanged', () => {
-  for (const c of ['CON003', 'CON004']) assert.deepEqual(giftsFor(c), [{ window: 'prewed', room: 'heritage-executive', kind: 'special', charge: 130 }], c);
+  for (const c of ['CON003', 'CON004']) assert.deepEqual(giftsFor(c), [{ window: 'prewed', room: 'heritage-executive', kind: 'special', charge: 130 },
+    { window: 'bkk-stay', room: 'u-sathorn-superior-garden', kind: 'gift', charge: 0, by: 'bride-groom' }], c);
   let room = 0;
   for (const gid of ['G001', 'G002']) {
     const w = page({ auth: { ...PEGGY, guestId: gid }, seed: { 'siyl.gifts': { guestId: gid, gifts: giftsFor(gid === 'G001' ? 'CON003' : 'CON004'), at: Date.now() } } });
@@ -209,4 +215,33 @@ test('PEGGY & STEFFIE (Owner, 3 Oct 2026 · 002 E21) · one Heritage Executive r
   /* SIGNED OUT (Codex final review, 5 Oct 2026): the server's catalogue answers a signed-in guest only — a visitor sees no amount ("Price unavailable"), and never anyone's arrangement */
   { const oq = page({ auth: null }).SIYL_PRICE.quote('prewed', 'heritage-executive'); assert.equal(oq.total, null); assert.equal(oq.personal, undefined); }
   assert.equal(page({ auth: null }).SIYL_ROOMS.souphattra.rooms.find((r) => r.slug === 'heritage-executive').rates.prewed, 130, 'USD 130 per person per night, as listed');
+});
+
+test('U SATHORN (Owners, 19 Nov 2026) · three guests: the whole stay USD 0, complimentary from the Bride & Groom, the hotel rate beneath; their room mate and every other guest keep the hotel rate', () => {
+  const q = (gid, gifts) => page({ auth: { ...PEGGY, guestId: gid }, seed: gifts ? { 'siyl.gifts': { guestId: gid, gifts, at: Date.now() } } : {} }).SIYL_PRICE.quote('bkk-stay', 'u-sathorn-superior-garden');
+  for (const [gid, c] of [['G001', 'CON003'], ['G002', 'CON004'], ['G003', 'CON005']]) {
+    const x = q(gid, giftsFor(c));
+    assert.equal(x.total, 0, gid + ': nothing to pay for U Sathorn'); assert.equal(x.gift, 'bride-groom'); assert.ok(x.hotelTotal > 0, 'the hotel rate stays a fact beneath');
+  }
+  const mate = q('G007', giftsFor('CON010')), other = q('G777', null);
+  assert.ok(mate.total > 0 && mate.gift === undefined, 'the room mate keeps the hotel rate');
+  assert.equal(other.total, mate.total, 'everyone else: the hotel rate, unchanged');
+});
+
+test('U SATHORN (Owners, 19 Nov 2026) · nobody asks the three guests to book a stay the Bride & Groom give them: no hotel link, no "book by themselves" on the pages or in the trip e-mail; the room mate keeps both', async () => {
+  const { composeGuestMail } = await import('../src/mail-templates.js');
+  const me = page({ auth: { ...PEGGY, guestId: 'G001' }, seed: { 'siyl.gifts': { guestId: 'G001', gifts: giftsFor('CON003'), at: Date.now() } } });
+  assert.equal(me.SIYL_PRICE.bookingOf('bkk-stay', 'u-sathorn-superior-garden'), null, 'a gift: nothing to book');
+  const q = me.SIYL_PRICE.quote('bkk-stay', 'u-sathorn-superior-garden');
+  assert.deepEqual([q.booking, q.bookingUrl, q.bookingWords], ['', '', '']);
+  const mate = page({ auth: { ...PEGGY, guestId: 'G007' }, seed: { 'siyl.gifts': { guestId: 'G007', gifts: giftsFor('CON010'), at: Date.now() } } });
+  const b = mate.SIYL_PRICE.bookingOf('bkk-stay', 'u-sathorn-superior-garden');
+  assert.equal(b.method, 'self'); assert.ok(b.url, 'the room mate keeps the hotel link');
+  const rec = (line) => ({ invitationId: 'INV-GT1', guestId: 'GT1', submissionId: 'SYL-GT1-TEST0002', version: 1, kind: 'initial', submittedAt: '2026-11-19T09:00:00.000Z', lastSentAt: '2026-11-19T09:00:00.000Z',
+    recipient: { email: 'sam.example@example.org' }, registration: { lang: 'en', contact: { email: 'sam.example@example.org' }, personal: { firstName: 'Sam', lastName: 'Example' },
+      selections: [{ id: 'bkk-stay', stay: 'bangkok', room: 'u-sathorn-superior-garden', name: 'U Sathorn Bangkok', meta: '21 – 24 February 2027 · Superior Room With Garden View', rate: 67.81, nights: 3, pay: 3, qty: 1, ...line }],
+      guestRecord: { partyName: 'Sam', scope: { bangkok: true, vientianePreWedding: false, vientianeWedding: false, china: false, none: false }, guests: [{ guestId: 'GT1', source: { fullName: 'Sam Example', preferredName: 'Sam' }, profile: {} }] } } });
+  const gift = composeGuestMail(rec({ price: 0, gift: 'bride-groom' })), plain = composeGuestMail(rec({ price: 203.42 }));
+  assert.match(gift.text, /Complimentary · from the Bride & Groom/); assert.doesNotMatch(gift.text + gift.html, /Guest will book by themselves/);
+  assert.match(plain.text, /Guest will book by themselves\./, 'a guest who pays: as before');
 });

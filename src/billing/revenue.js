@@ -76,8 +76,9 @@ import {
 import { calculate } from './engine.js';
 import { dueDateFor, journalPosition, paymentStatus } from './settlement.js';
 import { siteKeyOf, keyStage } from './owner-bookings.js';
+import { revenueClassesOf } from './revenue-classes.js';
 
-export const REVENUE_VERSION = 'billing-revenue/2.4.0';
+export const REVENUE_VERSION = 'billing-revenue/2.5.0';
 
 /** Freeze · Y — the only role this overview may ever be served to. */
 export const REVENUE_AUDIENCE = ROLE.BILLING_ADMIN;
@@ -893,6 +894,17 @@ export function buildRevenueOverview(input) {
   }
 
   const incomplete = Object.keys(kpis).filter((k) => !kpis[k].complete);
+  /* one failure of the class split names itself — every figure above stands */
+  const classesOf = () => {
+    try {
+      return revenueClassesOf({
+        booked: [...bp.rows].map(([id, r]) => ({ Holder_ID: id, lines: r.lines, gapReason: r.gapReason || null })),
+        issued: new Map(perHolder.filter((x) => x.issuedRow && Number.isFinite(x.issuedCents)).map((x) => [x.holderId, { lines: issuedLinesOf(x.issuedRow), cents: x.issuedCents }])),
+        positions: rows, items,
+        kpis: { booked: kpis.bookedRevenue, issued: kpis.issuedRevenue, cash: kpis.cashCollected, outstanding: kpis.outstanding, refund: kpis.refundDue },
+      });
+    } catch (e) { return { version: null, complete: false, error: 'the split of the guest billing by class could not be made just now' }; }
+  };
 
   const overview = {
     revenueVersion: REVENUE_VERSION,
@@ -914,6 +926,9 @@ export function buildRevenueOverview(input) {
     changedSinceIssue: kpis.changedSinceIssue,
     invoicedNotBooked: kpis.invoicedNotBooked,
     paymentsReported: bp.paymentsReported,
+    /* GUEST BILLING BY CLASS (2.5.0 · the Owners' consolidated order, 19 Nov 2026): the same lines, each in one class — the
+       Souphattra's accommodation revenue, other accommodation, pass-through services; China flagged apart (revenue-classes.js) */
+    classes: classesOf(),
     breakdown: bp.breakdown,
     payments: bp.payments,
     doubleBookings: bp.doubleBookings,

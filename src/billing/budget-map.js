@@ -24,7 +24,7 @@
               of the supplier, never split between stays).
    ========================================================================== */
 
-export const BUDGET_MAP_VERSION = 'budget-map/1.2.0';
+export const BUDGET_MAP_VERSION = 'budget-map/1.3.0';
 
 export const STAGES = Object.freeze({
   A2: { place: 'U Sathorn Bangkok' },
@@ -39,6 +39,23 @@ export const STAGES = Object.freeze({
   I: { place: 'Flight Lijiang → Bangkok' },
   J: { place: 'Hotel Muse Bangkok' },
 });
+
+/* THE CHINA TRIP AND ITS RETURN (Owners' consolidated order, 19 Nov 2026): Kunming and Lijiang travel is not part of the wedding
+   budget — the flight there, Kunming, the train, Lijiang, the flight back and the night at Hotel Muse Bangkok on the way home. Their
+   bookings, statements and payments stay tracked; their 004 lines and their guest collections are reported apart, never inside the
+   wedding project's costs, its variance or the Souphattra's revenue. */
+export const CHINA_STAGES = Object.freeze(['E2', 'F', 'G', 'H', 'I', 'J']);
+
+/* THE GUEST SERVICES H&S COLLECTS FOR AND PASSES ON (Owners' consolidated order, 19 Nov 2026) — named one by one: a guest-billed
+   service missing here is "not classified" on the console, never assumed to be a pass-through.
+     itemId   — the 002 product;   item004 — the words of the 004 Item whose rows record the purchase and its neutralising entry
+     (where 004 records it apart from the RULES below);   basis — why it is a pass-through;   confirmed — who said so (null: the
+     Owners have not said it yet — shown as "to confirm"). */
+export const PASS_THROUGH = Object.freeze([
+  { itemId: 'TEMPLE-OFFERING', item004: /^alms\s+giving\b/i, basis: 'what each guest pays for the offering (002) is what H&S pays for it — no contribution to the wedding budget', confirmed: 'the Owners, 19 Nov 2026' },
+  { itemId: 'B-TRAIN-BKK-NKI', stage: 'B', basis: 'the guests\' night-train tickets: H&S buys them and the guests pay for them — 004 neutralises the guests\' tickets with its own negative row', confirmed: null },
+  { itemId: 'G-TRAIN-KMG-LJG', stage: 'G', basis: 'the guests\' train Kunming → Lijiang: H&S buys the tickets and the guests pay for them', confirmed: null },
+]);
 
 export const RULES = Object.freeze([
   { id: 'U-SATHORN', category: 'Accommodation', item: /^u\s*sathorn\b/i, stages: ['A2'], whose: 'UNSTATED', model: 'ROOM_BLOCK' },

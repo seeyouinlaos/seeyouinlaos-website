@@ -12,7 +12,7 @@ import assert from 'node:assert/strict';
 import { page, src, SUTHEP, doState } from './sandbox.mjs';
 import { Seating } from '../src/seating.js';
 import { Rooms } from '../src/rooms.js';
-import { rosterOf, staysOf, hotelRoomsMeta, hotelChecksOf, EVENTS } from '../src/billing/assignments.js';
+import { rosterOf, staysOf, occupancyOf, hotelRoomsMeta, hotelChecksOf, EVENTS } from '../src/billing/assignments.js';
 
 const tick = async (n = 10) => { for (let i = 0; i < n; i++) await new Promise((r) => setImmediate(r)); };
 const res = (status, body) => ({ ok: status >= 200 && status < 300, status, json: async () => body });
@@ -62,10 +62,13 @@ async function payload() {
   const records = { 'INV-G901': joining('G901', 'Joining', 'Joining'), 'INV-G902': joining('G902', 'Joining', 'Not joining') };
   const confs = { 'INV-G901': { confirmedAt: '2026-11-01T10:00:00Z', version: 1 } };
   const roster = rosterOf({ entries: ENTRIES, register: REGISTER, records, confs, seating: seat, rooms: room, couple: COUPLE });
+  const STAYS = (rm) => staysOf({ rooms: rm, seedNames: { [KEY]: 'Heritage Executive' }, datesOf: { [KEY]: { item: 'D1-HERITAGE-EXECUTIVE', checkIn: '2027-02-27', checkOut: '2027-03-01', nights: 2 } } });
   return { ok: true, version: 'assignments/1.0.0', at: '2026-11-18T12:00:00Z', audience: 'GROOM', events: EVENTS, people: seat.people, capacity: seat.capacity,
     seating: { open: seat.open, frozen: seat.frozen, events: seat.events, log: seat.log },
-    rooms: { stays: staysOf({ rooms: room, seedNames: { [KEY]: 'Heritage Executive' }, datesOf: { [KEY]: { checkIn: '2027-02-27', checkOut: '2027-03-01', nights: 2 } } }), digest: room.digest, final: room.final, waitlist: room.waitlist, log: room.log,
-      hotelRooms: hotelRoomsMeta(room.hotelRooms), hotelChecks: hotelChecksOf(roster) },
+    rooms: { stays: STAYS(room), digest: room.digest, final: room.final, waitlist: room.waitlist, log: room.log,
+      hotelRooms: hotelRoomsMeta(room.hotelRooms), hotelChecks: hotelChecksOf(roster),
+      /* per hotel, each person once (Owners' consolidated order, 19 Nov 2026) — the server's own function over the same stays */
+      occupancy: occupancyOf(STAYS(room), room.waitlist, { rooms: { D1: '*' }, agreement: { rooms: { D1: 13 } } }) },
     roster, gaps: [] };
 }
 const OVERVIEW = { ok: true, asOf: '2026-11-18', audience: 'GROOM', chunk: 6, gate: { approved: true }, holders: [] };
@@ -283,4 +286,17 @@ test('STATIC · the page loads the extension before the console; no browser dial
   for (const f of ['assets/seating.js', 'assets/rooms.js', 'assets/pulse.js', 'wedding-preparation.html']) assert.doesNotMatch(src(f), /admin-apply|admin-read|admin-final|x-siyl-admin/, f);
   const w = src('src/worker.js');
   assert.match(w, /headers\.delete\('x-siyl-admin'\)/); assert.equal((w.match(/headers\.delete\('x-siyl-admin'\)/g) || []).length, 2, 'both public engine routes strip the Owner header');
+});
+
+test('ROOMS · per hotel, each person once (Owners\' consolidated order, 19 Nov 2026): unique guests beside the places held, booked rooms against empty allocation units, the CSV', async () => {
+  const P = await payload();
+  const { root, w } = load({ 'admin/overview': OVERVIEW, 'admin/assignments': P, revenue: { ok: false } }, '#assign');
+  await tick(60);
+  const h = root.innerHTML;
+  assert.match(h, /Unique guests in rooms<\/span><b>\d+<\/b><small>each person once/); assert.match(h, /Places held<\/span><b>\d+<\/b><small>one per person per stay — not a count of guests/);
+  assert.doesNotMatch(h, /Guests in rooms<\/span>/, 'the old sum of places is no longer called guests');
+  assert.match(h, /data-as-occupancy/); assert.match(h, /Empty allocation units/); assert.match(h, /not hotel inventory/);
+  assert.match(h, /data-as-csv="occupancy"/);
+  const csv = w.SIYL_ADMIN_BILLING.ext.csv('occupancy');
+  assert.match(csv, /Guests and Rooms per Hotel/); assert.match(csv, /All hotels,each person once/); assert.doesNotMatch(csv, /INV-|token|bearer/i);
 });

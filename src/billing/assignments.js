@@ -168,6 +168,88 @@ export function staysOf({ rooms, seedNames, datesOf }) {
   }).filter(Boolean);
 }
 
+/* WHO STAYS WHERE — PER HOTEL (Owners' consolidated order, 19 Nov 2026): "88 guests in rooms" added places across stays (one
+   person in two stays counted twice). Here every hotel has its own figures and the persons are counted once each:
+   · unique guests      — distinct persons with a place at that hotel (all its periods); the total line counts each person once;
+   · places held        — places held across the hotel's periods (a person in two periods holds two places);
+   · booked rooms       — rooms the hotel has sold to H&S for these nights. Only the Souphattra holds an agreement: it buys the
+                          rooms budget-map roomContract.rooms names (by 002 Item_ID — the same source the finance report's hotel
+                          purchase reads), and every other room one of its guests occupies is bought as an additional room (Owners,
+                          18 Nov 2026). Every other hotel sells the rooms its guests occupy — no block is held for H&S;
+   · empty allocation units — the console's room cards without a guest that the hotel has NOT sold to H&S: a free place there is
+                          not hotel availability (never "available inventory");
+   · available inventory — stated only where it is verified (the agreement's booked rooms still empty), else "not verified".
+   Nothing here is a price, a cost or a booking. */
+export function occupancyOf(stays, waitlist, roomContract) {
+  const R = (roomContract && roomContract.rooms) || {};
+  const stageOf = (item) => { const m = /^([A-Z][0-9]?)-/.exec(clean(item)); return m ? m[1] : null; };
+  const stagesOf = (st) => [...new Set((st.categories || []).map((c) => stageOf(c.item)).filter(Boolean))];
+  const covered = (c) => { const k = R[stageOf(c.item)]; return k === '*' || (Array.isArray(k) && k.includes(clean(c.item))); };
+  const hotels = new Map();
+  const waiting = new Map();
+  /* the waiting list is kept per stage of the room engine (two stays may share one — the wedding stay and the Guest House): a
+     waiting guest is counted once, at the first stay of that stage */
+  for (const w of waitlist || []) { const k = clean(w && (w.stage || w.window || clean(w.key).split('/')[0])); if (k) waiting.set(k, (waiting.get(k) || 0) + (Number(w.size) > 0 ? Number(w.size) : 1)); }
+  const counted = new Set();
+  const everyone = new Set();
+  let placesAll = 0;
+  for (const st of stays || []) {
+    if (!hotels.has(st.hotel)) hotels.set(st.hotel, { hotel: st.hotel, periods: [], persons: new Set() });
+    const H = hotels.get(st.hotel);
+    const p = { window: st.window, label: st.label, checkIn: st.checkIn, checkOut: st.checkOut, nights: null, persons: new Set(), places: 0,
+      units: 0, occupied: 0, booked: 0, bookedEmpty: 0, emptyUnits: 0, bookedRoomNights: 0, occupiedRoomNights: 0, roomNightsKnown: true, coveredUnits: 0,
+      agreement: stagesOf(st).some((x) => Object.prototype.hasOwnProperty.call(R, x)), stages: stagesOf(st),
+      itemsUnknown: (st.categories || []).some((c) => !c.item), unassigned: 0 };
+    const wk = waiting.has(st.window) ? st.window : st.stage;
+    if (!counted.has(wk)) { p.unassigned = waiting.get(wk) || 0; counted.add(wk); }
+    for (const c of st.categories || []) {
+      const n = Number.isFinite(c.nights) ? c.nights : null;
+      if (n != null) p.nights = Math.max(p.nights || 0, n); else p.roomNightsKnown = false;
+      for (const u of c.units || []) {
+        const occ = (u.occupants || []).filter((o) => o && o.guestId);
+        const inAgreement = covered(c), isBooked = inAgreement || occ.length > 0;
+        if (inAgreement) p.coveredUnits += 1;
+        p.units += 1; p.places += occ.length; placesAll += occ.length;
+        for (const o of occ) { p.persons.add(o.guestId); H.persons.add(o.guestId); everyone.add(o.guestId); }
+        if (occ.length) { p.occupied += 1; if (n != null) p.occupiedRoomNights += n; }
+        if (isBooked) { p.booked += 1; if (n != null) p.bookedRoomNights += n; if (!occ.length) p.bookedEmpty += 1; } else p.emptyUnits += 1;
+      }
+    }
+    H.periods.push(p);
+  }
+  const pct = (a, b) => (b > 0 ? Math.round((a / b) * 1000) / 10 : null);
+  const want = (roomContract && roomContract.agreement && roomContract.agreement.rooms) || {};
+  const agreementWords = (p) => {
+    const stated = p.stages.map((x) => want[x]).filter((n) => Number.isFinite(n));
+    if (!stated.length) return null;
+    const n = stated.reduce((t, x) => t + x, 0);
+    return p.coveredUnits === n ? null : 'the agreement buys ' + n + ' room' + (n === 1 ? '' : 's') + ' here; the booking system holds ' + p.coveredUnits + ' room' + (p.coveredUnits === 1 ? '' : 's') + ' of it';
+  };
+  const list = [...hotels.values()].map((H) => {
+    const periods = H.periods.map((p) => ({
+      window: p.window, label: p.label, checkIn: p.checkIn, checkOut: p.checkOut, nights: p.nights,
+      guests: p.persons.size, places: p.places, unassigned: p.unassigned,
+      bookedRooms: p.booked, occupiedRooms: p.occupied, bookedUnoccupied: p.bookedEmpty, emptyAllocationUnits: p.emptyUnits,
+      bookedRoomNights: p.roomNightsKnown ? p.bookedRoomNights : null, occupiedRoomNights: p.roomNightsKnown ? p.occupiedRoomNights : null,
+      availableInventory: p.agreement ? { verified: true, rooms: p.bookedEmpty, basis: 'rooms the hotel agreement buys that no guest occupies yet' } : { verified: false, rooms: null, basis: 'no block is held for H&S at this hotel — its free rooms are not known' },
+      occupancyPct: pct(p.occupied, p.booked),
+      basis: p.agreement ? 'the Souphattra agreement buys ' + (p.stages.some((x) => R[x] === '*') ? 'every room of this stay' : 'the rooms it names for this stay') + '; every other room a guest occupies is an additional room' : 'the hotel sells the rooms its guests occupy',
+      /* the agreement's own count of rooms beside the rooms it covers here — a difference is named, never adjusted */
+      agreementCheck: p.agreement ? agreementWords(p) : null,
+      itemsUnknown: p.itemsUnknown,
+    }));
+    const sumP = (k) => periods.reduce((t, p) => t + (p[k] || 0), 0);
+    return { hotel: H.hotel, guests: H.persons.size, places: sumP('places'), bookedRooms: sumP('bookedRooms'), occupiedRooms: sumP('occupiedRooms'),
+      bookedUnoccupied: sumP('bookedUnoccupied'), emptyAllocationUnits: sumP('emptyAllocationUnits'), unassigned: sumP('unassigned'),
+      bookedRoomNights: periods.every((p) => p.bookedRoomNights != null) ? sumP('bookedRoomNights') : null,
+      occupiedRoomNights: periods.every((p) => p.occupiedRoomNights != null) ? sumP('occupiedRoomNights') : null,
+      checkIn: periods.map((p) => p.checkIn).filter(Boolean).sort()[0] || null, checkOut: periods.map((p) => p.checkOut).filter(Boolean).sort().slice(-1)[0] || null,
+      periods };
+  });
+  return { version: 'occupancy/1.0.0', uniqueGuests: everyone.size, placesHeld: placesAll, hotels: list,
+    definition: 'unique guests count each person once; places held count one place per person per stay' };
+}
+
 /* who set the hotel room numbers, and when — never the numbers twice (they travel with each unit) */
 export function hotelRoomsMeta(h) {
   return h ? { version: h.version || 0, at: h.at || null, by: h.by || null, note: h.note || null, list: h.list || null, assigned: Object.keys(h.rooms || {}).length } : null;

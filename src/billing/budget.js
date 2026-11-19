@@ -37,14 +37,14 @@
    ========================================================================== */
 
 import { RULES, STAGES, VENDORS, BUDGET_MAP_VERSION, personNamed, roomScopeOf } from './budget-map.js';
-import { nightsBetween } from './budget-source.js';
+import { nightsBetween, mirrorPairs } from './budget-source.js';
 import { matchSpecialRate } from './engine.js';
 import { nightsOfItem } from './source.js';
 import { toCents } from './model.js';
-import { financeReportOf, unitId, hotelPurchaseOf } from './finance-report.js';
+import { financeReportOf, unitId, hotelPurchaseOf, sheetCents } from './finance-report.js';
 import { hotelRoomOf } from '../hotel-rooms.js';
 
-export const BUDGET_VERSION = 'billing-budget/1.3.0';
+export const BUDGET_VERSION = 'billing-budget/1.4.0';
 
 const clean = (v) => String(v == null ? '' : v).trim();
 const norm = (v) => clean(v).replace(/\s+/g, ' ').toLowerCase();
@@ -66,7 +66,7 @@ export const ASSUMPTIONS = Object.freeze({
 });
 
 export const LABELS = Object.freeze({
-  HOST_COST: 'Cost still to be covered by the hosts', SURPLUS: 'Expected surplus', AT_COST: 'At cost', ROUNDING: 'Rounding difference',
+  HOST_COST: 'Cost still to be covered by the hosts', SURPLUS: 'Guest revenue above planned cost', AT_COST: 'At cost', ROUNDING: 'Rounding difference',
 });
 
 /* only the sheet's own approval entry approves — "Approve by Suthep, 29.09.2026" / "Approved by …"; any other text
@@ -184,6 +184,7 @@ function itemsNamed(c, words, display) {
 
 function assign004(budget, centres, display) {
   const perCentre = new Map(), noGuest = [], unassigned = [];
+  const mirrors = mirrorPairs(asArray(budget && budget.lines));
   const byStage = new Map([...centres.values()].filter((c) => c.stage).map((c) => [c.stage, c]));
   for (const l of asArray(budget && budget.lines)) {
     const base = { row: l.row, item: l.item, vendor: l.vendor, category: l.category, details: l.details, rate: l.rate, qty: l.qty, mult: l.mult,
@@ -195,7 +196,10 @@ function assign004(budget, centres, display) {
        comparison — listed apart, never converted */
     const otherCurrency = clean(l.currency) && clean(l.currency).toUpperCase() !== 'USD' ? clean(l.currency).toUpperCase() : null;
     if (otherCurrency) { unassigned.push({ ...base, why: 'its Currency is ' + otherCurrency + ' — never converted, in no USD figure' }); continue; }
-    const role = l.rate < 0 && l.budget <= 0 ? 'PLANNED_CONTRIBUTION' : (l.rate >= 0 && l.budget >= 0 ? 'SUPPLIER_COST' : null);
+    /* the role by the SIGN OF THE BUDGET (Owners, 19 Nov 2026): a negative line with a negative rate plans a guest contribution per
+       room category; a negative line with a positive rate and a negative quantity is 004's neutralising entry of the row it mirrors
+       (budget-source mirrorPairs) — listed with the stay, never a cost, never a contribution, never revenue */
+    const role = l.rate < 0 && l.budget <= 0 ? 'PLANNED_CONTRIBUTION' : l.budget < 0 ? 'NEUTRALISING' : (l.rate >= 0 ? 'SUPPLIER_COST' : null);
     if (!role) { unassigned.push({ ...base, why: 'Rate USD ' + l.rate + ' and Budget USD ' + l.budget + ' disagree in sign — read as neither a cost nor a contribution' }); continue; }
     const rule = RULES.find((r) => norm(r.category) === norm(l.category) && r.item.test(clean(l.item)));
     if (!rule) { noGuest.push({ ...base, role }); continue; }
@@ -242,7 +246,8 @@ function assign004(budget, centres, display) {
     if (rel === 'UNREADABLE') notes.push('no readable period — placed by its name alone');
     const scoped = scope === 'ALL' || (Array.isArray(scope) && scope.length > 0);
     const usable = role === 'SUPPLIER_COST' && whose === 'GUEST_SERVICE' && base.approved && !conflicts.length && !!p && scoped;
-    const why = role !== 'SUPPLIER_COST' ? 'a planned guest contribution — comparison only, never revenue'
+    const why = role === 'NEUTRALISING' ? '004\'s neutralising entry' + (mirrors.mirrorOf.has(l.row) ? ' of row ' + mirrors.mirrorOf.get(l.row) : ' (no row it mirrors)') + ' — never a cost of this stay, never revenue'
+      : role !== 'SUPPLIER_COST' ? 'a planned guest contribution — comparison only, never revenue'
       : whose === 'PERSON_NAMED' ? 'names ' + names.join(' & ') + ' — their own place or ticket (A-2)'
       : whose === 'UNSTATED' ? 'does not say whose place it is — a question for the Owners'
       : !base.approved ? (clean(l.approval) ? 'its approval entry "' + clean(l.approval) + '" is not the sheet\'s "Approve by …" — not used' : 'not approved (no Suthep approval) — not used')
@@ -250,6 +255,7 @@ function assign004(budget, centres, display) {
       : !p ? 'no readable "Date or period" — not used'
       : !scoped ? 'names no room category of this stay — not used' : null;
     const out = { ...base, rule: rule.id, role, whose, scope, names, model: rule.model, service: rule.service || null, rel, conflicts, notes, usable, why, assumption, insideBlock: null,
+      mirrorOf: mirrors.mirrorOf.get(l.row) || null, neutralisedBy: mirrors.neutralisedBy.get(l.row) || null,
       perRoomNight: usable && rule.model === 'ROOM_BLOCK' && !notes.some((x) => /per-room rate/.test(x)) ? amt(toCents(l.rate)) : null };
     if (!perCentre.has(c.id)) perCentre.set(c.id, []);
     perCentre.get(c.id).push(out);
@@ -671,7 +677,11 @@ export function buildBudgetComparison(input) {
           : 'billed for ' + h.itemName));
         const f = inside.find((y) => y.line === x);
         if (f) merged.add(x);
-        centre.checks.push({ severity: 'data', assumption: 'A-2', row: x.row, text: 'Budget row ' + x.row + ' budgets ' + hits.map(([n]) => n).join(' & ') + '\'s own ' + (c.kind === 'STAY' ? 'place' : 'ticket') + ' as a host cost; ' +
+        /* 004 neutralises the line with its own negative row (Owners, 19 Nov 2026): the hosts do not carry it — the guest's payment is
+           collected and passed on, never "paid twice" */
+        if (x.neutralisedBy) centre.checks.push({ severity: 'info', assumption: 'A-2', row: x.row, text: 'Budget row ' + x.row + ' budgets ' + hits.map(([n]) => n).join(' & ') + '\'s own ' + (c.kind === 'STAY' ? 'place' : 'ticket') +
+          ' and 004 row ' + x.neutralisedBy + ' neutralises it; ' + said.join('; ') + ' — collected and passed on, not a host cost' + (f ? '; the line is ' + insideWords(f) : '') });
+        else centre.checks.push({ severity: 'data', assumption: 'A-2', row: x.row, text: 'Budget row ' + x.row + ' budgets ' + hits.map(([n]) => n).join(' & ') + '\'s own ' + (c.kind === 'STAY' ? 'place' : 'ticket') + ' as a host cost; ' +
           said.join('; ') + (free ? ' — what the hosts pay for it may be counted twice' : ' — possibly paid twice') + (f ? '; the line is ' + insideWords(f) : '') });
       }
       const sc = roomScopeOf(x.details);
@@ -878,12 +888,14 @@ export function buildBudgetComparison(input) {
   const sheet = (k, keep, sign, field, what) => {
     if (T[k] == null) return null;
     const val = (l) => sign * (toCents(field === 'paid' ? l.paid : l.budget) || 0);
-    const cents = sumCents(rl.filter(keep).map(val));
-    const c = { what, cell: T[k + 'Cell'], sheet: amt(toCents(T[k])), lines: amt(cents), equal: toCents(T[k]) === cents, formula: T[k + 'Formula'] || null, range: null, outside: [], carries: null };
+    /* the lines' own values added, then rounded once — as the sheet rounds its sum (1.4.0: no per-line rounding difference) */
+    const rawOf = (l) => { const v = field === 'paid' ? l.paid : l.budget; return Number.isFinite(v) ? sign * v : 0; };
+    const cents = sheetCents(rl.filter(keep).reduce((t, l) => t + rawOf(l), 0));
+    const c = { what, cell: T[k + 'Cell'], sheet: amt(sheetCents(T[k])), lines: amt(cents), equal: sheetCents(T[k]) === cents, formula: T[k + 'Formula'] || null, range: null, outside: [], carries: null };
     if (!c.equal && c.formula) {
       const range = rangeIn(c.formula, cols004[field]);
       const outside = range ? rl.filter((l) => keep(l) && (l.row < range.from || l.row > range.to) && val(l) !== 0) : [];
-      if (outside.length && sumCents(outside.map(val)) === cents - toCents(T[k])) { c.range = range; c.outside = outside.map((l) => ({ row: l.row, amount: amt(val(l)) })); }
+      if (outside.length && sheetCents(outside.reduce((t, l) => t + rawOf(l), 0)) === cents - sheetCents(T[k])) { c.range = range; c.outside = outside.map((l) => ({ row: l.row, amount: amt(val(l)) })); }
     }
     return c;
   };

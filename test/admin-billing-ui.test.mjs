@@ -589,13 +589,21 @@ function reviewRevenue() {
   const centres = [{ id: 'W1', place: 'Hotel Alpha · wedding stay', status: 'COMPLETE', missing: [], rooms: [{ label: 'F', item: 'W1-EXEC', lines: [
     { person: 'GT1', amount: usd(29000), statement: 'S-T1-0001', rateSource: '002' }, { person: 'GT2', amount: usd(0), complimentaryNights: 2, rateSource: '009' }, { person: 'GT3', amount: usd(7500), rateSource: '009' }] }] }];
   const contracts = [{ stay: 'W1', items: '*', ratePerRoomNight: 150 }];
-  const dashboard = { costs: { original: usd(500000), forecast: usd(560000), adjustments: [] }, position: { stated: true, projectedOwnerFunded: usd(523500), coverageProjected: 6.5 } };
+  const dashboard = { costs: { original: usd(500000), forecast: usd(560000), adjustments: [{ vendor: 'Hotel Beta', category: 'Accommodation', stages: ['W1'], difference: usd(60000) }] }, position: { stated: true, projectedOwnerFunded: usd(523500), coverageProjected: 6.5 } };
+  /* the guests' billing by class as the server splits it (revenue-classes) — synthetic */
+  const four = (b, i, r, o) => ({ booked: usd(b), invoiced: usd(i), received: usd(r), outstanding: usd(o) });
+  const classes = { version: 'revenue-classes/1.0.0', complete: true, classes: { SOUPHATTRA_ACCOMMODATION: { label: 'x', ...four(36500, 39000, 0, 39000), guests: 3, rooms: 1, roomNights: 2 },
+      OTHER_ACCOMMODATION: four(0, 0, 0, 0), PASS_THROUGH: four(0, 0, 0, 0), NOT_CLASSIFIED: four(0, 0, 0, 0) }, china: four(0, 0, 0, 0), totalGuestBilling: four(36500, 39000, 0, 39000),
+    souphattra: { guestsAcrossPeriods: 3, byPeriod: [{ window: 'wed', stage: 'W1', label: 'Wedding stay', ...four(36500, 39000, 0, 39000), guests: 3, rooms: 1, roomNights: 2 }],
+      byCategory: [{ Item_ID: 'W1-EXEC', ...four(36500, 39000, 0, 39000), guests: 3, rooms: 1 }],
+      byBooking: [{ Booking_ID: 'BK-T1', Holder_ID: 'INV-T1', Item_ID: 'W1-EXEC', Person_ID: 'GT1', period: 'Wedding stay', nights: 2, booked: usd(29000), invoiced: usd(29000), status: 'UNPAID' }] },
+    otherAccommodation: [], passThrough: [{ Item_ID: 'T-OFFER', china: false, basis: 'collected and passed on', confirmed: null, ...four(0, 0, 0, 0), guests: 0 }], notClassified: [], unallocated: { statements: [] }, excluded: [], reconciliation: {} };
   const report = financeReportOf({ budget: { totals: { totalBudget: 4000, totalBudgetCell: 'A2', budgetLeft: -1000, budgetLeftCell: 'F2' }, lines: [
       { row: 8, item: 'Hotel Alpha', vendor: 'Hotel Alpha', category: 'Accommodation', details: 'All Categories Rooms', rate: 150, qty: 2, mult: 2, budget: 600, paid: null, readable: true, periodText: '27.02-01.03.2031', period: { from: '2031-02-27', to: '2031-03-01' } },
       { row: 9, item: 'Rooms', vendor: 'Hotel Beta', category: 'Accommodation', budget: 4400, paid: null, readable: true }] },
     suppliers: [{ vendor: 'Sky Bakery', stages: [], contract: { currency: 'THB', cents: 3000000, amount: 30000 }, payments: [] }], centres, plan, contracts, dashboard,
     roomContractMeta: { ratePerRoomNight: 150, rooms: { W1: '*' }, agreement: { rooms: { W1: 2 }, total: 600 }, additional: { ratePerRoomNight: 150 }, supplement: { perRoomNight: 60, confirmed: true } },
-    rule: { category: 'Accommodation', item: /^hotel alpha\b/i }, vendor: /^hotel alpha\b/i, revenue: { booked: { cents: 36500, complete: true } }, receipts: { cashCollected: { cents: 0, complete: true } },
+    rule: { category: 'Accommodation', item: /^hotel alpha\b/i }, vendor: /^hotel alpha\b/i, revenue: { booked: { cents: 36500, complete: true }, classes }, receipts: { cashCollected: { cents: 0, complete: true } },
     list012: [{ row: 2, building: 'C', roomType: 'Grand Exec (Twin)', roomNo: '203', checkIn: '27.02.2031', checkOut: '01.03.2031', guests: ['Guest', 'Guest', 'Guest'] }] });
   for (const u of plan[0].rooms) {
     const l = report.purchase.lines.find((x) => x.label === u.label);
@@ -604,7 +612,7 @@ function reviewRevenue() {
       hotelRoom: u.label === 'F' ? { hotel: 'Hotel Alpha', numbers: ['203'], display: '203', building: 'C', type: 'Grand Exec (Twin)', suite: false } : null, hotelCost: usd(30000), hotelCostBasis: 'CONTRACT', hotelNights: { contract: 2, additional: 0 }, hotelStatus: l.status,
       hotelSupplement: l.cost.supplement ? usd(l.cost.supplement) : null, hotelIn004: { contract: l.rows.contract, additional: l.rows.additional, supplement: l.rows.supplement } });
   }
-  return { ok: true, asOf: '2026-11-18', calculatedAt: '2026-11-18T08:00:00.000Z', counts: {}, bookedRevenue: usd(36500), issuedRevenue: usd(39000), notYetInvoiced: usd(7500), changedSinceIssue: usd(-10000),
+  return { ok: true, asOf: '2026-11-18', calculatedAt: '2026-11-18T08:00:00.000Z', counts: {}, classes, bookedRevenue: usd(36500), issuedRevenue: usd(39000), notYetInvoiced: usd(7500), changedSinceIssue: usd(-10000),
     invoicedNotBooked: usd(0), outstanding: usd(39000), cashCollected: usd(0), overdue: usd(0), paymentsReported: usd(0),
     holders: [{ Holder_ID: 'INV-T1', Settlement_ID: 'S-T1-0001', revision: 1, issueDate: '2026-10-07', dueDate: '2026-10-28', issued: usd(39000), cashCollected: usd(0), outstanding: usd(39000), overdue: usd(0), paymentStatus: 'UNPAID', changedSinceIssue: usd(-10000), invoicedNotBooked: usd(0) }],
     budget: { available: true, version: 'billing-budget/1.2.0', asOf: '2026-11-18', dashboard, report, roomPlan: plan, roomContracts: contracts, centres, categories: [], suppliers: [], checks: [], questions: [], reconciliation: {} } };
@@ -658,17 +666,24 @@ test('REVIEW · Rooms & rates: by hotel and period, hotel room no. and building 
   assert.ok((h.match(/<td(?![^>]*data-l=)/g) || []).length === 0, 'every cell named for the phone');
 });
 
-test('REVIEW · Finance: A executive summary, B budget vs actual, C revenue, D hotels, E exceptions; print and CSVs; Revenue keeps guest revenue only', async () => {
+test('REVIEW · Finance: A executive summary, B budget vs actual, C guest billing by class, D Souphattra financial performance, E exceptions; print and CSVs; Revenue keeps guest revenue only', async () => {
   const revenue = reviewRevenue();
   const { root, A, calls } = load({ 'admin/overview': OVERVIEW, 'admin/status': statusAnswer, revenue }, { hash: '#finance' });
   await tick(40);
   const h = root.innerHTML;
-  for (const t of ['Executive summary', 'Budget vs actual and forecast', 'Guest revenue and receivables', 'Hotel financial performance', 'Reconciliation and exceptions']) assert.ok(h.indexOf(t) > 0, t);
-  assert.ok(h.indexOf('Executive summary') < h.indexOf('Budget vs actual') && h.indexOf('Hotel financial performance') < h.indexOf('Reconciliation and exceptions'), 'the report\'s order');
-  assert.match(h, /Approved budget<\/p><p class="t-h1" data-i18n-skip>USD 4,000\.00/); assert.match(h, /Budget variance<\/p><p class="t-h1" data-i18n-skip>\+USD 1,600\.00/);
+  for (const t of ['Executive summary', 'Budget vs actual and forecast', 'Guest billing by class, revenue and receivables', 'Souphattra Heritage – Financial Performance', 'Reconciliation and exceptions']) assert.ok(h.indexOf(t) > 0, t);
+  assert.ok(h.indexOf('Executive summary') < h.indexOf('Budget vs actual') && h.indexOf('Souphattra Heritage – Financial Performance') < h.indexOf('Reconciliation and exceptions'), 'the report\'s order');
+  assert.match(h, /Approved wedding budget<\/p><p class="t-h1" data-i18n-skip>USD 4,000\.00/); assert.match(h, /Wedding budget variance<\/p><p class="t-h1" data-i18n-skip>\+USD 1,600\.00/);
+  /* the Owners' order of 19 Nov 2026: the Souphattra's own revenue, its purchase and the difference by their exact name; no "Surplus", no "Profit" */
+  assert.match(h, /Souphattra Heritage – Accommodation Revenue<\/p><p class="t-h1" data-i18n-skip>USD 365\.00/);
+  assert.match(h, /data-ab-souphattra-fp/); assert.match(h, /Accommodation Revenue – Hotel Purchase Cost Difference/);
+  assert.match(h, /data-ab-classes/); assert.match(h, /Total guest billing/); assert.match(h, /China \/ private travel/);
+  assert.match(h, /data-ab-signed004/); assert.match(h, /Planned, net \(004\)/);
+  { const m = h.match(/.{80}(Surplus|surplus|Net Profit|net profit).{40}/); assert.ok(!m, 'never "Surplus", never "Net Profit": ' + (m && m[0])); }
   assert.match(h, /THB 30,000\.00/); assert.doesNotMatch(h, /USD 30,000/, 'THB keeps THB');
   assert.match(h, /USD equivalent <span class="ab-id">at the reporting reference rates — a reference, not a transaction rate<\/span>.*≈ USD 890\.74/, 'beside it, labelled');
-  assert.match(h, /Remaining project budget<\/p><p class="t-h1" data-i18n-skip>−USD 1,000\.00/); assert.match(h, /Projected financial position<\/p><p class="t-h1" data-i18n-skip>−USD 5,235\.00/);
+  assert.match(h, /Remaining wedding budget<\/p><p class="t-h1" data-i18n-skip>−USD 1,600\.00/); assert.match(h, /004 F2 "Budget left" states −USD 1,000\.00/);
+  assert.match(h, /Projected wedding financial position<\/p><p class="t-h1" data-i18n-skip>−USD 5,235\.00/);
   assert.match(h, /Additional hotel purchase costs<\/p><p class="t-h1" data-i18n-skip>USD 120\.00/);
   assert.match(h, /Souphattra Heritage · the bookings beside 004/); assert.match(h, /data-ab-recon/); assert.match(h, /Proposed 004 additions · awaiting your approval/);
   assert.match(h, /data-ab-proposals.*additional-person charge.*Guest 3 \(GT3\).*USD 120\.00/);
@@ -677,13 +692,21 @@ test('REVIEW · Finance: A executive summary, B budget vs actual, C revenue, D h
   assert.match(h, /data-ab-print/); assert.match(h, /data-ab-csv="finance-summary"/); assert.match(h, /data-ab-csv="budget-vs-actual"/);
   assert.match(h, /class="ab-print-head"/);
   assert.ok(calls.every((c) => c.method === 'GET'), 'Finance only reads');
-  const fin = A.csv.finance('finance-summary'); assert.match(fin, /Approved budget/); assert.match(fin, /Data as of/); assert.match(fin, /Currency/);
+  const fin = A.csv.finance('finance-summary'); assert.match(fin, /Approved wedding budget/); assert.match(fin, /Souphattra Heritage – Accommodation Revenue,365/); assert.match(fin, /Data as of/); assert.match(fin, /Currency/);
   const bva = A.csv.finance('budget-vs-actual'); assert.match(bva, /Approved budget \(004 A2, total only\)/); assert.match(bva, /Committed, USD equivalent \(reference rate\)/);
   const rc = A.csv.finance('reconciliation-004'); assert.match(rc, /004 row as written,8,hotel agreement,set against the booked rooms/);
   assert.match(rc, /Proposed addition,,additional-person charge,new entry,W1,F,Grand Exec,Guest 3,GT3/); assert.match(rc, /awaiting the Owners' approval — not written to 004/);
   const rv = load({ 'admin/overview': OVERVIEW, 'admin/status': statusAnswer, revenue }, { hash: '#revenue' });
   await tick(40);
   assert.match(rv.root.innerHTML, /data-ab-receivables/); assert.match(rv.root.innerHTML, /S-T1-0001 · V1/); assert.match(rv.root.innerHTML, /data-ab-csv="receivables"/);
+  /* the Souphattra's accommodation revenue is the Revenue tab's first, standalone figure */
+  const rh = rv.root.innerHTML;
+  assert.ok(rh.indexOf('data-ab-souphattra') > 0 && rh.indexOf('data-ab-souphattra') < rh.indexOf('data-ab-rev-main'), 'first, before all guest billing');
+  assert.match(rh, /Booked accommodation revenue<\/p><p class="t-h1" data-i18n-skip>USD 365\.00/); assert.match(rh, /data-ab-rev-classes/); assert.match(rh, /data-ab-csv="souphattra-revenue"/);
+  assert.match(rv.A.csv.classes('souphattra-revenue'), /Total,Souphattra Heritage – Accommodation Revenue,,,3,1,2,365,390,0,390/);
+  assert.match(rv.A.csv.classes('pass-through'), /T-OFFER,no,collected and passed on,to confirm/);
+  assert.match(rv.A.csv.classes('revenue-by-class'), /Total guest billing,each line once/);
+  assert.doesNotMatch(rh, /Surplus|Net Profit/);
   assert.doesNotMatch(rv.root.innerHTML, /Executive summary|Approved budget/, 'costs and budget stay in Finance');
   assert.match(rv.A.csv.receivables(), /INV-T1/);
 });
@@ -717,4 +740,21 @@ test('ADMIN UI · Download Original PDF: in a guest\'s row (the current version,
   el(L2.root, 'data-ab-pdf', '1').onclick({}); await tick();
   assert.ok(pdfs.some((u) => u === '/api/billing/pdf?holder=INV-T2&rev=1'), 'the superseded original, by its own version');
   assert.ok(!L1.calls.concat(L2.calls).some((c) => c.method === 'POST'), 'a download writes nothing');
+});
+
+test('REVIEW 19 Nov · Souphattra Heritage – Financial Performance counts the confirmed purchase only: a held room\'s cost is named apart, never in the difference', async () => {
+  const revenue = reviewRevenue();
+  const hp = revenue.budget.report.purchase;
+  const confirmedCost = hp.totals.contract.cents + hp.confirmed.additional.cents + hp.confirmed.supplement.cents;
+  /* a held room: in the purchase's totals and its pending, never in the confirmed parts */
+  hp.totals = { ...hp.totals, additional: { currency: 'USD', cents: hp.totals.additional.cents + 30000, amount: (hp.totals.additional.cents + 30000) / 100 }, total: { currency: 'USD', cents: hp.totals.total.cents + 30000, amount: (hp.totals.total.cents + 30000) / 100 } };
+  hp.pending = { currency: 'USD', cents: 30000, amount: 300 };
+  const { root } = load({ 'admin/overview': OVERVIEW, 'admin/status': statusAnswer, revenue }, { hash: '#finance' });
+  await tick(40);
+  const d = root.innerHTML.split('data-ab-souphattra-fp')[1].split('</table>')[0];
+  const usdOf = (c) => 'USD ' + (c / 100).toLocaleString('en-US', { minimumFractionDigits: 2 });
+  assert.ok(d.includes('Total hotel purchase cost</b><span class="ab-id">confirmed bookings</span></td><td data-l="USD" class="num"><span data-i18n-skip><b>' + usdOf(confirmedCost)), 'the confirmed purchase');
+  assert.match(d, /Held, not confirmed — not counted.*USD 300\.00/);
+  const diff = 36500 - confirmedCost;
+  assert.ok(d.includes((diff < 0 ? '−' : '+') + usdOf(Math.abs(diff))), 'revenue − the confirmed purchase');
 });

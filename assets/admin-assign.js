@@ -365,7 +365,7 @@
   function exportsBar(area) {
     var sep = C.csvSep(), items = area === 'seating'
       ? [['ceremony', 'CSV · Final Ceremony Seating Plan'], ['dinner', 'CSV · Final Dinner Seating Plan'], ['rooming', 'CSV · Final Hotel Rooming List'], ['outstanding', 'CSV · Unassigned guests / outstanding']]
-      : [['rooming', 'CSV · Final Hotel Rooming List'], ['outstanding', 'CSV · Unassigned guests / outstanding'], ['ceremony', 'CSV · Ceremony plan'], ['dinner', 'CSV · Dinner plan']];
+      : [['rooming', 'CSV · Final Hotel Rooming List'], ['occupancy', 'CSV · Guests and rooms per hotel'], ['outstanding', 'CSV · Unassigned guests / outstanding'], ['ceremony', 'CSV · Ceremony plan'], ['dinner', 'CSV · Dinner plan']];
     return '<div class="ab-export" data-as-export>' + items.map(function (x) { return '<button type="button" class="ab-filter" data-as-csv="' + x[0] + '">' + esc(x[1]) + '</button>'; }).join('') +
       '<label class="ab-sep"><span class="ab-mute">CSV for</span> <select data-ab-csvsep aria-label="CSV format"><option value=","' + (sep === ',' ? ' selected' : '') + '>Excel · comma</option><option value=";"' + (sep === ';' ? ' selected' : '') + '>Excel Europe · semicolon</option></select></label>' +
       (draftCount() ? '<p class="ab-why">Exports show the confirmed plans only — your unsaved draft is not in them.</p>' : '') + '</div>';
@@ -495,13 +495,39 @@
     if (moves.length) h += '<p class="t-b2 ab-flag">Another hotel room from 27 February: ' + moves.map(function (x) { return esc(firstOf(x.guestId)) + ' (' + esc(x.from) + ' → ' + esc(x.to) + ')'; }).join(' · ') + '</p>';
     return h + '</div>';
   }
+  /* PER HOTEL, EACH PERSON ONCE (Owners' consolidated order, 19 Nov 2026 · src/billing/assignments.js occupancyOf): booked rooms are
+     the rooms the hotel sold to H&S; an empty allocation unit elsewhere is not hotel inventory */
+  function occupancyPanel(R) {
+    var O = R.occupancy;
+    if (!O) return '';
+    var td = function (label, v, n) { return '<td data-l="' + esc(label) + '"' + (n ? ' class="num"' : '') + '>' + v + '</td>'; };
+    var n = function (v) { return v == null ? '—' : esc(v); };
+    var line = function (title, sub, x, cls) {
+      var inv = x.availableInventory ? (x.availableInventory.verified ? esc(x.availableInventory.rooms) + ' <span class="ab-id">booked, still empty</span>' : '<span class="ab-mute">not verified</span>') : '';
+      return '<tr' + (cls ? ' class="' + cls + '"' : '') + '>' + td('Hotel · period', title + (sub ? '<span class="ab-id">' + sub + '</span>' : '')) + td('Unique guests', n(x.guests), 1) + td('Places held', n(x.places), 1) +
+        td('Booked rooms', n(x.bookedRooms), 1) + td('Occupied', n(x.occupiedRooms), 1) + td('Booked, unoccupied', n(x.bookedUnoccupied), 1) + td('Empty allocation units', n(x.emptyAllocationUnits), 1) +
+        td('Unassigned guests', n(x.unassigned), 1) + td('Room nights (booked · occupied)', n(x.bookedRoomNights) + ' · ' + n(x.occupiedRoomNights), 1) + td('Available inventory', inv, 1) +
+        td('Occupancy', x.occupancyPct == null ? '—' : esc(x.occupancyPct) + ' %', 1) + '</tr>';
+    };
+    var rows = (O.hotels || []).map(function (H) {
+      /* one period: the hotel's row is that period's (its occupancy, inventory and agreement check shown); several: the hotel's sums above them */
+      if (H.periods.length === 1) { var p0 = H.periods[0]; return line('<b>' + esc(H.hotel) + '</b>', esc(C.day(p0.checkIn) + ' – ' + C.day(p0.checkOut) + (p0.nights ? ' · ' + p0.nights + ' nights' : '')) + (p0.agreementCheck ? ' · ' + esc(p0.agreementCheck) : ''), p0); }
+      var head = line('<b>' + esc(H.hotel) + '</b>', esc(C.day(H.checkIn) + ' – ' + C.day(H.checkOut)) + ' · rooms and room nights of its periods added', H, 'ab-total');
+      return head + H.periods.map(function (p) { return line(esc(p.label), esc(C.day(p.checkIn) + ' – ' + C.day(p.checkOut) + (p.nights ? ' · ' + p.nights + ' nights' : '')) + (p.agreementCheck ? ' · ' + esc(p.agreementCheck) : ''), p); }).join('');
+    }).join('');
+    rows += '<tr class="ab-total">' + td('Hotel · period', '<b>All hotels</b><span class="ab-id">each person once</span>') + td('Unique guests', '<b>' + esc(O.uniqueGuests) + '</b>', 1) + td('Places held', esc(O.placesHeld), 1) +
+      td('Booked rooms', '', 1) + td('Occupied', '', 1) + td('Booked, unoccupied', '', 1) + td('Empty allocation units', '', 1) + td('Unassigned guests', '', 1) + td('Room nights (booked · occupied)', '', 1) + td('Available inventory', '', 1) + td('Occupancy', '', 1) + '</tr>';
+    return '<div class="p-card ab-panel" data-as-occupancy><p class="t-l1">Guests and rooms per hotel</p>' +
+      '<div class="ab-table-wrap"><table class="ab-table ab-fin"><thead><tr><th>Hotel · period</th><th class="num">Unique guests</th><th class="num">Places held</th><th class="num">Booked rooms</th><th class="num">Occupied</th><th class="num">Booked, unoccupied</th><th class="num">Empty allocation units</th><th class="num">Unassigned guests</th><th class="num">Room nights (booked · occupied)</th><th class="num">Available inventory</th><th class="num">Occupancy</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      '<p class="t-b2 ab-mute">Unique guests count each person once — a guest of several periods or hotels is one guest there, and once in "All hotels". Booked rooms are the rooms the hotel sold to H&amp;S: at the Souphattra Heritage the agreement\'s rooms (every room of the wedding stay, the Presidential of 25–27 Feb) and every other room a guest occupies; at every other hotel, the rooms its guests occupy — no block is held there. An empty room card that no agreement buys is an allocation unit, not hotel inventory: a free place in it says nothing about the hotel\'s availability. Occupancy = occupied ÷ booked rooms.</p></div>';
+  }
   function roomsView() {
     if (X.phase !== 'ready') return gate();
     var R = X.data.rooms, fw = finalWords(R.final), pend = rpending();
     var h = '<section class="ab-assign" data-as-area="rooms"><p class="t-l1">Room Assignments</p><h2 class="t-h1">Who sleeps where — every stay</h2>' +
       '<p class="t-b2 ab-mute">Choose a guest, then a room of the same category: a free place moves them, a guest swaps with them. Another category or stay is a booking change and is never made here. Rooms with an extra bed, a guest\'s own room, a place kept for a party and the couple\'s suite stay as they are. Room A, B, C … are the booking system\'s allocation labels; the hotel room number and building beside them are the Souphattra Heritage\'s official list as you assigned it — a suite of two numbers is one room.</p>' +
-      '<div class="as-kpi"><div><span class="t-l1">Guests in rooms</span><b>' + stays().reduce(function (n, s) { return n + s.guests; }, 0) + '</b><small>places held, all stays</small></div><div><span class="t-l1">Waiting list</span><b>' + (R.waitlist || []).length + '</b><small>no room yet</small></div><div><span class="t-l1">Release</span>' + chip(fw[0], fw[1]) + '</div></div>';
-    h += hotelPanel(R);
+      '<div class="as-kpi"><div><span class="t-l1">Unique guests in rooms</span><b>' + (R.occupancy ? R.occupancy.uniqueGuests : '—') + '</b><small>each person once, every hotel · the couple included</small></div><div><span class="t-l1">Places held</span><b>' + (R.occupancy ? R.occupancy.placesHeld : stays().reduce(function (n, s) { return n + s.guests; }, 0)) + '</b><small>one per person per stay — not a count of guests</small></div><div><span class="t-l1">Waiting list</span><b>' + (R.waitlist || []).reduce(function (n, w) { return n + (Number(w && w.size) > 0 ? Number(w.size) : 1); }, 0) + '</b><small>persons, no room yet</small></div><div><span class="t-l1">Release</span>' + chip(fw[0], fw[1]) + '</div></div>';
+    h += occupancyPanel(R) + hotelPanel(R);
     if (X.rmsg) h += '<p class="ab-msg" role="status">' + esc(X.rmsg) + '</p>';
     if (X.rerr) h += '<p class="ab-err" role="alert">' + esc(X.rerr) + '</p>';
     var s0 = X.rsel ? guest(X.rsel.guestId) : null;
@@ -595,8 +621,17 @@
     return C.csvDoc('Unassigned Guests / Outstanding Assignments — H&S Wedding 001', metaOf('', null, null, [['Status', 'working list — always the current confirmed state']]),
       ['Event / stay', 'Outstanding', 'First name', 'Last name', 'Guest ID', 'Travelling with', 'Booking status', 'Answer'], rows);
   }
-  function csvOf(kind) { return kind === 'ceremony' || kind === 'dinner' ? seatCsv(kind) : kind === 'rooming' ? roomingCsv() : kind === 'outstanding' ? outstandingCsv() : null; }
-  var FILES = { ceremony: 'final-ceremony-seating-plan', dinner: 'final-dinner-seating-plan', rooming: 'final-hotel-rooming-list', outstanding: 'unassigned-guests-outstanding-assignments' };
+  function occupancyCsv() {
+    var O = (X.data.rooms && X.data.rooms.occupancy) || { hotels: [] }, R = X.data.rooms, rows = [];
+    var r = function (hotel, period, x) { return [hotel, period, x.checkIn || '', x.checkOut || '', x.guests, x.places, x.bookedRooms, x.occupiedRooms, x.bookedUnoccupied, x.emptyAllocationUnits, x.unassigned,
+      x.bookedRoomNights == null ? '' : x.bookedRoomNights, x.occupiedRoomNights == null ? '' : x.occupiedRoomNights, x.availableInventory ? (x.availableInventory.verified ? x.availableInventory.rooms : 'not verified') : '', x.occupancyPct == null ? '' : x.occupancyPct]; };
+    (O.hotels || []).forEach(function (H) { if (H.periods.length === 1) rows.push(r(H.hotel, H.periods[0].label, H.periods[0])); else { rows.push(r(H.hotel, 'all periods (rooms and room nights added)', H)); H.periods.forEach(function (p) { rows.push(r(H.hotel, p.label, p)); }); } });
+    rows.push(['All hotels', 'each person once', '', '', O.uniqueGuests, O.placesHeld, '', '', '', '', '', '', '', '', '']);
+    return C.csvDoc('Guests and Rooms per Hotel — H&S Wedding 001', metaOf('', null, R.final, [['Unique guests', 'each person once per hotel and once in "All hotels"; places held = one per person per stay'], ['Booked rooms', 'the rooms the hotel sold to H&S (Souphattra: the agreement\'s rooms and every other occupied room; elsewhere the occupied rooms)'], ['Empty allocation units', 'room cards no agreement buys — not hotel inventory']]),
+      ['Hotel', 'Period', 'Check-in', 'Check-out', 'Unique guests', 'Places held', 'Booked rooms', 'Occupied rooms', 'Booked, unoccupied', 'Empty allocation units', 'Unassigned guests', 'Booked room nights', 'Occupied room nights', 'Available inventory', 'Occupancy %'], rows);
+  }
+  function csvOf(kind) { return kind === 'ceremony' || kind === 'dinner' ? seatCsv(kind) : kind === 'rooming' ? roomingCsv() : kind === 'outstanding' ? outstandingCsv() : kind === 'occupancy' ? occupancyCsv() : null; }
+  var FILES = { ceremony: 'final-ceremony-seating-plan', dinner: 'final-dinner-seating-plan', rooming: 'final-hotel-rooming-list', outstanding: 'unassigned-guests-outstanding-assignments', occupancy: 'guests-and-rooms-per-hotel' };
 
   /* ---------------------------------------------------------------- the wiring */
   function wire(root, on) {
