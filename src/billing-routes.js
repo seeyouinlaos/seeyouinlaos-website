@@ -39,9 +39,9 @@ import { pricingSource, catalogueKey } from './billing/catalogue-cache.js';
 import { effectivePreference, routeFor, statedNationality, destinationOf, firstVerifiedPayment, isChannel, PREFERENCE_SOURCE } from './billing/preference.js';
 import { GoogleSheetsUnavailable, batchReadRanges } from './google-sheets.js';
 import { calculate, perPerson, matchSpecialRate, COUPLE_PERSONS } from './billing/engine.js';
-import { unitOf as roomUnitOf } from './rooms.js';
+import { unitOf as roomUnitOf, COUPLE_GUESTS } from './rooms.js';
 import { SEED as ROOM_SEED } from './inventory-seed.js';
-import { ASSIGNMENTS_VERSION, EVENTS as ASSIGNMENT_EVENTS, coupleOfEntries, guestsOfIndex, personName, attendanceOf, rosterOf, staysOf, seatChangeOf, roomChangeOf, roomMovesOf, sentRoomLines } from './billing/assignments.js';
+import { ASSIGNMENTS_VERSION, EVENTS as ASSIGNMENT_EVENTS, coupleOfEntries, guestsOfIndex, personName, attendanceOf, rosterOf, staysOf, hotelRoomsMeta, hotelChecksOf, seatChangeOf, roomChangeOf, roomMovesOf, sentRoomLines } from './billing/assignments.js';
 import { priceDifference } from './billing/price-difference.js';
 import {
   buildSnapshot, canIssue, dueDateFor, freezeFx, inPreferredCurrency,
@@ -2304,7 +2304,8 @@ async function adminAssignments(env, identity, url, cors) {
   return jsonRes({ ok: true, version: ASSIGNMENTS_VERSION, at: new Date().toISOString(), audience: admin, events: ASSIGNMENT_EVENTS,
     people: seat.j.people, capacity: seat.j.capacity,
     seating: { open: seat.j.open, frozen: seat.j.frozen, events: seat.j.events, log: seat.j.log },
-    rooms: { stays: staysOf({ rooms: room.j, seedNames, datesOf: src.datesOf }), digest: room.j.digest, final: room.j.final, waitlist: room.j.waitlist || [], log: room.j.log },
+    rooms: { stays: staysOf({ rooms: room.j, seedNames, datesOf: src.datesOf }), digest: room.j.digest, final: room.j.final, waitlist: room.j.waitlist || [], log: room.j.log,
+      hotelRooms: hotelRoomsMeta(room.j.hotelRooms), hotelChecks: hotelChecksOf(roster) },
     roster, gaps: src.gaps }, 200, cors);
 }
 
@@ -2400,6 +2401,19 @@ async function adminRoomsApply(env, identity, request, url, cors, deps) {
   const out = await engineAdmin(env, 'ROOMS', 'rooms', 'admin-apply', adminLabel(identity), { target: change.target, expect: change.expect, approveRoomCount: change.approveRoomCount, dryRun: change.dryRun });
   return jsonRes(out.j, out.status, cors);
 }
+/** POST admin/rooms/hotel { set: { '<key>|<label>': ['105'] | ['210', '211'] | null }, expectVersion, note, dryRun } — the Owners' hotel
+    room numbers of the Souphattra's units (src/hotel-rooms.js · the room engine checks them against the official list and keeps
+    them). A number never moves a guest, never changes a place, a booking, a rate, a statement or a cost. */
+async function adminRoomsHotel(env, identity, request, cors) {
+  const body = await request.json().catch(() => null);
+  const set = body && body.set && typeof body.set === 'object' && !Array.isArray(body.set) ? body.set : null;
+  const okNos = (v) => v === null || (Array.isArray(v) && v.length >= 1 && v.length <= 4 && v.every((n) => typeof n === 'string' && /^\d{3}$/.test(n.trim())));
+  if (!set || !Object.keys(set).length || Object.keys(set).length > 80) return jsonRes({ ok: false, reason: 'INVALID', error: 'a change names 1 to 80 rooms' }, 400, cors);
+  for (const [k, v] of Object.entries(set)) if (!/^[a-z0-9-]+\/[a-z0-9-]+\|[A-Z]{1,2}$/.test(k) || !okNos(v)) return jsonRes({ ok: false, reason: 'INVALID', error: 'invalid room ' + String(k).slice(0, 48) }, 400, cors);
+  if (!Number.isInteger(Number(body.expectVersion)) || Number(body.expectVersion) < 0) return jsonRes({ ok: false, reason: 'INVALID', error: 'expectVersion required' }, 400, cors);
+  const out = await engineAdmin(env, 'ROOMS', 'rooms', 'admin-hotel-rooms', adminLabel(identity), { set, expectVersion: Number(body.expectVersion), note: clean(body.note).slice(0, 300), dryRun: body.dryRun === true });
+  return jsonRes(out.j, out.status, cors);
+}
 /** POST admin/rooms/final { action: release | withdraw, expectDigest } */
 async function adminRoomsFinal(env, identity, request, cors, deps) {
   const body = await request.json().catch(() => null);
@@ -2470,6 +2484,8 @@ async function unitsForOwners(env, items) {
   for (const k of keys) {
     const units = (plan.units && plan.units[k]) || [];
     out[k] = units.filter((u) => !u.dedicatedTo).map((u) => ({ label: u.label, places: u.places,
+      /* the couple's suite (Owners, 19 Nov 2026): Haruthai's and Suthep's alone — recorded for nobody else */
+      ...(u.couple ? { couple: true } : {}),
       /* a place kept for a party carries the guest id "~…" — it is a kept place, never a person */
       holders: (u.occupants || []).filter((o) => o.guestId && !String(o.guestId).startsWith('~')).map((o) => o.guestId), kept: (u.occupants || []).filter((o) => !o.guestId || String(o.guestId).startsWith('~')).length,
       keptFor: (u.occupants || []).filter((o) => !o.guestId || String(o.guestId).startsWith('~')).map((o) => o.partyId || null),
@@ -2544,6 +2560,9 @@ async function adminOwnerBookingsPost(env, identity, request, url, cors) {
   if (Number(body.expectedRev) !== rec.rev) return jsonRes({ ok: false, error: 'the bookings changed since they were shown; nothing was written', reasons: ['STALE'], rev: rec.rev }, 409, cors);
   let held = null;
   if (action === 'confirm') {
+    /* the couple's suite, recorded for anyone else before the rule — with or without a room — is never confirmed (review, 19 Nov 2026) */
+    const strangers = (rec.entries || []).filter((e) => { const it = src.items[clean(e.itemId)], key = it ? clean(it.Site_Product_Key).split(/[,|]/)[0] : ''; return key && ROOM_SEED[key] && ROOM_SEED[key].couple && !COUPLE_GUESTS.includes(clean(e.personId)); });
+    if (strangers.length) return jsonRes({ ok: false, error: 'the Souphattra Presidential is the couple\'s suite — remove the entries of anyone else first; nothing was confirmed', reasons: strangers.map((e) => 'COUPLE_SUITE: ' + clean(e.personId)) }, 409, cors);
     const ob = await ownerBookingsOf(env, holderId, src, { guestId: holder.guestId, origin: url.origin, asOf });
     if (ob.problems.length) return jsonRes({ ok: false, error: 'these bookings cannot be confirmed yet', reasons: ob.problems }, 409, cors);
     /* THE ROOM IS RESERVED, NOT ONLY NAMED (Owner, 15 Nov 2026): every person recorded in a room holds their place in that very
@@ -2563,6 +2582,7 @@ async function adminOwnerBookingsPost(env, identity, request, url, cors) {
       for (const [k, label] of [...new Set(plan.map((x) => x.key + '|' + x.label))].map((x) => x.split('|'))) {
         const unit = (free[k] || []).find((u) => u.label === label);
         if (!unit) return jsonRes({ ok: false, error: 'room ' + label + ' is not a unit of ' + k, reasons: ['ROOM_UNKNOWN: ' + k + ' · ' + label] }, 409, cors);
+        if (unit.couple && plan.some((x) => x.key === k && x.label === label && !COUPLE_GUESTS.includes(x.personId))) return jsonRes({ ok: false, error: 'room ' + label + ' is the couple\'s suite — Haruthai\'s and Suthep\'s alone', reasons: ['COUPLE_SUITE: ' + k + ' · ' + label] }, 409, cors);
         const strangers = unit.holders.filter((g) => !ours.has(g)).length + (unit.keptFor || []).filter((pid) => !pid || !ourParties.has(pid)).length;
         /* counted per unit (review, 17 Nov 2026): a place one of ours holds HERE fills one of its own places unless that person is
            recorded into this very unit — an entry of hers in another unit or stage never hides it */
@@ -2586,6 +2606,14 @@ async function adminOwnerBookingsPost(env, identity, request, url, cors) {
     }
   }
   const persons = new Map(holders.filter((h) => !h.ambiguous && h.guestId).map((h) => [h.guestId, h.guestId]));
+  /* THE COUPLE'S SUITE (Owners, 19 Nov 2026): the Souphattra Presidential is recorded for Haruthai and Suthep only — refused when it
+     is added, not only when the room is held at Confirm */
+  if (action === 'add' && body.entry && typeof body.entry === 'object') {
+    const it = src.items[clean(body.entry.itemId)], key = it ? clean(it.Site_Product_Key).split(/[,|]/)[0] : '';
+    if (key && ROOM_SEED[key] && ROOM_SEED[key].couple && !COUPLE_GUESTS.includes(clean(body.entry.personId))) {
+      return jsonRes({ ok: false, error: 'the Souphattra Presidential is the couple\'s suite — Haruthai\'s and Suthep\'s alone; nothing was written', reasons: ['COUPLE_SUITE: ' + key] }, 409, cors);
+    }
+  }
   const r = applyAction(rec, action, { entry: body.entry, entryId: body.entryId, by: adminLabel(identity), at: new Date().toISOString(), items: src.items, persons });
   if (!r.ok) return jsonRes({ ok: false, error: r.error }, 409, cors);
   /* the entries the confirmation holds a place for carry it (a removal gives that place back) */
@@ -2753,6 +2781,9 @@ export async function handleBilling(request, env, url, cors, deps) {
       case 'admin/rooms/final':
         if (request.method !== 'POST') return jsonRes({ ok: false, error: 'POST only' }, 405, cors);
         return await adminRoomsFinal(env, identity, request, cors, deps);
+      case 'admin/rooms/hotel':
+        if (request.method !== 'POST') return jsonRes({ ok: false, error: 'POST only' }, 405, cors);
+        return await adminRoomsHotel(env, identity, request, cors);
       /* A READ NEVER WRITES (Owner, 8 Oct 2026 · closeout): every route below that records something in the ledger answers only a
          POST; a GET of reconcile is its read-only preview — the same report, nothing recorded (written: false) */
       case 'issue':

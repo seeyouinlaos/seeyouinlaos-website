@@ -348,7 +348,7 @@
   function logPanel(list, area) {
     list = list || [];
     var open = area === 'seating' ? X.logOpen : X.rlogOpen, shown = open ? list : list.slice(0, 8);
-    var T = { ASSIGN: 'Assigned', MOVE: 'Moved', SWAP: 'Swapped', RELEASE: 'Released', FINAL_RELEASED: 'Final released', FINAL_WITHDRAWN: 'Final withdrawn', SELF_SERVICE: 'Guests\' own choice' };
+    var T = { ASSIGN: 'Assigned', MOVE: 'Moved', SWAP: 'Swapped', RELEASE: 'Released', FINAL_RELEASED: 'Final released', FINAL_WITHDRAWN: 'Final withdrawn', SELF_SERVICE: 'Guests\' own choice', HOTEL_ROOMS: 'Hotel room numbers set' };
     var h = '<div class="p-card ab-panel" data-as-log="' + area + '"><p class="t-l1">Change log · ' + list.length + '</p>';
     if (!list.length) return h + '<p class="t-b2 ab-mute">No change has been made here yet.</p></div>';
     h += '<div class="ab-table-wrap"><table class="ab-table"><thead><tr><th>When</th><th>Who</th><th>Change</th><th>Guest</th><th>Before</th><th>After</th><th>Status</th></tr></thead><tbody>';
@@ -384,7 +384,14 @@
     if (!Object.prototype.hasOwnProperty.call(X.rseen, k)) X.rseen[k] = rbase(k).slice();
     if (list.slice().sort().join(',') === X.rseen[k].slice().sort().join(',')) { delete X.rdraft[k]; delete X.rseen[k]; } else X.rdraft[k] = list;
   }
-  function rlocked(u) { return u.extraBeds ? 'extra bed — set by the extra-bed attribution' : u.dedicated ? 'a guest\'s own room' : u.kept ? 'a place kept for a party' : u.occupants.length > u.places ? 'more guests than places' : ''; }
+  /* THE HOTEL'S OWN ROOM (Owners, 18 / 19 Nov 2026): "hotel room 105 · building C" beside the allocation label (a suite: "suite 210 + 211");
+     the official type's variant where it differs from the category ("Twin", "No Bath tub") */
+  function hotelOf(u, cat) {
+    var hr = u && u.hotelRoom; if (!hr) return '';
+    var v = hr.type && hr.type !== cat ? ((/\(([^)]*)\)/.exec(hr.type) || [])[1] || '') : '';
+    return (hr.suite ? 'suite ' : 'hotel room ') + hr.display + ' · building ' + hr.building + (v ? ' · ' + v : '');
+  }
+  function rlocked(u) { return u.couple ? 'the couple\'s suite — Haruthai\'s and Suthep\'s alone' : u.extraBeds ? 'extra bed — set by the extra-bed attribution' : u.dedicated ? 'a guest\'s own room' : u.kept ? 'a place kept for a party' : u.occupants.length > u.places ? 'more guests than places' : ''; }
   function rpick(gid, key, lab) { X.rerr = ''; X.rmsg = ''; if (X.rsel && X.rsel.guestId === gid) { X.rsel = null; return; } X.rsel = { guestId: gid, key: key, label: lab }; }
   function rclickUnit(key, lab, onGuest) {
     if (X.busy) return;
@@ -476,12 +483,25 @@
   }
   var STAY_CENTRE = { 'bkk-stay': 'A2', prewed: 'C', wedstay: 'D1', guesthouse: 'D2', kmg: 'F', ljg: 'H', kempinski: 'J' };
   function dates(s) { return s.checkIn ? C.day(s.checkIn) + ' – ' + C.day(s.checkOut) : 'dates from 002 not read'; }
+  /* the hotel room numbers in one line: who set them, and the guests they say something about (no number yet · another room from 27 Feb) */
+  function hotelPanel(R) {
+    var m = R.hotelRooms, c = R.hotelChecks || [];
+    if (!m) return '';
+    var none = c.filter(function (x) { return x.kind === 'NO_NUMBER'; }), moves = c.filter(function (x) { return x.kind === 'ROOM_CHANGES'; }), strangers = c.filter(function (x) { return x.kind === 'COUPLE_SUITE_OTHER'; });
+    var h = '<div class="p-card ab-panel" data-as-hotel><p class="t-l1">Hotel room numbers · Souphattra Heritage</p><p class="t-b2">' +
+      (m.version ? m.assigned + ' rooms assigned · version ' + m.version + ' · ' + esc(C.when(m.at)) + (m.by ? ' · ' + esc(WHO[m.by] || m.by) : '') : 'No hotel room numbers assigned yet.') + '</p>';
+    if (strangers.length) h += '<p class="t-b2 ab-err" role="alert">In the couple\'s suite, which is yours alone: ' + strangers.map(function (x) { return esc(firstOf(x.guestId)) + ' (' + esc(x.guestId + ' · ' + x.key.split('/')[0]) + ')'; }).join(' · ') + ' — moving them is a booking change.</p>';
+    if (none.length) h += '<p class="t-b2 ab-flag">Without a hotel room number: ' + none.map(function (x) { return esc(firstOf(x.guestId)) + ' (' + esc(x.key.split('/')[1] + ' · Room ' + x.label) + ')'; }).join(' · ') + '</p>';
+    if (moves.length) h += '<p class="t-b2 ab-flag">Another hotel room from 27 February: ' + moves.map(function (x) { return esc(firstOf(x.guestId)) + ' (' + esc(x.from) + ' → ' + esc(x.to) + ')'; }).join(' · ') + '</p>';
+    return h + '</div>';
+  }
   function roomsView() {
     if (X.phase !== 'ready') return gate();
     var R = X.data.rooms, fw = finalWords(R.final), pend = rpending();
     var h = '<section class="ab-assign" data-as-area="rooms"><p class="t-l1">Room Assignments</p><h2 class="t-h1">Who sleeps where — every stay</h2>' +
-      '<p class="t-b2 ab-mute">Choose a guest, then a room of the same category: a free place moves them, a guest swaps with them. Another category or stay is a booking change and is never made here. Rooms with an extra bed, a guest\'s own room and a place kept for a party stay as they are. Room labels are allocation labels, not the hotel\'s room numbers.</p>' +
+      '<p class="t-b2 ab-mute">Choose a guest, then a room of the same category: a free place moves them, a guest swaps with them. Another category or stay is a booking change and is never made here. Rooms with an extra bed, a guest\'s own room, a place kept for a party and the couple\'s suite stay as they are. Room A, B, C … are the booking system\'s allocation labels; the hotel room number and building beside them are the Souphattra Heritage\'s official list as you assigned it — a suite of two numbers is one room.</p>' +
       '<div class="as-kpi"><div><span class="t-l1">Guests in rooms</span><b>' + stays().reduce(function (n, s) { return n + s.guests; }, 0) + '</b><small>places held, all stays</small></div><div><span class="t-l1">Waiting list</span><b>' + (R.waitlist || []).length + '</b><small>no room yet</small></div><div><span class="t-l1">Release</span>' + chip(fw[0], fw[1]) + '</div></div>';
+    h += hotelPanel(R);
     if (X.rmsg) h += '<p class="ab-msg" role="status">' + esc(X.rmsg) + '</p>';
     if (X.rerr) h += '<p class="ab-err" role="alert">' + esc(X.rerr) + '</p>';
     var s0 = X.rsel ? guest(X.rsel.guestId) : null;
@@ -504,7 +524,8 @@
         h += '<div class="as-cat"><p class="as-catn">' + esc(c.name) + ' <span class="ab-mute">· ' + c.units.length + ' room' + (c.units.length === 1 ? '' : 's') + (c.nights != null ? ' · ' + c.nights + ' night' + (c.nights === 1 ? '' : 's') : '') + '</span></p><div class="as-units">';
         c.units.forEach(function (u) {
           var k = c.key + '|' + u.label, list = reff(k), lock = rlocked(u), changed = !!X.rdraft[k], same = X.rsel && X.rsel.key === c.key, other = X.rsel && X.rsel.key !== c.key;
-          h += '<div class="as-unit' + (lock ? ' as-lock' : '') + (changed ? ' as-chg' : '') + (other ? ' as-dim' : '') + '" data-as-unit="' + esc(k) + '"><p class="as-un">Room ' + esc(u.label) + ' <small>' + u.places + ' place' + (u.places === 1 ? '' : 's') + (u.extraBeds ? ' + extra bed' : '') + '</small></p>';
+          var hw = hotelOf(u, c.name);
+          h += '<div class="as-unit' + (lock ? ' as-lock' : '') + (changed ? ' as-chg' : '') + (other ? ' as-dim' : '') + '" data-as-unit="' + esc(k) + '"><p class="as-un">Room ' + esc(u.label) + ' <small>' + (hw ? esc(hw) + ' · ' : '') + u.places + ' place' + (u.places === 1 ? '' : 's') + (u.extraBeds ? ' + extra bed' : '') + '</small></p>';
           list.forEach(function (gid) {
             var o = u.occupants.filter(function (x) { return x.guestId === gid; })[0] || {}, sel = X.rsel && X.rsel.guestId === gid;
             h += '<button type="button" class="as-occ' + (sel ? ' as-sel' : '') + (o.by && !changed ? ' as-placed' : '') + '" data-as-occ="' + esc(gid) + '" data-as-k="' + esc(k) + '"' + (lock ? ' disabled' : '') + '>' + esc(firstOf(gid)) + ' <small>' + esc(gid) + (o.bed ? ' · extra bed' : '') + '</small></button>';
@@ -551,10 +572,10 @@
     var ids = bookingIds(), rows = [], R = X.data.rooms;
     stays().forEach(function (s) { s.categories.forEach(function (c) { c.units.forEach(function (u) { u.occupants.forEach(function (o) {
       var g = guest(o.guestId);
-      rows.push([s.label, s.hotel, s.checkIn || '', s.checkOut || '', c.nights == null ? '' : c.nights, c.name, 'Room ' + u.label, g ? g.first || '' : '', g ? g.last || '' : '', o.guestId, ids[STAY_CENTRE[s.window] + '|' + o.guestId] || '', g ? (BOOK[g.booking] || [g.booking])[0] : '', o.bed ? 'yes' : '', u.occupants.length]);
+      rows.push([s.label, s.hotel, s.checkIn || '', s.checkOut || '', c.nights == null ? '' : c.nights, c.name, 'Room ' + u.label, u.hotelRoom ? u.hotelRoom.display : '', u.hotelRoom ? u.hotelRoom.building : '', g ? g.first || '' : '', g ? g.last || '' : '', o.guestId, ids[STAY_CENTRE[s.window] + '|' + o.guestId] || '', g ? (BOOK[g.booking] || [g.booking])[0] : '', o.bed ? 'yes' : '', u.occupants.length]);
     }); }); }); });
-    return C.csvDoc('Final Hotel Rooming List — H&S Wedding 001', metaOf('', null, R.final, [['Booking IDs', C.revenue() ? 'from the booking system' : 'not read yet — open Finance once, then export again'], ['Room', 'the allocation label of the booking system, not a hotel room number']]),
-      ['Stay', 'Hotel', 'Check-in', 'Check-out', 'Nights', 'Room category', 'Room', 'First name', 'Last name', 'Guest ID', 'Booking ID', 'Booking status', 'Extra bed', 'Persons in room'], rows);
+    return C.csvDoc('Final Hotel Rooming List — H&S Wedding 001', metaOf('', null, R.final, [['Booking IDs', C.revenue() ? 'from the booking system' : 'not read yet — open Finance once, then export again'], ['Room', 'the allocation label of the booking system, not a hotel room number'], ['Hotel room no. · Building', 'the Souphattra Heritage\'s official room list as the Owners assigned it (a suite of two numbers is one room); other hotels have supplied no numbers']]),
+      ['Stay', 'Hotel', 'Check-in', 'Check-out', 'Nights', 'Room category', 'Room', 'Hotel room no.', 'Building', 'First name', 'Last name', 'Guest ID', 'Booking ID', 'Booking status', 'Extra bed', 'Persons in room'], rows);
   }
   function outstandingCsv() {
     var rows = [];

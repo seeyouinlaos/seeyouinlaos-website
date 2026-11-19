@@ -599,7 +599,9 @@ function reviewRevenue() {
     list012: [{ row: 2, building: 'C', roomType: 'Grand Exec (Twin)', roomNo: '203', checkIn: '27.02.2031', checkOut: '01.03.2031', guests: ['Guest', 'Guest', 'Guest'] }] });
   for (const u of plan[0].rooms) {
     const l = report.purchase.lines.find((x) => x.label === u.label);
-    Object.assign(u, { room012: report.rooms012.units['W1|' + u.key + '|' + u.label] || null, hotelCost: usd(30000), hotelCostBasis: 'CONTRACT', hotelNights: { contract: 2, additional: 0 }, hotelStatus: l.status,
+    Object.assign(u, { room012: report.rooms012.units['W1|' + u.key + '|' + u.label] || null,
+      /* the hotel's own room (src/hotel-rooms.js, Owners 18 / 19 Nov 2026) as the server sets it — synthetic */
+      hotelRoom: u.label === 'F' ? { hotel: 'Hotel Alpha', numbers: ['203'], display: '203', building: 'C', type: 'Grand Exec (Twin)', suite: false } : null, hotelCost: usd(30000), hotelCostBasis: 'CONTRACT', hotelNights: { contract: 2, additional: 0 }, hotelStatus: l.status,
       hotelSupplement: l.cost.supplement ? usd(l.cost.supplement) : null, hotelIn004: { contract: l.rows.contract, additional: l.rows.additional, supplement: l.rows.supplement } });
   }
   return { ok: true, asOf: '2026-11-18', calculatedAt: '2026-11-18T08:00:00.000Z', counts: {}, bookedRevenue: usd(36500), issuedRevenue: usd(39000), notYetInvoiced: usd(7500), changedSinceIssue: usd(-10000),
@@ -608,14 +610,15 @@ function reviewRevenue() {
     budget: { available: true, version: 'billing-budget/1.2.0', asOf: '2026-11-18', dashboard, report, roomPlan: plan, roomContracts: contracts, centres, categories: [], suppliers: [], checks: [], questions: [], reconciliation: {} } };
 }
 
-test('REVIEW · Guests: each guest\'s stay, room, 012 number, extra bed and complimentary nights; CSV of all or the filter — BOM, chosen delimiter, no formula, no code', async () => {
+test('REVIEW · Guests: each guest\'s stay, room, hotel room number and building, extra bed and complimentary nights; CSV of all or the filter — BOM, chosen delimiter, no formula, no code', async () => {
   const revenue = reviewRevenue();
   const { root, A, calls } = load({ 'admin/overview': OVERVIEW, 'admin/status': statusAnswer, 'admin/readiness': { ok: true, rows: [] }, revenue });
   await tick(60);
   const h = root.innerHTML;
   assert.match(h, /<th>Stays &amp; rooms<\/th>/);
   const row = (id) => h.split('data-ab-open="' + id + '"')[1].split('</tr>')[0];
-  assert.match(row('INV-T1'), /Grand Exec · Room F<\/span> · no\. <b data-i18n-skip>203<\/b>/); assert.match(row('INV-T1'), /invoiced/);
+  assert.match(row('INV-T1'), /Grand Exec · Room F<\/span> · hotel room <b data-i18n-skip>203<\/b> <span class="ab-mute" data-i18n-skip>· building C<\/span>/); assert.match(row('INV-T1'), /invoiced/);
+  assert.doesNotMatch(h, /012 ref\./, 'the hotel room number is the official list\'s, no longer a 012 reference');
   assert.match(row('INV-T2'), /2 nights complimentary/); assert.match(row('INV-T3'), /extra bed/);
   assert.match(row('INV-T5'), /no room/);
   assert.match(row('INV-T1'), /GT1 · INV-T1/, 'the Guest ID beside the invitation'); assert.match(row('INV-T1'), /S-T1-0001/, 'the statement number');
@@ -625,30 +628,31 @@ test('REVIEW · Guests: each guest\'s stay, room, 012 number, extra bed and comp
   assert.equal(csv.charCodeAt(0), 0xFEFF); assert.match(csv, /\r\n/);
   const sep = csv.indexOf('Guest ID;') >= 0 ? ';' : ',';
   assert.ok(csv.indexOf(['Guest ID', 'Guest', 'Invitation'].join(sep)) > 0);
-  assert.ok(csv.split('\r\n').some((l) => l.startsWith(['GT1', 'Guest 1', 'INV-T1', 'Hotel Alpha · wedding stay', '2031-02-27', '2031-03-01', '2'].join(sep))));
+  assert.ok(csv.split('\r\n').some((l) => l.startsWith(['GT1', 'Guest 1', 'INV-T1', 'Hotel Alpha · wedding stay', '2031-02-27', '2031-03-01', '2', 'F', '203', 'C', 'Grand Exec'].join(sep))));
+  assert.ok(csv.indexOf(['Room', 'Hotel room no.', 'Building', 'Room category'].join(sep)) > 0);
   assert.doesNotMatch(csv, /bearer|token|invite=/i);
   assert.equal(A.csv.cell('=SUM(A1)', ','), '\'=SUM(A1)'); assert.equal(A.csv.cell(-5, ','), '-5'); assert.equal(A.csv.cell(1234.5, ';'), '1234,5');
   assert.equal(A.csv.cell('a;b', ';'), '"a;b"'); assert.equal(A.csv.cell('say "x"', ','), '"say ""x"""');
 });
 
-test('REVIEW · Rooms & rates: by hotel and period, room no. from 012, occupancy, nights, purchase and sale per room, subtotals, rooming list', async () => {
+test('REVIEW · Rooms & rates: by hotel and period, hotel room no. and building (the official list), occupancy, nights, purchase and sale per room, subtotals, rooming list', async () => {
   const revenue = reviewRevenue();
   const { root, A } = load({ 'admin/overview': OVERVIEW, 'admin/status': statusAnswer, revenue }, { hash: '#rooms' });
   await tick(40);
   const h = root.innerHTML;
-  assert.match(h, /data-ab-rooms="W1"/); assert.match(h, /Room F<span class="ab-id">no\. <b data-i18n-skip>203<\/b>/);
+  assert.match(h, /data-ab-rooms="W1"/); assert.match(h, /Room F<span class="ab-id">hotel room <b data-i18n-skip>203<\/b> <span class="ab-mute" data-i18n-skip>· building C<\/span>/);
   assert.match(h, /data-l="Occupancy" class="num">3 \/ 2/); assert.match(h, /data-l="Nights" class="num">2</);
   assert.match(h, /data-l="Hotel cost \(purchase\)" class="num"><span data-i18n-skip>USD 420\.00<span class="ab-why">agreement · 2 nights × USD 150\.00 · \+ USD 120\.00 additional-person charge<\/span><span class="ab-why">agreement: 004 row 8 · additional-person charge: not in 004 — proposed<\/span>/);
   assert.match(h, /data-l="Guest revenue \(sale\)" class="num"><span data-i18n-skip>USD 365\.00/);
-  assert.match(h, /<b data-i18n-skip>203<\/b> <span class="ab-mute">012 ref\.<\/span>/, '012 is a reference only');
+  assert.doesNotMatch(h, /012 ref\./, 'no 012 reference beside the room any more');
   assert.match(h, /class="ab-total"/); assert.match(h, /Rooms without guests — Grand Exec: G/);
   assert.match(h, /data-ab-csv="rooming"/);
   const csv = A.csv.rooming(); const sep = csv.indexOf('Stay;') >= 0 ? ';' : ',';
   const lines = csv.split('\r\n');
-  assert.ok(lines.some((l) => l.startsWith(['Stay', 'Hotel', 'Room', 'Room category', 'Hotel room no. (012 reference)', 'Guest ID', 'Guest', 'Invitation', 'Booking ID', 'Booking status'].join(sep))));
-  const g1 = lines.find((l) => l.startsWith(['W1', 'Hotel Alpha · wedding stay', 'F', 'Grand Exec', '203', 'GT1', 'Guest 1'].join(sep)));
+  assert.ok(lines.some((l) => l.startsWith(['Stay', 'Hotel', 'Room', 'Room category', 'Hotel room no.', 'Building', 'Guest ID', 'Guest', 'Invitation', 'Booking ID', 'Booking status'].join(sep))));
+  const g1 = lines.find((l) => l.startsWith(['W1', 'Hotel Alpha · wedding stay', 'F', 'Grand Exec', '203', 'C', 'GT1', 'Guest 1'].join(sep)));
   assert.ok(g1, 'the first guest row of room F'); assert.ok(g1.includes(['2', '0', '150', '300', '120', 'agreement: 004 row 8 · additional-person charge: not in 004 — proposed'].join(sep)), 'the room\'s purchase on its first guest row');
-  const g2 = lines.find((l) => l.startsWith(['W1', 'Hotel Alpha · wedding stay', 'F', 'Grand Exec', '203', 'GT2'].join(sep)));
+  const g2 = lines.find((l) => l.startsWith(['W1', 'Hotel Alpha · wedding stay', 'F', 'Grand Exec', '203', 'C', 'GT2'].join(sep)));
   assert.ok(g2.includes(['', '', '', '', '', ''].join(sep)), 'never twice: the second guest row leaves the room\'s purchase empty');
   assert.match(g2, /complimentary/); assert.doesNotMatch(csv, /bearer|token|invite=/i);
   assert.ok((h.match(/<td(?![^>]*data-l=)/g) || []).length === 0, 'every cell named for the phone');

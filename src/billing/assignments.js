@@ -12,9 +12,15 @@
 
    NEVER A PRICE, A RATE, AN INVOICE OR A PAYMENT: nothing here reads 009 or 012, nothing computes an amount. Google 002 is read
    for a stay's dates only, 006 for names only.
+
+   THE HOTEL'S OWN ROOM NUMBERS (Owners, 18 / 19 Nov 2026): a unit of the Souphattra carries the room of the house the Owners
+   assigned it (src/hotel-rooms.js · the room engine's store) — `hotelRoom` beside the allocation label, never in its place; a
+   suite of two numbers is still one room.
    ========================================================================== */
 
 import { confirmationStands } from '../confirmation.js';
+import { hotelRoomOf } from '../hotel-rooms.js';
+import { SEED } from '../inventory-seed.js';
 
 export const ASSIGNMENTS_VERSION = 'assignments/1.0.0';
 const clean = (v) => (v == null ? '' : String(v)).trim();
@@ -114,7 +120,8 @@ export function rosterOf({ entries, register, records, confs, seating, rooms, co
   const roomsOf = {};
   for (const [key, units] of Object.entries((rooms && rooms.units) || {})) for (const u of units || []) for (const o of u.occupants || []) {
     if (!o || !o.guestId) continue;
-    (roomsOf[o.guestId] = roomsOf[o.guestId] || []).push({ key, window: key.split('/')[0], label: u.label, kind: u.kind, bed: !!o.bed, placed: /^owners:/.test(clean(o.by)) });
+    (roomsOf[o.guestId] = roomsOf[o.guestId] || []).push({ key, window: key.split('/')[0], label: u.label, kind: u.kind, bed: !!o.bed, placed: /^owners:/.test(clean(o.by)),
+      hotelRoom: hotelRoomOf(key, u.label, rooms.hotelRooms && rooms.hotelRooms.rooms) });
     if (o.name && !learned[o.guestId]) learned[o.guestId] = o.name;
   }
   const party = {};
@@ -150,6 +157,7 @@ export function staysOf({ rooms, seedNames, datesOf }) {
     const cats = keys.map((key) => {
       const d = (datesOf && datesOf[key]) || {};
       const list = (units[key] || []).map((u) => ({ label: u.label, name: u.name, kind: u.kind, places: u.places, extraBeds: u.extraBeds || 0, dedicated: !!u.dedicated, kept: u.kept || 0,
+        ...(u.couple ? { couple: true } : {}), hotelRoom: hotelRoomOf(key, u.label, rooms.hotelRooms && rooms.hotelRooms.rooms),
         occupants: (u.occupants || []).map((o) => ({ guestId: o.guestId, bed: !!o.bed, by: o.by || null, placedAt: o.placedAt || null, placedFrom: o.placedFrom || null })) }));
       return { key, name: (seedNames && seedNames[key]) || key, item: d.item || null, checkIn: d.checkIn || null, checkOut: d.checkOut || null, nights: d.nights == null ? null : d.nights,
         units: list, guests: list.reduce((n, u) => n + u.occupants.length, 0), places: list.reduce((n, u) => n + u.places, 0) };
@@ -158,6 +166,30 @@ export function staysOf({ rooms, seedNames, datesOf }) {
       checkIn: cats.map((c) => c.checkIn).filter(Boolean).sort()[0] || null, checkOut: cats.map((c) => c.checkOut).filter(Boolean).sort().slice(-1)[0] || null,
       guests: cats.reduce((n, c) => n + c.guests, 0) };
   }).filter(Boolean);
+}
+
+/* who set the hotel room numbers, and when — never the numbers twice (they travel with each unit) */
+export function hotelRoomsMeta(h) {
+  return h ? { version: h.version || 0, at: h.at || null, by: h.by || null, note: h.note || null, list: h.list || null, assigned: Object.keys(h.rooms || {}).length } : null;
+}
+/* WHAT THE NUMBERS SAY ABOUT THE GUESTS (Owners, 19 Nov 2026): anyone but the couple holding a place in the couple's suite; a guest of the
+   Souphattra whose room has no hotel number yet, and a guest
+   who sleeps in one room of the house before the wedding and in another from 27 February (the two windows are separate stock — a
+   move in one window alone changes their room): named, never corrected here */
+export function hotelChecksOf(roster) {
+  const out = [];
+  for (const p of roster || []) {
+    /* the couple's suite holds the couple alone (Owners, 19 Nov 2026): anyone else found there is named — moving them is a booking
+       change and the Owners' decision, never made here */
+    for (const r of (p.rooms || [])) if (SEED[r.key] && SEED[r.key].couple && !p.couple) out.push({ kind: 'COUPLE_SUITE_OTHER', guestId: p.guestId, key: r.key, label: r.label });
+    const soup = (p.rooms || []).filter((r) => r.window === 'prewed' || r.window === 'wedstay');
+    for (const r of soup) if (!r.hotelRoom) out.push({ kind: 'NO_NUMBER', guestId: p.guestId, key: r.key, label: r.label });
+    const pre = soup.find((r) => r.window === 'prewed'), wed = soup.find((r) => r.window === 'wedstay');
+    if (pre && wed && pre.hotelRoom && wed.hotelRoom && pre.hotelRoom.display !== wed.hotelRoom.display) {
+      out.push({ kind: 'ROOM_CHANGES', guestId: p.guestId, from: pre.hotelRoom.display, to: wed.hotelRoom.display });
+    }
+  }
+  return out;
 }
 
 /* ---- the inputs of a write, shaped and bounded (the ledger / the engine check everything again in their own turn) ---- */

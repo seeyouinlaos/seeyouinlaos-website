@@ -22,6 +22,8 @@
    Groom, not for the family. Every room of every category is bookable through
    the room engine by whoever chooses it first; the hosts start at zero like
    every guest.
+   ONE EXCEPTION (Owners, 19 Nov 2026): the Souphattra Presidential Suite is the
+   couple's alone — the two entries marked so below.
 
    ROOM ALLOCATION (Owner, 15 Sep 2026): the physical room count IS the
    inventory. One physical room = one persistent allocation unit = two
@@ -59,7 +61,11 @@ export const SEED = {
   /* NOT BEFORE THE WEDDING (002 · G21 / H21 / I21, 28 Sep 2026): the Noble Courtyard, the Grand Majestic and the Souphattra
      Majestic suites are offered for the Wedding Stay only — no pre-wedding stock (no guest held one) */
   'prewed/heritage-grand-premier':   { unit: 'room', capacity: 3,  occupancy: 2, held: 0, name: 'Heritage Grand Premier' },
-  'prewed/souphattra-presidential':  { unit: 'room', capacity: 1,  occupancy: 4, held: 0, name: 'Souphattra Presidential' },
+  /* THE COUPLE'S SUITE (Owners, 19 Nov 2026 — the one exception to "no reservation" above): the Souphattra Presidential is ONE suite
+     (two numbers of the house, one booking unit), the couple's alone. ONE unit of TWO places — no further guest place, never two
+     rooms: one booking unit, one room of the hotel's purchase. `couple` = nobody else may hold, be given or be kept a place in it
+     (src/rooms.js · mayJoin, Guest Relations assign, the Owners' assignments and bookings). */
+  'prewed/souphattra-presidential':  { unit: 'room', capacity: 1,  occupancy: 2, held: 0, name: 'Souphattra Presidential', couple: true },
 
   /* ---------------------------------------------- Vientiane · Wedding Stay */
   'wedstay/heritage':                { unit: 'room', capacity: 5,  occupancy: 2, held: 0, name: 'The Heritage',
@@ -74,7 +80,7 @@ export const SEED = {
   'wedstay/noble-courtyard':         { unit: 'room', capacity: 1,  occupancy: 2, held: 0, name: 'Noble Courtyard Suite' },
   'wedstay/grand-majestic':          { unit: 'room', capacity: 2,  occupancy: 2, held: 0, name: 'Grand Majestic Suite' },   /* opened to everyone (Owner, Edit 5 · 18 Sep 2026) */
   'wedstay/souphattra-majestic':     { unit: 'room', capacity: 1,  occupancy: 2, held: 0, name: 'Souphattra Majestic Suite' },
-  'wedstay/souphattra-presidential': { unit: 'room', capacity: 1,  occupancy: 4, held: 0, name: 'Souphattra Presidential' },
+  'wedstay/souphattra-presidential': { unit: 'room', capacity: 1,  occupancy: 2, held: 0, name: 'Souphattra Presidential', couple: true },   /* the couple's suite (above) */
 
   /* D2 · GUEST HOUSE COMPLIMENTARY (Operations Master 003_Accommodation_Details; Owner, 19 Sep 2026): the complimentary
      alternative for the same wedding window — ONE shared unit of SIX bookable guest places (a queen bed and the sofas; who

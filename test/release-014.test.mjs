@@ -46,7 +46,11 @@ const guestPage = async (rooms, who, auth, opts) => page({ auth, fetch: await ro
 test('NO FIXED ARRANGEMENT · the seed holds nothing for anyone; no unit is reserved; a host is refused nothing and given nothing; the hosts start at zero', async () => {
   assert.deepEqual(FIXED, []);
   for (const [k, s] of Object.entries(SEED)) { assert.equal(s.held || 0, 0, k + ' held'); assert.equal(s.heldFor, undefined, k + ' heldFor'); }
-  for (const k of Object.keys(SEED)) for (const u of unitsOf(k)) { assert.equal(u.reservedFor, null, k + ' ' + u.label); assert.equal(mayJoin(u, PEG).ok, true); assert.equal(mayJoin(u, HAR).ok, true); }
+  for (const k of Object.keys(SEED)) for (const u of unitsOf(k)) {
+    assert.equal(u.reservedFor, null, k + ' ' + u.label);
+    /* the one exception (Owners, 19 Nov 2026): the couple's suite — the allowlisted couple only; a host flag alone opens nothing */
+    assert.equal(mayJoin(u, PEG).ok, !u.couple, k + ' ' + u.label); assert.equal(mayJoin(u, HAR).ok, !u.couple, k + ' ' + u.label);
+  }
   assert.equal(mayJoin(unitsOf('bkk-stay/u-sathorn-superior-garden')[0], null).ok, false, 'no identity, no place');
   const rooms = new Rooms(doState());
   const v = (await call(rooms, 'read', null, HAR)).d;

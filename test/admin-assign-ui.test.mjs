@@ -12,7 +12,7 @@ import assert from 'node:assert/strict';
 import { page, src, SUTHEP, doState } from './sandbox.mjs';
 import { Seating } from '../src/seating.js';
 import { Rooms } from '../src/rooms.js';
-import { rosterOf, staysOf, EVENTS } from '../src/billing/assignments.js';
+import { rosterOf, staysOf, hotelRoomsMeta, hotelChecksOf, EVENTS } from '../src/billing/assignments.js';
 
 const tick = async (n = 10) => { for (let i = 0; i < n; i++) await new Promise((r) => setImmediate(r)); };
 const res = (status, body) => ({ ok: status >= 200 && status < 300, status, json: async () => body });
@@ -54,13 +54,19 @@ async function payload() {
   await r.storage.put('occ:' + KEY + '|A|G902', { invitationId: 'INV-G902', partyId: 'INV-900', name: 'Ben', at: 'x' });
   await r.storage.put('occ:' + KEY + '|C|G903', { invitationId: 'INV-G903', partyId: 'INV-903', name: 'Cleo', at: 'x' });
   const seat = await (await s.fetch(new Request('https://seating/api/seating/admin-read', { headers: H }))).json();
+  /* the Owners' hotel room numbers (src/hotel-rooms.js · Owners 18 / 19 Nov 2026) — synthetic assignment, checked by the engine */
+  const set = await (await r.fetch(new Request('https://rooms/api/rooms/admin-hotel-rooms', { method: 'POST', headers: H, body: JSON.stringify({ expectVersion: 0, note: 'test',
+    set: { [KEY + '|A']: ['304'], [KEY + '|C']: ['305'], 'wedstay/souphattra-presidential|A': ['211', '210'] } }) }))).json();
+  if (!set.ok) throw new Error('hotel rooms refused: ' + JSON.stringify(set));
   const room = await (await r.fetch(new Request('https://rooms/api/rooms/admin-read', { headers: H }))).json();
   const records = { 'INV-G901': joining('G901', 'Joining', 'Joining'), 'INV-G902': joining('G902', 'Joining', 'Not joining') };
   const confs = { 'INV-G901': { confirmedAt: '2026-11-01T10:00:00Z', version: 1 } };
+  const roster = rosterOf({ entries: ENTRIES, register: REGISTER, records, confs, seating: seat, rooms: room, couple: COUPLE });
   return { ok: true, version: 'assignments/1.0.0', at: '2026-11-18T12:00:00Z', audience: 'GROOM', events: EVENTS, people: seat.people, capacity: seat.capacity,
     seating: { open: seat.open, frozen: seat.frozen, events: seat.events, log: seat.log },
-    rooms: { stays: staysOf({ rooms: room, seedNames: { [KEY]: 'Heritage Executive' }, datesOf: { [KEY]: { checkIn: '2027-02-27', checkOut: '2027-03-01', nights: 2 } } }), digest: room.digest, final: room.final, waitlist: room.waitlist, log: room.log },
-    roster: rosterOf({ entries: ENTRIES, register: REGISTER, records, confs, seating: seat, rooms: room, couple: COUPLE }), gaps: [] };
+    rooms: { stays: staysOf({ rooms: room, seedNames: { [KEY]: 'Heritage Executive' }, datesOf: { [KEY]: { checkIn: '2027-02-27', checkOut: '2027-03-01', nights: 2 } } }), digest: room.digest, final: room.final, waitlist: room.waitlist, log: room.log,
+      hotelRooms: hotelRoomsMeta(room.hotelRooms), hotelChecks: hotelChecksOf(roster) },
+    roster, gaps: [] };
 }
 const OVERVIEW = { ok: true, asOf: '2026-11-18', audience: 'GROOM', chunk: 6, gate: { approved: true }, holders: [] };
 function load(answers, hash) {
@@ -230,8 +236,9 @@ test('EXPORTS · Final Ceremony / Dinner Seating Plan, Final Hotel Rooming List,
   const din = E.csv('dinner');
   assert.match(din, /Event date[,;]"?Sunday, 28 February 2027 · 19:30/); assert.equal(din.split('\r\n').filter((l) => /^[AB]\d+[,;]Side/.test(l)).length, 54);
   const rl = E.csv('rooming');
-  assert.match(rl, /^﻿Final Hotel Rooming List — H&S Wedding 001/); assert.match(rl, /Stay[,;]Hotel[,;]Check-in[,;]Check-out[,;]Nights[,;]Room category[,;]Room[,;]First name/);
-  assert.match(rl, /Vientiane · the wedding[,;]Souphattra Heritage Vientiane[,;]2027-02-27[,;]2027-03-01[,;]2[,;]Heritage Executive[,;]Room A[,;]Ada[,;]Example[,;]G901/);
+  assert.match(rl, /^﻿Final Hotel Rooming List — H&S Wedding 001/); assert.match(rl, /Stay[,;]Hotel[,;]Check-in[,;]Check-out[,;]Nights[,;]Room category[,;]Room[,;]Hotel room no\.[,;]Building[,;]First name/);
+  assert.match(rl, /Vientiane · the wedding[,;]Souphattra Heritage Vientiane[,;]2027-02-27[,;]2027-03-01[,;]2[,;]Heritage Executive[,;]Room A[,;]304[,;]D[,;]Ada[,;]Example[,;]G901/, 'the allocation label AND the hotel\'s own room, apart');
+  assert.match(rl, /Hotel room no\. · Building[,;]"?the Souphattra Heritage's official room list/);
   assert.doesNotMatch(rl, /USD|\d+\.\d\d/, 'no price in the hotel list');
   const out = E.csv('outstanding');
   assert.match(out, /Wedding Dinner[,;]"?Seat|Wedding Dinner[,;]Joining — no seat yet/);
@@ -248,6 +255,13 @@ test('ROOMS · a move inside one category is a draft, reviewed and confirmed wit
   let h = root.innerHTML;
   assert.match(h, /Room Assignments/); assert.match(h, /Souphattra Heritage Vientiane/); assert.match(h, /27 Feb 2027 – 1 Mar 2027/);
   assert.match(h, /data-as-unit="wedstay\/heritage-executive\|I"[\s\S]*?extra bed — set by the extra-bed attribution/, 'Room I with its extra bed is fixed');
+  /* THE HOTEL'S OWN ROOMS (Owners, 18 / 19 Nov 2026): beside the label, never in its place; the suite of two numbers is one room, the couple's, locked */
+  assert.match(h, /data-as-unit="wedstay\/heritage-executive\|A"><p class="as-un">Room A <small>hotel room 304 · building D · Twin · 2 places<\/small>/);
+  assert.match(h, /data-as-unit="wedstay\/heritage-executive\|C"><p class="as-un">Room C <small>hotel room 305 · building D · 2 places<\/small>/);
+  assert.match(h, /data-as-unit="wedstay\/souphattra-presidential\|A"><p class="as-un">Room A <small>suite 210 \+ 211 · building F · 2 places<\/small>/, 'a suite of two numbers is one unit');
+  const pres = h.split('data-as-unit="wedstay/souphattra-presidential|A"')[1].split('data-as-unit=')[0];
+  assert.match(pres, /as-lock|<p class="ab-why">the couple's suite/, 'the suite is locked'); assert.match(pres, /<p class="ab-why">the couple's suite — [^<]+<\/p>/);
+  assert.match(h, /data-as-hotel[\s\S]*?3 rooms assigned · version 1/); assert.doesNotMatch(h, /Without a hotel room number/, 'every guest here has their room');
   await click(root, 'data-as-occ', 'G902');
   await click(root, 'data-as-to', KEY + '|B');
   h = root.innerHTML; assert.match(h, /Move · <b>Ben<\/b> heritage-executive: Room A → Room B/);
