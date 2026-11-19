@@ -104,3 +104,63 @@ test('PDF 1.3 · the recipient apart from the hosts, names with ids, products by
   const plain = text(renderSettlementPdf({ ...snap, lines: [L({ Person_ID: 'GT1', Item_ID: 'T-WED', Rate_Basis: 'PER_PERSON_PER_NIGHT', rateCents: 15500, nights: 2, payableNights: 2, amountCents: 31000, modifiers: ['SECOND_NIGHT_COMPLIMENTARY'] })] }, { items: { 'T-WED': { name: 'Hotel · Room', detail: '' } } }));
   assert.ok(!plain.includes('second night complimentary'));
 });
+
+test('LAYOUT 1.2 · GOLDEN: the frozen writer renders a fixed statement byte for byte as main\'s writer did (19 Nov 2026) — its imports cannot drift it', async () => {
+  const { renderSettlementPdf: render12 } = await import('../src/billing/pdf-layout-12.js');
+  const L = (o) => ({ Booking_ID: 'B', Bill_To_Holder_ID: 'INV-T1', Room_Unit_ID: null, Billing_Category: 'GUEST_SETTLEMENT_REQUIRED', rateSource: 'STANDARD_RATE', modifiers: [], block: 'A', Currency: 'USD', ...o });
+  const snap = { Settlement_ID: 'S-T-0001', Revision: 1, Holder_ID: 'INV-T1', Issue_Date: '2026-10-11', Due_Date: '2026-11-01', Currency: 'USD', FX_USD_THB: 33.68, FX_USD_EUR: 0.89,
+    Engine_Version: 'billing-engine/2.5.0', Source_Hash: 'abc123', Total_Payable_Cents: 17000, Block_A_Total_Cents: 17000, Block_B_Informational: [], Payment_Preference: 'PAYPAL_EUR',
+    lines: [L({ Person_ID: 'GT1', Item_ID: 'T-WED', Rate_Basis: 'PER_PERSON_PER_NIGHT', rateCents: 15500, nights: 2, payableNights: 1, amountCents: 15500, modifiers: ['SECOND_NIGHT_COMPLIMENTARY'] }),
+      L({ Person_ID: 'GT2', Item_ID: 'T-OFF', Rate_Basis: 'PER_PERSON', rateCents: 1500, quantity: 1, amountCents: 1500 })] };
+  const payment = { method: 'PAYPAL_EUR', recipient: 'Payee', reference: 'S-T-0001', amount: { currency: 'EUR', amount: 151.3 }, totalUsd: 170, dueDate: '2026-11-01' };
+  assert.equal(crypto.createHash('sha256').update(render12(snap, { payment })).digest('hex'), 'f2ffcf6e6ebe35a7b5f3782bf1405ff661b6395d57a7ed1228ed68b91eb779e5');
+});
+
+test('ISSUE DATE · no statement of the new layout before 21 Nov 2026 (the ledger refuses it before anything is written)', async () => {
+  const { ISSUE_RULES } = await import('../src/billing/pdf-layouts.js');
+  const was = { ...ISSUE_RULES };
+  try {
+    Object.assign(ISSUE_RULES, { floor: '2026-11-21' });
+    const draft = { lines: [{ Person_ID: 'GT1', Item_ID: 'T-A' }] };
+    const body = { pdfLayout: CURRENT_LAYOUT, recipient: { Holder_ID: 'INV-T1', Person_ID: 'GT1', name: 'Alex Example' }, personNames: { GT1: 'Alex Example' }, itemWords: { 'T-A': { name: 'Stay A' } } };
+    assert.equal(BillingLedger.frozenIssueFields(body, draft, '2026-11-20', 'INV-T1').reason, 'ISSUE_DATE_TOO_EARLY');
+    assert.equal(BillingLedger.frozenIssueFields(body, draft, '2026-11-21', 'INV-T1').error, undefined);
+    assert.equal(BillingLedger.frozenIssueFields(body, draft, '2026-11-21', 'INV-T9').reason, 'RECIPIENT_INCOMPLETE', 'the recipient is the holder of this statement');
+    assert.equal(BillingLedger.frozenIssueFields({ ...body, paymentOptions: ['PROMPTPAY_THB'], expectedPaymentPreference: 'PAYPAL_EUR' }, draft, '2026-11-21', 'INV-T1').reason, 'PAYMENT_OPTIONS_MISMATCH');
+  } finally { Object.assign(ISSUE_RULES, was); }
+});
+
+test('CORRECTION NOTE · only a version of the earlier layout gets "names added"; a later correction says what changed', () => {
+  const issued = { Revision: 4, Issue_Date: '2026-11-21', Total_Payable_Cents: 17000, lines: [{ Person_ID: 'GT1', Item_ID: 'T-B', block: 'A', amountCents: 17000 }] };
+  assert.equal(correctionOf(issued, { Total_Payable_Cents: 20000, lines: [{ Person_ID: 'GT1', Item_ID: 'T-B', block: 'A', amountCents: 20000 }] }, {}, { legacy: false }).reason, 'amount changed from USD 170.00 to USD 200.00');
+  assert.equal(correctionOf(issued, { Total_Payable_Cents: 17000, lines: [{ Person_ID: 'GT2', Item_ID: 'T-B', block: 'A', amountCents: 17000 }] }, {}, { legacy: false }).reason, 'booked items updated');
+  assert.equal(correctionOf(issued, { Total_Payable_Cents: 17000, lines: issued.lines }, {}, { legacy: false }).reason, 'statement updated');
+  assert.equal(correctionOf(issued, { Total_Payable_Cents: 17000, lines: issued.lines }, {}).reason, 'recipient and product names added');
+  assert.equal(isGermanNationality('Deutsche'), true);
+});
+
+test('PDF 1.3 · the couple\'s names never break across lines; a long recipient name is printed in full; "nothing payable" is said once; the PayPal label never runs into its value', () => {
+  const L = (o) => ({ Booking_ID: 'B', Bill_To_Holder_ID: 'INV-T1', Room_Unit_ID: null, Billing_Category: 'GUEST_SETTLEMENT_REQUIRED', rateSource: 'STANDARD_RATE', modifiers: [], block: 'A', Currency: 'USD', ...o });
+  const base = { Settlement_ID: 'S-T-0002', Revision: 2, Holder_ID: 'INV-T1', Issue_Date: '2026-11-21', Due_Date: '2026-11-30', Currency: 'USD', FX_USD_THB: 33.68, FX_USD_EUR: 0.89,
+    Engine_Version: 'e', Source_Hash: 'h', Block_B_Informational: [], Payment_Preference: 'PAYPAL_EUR' };
+  const long = 'Maximiliana Konstantina Wilhelmina-Friederike von Hohenzollern-Sigmaringen';
+  for (const w of [180, 260, 330, 420]) {   /* the second-night words fall at a different place for every name width */
+    const snap = { ...base, Total_Payable_Cents: 15500, Block_A_Total_Cents: 15500,
+      lines: [L({ Person_ID: 'GT1', Item_ID: 'T-WED', Rate_Basis: 'PER_PERSON_PER_NIGHT', rateCents: 15500, nights: 2, payableNights: 1, amountCents: 15500, modifiers: ['SECOND_NIGHT_COMPLIMENTARY'] })] };
+    const t = text(renderSettlementPdf(snap, { recipient: { Person_ID: 'GT1', name: long }, persons: { GT1: long }, items: { 'T-WED': { name: 'Hotel · ' + 'Room '.repeat(w / 30), detail: 'Wedding Stay' } } }));
+    assert.ok(!/Haruthai &\n|\nSuthep/.test(t), 'never "Haruthai &" / "Suthep" on two lines');
+    assert.ok(t.replace(/\n/g, ' ').includes(long), 'the full name, never shortened'); assert.ok(!t.includes('…'));
+  }
+  const zero = text(renderSettlementPdf({ ...base, Total_Payable_Cents: 0, Block_A_Total_Cents: 0, lines: [] }, { payment: { nothingDue: true }, recipient: { Person_ID: 'GT1', name: 'Alex Example' }, persons: {}, items: {} }));
+  assert.equal(zero.split('Nothing is payable on this statement.').length - 1, 1);
+  const qr = { width: 3, height: 2, colorSpace: 'DeviceRGB', filter: 'RunLengthDecode', data: new Uint8Array([17, ...new Array(18).fill(0), 128]) };
+  const snap = { ...base, Total_Payable_Cents: 17000, Block_A_Total_Cents: 17000, lines: [L({ Person_ID: 'GT1', Item_ID: 'T-OFF', Rate_Basis: 'PER_PERSON', rateCents: 17000, quantity: 1, amountCents: 17000 })] };
+  const options = [optionView('SEPA_EUR', 17000, snap, { recipient: 'Account Holder', iban: 'XX00TEST0000000000000001' }, null), optionView('PAYPAL_EUR', 17000, snap, { recipient: 'Payee' }, qr)];
+  const raw = Buffer.from(renderSettlementPdf(snap, { payment: { options, totalUsd: 170, dueDate: '2026-11-30', reference: 'S-T-0002' }, recipient: { Person_ID: 'GT1', name: 'Alex Example' }, persons: { GT1: 'Alex Example' }, items: { 'T-OFF': { name: 'Offering', detail: '' } } })).toString('latin1');
+  const at = (s) => { const k = raw.indexOf('(' + s.replace(/[()\\]/g, (c) => '\\' + c) + ') Tj'); if (k < 0) return null;
+    const m = /1 0 0 1 ([\d.]+) ([\d.]+) Tm $/.exec(raw.slice(Math.max(0, k - 40), k)); return m ? [+m[1], +m[2]] : null; };
+  const label = at('Reference (note)'), value = [...raw.matchAll(/1 0 0 1 ([\d.]+) ([\d.]+) Tm \(S-T-0002\) Tj/g)].map((m) => [+m[1], +m[2]]).find((v) => label && Math.abs(v[1] - label[1]) < 0.5);
+  assert.ok(label && value && value[0] - label[0] >= 60 + 5, 'the value starts after the label (' + (label && value ? value[0] - label[0] : '?') + 'pt)');
+  const img = /\/Im3 Do Q/.test(raw) ? /q ([\d.]+) 0 0 ([\d.]+) [\d.]+ [\d.]+ cm \/Im3 Do Q/.exec(raw) : null;
+  assert.ok(img && +img[1] <= 92 && +img[2] <= 92, 'a wide code stays inside its 92 × 92 box');
+});

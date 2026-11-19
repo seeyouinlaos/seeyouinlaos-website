@@ -43,6 +43,9 @@ export async function resolve(specifier, context, next) {
 }`));
 
 const { handleBilling } = await import('../src/billing-routes.js');
+/* the synthetic statements of this suite are dated by the test clock: the Owners' floor (no statement before 21 Nov 2026) is lowered
+   here only — test/statements-13.test.mjs proves the floor itself */
+Object.assign((await import('../src/billing/pdf-layouts.js')).ISSUE_RULES, { floor: '2000-01-01', today: () => '2000-01-01' });
 const { BillingLedger } = await import('../src/billing-ledger.js');
 const { PAYMENT_JOURNAL_COLUMNS } = await import('../src/billing/source.js');
 const { composeStatementMail } = await import('../src/mail-templates.js');
@@ -412,7 +415,7 @@ test('ADMIN · the statement e-mail: the issued figures, My Profile → Your sta
     dueDate: '2026-10-28', inCurrency: { currency: 'EUR', amount: 1098.71 }, method: 'PayPal (EUR)', profileUrl: 'https://stage.invalid/profile#statement' });
   assert.match(m.subject, /S-TEST-0001/);
   for (const t of [m.text, m.html]) {
-    assert.match(t, /S-TEST-0001/); assert.match(t, /USD 1,234\.50/); assert.match(t, /EUR 1,098\.71/); assert.match(t, /21 days after it is issued/);
+    assert.match(t, /S-TEST-0001/); assert.match(t, /USD 1,234\.50/); assert.match(t, /EUR 1,098\.71/); assert.match(t, /Please settle it by the due date above\./); assert.doesNotMatch(t, /21 days/);
     assert.doesNotMatch(t, /IBAN|bearer|invitation code is|\/api\//i);
   }
   assert.match(m.text, /My Profile → Your statement: https:\/\/stage\.invalid\/profile#statement/);
@@ -1404,4 +1407,16 @@ test('HS-004 · THE ISSUE FREEZES THE RECIPIENT AND THE LAYOUT: a missing surnam
   delete W2.docs.head;
   const old = Buffer.from((await hit(W2, GROOM, 'pdf?holder=INV-T1&rev=1')).bytes).toString('latin1');
   assert.match(old, /\/Producer \(guest-settlement-pdf\/1\.2\)/); assert.doesNotMatch(old, /\(STATEMENT FOR\)/, 'the 1.2 original: exactly as it would have been');
+});
+
+test('HS-004.16 · a German guest whose 006 row holds no nationality is offered SEPA first by their own sent registration; another nationality keeps PayPal alone', async () => {
+  for (const [nat, want] of [['German', ['SEPA_EUR', 'PAYPAL_EUR']], ['Indian', ['PAYPAL_EUR']]]) {
+    const W = world({ store: {
+      'reg:INV-T1': { ...SENT, registration: { ...SENT.registration, personal: { guestId: 'GT1', nationality: nat } } },
+      'conf:INV-T1': { confirmedAt: '2026-10-02T09:00:00Z', version: 1 }, 'contact:INV-T1': { email: 'Tess.Example@Example.invalid', firstName: 'Tess' } } });
+    await approveGate(W.st);
+    W.workbook['006_Guestlist'] = W.workbook['006_Guestlist'].map((r) => (r[0] === 'CON-T1' ? [...r.slice(0, 4), ''] : r));
+    const h = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+    assert.deepEqual(h.j.preview.paymentOptions, want, nat);
+  }
 });

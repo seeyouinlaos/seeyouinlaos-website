@@ -483,7 +483,8 @@
     if (!lines || !lines.length) return '<p class="t-b2">No billable lines.</p>';
     return '<div class="ab-table-wrap"><table class="ab-table ab-lines"><thead><tr><th>Person</th><th>Item</th><th>Category</th><th class="num">Nights</th><th class="num">Qty</th><th class="num">Rate</th><th class="num">Amount</th><th>Block</th>' + (withReview ? '<th>Review</th>' : '') + '</tr></thead><tbody>' +
       lines.map(function (l) {
-        return '<tr><td data-l="Person">' + esc(l.person || l.Person_ID || '—') + '</td><td data-l="Item"><span data-i18n-skip>' + esc(l.Item_ID || '—') + '</span>' + (l.Room_Unit_ID ? '<br><span class="ab-mute">' + esc(l.Room_Unit_ID) + '</span>' : '') + '</td>' +
+        var word = S.holder && S.holder.preview && S.holder.preview.itemWords && S.holder.preview.itemWords[l.Item_ID];
+        return '<tr><td data-l="Person">' + esc(l.person || l.Person_ID || '—') + '</td><td data-l="Item">' + (word ? '<span data-i18n-skip>' + esc(word.name) + '</span><br><span class="ab-mute" data-i18n-skip>' + esc(l.Item_ID || '') + '</span>' : '<span data-i18n-skip>' + esc(l.Item_ID || '—') + '</span>') + (l.Room_Unit_ID ? '<br><span class="ab-mute">' + esc(l.Room_Unit_ID) + '</span>' : '') + '</td>' +
           '<td data-l="Category">' + esc(l.Billing_Category || '—') + (l.hosted ? ' · hosted' : '') +
             (l.paidByHS ? '<br><span class="ab-mute" data-ab-paid>' + esc(l.paidNote || 'Haruthai has already paid this booking for the guest. It is repaid to Haruthai & Suthep through the settlement.') +
               ' · payable to H&amp;S</span>' : '') + '</td>' +
@@ -655,6 +656,22 @@
       (b.blockB && b.blockB.length ? '<p class="t-l1">Block B · settled with the provider, never in the booked value</p>' + linesTable(b.blockB, false) : '') +
       (b.unmapped && b.unmapped.length ? '<p class="t-b2 ab-why">Selected products without an 002 item: ' + esc(b.unmapped.join(', ')) + '</p>' : '') + '</section>';
   }
+  /* WHAT THE STATEMENT PRINTS (HS-004.6/.8/.16): the recipient, everyone else on it, the ways to pay in their order, the correction
+     note — exactly the fields the issue freezes */
+  function waysToPay(list) {
+    var l = (list || []).filter(function (m) { return METHOD[m]; });
+    if (l.length > 1) return l.map(function (m, i) { return 'Option ' + (i + 1) + ' · ' + METHOD[m]; }).join(' · ');
+    return l.length ? METHOD[l[0]] : '—';
+  }
+  function printsView(pv) {
+    var r = pv.recipient, others = [];
+    Object.keys(pv.personNames || {}).forEach(function (pid) { if (!r || pid !== r.Person_ID) others.push(pv.personNames[pid] + ' (' + pid + ')'); });
+    var k = pv.correction;
+    return '<div class="ab-grid2" data-ab-prints>' + kv('Statement for', r ? '<b data-i18n-skip>' + esc(r.name) + '</b> <span class="ab-mute" data-i18n-skip>' + esc(r.Person_ID) + '</span>' : '<span class="ab-err">no recipient — not issuable</span>') +
+      kv('Also on this statement', others.length ? '<span data-i18n-skip>' + esc(others.join(', ')) + '</span>' : '—') +
+      kv('Ways to pay', esc(waysToPay(pv.paymentOptions))) +
+      kv('Correction', k ? esc('replaces ' + k.replaces + (k.replacesIssued ? ' issued ' + day(k.replacesIssued) : '') + ' · ' + k.reason) : '—') + '</div>';
+  }
   function previewView() {
     var H = S.holder, pv = H.preview || {};
     var reasons = (pv.reasons || []).map(function (r) { var w = reasonWords(r); return '<li>' + esc(w) + (w !== r ? ' <span class="ab-mute" data-i18n-skip>' + esc(String(r).split(' — ')[0]) + '</span>' : '') + '</li>'; }).join('');
@@ -663,6 +680,7 @@
       '<div class="ab-grid2">' + kv('Issue date if issued now', esc(day(pv.issueDate))) + kv('Due date', esc(day(pv.dueDate))) +
       kv('In the payment currency', pv.inCurrency ? '<span data-i18n-skip>' + esc(money(pv.inCurrency.currency, pv.inCurrency.amount)) + '</span> <span class="ab-mute">at ' + esc(pv.inCurrency.rate) + '</span>' : '—') +
       kv('Hosted value', '<span data-i18n-skip>' + esc(usd(pv.hostedValue)) + '</span> <span class="ab-mute">· informational</span>') + '</div>' +
+      printsView(pv) +
       linesTable(pv.lines, true) +
       (pv.blockB && pv.blockB.length ? '<p class="t-l1">Block B · informational, never in the total</p>' + linesTable(pv.blockB, false) : '') +
       (pv.manualReview && pv.manualReview.length ? '<p class="t-b2 ab-why">Manual review: ' + esc(pv.manualReview.join(', ')) + '</p>' : '') +
@@ -695,7 +713,8 @@
     if (I.done) return '<section class="p-card ab-panel ab-confirm" aria-label="Issued"><p class="t-l1 on">Issued</p><p class="t-b1">' + esc(I.done) + '</p></section>';
     var g = H.guest || {};
     return '<section class="p-card ab-panel ab-confirm" aria-label="Issue statement"><p class="t-l1 open">Issue statement · final</p>' +
-      '<p class="t-b1">You are issuing the statement for <b>' + esc(g.name ? g.name.full : H.Holder_ID) + '</b>: <b data-i18n-skip>' + esc(usd(pv.total)) + '</b>, due <b>' + esc(day(pv.dueDate)) + '</b>, payable by ' + esc(METHOD[H.method && H.method.channel] || '—') + '.</p>' +
+      '<p class="t-b1">You are issuing the statement for <b>' + esc(pv.recipient ? pv.recipient.name : (g.name ? g.name.full : H.Holder_ID)) + '</b>: <b data-i18n-skip>' + esc(usd(pv.total)) + '</b>, due <b>' + esc(day(pv.dueDate)) + '</b>, payable by ' + esc(pv.paymentOptions && pv.paymentOptions.length ? waysToPay(pv.paymentOptions) : (METHOD[H.method && H.method.channel] || '—')) + '.</p>' +
+      (pv.correction ? '<p class="t-b2">' + esc('Corrected version · replaces ' + pv.correction.replaces + (pv.correction.replacesIssued ? ' issued ' + day(pv.correction.replacesIssued) : '') + ' · ' + pv.correction.reason) + '</p>' : '') +
       '<p class="t-b2">An issued revision is immutable. The guest sees it in My Profile at once; nothing is e-mailed until you send it.</p>' +
       priceBlock(pdOf(H)) + (pdOf(H) && pdOf(H).material ? pricesTick(I.prices, I.busy, 'data-ab-issue-prices') : '') +
       '<label class="p-check t-b2"><input type="checkbox" data-ab-issue-check' + (I.checked ? ' checked' : '') + (I.busy ? ' disabled' : '') + '><span>I have checked the preview above and want to issue it.</span></label>' +

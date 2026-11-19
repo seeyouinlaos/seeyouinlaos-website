@@ -91,7 +91,7 @@ import {
 } from './billing/settlement.js';
 import { evaluateGate, GATE_NOT_RUN } from './billing/activation-gate.js';
 import { isChannel, PREFERENCE_SOURCE } from './billing/preference.js';
-import { ISSUE_LAYOUTS } from './billing/pdf-layouts.js';
+import { ISSUE_LAYOUTS, ISSUE_RULES } from './billing/pdf-layouts.js';
 
 const SEQ = 'seq:settlement';
 const GATE = 'gate';
@@ -182,12 +182,14 @@ export class BillingLedger {
   }
 
   /* the fields a new issue freezes beside its snapshot (HS-004.6/.7/.9/.16): validated before any write */
-  static frozenIssueFields(body, draft) {
+  static frozenIssueFields(body, draft, issueDate, holderId) {
     const b = body || {}, clip = (v, n) => clean(v).slice(0, n || 160);
     const layout = clean(b.pdfLayout);
     if (!ISSUE_LAYOUTS.includes(layout)) return { error: 'the issue must name a PDF layout that prints the recipient (' + ISSUE_LAYOUTS.join(', ') + ')', reason: 'PDF_LAYOUT_NOT_STATED', status: 400 };
+    if (issueDate != null && !(clean(issueDate) >= ISSUE_RULES.floor)) return { error: 'no statement is dated before ' + ISSUE_RULES.floor, reason: 'ISSUE_DATE_TOO_EARLY' };
     const r = b.recipient && typeof b.recipient === 'object' ? b.recipient : null;
     if (!r || !/^[A-Z][A-Z0-9-]{1,30}$/.test(clean(r.Person_ID)) || !/\S+ \S+/.test(clean(r.name))) return { error: 'the issue names no recipient with a full name', reason: 'RECIPIENT_INCOMPLETE' };
+    if (holderId != null && clean(r.Holder_ID) !== clean(holderId)) return { error: 'the recipient is not this statement\'s holder', reason: 'RECIPIENT_INCOMPLETE' };
     const persons = [...new Set(((draft && draft.lines) || []).map((l) => clean(l && l.Person_ID)).filter(Boolean))];
     const names = b.personNames && typeof b.personNames === 'object' ? b.personNames : {};
     const missing = persons.filter((pid) => !/\S+ \S+/.test(clean(names[pid])));
@@ -197,6 +199,9 @@ export class BillingLedger {
     const unnamed = itemIds.filter((id) => !(words[id] && clean(words[id].name)));
     if (unnamed.length) return { error: 'no product name for ' + unnamed.join(', '), reason: 'ITEM_NAME_MISSING' };
     const options = Array.isArray(b.paymentOptions) ? b.paymentOptions.map(clean).filter(isChannel) : [];
+    /* the ways to pay include the method frozen with the statement, all in its currency */
+    const method = clean(b.expectedPaymentPreference || b.paymentPreference);
+    if (options.length && method && (!options.includes(method) || options.some((m) => m.slice(-3) !== method.slice(-3)))) return { error: 'the ways to pay do not match the statement\'s method', reason: 'PAYMENT_OPTIONS_MISMATCH' };
     const fields = {
       Pdf_Layout: layout,
       Recipient: { Holder_ID: clip(r.Holder_ID, 40), Person_ID: clean(r.Person_ID), name: clip(r.name, 120) },
@@ -696,7 +701,7 @@ export class BillingLedger {
         /* THE RECIPIENT AND THE LAYOUT, FROZEN WITH THE REVISION (Owners, 19 Nov 2026 · HS-004.6/.7) — checked here, in the same turn
            and before anything is written: a new issue names a layout that prints the names, the recipient by full name, and a name
            for every person on its lines; the product words and the ways to pay are frozen with it */
-        const frozen = BillingLedger.frozenIssueFields(body, draft);
+        const frozen = BillingLedger.frozenIssueFields(body, draft, clean(body.issueDate) || at.slice(0, 10), clean(body.holderId));
         if (frozen.error) return json({ ok: false, review: MANUAL_REVIEW_REQUIRED, reasons: [frozen.reason], error: frozen.error }, frozen.status || 409);
         const snapshot = buildSnapshot({
           settlementId: s.Settlement_ID, revision: n, holderId,

@@ -232,7 +232,8 @@ function breakPoint(word, font, size, maxWidth) {
 function wrapText(value, font, size, maxWidth, maxLines) {
   const out = [];
   let cur = '';
-  for (const word of toLatin1(value).split(/\s+/).filter(Boolean)) {
+  /* "Haruthai & Suthep" never breaks across lines (the Owners' rule, everywhere) — one token for the wrap */
+  for (const word of toLatin1(value).replace(/Haruthai & Suthep/g, 'Haruthai\x01&\x01Suthep').split(/\s+/).filter(Boolean).map((w) => w.replace(/\x01/g, ' '))) {
     if (cur && textWidth(cur + ' ' + word, font, size) <= maxWidth) { cur += ' ' + word; continue; }
     if (cur) { out.push(cur); cur = ''; }
     let rest = word;
@@ -553,10 +554,12 @@ function masthead(doc, snapshot, o) {
   const top = doc.y;
   let yl = top, yr = top;
   drawText(doc, c.left, yl, 'STATEMENT FOR', REG, 7, SOFT); yl -= 15;
-  drawText(doc, c.left, yl, fitText(r && clean(r.name) ? clean(r.name) : 'not stated', BOLD, 12.5, split - c.left - 12), BOLD, 12.5); yl -= 12;
+  /* the full name, never shortened: a long one takes a second line */
+  for (const t of wrapText(r && clean(r.name) ? clean(r.name) : 'not stated', BOLD, 12.5, split - c.left - 12)) { drawText(doc, c.left, yl, t, BOLD, 12.5); yl -= 14; }
+  yl += 2;
   if (r && clean(r.Person_ID)) { drawText(doc, c.left, yl, 'Guest ID ' + clean(r.Person_ID), REG, 7.5, SOFT); yl -= 11; }
   const others = Object.entries(opts.persons || {}).filter(([pid]) => !r || pid !== clean(r.Person_ID)).map(([pid, n]) => clean(n) + ' (' + pid + ')');
-  if (others.length) for (const t of wrapText('Also on this statement: ' + others.join(', '), REG, 7.5, split - c.left - 12, 4)) { drawText(doc, c.left, yl, t, REG, 7.5, SOFT); yl -= 10; }
+  if (others.length) for (const t of wrapText('Also on this statement: ' + others.join(', '), REG, 7.5, split - c.left - 12)) { drawText(doc, c.left, yl, t, REG, 7.5, SOFT); yl -= 10; }
   drawText(doc, split, yr, 'FROM', REG, 7, SOFT); yr -= 15;
   drawText(doc, split, yr, 'Haruthai & Suthep', BOLD, 10.5); yr -= 12;
   drawText(doc, split, yr, 'Hosts of the wedding · payee', REG, 7.5, SOFT); yr -= 11;
@@ -846,6 +849,7 @@ function paymentSection(doc, p) {
     : p.nothingDue ? 'Nothing is payable on this statement.' : null;
   const options = (Array.isArray(p.options) && p.options.length ? p.options : (p.method ? [p] : [])).filter((o) => o && OPTION_WORDS[clean(o.method)])
     .map((o) => ({ ...o, method: clean(o.method) }));
+  if (p.nothingDue && !p.supersededBy) return;   /* said once, under the dates: "Nothing is payable on this statement." */
   if (only || !options.length) {
     ensure(doc, 40);
     drawText(doc, c.left, doc.y, PAY_HEADING, BOLD, 9); doc.y -= 13;
@@ -873,15 +877,19 @@ function paymentSection(doc, p) {
   /* the bank transfer's column is the wider one: its IBAN is never broken */
   const colWs = [(c.width - codeCol - 2 * gap) * 0.6, (c.width - codeCol - 2 * gap) * 0.4];
   const col = sized.length === 2 ? sized.map(({ o, w, rows, img, qrW, qrH }, n) => {
-    const colW = colWs[n], lab = n === 0 ? 66 : 58;
+    const colW = colWs[n], lab = Math.ceil(Math.max(...rows.map(([k]) => textWidth(k, REG, 8)))) + 7;
     const how = wrapText(w.how, REG, 8, colW - 4);
     const vals = rows.map(([k, v]) => [k, k === 'IBAN' ? [v] : wrapText(v, /^Reference/.test(k) ? MONO : REG, 8.3, colW - lab, 3)]);
+    let ibanSize = 8.3; const iban = rows.find(([k]) => k === 'IBAN');
+    while (iban && ibanSize > 6.5 && textWidth(iban[1], MONO, ibanSize) > colW - lab) ibanSize -= 0.1;
     const textH = 14 + vals.reduce((t, [, l]) => t + l.length * 11 + 1, 0) + how.length * 10 + 6;
-    return { o, w, vals, how, img, qrW, qrH, lab, h: Math.max(textH, img ? 96 : 0) };
+    return { o, w, vals, how, img, qrW, qrH, lab, ibanSize, h: Math.max(textH, img ? 96 : 0) };
   }) : null;
   /* ONE way to pay: its rows and words on the left, its code on the right (HS-004.13) — the same facts in less height */
   const one = !col && sized.length === 1 ? (() => {
-    const k = sized[0], codeW = k.img ? (k.o.method === 'PROMPTPAY_THB' ? 128 : 100) : 0, codeH = k.img ? Math.round(codeW * k.img.height / k.img.width) : 0;
+    const k = sized[0], box = k.o.method === 'PROMPTPAY_THB' ? 128 : 100;
+    const f = k.img ? Math.min(box / k.img.width, (k.o.method === 'PROMPTPAY_THB' ? 190 : 100) / k.img.height) : 0;
+    const codeW = k.img ? Math.round(k.img.width * f) : 0, codeH = k.img ? Math.round(k.img.height * f) : 0;
     const textW = c.width - (codeW ? codeW + 24 : 0);
     const how = wrapText(k.w.how, REG, 8.3, textW - 10);
     const vals = k.rows.map(([kk, v]) => [kk, wrapText(v, /^(IBAN|Reference)/.test(kk) ? MONO : REG, 8.5, textW - 120, 3)]);
@@ -925,13 +933,14 @@ function paymentSection(doc, p) {
       for (const [label, lines] of k.vals) {
         const mono = /^(IBAN|Reference)/.test(label);
         drawText(doc, x, y, label, REG, 8, SOFT);
-        lines.forEach((t, i) => drawText(doc, x + k.lab, y - i * 11, t, mono ? MONO : REG, 8.3));
+        lines.forEach((t, i) => drawText(doc, x + k.lab, y - i * 11, t, mono ? MONO : REG, label === 'IBAN' ? k.ibanSize : 8.3));
         y -= lines.length * 11 + 1;
       }
       for (const t of k.how) { drawText(doc, x, y, t, REG, 8, INK); y -= 10; }
       y -= 6;
       /* the code in its own column at the right edge, level with its option */
-      if (k.img) { const h = 92, w2 = Math.round(h * k.img.width / k.img.height); placeImage(doc, k.img, c.right - w2, top + 4 - h, w2, h); y = Math.min(y, top + 4 - h - 6); }
+      if (k.img) { const f = Math.min(92 / k.img.height, 92 / k.img.width), h = Math.round(k.img.height * f), w2 = Math.round(k.img.width * f);
+        placeImage(doc, k.img, c.right - w2, top + 4 - h, w2, h); y = Math.min(y, top + 4 - h - 6); }
       k.end = y;
     });
     doc.y = Math.min(col[0].end, col[1].end) - 6;

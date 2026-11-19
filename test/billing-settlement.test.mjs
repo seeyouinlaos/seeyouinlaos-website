@@ -28,6 +28,9 @@ export async function resolve(specifier, context, next) {
 }`));
 
 const { handleBilling } = await import('../src/billing-routes.js');
+/* the synthetic statements of this suite are dated by the test clock: the Owners' floor (no statement before 21 Nov 2026) is lowered
+   here only — test/statements-13.test.mjs proves the floor itself */
+Object.assign((await import('../src/billing/pdf-layouts.js')).ISSUE_RULES, { floor: '2000-01-01', today: () => '2000-01-01' });
 const { BillingLedger } = await import('../src/billing-ledger.js');
 const { calculate, computeLine, ENGINE_VERSION } = await import('../src/billing/engine.js');
 const { paymentPosition, journalPosition, paymentStatus, buildSnapshot } = await import('../src/billing/settlement.js');

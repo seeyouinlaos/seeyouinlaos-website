@@ -51,7 +51,7 @@ import { loadConfirmedBookings, unmappedProducts, siteKeyOfSelection, nightsOf, 
 import { OWNER_BOOKING_STATE, obkKey, OBK_INDEX_KEY, readRecord, stateOf as ownerStateOf, stageOf, keyStage, holdPlan, applyAction, toBookings, occupancy, problemsOf, combinedConfirmation } from './billing/owner-bookings.js';
 import { canonicalLines, canonicalKey } from './legacy-keys.js';
 import { isPrintable } from './billing/pdf.js';
-import { CURRENT_LAYOUT, LAYOUT_12, layoutOfRevision } from './billing/pdf-layouts.js';
+import { CURRENT_LAYOUT, LAYOUT_12, layoutOfRevision, ISSUE_RULES } from './billing/pdf-layouts.js';
 import { pdfOptionsFor, renderIssuedPdf } from './billing/pdf-writers.js';
 import { recipientOfIssue } from './billing/recipient.js';
 import { isGermanNationality, wordsForIssue, paymentOptionsFor, optionView, correctionOf } from './billing/statement-inputs.js';
@@ -314,7 +314,7 @@ async function preferenceOf(env, origin, holderId, state, src, register) {
   const pref = effectivePreference({ record: state.paymentPreference, route });
   /* a German guest is offered the SEPA bank transfer first and PayPal (HS-004.16): the same sources, the same order (006, else the
      guest's own sent registration) */
-  const german = isGermanNationality(nat && nat.found ? nat.value : (stated && stated.found ? stated.value : ''));
+  const german = isGermanNationality(nat && nat.found && clean(nat.value) ? nat.value : (stated && stated.found ? stated.value : ''));
   const verified = firstVerifiedPayment(src.journalRows, state.Settlement_ID);
   return {
     ...pref,
@@ -1028,11 +1028,14 @@ async function assessIssue(env, holderId, src, asOf, origin, opts) {
   /* THE RECIPIENT (HS-004.6 · critical): every statement names its recipient and every person on its lines in full — missing,
      ambiguous or unprintable names block the issue; the product words (HS-004.9) and the ways to pay (HS-004.16) likewise */
   const names = await namesForIssue(env, origin, holderId, src, current.result.lines);
-  reasons.push(...names.reasons);
   const words = wordsForIssue(current.result.lines, src.items);
-  if (words.missing.length) reasons.push('ITEM_NAME_MISSING: ' + words.missing.join(', ') + ' — the statement has no name for this product');
   const paymentOptions = paymentOptionsFor(pref);
-  for (const m of paymentOptions) { const d = destinationOf(m, env); if (!d || !d.complete) reasons.push('PAYMENT_DESTINATION_INCOMPLETE: ' + m + ' has no configured account'); }
+  const statementBlockers = [...names.reasons];
+  if (words.missing.length) statementBlockers.push('ITEM_NAME_MISSING: ' + words.missing.join(', ') + ' — the statement has no name for this product');
+  for (const m of paymentOptions) { const d = destinationOf(m, env); if (!d || !d.complete) statementBlockers.push('PAYMENT_DESTINATION_INCOMPLETE: ' + m + ' has no configured account'); }
+  /* no statement dated before 21 November 2026 (Owners, HS-PROMPT-013 Nr. 12) */
+  if (!(clean(asOf) >= ISSUE_RULES.floor)) statementBlockers.push('ISSUE_DATE_TOO_EARLY: no statement is dated before ' + ISSUE_RULES.floor);
+  reasons.push(...statementBlockers);
 
   const hash = await sourceHash({ items: src.items, specialRates: src.specialRates });
   const proposal = pref.channel ? buildSnapshot({
@@ -1048,7 +1051,7 @@ async function assessIssue(env, holderId, src, asOf, origin, opts) {
   /* what the new version freezes beside its snapshot; a version of an earlier layout (no names) is corrected by a new one */
   const frozen = { layout: CURRENT_LAYOUT, recipient: names.recipient, persons: names.personNames, words: words.words, options: paymentOptions.length ? paymentOptions : null };
   const frozenOf = (r) => (r ? { layout: r.Pdf_Layout || null, recipient: r.Recipient || null, persons: r.Person_Names || null, words: r.Item_Words || null, options: r.Payment_Options || null } : null);
-  const correction = issuedNow && proposal ? correctionOf(issuedNow, proposal, words.words) : null;
+  const correction = issuedNow && proposal ? correctionOf(issuedNow, proposal, words.words, { legacy: !(state.issuedRecord && state.issuedRecord.Pdf_Layout) }) : null;
   if (issuedNow && proposal && substance(proposal) === substance(issuedNow) && stableJson(frozenOf(state.issuedRecord)) === stableJson(frozen)) {
     reasons.push('NO_CHANGE: revision ' + issuedNow.Revision + ' already holds exactly this statement');
   }
@@ -1063,7 +1066,7 @@ async function assessIssue(env, holderId, src, asOf, origin, opts) {
     asOf, fx, sourceGaps, state, pref, destination, current, confirmation, gateCheck, currentDrifts, drifts,
     gate: { stored: gate.approved, now: gateNow ? { approved: gateNow.approved, open: gateNow.open || [] } : null },
     allowed: reasons.length === 0, reasons, proposal, proposalHash, sourceHash: hash,
-    names, words, paymentOptions, correction, frozen,
+    names, words, paymentOptions, correction, frozen, statementBlockers,
   };
 }
 
@@ -1092,6 +1095,8 @@ async function adminIssue(env, identity, request, cors) {
 
   const asOf = clean(body.asOf) || utcDay();
   if (!/^\d{4}-\d{2}-\d{2}$/.test(asOf)) return jsonRes({ ok: false, error: 'asOf must be YYYY-MM-DD' }, 400, cors);
+  /* NEVER BACKDATED (Owners, HS-PROMPT-013 Nr. 12): a statement carries the day it is issued, never an earlier one */
+  if (asOf < ISSUE_RULES.today()) return jsonRes({ ok: false, error: 'a statement is never dated before the day it is issued', reasons: ['ISSUE_BACKDATED'] }, 409, cors);
   if (clean(body.dueDateOverride) && !/^\d{4}-\d{2}-\d{2}$/.test(clean(body.dueDateOverride))) {
     return jsonRes({ ok: false, error: 'dueDateOverride must be YYYY-MM-DD' }, 400, cors);
   }
@@ -1187,8 +1192,7 @@ async function adminIssue(env, identity, request, cors) {
   /* an existing revision: the as-sent check comes last, right before it is issued */
   if (asked != null) { const unseen = await unseenDifference(); if (unseen) return unseen; }
   /* NO STATEMENT WITHOUT ITS RECIPIENT (HS-004.6), on both paths */
-  const unnamed = [...a.names.reasons, ...(a.words.missing.length ? ['ITEM_NAME_MISSING: ' + a.words.missing.join(', ')] : [])];
-  if (unnamed.length) return jsonRes({ ok: false, error: 'Issue & Publish is blocked', reasons: unnamed }, 409, cors);
+  if (a.statementBlockers.length) return jsonRes({ ok: false, error: 'Issue & Publish is blocked', reasons: a.statementBlockers }, 409, cors);
   const issued = await ledgerCall(env, 'revision-issue', {
     holderId, revision, by,
     items: src.items, specialRates: src.specialRates, fx, sourceGaps,
@@ -2192,6 +2196,13 @@ async function sendContext(env, url, holderId) {
     inCurrency: issued.Payment_Preference ? inPreferredCurrency(issued.Total_Payable_Cents, issued.Payment_Preference, fx) : null };
 }
 
+/* the way(s) to pay the issued revision froze (HS-004.16): a German guest's SEPA first and PayPal, as on the PDF; else its one method */
+function methodWordsOf(ctx) {
+  const opts = ctx && ctx.state && ctx.state.issuedRecord && Array.isArray(ctx.state.issuedRecord.Payment_Options) ? ctx.state.issuedRecord.Payment_Options.filter((m) => METHOD_WORDS[m]) : [];
+  if (opts.length > 1) return opts.map((m) => METHOD_WORDS[m]).join(', or ');
+  return METHOD_WORDS[opts[0] || (ctx && ctx.issued && ctx.issued.Payment_Preference)] || null;
+}
+
 /** GET admin/send?holder=INV — the facts the confirmation shows before anything is sent. */
 async function adminSendGet(env, identity, url, cors) {
   const holderId = clean(url.searchParams.get('holder'));
@@ -2202,7 +2213,7 @@ async function adminSendGet(env, identity, url, cors) {
   return jsonRes({ ok: true, Holder_ID: holderId, issued: true,
     recipientName: ctx.fullName, firstName: ctx.firstName, email: ctx.recipient.email, emailSource: ctx.recipient.source,
     Settlement_ID: ctx.issued.Settlement_ID, revision: ctx.issued.Revision, totalPayable: fromCents(ctx.issued.Total_Payable_Cents),
-    dueDate: ctx.issued.Due_Date, issueDate: ctx.issued.Issue_Date, inCurrency: ctx.inCurrency,
+    dueDate: ctx.issued.Due_Date, issueDate: ctx.issued.Issue_Date, inCurrency: ctx.inCurrency, method: methodWordsOf(ctx),
     attempts: log && log.ok === true ? log.attempts : null, open: log && log.ok === true ? log.open : null }, 200, cors);
 }
 
@@ -2258,7 +2269,8 @@ async function adminSendPost(env, identity, request, url, cors, deps) {
   const mail = composeStatementMail({
     firstName: ctx.firstName, settlementId: sid, revision: rev, totalPayable: fromCents(ctx.issued.Total_Payable_Cents),
     issueDate: ctx.issued.Issue_Date, dueDate: ctx.issued.Due_Date, inCurrency: ctx.inCurrency,
-    method: METHOD_WORDS[ctx.issued.Payment_Preference] || null, profileUrl: url.origin + '/profile#statement',
+    method: methodWordsOf(ctx), profileUrl: url.origin + '/profile#statement',
+    correction: ctx.state && ctx.state.issuedRecord ? ctx.state.issuedRecord.Correction : null,
   });
   const sent = await sendMail(env, ctx.recipient.email, ctx.fullName || ctx.recipient.email, mail.subject, mail.text, mail.html,
     [{ name: 'Statement-' + sid + '-V' + rev + '.pdf', content: base64Of(bytes) }]);

@@ -338,9 +338,12 @@ export function composeStatementMail(m) {
   const total = 'USD ' + Number(d.totalPayable || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const rows = [kvRow('Statement', d.settlementId + ' · version ' + d.revision), kvRow('Issued', dayWords(d.issueDate)), kvRow('Total', total),
     owed ? kvRow('In ' + d.inCurrency.currency, owed, 'at this statement\'s own rate') : '', kvRow('Due by', dayWords(d.dueDate)),
-    d.method ? kvRow('Payment method', d.method) : ''].filter(Boolean);
+    d.method ? kvRow('Payment method', d.method) : '',
+    /* a corrected version names the version it replaces (HS-004.8), as its PDF does */
+    d.correction && d.correction.replaces ? kvRow('Replaces', d.correction.replaces + (d.correction.replacesIssued ? ' issued ' + dayWords(d.correction.replacesIssued) : '')) : ''].filter(Boolean);
   const intro = 'Your statement for the wedding journey is ready. It is attached to this email, and you will always find it in My Profile, under Your statement — together with how to pay.';
-  const rule21 = 'It is settled within 21 days after it is issued, by the due date above. Once you have paid, tell us with "I have paid" in My Profile; Guest Relations then verifies the payment.';
+  /* the due date itself, never a fixed "21 days" beside it (HS-004.11) */
+  const rule21 = 'Please settle it by the due date above. Once you have paid, tell us with "I have paid" in My Profile; Guest Relations then verifies the payment.';
   const inner = '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td>' +
     h1('Your statement') + para('Dear ' + esc(d.firstName || 'guest') + ',') + para(esc(intro)) + '</td></tr>' + gap(10) +
     '<tr><td>' + kvTable(rows) + '</td></tr>' + gap(14) + rule() +
@@ -351,7 +354,8 @@ export function composeStatementMail(m) {
   const T = ['SEE YOU IN LAOS — YOUR STATEMENT', '', 'Dear ' + (d.firstName || 'guest') + ',', '', intro, '',
     'Statement: ' + d.settlementId + ' · version ' + d.revision, 'Issued: ' + dayWords(d.issueDate), 'Total: ' + total,
     owed ? 'In ' + d.inCurrency.currency + ': ' + owed + ' (at this statement\'s own rate)' : '', 'Due by: ' + dayWords(d.dueDate),
-    d.method ? 'Payment method: ' + d.method : '', '', rule21, '', 'My Profile → Your statement: ' + (d.profileUrl || SITE + '/profile#statement'), '',
+    d.method ? 'Payment method: ' + d.method : '',
+    d.correction && d.correction.replaces ? 'Replaces: ' + d.correction.replaces + (d.correction.replacesIssued ? ' issued ' + dayWords(d.correction.replacesIssued) : '') : '', '', rule21, '', 'My Profile → Your statement: ' + (d.profileUrl || SITE + '/profile#statement'), '',
     PRIVACY, '', 'With love,', 'Haruthai & Suthep', '', 'Guest Relations — Khun Ket & Khun Paddy · ' + GR_EMAIL];
   return { subject, text: T.join('\n').replace(/\n{3,}/g, '\n\n'), html: shell(subject, inner, 'Your statement') };
 }
