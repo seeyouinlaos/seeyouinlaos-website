@@ -2,15 +2,15 @@
  "about": "Signed by src/release-attest.mjs on the release machine; verified by src/release-verify.cjs in the build. Not the Owner's consent — a record that these checks passed for exactly this tree.",
  "payload": {
   "v": 1,
-  "tree": "a9054419beacd0b382312eeb84f80de9525589f6",
+  "tree": "555e48451fdda3eb4e1fe2046b47058254d56265",
   "pricingRef": "327be7b554f5",
   "keyId": "d02a1256537ec29e",
-  "at": "2026-11-19T12:40:03.457Z",
-  "base": "d31c86e6f38a9d1493f995d5f7100fd179fab92b",
+  "at": "2026-11-19T17:00:22.220Z",
+  "base": "6defdd73bf1dc84202ee32ea82252bad5048f75e",
   "markers": {},
   "checks": {
    "npmTest": {
-    "pass": 1082,
+    "pass": 1104,
     "fail": 0
    },
    "releaseCheck": {
@@ -23,5 +23,5 @@
    }
   }
  },
- "signature": "uE70qGk2ZkabbcHuVwqfL5TLNxw7zAFAmS+Y8UZNUFwe9XYRFSnIKBrDD5qDpCRFaYsUop1Qe/cO6ThKXTujCQ=="
+ "signature": "sRRrytCXLcLTkiS4poZPB+IRwkO+X0aLQ06RsrkQhA/2t0MDt9ueAxgG3bg0QaVh5DfAcDuAc0Dnf0uZ55+oCg=="
 }
