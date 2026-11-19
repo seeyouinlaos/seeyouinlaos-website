@@ -70,7 +70,7 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/aman.js?v=641d956e"></script>
 <script src="assets/rooms-data.js?v=6f38c0f8"></script>
 <script src="assets/billing-client.js?v=421fbc48"></script>
-<script src="assets/pricing.js?v=3d7251a6"></script>
+<script src="assets/pricing.js?v=d7ec3c43"></script>
 <script src="assets/stage-graph.js?v=f5f4dc76"></script>
 <script src="assets/questionnaire.js?v=1dc3e01d"></script>
 <script src="assets/guest.js?v=f30d0df8"></script>
@@ -122,7 +122,7 @@ function display(v){var Q=window.SIYL_QUESTIONNAIRE;if(Array.isArray(v))return Q
 /* the amount with its basis (PRQ-04-11): per person, the 1872 tea for the table */
 function perOf(x){return x&&(x.id==='1872'||x.id==='tea1872')?'for the table':x&&x.personal==='employee'?'for the room':'per person'}
 /* who books a stay (Owner, 28 Sep 2026 · 002 "Note for Guest") — in the text Guest Relations receives */
-function bookingText(x){var b=x&&x.stay&&window.SIYL_PRICE&&SIYL_PRICE.bookingOf?SIYL_PRICE.bookingOf(x.id,x.room):null;return b?(b.method==='prepaid'?' · ALREADY PAID BY HARUTHAI FOR THE GUEST (repaid to Haruthai & Suthep through the settlement)':b.method==='self'?' · GUEST BOOKS THIS HOTEL THEMSELVES (not invoiced by Haruthai & Suthep)':' · BOOKED BY THE BRIDE & GROOM, settled within 21 days after the statement is issued'):''}
+function bookingText(x){var b=x&&x.stay&&window.SIYL_PRICE&&SIYL_PRICE.bookingOf?SIYL_PRICE.bookingOf(x.id,x.room):null;return b?(b.method==='prepaid'?' · ALREADY PAID BY HARUTHAI FOR THE GUEST (repaid to Haruthai & Suthep through the settlement)':b.method==='self'?' · GUEST BOOKS THIS HOTEL THEMSELVES (not invoiced by Haruthai & Suthep)':b.method==='statement'?' · SETTLED THROUGH THE STATEMENT TO HARUTHAI & SUTHEP (please do not pay the hotel directly)':' · BOOKED BY THE BRIDE & GROOM, settled within 21 days after the statement is issued'):''}
 var INTEREST_WORDS='Interest · Guest Relations confirms your time · paid at the spa';
 var REQUEST_WORDS='Request · Guest Relations will confirm your table';
 var NOT_AT_WEDDING='You are not joining us for the wedding in Vientiane.';

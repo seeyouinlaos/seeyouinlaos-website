@@ -131,7 +131,18 @@
   /* A STAY H&S ALREADY PAID FOR THE GUEST (Owner, Edit 10 · 7 Oct 2026): the server marks it (paidByHS, from a 009 row);
      its amount is what the guest repays through the statement — never "your special rate" beside a listed one */
   var PREPAID_WORDS = 'Already paid for you by Haruthai · you repay Haruthai & Suthep through your statement';
-  var BOOKING_WORDS = { prepaid: PREPAID_WORDS + '.', self: 'Guest will book by themselves.', 'bride-groom': 'Will be booked by the bride & groom. It is settled within 21 days after your statement is issued.' };
+  var BOOKING_WORDS = { prepaid: PREPAID_WORDS + '.', self: 'Guest will book by themselves.', 'bride-groom': 'Will be booked by the bride & groom. It is settled within 21 days after your statement is issued.',
+    /* HS-031.8 (Owners, 19 Nov 2026): this guest's stay is settled through their statement (src/gifts.js · statement) */
+    statement: 'Settled through your statement to Haruthai & Suthep — please do not pay the hotel directly.' };
+  /* THE STAY SETTLED THROUGH THE STATEMENT (HS-031.8): the guest's own entry says so (src/gifts.js · statement) and the server prices it
+     as an H&S amount — on the room shown, else the room of this window in the bag. Nothing else changes: the amount is the server's. */
+  function viaStatementIn(at, slug) {
+    if (!at) return false;
+    var s = slug;
+    if (!s) { var B = window.SIYL_BAG, line = B && B.get ? B.get().filter(function (x) { return x && x.id === at.win.id; })[0] : null; if (line && line.room) s = line.room; }
+    var g = s ? giftFor(at.win.id, s) : null;
+    return !!(g && g.kind === 'statement') && serverAnswer(at.win.id, s).state === 'amount';
+  }
   /* no leading zero in a date: "06 – 08 March 2027" → "6 – 8 March 2027" */
   function unpad(t) { return String(t == null ? '' : t).replace(/(^|[^\d])0(\d)(?!\d)/g, '$1$2'); }
   var MONTH_RE = /\s+(January|February|March|April|May|June|July|August|September|October|November|December)$/;
@@ -381,7 +392,7 @@
         if (sq.rateSource === 'SPECIAL_RATE' && q.total != null) {
           gift = sq.paidByHS ? { kind: 'prepaid', charge: q.total }
             : q.total === 0 ? { kind: 'gift', by: (local && local.by) || 'bride-groom' }
-            : { kind: local && local.kind && local.kind !== 'gift' ? local.kind : 'special', per: local && local.per, charge: q.total };
+            : { kind: local && local.kind && local.kind !== 'gift' && local.kind !== 'statement' ? local.kind : 'special', per: local && local.per, charge: q.total };
         }
       } else if (sa.state === 'self' || sa.state === 'none') gift = local;
       /* a stay H&S already paid whose price 009 still asks for: no amount yet, but the line already says who paid (Edit 10) */
@@ -413,6 +424,8 @@
       q.booking = at.win.booking || ''; q.bookingUrl = at.win.bookingUrl || ''; q.bookingWords = BOOKING_WORDS[q.booking] || '';
       /* a stay H&S already paid for this guest is not the guest's to book: no hotel link, the words say who paid */
       if (sq && sq.paidByHS) { q.booking = 'prepaid'; q.bookingUrl = ''; q.bookingWords = BOOKING_WORDS.prepaid; }
+      /* settled through the guest's statement (HS-031.8): no hotel link, never "book by themselves" */
+      else if (viaStatementIn(at, room && room.slug)) { q.booking = 'statement'; q.bookingUrl = ''; q.bookingWords = BOOKING_WORDS.statement; }
       return q;
     },
 
@@ -655,6 +668,7 @@
     bookingOf: function (windowId, slug) {
       var at = locate(windowId); var w = at && at.win; if (!w || !w.booking) return null;
       if (prepaidIn(at, slug)) return { method: 'prepaid', url: '', words: BOOKING_WORDS.prepaid };
+      if (viaStatementIn(at, slug)) return { method: 'statement', url: '', words: BOOKING_WORDS.statement };
       return { method: w.booking, url: w.bookingUrl || '', words: BOOKING_WORDS[w.booking] || '' };
     },
     BOOKING_WORDS: BOOKING_WORDS,

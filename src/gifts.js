@@ -7,6 +7,8 @@
      · gift      — complimentary, "from the Bride & Groom" (the guest's charge is nothing)
      · special   — a personal rate, the stated total for the window
      · employee  — a personal employee rate for the whole room, paid in full by that guest alone (never split with a partner)
+     · statement — no charge of its own (the server's amount stands): this guest's stay is settled through their statement to
+                   Haruthai & Suthep, so the page and the trip e-mail say so and show no hotel link (Owners, 19 Nov 2026 · HS-031.8)
    Nothing else changes: the hotel's rate stays the rate for everyone else (assets/rooms-data.js), the room is held and counted like
    any other (the room engine never reads this), another room of the same stay is priced as usual, and nobody else — not the guest's
    party — is touched.
@@ -37,6 +39,10 @@ export const GIFTS = Object.freeze([
      night). Their personal rate only: the public pre-wedding Heritage Executive rate is unchanged (assets/rooms-data.js). */
   E('CON003', 'prewed', 'heritage-executive', 'special', 130),
   E('CON004', 'prewed', 'heritage-executive', 'special', 130),
+  /* A2 · U Sathorn Bangkok (21 – 24 February 2027) · this one register id (Owners, 19 Nov 2026 · HS-031.8): the stay is settled through
+     the guest's statement to Haruthai & Suthep (USD 203.42 open on it) — the page and the trip e-mail must not send the guest to pay the
+     hotel a second time. Her booking, her price and her open amount are the engine's and are not touched here. */
+  E('CON010', 'bkk-stay', 'u-sathorn-superior-garden', 'statement', null),
 ]);
 
 /* the entries of one person, in the form the guest's own pages read (never the person id) */
@@ -54,6 +60,20 @@ export function entryFor(gifts, line) {
   return (line && Array.isArray(gifts) && gifts.find((g) => g.window === line.id && g.room === line.room)) || null;
 }
 export function isGift(gifts, line) { const e = entryFor(gifts, line); return !!(e && (e.kind || 'gift') === 'gift'); }
+
+/* a sent stay the sender's own entry says is settled through the statement carries viaStatement (for the trip e-mail's words); a line
+   that claims it without the entry loses it — never a price, only the words */
+export function statementLines(lines, gifts) {
+  if (!Array.isArray(lines)) return lines;
+  return lines.map((l) => {
+    if (!l || typeof l !== 'object') return l;
+    const e = entryFor(gifts, l);
+    if (e && e.kind === 'statement') return { ...l, viaStatement: true };
+    if (!l.viaStatement) return l;
+    const { viaStatement, ...rest } = l;
+    return rest;
+  });
+}
 
 /* a sent line keeps a personal charge only when the sender holds it — at exactly the entry's charge; a line that claims one it
    does not hold is the hotel's rate again (rate × payable nights) */

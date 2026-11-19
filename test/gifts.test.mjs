@@ -58,21 +58,24 @@ test('THE LIST · one person (the register id, never a name), one window, one ro
     { contactId: 'CON001', window: 'wedstay', room: 'souphattra-presidential', kind: 'special', charge: 150, nights: 'both' },
     { contactId: 'CON002', window: 'wedstay', room: 'souphattra-presidential', kind: 'special', charge: 150, nights: 'both' },
     { contactId: 'CON003', window: 'prewed', room: 'heritage-executive', kind: 'special', charge: 130 },
-    { contactId: 'CON004', window: 'prewed', room: 'heritage-executive', kind: 'special', charge: 130 }]);
+    { contactId: 'CON004', window: 'prewed', room: 'heritage-executive', kind: 'special', charge: 130 },
+    /* U Sathorn, settled through the statement (Owners, 19 Nov 2026 · HS-031.8) */
+    { contactId: 'CON010', window: 'bkk-stay', room: 'u-sathorn-superior-garden', kind: 'statement', charge: null }]);
   assert.deepEqual(giftsFor('CON005'), [
     { window: 'prewed', room: 'heritage-executive', kind: 'special', charge: 225 },
     { window: 'wedstay', room: 'heritage-executive', kind: 'gift', charge: 0, by: 'bride-groom' },
     { window: 'kempinski', room: 'jatu-room', kind: 'employee', charge: 232, per: 'room' }]);
   assert.deepEqual(giftsFor('CON010'), [
     { window: 'prewed', room: 'heritage-executive', kind: 'special', charge: 225 },
-    { window: 'wedstay', room: 'heritage-executive', kind: 'gift', charge: 0, by: 'bride-groom' }], 'the employee rate is one person\'s alone');
+    { window: 'wedstay', room: 'heritage-executive', kind: 'gift', charge: 0, by: 'bride-groom' },
+    { window: 'bkk-stay', room: 'u-sathorn-superior-garden', kind: 'statement', charge: null }], 'the employee rate is one person\'s alone; U Sathorn settled through her statement (HS-031.8)');
   assert.deepEqual(giftsFor('CON006'), [], 'the party mate'); assert.deepEqual(giftsFor(''), []); assert.deepEqual(giftsFor(null), []);
   const g = giftsFor('CON005'), he = (id) => ({ ...heritage(0), id, room: 'heritage-executive' });
   assert.equal(isGift(g, he('wedstay')), true); assert.equal(isGift(g, heritage(0)), false, 'The Heritage is not the entitled room'); assert.equal(isGift(g, he('prewed')), false, 'a special rate is not a gift');
   /* the public source names nobody: an entry is the register's opaque person id, a window, a room, its kind and charge — nothing else */
   for (const g of GIFTS) {
     for (const k of Object.keys(g)) assert.ok(['contactId', 'window', 'room', 'kind', 'charge', 'by', 'per', 'nights'].includes(k), k);
-    assert.match(g.contactId, /^CON\d{3}$/); assert.ok(['gift', 'special', 'employee'].includes(g.kind)); assert.equal(typeof g.charge, 'number');
+    assert.match(g.contactId, /^CON\d{3}$/); assert.ok(['gift', 'special', 'employee', 'statement'].includes(g.kind)); assert.equal(typeof g.charge, g.kind === 'statement' ? 'object' : 'number');   /* a statement entry has no charge of its own (HS-031.8) */
   }
 });
 

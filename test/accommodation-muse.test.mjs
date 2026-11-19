@@ -54,7 +54,9 @@ test('THE BOOKING METHOD (002 · "Note for Guest") · self-booking stays name th
   const w = page({ auth: PEGGY }); const P = w.SIYL_PRICE;
   /* Edit 10: a stay H&S already paid for the guest says so (only where the server marks it) */
   assert.deepEqual(plain(P.BOOKING_WORDS), { prepaid: 'Already paid for you by Haruthai · you repay Haruthai & Suthep through your statement.',
-    self: 'Guest will book by themselves.', 'bride-groom': 'Will be booked by the bride & groom. It is settled within 21 days after your statement is issued.' });
+    self: 'Guest will book by themselves.', 'bride-groom': 'Will be booked by the bride & groom. It is settled within 21 days after your statement is issued.',
+    /* HS-031.8 (Owners, 19 Nov 2026): a stay settled through the guest's statement */
+    statement: 'Settled through your statement to Haruthai & Suthep — please do not pay the hotel directly.' });
   assert.deepEqual(plain(BOOKING_WORDS), plain(P.BOOKING_WORDS), 'the emails and the pages say the same');
   const b = (win) => plain(P.bookingOf(win));
   assert.equal(b('bkk-stay').method, 'self'); assert.match(b('bkk-stay').url, /^https:\/\/www\.trip\.com\/hotels\/detail\/\?.*hotelId=1530783.*checkIn=2027-02-21&checkOut=2027-02-24/);

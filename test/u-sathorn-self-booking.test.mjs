@@ -62,7 +62,7 @@ test('THE CHAIN · the server\'s answer, the frozen statement and its PDF: Block
 });
 
 test('THE WEBSITE AND THE TRIP E-MAIL · the stay is the guest\'s own: the hotel link and "Guest will book by themselves" — no gift, no "already paid"', () => {
-  assert.ok(!GIFTS.some((g) => (g.window || g.stage) === 'bkk-stay' || g.room === 'u-sathorn-superior-garden'), 'no U Sathorn gift entry');
+  assert.ok(!GIFTS.some((g) => g.kind === 'gift' && ((g.window || g.stage) === 'bkk-stay' || g.room === 'u-sathorn-superior-garden')), 'no U Sathorn gift entry');
   const quotes = { 'bkk-stay/u-sathorn-superior-garden': { total: 0, block: 'B', rateSource: 'GUEST_SELF_BOOKING', hosted: false, paidByHS: null, listRate: 67.805 } };
   const P = page({ auth: PEGGY, quotes }).SIYL_PRICE;
   const q = P.quote('bkk-stay', 'u-sathorn-superior-garden');
@@ -74,4 +74,31 @@ test('THE WEBSITE AND THE TRIP E-MAIL · the stay is the guest\'s own: the hotel
   const m = journeyModel({ guestId: 'GT1', registration: { guestId: 'GT1', selections: [{ id: 'bkk-stay', name: 'U Sathorn Bangkok', meta: '21 – 24 February 2027 · Superior Garden', price: 203.42, stay: 'usathorn', room: 'u-sathorn-superior-garden', qty: 1 }], totalUsd: 203.42 } });
   const s = (m.stays || []).find((x) => x.id === 'bkk-stay');
   assert.ok(s, 'the stay is in the trip e-mail'); assert.equal(s.booking, 'self'); assert.equal(s.gift, '');
+});
+
+test('HS-031.8 · G007 (CON010) only: her U Sathorn stay is settled through her statement — no hotel link, no "book by themselves", the server\'s USD 203.42 unchanged; nobody else changes', async () => {
+  const { giftsFor, statementLines, verifiedLines } = await import('../src/gifts.js');
+  const own = giftsFor('CON010');
+  assert.ok(own.some((g) => g.window === 'bkk-stay' && g.room === 'u-sathorn-superior-garden' && g.kind === 'statement' && g.charge === null));
+  assert.ok(!giftsFor('CON003').some((g) => g.kind === 'statement') && !giftsFor('CON005').some((g) => g.kind === 'statement'), 'only her');
+  const payable = { 'bkk-stay/u-sathorn-superior-garden': { total: 203.42, block: 'A', rateSource: 'STANDARD_RATE', hosted: false, paidByHS: null, listRate: 67.805 } };
+  const P = page({ auth: { ...PEGGY, guestId: 'G007' }, quotes: payable, seed: { 'siyl.gifts': { guestId: 'G007', gifts: own, at: Date.now() } } }).SIYL_PRICE;
+  const q = P.quote('bkk-stay', 'u-sathorn-superior-garden');
+  assert.equal(q.total, 203.42, 'the server\'s amount, unchanged'); assert.equal(q.priceState, 'amount');
+  assert.deepEqual([q.booking, q.bookingUrl, q.bookingWords], ['statement', '', 'Settled through your statement to Haruthai & Suthep — please do not pay the hotel directly.']);
+  assert.equal(q.personal, undefined, 'no personal rate'); assert.equal(q.gift, undefined, 'no gift');
+  assert.equal(JSON.stringify(P.bookingOf('bkk-stay', 'u-sathorn-superior-garden')), JSON.stringify({ method: 'statement', url: '', words: 'Settled through your statement to Haruthai & Suthep — please do not pay the hotel directly.' }));
+  /* the same entry while the server says she books it herself (Block B) changes nothing: the words follow the server's amount */
+  const selfQ = page({ auth: { ...PEGGY, guestId: 'G007' }, quotes: { 'bkk-stay/u-sathorn-superior-garden': { total: 0, block: 'B', rateSource: 'GUEST_SELF_BOOKING', listRate: 67.805 } }, seed: { 'siyl.gifts': { guestId: 'G007', gifts: own, at: Date.now() } } }).SIYL_PRICE.quote('bkk-stay', 'u-sathorn-superior-garden');
+  assert.equal(selfQ.booking, 'self');
+  /* another guest with the same payable answer and no entry: unchanged */
+  const other = page({ auth: { ...PEGGY, guestId: 'G777' }, quotes: payable }).SIYL_PRICE.quote('bkk-stay', 'u-sathorn-superior-garden');
+  assert.equal(other.booking, 'self'); assert.match(other.bookingUrl, /trip\.com/);
+  /* the sent trip: the Worker stamps viaStatement from the sender's own entry only; the e-mail says it */
+  const line = { id: 'bkk-stay', room: 'u-sathorn-superior-garden', stay: 'usathorn', name: 'U Sathorn Bangkok', price: 203.42, qty: 1 };
+  assert.equal(statementLines(verifiedLines([line], own), own)[0].viaStatement, true);
+  assert.equal(statementLines([{ ...line, viaStatement: true }], giftsFor('CON003'))[0].viaStatement, undefined, 'a claim without the entry is dropped');
+  const m = journeyModel({ guestId: 'G007', registration: { guestId: 'G007', selections: [{ ...line, viaStatement: true, meta: '21 – 24 February 2027 · Superior Garden' }], totalUsd: 203.42 } });
+  const s = (m.stays || []).find((x) => x.id === 'bkk-stay');
+  assert.equal(s.booking, 'statement'); assert.equal(s.price, 203.42, 'her amount unchanged');
 });

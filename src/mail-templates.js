@@ -57,7 +57,9 @@ const STAGE_OF_STAY = { 'bkk-stay': 'bkk-stay', prewed: 'prewed', wedstay: 'weds
 const BOOKING_OF = { 'bkk-stay': 'self', prewed: 'bride-groom', wedstay: 'bride-groom', guesthouse: 'bride-groom', kmg: 'self', ljg: 'self', kempinski: 'self' };
 /* a stay H&S already paid for the guest (Edit 10): the server's mark on the sent line (worker.js · markPaidByHS) */
 const PREPAID_WORDS = 'Already paid for you by Haruthai · you repay Haruthai & Suthep through your statement';
-export const BOOKING_WORDS = { prepaid: PREPAID_WORDS + '.', self: 'Guest will book by themselves.', 'bride-groom': 'Will be booked by the bride & groom. It is settled within 21 days after your statement is issued.' };
+export const BOOKING_WORDS = { prepaid: PREPAID_WORDS + '.', self: 'Guest will book by themselves.', 'bride-groom': 'Will be booked by the bride & groom. It is settled within 21 days after your statement is issued.',
+  /* HS-031.8 (Owners, 19 Nov 2026): a stay settled through the guest's statement (src/gifts.js · statement) */
+  statement: 'Settled through your statement to Haruthai & Suthep — please do not pay the hotel directly.' };
 /* DATE ORDER (PRQ-04-11): the Guest House (27 February – 1 March) stands between the Pre-Wedding Stay and the Wedding Stay */
 const ORDER_OF = Object.assign({}, ...STAGES.map((id, i) => ({ [id]: i })), { guesthouse: STAGES.indexOf('wedstay') - 0.5 });
 const EVENTS = [
@@ -168,7 +170,7 @@ export function journeyModel(record) {
   const STAGE_WORDS = { 'bkk-stay': 'Bangkok · Before the Wedding', prewed: 'Vientiane · Pre-Wedding Stay', wedstay: 'Vientiane · Wedding Stay', kmg: 'Kunming', ljg: 'Lijiang', kempinski: 'Bangkok · Hotel Muse' };
   const waitlisted = Object.entries(rooms || {}).filter(([, m]) => m && m.waitlisted).map(([k, m]) => ({ stage: m.stage || k, name: STAGE_WORDS[m.stage || k] || (m.stage || k), position: m.position, size: m.size || 1 }));
   const arranged = [];
-  const stays = sorted.filter((x) => (x.stay || STAGE_OF_STAY[x.id])).map((x) => ({ id: x.id, name: x.name, dates: (x.meta || '').split(' · ')[0], category: (x.meta || '').split(' · ').slice(1).join(' · '), room: roomOf(x), price: x.price, per: perOf(x), complimentary: !!x.complimentary, gift: x.gift || '', personal: x.personal || '', paidByHS: !!x.paidByHS, prepaidUnverified: !!x.prepaidUnverified, booking: x.paidByHS ? 'prepaid' : x.prepaidUnverified ? '' : (BOOKING_OF[x.id] || ''), rate: x.rate, nights: x.nights, note: x.note ? x.note + (x.noteBy ? ' · ' + x.noteBy : '') : '', breakfast: x.breakfast || '', interest: !!x.interest }));
+  const stays = sorted.filter((x) => (x.stay || STAGE_OF_STAY[x.id])).map((x) => ({ id: x.id, name: x.name, dates: (x.meta || '').split(' · ')[0], category: (x.meta || '').split(' · ').slice(1).join(' · '), room: roomOf(x), price: x.price, per: perOf(x), complimentary: !!x.complimentary, gift: x.gift || '', personal: x.personal || '', paidByHS: !!x.paidByHS, prepaidUnverified: !!x.prepaidUnverified, booking: x.paidByHS ? 'prepaid' : x.prepaidUnverified ? '' : x.viaStatement ? 'statement' : (BOOKING_OF[x.id] || ''), rate: x.rate, nights: x.nights, note: x.note ? x.note + (x.noteBy ? ' · ' + x.noteBy : '') : '', breakfast: x.breakfast || '', interest: !!x.interest }));
   const travel = sorted.filter((x) => TRAVEL.has(x.id) || (x.cls && !x.stay)).map((x) => ({ id: x.id, name: x.name, meta: x.meta || '', price: x.price, per: perOf(x) }));
   /* a spa interest and a restaurant request carry their state (PRQ-04-12): an interest is never part of the total */
   const experiences = sorted.filter((x) => !stays.some((s) => s.name === x.name) && !travel.some((t) => t.name === x.name) && x.id !== 'sangkhathan').map((x) => ({ id: x.id, name: x.name, meta: x.meta || '', price: x.price, per: perOf(x), interest: !!x.interest, request: !!x.request, status: x.interest ? INTEREST_WORDS : x.request ? REQUEST_WORDS : '' }));
