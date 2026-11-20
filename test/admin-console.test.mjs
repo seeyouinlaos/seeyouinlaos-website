@@ -175,8 +175,8 @@ function world({ store, journal, drafts } = {}) {
       'contact:INV-T1': { email: 'Tess.Example@Example.invalid', firstName: 'Tess' },
     }),
     DOCS: docs,
-    /* the SEPA account a German guest's statement offers first (HS-004.16) — synthetic */
-    BILLING_SEPA_IBAN: 'XX00TEST0000000000000001',
+    /* the SEPA account the EUR route offers first (HS-004.19) — synthetic: N26's public bank code, check digits 00 (no real account) */
+    BILLING_SEPA_IBAN: 'DE00100110010000000000',
   };
   const draftCalls = [];
   if (drafts) env.DRAFTS = draftsActor(drafts, draftCalls);
@@ -228,7 +228,7 @@ test('ADMIN · the overview lists every invitation from ONE Sheets batch (006 + 
   assert.equal(r.j.holders.length, 3);
   const t1 = r.j.holders.find((h) => h.Holder_ID === 'INV-T1');
   assert.equal(t1.name.full, 'Testa Example'); assert.equal(t1.name.nick, 'Tess');
-  assert.equal(t1.method.channel, 'PAYPAL_EUR'); assert.equal(t1.method.currency, 'EUR'); assert.equal(t1.method.determined, true);
+  assert.equal(t1.method.channel, 'SEPA_EUR', 'the EUR route: option 1 SEPA (HS-004.19)'); assert.equal(t1.method.currency, 'EUR'); assert.equal(t1.method.determined, true);
   assert.equal(t1.settlement, null); assert.equal(t1.payment, null);
   const t2 = r.j.holders.find((h) => h.Holder_ID === 'INV-T2');
   assert.equal(t2.method.determined, false, 'no nationality in 006: the method is a BILLING_ADMIN\'s to state, never guessed');
@@ -275,7 +275,7 @@ test('ADMIN · preview → issue: only the very statement previewed is issued; a
 
   const ok = await hit(W, GROOM, 'issue', { holderId: 'INV-T1', expectedProposal: h.j.preview.proposalHash });
   assert.equal(ok.status, 200, JSON.stringify(ok.j));
-  assert.equal(ok.j.totalPayable, 390); assert.equal(ok.j.revision, 1); assert.equal(ok.j.Payment_Preference, 'PAYPAL_EUR');
+  assert.equal(ok.j.totalPayable, 390); assert.equal(ok.j.revision, 1); assert.equal(ok.j.Payment_Preference, 'SEPA_EUR');
   assert.equal(W.sent.length, 0, 'issuing never sends an e-mail');
 });
 
@@ -296,7 +296,7 @@ test('ADMIN · view, PDF and the overview after issue: the immutable revision, i
   const ok = await hit(W, GROOM, 'issue', { holderId: 'INV-T1', expectedProposal: h.j.preview.proposalHash });
   assert.equal(ok.status, 200, JSON.stringify(ok.j));
   const v = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
-  assert.equal(v.j.issued.revision, 1); assert.equal(v.j.issued.total, 390); assert.equal(v.j.issued.method, 'PAYPAL_EUR');
+  assert.equal(v.j.issued.revision, 1); assert.equal(v.j.issued.total, 390); assert.equal(v.j.issued.method, 'SEPA_EUR');
   assert.equal(v.j.issued.fx.FX_USD_EUR, 0.89); assert.equal(v.j.issued.inCurrency.amount, 347.1);
   assert.equal(v.j.issued.lines.length, 2);
   assert.equal(v.j.payment.status, 'UNPAID'); assert.equal(v.j.payment.balance, 390);
@@ -343,7 +343,12 @@ test('ADMIN · send: the dialog\'s facts, the PDF attached, once per confirmatio
   assert.match(subject, /Your statement/); assert.match(text, /My Profile → Your statement/); assert.match(html, /profile#statement/);
   assert.equal(files.length, 1); assert.match(files[0].name, /^Statement-.*-V1\.pdf$/);
   assert.equal(Buffer.from(files[0].content, 'base64').subarray(0, 5).toString(), '%PDF-', 'the issued PDF, attached');
-  assert.doesNotMatch(text + html, /\/api\/billing\/pdf|bearer|IBAN/i, 'no PDF link, no bearer, no bank account in the mail');
+  assert.doesNotMatch(text + html, /\/api\/billing\/pdf|bearer/i, 'no PDF link, no bearer in the mail');
+  /* the complete bank connection of the SEPA option (Owners, 20 Nov 2026 · HS-PROMPT-040), in the text and the HTML */
+  for (const part of [text, html]) {
+    for (const want of ['Bank transfer (SEPA)', 'Suthep Thongantang', 'N26 Bank AG', 'DE00 1001 1001 0000 0000 00', 'NTSBDEB1XXX']) assert.ok(part.includes(want), want);
+  }
+  assert.match(text, /Reference: \S+/); assert.match(text, /Amount: EUR [\d,]+\.\d\d \(at this statement's own rate\)/);
 
   const replay = await hit(W, GROOM, 'admin/send', { holderId: 'INV-T1', revision: 1, email: g.j.email, sendKey: k1 });
   assert.equal(replay.j.replay, true); assert.equal(W.sent.length, 1, 'the same confirmation never sends twice');
@@ -1294,7 +1299,7 @@ test('THE GUEST\'S OWN WORD (Owners, 18 Nov 2026): a confirmed guest whose 006 r
   assert.equal(h2.j.method.determined, false); assert.equal(h2.j.method.reason, 'NATIONALITY_MISSING');
   /* 006 holds a nationality (INV-T1: German): the registration is not read, the route is the register's */
   const t1 = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
-  assert.equal(t1.j.method.channel, 'PAYPAL_EUR');
+  assert.equal(t1.j.method.channel, 'SEPA_EUR');
 
   /* the issue — only on the Owners' own click — freezes PromptPay and records why the route offered it */
   const ok = await hit(W, GROOM, 'issue', { holderId: 'INV-T2', expectedProposal: h.j.preview.proposalHash });
@@ -1409,8 +1414,8 @@ test('HS-004 · THE ISSUE FREEZES THE RECIPIENT AND THE LAYOUT: a missing surnam
   assert.match(old, /\/Producer \(guest-settlement-pdf\/1\.2\)/); assert.doesNotMatch(old, /\(STATEMENT FOR\)/, 'the 1.2 original: exactly as it would have been');
 });
 
-test('HS-004.16 · a German guest whose 006 row holds no nationality is offered SEPA first by their own sent registration; another nationality keeps PayPal alone', async () => {
-  for (const [nat, want] of [['German', ['SEPA_EUR', 'PAYPAL_EUR']], ['Indian', ['PAYPAL_EUR']]]) {
+test('HS-004.19 · a guest whose 006 row holds no nationality is routed by their own sent registration: every EUR guest SEPA first and PayPal, an American PromptPay', async () => {
+  for (const [nat, want] of [['German', ['SEPA_EUR', 'PAYPAL_EUR']], ['Indian', ['SEPA_EUR', 'PAYPAL_EUR']], ['American', ['PROMPTPAY_THB']]]) {
     const W = world({ store: {
       'reg:INV-T1': { ...SENT, registration: { ...SENT.registration, personal: { guestId: 'GT1', nationality: nat } } },
       'conf:INV-T1': { confirmedAt: '2026-10-02T09:00:00Z', version: 1 }, 'contact:INV-T1': { email: 'Tess.Example@Example.invalid', firstName: 'Tess' } } });
@@ -1454,4 +1459,56 @@ test('HS-PROMPT-032 · admin/preview-pdf: the corrected version as Issue would f
   assert.match(t, /Corrected version \\267 replaces V1/);
   assert.equal(W.docs._puts(), puts, 'nothing stored'); assert.equal([...(await W.st.storage.list()).keys()].length, keys, 'the ledger untouched');
   assert.equal((await hit(W, GUEST, 'admin/preview-pdf?holder=INV-T1')).status, 403, 'billing administration only');
+});
+
+test('HS-004.19 · a method stored only as an earlier issue\'s default gives way to the route (history kept, appended); a method the guest chose stays — both ways offered', async () => {
+  const W = world(); await approveGate(W.st);
+  const old = { Holder_ID: 'INV-T1', Payment_Preference: 'PAYPAL_EUR', source: 'DEFAULT_ROUTING', setAt: '2026-10-11T00:00:00Z', setBy: 'GROOM', basis: 'NATIONALITY_NON_THAI',
+    lockedAt: null, lockedBy: null, history: [{ action: 'ISSUE_DEFAULT', Payment_Preference: 'PAYPAL_EUR', at: '2026-10-11T00:00:00Z', revision: 1 }] };
+  await W.st.storage.put('paypref:INV-T1', old);
+  const h = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+  assert.equal(h.j.method.channel, 'SEPA_EUR'); assert.deepEqual(h.j.preview.paymentOptions, ['SEPA_EUR', 'PAYPAL_EUR']);
+  assert.deepEqual(h.j.preview.paymentBank, { holder: 'Suthep Thongantang', bank: 'N26 Bank AG', bic: 'NTSBDEB1XXX' });
+  const ok = await hit(W, GROOM, 'issue', { holderId: 'INV-T1', expectedProposal: h.j.preview.proposalHash });
+  assert.equal(ok.status, 200, JSON.stringify(ok.j)); assert.equal(ok.j.Payment_Preference, 'SEPA_EUR');
+  const rec = await W.st.storage.get('paypref:INV-T1');
+  assert.equal(rec.Payment_Preference, 'SEPA_EUR'); assert.equal(rec.source, 'DEFAULT_ROUTING');
+  assert.deepEqual(rec.history.map((x) => x.action), ['ISSUE_DEFAULT', 'ROUTE_RULE_20NOV']); assert.equal(rec.history[1].from, 'PAYPAL_EUR');
+  const v = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+  assert.deepEqual(v.j.issued.paymentBank, { holder: 'Suthep Thongantang', bank: 'N26 Bank AG', bic: 'NTSBDEB1XXX' }, 'frozen with the revision');
+  assert.equal(v.j.preview.issuable, false); assert.match(v.j.preview.reasons.join(' '), /NO_CHANGE/, 'the frozen bank is part of what is compared: no re-issue of itself');
+  const pdf = Buffer.from((await hit(W, GROOM, 'pdf?holder=INV-T1&rev=1')).bytes).toString('latin1');
+  assert.match(pdf, /NTSBDEB1XXX/); assert.match(pdf, /N26 Bank AG/);
+
+  /* the guest's own pick is never moved by the rule */
+  const W2 = world(); await approveGate(W2.st);
+  await W2.st.storage.put('paypref:INV-T1', { ...old, source: 'HOLDER', history: [...old.history, { action: 'SET', Payment_Preference: 'PAYPAL_EUR', source: 'HOLDER', at: '2026-10-12T00:00:00Z' }] });
+  const h2 = await hit(W2, GROOM, 'admin/holder?holder=INV-T1');
+  assert.equal(h2.j.method.channel, 'PAYPAL_EUR'); assert.deepEqual(h2.j.preview.paymentOptions, ['SEPA_EUR', 'PAYPAL_EUR']);
+});
+
+test('HS-004.19 · a verified payment wins over the route: in 008 before the ledger lock, the stored method stays; the lock takes the method the guest actually paid with', async () => {
+  const stale = { Holder_ID: 'INV-T1', Payment_Preference: 'PAYPAL_EUR', source: 'DEFAULT_ROUTING', setAt: '2026-10-11T00:00:00Z', setBy: 'GROOM', lockedAt: null, lockedBy: null,
+    history: [{ action: 'ISSUE_DEFAULT', Payment_Preference: 'PAYPAL_EUR', at: '2026-10-11T00:00:00Z', revision: 1 }] };
+  for (const [paidWith, locked] of [['PAYPAL_EUR', 'PAYPAL_EUR'], ['SEPA_EUR', 'SEPA_EUR']]) {
+    const W = world(); await approveGate(W.st);
+    const h = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+    const ok = await hit(W, GROOM, 'issue', { holderId: 'INV-T1', expectedProposal: h.j.preview.proposalHash });
+    const sid = ok.j.Settlement_ID;
+    await W.st.storage.put('paypref:INV-T1', stale);
+    W.workbook['008_Payment_Journal'].push(['PAY-' + sid + '-1', sid, 'INV-T1', 'V1', 'PAYMENT', paidWith, 100, 'EUR', 112.36, 'INV-T1', '2026-10-06T10:00:00Z', 'PP-1', '', '', '', 'REPORTED', '', 'FALSE']);
+    const verify = await hit(W, GROOM, 'payment/verify', { Payment_ID: 'PAY-' + sid + '-1' });
+    assert.equal(verify.status, 200, JSON.stringify(verify.j));
+    const rec = await W.st.storage.get('paypref:INV-T1');
+    assert.equal(rec.Payment_Preference, locked, paidWith); assert.ok(rec.lockedAt, 'locked');
+    assert.equal(rec.history.some((x) => x.action === 'ROUTE_RULE_20NOV'), paidWith !== 'PAYPAL_EUR');
+  }
+  /* VERIFIED in 008, the ledger lock not recorded yet: the stored default does not give way */
+  const W = world(); await approveGate(W.st);
+  const h = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+  const sid = (await hit(W, GROOM, 'issue', { holderId: 'INV-T1', expectedProposal: h.j.preview.proposalHash })).j.Settlement_ID;
+  await W.st.storage.put('paypref:INV-T1', stale);
+  W.workbook['008_Payment_Journal'].push(['PAY-' + sid + '-9', sid, 'INV-T1', 'V1', 'PAYMENT', 'PAYPAL_EUR', 100, 'EUR', 112.36, 'INV-T1', '2026-10-06T10:00:00Z', 'PP-9', '', '', '', 'VERIFIED', '', 'FALSE']);
+  const v = await hit(W, GROOM, 'admin/holder?holder=INV-T1');
+  assert.equal(v.j.method.channel, 'PAYPAL_EUR'); assert.deepEqual(v.j.preview.paymentOptions || [], v.j.preview.paymentOptions && v.j.preview.paymentOptions.length ? ['PAYPAL_EUR'] : []);
 });

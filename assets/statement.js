@@ -160,16 +160,25 @@
       esc(st.qrFail[ch] ? 'The payment code cannot be shown just now. Please reload the page, or ask Guest Relations.' : 'Loading the payment code…') + '</p>';
   }
 
+  /* the SEPA account as the guest copies it: holder, bank, IBAN on its own line (never broken, one tap selects it whole), BIC, reference */
+  function sepaRows(dest, d) {
+    var iban = String(dest.iban || '').replace(/\s+/g, '').replace(/(.{4})/g, '$1 ').trim();
+    return row('Account holder', '<span data-i18n-skip>' + esc(dest.recipient) + '</span>') +
+      (dest.bank ? row('Bank', '<span data-i18n-skip>' + esc(dest.bank) + '</span>') : '') +
+      '<p class="t-b2"><span class="t-l1">IBAN</span> <span data-i18n-skip style="display:block;white-space:nowrap;user-select:all;-webkit-user-select:all">' + esc(iban) + '</span></p>' +
+      (dest.bic ? row('BIC / SWIFT', '<span data-i18n-skip style="user-select:all;-webkit-user-select:all">' + esc(dest.bic) + '</span>') : '') +
+      row('Reference no.', '<span data-i18n-skip>' + esc(d.Settlement_ID) + '</span>');
+  }
+
   function destinationHtml(p, d) {
     var ch = p.Payment_Preference, dest = p.destination || {};
     var ref = row('Reference no.', '<span data-i18n-skip>' + esc(d.Settlement_ID) + '</span>');
     if (ch === 'SEPA_EUR') {
       if (!dest.complete || !dest.iban) return '<p class="t-b2 measure">The bank details cannot be shown just now. Please choose PayPal, or ask Guest Relations.</p>';
-      var iban = String(dest.iban).replace(/\s+/g, '').replace(/(.{4})/g, '$1 ').trim();
+      var c = owed();
+      /* the complete bank connection (Owners, 20 Nov 2026 · HS-PROMPT-040): holder, bank, IBAN, BIC, reference, amount in euros */
       return '<p class="t-b2 measure">Transfer the amount to pay by SEPA bank transfer, and add your reference to the transfer.</p>' +
-        '<div class="pf-rows">' + row('Account holder', '<span data-i18n-skip>' + esc(dest.recipient) + '</span>') +
-        /* on its own line, never broken, one tap selects it whole */
-        '<p class="t-b2"><span class="t-l1">IBAN</span> <span data-i18n-skip style="display:block;white-space:nowrap;user-select:all;-webkit-user-select:all">' + esc(iban) + '</span></p>' + ref + '</div>';
+        '<div class="pf-rows">' + sepaRows(dest, d) + (c && c.currency === 'EUR' ? row('Amount', '<b>' + amount(c.currency, c.amount) + '</b>') : '') + '</div>';
     }
     if (ch === 'PAYPAL_EUR' || ch === 'PROMPTPAY_THB') {
       return '<p class="t-b2 measure">' + esc(ch === 'PAYPAL_EUR'
@@ -210,6 +219,13 @@
       (st.msg ? '<p class="t-b2" role="status">' + esc(st.msg) + '</p>' : '') + '</div>';
   }
 
+  /* where a bank transfer went, shown again where the guest reports it (HS-PROMPT-040) — the method the guest actually uses */
+  function paidToHtml(p) {
+    var dest = p.destination || {};
+    if (p.Payment_Preference !== 'SEPA_EUR' || !dest.complete || !dest.iban) return '';
+    return '<p class="t-l1" style="margin-top:var(--s3)">Paid to</p><div class="pf-rows">' + sepaRows(dest, st.data || {}) + '</div>';
+  }
+
   function paidHtml(p) {
     var m = METHOD[p.Payment_Preference], f = st.form;
     if (!f) return '<div class="p-actions"><button type="button" class="p-act" data-st-paid>I have paid</button></div>';
@@ -217,11 +233,11 @@
       return '<div class="p-card flat" data-st-confirm style="margin-top:var(--s4)"><p class="t-l1">I have paid</p>' +
         '<p class="t-b1 measure">Please confirm what you are reporting to Guest Relations.</p>' +
         '<div class="pf-rows">' + row('Amount paid', '<b>' + amount(m.currency, f.amount) + '</b>') + row('Method', esc(m.label)) +
-        (f.reference ? row('Reference no.', '<span data-i18n-skip>' + esc(f.reference) + '</span>') : '') + '</div>' +
+        (f.reference ? row('Reference no.', '<span data-i18n-skip>' + esc(f.reference) + '</span>') : '') + '</div>' + paidToHtml(p) +
         '<p class="t-b2 measure">Guest Relations checks every payment before your balance changes.</p>' +
         '<div class="p-actions"><button type="button" class="p-act" data-st-report' + (st.busy ? ' disabled' : '') + '>Yes, report this payment</button><button type="button" class="p-link mute" data-st-edit' + (st.busy ? ' disabled' : '') + '>Change</button></div></div>';
     }
-    return '<div class="p-card flat" data-st-form style="margin-top:var(--s4)"><p class="t-l1">I have paid</p>' +
+    return '<div class="p-card flat" data-st-form style="margin-top:var(--s4)"><p class="t-l1">I have paid</p>' + paidToHtml(p) +
       '<div class="p-field"><label class="t-l1" for="st-amount">Amount paid in ' + esc(m.currency) + '</label><input id="st-amount" type="text" inputmode="decimal" autocomplete="off" value="' + esc(f.amount) + '" data-st-amount></div>' +
       '<div class="p-field"><label class="t-l1" for="st-ref">Payment reference (optional)</label><input id="st-ref" type="text" maxlength="120" autocomplete="off" value="' + esc(f.reference) + '" data-st-ref></div>' +
       '<div class="p-actions"><button type="button" class="p-act" data-st-next>Continue</button><button type="button" class="p-link mute" data-st-cancel>Cancel</button></div></div>';

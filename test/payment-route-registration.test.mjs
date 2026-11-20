@@ -13,7 +13,7 @@ test('ROUTE · 006 blank: the guest\'s own sent "Thai" routes THB (PromptPay), a
   const thb = routeFor({ holderId: 'INV-X1', nationality: blank, stated: own(sent('Thai')) });
   assert.equal(thb.route, 'THB'); assert.equal(thb.default, 'PROMPTPAY_THB'); assert.equal(thb.basis, 'REGISTRATION_THAI');
   const eur = routeFor({ holderId: 'INV-X1', nationality: blank, stated: own(sent('German')) });
-  assert.equal(eur.route, 'EUR'); assert.deepEqual([...eur.options], ['PAYPAL_EUR', 'SEPA_EUR']); assert.equal(eur.basis, 'REGISTRATION_NON_THAI');
+  assert.equal(eur.route, 'EUR'); assert.deepEqual([...eur.options], ['SEPA_EUR', 'PAYPAL_EUR']); assert.equal(eur.default, 'SEPA_EUR'); assert.equal(eur.basis, 'REGISTRATION_NON_THAI');
   const p = effectivePreference({ record: null, route: thb });
   assert.equal(p.determined, true); assert.equal(p.channel, 'PROMPTPAY_THB'); assert.equal(p.source, 'DEFAULT_ROUTING');
 });
@@ -74,6 +74,10 @@ test('FREE TEXT · the guest\'s own word is read strictly: THB only for "Thai" i
     assert.equal(route(v), 'NATIONALITY_MIXED_WITH_THAI', v);
   for (const v of ['TH', 'DE', '\u4e2d\u56fd', 'German1', 'n/a x', 'Tha\u00ef', 'Tha\u00eflandaise', 'Tailandese', 'Tailand\u00e9s', 'THA', 'Siamese']) assert.equal(route(v), 'REGISTRATION_NATIONALITY_UNRECOGNISED', v);
   for (const v of ['-', '?', 'n/a', 'none', 'unknown', '...']) assert.equal(route(v), 'NATIONALITY_MISSING', v);
-  for (const v of ['German', 'Deutsch', 'Lao', 'USA', 'British', 'German, Austrian', 'Österreichisch']) assert.equal(route(v), 'EUR', v);
+  for (const v of ['German', 'Deutsch', 'Lao', 'British', 'German, Austrian', 'Österreichisch']) assert.equal(route(v), 'EUR', v);
+  /* American (Owners, 20 Nov 2026 · HS-004.19): PromptPay — alone or beside Thai; beside another nationality decided per person */
+  for (const v of ['American', 'american', 'USA', 'U.S.A.', 'US', 'United States', 'United States of America', 'US-American', 'Amerikanisch', 'Thai / American', 'American, Thai'])
+    assert.equal(route(v), 'THB', v);
+  for (const v of ['American, German', 'German / American', 'American and British', 'African American', 'Latin American', 'South American']) assert.equal(route(v), 'NATIONALITY_MIXED_WITH_AMERICAN', v);
   assert.equal(registrationNationalityKind('Thai').kind, 'THAI');
 });
