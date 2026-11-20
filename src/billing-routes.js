@@ -54,7 +54,7 @@ import { isPrintable } from './billing/pdf.js';
 import { CURRENT_LAYOUT, LAYOUT_12, layoutOfRevision, ISSUE_RULES } from './billing/pdf-layouts.js';
 import { pdfOptionsFor, renderIssuedPdf } from './billing/pdf-writers.js';
 import { recipientOfIssue } from './billing/recipient.js';
-import { isGermanNationality, wordsForIssue, paymentOptionsFor, optionView, correctionOf } from './billing/statement-inputs.js';
+import { wordsForIssue, paymentOptionsFor, optionView, correctionOf, bankOfIssue } from './billing/statement-inputs.js';
 import { qrImageOf } from './billing/pdf-image.js';
 import { buildRevenueOverview } from './billing/revenue.js';
 import { buildBudgetComparison } from './billing/budget.js';
@@ -215,7 +215,8 @@ function stateOfView(v, holderId) {
     }
     issuedRevision = Object.freeze({ ...snap, Revision_State: rec.Revision_State, snapshot: snap });
     issuedRecord = Object.freeze({ Pdf_Layout: rec.Pdf_Layout || null, Recipient: rec.Recipient || null, Person_Names: rec.Person_Names || null,
-      Item_Words: rec.Item_Words || null, Payment_Options: rec.Payment_Options || null, Correction: rec.Correction || null });
+      Item_Words: rec.Item_Words || null, Payment_Options: rec.Payment_Options || null, Payment_Bank: rec.Payment_Bank || null,
+      Correction: rec.Correction || null });
   }
   return {
     Holder_ID: v.Holder_ID,
@@ -311,17 +312,17 @@ async function preferenceOf(env, origin, holderId, state, src, register) {
   const nat = nationalityOf(reg, who.contactId);
   const stated = await statedOf(env, holderId, who, nat);
   const route = routeFor({ holderId, nationality: nat, stated });
-  const pref = effectivePreference({ record: state.paymentPreference, route });
-  /* a German guest is offered the SEPA bank transfer first and PayPal (HS-004.16): the same sources, the same order (006, else the
-     guest's own sent registration) */
-  const german = isGermanNationality(nat && nat.found && clean(nat.value) ? nat.value : (stated && stated.found ? stated.value : ''));
   const verified = firstVerifiedPayment(src.journalRows, state.Settlement_ID);
+  /* a VERIFIED payment in 008 locks the method even before the ledger has recorded the lock: a stored default never gives way then */
+  const rec = state.paymentPreference;
+  const pref = effectivePreference({ record: verified && rec && !clean(rec.lockedAt) ? { ...rec, lockedAt: 'VERIFIED_IN_008' } : rec, route });
   return {
     ...pref,
     locked: pref.locked || !!verified,
-    german,
     lockedBy: (state.paymentPreference && state.paymentPreference.lockedBy) || (verified ? clean(verified.Payment_ID) : null),
     verifiedPaymentId: verified ? clean(verified.Payment_ID) : null,
+    /* the method that first verified payment used — what a lock records (HS-004.19) */
+    verifiedMethod: verified && isChannel(clean(verified.Method)) ? clean(verified.Method) : null,
   };
 }
 
@@ -792,13 +793,15 @@ async function issuedPdf(env, holderId, askedRevision) {
     if (!layout) return { status: 500, error: 'the revision names a PDF layout this build cannot render; nothing was produced' };
     if (layout !== LAYOUT_12 && !(one.Recipient && one.Person_Names && one.Item_Words)) return { status: 500, error: 'the revision carries no frozen recipient; nothing was produced' };
     const payment = current && rev !== current ? { supersededBy: 'V' + current }
-      : layout === LAYOUT_12 ? await paymentForPdf(env, snapshot) : await paymentOptionsForPdf(env, snapshot, one.Payment_Options);
+      : layout === LAYOUT_12 ? await paymentForPdf(env, snapshot) : await paymentOptionsForPdf(env, snapshot, one.Payment_Options, one.Payment_Bank || null);
     /* FAIL CLOSED: a payment section that cannot be read completely just now (the code, the account) is never frozen into the
        original — nothing is stored, the request is answered "try again", the e-mail records NOT_SENT */
     if (payment.incomplete) return { status: 503, error: 'the statement cannot be prepared just now (' + payment.incomplete + '); please try again in a moment' };
     const bytes = renderIssuedPdf(layout, snapshot, pdfOptionsFor(layout, one, payment));
     await env.DOCS.put(key, bytes, { httpMetadata: { contentType: 'application/pdf' }, customMetadata: { writer: layout,
-      method: clean(payment.method || (payment.options || []).map((o) => o.method).join('+')) || '', qrSha256: payment.qrSha256 || '' } });
+      method: clean(payment.method || (payment.options || []).map((o) => o.method).join('+')) || '', qrSha256: payment.qrSha256 || '',
+      /* whether this original prints the frozen bank and BIC (HS-PROMPT-040) — absent for every revision issued before them */
+      bank: one && one.Payment_Bank ? 'frozen' : '' } });
     obj = await env.DOCS.get(key);
     if (!obj) return { status: 503, error: 'the statement could not be stored' };
   }
@@ -833,7 +836,7 @@ async function paymentForPdf(env, snapshot) {
 }
 
 /* LAYOUT 1.3 · every way to pay the revision froze (HS-004.16), each read completely or the PDF is not produced (fail closed) */
-async function paymentOptionsForPdf(env, snapshot, frozenOptions) {
+async function paymentOptionsForPdf(env, snapshot, frozenOptions, frozenBank) {
   const total = Number(snapshot && snapshot.Total_Payable_Cents);
   if (!Number.isFinite(total) || total <= 0) return { nothingDue: Number.isFinite(total) && total <= 0, options: [] };
   const channel = clean(snapshot && snapshot.Payment_Preference);
@@ -854,7 +857,7 @@ async function paymentOptionsForPdf(env, snapshot, frozenOptions) {
       if (!qr) return { incomplete: 'the approved payment code cannot be embedded' };
       shas.push([...new Uint8Array(await crypto.subtle.digest('SHA-256', raw))].map((x) => x.toString(16).padStart(2, '0')).join(''));
     }
-    options.push(optionView(m, total, fx, dest, qr));
+    options.push(optionView(m, total, fx, dest, qr, frozenBank || null));
   }
   return { options, totalUsd: fromCents(total), dueDate: clean(snapshot.Due_Date) || null, reference: clean(snapshot.Settlement_ID) || null, qrSha256: shas.join('+') };
 }
@@ -1030,7 +1033,10 @@ async function assessIssue(env, holderId, src, asOf, origin, opts) {
   const names = await namesForIssue(env, origin, holderId, src, current.result.lines);
   const words = wordsForIssue(current.result.lines, src.items);
   const paymentOptions = paymentOptionsFor(pref);
+  /* with SEPA, the account holder, bank and BIC are frozen with the version (HS-PROMPT-040) — all three, or no issue */
+  const paymentBank = bankOfIssue(paymentOptions, destinationOf('SEPA_EUR', env));
   const statementBlockers = [...names.reasons];
+  if (paymentBank && paymentBank.missing) statementBlockers.push('PAYMENT_BANK_INCOMPLETE: the bank transfer cannot name its bank and BIC for the configured account');
   if (words.missing.length) statementBlockers.push('ITEM_NAME_MISSING: ' + words.missing.join(', ') + ' — the statement has no name for this product');
   for (const m of paymentOptions) { const d = destinationOf(m, env); if (!d || !d.complete) statementBlockers.push('PAYMENT_DESTINATION_INCOMPLETE: ' + m + ' has no configured account'); }
   /* no corrected statement dated before 21 November 2026 (Owners, HS-PROMPT-013 Nr. 12) */
@@ -1049,9 +1055,12 @@ async function assessIssue(env, holderId, src, asOf, origin, opts) {
   const substance = (x) => (x ? stableJson({ lines: x.lines, total: x.Total_Payable_Cents, method: x.Payment_Preference,
     fx: [x.FX_USD_THB, x.FX_USD_EUR], blockB: x.Block_B_Informational, hosted: x.Hosted_Value_Cents }) : null);
   /* what the new version freezes beside its snapshot; a version of an earlier layout (no names) is corrected by a new one */
-  const frozen = { layout: CURRENT_LAYOUT, recipient: names.recipient, persons: names.personNames, words: words.words, options: paymentOptions.length ? paymentOptions : null };
-  const frozenOf = (r) => (r ? { layout: r.Pdf_Layout || null, recipient: r.Recipient || null, persons: r.Person_Names || null, words: r.Item_Words || null, options: r.Payment_Options || null } : null);
-  const correction = issuedNow && proposal ? correctionOf(issuedNow, proposal, words.words, { legacy: !(state.issuedRecord && state.issuedRecord.Pdf_Layout) }) : null;
+  const bankNow = paymentBank && !paymentBank.missing ? paymentBank : null;
+  const frozen = { layout: CURRENT_LAYOUT, recipient: names.recipient, persons: names.personNames, words: words.words, options: paymentOptions.length ? paymentOptions : null, bank: bankNow };
+  const frozenOf = (r) => (r ? { layout: r.Pdf_Layout || null, recipient: r.Recipient || null, persons: r.Person_Names || null, words: r.Item_Words || null, options: r.Payment_Options || null, bank: r.Payment_Bank || null } : null);
+  const correction = issuedNow && proposal ? correctionOf(issuedNow, proposal, words.words, { legacy: !(state.issuedRecord && state.issuedRecord.Pdf_Layout),
+    wasOptions: state.issuedRecord ? state.issuedRecord.Payment_Options : null, nowOptions: paymentOptions,
+    wasBank: state.issuedRecord ? state.issuedRecord.Payment_Bank : null, nowBank: bankNow }) : null;
   if (issuedNow && proposal && substance(proposal) === substance(issuedNow) && stableJson(frozenOf(state.issuedRecord)) === stableJson(frozen)) {
     reasons.push('NO_CHANGE: revision ' + issuedNow.Revision + ' already holds exactly this statement');
   }
@@ -1066,7 +1075,7 @@ async function assessIssue(env, holderId, src, asOf, origin, opts) {
     asOf, fx, sourceGaps, state, pref, destination, current, confirmation, gateCheck, currentDrifts, drifts,
     gate: { stored: gate.approved, now: gateNow ? { approved: gateNow.approved, open: gateNow.open || [] } : null },
     allowed: reasons.length === 0, reasons, proposal, proposalHash, sourceHash: hash,
-    names, words, paymentOptions, correction, frozen, statementBlockers,
+    names, words, paymentOptions, paymentBank: bankNow, correction, frozen, statementBlockers,
   };
 }
 
@@ -1205,7 +1214,7 @@ async function adminIssue(env, identity, request, cors) {
     /* frozen beside the snapshot (HS-004): the layout, the recipient and the persons by name, the product words, the ways to pay,
        the correction note */
     pdfLayout: CURRENT_LAYOUT, recipient: a.names.recipient, personNames: a.names.personNames, itemWords: a.words.words,
-    paymentOptions: a.paymentOptions, correction: a.correction,
+    paymentOptions: a.paymentOptions, paymentBank: a.paymentBank || null, correction: a.correction,
     gateCheck, currentDrifts,
   });
   const snapshot = issued && issued.ok === true && issued.snapshot && typeof issued.snapshot === 'object' ? issued.snapshot : null;
@@ -1873,8 +1882,8 @@ async function adminPreviewPdf(env, identity, url, cors) {
   if (a.names.reasons.length || a.words.missing.length) return jsonRes({ ok: false, error: 'the statement cannot name its recipient or products', reasons: a.statementBlockers }, 409, cors);
   const revision = (Number(a.state.latestRevision) || 0) + 1;
   const snapshot = { ...a.proposal, Settlement_ID: a.state.Settlement_ID || 'not issued yet', Revision: revision, Holder_ID: holderId };
-  const rec = { Recipient: a.names.recipient, Person_Names: a.names.personNames, Item_Words: a.words.words, Payment_Options: a.paymentOptions, Correction: a.correction };
-  const payment = await paymentOptionsForPdf(env, snapshot, a.paymentOptions);
+  const rec = { Recipient: a.names.recipient, Person_Names: a.names.personNames, Item_Words: a.words.words, Payment_Options: a.paymentOptions, Payment_Bank: a.paymentBank || null, Correction: a.correction };
+  const payment = await paymentOptionsForPdf(env, snapshot, a.paymentOptions, a.paymentBank || null);
   if (payment.incomplete) return jsonRes({ ok: false, error: 'the preview cannot be prepared just now (' + payment.incomplete + '); please try again in a moment' }, 503, cors);
   const bytes = renderIssuedPdf(CURRENT_LAYOUT, snapshot, { ...pdfOptionsFor(CURRENT_LAYOUT, rec, payment), preview: true });
   return new Response(bytes, { status: 200, headers: { ...cors, 'content-type': 'application/pdf', 'cache-control': 'no-store',
@@ -1981,7 +1990,7 @@ async function adminHolder(env, identity, url, cors) {
       issuable: a.allowed, reasons: a.reasons, proposalHash: a.allowed ? a.proposalHash : null,
       /* what the issue freezes beside the snapshot (HS-004): shown before the click */
       recipient: a.names ? a.names.recipient : null, personNames: a.names ? a.names.personNames : null, itemWords: a.words ? a.words.words : null,
-      paymentOptions: a.paymentOptions || [], correction: a.correction || null,
+      paymentOptions: a.paymentOptions || [], paymentBank: a.paymentBank || null, correction: a.correction || null,
       gate: a.gate, drifts: a.drifts.filter((d) => !d.resolved).map((d) => ({ code: d.code, detail: d.detail || '' })),
     },
     issued: issued ? {
@@ -1994,7 +2003,8 @@ async function adminHolder(env, identity, url, cors) {
       engineVersion: issued.Engine_Version, evidence: issued.Evidence_Status,
       /* what this revision froze beside its snapshot (HS-004) — none for a revision of the earlier layout */
       itemWords: state.issuedRecord ? state.issuedRecord.Item_Words : null, recipientName: state.issuedRecord && state.issuedRecord.Recipient ? state.issuedRecord.Recipient.name : null,
-      paymentOptions: state.issuedRecord ? state.issuedRecord.Payment_Options : null, correction: state.issuedRecord ? state.issuedRecord.Correction : null,
+      paymentOptions: state.issuedRecord ? state.issuedRecord.Payment_Options : null, paymentBank: state.issuedRecord ? state.issuedRecord.Payment_Bank || null : null,
+      correction: state.issuedRecord ? state.issuedRecord.Correction : null,
     } : null,
     payment: issued ? { status: pay.status, soll: pay.soll, ist: pay.ist, balance: pay.balance, flags: pay.flags || [],
       pendingCount: pay.pendingCount || 0, overdue: (pay.flags || []).includes('OVERDUE') } : null,
@@ -2223,11 +2233,27 @@ async function sendContext(env, url, holderId) {
     inCurrency: issued.Payment_Preference ? inPreferredCurrency(issued.Total_Payable_Cents, issued.Payment_Preference, fx) : null };
 }
 
-/* the way(s) to pay the issued revision froze (HS-004.16): a German guest's SEPA first and PayPal, as on the PDF; else its one method */
+/* the way(s) to pay the issued revision froze (HS-004.16/.19): SEPA first and PayPal on the EUR route, as on the PDF; else its one method */
 function methodWordsOf(ctx) {
   const opts = ctx && ctx.state && ctx.state.issuedRecord && Array.isArray(ctx.state.issuedRecord.Payment_Options) ? ctx.state.issuedRecord.Payment_Options.filter((m) => METHOD_WORDS[m]) : [];
   if (opts.length > 1) return opts.map((m) => METHOD_WORDS[m]).join(', or ');
   return METHOD_WORDS[opts[0] || (ctx && ctx.issued && ctx.issued.Payment_Preference)] || null;
+}
+
+/* THE BANK TRANSFER IN THE E-MAIL (Owners, 20 Nov 2026 · HS-PROMPT-040): for a revision that offers SEPA, the complete connection —
+   account holder, bank, IBAN, BIC, the statement's reference and the amount in euros at its own frozen rate. The account is read from
+   the configuration as the statement page reads it; an incomplete one is left out (the e-mail then points to My Profile). The ledger's
+   mail log keeps no body. */
+function sepaForMail(env, ctx) {
+  const rec = ctx && ctx.state && ctx.state.issuedRecord;
+  const offered = rec && Array.isArray(rec.Payment_Options) ? rec.Payment_Options.includes('SEPA_EUR') : clean(ctx && ctx.issued && ctx.issued.Payment_Preference) === 'SEPA_EUR';
+  if (!offered || !ctx.issued || !(Number(ctx.issued.Total_Payable_Cents) > 0)) return null;
+  const dest = destinationOf('SEPA_EUR', env);
+  if (!dest || !dest.complete || !dest.iban || !dest.bank || !dest.bic) return null;
+  const fx = freezeFx({ FX_USD_THB: ctx.issued.FX_USD_THB, FX_USD_EUR: ctx.issued.FX_USD_EUR });
+  const eur = inPreferredCurrency(ctx.issued.Total_Payable_Cents, 'SEPA_EUR', fx);
+  if (!eur || eur.amount == null) return null;
+  return { holder: dest.recipient, bank: dest.bank, iban: dest.iban, bic: dest.bic, reference: clean(ctx.issued.Settlement_ID), amount: eur };
 }
 
 /** GET admin/send?holder=INV — the facts the confirmation shows before anything is sent. */
@@ -2301,6 +2327,7 @@ async function adminSendPost(env, identity, request, url, cors, deps) {
     issueDate: ctx.issued.Issue_Date, dueDate: ctx.issued.Due_Date, inCurrency: ctx.inCurrency,
     method: methodWordsOf(ctx), profileUrl: url.origin + '/profile#statement',
     correction: ctx.state && ctx.state.issuedRecord ? ctx.state.issuedRecord.Correction : null,
+    sepa: sepaForMail(env, ctx),
   });
   const sent = await sendMail(env, ctx.recipient.email, ctx.fullName || ctx.recipient.email, mail.subject, mail.text, mail.html,
     [{ name: 'Statement-' + sid + '-V' + rev + '.pdf', content: base64Of(bytes) }]);
@@ -2829,7 +2856,7 @@ async function paymentPreference(env, identity, request, url, cors) {
   if (pref.verifiedPaymentId && !(state.paymentPreference && state.paymentPreference.lockedAt)) {
     /* the journal already holds a VERIFIED payment: the lock is recorded now */
     await ledgerCall(env, 'payment-preference', { holderId, action: 'lock', verifiedPaymentId: pref.verifiedPaymentId,
-      channel: pref.channel, source: pref.source, by });
+      channel: pref.verifiedMethod || pref.channel, source: pref.source, by });
   }
   if (pref.locked) {
     return jsonRes({ ok: false, locked: true, error: 'the payment method is locked since the first VERIFIED payment',
@@ -3037,7 +3064,10 @@ export async function handleBilling(request, env, url, cors, deps) {
            the verification and its lock. */
         const pref = locks ? await preferenceOf(env, url.origin, holder, await holderState(env, holder), src) : null;
         const claim = await ledgerCall(env, 'payment-decision', { paymentId, action: 'claim', decision, rejectReason,
-          holderId: holder || null, lockPreference: locks, channel: pref && pref.channel, source: pref && pref.source, basis: (pref && pref.basis) || null, by });
+          /* the lock takes the method the guest actually paid with, where 008 names one (HS-004.19) */
+          holderId: holder || null, lockPreference: locks,
+          channel: (pref && pref.verifiedMethod) || (isChannel(clean(row.Method)) ? clean(row.Method) : pref && pref.channel),
+          source: pref && pref.source, basis: (pref && pref.basis) || null, by });
         if (!claim || claim.ok !== true || !claim.claim) {
           return jsonRes({ ok: false, error: (claim && claim.error) || 'the decision could not be claimed',
             decided: !!(claim && claim.decided), inProgress: !!(claim && claim.inProgress) }, 409, cors);

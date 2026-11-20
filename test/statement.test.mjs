@@ -148,6 +148,23 @@ test('STATEMENT · SEPA_EUR: the bank transfer shows the configured IBAN and acc
   assert.doesNotMatch(missing.S.html(), /IBAN/); assert.match(missing.S.html(), /bank details cannot be shown/);
 });
 
+test('STATEMENT · SEPA (HS-PROMPT-040): the complete bank connection — holder, bank, IBAN, BIC, reference, amount in euros — on the page and again where the guest reports the payment', async () => {
+  /* synthetic: the bank's public code with check digits 00 — no real account */
+  const BANKED = { ...SEPA, recipient: 'Suthep Thongantang', iban: 'DE00100110010000000000', bank: 'N26 Bank AG', bic: 'NTSBDEB1XXX' };
+  const pp = { Payment_Preference: 'SEPA_EUR', currency: 'EUR', determined: true, locked: false, options: [BANKED, PAYPAL], destination: BANKED };
+  const { w, S } = load({ '/api/billing/mine': issued({ Payment_Preference: 'SEPA_EUR', paymentPreference: pp }) });
+  await S.load();
+  const h = S.html();
+  for (const re of [/Account holder<\/span> <span data-i18n-skip>Suthep Thongantang/, /Bank<\/span> <span data-i18n-skip>N26 Bank AG/,
+    /IBAN<\/span> <span data-i18n-skip[^>]*>DE00 1001 1001 0000 0000 00<\/span>/, /BIC \/ SWIFT<\/span> <span data-i18n-skip[^>]*>NTSBDEB1XXX/,
+    /Reference no\.<\/span> <span data-i18n-skip>S-TEST-0001/, /Amount<\/span> <b><span data-i18n-skip>EUR 1,111\.11<\/span><\/b>/]) assert.match(h, re);
+  assert.ok(h.indexOf('N26 Bank AG') < h.indexOf('DE00 1001') && h.indexOf('DE00 1001') < h.indexOf('NTSBDEB1XXX'));
+  assert.deepEqual([...h.matchAll(/name="st-method" value="([A-Z_]+)"/g)].map((m) => m[1]), ['SEPA_EUR', 'PAYPAL_EUR'], 'option 1 SEPA, option 2 PayPal');
+  await click(w, 'data-st-paid');
+  const f = S.html().slice(S.html().indexOf('data-st-form'));
+  assert.match(f, /Paid to/); assert.match(f, /NTSBDEB1XXX/); assert.match(f, /DE00 1001 1001 0000 0000 00/);
+});
+
 test('STATEMENT · PROMPTPAY_THB: PromptPay in baht with its own QR, and no method to choose on a one-method route', async () => {
   const thb = issued({
     Payment_Preference: 'PROMPTPAY_THB',

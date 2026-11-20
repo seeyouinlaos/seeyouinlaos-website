@@ -9,7 +9,8 @@ import crypto from 'node:crypto';
 import { layoutOfRevision, KNOWN_LAYOUTS, ISSUE_LAYOUTS, LEGACY_LAYOUT, CURRENT_LAYOUT } from '../src/billing/pdf-layouts.js';
 import { pdfOptionsFor, renderIssuedPdf } from '../src/billing/pdf-writers.js';
 import { recipientOfIssue } from '../src/billing/recipient.js';
-import { isGermanNationality, paymentOptionsFor, optionView, correctionOf, wordsForIssue } from '../src/billing/statement-inputs.js';
+import { paymentOptionsFor, optionView, correctionOf, wordsForIssue, bankOfIssue } from '../src/billing/statement-inputs.js';
+import { destinationOf } from '../src/billing/preference.js';
 import { renderSettlementPdf, isPrintable } from '../src/billing/pdf.js';
 import { BillingLedger } from '../src/billing-ledger.js';
 
@@ -47,6 +48,7 @@ test('LEDGER · a new issue freezes the layout, the recipient, the names, the wo
   const draft = { lines: [{ Person_ID: 'GT1', Item_ID: 'T-A' }, { Person_ID: 'GT2', Item_ID: 'T-B' }] };
   const body = { pdfLayout: CURRENT_LAYOUT, recipient: { Holder_ID: 'INV-T1', Person_ID: 'GT1', name: 'Alex Example' }, personNames: { GT1: 'Alex Example', GT2: 'Toni Sample' },
     itemWords: { 'T-A': { name: 'Stay A', detail: 'dates' }, 'T-B': { name: 'Stay B', detail: '' } }, paymentOptions: ['SEPA_EUR', 'PAYPAL_EUR', 'NOT_A_METHOD'],
+    paymentBank: { holder: 'Account Holder', bank: 'Synthetic Bank', bic: 'SYNTDEXXXXX' },
     correction: { replaces: 'V1', replacesIssued: '2026-10-11', reason: 'recipient and product names added' } };
   const f = BillingLedger.frozenIssueFields(body, draft);
   assert.equal(f.error, undefined);
@@ -60,15 +62,37 @@ test('LEDGER · a new issue freezes the layout, the recipient, the names, the wo
   assert.equal(sum.Pdf_Layout, CURRENT_LAYOUT); assert.equal(sum.recipientName, 'Alex Example');
 });
 
-test('PAYMENT OPTIONS · a German guest on the EUR route: SEPA first, PayPal as the alternative; everyone else the frozen method; a locked method stays alone', () => {
-  assert.equal(isGermanNationality('German'), true); assert.equal(isGermanNationality('germany'), true);
-  assert.equal(isGermanNationality('Thai, German'), false, 'mixed with Thai: the frozen method'); assert.equal(isGermanNationality('India'), false); assert.equal(isGermanNationality(''), false);
-  assert.deepEqual(paymentOptionsFor({ channel: 'PAYPAL_EUR', german: true }), ['SEPA_EUR', 'PAYPAL_EUR']);
-  assert.deepEqual(paymentOptionsFor({ channel: 'PAYPAL_EUR', german: false }), ['PAYPAL_EUR']);
-  assert.deepEqual(paymentOptionsFor({ channel: 'PROMPTPAY_THB', german: true }), ['PROMPTPAY_THB'], 'PromptPay is never switched');
-  assert.deepEqual(paymentOptionsFor({ channel: 'PAYPAL_EUR', german: true, locked: true }), ['PAYPAL_EUR']);
-  const v = optionView('SEPA_EUR', 17000, { FX_USD_THB: 33.68, FX_USD_EUR: 0.89 }, { recipient: 'Account Holder', iban: 'XX00TEST0000000000000001' }, null);
+test('PAYMENT OPTIONS (HS-004.19) · every guest on the EUR route: SEPA first and PayPal, whatever the nationality; PromptPay alone; a locked or admin-set method stays alone', () => {
+  for (const ch of ['PAYPAL_EUR', 'SEPA_EUR']) assert.deepEqual(paymentOptionsFor({ channel: ch }), ['SEPA_EUR', 'PAYPAL_EUR'], ch);
+  assert.deepEqual(paymentOptionsFor({ channel: 'PAYPAL_EUR', source: 'HOLDER' }), ['SEPA_EUR', 'PAYPAL_EUR'], 'the guest\'s own pick: both still offered');
+  assert.deepEqual(paymentOptionsFor({ channel: 'PROMPTPAY_THB' }), ['PROMPTPAY_THB'], 'PromptPay is never switched');
+  assert.deepEqual(paymentOptionsFor({ channel: 'PAYPAL_EUR', locked: true }), ['PAYPAL_EUR'], 'a verified payment locks the method');
+  assert.deepEqual(paymentOptionsFor({ channel: 'PAYPAL_EUR', source: 'BILLING_ADMIN' }), ['PAYPAL_EUR'], 'a documented individual arrangement');
+  assert.deepEqual(paymentOptionsFor({ channel: '' }), []);
+  const v = optionView('SEPA_EUR', 17000, { FX_USD_THB: 33.68, FX_USD_EUR: 0.89 }, { recipient: 'Account Holder', iban: 'XX00TEST0000000000000001', bank: 'Live Bank', bic: 'LIVEDEXXXXX' }, null);
   assert.deepEqual([v.amount.currency, v.amount.amount, v.amount.rate, v.recipient, v.iban], ['EUR', 151.3, '1 USD = 0.89 EUR', 'Account Holder', 'XX00TEST0000000000000001']);
+  assert.equal(v.bank, undefined, 'bank and BIC never from the live configuration'); assert.equal(v.bic, undefined);
+  const f = optionView('SEPA_EUR', 17000, { FX_USD_THB: 33.68, FX_USD_EUR: 0.89 }, { recipient: 'Account Holder', iban: 'XX00TEST0000000000000001' }, null, { holder: 'Account Holder', bank: 'Frozen Bank', bic: 'FROZDEXXXXX' });
+  assert.deepEqual([f.bank, f.bic], ['Frozen Bank', 'FROZDEXXXXX']);
+});
+
+test('BANK (HS-PROMPT-040) · the SEPA destination names the bank and its BIC only for an account of that bank; the IBAN stays configuration; a revision freezes holder, bank and BIC', () => {
+  /* synthetic: the bank's public code with check digits 00 — no real account */
+  const d = destinationOf('SEPA_EUR', { BILLING_SEPA_IBAN: 'DE00 1001 1001 0000 0000 00' });
+  assert.deepEqual([d.recipient, d.bank, d.bic, d.iban, d.complete], ['Suthep Thongantang', 'N26 Bank AG', 'NTSBDEB1XXX', 'DE00100110010000000000', true]);
+  const other = destinationOf('SEPA_EUR', { BILLING_SEPA_IBAN: 'XX00TEST0000000000000001' });
+  assert.deepEqual([other.complete, other.bank, other.bic], [true, null, null], 'another account: the IBAN still shown, never another bank\'s name');
+  assert.deepEqual([destinationOf('SEPA_EUR', {}).complete, destinationOf('PAYPAL_EUR', {}).bank], [false, undefined]);
+  assert.deepEqual(bankOfIssue(['SEPA_EUR', 'PAYPAL_EUR'], d), { holder: 'Suthep Thongantang', bank: 'N26 Bank AG', bic: 'NTSBDEB1XXX' });
+  assert.equal(JSON.stringify(bankOfIssue(['SEPA_EUR'], d)).includes('DE00'), false, 'the IBAN is never frozen');
+  assert.deepEqual(bankOfIssue(['SEPA_EUR'], other), { missing: true }); assert.equal(bankOfIssue(['PROMPTPAY_THB'], d), null);
+  const draft = { lines: [{ Person_ID: 'GT1', Item_ID: 'T-B' }] }, base = { pdfLayout: CURRENT_LAYOUT, recipient: { Holder_ID: 'INV-T1', Person_ID: 'GT1', name: 'Alex Example' },
+    personNames: { GT1: 'Alex Example' }, itemWords: { 'T-B': { name: 'Thing', detail: '' } }, paymentOptions: ['SEPA_EUR', 'PAYPAL_EUR'], paymentPreference: 'SEPA_EUR' };
+  assert.equal(BillingLedger.frozenIssueFields(base, draft, '2026-11-21', 'INV-T1', null).reason, 'PAYMENT_BANK_INCOMPLETE');
+  const ok = BillingLedger.frozenIssueFields({ ...base, paymentBank: { holder: 'Suthep Thongantang', bank: 'N26 Bank AG', bic: 'NTSBDEB1XXX' } }, draft, '2026-11-21', 'INV-T1', null);
+  assert.deepEqual(ok.fields.Payment_Bank, { holder: 'Suthep Thongantang', bank: 'N26 Bank AG', bic: 'NTSBDEB1XXX' });
+  const thb = BillingLedger.frozenIssueFields({ ...base, paymentOptions: ['PROMPTPAY_THB'], paymentPreference: 'PROMPTPAY_THB' }, draft, '2026-11-21', 'INV-T1', null);
+  assert.equal(thb.fields.Payment_Bank, undefined);
 });
 
 test('CORRECTION NOTE · the version replaced, its issue date and what changed — in words, never a product key', () => {
@@ -139,7 +163,14 @@ test('CORRECTION NOTE · only a version of the earlier layout gets "names added"
   assert.equal(correctionOf(issued, { Total_Payable_Cents: 17000, lines: [{ Person_ID: 'GT2', Item_ID: 'T-B', block: 'A', amountCents: 17000 }] }, {}, { legacy: false }).reason, 'booked items updated');
   assert.equal(correctionOf(issued, { Total_Payable_Cents: 17000, lines: issued.lines }, {}, { legacy: false }).reason, 'statement updated');
   assert.equal(correctionOf(issued, { Total_Payable_Cents: 17000, lines: issued.lines }, {}).reason, 'recipient and product names added');
-  assert.equal(isGermanNationality('Deutsche'), true);
+  /* the ways to pay (HS-004.19 / HS-PROMPT-040) */
+  const legacyPaypal = { ...issued, Payment_Preference: 'PAYPAL_EUR' };
+  assert.equal(correctionOf(legacyPaypal, { Total_Payable_Cents: 17000, lines: issued.lines }, {}, { nowOptions: ['PROMPTPAY_THB'] }).reason, 'recipient and product names added; way to pay changed to PromptPay');
+  assert.equal(correctionOf(legacyPaypal, { Total_Payable_Cents: 17000, lines: issued.lines }, {}, { legacy: false, wasOptions: ['PAYPAL_EUR'], nowOptions: ['SEPA_EUR', 'PAYPAL_EUR'] }).reason, 'bank transfer (SEPA) added as a way to pay');
+  assert.equal(correctionOf(legacyPaypal, { Total_Payable_Cents: 17000, lines: issued.lines }, {}, { legacy: false, wasOptions: ['SEPA_EUR', 'PAYPAL_EUR'], nowOptions: ['SEPA_EUR', 'PAYPAL_EUR'], nowBank: { bank: 'B' } }).reason, 'bank name and BIC added');
+  assert.equal(correctionOf(legacyPaypal, { Total_Payable_Cents: 17000, lines: [{ Person_ID: 'GT2', Item_ID: 'T-B', block: 'A', amountCents: 17000 }] }, {}, { legacy: false, wasOptions: ['PAYPAL_EUR'], nowOptions: ['SEPA_EUR', 'PAYPAL_EUR'] }).reason,
+    'booked items updated; bank transfer (SEPA) added as a way to pay', 'the booked-items note is not suppressed by a way-to-pay note');
+  assert.equal(correctionOf(issued, { Total_Payable_Cents: 17000, lines: issued.lines }, {}, { legacy: false, wasOptions: ['PROMPTPAY_THB'], nowOptions: ['PROMPTPAY_THB'] }).reason, 'statement updated');
 });
 
 test('PDF 1.3 · the couple\'s names never break across lines; a long recipient name is printed in full; "nothing payable" is said once; the PayPal label never runs into its value', () => {
@@ -208,4 +239,25 @@ test('PDF 1.3 · a booking Haruthai & Suthep paid keeps the Owners\' words to th
   const huge = text(renderSettlementPdf({ ...base, Total_Payable_Cents: big, Block_A_Total_Cents: big, lines: [{ ...paid, amountCents: big }] },
     { payment: { options: [optionView('PROMPTPAY_THB', big, base, { recipient: 'Payee' }, slip)], totalUsd: 1000000, dueDate: '2026-11-30', reference: 'S-T-0004' }, items: { 'T-H': { name: 'Hotel', detail: '' } } }));
   assert.ok(huge.replace(/\n/g, ' ').includes('(1 USD = 33.68 THB)'), 'the rate in full'); assert.ok(!huge.includes('...'));
+});
+
+test('PDF 1.3 · BANK (HS-PROMPT-040): a revision that froze its bank prints holder, bank, IBAN, BIC, reference and amount; one issued without it renders byte for byte as before, whatever the live configuration says', () => {
+  const L = (o) => ({ Booking_ID: 'B', Bill_To_Holder_ID: 'INV-T1', Room_Unit_ID: null, Billing_Category: 'GUEST_SETTLEMENT_REQUIRED', rateSource: 'STANDARD_RATE', modifiers: [], block: 'A', Currency: 'USD', ...o });
+  const snap = { Settlement_ID: 'S-T-0002', Revision: 2, Holder_ID: 'INV-T1', Issue_Date: '2026-11-21', Due_Date: '2026-11-30', Currency: 'USD', FX_USD_THB: 33.68, FX_USD_EUR: 0.89,
+    Engine_Version: 'billing-engine/2.5.0', Source_Hash: 'abc123', Total_Payable_Cents: 17000, Block_A_Total_Cents: 17000, Block_B_Informational: [], Payment_Preference: 'SEPA_EUR',
+    lines: [L({ Person_ID: 'GT1', Item_ID: 'T-OFF', Rate_Basis: 'PER_PERSON', rateCents: 17000, quantity: 1, amountCents: 17000 })] };
+  const qr = { width: 2, height: 2, colorSpace: 'DeviceRGB', filter: 'RunLengthDecode', data: new Uint8Array([11, 0, 0, 0, 255, 255, 255, 0, 0, 0, 255, 255, 255, 128]) };
+  const IBAN = 'DE00100110010000000000';   /* synthetic: check digits 00, no real account */
+  const live = { recipient: 'Suthep Thongantang', iban: IBAN, bank: 'N26 Bank AG', bic: 'NTSBDEB1XXX' };
+  const render = (dest, frozen) => renderSettlementPdf(snap, { payment: { options: [optionView('SEPA_EUR', 17000, snap, dest, null, frozen), optionView('PAYPAL_EUR', 17000, snap, { recipient: 'Suthep' }, qr)],
+    totalUsd: 170, dueDate: '2026-11-30', reference: 'S-T-0002' }, recipient: { Person_ID: 'GT1', name: 'Alex Example' }, persons: { GT1: 'Alex Example' },
+    items: { 'T-OFF': { name: 'Offering', detail: 'temple' } }, correction: null });
+  const t = text(render(live, { holder: 'Suthep Thongantang', bank: 'N26 Bank AG', bic: 'NTSBDEB1XXX' }));
+  for (const s of ['Option 1 · Bank transfer (SEPA)', 'Account holder', 'Suthep Thongantang', 'Bank', 'N26 Bank AG', 'IBAN', 'DE00 1001 1001 0000 0000 00', 'BIC / SWIFT', 'NTSBDEB1XXX',
+    'Reference', 'S-T-0002', 'EUR 151.30', 'Option 2 · PayPal (alternative)']) assert.ok(t.includes(s), s);
+  assert.ok(t.indexOf('N26 Bank AG') < t.indexOf('DE00 1001') && t.indexOf('DE00 1001') < t.indexOf('NTSBDEB1XXX'), 'holder, bank, IBAN, BIC in that order');
+  /* an earlier 1.3 revision (no Payment_Bank): the live bank never reaches its first render */
+  const before = render({ recipient: 'Suthep Thongantang', iban: IBAN }, null), after = render(live, null);
+  assert.equal(Buffer.compare(Buffer.from(before), Buffer.from(after)), 0, 'byte for byte');
+  assert.ok(!text(after).includes('NTSBDEB1XXX') && !text(after).includes('N26 Bank AG'));
 });

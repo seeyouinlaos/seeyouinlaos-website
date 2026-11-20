@@ -2,11 +2,13 @@
    H&S WEDDING 2027 — PAYMENT ROUTING AND THE PAYMENT PREFERENCE
    (Owner, 5 Oct 2026 · corrected the same day) · Freeze · L, M.
 
-   THE APPROVED ROUTING (final Owner decision, 5 Oct 2026)
-     Thai               default PROMPTPAY_THB
-     every non-Thai     default PAYPAL_EUR   · SEPA_EUR also available
-     Suthep himself     PAYPAL_EUR           · SEPA_EUR also available
-     Haruthai           PROMPTPAY_THB
+   THE APPROVED ROUTING (Owners, 20 Nov 2026 · HS-004.19, replacing 5 Oct 2026 and the German-only SEPA rule of 19 Nov)
+     Thai, American     PROMPTPAY_THB
+     everyone else      SEPA_EUR (option 1) and PAYPAL_EUR (option 2), always both
+     Suthep himself     the EUR route         · Haruthai   PROMPTPAY_THB
+     A documented individual arrangement (the couple, OWNER_HOLDER_ROUTE, a method a BILLING_ADMIN set) and a method locked by
+     a verified payment come first. A method the ledger only stored as the route's default at an earlier issue
+     (source DEFAULT_ROUTING, never chosen by anyone) gives way to the route; an issued revision keeps its own method.
    Destinations: PAYPAL_EUR → Suthep · SEPA_EUR → Suthep · PROMPTPAY_THB → Haruthai.
    Settlement currency: PayPal EUR · SEPA EUR · PromptPay THB. There is no
    PayPal-USD method: SEPA is an ADDITIONAL option beside PayPal, never its
@@ -55,7 +57,8 @@ const { PROMPTPAY_THB, PAYPAL_EUR, SEPA_EUR } = PAYMENT_CHANNEL;
 
 /** The two approved routes: a default method and the methods a Holder may pick. */
 export const PAYMENT_ROUTE = Object.freeze({
-  EUR: Object.freeze({ route: 'EUR', default: PAYPAL_EUR, options: Object.freeze([PAYPAL_EUR, SEPA_EUR]) }),
+  /* option 1 SEPA, option 2 PayPal — the order every page, PDF and e-mail shows (Owners, 20 Nov 2026 · HS-004.19) */
+  EUR: Object.freeze({ route: 'EUR', default: SEPA_EUR, options: Object.freeze([SEPA_EUR, PAYPAL_EUR]) }),
   THB: Object.freeze({ route: 'THB', default: PROMPTPAY_THB, options: Object.freeze([PROMPTPAY_THB]) }),
 });
 
@@ -70,7 +73,10 @@ export const PAYMENT_ROUTE = Object.freeze({
 export const CHANNEL_DESTINATION = Object.freeze({
   PAYPAL_EUR: Object.freeze({ recipient: 'Suthep', currency: 'EUR' }),
   /* the account holder's full name (Owner, 7 Oct 2026 · closeout) — the SEPA beneficiary as the bank knows it */
-  SEPA_EUR: Object.freeze({ recipient: 'Suthep Thongantang', currency: 'EUR', accountFrom: 'BILLING_SEPA_IBAN' }),
+  SEPA_EUR: Object.freeze({ recipient: 'Suthep Thongantang', currency: 'EUR', accountFrom: 'BILLING_SEPA_IBAN',
+    /* the bank's own public identifiers (Owners, 20 Nov 2026 · HS-PROMPT-040) — shown only while the configured IBAN is a German
+       account of this bank (its bank code), never for another account; the account itself stays configuration */
+    bank: Object.freeze({ name: 'N26 Bank AG', bic: 'NTSBDEB1XXX', bankCode: '10011001' }) }),
   PROMPTPAY_THB: Object.freeze({ recipient: 'Haruthai', currency: 'THB' }),
 });
 
@@ -87,6 +93,11 @@ export const OWNER_HOLDER_ROUTE = Object.freeze({
 
 /* the register's spellings of Thai, as entered; every other nationality is non-Thai */
 const THAI = /^(thai|thailand|thailändisch|thailaendisch|thailänder|thailaender)$/i;
+/* American (Owners, 20 Nov 2026 · HS-004.19: Thai and American guests pay by PromptPay) — the nationality as a whole word or phrase.
+   Any other phrase naming "American" ("African American", "Latin American", "South American") is not read either way: Guest
+   Relations states the method (AMERICAN_UNCLEAR) */
+const AMERICAN_WORD = /americ|amerikan/i;
+const AMERICAN = /^(american|us[- ]?american|u\.?s\.?a?\.?|united states( of america)?|amerikanisch(e|er|es)?|amerikaner(in)?)$/i;
 
 export const PREFERENCE_SOURCE = Object.freeze({
   DEFAULT_ROUTING: 'DEFAULT_ROUTING',
@@ -107,9 +118,15 @@ export function nationalityKind(nationality) {
   const parts = raw.split(/\s*(?:,|\/|;|&|\+|\band\b|\bund\b)\s*/i).map(clean).filter(Boolean);
   if (!parts.length) return { kind: null, reason: 'NATIONALITY_MISSING' };
   const thai = parts.filter((p) => THAI.test(p)).length;
+  const american = parts.filter((p) => AMERICAN.test(p)).length;
   if (thai === parts.length) return { kind: 'THAI', reason: null };
+  /* every part Thai or American: PromptPay either way (Owners, 20 Nov 2026) */
+  if (parts.some((p) => !AMERICAN.test(p) && AMERICAN_WORD.test(p))) return { kind: null, reason: 'NATIONALITY_MIXED_WITH_AMERICAN' };
+  if (american > 0 && thai + american === parts.length) return { kind: 'AMERICAN', reason: null };
   /* Thai together with another nationality is decided per person, never by rule */
   if (thai > 0) return { kind: null, reason: 'NATIONALITY_MIXED_WITH_THAI' };
+  /* American beside another nationality: PromptPay or the EUR route is decided per person, never by rule */
+  if (american > 0) return { kind: null, reason: 'NATIONALITY_MIXED_WITH_AMERICAN' };
   return { kind: 'NON_THAI', reason: null };
 }
 
@@ -124,6 +141,7 @@ export function routeFor({ holderId, nationality, stated }) {
   if (OWNER_HOLDER_ROUTE[id]) return { ...PAYMENT_ROUTE[OWNER_HOLDER_ROUTE[id]], basis: 'OWNER_DECISION' };
   const nat = nationalityKind(nationality);
   if (nat.kind === 'THAI') return { ...PAYMENT_ROUTE.THB, basis: 'NATIONALITY_THAI' };
+  if (nat.kind === 'AMERICAN') return { ...PAYMENT_ROUTE.THB, basis: 'NATIONALITY_AMERICAN' };
   if (nat.kind === 'NON_THAI') return { ...PAYMENT_ROUTE.EUR, basis: 'NATIONALITY_NON_THAI' };
   /* 4 · the person's 006 row is there but holds no nationality: the guest's own sent registration (Owners, 18 Nov 2026) */
   if (nat.reason === 'NATIONALITY_MISSING' && stated) {
@@ -133,6 +151,7 @@ export function routeFor({ holderId, nationality, stated }) {
     }
     const own = registrationNationalityKind(stated.value);
     if (own.kind === 'THAI') return { ...PAYMENT_ROUTE.THB, basis: 'REGISTRATION_THAI' };
+    if (own.kind === 'AMERICAN') return { ...PAYMENT_ROUTE.THB, basis: 'REGISTRATION_AMERICAN' };
     if (own.kind === 'NON_THAI') return { ...PAYMENT_ROUTE.EUR, basis: 'REGISTRATION_NON_THAI' };
     return { route: null, default: null, options: [], basis: null, reason: own.reason };
   }
@@ -148,6 +167,15 @@ const PLACEHOLDER = /^(n\/?a|na|none|nil|null|unknown|unbekannt|tbd|tba|kein|kei
 export function registrationNationalityKind(value) {
   const raw = clean(value);
   if (!raw || PLACEHOLDER.test(raw)) return { kind: null, reason: 'NATIONALITY_MISSING' };
+  /* American as a whole phrase, read before the words are split (Owners, 20 Nov 2026): alone, or only beside Thai → PromptPay */
+  const phrases = raw.split(/\s*(?:,|\/|;|&|\+|\band\b|\bund\b|\u0e41\u0e25\u0e30)\s*/i).map(clean).filter(Boolean);
+  const americanPhrases = phrases.filter((p) => AMERICAN.test(p)).length;
+  if (phrases.some((p) => !AMERICAN.test(p) && AMERICAN_WORD.test(p))) return { kind: null, reason: 'NATIONALITY_MIXED_WITH_AMERICAN' };
+  if (americanPhrases > 0) {
+    const rest = phrases.filter((p) => !AMERICAN.test(p));
+    if (rest.every((p) => THAI_WORDS.has(p.toLowerCase()))) return { kind: 'AMERICAN', reason: null };
+    return { kind: null, reason: 'NATIONALITY_MIXED_WITH_AMERICAN' };
+  }
   const parts = raw.toLowerCase().split(/[\s,\/;&+\-()\[\]]+|\band\b|\bund\b|\u0e41\u0e25\u0e30/).map(clean).filter(Boolean);
   if (!parts.length) return { kind: null, reason: 'NATIONALITY_MISSING' };
   const thai = parts.filter((p) => THAI_WORDS.has(p)).length;
@@ -202,9 +230,18 @@ export function statedNationality({ record, contact, guestId, contactId, unreada
  * A stored approved method always wins: once chosen or frozen at issue, a later
  * change in the register can never switch it silently.
  */
+/** A stored method that is only the route's default, kept with an earlier issue — never chosen by the guest or an admin, never
+ *  locked by a verified payment. It gives way to the route (Owners, 20 Nov 2026 · HS-004.19); the revision issued with it keeps it. */
+export function isStoredDefault(record) {
+  return !!(record && isChannel(record.Payment_Preference) && !clean(record.lockedAt)
+    && clean(record.source) === PREFERENCE_SOURCE.DEFAULT_ROUTING
+    && !((record.history || []).some((h) => h && clean(h.action) === 'SET')));
+}
+
 export function effectivePreference({ record, route }) {
   const r = route || { route: null, options: [], reason: 'NOT_ROUTED' };
-  const stored = record && isChannel(record.Payment_Preference) ? clean(record.Payment_Preference) : null;
+  const yields = isStoredDefault(record) && !!r.route;
+  const stored = !yields && record && isChannel(record.Payment_Preference) ? clean(record.Payment_Preference) : null;
   const locked = !!(record && clean(record.lockedAt));
   const options = r.route ? [...r.options] : (stored ? [stored] : []);
   if (stored) {
@@ -228,6 +265,10 @@ export function destinationOf(channel, env) {
     const iban = clean(env && env[d.accountFrom]).replace(/\s+/g, '');
     out.iban = iban || null;
     out.complete = !!iban;
+    /* the bank's name and BIC only for an account of that bank — a different account never borrows them */
+    const bankOk = !!(iban && d.bank && iban.slice(0, 2).toUpperCase() === 'DE' && iban.slice(4, 12) === d.bank.bankCode);
+    out.bank = bankOk ? d.bank.name : null;
+    out.bic = bankOk ? d.bank.bic : null;
   } else out.complete = true;
   return out;
 }

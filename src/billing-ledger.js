@@ -90,7 +90,7 @@ import {
   buildSnapshot, canIssue, freezeFx, nextRevisionState, settlementStateAfterDrift,
 } from './billing/settlement.js';
 import { evaluateGate, GATE_NOT_RUN } from './billing/activation-gate.js';
-import { isChannel, PREFERENCE_SOURCE } from './billing/preference.js';
+import { isChannel, isStoredDefault, PREFERENCE_SOURCE } from './billing/preference.js';
 import { ISSUE_LAYOUTS, ISSUE_RULES } from './billing/pdf-layouts.js';
 
 const SEQ = 'seq:settlement';
@@ -208,6 +208,16 @@ export class BillingLedger {
     /* the ways to pay include the method frozen with the statement, all in its currency */
     const method = clean(b.expectedPaymentPreference || b.paymentPreference);
     if (options.length && method && (!options.includes(method) || options.some((m) => m.slice(-3) !== method.slice(-3)))) return { error: 'the ways to pay do not match the statement\'s method', reason: 'PAYMENT_OPTIONS_MISMATCH' };
+    /* THE BANK OF THE SEPA OPTION (Owners, 20 Nov 2026 · HS-PROMPT-040): account holder, bank and BIC frozen with the revision that
+       offers SEPA — required, so no new SEPA statement goes out without them; the IBAN itself is never stored here */
+    let bank = null;
+    if (options.includes('SEPA_EUR')) {
+      const k = b.paymentBank && typeof b.paymentBank === 'object' ? b.paymentBank : {};
+      if (!/\S+ \S+/.test(clean(k.holder)) || !clean(k.bank) || !/^[A-Z0-9]{8}([A-Z0-9]{3})?$/.test(clean(k.bic))) {
+        return { error: 'the bank transfer names no complete bank (account holder, bank, BIC)', reason: 'PAYMENT_BANK_INCOMPLETE', status: 409 };
+      }
+      bank = { holder: clip(k.holder, 120), bank: clip(k.bank, 120), bic: clean(k.bic) };
+    }
     const fields = {
       Pdf_Layout: layout,
       Recipient: { Holder_ID: clip(r.Holder_ID, 40), Person_ID: clean(r.Person_ID), name: clip(r.name, 120) },
@@ -215,6 +225,7 @@ export class BillingLedger {
       Item_Words: Object.fromEntries(itemIds.map((id) => [id, { name: clip(words[id].name, 160), detail: clip(words[id].detail, 160) }])),
       Payment_Options: options.length ? [...new Set(options)] : null,
     };
+    if (bank) fields.Payment_Bank = bank;
     const k = b.correction && typeof b.correction === 'object' ? b.correction : null;
     if (k && clean(k.replaces)) fields.Correction = { replaces: clip(k.replaces, 8), replacesIssued: clip(k.replacesIssued, 10), reason: clip(k.reason, 200) };
     return { fields };
@@ -684,7 +695,10 @@ export class BillingLedger {
            method, no issue: the default is never guessed here. */
         const prefRec = await this.storage.get(PAYPREF + holderId);
         const offered = clean(body.paymentPreference);
-        const channel = prefRec && isChannel(prefRec.Payment_Preference) ? clean(prefRec.Payment_Preference)
+        /* a method stored only as an earlier issue's default (never chosen, never locked) gives way to the method the route offers
+           now (Owners, 20 Nov 2026 · HS-004.19) — the change is appended to its history below; the revisions issued with it keep it */
+        const reroute = isStoredDefault(prefRec) && isChannel(offered) && offered !== clean(prefRec.Payment_Preference);
+        const channel = prefRec && isChannel(prefRec.Payment_Preference) && !reroute ? clean(prefRec.Payment_Preference)
           : (isChannel(offered) ? offered : null);
         if (!channel) {
           return json({ ok: false, review: MANUAL_REVIEW_REQUIRED, reasons: ['PAYMENT_PREFERENCE_UNDETERMINED'],
@@ -730,6 +744,12 @@ export class BillingLedger {
             error: 'the snapshot would be incomplete (' + gaps.join(', ') + '); nothing was issued' }, 409);
         }
 
+        if (reroute) {
+          await this.storage.put(PAYPREF + holderId, { ...prefRec, Payment_Preference: channel, setAt: at, setBy: by || null,
+            basis: clean(body.paymentPreferenceBasis) || prefRec.basis || null, note: 'the route rule of 20 Nov 2026, with the issue of revision ' + n,
+            history: [...(prefRec.history || []), { action: 'ROUTE_RULE_20NOV', from: clean(prefRec.Payment_Preference), Payment_Preference: channel,
+              basis: clean(body.paymentPreferenceBasis) || null, by: by || null, at, revision: n }] });
+        }
         if (!prefRec) {
           await this.storage.put(PAYPREF + holderId, {
             Holder_ID: holderId, Payment_Preference: channel,
@@ -969,7 +989,9 @@ export class BillingLedger {
           if (prev && prev.lockedAt) return json({ ok: true, preference: prev, alreadyLocked: true });
           const offered = clean(body.channel);
           const rec = prev ? { ...prev } : { Holder_ID: holderId, Payment_Preference: null, source: null, setAt: null, setBy: null, history: [] };
-          if (!isChannel(rec.Payment_Preference) && isChannel(offered)) {
+          const reroute = isStoredDefault(rec) && isChannel(offered) && offered !== clean(rec.Payment_Preference);
+          if ((!isChannel(rec.Payment_Preference) || reroute) && isChannel(offered)) {
+            if (reroute) rec.history = [...(rec.history || []), { action: 'ROUTE_RULE_20NOV', from: clean(rec.Payment_Preference), Payment_Preference: offered, by: by || null, at }];
             rec.Payment_Preference = offered;
             rec.source = clean(body.source) || PREFERENCE_SOURCE.DEFAULT_ROUTING;
             rec.setAt = at; rec.setBy = by || null;
@@ -1101,7 +1123,10 @@ export class BillingLedger {
             const rec = await lockRec(holder);
             if (!rec.lockedAt) {
               const offered = clean(body.channel);
-              if (!isChannel(rec.Payment_Preference) && isChannel(offered)) {
+              /* a stored default (never chosen, never locked) gives way to the method this verified payment used (HS-004.19) */
+              const reroute = isStoredDefault(rec) && isChannel(offered) && offered !== clean(rec.Payment_Preference);
+              if ((!isChannel(rec.Payment_Preference) || reroute) && isChannel(offered)) {
+                if (reroute) rec.history = [...(rec.history || []), { action: 'ROUTE_RULE_20NOV', from: clean(rec.Payment_Preference), Payment_Preference: offered, by, at }];
                 rec.Payment_Preference = offered;
                 rec.source = clean(body.source) || PREFERENCE_SOURCE.DEFAULT_ROUTING;
                 rec.basis = clean(body.basis) || null;   /* why the route offered it */

@@ -329,7 +329,9 @@ export function composeGuestMail(record) { return localiseGuestMail(composeGuest
 /* ---- THE STATEMENT EMAIL (Owner, 7 Oct 2026 · admin console) ----
    Sent only when a BILLING_ADMIN sends an issued statement. The figures are the issued revision's own (its total, its due
    date, the amount at its own frozen rate); the PDF travels as an attachment, never as a link. It points to My Profile →
-   Your statement, where the guest sees how to pay. No code, no bearer, no bank account number in the body. */
+   Your statement, where the guest sees how to pay. No code and no bearer in the body. The one account it names is the SEPA bank
+   connection of a statement that offers the bank transfer (Owners, 20 Nov 2026 · HS-PROMPT-040 — superseding "no bank account
+   number" of 7 Oct for that account only): holder, bank, IBAN, BIC, reference, amount in euros. */
 export function composeStatementMail(m) {
   const d = m || {};
   const subject = 'Your statement — See You In Laos (' + d.settlementId + ')';
@@ -341,12 +343,21 @@ export function composeStatementMail(m) {
     d.method ? kvRow('Payment method', d.method) : '',
     /* a corrected version names the version it replaces (HS-004.8), as its PDF does */
     d.correction && d.correction.replaces ? kvRow('Replaces', d.correction.replaces + (d.correction.replacesIssued ? ' issued ' + dayWords(d.correction.replacesIssued) : '')) : ''].filter(Boolean);
+  /* option 1 · the bank transfer, complete (HS-PROMPT-040); PayPal stays named under Payment method */
+  const k = d.sepa && d.sepa.iban ? d.sepa : null;
+  const ibanTxt = k ? String(k.iban).replace(/\s+/g, '').replace(/(.{4})/g, '$1 ').trim() : '';
+  const eurTxt = k && k.amount ? k.amount.currency + ' ' + Number(k.amount.amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '';
+  const sepaRows = k ? [kvRow('Account holder', k.holder), kvRow('Bank', k.bank), kvRow('IBAN', ibanTxt), kvRow('BIC / SWIFT', k.bic),
+    kvRow('Reference', k.reference), eurTxt ? kvRow('Amount', eurTxt, 'at this statement\'s own rate') : ''].filter(Boolean) : [];
+  const sepaText = k ? ['', 'Bank transfer (SEPA)', 'Account holder: ' + k.holder, 'Bank: ' + k.bank, 'IBAN: ' + ibanTxt, 'BIC / SWIFT: ' + k.bic,
+    'Reference: ' + k.reference, eurTxt ? 'Amount: ' + eurTxt + ' (at this statement\'s own rate)' : ''].filter((x) => x !== null) : [];
   const intro = 'Your statement for the wedding journey is ready. It is attached to this email, and you will always find it in My Profile, under Your statement — together with how to pay.';
   /* the due date itself, never a fixed "21 days" beside it (HS-004.11) */
   const rule21 = 'Please settle it by the due date above. Once you have paid, tell us with "I have paid" in My Profile; Guest Relations then verifies the payment.';
   const inner = '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td>' +
     h1('Your statement') + para('Dear ' + esc(d.firstName || 'guest') + ',') + para(esc(intro)) + '</td></tr>' + gap(10) +
-    '<tr><td>' + kvTable(rows) + '</td></tr>' + gap(14) + rule() +
+    '<tr><td>' + kvTable(rows) + '</td></tr>' + gap(14) +
+    (k ? '<tr><td>' + para('<b>Bank transfer (SEPA)</b>') + kvTable(sepaRows) + '</td></tr>' + gap(14) : '') + rule() +
     '<tr><td style="padding:22px 0 0;">' + small(esc(rule21)) + '</td></tr>' +
     '<tr><td style="padding:24px 0 10px;">' + button(d.profileUrl || SITE + '/profile#statement', 'Open Your statement') + '</td></tr>' +
     '<tr><td>' + small(esc(PRIVACY)) + small('With love,<br>Haruthai &amp; Suthep') +
@@ -355,7 +366,7 @@ export function composeStatementMail(m) {
     'Statement: ' + d.settlementId + ' · version ' + d.revision, 'Issued: ' + dayWords(d.issueDate), 'Total: ' + total,
     owed ? 'In ' + d.inCurrency.currency + ': ' + owed + ' (at this statement\'s own rate)' : '', 'Due by: ' + dayWords(d.dueDate),
     d.method ? 'Payment method: ' + d.method : '',
-    d.correction && d.correction.replaces ? 'Replaces: ' + d.correction.replaces + (d.correction.replacesIssued ? ' issued ' + dayWords(d.correction.replacesIssued) : '') : '', '', rule21, '', 'My Profile → Your statement: ' + (d.profileUrl || SITE + '/profile#statement'), '',
+    d.correction && d.correction.replaces ? 'Replaces: ' + d.correction.replaces + (d.correction.replacesIssued ? ' issued ' + dayWords(d.correction.replacesIssued) : '') : '', ...sepaText, '', rule21, '', 'My Profile → Your statement: ' + (d.profileUrl || SITE + '/profile#statement'), '',
     PRIVACY, '', 'With love,', 'Haruthai & Suthep', '', 'Guest Relations — Khun Ket & Khun Paddy · ' + GR_EMAIL];
   return { subject, text: T.join('\n').replace(/\n{3,}/g, '\n\n'), html: shell(subject, inner, 'Your statement') };
 }

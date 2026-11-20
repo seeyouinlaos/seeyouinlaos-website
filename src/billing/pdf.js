@@ -831,8 +831,8 @@ const PAY_WORDS = Object.freeze({
 const PAY_PROFILE = 'My Profile always shows this statement\'s current balance and the current way to pay; a payment counts once Guest Relations has verified it.';
 function money2(cur, n) { return cur + ' ' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 /* LAYOUT 1.3 · HOW TO PAY (HS-004.15/.16): one look for every method. The amount due in USD and, for a payment in another currency,
-   the full amount in that currency at this statement's frozen rate; then each way to pay the guest may use — for a German guest the
-   SEPA bank transfer first and PayPal as the alternative, everyone else the method frozen with the statement. Every detail is the
+   the full amount in that currency at this statement's frozen rate; then each way to pay the guest may use — on the EUR route the
+   SEPA bank transfer first and PayPal as the alternative (HS-004.19), else the method frozen with the statement. Every detail is the
    caller's (src/billing-routes.js · paymentForPdf: the account, the approved code, the reference); nothing is made up here. */
 const OPTION_WORDS = Object.freeze({
   SEPA_EUR: { title: 'Bank transfer (SEPA)', payee: 'Account holder', how: 'Please transfer the amount in euros and add the reference to your transfer.' },
@@ -842,7 +842,10 @@ const OPTION_WORDS = Object.freeze({
 function optionRows(o, p) {
   const rows = [];
   if (clean(o.recipient)) rows.push([OPTION_WORDS[o.method].payee, clean(o.recipient)]);
+  /* the bank and its BIC only as the revision froze them (HS-PROMPT-040) — a revision issued without them prints exactly as before */
+  if (o.method === 'SEPA_EUR' && clean(o.bank)) rows.push(['Bank', clean(o.bank)]);
   if (o.method === 'SEPA_EUR') rows.push(['IBAN', clean(o.iban) ? clean(o.iban).replace(/\s+/g, '').replace(/(.{4})/g, '$1 ').trim() : 'shown in My Profile, under Your statement']);
+  if (o.method === 'SEPA_EUR' && clean(o.bic)) rows.push(['BIC / SWIFT', clean(o.bic)]);
   if (o.amount && Number.isFinite(Number(o.amount.amount)) && clean(o.amount.currency)) rows.push(['Amount', money2(clean(o.amount.currency), o.amount.amount)]);
   if (clean(p.reference)) rows.push([o.method === 'SEPA_EUR' ? 'Reference' : 'Reference (note)', clean(p.reference)]);
   return rows;

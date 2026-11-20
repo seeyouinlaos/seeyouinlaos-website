@@ -499,6 +499,8 @@ function routeEnv(extra) {
     GOOGLE_SERVICE_ACCOUNT_JSON: JSON.stringify({ client_email: 'synthetic@test.invalid', private_key: privateKey, private_key_id: 'synthetic' }),
     BILLING_LEDGER: { idFromName: () => 'billing', get: () => ({ fetch: (req) => led.fetch(req) }) },
     REG_KV: kv({}),
+    /* the SEPA account the EUR route offers first (HS-004.19) — synthetic: the bank's public code, check digits 00 (no real account) */
+    BILLING_SEPA_IBAN: 'DE00100110010000000000',
     ...(extra || {}),
   } };
 }
