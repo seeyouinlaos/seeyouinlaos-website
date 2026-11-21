@@ -1172,7 +1172,8 @@ test('REVENUE AND BUDGET · beside the overview: the same figures with or withou
   assert.equal(d1.status, 'COMPLETE'); assert.equal(d1.cost.cents, 60000); assert.equal(d1.difference.cents, 29000 - 60000); assert.equal(d1.labelText, 'Cost still to be covered by the hosts');
   assert.equal(d1.rooms[0].lines[0].personName, 'Testa Example', '006 names the guest'); assert.equal(d1.rooms[0].lines[0].payerName, 'Testa Example');
   assert.match(JSON.stringify(B.checks), /rooming list \(Rooms engine\) could not be read just now/, 'no Rooms engine bound here: a named check, nothing else');
-  const keep = (j) => { const o = { ...j }; delete o.budget; delete o.calculatedAt; return o; };
+  /* the Overview's figures (HS-034 · quick) read the budget for the hotels: compared without it, its finance part never depends on it */
+  const keep = (j) => { const o = { ...j }; delete o.budget; delete o.calculatedAt; o.quick = o.quick && o.quick.finance; return o; };
   const withBudget = keep(r.j);
   /* the budget's own reads refused: the overview identical, the comparison a named gap */
   const was = globalThis.fetch;

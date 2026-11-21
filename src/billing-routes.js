@@ -60,6 +60,7 @@ import { buildRevenueOverview } from './billing/revenue.js';
 import { buildBudgetComparison } from './billing/budget.js';
 import { BUDGET_TABS, rangeOfTab, parseBudget004, parseVendors007, parseItemDisplay, parseSpecialRateRows, parseRoomList012 } from './billing/budget-source.js';
 import { VENDORS } from './billing/budget-map.js';
+import { quickFinanceOf, participationOf } from './billing/quick-overview.js';
 import { detectDrift, blockingOf, monitoringSignals, proposeRevisionDraft, reconciliationReport } from './billing/reconciliation.js';
 import { REFERENCE_CASES, evaluateGate, runReferenceCases, GATE_NOT_RUN } from './billing/activation-gate.js';
 import { PAYMENT_CHANNEL, CHANNEL_CURRENCY, RECORD_STATUS, ENTRY_TYPE, REVISION_STATE, toCents, fromCents } from './billing/model.js';
@@ -1334,9 +1335,13 @@ async function adminRevenue(env, identity, url, cors) {
   extraBedsBeyondPlaces(overview.breakdown, src.items);
   /* where every active guest stands — only CONFIRMED bookings are revenue above; the rest is named here, never as money */
   let progress; try { progress = await bookingProgress(env, indexEntries, { ownerRecords: recorded.length > 0 }); } catch (e) { progress = { error: clean(e && e.message).slice(0, 200) || 'not readable' }; }
-  return jsonRes({ ok: true, ...overview, unresolved, calculatedAt: new Date().toISOString(), bookingProgress: progress, fxReference,
+  const body = { ok: true, ...overview, unresolved, calculatedAt: new Date().toISOString(), bookingProgress: progress, fxReference,
     population: { holders: ids.length, withSettlement: withSettlement.length, withConfirmation: confirmed.length, withDrift: withDrift.length,
-      withOwnerBookings: recorded.length, cancelled: holders.filter((h) => h.cancelled).length, couple: couple.length }, couple, budget }, 200, cors);
+      withOwnerBookings: recorded.length, cancelled: holders.filter((h) => h.cancelled).length, couple: couple.length }, couple, budget };
+  /* THE OVERVIEW (HS-034, Owners HS-PROMPT-052): counts and ratios of the figures above, read beside them — a fault in it never
+     touches this answer, which the Finance, Revenue and Rooms & rates tabs read as before */
+  try { body.quick = quickFinanceOf(body); } catch (e) { body.quick = { status: 'NOT_AVAILABLE', why: 'the overview figures could not be formed just now' }; }
+  return jsonRes(body, 200, cors);
 }
 
 /* ------------------------------------------------------------ revenue and budget */
@@ -2479,14 +2484,21 @@ async function adminAssignments(env, identity, url, cors) {
   const seedNames = Object.fromEntries(Object.keys(ROOM_SEED).map((k) => [k, ROOM_SEED[k].name]));
   const roster = rosterOf({ entries, register: src.register, records: kv.records, confs: kv.confs, seating: seat.j, rooms: room.j, couple });
   const stays = staysOf({ rooms: room.j, seedNames, datesOf: src.datesOf });
-  return jsonRes({ ok: true, version: ASSIGNMENTS_VERSION, at: new Date().toISOString(), audience: admin, events: ASSIGNMENT_EVENTS,
+  const body = { ok: true, version: ASSIGNMENTS_VERSION, at: new Date().toISOString(), audience: admin, events: ASSIGNMENT_EVENTS,
     people: seat.j.people, capacity: seat.j.capacity,
     seating: { open: seat.j.open, frozen: seat.j.frozen, events: seat.j.events, log: seat.j.log },
     rooms: { stays, digest: room.j.digest, final: room.j.final, waitlist: room.j.waitlist || [], log: room.j.log,
       hotelRooms: hotelRoomsMeta(room.j.hotelRooms), hotelChecks: hotelChecksOf(roster),
       /* per hotel, each person once (Owners' consolidated order, 19 Nov 2026) — beside the stays, never instead of them */
       occupancy: occupancyOf(stays, room.j.waitlist || [], (VENDORS.find((v) => v.roomContract) || {}).roomContract || null) },
-    roster, gaps: src.gaps }, 200, cors);
+    roster, gaps: src.gaps };
+  /* THE OVERVIEW (HS-034, Owners HS-PROMPT-052): only when the Overview asks (?overview=1) — Seating and Room assignments read this
+     route after every change and keep exactly today's answer; guest ids and counts only, a fault never touches the answer */
+  if (url.searchParams.get('overview') === '1') {
+    try { body.participation = participationOf({ roster, records: kv.records, seating: seat.j, stays, gaps: src.gaps }); }
+    catch (e) { body.participation = { status: 'NOT_AVAILABLE', why: 'the programme figures could not be formed just now' }; }
+  }
+  return jsonRes(body, 200, cors);
 }
 
 /* the guests a write names, resolved from the index: guest id → { invitationId, partyId, name } — or the ids that resolve to nobody */
