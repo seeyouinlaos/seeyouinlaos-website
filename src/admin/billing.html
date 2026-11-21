@@ -210,6 +210,35 @@ html{scroll-padding-top:var(--ab-sat,env(safe-area-inset-top,0px))}
 .as-occ small{display:block;font-size:10.5px;color:#6B6964}.as-occ.as-placed{background:#E3ECE3;border-color:#2F5D3A}
 .as-free{background:#fff;border-style:dashed;color:#6B6964}.as-free[disabled],.as-occ[disabled]{cursor:not-allowed}
 @media print{.as-hint,.as-pend,[data-as-export],[data-as-final],[data-as-rfinal]{display:none!important}}
+/* HS-035 P1 · THE ADMIN GUEST PROFILE (Owners, 21 Nov 2026 · assets/admin-profile.js) — read only, every line with its source */
+.ab-pf{margin-top:14px}
+.ab-pf-sum{cursor:pointer;list-style:none;display:flex;gap:10px;align-items:baseline;font-family:'PP Editorial Old',serif;font-weight:200;font-size:22px;line-height:1.2;padding:2px 0}
+.ab-pf-sum::-webkit-details-marker{display:none}
+.ab-pf-sum::after{content:'+';margin-left:auto;font-size:18px;color:#6B6964}
+.ab-pf[open]>.ab-pf-sum::after{content:'\2013'}
+.ab-pf-body{margin-top:10px}
+.ab-pf-h{margin:14px 0 6px}
+.ab-pf-src{display:inline-block;font-size:10.5px;letter-spacing:.3px;text-transform:none;color:#6B6964;border:1px solid #DAD9D7;padding:0 6px;margin-left:6px}
+.ab-pf-tbl{width:100%;border-collapse:collapse;font-size:13px;margin:4px 0 10px}
+.ab-pf-tbl th,.ab-pf-tbl td{text-align:left;vertical-align:top;padding:6px 8px;border-top:1px solid #EAE6DF;overflow-wrap:anywhere}
+.ab-pf-tbl thead th{border-top:0;font-weight:400;font-size:11px;letter-spacing:1.4px;text-transform:uppercase;color:#6B6964}
+.ab-pf-tbl tbody th{font-weight:400;color:#6B6964;width:24%}
+.ab-pf-draft{border-left:3px solid #74070E;padding-left:12px;margin-top:10px}
+.ab-pf-more{margin:8px 0}.ab-pf-more>summary{cursor:pointer;text-decoration:underline}
+.ab-pf .ab-kv>span:last-child{overflow-wrap:anywhere}
+.ab-pf-open{margin-left:8px;font-size:12px}
+.ab-pf-note{display:block;margin-top:6px;font-size:12px}
+.ab-pf-head a.p-act,.ab-pf a.p-act{display:inline-block;text-decoration:none}
+@media(max-width:759px){
+  .ab-pf-tbl thead{display:none}
+  .ab-pf-tbl tr{display:block;border-top:1px solid #EAE6DF;padding:6px 0}
+  .ab-pf-tbl th,.ab-pf-tbl td{display:block;border:0;padding:2px 0;width:auto}
+  .ab-pf-tbl tbody th{font-size:11px;letter-spacing:1.2px;text-transform:uppercase;width:auto;overflow-wrap:normal}
+  .ab-pf-tbl td::before{content:attr(data-l) ' \00B7\00A0';color:#6B6964;font-size:11px}
+  .ab-pf-sum{font-size:19px}
+  .ab-pf-open{display:inline-block;margin:4px 0 0}
+}
+@media print{.ab-pf-sum::after,[data-ab-pf-finance],.ab-pf-open{display:none!important}}
 </style>
 <link rel="stylesheet" href="assets/prep.css?v=0a6eb26a">
 </head><body class="prep p-in">
@@ -217,5 +246,6 @@ html{scroll-padding-top:var(--ab-sat,env(safe-area-inset-top,0px))}
 <main class="ab-main"><h1>Guest Settlement</h1><p class="t-b2 ab-sub">Statements, payments and revenue — for Haruthai and Suthep. Nothing here happens without your confirmation.</p>
 <div id="admin" aria-live="polite"></div></main>
 <script src="assets/admin-assign.js?v=a08afe8e"></script>
-<script src="assets/admin-billing.js?v=4caf75a9"></script>
+<script src="assets/admin-profile.js?v=bafa8dc9"></script>
+<script src="assets/admin-billing.js?v=6b51f678"></script>
 </body></html>

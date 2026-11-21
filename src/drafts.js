@@ -44,6 +44,19 @@ export class Drafts {
     return d || null;
   }
 
+  /* HS-035 P1 · THE ADMIN GUEST PROFILE (Owners, 21 Nov 2026): the draft exactly as `get` would answer it, WITHOUT seeding —
+     an actor that has never been read stores nothing; the KV mirror is read but never copied in. A failed mirror read is a
+     failed read (thrown), never "no draft". Nothing here writes. */
+  async peek(invitationId) {
+    const d = await this.storage.get('draft');
+    if (d) return d;
+    if (await this.storage.get('seeded')) return null;
+    if (!(this.env && this.env.REG_KV)) return null;
+    let raw = null;
+    try { raw = await this.env.REG_KV.get('draft:' + invitationId); } catch (e) { const err = new Error('draft store unavailable'); err.seed = true; throw err; }
+    try { return JSON.parse(raw || 'null'); } catch (e) { return null; }
+  }
+
   async fetch(request) {
     const url = new URL(request.url);
     const op = url.pathname.replace(/^.*\//, '');
@@ -53,6 +66,9 @@ export class Drafts {
 
     /* reads are serialised with writes too: a seed can never interleave with a save */
     if (op === 'get') { return await this.state.blockConcurrencyWhile(async () => { try { return json({ ok: true, draft: await this.current(invitationId), epoch: (await this.storage.get('epoch')) || null }); } catch (e) { return json({ ok: false, error: e && e.seed ? 'draft store unavailable' : 'draft could not be read', retry: true }, 503); } }); }
+
+    /* the admin guest profile's read (HS-035): serialised like `get`, never a write */
+    if (op === 'peek') { return await this.state.blockConcurrencyWhile(async () => { try { return json({ ok: true, draft: await this.peek(invitationId) }); } catch (e) { return json({ ok: false, error: e && e.seed ? 'draft store unavailable' : 'draft could not be read', retry: true }, 503); } }); }
 
     /* THE CLEAN RESET (Owner, 19 Sep 2026): the actor forgets the draft and is marked seeded, so the (deleted) KV mirror can
        never bring an older copy back; the Worker calls this for every invitation the register knows, after the GR check */
