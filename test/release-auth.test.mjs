@@ -30,8 +30,11 @@ const PRIVATE = path.join(ROOT, 'src/invitation-tokens.private.csv');
    15 Nov 2026 (the Owners' final 006_Guestlist): the people no longer on the list cancelled (records kept, codes retired); one name
    correction (CON027, --same-person); six rows that now name other people (--new-person: the old guest retired, a new guest with a
    new code — CON031, CON079, CON080, CON096, CON097, CON098, CON099, CON101; the parents CON096/CON097 their own couple, the sheet's
-   COUPL018 being another party's); CON030 carried, CON095 held for the Owners: 66 active guests, 59 cancelled ids kept, never reused. */
-const ACTIVE = 66, CANCELLED = 59;
+   COUPL018 being another party's); CON030 carried, CON095 held for the Owners: 66 active guests, 59 cancelled ids kept, never reused.
+   21 Nov 2026 (the Owners' order): the partner of CON031 named — one new guest CON115 → G126 with a new code from the same builder,
+   in CON031's party INV-093 (the couple completed, COUPL114); every existing code kept and opening the same guest, no name
+   corrected: 67 active guests, 59 cancelled ids kept, never reused. */
+const ACTIVE = 67, CANCELLED = 59;
 test('REGISTER · the shipped index and bundle: one entry per active guest, every invitation INV-<guestId>, no guest twice, no id of a cancelled guest', () => {
   const entries = Object.values(index.entries);
   assert.equal(index.v, 2); assert.equal(entries.length, ACTIVE); assert.equal(records.length, ACTIVE);
