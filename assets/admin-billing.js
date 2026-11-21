@@ -117,7 +117,13 @@
     issue: null, send: null, pay: null, confirm: null, msg: '', download: '',
     revenue: null, revenuePhase: 'idle', revenueError: '',
     budgetOpen: {},   /* which stays / routes of the budget comparison are open — kept across a redraw */
+    /* HS-034 + HS-035 · THE OVERVIEW (Owners HS-PROMPT-052, 21 Nov 2026): the programme figures (admin/assignments?overview=1), read
+       once per visit after the guest checks and the figures; the open tables and the chosen night kept across a redraw */
+    ov: { phase: 'idle', data: null, error: '', night: 'all', open: {}, jump: null }, readyDone: false, backTo: null,
   };
+  /* E17 · OWNER DECIDED (HS-PROMPT-053, 21 Nov 2026): the programme figures load by themselves when the Overview opens, at most once
+     per console visit, after the guest checks and the figures, never retried by themselves (HS-032). false = only on the Owners' click. */
+  var OVERVIEW_AUTOLOAD = true;
   var root = null;
   /* THE OWNERS' SEATING MANAGEMENT & ROOM ASSIGNMENTS (Owners, 18 Nov 2026): two more areas from assets/admin-assign.js — loaded
      before this file, given this console's own helpers, drawn and wired by it; absent, the console is what it was */
@@ -144,14 +150,22 @@
     if (m) return { view: 'holder', id: m[1] };
     var pm = /^profile=(INV-[A-Z0-9-]+)$/.exec(h);
     if (pm) return { view: 'profile', id: pm[1] };
-    if (h === 'revenue' || h === 'rooms' || h === 'finance') return { view: h, id: null };
+    /* a list one figure of the Overview opens — only the keys the Overview knows */
+    var lm = /^list=([A-Za-z0-9_.-]{3,80})$/.exec(h), OV = window.SIYL_ADMIN_OVERVIEW;
+    if (lm && OV && OV.LIST_RE && OV.LIST_RE.test(lm[1])) return { view: 'list', id: lm[1] };
+    if (h === 'revenue' || h === 'rooms' || h === 'finance' || h === 'guests') return { view: h, id: null };
     if (extView(h)) return { view: h, id: null };
-    return { view: 'guests', id: null };
+    /* the Overview is the start view (HS-034); without its renderer the console opens on the guest list, as before */
+    return { view: OV ? 'overview' : 'guests', id: null };
   }
   var hashEvents = true;
   function go(hash) { if (location.hash === hash || !hashEvents) { location.hash = hash; onRoute(); } else location.hash = hash; }
   function onRoute() {
+    var prev = S.route;
     S.route = readRoute();
+    /* a profile opened from a list returns to that list */
+    if (S.route.view === 'profile') S.backTo = prev && prev.view === 'list' ? '#list=' + prev.id : (prev && prev.view === 'profile' ? S.backTo : null);
+    else S.backTo = null;
     S.panel = null; S.issue = null; S.send = null; S.pay = null; S.confirm = null; S.msg = ''; S.download = ''; S.owner = null; S.ownerMsg = ''; S.obForm = null;
     S.profile = null; S.profilePhase = 'idle'; S.profileError = '';
     if (S.route.view === 'holder') loadHolder(S.route.id);
@@ -160,6 +174,15 @@
     else if (extView(S.route.view) && EXT.enter) EXT.enter(S.route.view);
     draw();
     try { window.scrollTo(0, 0); } catch (e) {}
+    ovJump();
+    ovMaybe();
+  }
+  /* a jump inside the Overview (its area bar, "back to the figure") — scrolled to after the redraw */
+  function ovJump() {
+    var id = S.ov.jump; S.ov.jump = null;
+    if (!id || typeof document.getElementById !== 'function') return;
+    var el = document.getElementById(id);
+    if (el && el.scrollIntoView) { try { el.scrollIntoView({ block: 'start' }); } catch (e) { el.scrollIntoView(); } }
   }
 
   /* --------------------------------------------------------------- loading */
@@ -167,11 +190,13 @@
     if (!auth()) { S.phase = 'signedout'; draw(); return; }
     S.phase = 'loading'; draw();
     api('admin/overview').then(function (x) {
-      if (x.status === 403) { S.phase = 'denied'; draw(); return; }
-      if (x.status === 401) { S.phase = 'signedout'; draw(); return; }
+      if (x.status === 403) { S.phase = 'denied'; searchHide(); draw(); return; }
+      if (x.status === 401) { S.phase = 'signedout'; searchHide(); draw(); return; }
       if (!x.ok) { S.phase = 'error'; S.error = x.j.error || 'The guest list could not be read.'; draw(); return; }
-      S.phase = 'ready'; S.overview = x.j; S.status = {}; S.ready = {}; S.checked = 0;
+      S.phase = 'ready'; S.overview = x.j; S.status = {}; S.ready = {}; S.checked = 0; S.readyDone = false;
+      S.ov = { phase: 'idle', data: null, error: '', night: S.ov.night, open: S.ov.open, jump: null }; ovGen++;
       onRoute();
+      searchReady();
       checkAll();
     });
   }
@@ -193,7 +218,7 @@
         if (x.ok) (x.j.rows || []).forEach(function (r) { S.status[r.Holder_ID] = r; });
         else part.forEach(function (id) { S.status[id] = { Holder_ID: id, error: x.j.error || 'not readable' }; });
         i += size; S.checked = Math.min(i, ids.length);
-        if (S.route.view === 'guests') draw();
+        if (S.route.view === 'guests' || S.route.view === 'overview') draw();
         next();
       });
     }
@@ -208,13 +233,13 @@
     });
     var size = Number(S.overview.chunk) || 6, i = 0;
     function next() {
-      if (mine !== generation || i >= ids.length) { if (mine === generation) draw(); return; }
+      if (mine !== generation || i >= ids.length) { if (mine === generation) { S.readyDone = true; draw(); ovMaybe(); } return; }
       var part = ids.slice(i, i + size);
       api('admin/readiness?ids=' + encodeURIComponent(part.join(','))).then(function (x) {
         if (mine !== generation) return;
         if (x.ok) (x.j.rows || []).forEach(function (r) { S.ready[r.Holder_ID] = r; });
         else part.forEach(function (id) { S.ready[id] = { Holder_ID: id, error: x.j.error || 'not readable' }; });
-        i += size; if (S.route.view === 'guests') draw();
+        i += size; if (S.route.view === 'guests' || S.route.view === 'overview') draw();
         next();
       });
     }
@@ -267,8 +292,60 @@
     S.revenuePhase = 'loading'; S.revenueError = '';
     api('revenue').then(function (x) {
       if (!x.ok) { S.revenuePhase = 'error'; S.revenueError = x.j.error || 'The revenue overview could not be calculated.'; draw(); return; }
-      S.revenue = x.j; S.revenuePhase = 'ready'; draw();
+      S.revenue = x.j; S.revenuePhase = 'ready'; S.revenueStale = false; draw();
+    }).then(function () { ovMaybe(); });
+  }
+  /* THE OVERVIEW'S PROGRAMME FIGURES (HS-034 · E17 decided, HS-PROMPT-053): one read, after the guest checks and the figures, never
+     retried by itself — a refusal is said, and "Try again" is the Owners' own click */
+  function ovMaybe() {
+    /* only for the Overview and its lists, and only where its renderer is on the page — Seating, Rooms and every other tab keep
+       exactly their own reads */
+    if (!window.SIYL_ADMIN_OVERVIEW || (S.route.view !== 'overview' && S.route.view !== 'list')) return;
+    if (!OVERVIEW_AUTOLOAD || S.ov.phase !== 'idle' || !S.readyDone || S.checking) return;
+    if (S.revenuePhase !== 'ready' && S.revenuePhase !== 'error') return;
+    loadOv();
+  }
+  var ovGen = 0;
+  function loadOv() {
+    if (S.ov.phase === 'loading') return;
+    S.ov.phase = 'loading'; S.ov.error = '';
+    var mine = ovGen;
+    if (S.route.view === 'overview') draw();
+    api('admin/assignments?overview=1').then(function (x) {
+      if (mine !== ovGen) return;                 /* a newer read of the console took over — a late answer never lands */
+      if (x.status === 403) { S.phase = 'denied'; searchHide(); draw(); return; }
+      if (!x.ok) { S.ov.phase = 'error'; S.ov.error = x.j.error || (x.status === 503 ? BUSY_WORDS : 'The programme figures could not be read just now.'); }
+      else { S.ov.data = x.j; S.ov.phase = 'ready'; }
+      if (S.route.view === 'overview' || S.route.view === 'list') draw();
     });
+  }
+  /* what the Overview is drawn from — the console's own state, nothing else */
+  function ovModel() {
+    var H = S.overview ? S.overview.holders : [], ac = { toConfirm: [], ready: [], blocked: [], notSent: [] };
+    H.forEach(function (h) {
+      if (matches(h, 'toConfirm')) ac.toConfirm.push(h.Holder_ID);
+      if (matches(h, 'ready')) ac.ready.push(h.Holder_ID);
+      if (matches(h, 'blocked')) ac.blocked.push(h.Holder_ID);
+      if (matches(h, 'notSent')) ac.notSent.push(h.Holder_ID);
+    });
+    var d = new Date(), today = d.getFullYear() + '-' + (d.getMonth() < 9 ? '0' : '') + (d.getMonth() + 1) + '-' + (d.getDate() < 10 ? '0' : '') + d.getDate();
+    return { holders: H, ac: ac, checked: S.checked, total: H.length, checking: S.checking, readyDone: S.readyDone, revenue: S.revenue, revenuePhase: S.revenuePhase,
+      revenueError: S.revenueError, ov: S.ov, today: today, autoload: OVERVIEW_AUTOLOAD, stale: !!(S.overviewStale || S.revenueStale) };
+  }
+  function overviewView() {
+    var R = window.SIYL_ADMIN_OVERVIEW;
+    try { return R.render(ovModel(), { esc: esc }); }
+    catch (e) { return ovFallback(); }
+  }
+  function ovListView() {
+    var R = window.SIYL_ADMIN_OVERVIEW;
+    try { return R.renderList(S.route.id, ovModel(), { esc: esc }); }
+    catch (e) { return ovFallback(); }
+  }
+  /* a fault in the Overview never blanks the console: every tab stays one click away */
+  function ovFallback() {
+    return '<div class="p-card" data-ov-fallback><p class="t-b1">The Overview could not be drawn just now. Everything else works as before:</p><p class="t-b2">' +
+      '<a href="/admin/billing#guests" data-ab-tab="#guests">Guests</a> · <a href="/admin/billing#finance" data-ab-tab="#finance">Finance</a> · <a href="/admin/billing#revenue" data-ab-tab="#revenue">Revenue</a></p></div>';
   }
 
   /* ------------------------------------------------------------- the list */
@@ -544,11 +621,12 @@
   /* HS-035 P1 · the profile drawn by assets/admin-profile.js (absent: said, the console is what it was) */
   function profileView() {
     if (S.profilePhase === 'loading' || S.profilePhase === 'idle') return '<p class="t-b2 ab-progress" role="status">Reading this guest\'s profile: contact, trip as sent, rooms, seats, answers and documents…</p>';
-    if (S.profilePhase === 'error') return '<div class="p-card"><p class="t-l1"><a href="/admin/billing#guests" class="ab-back" data-ab-back>← All guests</a></p><p class="t-b1">' + esc(S.profileError) + '</p><div class="p-actions"><button type="button" class="p-link" data-ab-profile-reload>Try again</button></div></div>';
+    if (S.profilePhase === 'error') return (S.backTo ? '<p class="t-l1 ab-pf-back"><a href="/admin/billing' + esc(S.backTo) + '" class="ab-back" data-ab-backlist="' + esc(S.backTo) + '">← Back to the list</a></p>' : '') + '<div class="p-card"><p class="t-l1"><a href="/admin/billing#guests" class="ab-back" data-ab-back>← All guests</a></p><p class="t-b1">' + esc(S.profileError) + '</p><div class="p-actions"><button type="button" class="p-link" data-ab-profile-reload>Try again</button></div></div>';
     var R = window.SIYL_ADMIN_PROFILE;
     if (!R || typeof R.render !== 'function') return '<div class="p-card"><p class="t-b1">The guest profile view is not loaded on this page.</p></div>';
     var h = (S.overview && S.overview.holders || []).filter(function (x) { return x.Holder_ID === S.route.id; })[0];
-    return R.render(S.profile, { esc: esc, day: day, when: when, registerName: h && h.name ? h.name.full : '' });
+    var back = S.backTo ? '<p class="t-l1 ab-pf-back"><a href="/admin/billing' + esc(S.backTo) + '" class="ab-back" data-ab-backlist="' + esc(S.backTo) + '">← Back to the list</a></p>' : '';
+    return back + R.render(S.profile, { esc: esc, day: day, when: when, registerName: h && h.name ? h.name.full : '' });
   }
   function holderView() {
     if (S.holderPhase === 'loading' || S.holderPhase === 'idle') return '<p class="t-b2 ab-progress" role="status">Reading this guest: the submitted booking and its confirmation, the engine\'s preview, the statement and the payments…</p>';
@@ -1952,12 +2030,13 @@
     var o = S.overview, v = S.route.view;
     /* the page has <base href="/">: an in-page link names the page itself, or "#revenue" would leave for the home page */
     var tab = function (k, label, on) { return '<a href="/admin/billing#' + k + '" data-ab-tab="#' + k + '" class="' + (on ? 'on' : '') + '">' + label + '</a>'; };
-    var tabs = '<nav class="ab-tabs" aria-label="Sections">' + tab('guests', 'Guests', !/^(revenue|rooms|finance)$/.test(v) && !extView(v)) +
+    var OVR = !!window.SIYL_ADMIN_OVERVIEW;
+    var tabs = '<nav class="ab-tabs" aria-label="Sections">' + (OVR ? tab('overview', 'Overview', v === 'overview' || v === 'list') : '') + tab('guests', 'Guests', !/^(revenue|rooms|finance|overview|list)$/.test(v) && !extView(v)) +
       (EXT && EXT.tabs ? EXT.tabs.map(function (t) { return tab(t[0], esc(t[1]), v === t[0]); }).join('') : '') + tab('rooms', 'Rooms &amp; rates', v === 'rooms') +
       tab('finance', 'Finance', v === 'finance') + tab('revenue', 'Revenue', v === 'revenue') +
       '<span class="ab-gate ' + (o.gate && o.gate.approved ? 'on' : 'open') + '">' + (o.gate && o.gate.approved ? 'Issue &amp; Publish enabled' : 'Activation Gate not approved') + '</span>' +
       '<span class="ab-who">Signed in · ' + esc(o.audience === 'BRIDE' ? 'Haruthai' : o.audience === 'GROOM' ? 'Suthep' : '') + '</span></nav>';
-    return tabs + (extView(v) ? EXT.views[v]() : v === 'holder' ? holderView() : v === 'profile' ? profileView() : v === 'revenue' ? revenueView() : v === 'rooms' ? roomsTabView() : v === 'finance' ? financeTabView() : listView());
+    return tabs + (extView(v) ? EXT.views[v]() : v === 'overview' && OVR ? overviewView() : v === 'list' && OVR ? ovListView() : v === 'holder' ? holderView() : v === 'profile' ? profileView() : v === 'revenue' ? revenueView() : v === 'rooms' ? roomsTabView() : v === 'finance' ? financeTabView() : listView());
   }
 
   /* --------------------------------------------------------------- actions */
@@ -2136,6 +2215,8 @@
     var keepMsg = S.msg, keepPay = S.pay && S.pay.msg ? { msg: S.pay.msg } : null, keepSend = S.send, keepIssue = S.issue;
     /* the list's figures for this guest are stale too: read again on the way back */
     S.overviewStale = true;
+    /* the Overview's figures (revenue) stay marked until they are calculated again — never silently current */
+    S.revenueStale = true;
     return loadHolder(id).then(function () {
       S.msg = keepMsg; if (keepPay) S.pay = keepPay;
       if (panel === 'view') { S.panel = 'view'; S.issue = null; }
@@ -2256,8 +2337,59 @@
     on('[data-ab-profile-reload]', 'click', function () { if (S.route.view === 'profile') { loadProfile(S.route.id); draw(); } });
     on('[data-ab-row-pdf]', 'click', function (el, e) { if (e && e.stopPropagation) e.stopPropagation(); download(el.getAttribute('data-ab-row-pdf'), el.getAttribute('data-ab-pdf-sid'), el.getAttribute('data-ab-pdf-rev')); });
     on('[data-ab-row-preview]', 'click', function (el, e) { if (e && e.stopPropagation) e.stopPropagation(); previewPdf(el.getAttribute('data-ab-row-preview'), el.getAttribute('data-ab-pdf-sid')); });
+    /* THE OVERVIEW (HS-034): a figure opens its list, the area bar scrolls, the night switch, the open tables, one Try again */
+    on('[data-ov-go]', 'click', function (el, e) { if (e && e.preventDefault) e.preventDefault(); go(el.getAttribute('data-ov-go')); });
+    on('[data-ov-go]', 'keydown', function (el, e) { if (e && (e.key === 'Enter' || e.key === ' ')) { if (e.preventDefault) e.preventDefault(); go(el.getAttribute('data-ov-go')); } });
+    on('[data-ov-jump]', 'click', function (el, e) { if (e && e.preventDefault) e.preventDefault(); S.ov.jump = el.getAttribute('data-ov-jump'); ovJump(); });
+    on('[data-ov-back]', 'click', function (el) { S.ov.jump = el.getAttribute('data-ov-back'); go('#overview'); });
+    on('[data-ov-night]', 'click', function (el) { S.ov.night = el.getAttribute('data-ov-night'); draw(); });
+    on('[data-ov-det]', 'toggle', function (el) { S.ov.open[el.getAttribute('data-ov-det')] = !!el.open; });
+    on('[data-ov-retry]', 'click', function () { if (S.ov.phase !== 'loading') { S.ov.phase = 'idle'; loadOv(); } });
+    on('[data-ab-backlist]', 'click', function (el, e) { if (e) e.preventDefault(); var to = el.getAttribute('data-ab-backlist'); if (S.overviewStale) { S.overviewStale = false; go(to); start(); } else go(to); });
     if (EXT && EXT.wire) EXT.wire(root, on);
   }
+
+  /* ----------------------------------------------------------- THE GUEST SEARCH (HS-035 · Owners HS-PROMPT-052)
+     One field above the tabs, on every view: name, G-number or invitation id (never a code) from the guest list the console already
+     holds — no request. It lives outside the redrawn area, so a redraw never takes the focus, the text or the open list away. */
+  var GS = { el: null, q: null, list: null, hits: [], at: -1, wired: false };
+  function searchReady() {
+    if (typeof document.getElementById !== 'function') return;
+    GS.el = document.getElementById('ab-gs'); GS.q = document.getElementById('ab-gs-q'); GS.list = document.getElementById('ab-gs-list');
+    if (!GS.el || !GS.q || !GS.list) return;
+    GS.el.hidden = false;
+    if (GS.wired) return;
+    GS.wired = true;
+    GS.q.oninput = function () { searchRun(GS.q.value); };
+    GS.q.onkeydown = function (e) {
+      if (e.key === 'ArrowDown') { e.preventDefault(); searchMove(1); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); searchMove(-1); }
+      else if (e.key === 'Enter') { e.preventDefault(); var h = GS.hits[GS.at >= 0 ? GS.at : 0]; if (h) searchOpen(h.Holder_ID); }
+      else if (e.key === 'Escape') { GS.q.value = ''; searchRun(''); }
+    };
+    GS.list.onclick = function (e) { var t = e.target; while (t && t !== GS.list && !(t.getAttribute && t.getAttribute('data-gs'))) t = t.parentNode; if (t && t !== GS.list) searchOpen(t.getAttribute('data-gs')); };
+  }
+  function searchRun(q) {
+    q = String(q || '').trim().toLowerCase();
+    var H = S.overview ? S.overview.holders : [];
+    GS.hits = q.length < 2 ? [] : H.filter(function (h) {
+      return [h.name && h.name.full, h.name && h.name.nick, h.Holder_ID, h.guestId].some(function (v) { return v && String(v).toLowerCase().indexOf(q) >= 0; });
+    }).slice(0, 8);
+    GS.at = GS.hits.length ? 0 : -1;
+    searchDraw(q);
+  }
+  function searchMove(d) { if (!GS.hits.length) return; GS.at = (GS.at + d + GS.hits.length) % GS.hits.length; searchDraw(String(GS.q.value || '').trim().toLowerCase()); }
+  function searchDraw(q) {
+    GS.list.innerHTML = GS.hits.map(function (h, i) {
+      return '<li role="option" id="ab-gs-o' + i + '" data-gs="' + esc(h.Holder_ID) + '"' + (i === GS.at ? ' aria-selected="true" class="on"' : ' aria-selected="false"') + '><b>' + esc(h.name ? h.name.full : h.Holder_ID) + '</b><span>' + esc((h.guestId ? h.guestId + ' · ' : '') + h.Holder_ID) + '</span></li>';
+    }).join('') + (q.length >= 2 && !GS.hits.length ? '<li class="none" role="option" aria-disabled="true">No guest found</li>' : '');
+    GS.list.hidden = q.length < 2;
+    GS.q.setAttribute('aria-expanded', q.length >= 2 ? 'true' : 'false');
+    if (GS.at >= 0) GS.q.setAttribute('aria-activedescendant', 'ab-gs-o' + GS.at); else GS.q.removeAttribute('aria-activedescendant');
+  }
+  /* signed out, refused or another person: the search and its hits go at once */
+  function searchHide() { GS.hits = []; GS.at = -1; if (GS.list) { GS.list.innerHTML = ''; GS.list.hidden = true; } if (GS.q) GS.q.value = ''; if (GS.el) GS.el.hidden = true; }
+  function searchOpen(id) { if (!id) return; GS.q.value = ''; searchRun(''); go('#profile=' + id); }
 
   /* ----------------------------------------------------------------- boot */
   function boot(el) {
@@ -2270,7 +2402,8 @@
     /* an unsaved seating or room draft is never lost by leaving the page unawares — the browser asks */
     window.addEventListener('beforeunload', function (e) { if (EXT && EXT.unsaved && EXT.unsaved()) { e.preventDefault(); e.returnValue = ''; } });
     /* signed out, or in as someone else, in another tab: everything held is dropped at once */
-    window.addEventListener('storage', function (e) { if (e && e.key === 'siyl.auth') { S = Object.assign(S, { overview: null, status: {}, holder: null, revenue: null, revenuePhase: 'idle' }); start(); } });
+    window.addEventListener('storage', function (e) { if (e && e.key === 'siyl.auth') { S = Object.assign(S, { overview: null, status: {}, holder: null, revenue: null, revenuePhase: 'idle', profile: null,
+      ov: { phase: 'idle', data: null, error: '', night: 'all', open: {}, jump: null } }); ovGen++; searchHide(); start(); } });
     start();
   }
   window.SIYL_ADMIN_BILLING = { boot: boot, state: function () { return S; }, page: page, matches: matches, review: review, ext: EXT,

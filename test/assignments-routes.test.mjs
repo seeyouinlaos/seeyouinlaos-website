@@ -126,3 +126,18 @@ test('THE PUBLIC ROUTES · /api/seating and /api/rooms never forward an Owner he
   assert.ok(seen.length >= 2, 'the requests reached the engines as plain requests: ' + JSON.stringify(seen));
   assert.ok(seen.every((x) => x[2] === null), 'the Owner header never passes'); assert.ok(seen.every((x) => x[3] === null), 'an admin operation is not a GR operation');
 });
+
+test('OVERVIEW (HS-034, Owners HS-PROMPT-052) · admin/assignments is exactly today\'s answer without ?overview=1; with it, the participation — ids and counts, no name — and a guest still gets nothing', async () => {
+  const store = { 'reg:INV-G901': { submissionId: 'S1', version: 1, registration: { guestRecord: { scope: { vientianeWedding: true }, guests: [{ allergy: { answer: 'Yes', details: 'never-shown' } }] }, templeCeremony: { guests: [{ guestId: 'G901', events: { temple: 'Joining', vows: 'Joining', dinner: 'Joining' } }] } } } };
+  const W = await world(store);
+  const plain1 = await hit(W, GROOM, 'admin/assignments');
+  assert.equal(plain1.status, 200); assert.equal('participation' in plain1.j, false, 'Seating and Room assignments keep today\'s answer');
+  const ov = await hit(W, GROOM, 'admin/assignments?overview=1');
+  assert.equal(ov.status, 200); const P = ov.j.participation;
+  assert.equal(P.people.invited, 4); assert.equal(P.people.couple, 2); assert.deepEqual(P.events.temple.yes, ['G048', 'G049', 'G901']);
+  assert.deepEqual(P.care.allergy.yes, ['G901']); assert.equal(P.events.dinner.capacity, 54); assert.equal(P.events.dinner.capacityDecision.id, 'E16');
+  const strip = (j) => { const o = { ...j }; delete o.at; delete o.participation; return JSON.stringify(o); };
+  assert.equal(strip(ov.j), strip(plain1.j), 'everything else is the very same answer');
+  assert.doesNotMatch(JSON.stringify(P), /Ada|Ben|never-shown/, 'no name, no allergy text');
+  assert.equal((await hit(W, GUEST, 'admin/assignments?overview=1')).status, 403);
+});
