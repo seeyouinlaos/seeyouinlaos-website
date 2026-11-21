@@ -27,7 +27,7 @@ function countedKv(c) {
     list: async ({ prefix }) => { c.kvList++; return { keys: [...m.keys()].filter((n) => n.startsWith(prefix || '')).map((name) => ({ name, metadata: m.get(name).meta || null })), list_complete: true }; } };
 }
 
-export async function world(workerPath) {
+export async function world(workerPath, opts) {
   const w = (await import(workerPath || process.env.GR_SCALE_WORKER || '../src/worker.js')).default;   /* GR_SCALE_WORKER: run the same test against another build (the former route, to prove the test catches it) */
   const c = { kvGet: 0, kvPut: 0, kvDelete: 0, kvList: 0, rooms: 0, seating: 0, drafts: 0, named: 0 };
   const entries = {}, people = [];
@@ -38,6 +38,10 @@ export async function world(workerPath) {
     entries[await authIdOf(bearer)] = { i: 'INV-S' + pad(n), g: 'S' + pad(n), p: party, c: 'CONS' + pad(n), k: n % 2 ? 'COUPLS' + pad(n) : 'SIGL', ...(hosts ? { h: 1, r: n === 1 ? 'B' : 'G' } : {}) };
     people.push({ n, bearer, inv: 'INV-S' + pad(n), gid: 'S' + pad(n) });
   }
+  /* HS-035 P1 (the admin guest profile): optionally the groom's own invitation of the billing allowlist, so the BILLING_ADMIN routes
+     can be called — absent unless asked for, so every other test reads the same 120 invitations */
+  let admin = null;
+  if (opts && opts.admin) { const bearer = await bearerOf('scale-admin-groom'); entries[await authIdOf(bearer)] = { i: 'INV-G049', g: 'G049', p: 'INV-P000', c: 'CONG049', k: 'COUPLS000', h: 1, r: 'G' }; admin = { bearer, inv: 'INV-G049', gid: 'G049' }; }
   const index = JSON.stringify({ v: 2, entries });
   const rooms = new Rooms(doState());
   const seating = new Seating({ storage: storageStub(), blockConcurrencyWhile: (fn) => fn() });
@@ -81,7 +85,7 @@ export async function world(workerPath) {
     } else state.draft.push(p.inv);
   }
   const reset = () => { for (const k of Object.keys(c)) c[k] = 0; };
-  return { w, env, c, reset, people, state, entries, done: () => { globalThis.fetch = realFetch; },
+  return { w, env, c, reset, people, state, entries, admin, rooms, seating, call, done: () => { globalThis.fetch = realFetch; },
     journeys: async () => { const r = await gr('/api/gr/journeys'); return { status: r.status, d: await r.json() }; },
     unauthorised: async (token) => (await w.fetch(req('/api/gr/journeys', token ? { 'x-gr-token': token } : {}), env)).status };
 }

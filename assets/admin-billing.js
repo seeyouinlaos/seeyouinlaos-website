@@ -113,6 +113,7 @@
     phase: 'idle', error: '', overview: null, status: {}, checked: 0, checking: false, statusError: '',
     filter: 'all', q: '', route: { view: 'guests', id: null },
     holder: null, holderPhase: 'idle', holderError: '', panel: null,
+    profile: null, profilePhase: 'idle', profileError: '',   /* HS-035 P1 · the admin guest profile (read only) */
     issue: null, send: null, pay: null, confirm: null, msg: '', download: '',
     revenue: null, revenuePhase: 'idle', revenueError: '',
     budgetOpen: {},   /* which stays / routes of the budget comparison are open — kept across a redraw */
@@ -141,6 +142,8 @@
     var h = String(location.hash || '').replace(/^#/, '');
     var m = /^holder=(INV-[A-Z0-9-]+)$/.exec(h);
     if (m) return { view: 'holder', id: m[1] };
+    var pm = /^profile=(INV-[A-Z0-9-]+)$/.exec(h);
+    if (pm) return { view: 'profile', id: pm[1] };
     if (h === 'revenue' || h === 'rooms' || h === 'finance') return { view: h, id: null };
     if (extView(h)) return { view: h, id: null };
     return { view: 'guests', id: null };
@@ -150,7 +153,9 @@
   function onRoute() {
     S.route = readRoute();
     S.panel = null; S.issue = null; S.send = null; S.pay = null; S.confirm = null; S.msg = ''; S.download = ''; S.owner = null; S.ownerMsg = ''; S.obForm = null;
+    S.profile = null; S.profilePhase = 'idle'; S.profileError = '';
     if (S.route.view === 'holder') loadHolder(S.route.id);
+    else if (S.route.view === 'profile') loadProfile(S.route.id);
     else if (/^(revenue|rooms|finance)$/.test(S.route.view) && S.revenuePhase === 'idle') loadRevenue();
     else if (extView(S.route.view) && EXT.enter) EXT.enter(S.route.view);
     draw();
@@ -218,11 +223,23 @@
   function loadHolder(id) {
     S.holder = null; S.holderPhase = 'loading'; S.holderError = '';
     return api('admin/holder?holder=' + encodeURIComponent(id)).then(function (x) {
-      if (S.route.id !== id) return;
+      if (S.route.view !== 'holder' || S.route.id !== id) return;
       if (x.status === 403) { S.phase = 'denied'; draw(); return; }
       if (!x.ok) { S.holderPhase = 'error'; S.holderError = x.j.error || (x.status === 503 ? BUSY_WORDS : 'This guest could not be read.'); draw(); return; }
       S.holder = x.j; S.holderPhase = 'ready'; draw();
-    }).then(function () { if (S.route.id === id) return loadOwner(id); });
+    }).then(function () { if (S.route.view === 'holder' && S.route.id === id) return loadOwner(id); });
+  }
+  /* HS-035 P1 · THE ADMIN GUEST PROFILE (Owners, 21 Nov 2026): one light read of one guest — no Google, no engine price; the
+     financial view stays a click away. A late answer for another guest or another view is dropped; a refusal for the platform's
+     resource limit is said as such and never retried by itself (HS-032). */
+  function loadProfile(id) {
+    S.profile = null; S.profilePhase = 'loading'; S.profileError = '';
+    return api('admin/profile?holder=' + encodeURIComponent(id)).then(function (x) {
+      if (S.route.view !== 'profile' || S.route.id !== id) return;
+      if (x.status === 403) { S.phase = 'denied'; draw(); return; }
+      if (!x.ok || !x.j.profile) { S.profilePhase = 'error'; S.profileError = x.j.error || (x.status === 503 ? BUSY_WORDS : 'This guest\'s profile could not be read.'); draw(); return; }
+      S.profile = x.j.profile; S.profilePhase = 'ready'; draw();
+    });
   }
   /* THE OWNERS' OWN BOOKINGS (15 Nov 2026): what Haruthai & Suthep recorded for this paying invitation */
   function loadOwner(id) {
@@ -452,7 +469,8 @@
       var s = h.settlement || {}, p = h.payment, rv = review(h);
       var out = p ? (p.overdue ? '<span class="ab-chip open">Overdue</span> ' : '') + '<span data-i18n-skip>' + esc(usd(Math.max(0, Number(p.balance) || 0))) + '</span>' : '<span class="ab-mute">—</span>';
       return '<tr data-ab-open="' + esc(h.Holder_ID) + '" tabindex="0">' +
-        '<td data-l="Guest"><span class="ab-name">' + esc(h.name ? h.name.full : '(no 006 name)') + '</span><span class="ab-id">' + esc((h.guestId ? h.guestId + ' · ' : '') + h.Holder_ID) + (h.billingAdmin ? ' · admin' : '') + '</span></td>' +
+        '<td data-l="Guest"><span class="ab-name">' + esc(h.name ? h.name.full : '(no 006 name)') + '</span><span class="ab-id">' + esc((h.guestId ? h.guestId + ' · ' : '') + h.Holder_ID) + (h.billingAdmin ? ' · admin' : '') + '</span>' +
+          '<button type="button" class="p-link ab-pf-open" data-ab-profile="' + esc(h.Holder_ID) + '">Profile</button></td>' +
         '<td data-l="Stays &amp; rooms">' + stayCell(h) + '</td>' +
         '<td data-l="Guest Relations">' + confChip(S.status[h.Holder_ID]) + (stage(h) ? '<br><span class="ab-mute" data-ab-stage="' + stage(h).key + '">' + esc(stage(h).words) + '</span>' : '') + readyWords(h) + '</td>' +
         '<td data-l="Booked value" class="num">' + bookedCell(h) + '</td>' +
@@ -523,6 +541,15 @@
         '<div class="ab-act"><button type="button" class="p-act ab-ghost" data-ab-bed-set="' + esc(r.key + '|' + r.label) + '"' + (S.bedBusy ? ' disabled' : '') + '>Record</button></div></div>';
     }).join('') + (S.bedMsg ? '<p class="t-b2" role="status">' + esc(S.bedMsg) + '</p>' : '') + '</div>';
   }
+  /* HS-035 P1 · the profile drawn by assets/admin-profile.js (absent: said, the console is what it was) */
+  function profileView() {
+    if (S.profilePhase === 'loading' || S.profilePhase === 'idle') return '<p class="t-b2 ab-progress" role="status">Reading this guest\'s profile: contact, trip as sent, rooms, seats, answers and documents…</p>';
+    if (S.profilePhase === 'error') return '<div class="p-card"><p class="t-l1"><a href="/admin/billing#guests" class="ab-back" data-ab-back>← All guests</a></p><p class="t-b1">' + esc(S.profileError) + '</p><div class="p-actions"><button type="button" class="p-link" data-ab-profile-reload>Try again</button></div></div>';
+    var R = window.SIYL_ADMIN_PROFILE;
+    if (!R || typeof R.render !== 'function') return '<div class="p-card"><p class="t-b1">The guest profile view is not loaded on this page.</p></div>';
+    var h = (S.overview && S.overview.holders || []).filter(function (x) { return x.Holder_ID === S.route.id; })[0];
+    return R.render(S.profile, { esc: esc, day: day, when: when, registerName: h && h.name ? h.name.full : '' });
+  }
   function holderView() {
     if (S.holderPhase === 'loading' || S.holderPhase === 'idle') return '<p class="t-b2 ab-progress" role="status">Reading this guest: the submitted booking and its confirmation, the engine\'s preview, the statement and the payments…</p>';
     if (S.holderPhase === 'error') return '<div class="p-card"><p class="t-b1">' + esc(S.holderError) + '</p><div class="p-actions"><button type="button" class="p-link" data-ab-reload>Try again</button></div></div>';
@@ -543,7 +570,8 @@
       act('download', 'Download Original PDF', !!iss, iss ? 'the issued version, exactly as the guest receives it' : 'Not issued yet.') +
       act('send', 'Send statement', !!(iss && g.email), sendWhy) + '</div>' +
       (S.download ? '<p class="t-b2" role="status">' + esc(S.download) + '</p>' : '');
-    var head = '<div class="p-card ab-guest"><p class="t-l1"><a href="/admin/billing#guests" class="ab-back" data-ab-back>← All guests</a></p>' +
+    var head = '<div class="p-card ab-guest"><p class="t-l1"><a href="/admin/billing#guests" class="ab-back" data-ab-back>← All guests</a>' +
+      ' · <a href="/admin/billing#profile=' + encodeURIComponent(H.Holder_ID) + '" class="ab-back" data-ab-profile-link>Guest profile</a></p>' +
       '<h2 class="t-d1 ab-h">' + esc(name) + '</h2>' +
       '<div class="ab-grid2">' +
       kv('Holder', '<span data-i18n-skip>' + esc(H.Holder_ID) + '</span> · ' + esc(g.guestId || '') + (g.hosts ? ' · host' : '')) +
@@ -1929,7 +1957,7 @@
       tab('finance', 'Finance', v === 'finance') + tab('revenue', 'Revenue', v === 'revenue') +
       '<span class="ab-gate ' + (o.gate && o.gate.approved ? 'on' : 'open') + '">' + (o.gate && o.gate.approved ? 'Issue &amp; Publish enabled' : 'Activation Gate not approved') + '</span>' +
       '<span class="ab-who">Signed in · ' + esc(o.audience === 'BRIDE' ? 'Haruthai' : o.audience === 'GROOM' ? 'Suthep' : '') + '</span></nav>';
-    return tabs + (extView(v) ? EXT.views[v]() : v === 'holder' ? holderView() : v === 'revenue' ? revenueView() : v === 'rooms' ? roomsTabView() : v === 'finance' ? financeTabView() : listView());
+    return tabs + (extView(v) ? EXT.views[v]() : v === 'holder' ? holderView() : v === 'profile' ? profileView() : v === 'revenue' ? revenueView() : v === 'rooms' ? roomsTabView() : v === 'finance' ? financeTabView() : listView());
   }
 
   /* --------------------------------------------------------------- actions */
@@ -2134,7 +2162,7 @@
     var q = root.querySelector('[data-ab-q]');
     if (q) q.oninput = function () { S.q = q.value; var pos = q.selectionStart; draw(); var n = root.querySelector('[data-ab-q]'); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} } };
     on('[data-ab-open]', 'click', function (el) { go('#holder=' + el.getAttribute('data-ab-open')); });
-    on('[data-ab-open]', 'keydown', function (el, e) { if (e && e.target && e.target !== el && e.target.tagName === 'BUTTON') return; if (e && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); go('#holder=' + el.getAttribute('data-ab-open')); } });
+    on('[data-ab-open]', 'keydown', function (el, e) { if (e && e.target && e.target !== el && (e.target.tagName === 'BUTTON' || (e.target.getAttribute && e.target.getAttribute('data-ab-profile') != null))) return; if (e && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); go('#holder=' + el.getAttribute('data-ab-open')); } });
     on('[data-ab-back]', 'click', function (el, e) { if (e) e.preventDefault(); if (S.overviewStale) { S.overviewStale = false; go('#guests'); start(); } else go('#guests'); });
     on('[data-ab-tab]', 'click', function (el, e) { if (e) e.preventDefault(); go(el.getAttribute('data-ab-tab')); });
     on('[data-ab-reload]', 'click', function () { if (S.route.id) loadHolder(S.route.id); draw(); });
@@ -2223,6 +2251,9 @@
     on('[data-ab-pay-cancel]', 'click', function () { S.pay = null; draw(); });
     /* the original PDF of a version (holder view) and of the current version (a guest's row — the row itself is not opened) */
     on('[data-ab-pdf]', 'click', function (el) { download(S.holder && S.holder.Holder_ID, el.getAttribute('data-ab-pdf-sid'), el.getAttribute('data-ab-pdf')); });
+    /* HS-035 P1: the profile of the row's guest — its own button, never the row's click (which opens the financial view) */
+    on('[data-ab-profile]', 'click', function (el, e) { if (e && e.stopPropagation) e.stopPropagation(); if (e && e.preventDefault) e.preventDefault(); go('#profile=' + el.getAttribute('data-ab-profile')); });
+    on('[data-ab-profile-reload]', 'click', function () { if (S.route.view === 'profile') { loadProfile(S.route.id); draw(); } });
     on('[data-ab-row-pdf]', 'click', function (el, e) { if (e && e.stopPropagation) e.stopPropagation(); download(el.getAttribute('data-ab-row-pdf'), el.getAttribute('data-ab-pdf-sid'), el.getAttribute('data-ab-pdf-rev')); });
     on('[data-ab-row-preview]', 'click', function (el, e) { if (e && e.stopPropagation) e.stopPropagation(); previewPdf(el.getAttribute('data-ab-row-preview'), el.getAttribute('data-ab-pdf-sid')); });
     if (EXT && EXT.wire) EXT.wire(root, on);

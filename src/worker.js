@@ -67,6 +67,7 @@ import { canonicalKey, canonicalLines, lineAs, viewAs } from './legacy-keys.js';
 import { stageOf, dedicatedStages } from './rooms.js';
 import { WEDDING_PEOPLE } from './seating.js';
 import { composeGuestMail, composeOwnerMail } from './mail-templates.js';
+import { profileModel } from './admin-profile.js';   /* HS-035 P1 · the admin guest profile, read only (Owners, 21 Nov 2026) */
 import { completion as graphCompletion, normalizeScope as graphScope, isRelevant as graphRelevant, STAGES as GRAPH_STAGES, STAGE_IDS as GRAPH_IDS, participationOf as graphParticipation, partyNeed as graphPartyNeed, travelsIn as graphTravels } from './stage-graph.js';
 import { profileMissing as questionnaireMissing, finaleOf, PHOTO_LABEL, GENRES } from './questionnaire.js';   /* the one questionnaire: what About You and the wedding night require (Owner, 22 Sep 2026) */
 
@@ -610,26 +611,32 @@ const DOC_KEY = /^doc\/(INV-[A-Za-z0-9_-]{1,32})\/([A-Za-z0-9_-]{1,32})\/(passpo
 async function handleGrDocuments(url, env) {
   const inv = String(url.searchParams.get('invitation') || '').trim();
   if (!/^INV-[A-Za-z0-9_-]{1,32}$/.test(inv)) return json({ ok: false, error: 'invitation required' }, 400);
+  let documents;
+  try { documents = await documentsOf(env, inv, url.searchParams.get('all') === '1'); }
+  catch (e) { return json({ ok: false, error: 'document store unavailable' }, 503); }
+  return json({ ok: true, invitationId: inv, count: documents.length, documents }, 200, { 'cache-control': 'private, no-store' });
+}
+/* one invitation's stored documents (metadata only, never the bytes) — the current copy of each guest and kind unless `all`;
+   a store that cannot be read throws. Guest Relations' listing and the admin guest profile (HS-035) read through this one rule. */
+async function documentsOf(env, inv, all) {
   const documents = []; let cursor;
-  try {
-    do {
-      const l = await env.DOCS.list({ prefix: 'doc/' + inv + '/', cursor, include: ['httpMetadata', 'customMetadata'] });
-      for (const o of l.objects || []) {
-        const cm = o.customMetadata || {}, hm = o.httpMetadata || {};
-        documents.push({ key: o.key, guestId: cm.guestId || o.key.split('/')[2] || '', kind: cm.kind || o.key.split('/')[3] || '', filename: cm.filename || '', type: hm.contentType || '', bytes: o.size, receivedAt: cm.receivedAt || (o.uploaded ? new Date(o.uploaded).toISOString() : ''), sha256: cm.sha256 || '' });
-      }
-      cursor = l.truncated ? l.cursor : null;
-    } while (cursor);
-  } catch (e) { return json({ ok: false, error: 'document store unavailable' }, 503); }
+  do {
+    const l = await env.DOCS.list({ prefix: 'doc/' + inv + '/', cursor, include: ['httpMetadata', 'customMetadata'] });
+    for (const o of l.objects || []) {
+      const cm = o.customMetadata || {}, hm = o.httpMetadata || {};
+      documents.push({ key: o.key, guestId: cm.guestId || o.key.split('/')[2] || '', kind: cm.kind || o.key.split('/')[3] || '', filename: cm.filename || '', type: hm.contentType || '', bytes: o.size, receivedAt: cm.receivedAt || (o.uploaded ? new Date(o.uploaded).toISOString() : ''), sha256: cm.sha256 || '' });
+    }
+    cursor = l.truncated ? l.cursor : null;
+  } while (cursor);
   /* newest first — the receipt time, then the key (the same order the current-copy rule uses), so the copy listed as current is
      always the one Guest Relations can open, equal timestamps included */
   documents.sort((a, b) => (a.receivedAt < b.receivedAt ? 1 : a.receivedAt > b.receivedAt ? -1 : a.key < b.key ? 1 : a.key > b.key ? -1 : 0));
   /* only the newest object of each guest and kind is the guest's document; an earlier copy a replacement superseded is never
      shown (PRQ-06-12) — ?all=1 lists every stored object for an audit */
-  if (url.searchParams.get('all') !== '1') { const seen = new Set();   /* the list is newest first: the first of each guest and kind is kept */
+  if (!all) { const seen = new Set();   /* the list is newest first: the first of each guest and kind is kept */
     const kept = documents.filter((d) => { const k = d.guestId + '/' + d.kind; if (seen.has(k)) return false; seen.add(k); return true; });
     documents.length = 0; kept.forEach((d) => documents.push(d)); }
-  return json({ ok: true, invitationId: inv, count: documents.length, documents }, 200, { 'cache-control': 'private, no-store' });
+  return documents;
 }
 /* one object, streamed through the Worker: the exact key only (its shape is pinned — no prefix, no wildcard, no listing) */
 async function handleGrDocument(url, env) {
@@ -779,6 +786,12 @@ const draftKey = (invitationId) => 'draft:' + invitationId;
 function draftActor(env, invitationId) { return env.DRAFTS ? env.DRAFTS.get(env.DRAFTS.idFromName(invitationId)) : null; }
 async function draftOp(env, invitationId, op, body) { const stub = draftActor(env, invitationId); const r = await stub.fetch(new Request('https://drafts/' + op, { method: 'POST', body: JSON.stringify({ invitationId, ...(body || {}) }) })); return { status: r.status, ...(await r.json()) }; }
 /* strict: a failed read is thrown (the draft endpoint answers 503 instead of pretending an empty draft); otherwise null */
+/* HS-035 P1 · the draft for the admin guest profile: the actor's `peek` (never a seed write); a failed read is thrown */
+async function peekedDraft(env, invitationId) {
+  if (env.DRAFTS) { const r = await draftOp(env, invitationId, 'peek'); if (!r.ok) throw new Error(r.error || 'draft could not be read'); return r.draft || null; }
+  if (!env.REG_KV) return null;
+  return JSON.parse(await env.REG_KV.get(draftKey(invitationId)) || 'null');
+}
 async function storedDraft(env, invitationId, strict) {
   if (env.DRAFTS) { try { const r = await draftOp(env, invitationId, 'get'); if (!r.ok) throw new Error(r.error || 'draft could not be read'); return r.draft || null; } catch (e) { if (strict) throw e; return null; } }
   if (!env.REG_KV) return null; try { return JSON.parse(await env.REG_KV.get(draftKey(invitationId)) || 'null'); } catch (e) { return null; }
@@ -1441,6 +1454,45 @@ async function handleGrJourneys(request, env) {
   } catch (e) { answers = null; }
   return json({ ok: true, at: new Date().toISOString(), acknowledgements: acknowledgementSummary(entries, out), answers, journeys: out });
 }
+/* HS-035 P1 · THE ADMIN GUEST PROFILE (Owners, 21 Nov 2026): ONE invitation, read only, for the BILLING_ADMINs (served by
+   src/billing-routes.js · admin/profile). Every read is by key, for this one invitation — no listing of the store, no Google, no
+   price calculation:
+     · reg: · conf: · contact: — each read on its own, so a failed read is said as "could not be read", never as "not sent";
+     · the draft from its own actor through `peek` — strictly (a failed read is never an empty draft) and without the seed
+       write an ordinary first read makes (the KV mirror is read, never copied in);
+     · the two engines through Guest Relations' own reads (rooms gr-mine · the seating plan), never with a guest identity — an
+       identity would teach the engines a first name and could trim a party's placeholders;
+     · the comparison with the sent trip through submissionFor WITH `pre` — the one branch that never keeps a fingerprint.
+   The answer is shaped by src/admin-profile.js from an allowlist: no amount, no code, no mail data, no document file name. */
+async function profileOf(env, origin, e, entries) {
+  const inv = e.i;
+  const who = { invitationId: inv, guestId: e.g, partyId: e.p || null, hosts: e.h === 1, contactId: e.c || null, couple: e.k || null };
+  /* a value that is stored but cannot be parsed is a failed read too — never "not sent" or "none" */
+  const one = async (key) => { if (!env.REG_KV) return { ok: false, v: null }; try { const raw = await env.REG_KV.get(key); if (raw == null) return { ok: true, v: null }; const v = parsed(raw); return v == null ? { ok: false, v: null } : { ok: true, v }; } catch (x) { return { ok: false, v: null }; } };
+  const invOfGuest = {}; for (const x of Object.values(entries || {})) if (x && x.g && x.i) invOfGuest[x.g] = x.i;
+  const [reg, conf, contact, draft, roomsAll, seatPlan, docs] = await Promise.all([
+    one('reg:' + inv), one('conf:' + inv), one(contactKey(inv)),
+    peekedDraft(env, inv).then((d) => ({ ok: true, d }), () => ({ ok: false, d: null })),
+    grEngine(env, 'ROOMS', 'rooms', '/api/rooms/gr-mine'),
+    grEngine(env, 'SEATING', 'seating', '/api/seating/plan'),
+    env.DOCS ? documentsOf(env, inv, false).catch(() => null) : Promise.resolve(null),
+  ]);
+  const record = reg.v && typeof reg.v === 'object' ? reg.v : null;
+  const rooms = roomsAll ? roomsViewOf({ ok: true, ...((roomsAll.byGuest || {})[who.guestId] || { mine: {}, waitlist: {} }) }) : null;
+  const seats = seatPlan ? (seatsByInvitation(seatPlan, invOfGuest)[inv] || { ceremony: {}, dinner: {} }) : null;
+  /* unsent changes only when every part of the comparison could be read — otherwise "could not be checked" */
+  let unsent = null;
+  if (record && conf.ok && draft.ok && rooms && seats) {
+    try { unsent = !!(await submissionFor(env, who, draft.d, { record, conf: conf.v, rooms, seats })).hasUnsentChanges; } catch (x) { unsent = null; }
+  }
+  const content = draft.ok ? draftContent(draft.d && draft.d.keys) : {}, g = content['siyl.guest'] || {};
+  const own = g.guests && typeof g.guests === 'object' ? (g.guests[who.guestId] || null) : null;
+  const model = profileModel({ who, record, conf: conf.v, stands: confirmationStands(conf.v, record), contact: contact.v ? publicContact(contact.v) : null,
+    draft: { ok: draft.ok, updatedAt: draft.d ? draft.d.updatedAt : null, guest: own }, rooms, seats, unsent, docs,
+    acks: draft.ok ? { note: noteAckOf(draft.d), rules: rulesAckOf(draft.d) } : null });
+  model.readable = { record: reg.ok, confirmation: conf.ok, contact: contact.ok };
+  return model;
+}
 /* the guest's two acknowledgements, each on its own — read from the guest's own draft record (never the trip content) */
 function rawGuest(keys) {
   if (!keys || typeof keys !== 'object') return null;
@@ -1589,7 +1641,9 @@ const MAIL_FROM_NAME = 'See You In Laos — Guest Relations';
 const BILLING_DEPS = Object.freeze({ sendMail: (...a) => sendMail(...a),
   /* the Owners' seating and room assignments (admin console, 18 Nov 2026): the Wedding Circle reads the seats again after a write;
      no write while the clean reset sweeps the engines */
-  cohortStale: (env) => { if (env && env.REG_KV) cohortStale(env); }, resetLocked: (env) => resetLocked(env) });
+  cohortStale: (env) => { if (env && env.REG_KV) cohortStale(env); }, resetLocked: (env) => resetLocked(env),
+  /* HS-035 P1 · the admin guest profile (Owners, 21 Nov 2026): one invitation, read only — served by admin/profile */
+  profileOf: (env, origin, entry, entries) => profileOf(env, origin, entry, entries) });
 /* the email provider — the API key is a Worker secret, never in the repository:
  *   BREVO_API_KEY   → https://api.brevo.com/v3/smtp/email (sender = MAIL_FROM, a sender validated in Brevo)
  *   RESEND_API_KEY  → https://api.resend.com/emails       (sender = MAIL_FROM, a domain verified in Resend)

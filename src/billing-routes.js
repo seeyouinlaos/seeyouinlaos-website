@@ -1890,6 +1890,27 @@ async function adminPreviewPdf(env, identity, url, cors) {
     'content-disposition': 'inline; filename="Statement-' + snapshot.Settlement_ID + '-V' + revision + '-PREVIEW.pdf"' } });
 }
 
+/**
+ * GET admin/profile?holder=INV — HS-035 P1 · THE ADMIN GUEST PROFILE (Owners, 21 Nov 2026 · E31–E37): one guest's information
+ * for Haruthai and Suthep, without signing in as the guest. READ ONLY and LIGHT: no Google, no Billing Engine, no ledger — the
+ * money stays in admin/holder, opened from the profile on purpose. The invitation must be exactly one person of the served
+ * register; the reads (src/worker.js · profileOf) touch this one invitation only, and the answer is an allowlist
+ * (src/admin-profile.js): no amount, no code, no mail data, no document file name. Nothing is written.
+ */
+async function adminProfile(env, url, cors, deps) {
+  const holderId = clean(url.searchParams.get('holder'));
+  if (!INVITATION_RE.test(holderId)) return jsonRes({ ok: false, error: 'holder required' }, 400, cors);
+  if (!deps || typeof deps.profileOf !== 'function') return jsonRes({ ok: false, error: 'the guest profile is not available here' }, 503, cors);
+  const entries = await loadIndex(env, url.origin, false);
+  const all = Object.values(entries || {}).filter((e) => e && clean(e.i) === holderId);
+  const row = holdersOfIndex(entries).find((h) => h.Holder_ID === holderId);
+  if (!row || row.ambiguous || !row.guestId || !all.length) return jsonRes({ ok: false, error: holderId + ' is not one invitation of the register' }, 404, cors);
+  /* the raw index entry (it carries the couple flag and the role the holder row leaves out) */
+  const entry = all.find((e) => clean(e.g) === row.guestId) || all[0];
+  const profile = await deps.profileOf(env, url.origin, entry, entries);
+  return jsonRes({ ok: true, holderId, at: new Date().toISOString(), profile }, 200, cors);
+}
+
 /** GET admin/holder?holder=INV — one guest in full: identity, preview, the issued statement, payments, e-mail log. */
 async function adminHolder(env, identity, url, cors) {
   const holderId = clean(url.searchParams.get('holder'));
@@ -2911,6 +2932,7 @@ export async function handleBilling(request, env, url, cors, deps) {
       case 'admin/status': return await adminStatus(env, identity, url, cors);
       case 'admin/readiness': return await adminReadiness(env, identity, url, cors);
       case 'admin/holder': return await adminHolder(env, identity, url, cors);
+      case 'admin/profile': return await adminProfile(env, url, cors, deps);
       case 'admin/preview-pdf': return await adminPreviewPdf(env, identity, url, cors);
       case 'admin/send':
         return request.method === 'POST' ? await adminSendPost(env, identity, request, url, cors, deps) : await adminSendGet(env, identity, url, cors);
