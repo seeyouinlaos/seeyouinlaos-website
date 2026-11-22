@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="sp" viewBox="95 186 900 884" width="900" height="884" role="img" aria-labelledby="sp-title sp-desc">
+<title id="sp-title">Souphattra Heritage Vientiane · site plan</title>
+<desc id="sp-desc">Schematic site plan, not to scale, drawn from the hotel's official plan: Building A with the Lobby, Building B, Building C, Building D, Building E, Building F with the Peacock Bistro, Peacock Court, the pool, and the walkways between them.</desc>
+<style>
+.sp .sp-ground{fill:#F7F3EC}
+.sp .sp-site{fill:#FBF8F2;stroke:#B9B2A6;stroke-width:1.5}
+.sp .sp-fence{fill:none;stroke:#C9C2B5;stroke-width:1.5;stroke-dasharray:6 6}
+.sp .sp-walk{fill:none;stroke:#E2DACB;stroke-width:12;stroke-linecap:round;stroke-linejoin:round}
+.sp .sp-bldg{fill:#E9E2D6;stroke:#8B8478;stroke-width:1.6}
+.sp .sp-open{fill:#F1ECE2;stroke:#C9C2B5;stroke-width:1.2}
+.sp .sp-court{fill:#EFE9DE;stroke:#8B8478;stroke-width:1.4}
+.sp .sp-water{fill:#CFDCD8;stroke:#8FA6A1;stroke-width:1.4}
+.sp .sp-cap{font-family:'Hanken Grotesk','Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;letter-spacing:3px;fill:#6B6964}
+.sp .sp-name{font-family:'PP Editorial Old',Georgia,'Times New Roman',serif;font-size:24px;fill:#313131}
+.sp .sp-name.sm{font-size:21px}
+</style>
+<rect class="sp-ground" x="95" y="186" width="900" height="884"/>
+<path class="sp-site" d="M115 230 L926 314 L936 935 L508 988 L491 1008 L115 1010 Z"/>
+<path class="sp-fence" d="M376 258 V1008"/>
+<path class="sp-walk" d="M419 376 V798 M376 479 H458 M419 564 H719 M709 564 V676 M376 798 H650"/>
+<rect class="sp-bldg" x="157" y="254" width="209" height="263"/>
+<rect class="sp-water" x="194" y="553" width="144" height="24"/>
+<rect class="sp-open" x="182" y="611" width="159" height="122"/>
+<rect class="sp-bldg" x="160" y="733" width="198" height="200"/>
+<rect class="sp-court" x="458" y="451" width="47" height="66"/>
+<path class="sp-open" d="M441 573 H684 V779 H650 V648 H441 Z"/>
+<rect class="sp-water" x="441" y="648" width="209" height="122"/>
+<rect class="sp-bldg" x="433" y="296" width="234" height="80"/>
+<rect class="sp-bldg" x="734" y="352" width="159" height="259"/>
+<rect class="sp-bldg" x="712" y="682" width="168" height="225"/>
+<rect class="sp-bldg" x="399" y="839" width="243" height="100"/>
+<text class="sp-cap" x="262" y="222" text-anchor="middle">BUILDING A</text>
+<text class="sp-name" x="262" y="394" text-anchor="middle">Lobby</text>
+<text class="sp-name" x="259" y="822" text-anchor="middle">Peacock</text>
+<text class="sp-name" x="259" y="850" text-anchor="middle">Bistro</text>
+<text class="sp-cap" x="160" y="1046" text-anchor="start">BUILDING F</text>
+<text class="sp-name sm" x="516" y="481" text-anchor="start">Peacock</text>
+<text class="sp-name sm" x="516" y="506" text-anchor="start">Court</text>
+<text class="sp-name" x="545" y="717" text-anchor="middle">Pool</text>
+<text class="sp-cap" x="550" y="262" text-anchor="middle">BUILDING B</text>
+<text class="sp-cap" x="813" y="338" text-anchor="middle">BUILDING C</text>
+<text class="sp-cap" x="796" y="988" text-anchor="middle">BUILDING D</text>
+<text class="sp-cap" x="520" y="1040" text-anchor="middle">BUILDING E</text>
+</svg>

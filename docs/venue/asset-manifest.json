@@ -940,5 +940,11 @@
    "surface": "venue · Wedding Dinner · Poolside",
    "inspected": true
   }
- ]
+ ],
+ "plan": {
+  "file": "assets/images/venue/souphattra-site-plan.svg",
+  "since": "2026-11-22",
+  "what": "An architectural site plan (vector drawing) drawn from the hotel's official plan (the plan image of the Souphattra Heritage room sheet); building and area names only — no room numbers, no allocations, no event positions until confirmed. It replaces THE BASE aerial on the page; the rule above stays the rule for every photograph.",
+  "order": "Owners, 22 Nov 2026 · HS-058"
+ }
 }

@@ -1,5 +1,5 @@
 /* ============================================================================
-   THE VENUE STAGE — photo first, an architectural information layer over it.
+   THE VENUE — the site plan (Owners, 22 Nov 2026 · HS-058), the list of places, their photographs.
    Palette: the site's ivory / stone / ink; fine lines, no pins, no callouts.
    Motion tokens from assets/motion.css. 390 px composes first; desktop adapts.
    ========================================================================== */
@@ -10,52 +10,37 @@
 .venue-head h2 { font-family: 'PP Editorial Old', Georgia, serif; font-weight: 200; font-size: 27px; line-height: 1.28; letter-spacing: .3px; margin: 0 0 14px; }
 .venue-lede { font-size: 13.5px; line-height: 1.9; color: #4A4A4A; max-width: 30em; margin: 0; }
 
-/* ---- the stage: the photograph, then the layer ---- */
-.venue-stage { position: relative; margin: 0; }
-.venue-picture { display: block; background: #E7E3DB; overflow: hidden; }
-.venue-picture, .venue-img { width: 100%; height: auto; }
-.venue-img { display: block; }
-.venue-img { aspect-ratio: 1152 / 1440; object-fit: cover; }
-@media (min-width: 768px) { .venue-img { aspect-ratio: 2560 / 1440; } }
-/* the entrance: the photograph settles (scale 1.035 → 1) while the traces draw and the labels arrive */
-.venue-stage .venue-img { opacity: 0; transform: scale(1.035); transition: opacity var(--m-photo) var(--m-ease), transform 1300ms var(--m-ease); }
-.venue-stage.is-in .venue-img { opacity: 1; transform: none; }
-.venue-layer { position: absolute; inset: 0 0 auto; aspect-ratio: 1152 / 1440; overflow: hidden; }
-@media (min-width: 768px) { .venue-layer { aspect-ratio: 2560 / 1440; } }
-.venue-trace { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
-/* the veil: a soft ivory wash on everything but the active area (mask) */
-.venue-veil { fill: #14120E; opacity: 0; transition: opacity var(--m-reveal) var(--m-ease); }
-.venue-stage[data-active]:not([data-active=""]) .venue-veil { opacity: .34; }
-.venue-hole { opacity: 0; transition: opacity var(--m-reveal) var(--m-ease); }
-.venue-hole.is-active { opacity: 1; }   /* the active place's areas (all of them: the rooms are three houses) cut the veil */
-/* the outline: a fine perimeter that draws itself once the stage is in view */
-.venue-outline { fill: none; stroke: #F6F1E9; stroke-width: 1.1px; opacity: .55; stroke-dasharray: 100; stroke-dashoffset: 100; transition: stroke-dashoffset var(--m-trace) var(--m-ease-in-out) 350ms, opacity var(--m-reveal) var(--m-ease); }
-.venue-stage.is-in .venue-outline { stroke-dashoffset: 0; }
-.venue-tick { fill: none; stroke: #F6F1E9; stroke-width: 1.4px; opacity: 0; transition: opacity var(--m-reveal) var(--m-ease) 900ms; }
-.venue-stage.is-in .venue-tick { opacity: .9; }
-.venue-zone.is-active .venue-outline { opacity: .95; stroke-width: 1.5px; }
-.venue-stage[data-active]:not([data-active=""]) .venue-zone:not(.is-active) .venue-outline { opacity: .3; }
-
-/* ---- the labels: on the real place, semantic, 44 px targets ---- */
-.venue-labels { position: absolute; inset: 0; }
-.venue-label {
-  position: absolute; left: var(--x); top: var(--y); transform: translate(-50%, -50%);   /* the dot on the anchor, the text centred */
-  display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 8px 12px 8px 8px; margin: 0;
-  background: none; border: 0; cursor: pointer; color: #F6F1E9; text-align: left; white-space: nowrap;
-  font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; line-height: 1.2;
-  text-shadow: 0 1px 2px rgba(20,18,14,.55), 0 0 18px rgba(20,18,14,.35);
-  opacity: 0; transition: opacity var(--m-reveal) var(--m-ease) calc(1100ms + var(--m-i, 0) * 140ms), transform var(--m-reveal) var(--m-ease) calc(1100ms + var(--m-i, 0) * 140ms);
-  -webkit-tap-highlight-color: transparent;
+/* ---- the plan: the drawing, whole on a wide screen; on a phone at a readable size, swiped across, or enlarged ---- */
+.venue-stage { position: relative; margin: 0; min-width: 0; max-width: 100%; }   /* a grid item never grows with the drawing */
+.venue-grid > * { min-width: 0; }
+.venue-plan-frame { display: block; background: #F7F3EC; border: 1px solid #E4DED3; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; opacity: 0; transition: opacity var(--m-photo) var(--m-ease); }
+.venue-stage.is-in .venue-plan-frame { opacity: 1; }
+.venue-plan-img, .venue-plan-svg { display: block; width: 100%; height: auto; }
+.venue-plan-frame:focus-visible { outline: 2px solid #313131; outline-offset: 2px; }
+.venue-cap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 16px; padding: 10px 0 0; font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--a-mute); }
+.venue-zoom-open { min-height: 44px; padding: 0; background: none; border: 0; border-bottom: 1px solid #313131; font: inherit; letter-spacing: 2px; text-transform: uppercase; color: #313131; cursor: pointer; }
+.venue-zoom-open:focus-visible { outline: 2px solid #313131; outline-offset: 2px; }
+.venue-swipe { display: none; }
+@media (max-width: 767px) {
+  .venue-swipe { display: inline; }
+  .venue-plan-frame .venue-plan-img, .venue-plan-frame .venue-plan-svg { width: 720px; max-width: none; }   /* labels at a reading size; the frame scrolls across */
 }
-.venue-label[data-align="left"] { transform: translate(-13px, -50%); }    /* the dot on the anchor, the text hanging to the right (the phone crop's left edge) */
-.venue-label[data-align="right"] { transform: translate(calc(-100% + 13px), -50%); flex-direction: row-reverse; padding: 8px 8px 8px 12px; }
-.venue-stage.is-in .venue-label { opacity: 1; }
-.venue-stage[data-active]:not([data-active=""]) .venue-label:not(.is-active) { opacity: .62; }
-.venue-label .venue-dot { width: 10px; height: 10px; border-radius: 50%; border: 1.2px solid #F6F1E9; background: rgba(246,241,233,.08); box-shadow: 0 0 0 4px rgba(246,241,233,.12); flex: none; transition: background var(--m-fast) var(--m-ease), box-shadow var(--m-fast) var(--m-ease); }
-.venue-label:hover .venue-dot, .venue-label.is-active .venue-dot { background: #F6F1E9; box-shadow: 0 0 0 5px rgba(246,241,233,.22); }
-.venue-label .venue-n { opacity: .72; font-size: 9px; letter-spacing: 1.6px; }
-.venue-label:focus-visible { outline: 2px solid #F6F1E9; outline-offset: 2px; border-radius: 2px; }
-.venue-cap { padding: 10px 0 0; font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--a-mute); }
+@media (min-width: 768px) {
+  .venue-plan { max-width: 860px; }
+}
+/* the plan enlarged: over the page, the drawing wider than the screen, panned and pinched natively */
+html.venue-zoom-on { overflow: hidden; }
+.venue-zoom { position: fixed; inset: 0; z-index: 1000; display: flex; flex-direction: column; background: #F3EEE7; }
+.venue-zoom-bar { display: flex; align-items: center; gap: 8px; padding: 8px 16px; padding-top: max(8px, env(safe-area-inset-top, 0px)); border-bottom: 1px solid #DAD9D7; background: #F3EEE7; }
+.venue-zoom-t { flex: 1; margin: 0; font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--a-mute); }
+.venue-zoom-b { min-width: 44px; min-height: 44px; padding: 0 10px; border: 1px solid #C9C4BA; background: none; font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 18px; line-height: 1; color: #313131; cursor: pointer; }
+.venue-zoom-b[aria-disabled="true"] { opacity: .35; cursor: default; }
+.venue-zoom-x { font-size: 10.5px; letter-spacing: 2px; text-transform: uppercase; padding: 0 14px; }
+.venue-zoom-b:focus-visible, .venue-zoom-area:focus-visible { outline: 2px solid #313131; outline-offset: 2px; }
+.venue-zoom-area { flex: 1; overflow: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; touch-action: pan-x pan-y pinch-zoom; padding-bottom: env(safe-area-inset-bottom, 0px); }
+.venue-zoom-canvas { margin: 0 auto; padding: 16px; box-sizing: border-box; }
+.venue-zoom-canvas .venue-plan-frame { opacity: 1; border: 0; overflow: visible; }
+.venue-zoom-canvas .venue-plan-img, .venue-zoom-canvas .venue-plan-svg { width: 100%; max-width: none; }
 
 /* ---- the legend + the detail ---- */
 .venue-grid { display: grid; grid-template-columns: 1fr; gap: 30px; }
@@ -109,11 +94,10 @@
   .a-sec.venue + .a-sec { margin-top: 56px; }
   .a-sec:has(+ .a-sec.venue) { margin-bottom: 56px; }
 }
-/* ---- tablet and desktop: the photograph keeps the full frame, the legend and the detail sit beside it ---- */
+/* ---- tablet and desktop: the plan whole, the legend and the detail beside each other below it ---- */
 @media (min-width: 768px) {
   .venue-head { margin-bottom: 34px; }
   .venue-head h2 { font-size: 34px; }
-  .venue-label { font-size: 10.5px; }
 }
 @media (min-width: 900px) {
   .venue-grid { gap: 40px; }
@@ -122,17 +106,11 @@
   .venue-title { font-size: 28px; }
   .venue-item { min-height: 52px; padding: 12px 0; }
   .venue-item .venue-t { font-size: 20px; }
-  .venue-label { font-size: 11px; letter-spacing: 2.2px; }
 }
 @media (min-width: 1280px) {
   .venue-side { gap: 72px; }
-  .venue-label { font-size: 11.5px; letter-spacing: 2.4px; }
-  .venue-label .venue-dot { width: 11px; height: 11px; }
 }
 /* the details are content, never a scroll-jack: with reduced motion everything is simply there */
-.m-reduced .venue-stage .venue-img, .m-reduced .venue-outline, .m-reduced .venue-tick, .m-reduced .venue-label, .m-reduced .venue-veil, .m-reduced .venue-hole, .m-reduced .venue-photo-img, .m-reduced .venue-detail-in, .m-reduced .venue-thumb, .m-reduced .venue-item { transition: none !important; }
-.m-reduced .venue-stage .venue-img { opacity: 1; transform: none; }
-.m-reduced .venue-outline { stroke-dashoffset: 0; }
-.m-reduced .venue-tick { opacity: .9; }
-.m-reduced .venue-label { opacity: 1; }
+.m-reduced .venue-plan-frame, .m-reduced .venue-photo-img, .m-reduced .venue-detail-in, .m-reduced .venue-thumb, .m-reduced .venue-item { transition: none !important; }
+.m-reduced .venue-plan-frame { opacity: 1; }
 .m-reduced .venue-photo-img { opacity: 1; transform: none; }
