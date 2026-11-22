@@ -61,14 +61,19 @@
   }
   var planSvg = null;
   /* one read of the drawing (the same file the image shows); a drawing that cannot be read keeps the image — never a blank frame */
+  /* ONE REQUEST FOR THE DRAWING (HS-058 release): My Profile draws its sections several times while its data arrives — every
+     wiring shares the one request in flight instead of starting its own; a failed request may be tried again by the next one */
+  var planLoading = null;
   function loadPlan(plan) {
     if (planSvg) return Promise.resolve(planSvg);
     if (!root.fetch) return Promise.resolve(null);
-    return root.fetch(plan.src).then(function (r) { return r.ok ? r.text() : null; }).then(function (t) {
+    if (planLoading) return planLoading;
+    planLoading = root.fetch(plan.src).then(function (r) { return r.ok ? r.text() : null; }).then(function (t) {
       /* a guard on our own static drawing (same origin, attested with the release) — not a general sanitizer: anything active refuses the inline copy */
       if (!t || t.indexOf('<svg') < 0 || /<script|[\s\/"']on[a-z]+\s*=|<foreignObject|<a[\s>]|<animate|<set[\s>]|href\s*=|url\(|@import|javascript:/i.test(t)) return null;
       planSvg = t.slice(t.indexOf('<svg')); return planSvg;
-    }, function () { return null; });
+    }, function () { return null; }).then(function (svg) { planLoading = null; return svg; });
+    return planLoading;
   }
   function fillPlan(box, svg) {
     if (!box || !svg) return;

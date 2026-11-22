@@ -67,8 +67,8 @@
   /* the set menu, drawn from the record (HS-058) — the courses in the order they are served; text only, no photograph */
   WD.menuHtml = function () {
     var m = WD.menu; if (!m) return '';
-    return '<p class="a-eyebrow" style="margin-top:14px">' + esc(m.title) + '</p><ol class="wd-courses" style="margin:10px 0 0;padding-left:1.25em;line-height:1.65">' +
-      m.courses.map(function (c) { return '<li><strong>' + esc(c.name) + '</strong>' + (c.detail ? ' · ' + esc(c.detail) : '') + (c.items ? '<br>' + c.items.map(esc).join(' · ') : '') + '</li>'; }).join('') +
+    return '<p class="a-eyebrow" style="margin-top:14px">' + esc(m.title) + '</p><ol class="wd-courses" style="margin:10px 0 0;padding:0;list-style:none;line-height:1.65">' +
+      m.courses.map(function (c, i) { return '<li' + (i ? ' style="margin-top:8px"' : '') + '><strong>' + esc(c.name) + '</strong>' + (c.detail ? ' · ' + esc(c.detail) : '') + (c.items ? '<br>' + c.items.map(esc).join(' · ') : '') + '</li>'; }).join('') +
       '</ol><p class="wd-menu-note" style="margin-top:10px;opacity:.78">' + esc(m.note) + '</p>';
   };
   WD.fill = function (rootEl) {

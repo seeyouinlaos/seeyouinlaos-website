@@ -1,8 +1,8 @@
 {
  "mode": "fast",
- "fingerprint": "4cd0237218ff00c5",
+ "fingerprint": "39e888a0d45344fa",
  "origin": "local stage",
- "finished": "2026-10-03T23:29:43.609Z",
+ "finished": "2026-11-22T18:18:39.574Z",
  "engines": [
   "chromium",
   "webkit"
@@ -19,9 +19,9 @@
   "steps-open"
  ],
  "skippedStates": [],
- "routes": 24,
- "measurements": 924,
- "loads": 924,
+ "routes": 25,
+ "measurements": 938,
+ "loads": 938,
  "widths": 8,
  "unexplained": 0,
  "rootCauses": [],
@@ -30,11 +30,12 @@
   ".av-gh .av-gh-img": 72,
   ".acar .atrk, .refgal .atrk, .others .oc": 300,
   ".a-duo .a-map": 42,
-  "footer.sfoot": 840,
+  "footer.sfoot": 854,
   ".a-band": 30,
   ".prep-head .p-media": 440,
   ".intro, .lede, .plane h2, .ed .body, .ok, main > h2, main > p": 228,
   "main > .media": 10,
+  ".pw-hero": 6,
   ".jbar": 364,
   "section.buy, section.plane": 60,
   "main > .gal": 20

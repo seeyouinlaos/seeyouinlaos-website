@@ -120,6 +120,11 @@ export const RECIPES = {
     await p.evaluate(() => { const b = document.querySelector('[data-choose-flat="train"]'); b && b.click(); }); await settle(p, 2000);
     await holdRoom(p, 'prewed'); await declineOpen(p); await settle(p);
     await p.goto(origin + '/review.html'); await settle(p, 3000);
+    /* THE STAGE HAS NO PRICE SOURCE (since the Google migration of 5 Oct 2026 the catalogue answers 503 without SHEETS_ID, and
+       the stage never gets the financial source): the page's own pre-send price check would keep the trip a draft forever. On
+       this local stage only, for this one synthetic send, the Bag counts as priced and the check as agreeing — the server's
+       submit is unchanged, and every page the auditor then renders is a fresh, unpatched page. */
+    await p.evaluate(() => { if (window.SIYL_BAG) SIYL_BAG.pending = () => false; if (window.SIYL_BILLING) SIYL_BILLING.validate = () => Promise.resolve({ ok: true, valid: true }); });
     await p.evaluate(() => { const x0 = document.getElementById('send'); const x = (x0 && !x0.hidden ? x0 : null) || [...document.querySelectorAll('button')].find((b) => /^(Send my trip|Send the update|Send my reply)$/.test(b.textContent.trim()) && b.offsetParent !== null); x && x.click(); });
     await p.waitForFunction(() => SIYL_DRAFT.words().key === 'sent', null, { timeout: 25000 }).catch(() => {});
     const sent = await p.evaluate(() => SIYL_DRAFT.words().key);
