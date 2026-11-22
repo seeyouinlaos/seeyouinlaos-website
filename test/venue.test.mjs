@@ -41,7 +41,8 @@ test('ASSETS · the site plan is the corrected architectural drawing (vector, th
   const V = 'assets/images/venue/';
   const svg = src(V + 'souphattra-site-plan.svg');
   assert.match(svg, /^<svg xmlns="http:\/\/www\.w3\.org\/2000\/svg" class="sp" viewBox="95 186 900 884"/, 'an SVG drawing with its viewBox — never a raster copy');
-  assert.match(svg, /<title id="sp-title">Souphattra Heritage Vientiane · site plan<\/title>/); assert.match(svg, /<desc id="sp-desc">/);
+  assert.match(svg, /<title id="sp-title">Souphattra Heritage Vientiane · site plan<\/title>/);
+  assert.deepEqual([...svg.matchAll(/<rect class="sp-bldg" data-building="([A-F])"/g)].map((m) => m[1]), ['A', 'F', 'B', 'C', 'D', 'E'], 'the six buildings carry their letter (the hook for a guest\'s own building, drawn only in My Profile)'); assert.match(svg, /<desc id="sp-desc">/);
   assert.doesNotMatch(svg, /<image|data:image|<script|\son[a-z]+=|<foreignObject|href="http/i, 'no embedded raster, no script, no external reference');
   /* the visible words: exactly the names the official plan confirms (HS-058 reconciliation, 22 Nov 2026) */
   const words = [...svg.matchAll(/<text [^>]*>([^<]*)<\/text>/g)].map((m) => m[1]);
@@ -95,7 +96,7 @@ test('MARKUP · every label and legend item is a button with a name and a presse
   assert.match(css, /\.venue-zoom-open:focus-visible \{ outline: 2px solid/); assert.match(css, /\.venue-item:focus-visible \{ outline: 2px solid/);
   /* THE PLAN ENLARGED: a real dialog, Escape and Close, focus kept inside and returned; − / + change the width; native pan and pinch */
   assert.match(js, /zoom\.setAttribute\('role', 'dialog'\); zoom\.setAttribute\('aria-modal', 'true'\)/);
-  assert.match(js, /if \(e\.key === 'Escape'\) \{ e\.preventDefault\(\); closeZoom\(\); return; \}/); assert.match(js, /var back = zoomFrom && zoomFrom !== doc\.body && doc\.contains\(zoomFrom\) \? zoomFrom : host\.querySelector\('\[data-zoom-open\]'\);/, 'the focus returns to the button that opened the plan');
+  assert.match(js, /if \(e\.key === 'Escape'\) \{ e\.preventDefault\(\); closeZoom\(\); return; \}/); assert.match(js, /var back = zoomFrom && zoomFrom !== doc\.body && doc\.contains\(zoomFrom\) \? zoomFrom : scope\.querySelector\('\[data-zoom-open\]'\);/, 'the focus returns to the button that opened the plan');
   assert.match(js, /data-zoom-in/); assert.match(js, /data-zoom-out/); assert.doesNotMatch(js, /\.disabled = /, 'a limit never disables the focused button (aria-disabled)'); assert.match(js, /doc\.addEventListener\('keydown', onZoomKey\)/, 'Escape works wherever the focus is'); assert.match(css, /\.venue-zoom \{ position: fixed; inset: 0;/); assert.match(css, /touch-action: pan-x pan-y pinch-zoom/);
   /* a phone: the drawing at a reading size inside a frame that scrolls across — never shrunk unreadably, never wider than the page */
   assert.match(css, /@media \(max-width: 767px\) \{\s*\.venue-swipe \{ display: inline; \}\s*\.venue-plan-frame \.venue-plan-img, \.venue-plan-frame \.venue-plan-svg \{ width: 720px; max-width: none; \}/);

@@ -48,6 +48,12 @@
       '<img class="venue-plan-img" src="' + esc(plan.src) + '" width="' + plan.w + '" height="' + plan.h + '" alt="' + esc(plan.alt) + '" decoding="async">' +
       '</div>';
   }
+  /* the frame and its caption line (the caption, the phone's swipe hint, the button that enlarges the plan) */
+  function planFigureHtml(plan) {
+    return planHtml(plan) +
+      '<figcaption class="venue-cap"><span>' + esc(plan.caption) + '</span><span class="venue-swipe">' + esc(plan.swipe) + '</span>' +
+        '<button type="button" class="venue-zoom-open" data-zoom-open aria-haspopup="dialog">' + esc(plan.enlarge) + '</button></figcaption>';
+  }
   var planSvg = null;
   /* one read of the drawing (the same file the image shows); a drawing that cannot be read keeps the image — never a blank frame */
   function loadPlan(plan) {
@@ -91,32 +97,12 @@
       '</div>';
   }
 
-  function mount(host, data) {
-    if (!host || !data) return null;
-    var plan = data.plan;
-    host.innerHTML =
-      '<div class="venue-head" data-motion="reveal">' +
-        '<p class="a-eyebrow">' + esc(data.kicker) + '</p>' +
-        '<h2 id="venue-h">' + esc(data.name) + '</h2>' +
-        '<p class="venue-lede">' + esc(data.lede) + '</p>' +
-      '</div>' +
-      '<div class="venue-grid">' +
-        '<figure class="venue-stage venue-plan" data-motion="stage" aria-describedby="venue-stage-desc">' +
-          planHtml(plan) +
-          '<figcaption class="venue-cap"><span>' + esc(plan.caption) + '</span><span class="venue-swipe">' + esc(plan.swipe) + '</span>' +
-            '<button type="button" class="venue-zoom-open" data-zoom-open aria-haspopup="dialog">' + esc(plan.enlarge) + '</button></figcaption>' +
-          '<p class="vh" id="venue-stage-desc">' + esc(plan.desc) + '</p>' +
-        '</figure>' +
-        '<div class="venue-side">' +
-          '<ol class="venue-legend" aria-label="Venue map">' + data.zones.map(function (z) {
-            return '<li><button type="button" class="venue-item" data-zone="' + z.id + '" aria-pressed="false" aria-controls="venue-detail"><span class="venue-n" aria-hidden="true">' + esc(z.n) + '</span><span class="venue-t">' + esc(z.label) + '</span><span class="venue-w">' + esc(z.when) + '</span></button></li>';
-          }).join('') + '</ol>' +
-          '<div class="venue-detail" id="venue-detail" role="region" aria-labelledby="venue-detail-h"></div>' +
-          '<p class="vh venue-live" aria-live="polite"></p>' +
-        '</div>' +
-      '</div>';
-    var stage = host.querySelector('.venue-stage'), frame = host.querySelector('[data-plan-frame]'), detail = host.querySelector('.venue-detail'), live = host.querySelector('.venue-live');
-    loadPlan(plan).then(function (svg) { fillPlan(frame, svg); });
+  /* THE PLAN, WIRED (one primitive for the public venue and the guest's own plan in My Profile · HS-058.7): the drawing fetched once
+     and inlined into the frame, `decorate` (optional) applied to every copy — the page's and the enlarged one — and the enlarged
+     view. `scope` holds one [data-plan-frame] and one [data-zoom-open]. */
+  function wirePlan(scope, plan, decorate) {
+    var frame = scope.querySelector('[data-plan-frame]');
+    loadPlan(plan).then(function (svg) { fillPlan(frame, svg); if (frame && decorate) decorate(frame); });
 
     /* THE PLAN, ENLARGED (Owners, 22 Nov 2026 · every label readable on a phone): a full-screen view over the page, the drawing
        at a larger width inside a native scroll area — pan with a finger, pinch, or − / + — Escape or Close returns to the page
@@ -140,7 +126,7 @@
         '<div class="venue-zoom-area" tabindex="0"><div class="venue-zoom-canvas" data-zoom-canvas>' + planHtml(plan) + '</div></div>';
       doc.body.appendChild(zoom); doc.documentElement.classList.add('venue-zoom-on');
       var inner = zoom.querySelector('[data-plan-frame]'); if (inner) { inner.removeAttribute('data-scrolls'); inner.removeAttribute('role'); inner.removeAttribute('aria-label'); }
-      loadPlan(plan).then(function (svg) { fillPlan(zoom && zoom.querySelector('[data-plan-frame]'), svg); });
+      loadPlan(plan).then(function (svg) { var box = zoom && zoom.querySelector('[data-plan-frame]'); fillPlan(box, svg); if (box && decorate) decorate(box); });
       zoom.querySelector('[data-zoom-in]').addEventListener('click', function () { if (zoomStep < STEPS.length - 1) { zoomStep++; drawZoom(); } });
       zoom.querySelector('[data-zoom-out]').addEventListener('click', function () { if (zoomStep > 0) { zoomStep--; drawZoom(); } });
       zoom.querySelector('[data-zoom-close]').addEventListener('click', closeZoom);
@@ -159,10 +145,36 @@
     function closeZoom() {
       if (!zoom) return;
       zoom.parentNode.removeChild(zoom); zoom = null; doc.documentElement.classList.remove('venue-zoom-on');
-      var back = zoomFrom && zoomFrom !== doc.body && doc.contains(zoomFrom) ? zoomFrom : host.querySelector('[data-zoom-open]');
+      var back = zoomFrom && zoomFrom !== doc.body && doc.contains(zoomFrom) ? zoomFrom : scope.querySelector('[data-zoom-open]');
       if (back && back.focus) { try { back.focus(); } catch (e) {} }
     }
-    host.querySelector('[data-zoom-open]').addEventListener('click', openZoom);
+    scope.querySelector('[data-zoom-open]').addEventListener('click', openZoom);
+  }
+
+  function mount(host, data) {
+    if (!host || !data) return null;
+    var plan = data.plan;
+    host.innerHTML =
+      '<div class="venue-head" data-motion="reveal">' +
+        '<p class="a-eyebrow">' + esc(data.kicker) + '</p>' +
+        '<h2 id="venue-h">' + esc(data.name) + '</h2>' +
+        '<p class="venue-lede">' + esc(data.lede) + '</p>' +
+      '</div>' +
+      '<div class="venue-grid">' +
+        '<figure class="venue-stage venue-plan" data-motion="stage" aria-describedby="venue-stage-desc">' +
+          planFigureHtml(plan) +
+          '<p class="vh" id="venue-stage-desc">' + esc(plan.desc) + '</p>' +
+        '</figure>' +
+        '<div class="venue-side">' +
+          '<ol class="venue-legend" aria-label="Venue map">' + data.zones.map(function (z) {
+            return '<li><button type="button" class="venue-item" data-zone="' + z.id + '" aria-pressed="false" aria-controls="venue-detail"><span class="venue-n" aria-hidden="true">' + esc(z.n) + '</span><span class="venue-t">' + esc(z.label) + '</span><span class="venue-w">' + esc(z.when) + '</span></button></li>';
+          }).join('') + '</ol>' +
+          '<div class="venue-detail" id="venue-detail" role="region" aria-labelledby="venue-detail-h"></div>' +
+          '<p class="vh venue-live" aria-live="polite"></p>' +
+        '</div>' +
+      '</div>';
+    var stage = host.querySelector('.venue-stage'), detail = host.querySelector('.venue-detail'), live = host.querySelector('.venue-live');
+    wirePlan(host, plan, null);
     var active = null, photoIndex = 0;
 
     function paint() {
@@ -238,6 +250,6 @@
     var host = doc.querySelector('[data-venue]'); if (!host || !root.SIYL_VENUE_DATA) return;
     root.SIYL_VENUE.instance = mount(host, root.SIYL_VENUE_DATA);
   }
-  root.SIYL_VENUE = { mount: mount, boot: boot, instance: null, thumbOf: thumbOf, html: { picture: pictureHtml, plan: planHtml, detail: detailHtml } };
+  root.SIYL_VENUE = { mount: mount, boot: boot, instance: null, thumbOf: thumbOf, wirePlan: wirePlan, html: { picture: pictureHtml, plan: planHtml, figure: planFigureHtml, detail: detailHtml } };
   if (doc.readyState === 'loading') doc.addEventListener('DOMContentLoaded', boot); else boot();
 })(typeof window !== 'undefined' ? window : null);

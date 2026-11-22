@@ -114,3 +114,6 @@ html.venue-zoom-on { overflow: hidden; }
 .m-reduced .venue-plan-frame, .m-reduced .venue-photo-img, .m-reduced .venue-detail-in, .m-reduced .venue-thumb, .m-reduced .venue-item { transition: none !important; }
 .m-reduced .venue-plan-frame { opacity: 1; }
 .m-reduced .venue-photo-img { opacity: 1; transform: none; }
+/* HS-058.7 · the guest's own building on the same plan (My Profile only — drawn by the guest's own session, never in the file) */
+.sp .sp-bldg.sp-mine { fill: #EAD9CC; stroke: #8A5A55; stroke-width: 3; }
+.sp .sp-mine-t { font-family: 'Hanken Grotesk', 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 17px; letter-spacing: 2.5px; fill: #8A5A55; }

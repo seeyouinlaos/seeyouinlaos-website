@@ -384,7 +384,7 @@
     if (!Object.prototype.hasOwnProperty.call(X.rseen, k)) X.rseen[k] = rbase(k).slice();
     if (list.slice().sort().join(',') === X.rseen[k].slice().sort().join(',')) { delete X.rdraft[k]; delete X.rseen[k]; } else X.rdraft[k] = list;
   }
-  /* THE HOTEL'S OWN ROOM (Owners, 18 / 19 Nov 2026): "hotel room 105 · building C" beside the allocation label (a suite: "suite 210 + 211");
+  /* THE HOTEL'S OWN ROOM (Owners, 18 / 19 Nov 2026): "hotel room NNN · building X" beside the allocation label (a suite: "suite NNN + NNN");
      the official type's variant where it differs from the category ("Twin", "No Bath tub") */
   function hotelOf(u, cat) {
     var hr = u && u.hotelRoom; if (!hr) return '';

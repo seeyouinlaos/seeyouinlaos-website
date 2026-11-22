@@ -293,6 +293,27 @@ export default {
       if (!grAuthorised(request, env)) return json({ ok: false, error: 'unauthorised' }, 401);
       return handleConfirm(request, env);
     }
+    /* HS-058.7 · MY ROOM ON THE SITE PLAN (Owners, 22 Nov 2026): the signed-in guest's OWN Souphattra room(s) — the building and the
+       hotel number the Owners assigned to the unit the guest holds now ("a number is enough"); nothing else, nobody else. The guest
+       is the bearer's (one code = one guest); no id, no query is read from the request; the answer is never cached in a shared
+       cache. The room engine's op is internal (x-gr-verified, set here only). Nothing is written, priced, confirmed or mailed. */
+    if (url.pathname === '/api/my-room') {
+      if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders(request) });
+      if (request.method !== 'GET') return json({ ok: false, error: 'method not allowed' }, 405, corsHeaders(request));
+      const priv = { ...corsHeaders(request), 'cache-control': 'private, no-store' };
+      if (!env.ROOMS) return json({ ok: false, error: 'the room plan is not available just now' }, 503, priv);
+      const who = await identify(request, env);
+      if (!who) return json({ ok: false, error: 'unauthorised' }, 401, priv);
+      const stub = env.ROOMS.get(env.ROOMS.idFromName('rooms'));
+      const res = await stub.fetch(new Request('https://rooms/api/rooms/gr-own-room', { method: 'POST', headers: { 'content-type': 'application/json', 'x-gr-verified': 'yes' }, body: JSON.stringify({ guestId: who.guestId }) }));
+      const j = await res.json().catch(() => null);
+      if (!res.ok || !j || !j.ok) return json({ ok: false, error: 'the room plan could not be read just now', retry: true }, 503, priv);
+      /* only what the guest's own card shows: the stay, the room's category, the allocation label the guest already sees, the
+         building and number of an assigned unit (else null), and whether the guest sleeps on the extra bed */
+      const stays = (j.stays || []).map((x) => ({ stage: x.stage, name: x.name, label: x.label, bed: !!x.bed, souphattra: /^(prewed|wedstay)\//.test(x.key),
+        building: x.hotelRoom ? x.hotelRoom.building : null, room: x.hotelRoom ? x.hotelRoom.display : null, suite: !!(x.hotelRoom && x.hotelRoom.suite) }));
+      return json({ ok: true, guestId: who.guestId, stays }, 200, priv);
+    }
     /* THE PRE-WEDDING DINNER (Owners, 22 Nov 2026 · HS-058): the signed-in guest's own answer and menu order — GET reads it, PUT
        saves / confirms / reopens it. One code = one guest: the identity is the bearer's, the order is that guest's alone. Kept by
        the seating ledger under keys of its own (src/pre-wedding-dinner.js); never a Bag line, a trip, a statement or a mail. */

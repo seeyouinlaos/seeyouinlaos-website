@@ -489,7 +489,7 @@
         (x.bed ? ' <span class="ab-chip">extra bed</span>' : '') + (cw ? ' <span class="ab-chip on">' + esc(cw) + '</span>' : '') + '</span>';
     }).join('');
   }
-  /* THE HOTEL ROOM NUMBER of a unit, in words: " · hotel room 105 · building C" — a suite "suite 210 + 211"; nothing where none is assigned */
+  /* THE HOTEL ROOM NUMBER of a unit, in words:  " · hotel room NNN · building X" — a suite "suite NNN + NNN"; nothing where none is assigned */
   function hotelWords(hr) {
     if (!hr) return '';
     return ' · ' + (hr.suite ? 'suite' : 'hotel room') + ' <b data-i18n-skip>' + esc(hr.display) + '</b> <span class="ab-mute" data-i18n-skip>· building ' + esc(hr.building) + '</span>';

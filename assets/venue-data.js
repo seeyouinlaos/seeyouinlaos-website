@@ -29,7 +29,7 @@
     lede: 'Coffee & Cake, the vows, the dinner and the Wedding Stay are all here: the heritage houses around the courtyard, the garden and the pool.',
     /* the site plan: the drawing (vector), its words — no room number, no allocation, no event position */
     plan: {
-      src: V + 'souphattra-site-plan.svg?v=f6bfd246', w: 900, h: 884,   /* ?v= the first 8 hex of the file's sha256 (test/venue.test.mjs keeps it current) */
+      src: V + 'souphattra-site-plan.svg?v=a8636e24', w: 900, h: 884,   /* ?v= the first 8 hex of the file's sha256 (test/venue.test.mjs keeps it current) */
       alt: 'Site plan of Souphattra Heritage Vientiane: Buildings A to F, the Lobby, the Peacock Bistro, Peacock Court, the pool and the walkways',
       desc: 'A schematic plan, not to scale: Building A with the Lobby, Buildings B to E, Building F with the Peacock Bistro, Peacock Court, the pool and the walkways. Every place of the venue is listed below.',
       caption: 'Site plan · schematic, not to scale', swipe: 'Swipe across the plan',

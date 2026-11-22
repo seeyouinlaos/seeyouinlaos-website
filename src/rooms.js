@@ -54,7 +54,7 @@ import { SEED } from './inventory-seed.js';
 import { canonicalKey } from './legacy-keys.js';
 import { COMPLIMENTARY, deadlineState } from './stay-plan.js';
 import { BILLING_ADMINS, isBillingAdmin } from './billing/admin.js';
-import { checkHotelRooms, HOTEL_ROOMS_VERSION } from './hotel-rooms.js';
+import { checkHotelRooms, HOTEL_ROOMS_VERSION, hotelRoomOf } from './hotel-rooms.js';
 
 export const PLACES = 2;
 const OCC = 'occ:';
@@ -397,6 +397,19 @@ export class Rooms {
       for (const o of occ) if (!o.placeholder && o.guestId && Array.isArray(o.placedFrom) && o.placedFrom.length) (of(o.guestId).placed = of(o.guestId).placed || {})[stageOf(o.key)] = o.placedFrom.map((l) => ({ key: o.key, label: l }));
       for (const r of wl) if (r.guestId) of(r.guestId).waitlist[r.stage] = { at: r.at, position: r.position, size: r.size || 1, wanted: r.wanted || [] };
       return json({ ok: true, byGuest });
+    }
+    /* HS-058.7 · THE GUEST'S OWN ROOM ON THE SITE PLAN (Owners, 22 Nov 2026): for ONE guest id — the Worker's verified bearer
+       (/api/my-room), never an id a client chose — the Souphattra-stay places that guest holds now, each with the hotel number the
+       Owners assigned to that unit ("a number is enough": none assigned → null, and the guest reads a neutral note). Verified
+       callers only: /api/rooms never forwards x-gr-verified for this op, so no guest can ask for another guest's room. Nothing is
+       written; no other guest's place, name or number is read out. */
+    if (op === 'gr-own-room') {
+      if (!gr) return json({ ok: false, error: 'unauthorised' }, 401);
+      const body = await safeJson(request), gid = String((body && body.guestId) || '');
+      if (!/^G\d{3,}$/.test(gid)) return json({ ok: false, error: 'invalid guest' }, 400);
+      const own = (await this.occupancies()).filter((o) => !o.placeholder && o.guestId === gid && (stageOf(o.key) === 'prewed' || stageOf(o.key) === 'wedstay'));
+      const assigned = (await this.hotelRooms()).rooms;
+      return json({ ok: true, stays: own.map((o) => ({ stage: stageOf(o.key), key: o.key, label: o.label, name: (SEED[o.key] && SEED[o.key].name) || '', bed: !!o.bed, hotelRoom: hotelRoomOf(o.key, o.label, assigned) })) });
     }
     /* WHO STAYS WHERE (Owner, 2 Oct 2026): every real place held — the guest id, the stay and its unit, the first name the engine
        learned — for the Worker's Wedding Circle, which joins it to the joining cohort by guest id and returns no unit label, no
