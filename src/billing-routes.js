@@ -2467,6 +2467,36 @@ async function assignmentSources(env, waitMs) {
   }
 }
 
+/* HS-058 · THE PRE-WEDDING DINNER (Owners, 22 Nov 2026): every active guest's own order in ONE read of the seating ledger, and the
+   Owners' release to the restaurant — recorded in the ledger, never sent anywhere. Nothing here prices a booking, issues, e-mails
+   or pays. */
+async function adminPwdGuests(env, url) {
+  const entries = await loadIndex(env, url.origin, false);
+  if (!entries || !Object.keys(entries).length) return null;
+  return Object.values(guestsOfIndex(entries)).filter((g) => !g.ambiguous);
+}
+async function adminPwd(env, identity, url, cors) {
+  const list = await adminPwdGuests(env, url);
+  if (!list) return jsonRes({ ok: false, retry: true, error: 'the register index is not readable just now' }, 503, cors);
+  const out = await engineAdmin(env, 'SEATING', 'seating', 'admin-pwd-read', adminLabel(identity), { active: list.map((g) => g.guestId) });
+  if (!out.j.ok) return jsonRes(out.j, out.status, cors);
+  /* LIGHT (HS-032, review 22 Nov 2026): the index and ONE ledger read — no Google read; the first names are the ones the guests'
+     own verified sessions gave the ledger (their order, their seat), never a guess */
+  const byId = Object.fromEntries((out.j.orders || []).map((o) => [o.guestId, o.firstName || '']));
+  const guests = list.map((g) => ({ guestId: g.guestId, invitationId: g.invitationId, first: byId[g.guestId] || (out.j.names || {})[g.guestId] || '', hosts: !!g.hosts }))
+    .sort((a, b) => a.guestId.localeCompare(b.guestId, 'en', { numeric: true }));
+  const { names, ...rest } = out.j;
+  return jsonRes({ ...rest, guests }, 200, cors);
+}
+async function adminPwdRelease(env, identity, request, url, cors) {
+  const body = await request.json().catch(() => null);
+  const list = await adminPwdGuests(env, url);
+  if (!list) return jsonRes({ ok: false, retry: true, error: 'the register index is not readable just now' }, 503, cors);
+  const out = await engineAdmin(env, 'SEATING', 'seating', 'admin-pwd-release', adminLabel(identity),
+    { action: clean(body && body.action), expectDigest: clean(body && body.expectDigest), active: list.map((g) => g.guestId) });
+  return jsonRes(out.j, out.status, cors);
+}
+
 /** GET admin/assignments — the seating plans, the rooming list and every guest, in one read; nothing is written. */
 async function adminAssignments(env, identity, url, cors) {
   const admin = adminLabel(identity);
@@ -2960,6 +2990,10 @@ export async function handleBilling(request, env, url, cors, deps) {
         return await adminExtraBed(env, identity, request, cors);
       /* THE OWNERS' SEATING & ROOM ASSIGNMENTS (Owners, 18 Nov 2026) — read with GET, every write a POST */
       case 'admin/assignments': return await adminAssignments(env, identity, url, cors);
+      case 'admin/pwd': return await adminPwd(env, identity, url, cors);
+      case 'admin/pwd/release':
+        if (request.method !== 'POST') return jsonRes({ ok: false, error: 'POST only' }, 405, cors);
+        return await adminPwdRelease(env, identity, request, url, cors);
       case 'admin/seating/apply':
         if (request.method !== 'POST') return jsonRes({ ok: false, error: 'POST only' }, 405, cors);
         return await adminSeatingApply(env, identity, request, url, cors, deps);

@@ -245,7 +245,7 @@
   }
   function dinnerPlan() {
     var m = eff('dinner'), rows = rowsOf('dinner'), pool = (evData('dinner') || {}).poolSide === 'B' ? 'B' : 'T';
-    var side = function (k) { return '<div class="as-side"><span class="as-sl">Side ' + (k === 'T' ? 'A' : 'B') + (pool === k ? ' · poolside' : '') + '</span><div class="as-drow">' + (rows[k] || []).map(function (s) { return seatBtn('dinner', s, m); }).join('') + '</div></div>'; };
+    var side = function (k) { return '<div class="as-side"><span class="as-sl">Side ' + (k === 'T' ? 'A' : 'B') + '' + '</span><div class="as-drow">' + (rows[k] || []).map(function (s) { return seatBtn('dinner', s, m); }).join('') + '</div></div>'; };
     return '<div class="as-plan as-din" role="group" aria-label="Wedding Dinner seating plan: one long table, side A and side B">' + side('T') + '<div class="as-table" aria-hidden="true">One long table</div>' + side('B') + '</div>';
   }
   function filtered(ev) {
@@ -384,7 +384,7 @@
     if (!Object.prototype.hasOwnProperty.call(X.rseen, k)) X.rseen[k] = rbase(k).slice();
     if (list.slice().sort().join(',') === X.rseen[k].slice().sort().join(',')) { delete X.rdraft[k]; delete X.rseen[k]; } else X.rdraft[k] = list;
   }
-  /* THE HOTEL'S OWN ROOM (Owners, 18 / 19 Nov 2026): "hotel room 105 · building C" beside the allocation label (a suite: "suite 210 + 211");
+  /* THE HOTEL'S OWN ROOM (Owners, 18 / 19 Nov 2026): "hotel room NNN · building X" beside the allocation label (a suite: "suite NNN + NNN");
      the official type's variant where it differs from the category ("Twin", "No Bath tub") */
   function hotelOf(u, cat) {
     var hr = u && u.hotelRoom; if (!hr) return '';

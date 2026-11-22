@@ -40,6 +40,10 @@ test('EXTRA BED · the seed: the Owners give Room I (Heritage Executive) and Roo
   assert.deepEqual([d.places, d.extraBeds], [2, 1]);
   assert.ok(unitsOf('wedstay/heritage').filter((u) => u.label !== 'D').every((u) => !u.extraBeds));
   assert.ok(!SEED['prewed/heritage-executive'].extraBeds && !SEED['prewed/heritage'].extraBeds, 'the pre-wedding window is another period: no extra bed there');
+  /* HS-058 (Owners, 22 Nov 2026): the Grand Majestic Suite's Room B sleeps three; Room A keeps its two places */
+  assert.deepEqual(plain(SEED['wedstay/grand-majestic'].extraBeds), [{ label: 'B', beds: 1 }]);
+  const gm = unitsOf('wedstay/grand-majestic');
+  assert.deepEqual(gm.map((u) => [u.label, u.places, u.extraBeds || 0]), [['A', 2, 0], ['B', 2, 1]], 'two suites, only B with the bed');
   assert.deepEqual([bedsFor(i, 'G121'), bedsFor(i, 'G050'), bedsFor(i), bedsFor(units[0], 'G121')], [1, 1, 1, 0], 'the same for every guest');
 });
 

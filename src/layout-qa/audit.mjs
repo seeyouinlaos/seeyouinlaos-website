@@ -105,6 +105,11 @@ async function job(j) {
   const b = browsers[j.engine];
   const ctx = await b.newContext({ storageState: j.storage || undefined, reducedMotion: 'reduce', viewport: { width: j.widths[0], height: core.heightFor(j.widths[0]) } });
   await ctx.addInitScript((l) => { try { localStorage.setItem('siyl.lang', l); } catch (e) { /* storage blocked */ } }, j.lang);
+  /* PLAYWRIGHT'S WEBKIT AND THE 304 (HS-058 release, 22 Nov 2026): the automation's own network inspector crashes the WebKit
+     page process when a reloaded page revalidates a cached file (macOS report: InspectorNetworkAgent::didReceiveResponse →
+     FragmentedSharedBuffer — a fault of the automation, never of a guest's Safari, which has no inspector attached). A routed
+     context does not use the HTTP cache, so every reload fetches fresh and the inspector never meets a 304. */
+  if (j.engine === 'webkit') await ctx.route('**/*', (r) => r.continue());
   const p = await ctx.newPage();
   p.on('pageerror', (e) => report.pageErrors.push({ route: j.route.path + j.q, state: j.state.id, lang: j.lang, engine: j.engine, message: String(e.message).slice(0, 200) }));
   let loaded = false;

@@ -31,7 +31,7 @@ export const SEAT_ID_RE = /^C-[LR]-\d{2}-\d{2}$|^D-[TB]-\d{2}$/;
 /* THE EVENTS (assets/temple.js · the active wedding programme, 28 February 2027) — the seating ledger's two events */
 export const EVENTS = Object.freeze({
   ceremony: { name: 'Vow Ceremony', date: '2027-02-28', time: '15:30', dateWords: 'Sunday, 28 February 2027 · 15:30', venue: 'Souphattra Heritage Vientiane', answer: 'vows' },
-  dinner: { name: 'Wedding Dinner', date: '2027-02-28', time: '19:30', dateWords: 'Sunday, 28 February 2027 · 19:30', venue: 'Souphattra Heritage Vientiane · poolside', answer: 'dinner' },
+  dinner: { name: 'Wedding Dinner', date: '2027-02-28', time: '19:30', dateWords: 'Sunday, 28 February 2027 · 19:30', venue: 'Souphattra Heritage Vientiane · Green Doors', answer: 'dinner' },
 });
 /* the stays of the room engine (a window is the first segment of a key), with the hotel the 002 / budget map names */
 export const STAYS = Object.freeze([

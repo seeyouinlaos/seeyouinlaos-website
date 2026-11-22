@@ -40,6 +40,7 @@ module.exports = {
     { sel: '.prep-head .p-media', maxWidth: 599, why: 'the approved iPhone composition: the step page\'s opening photograph edge to edge' },
     { sel: 'section.buy, section.plane', maxWidth: 599, why: 'the approved iPhone composition: the booking panel and the plan band of a room or transport page' },
     { sel: 'main > .media', maxWidth: 599, why: 'the approved iPhone composition: the opening photograph of a venue page' },
+    { sel: '.pw-hero', maxWidth: 767, why: 'HS-058 (Owners, 22 Nov 2026): the Pre-Wedding Dinner page opens with Cảm Ơn at night edge to edge on the phone; from 768 px it is framed in the wall like every page; its words return to the wall' },
     { sel: 'main > .gal', maxWidth: 599, why: 'Owner, 24 Sep 2026: the transport photograph edge to edge on the phone; its caption, count and arrows inside the wall' },
     { sel: '.acar .atrk, .refgal .atrk, .others .oc', maxWidth: 599, why: 'the approved iPhone composition: a rail\'s neighbour peeks to the screen\'s edge' }
   ],
@@ -72,7 +73,7 @@ module.exports = {
 
   /* components whose inner text is positioned by the component itself (labels on a map, counters on a picture) */
   axisFree: [
-    { sel: '.venue-labels, .venue-stage', why: 'the venue map: labels sit on the drawing at the venue\'s coordinates' },
+    { sel: '.venue-plan-frame, .venue-stage', why: 'the venue site plan: a drawing at a reading size that scrolls across on a phone (HS-058)' },
     { sel: '.av-ring, .av-count', why: 'the availability ring: the count is centred in its circle' },
     { sel: '.pl-cmap, .pl-dmap', why: 'Your Wedding Circle (Owner, 27 Sep 2026): the read-only seat plans are drawings — the Bride · Groom mark stands at the front centre of the ceremony, over the aisle, where the couple stand' }
   ],

@@ -300,12 +300,13 @@ gate('P3', 'MASTER-02 programme truth (four events, no active Alms, no pool in v
       if (TAKBAT_FREE.test(window) && !/self-pay/i.test(window)) { bad.push(f + ': the alms-giving reads as free of charge near "' + window.replace(/\s+/g, ' ').slice(0, 80) + '…"'); break; }
     }
   }
-  /* Owner 13 Sep 2026: the Wedding Dinner is POOLSIDE; the pool stays out of the vow ceremony only */
+  /* Owner 13 Sep 2026, superseded by the Owners on 22 Nov 2026 (HS-058.7): the Vow Ceremony AND the Wedding Dinner are at the
+     GREEN DOORS — "poolside" is retired as the dinner's place; the pool stays out of the vow ceremony */
   const vowSec = vy.slice(vy.indexOf('id="vows"'), vy.indexOf('id="vows"') + 700);
   if (/pool/i.test(vowSec)) bad.push('no pool narrative in the vow ceremony');
-  if (/courtyard garden/i.test(vy)) bad.push('the Wedding Dinner is poolside, never "courtyard garden"');
-  /* TO-03604 / TO-02009 (Window 007): the dinner eyebrow names the house and a lower-case "poolside" — never the mid-label capital "Poolside" */
-  if (!/19:30 · Souphattra Heritage · poolside/.test(vy) || /19:30 · Poolside/.test(vy)) bad.push('the Wedding Dinner must say "19:30 · Souphattra Heritage · poolside"');
+  if (/courtyard garden/i.test(vy)) bad.push('the Wedding Dinner is at the Green Doors, never "courtyard garden"');
+  /* the dinner eyebrow names the house and its place (TO-03604 / TO-02009 · the place since 22 Nov 2026: the Green Doors) */
+  if (!/19:30 · Souphattra Heritage · Green Doors/.test(vy) || /poolside/i.test(vy.slice(vy.indexOf('id="dinner"'), vy.indexOf('<!-- THE VENUE')).replace(/url\([^)]*\)|src="[^"]*"/g, ''))) bad.push('the Wedding Dinner must say "19:30 · Souphattra Heritage · Green Doors" and never "poolside"');
   if (/052-temple-ceremony-bride/.test(vy)) bad.push('the retired bride photograph is still on the page');
   if (/053-wedding-dinner-courtyard-garden/.test(vy)) bad.push('the fountain photograph is still the wedding dinner image');
   /* participation is an explicit two-way decision for EVERY active event —
@@ -320,7 +321,7 @@ gate('P3', 'MASTER-02 programme truth (four events, no active Alms, no pool in v
     bad.length === 0,
     bad.length ? bad.join(' · ')
       : 'four events; Tak Bat and Sangkhathan sit inside the Temple Ceremony; alms-giving unpriced; ' +
-        'only the Sangkhathan is USD 15; dinner poolside, vow pool-free; retired bride and fountain images removed');
+        'only the Sangkhathan is USD 15; vows and dinner at the Green Doors, vow pool-free; retired bride and fountain images removed');
 }
 
 /* P9 — ONE CODE = ONE GUEST (Owner, 14 Sep 2026). The session is one guest;

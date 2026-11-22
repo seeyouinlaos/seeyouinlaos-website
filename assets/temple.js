@@ -80,7 +80,7 @@
     { key: 'vows', label: 'Vow Ceremony', when: '15:30', whenShort: '15:30',
       place: 'Souphattra Heritage Vientiane' },
     { key: 'dinner', label: 'Wedding Dinner', when: '19:30', whenShort: '19:30',
-      place: 'Souphattra Heritage Vientiane · poolside' }
+      place: 'Souphattra Heritage Vientiane · Green Doors' }
   ];
 
   var T = window.SIYL_TEMPLE = {

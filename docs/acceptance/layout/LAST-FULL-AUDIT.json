@@ -1,8 +1,8 @@
 {
  "mode": "full",
- "fingerprint": "4cd0237218ff00c5",
+ "fingerprint": "39e888a0d45344fa",
  "origin": "local stage",
- "finished": "2026-10-04T00:59:03.683Z",
+ "finished": "2026-11-22T19:47:46.416Z",
  "engines": [
   "chromium",
   "webkit"
@@ -23,9 +23,9 @@
   "steps-open"
  ],
  "skippedStates": [],
- "routes": 24,
- "measurements": 24848,
- "loads": 9760,
+ "routes": 25,
+ "measurements": 25092,
+ "loads": 9840,
  "widths": 61,
  "unexplained": 0,
  "rootCauses": [],
@@ -34,12 +34,13 @@
   ".av-gh .av-gh-img": 1688,
   ".acar .atrk, .refgal .atrk, .others .oc": 7246,
   ".a-duo .a-map": 976,
-  "footer.sfoot": 22896,
+  "footer.sfoot": 23140,
   ".a-band": 504,
   ".x-clip .am": 40,
   ".prep-head .p-media": 8148,
   ".intro, .lede, .plane h2, .ed .body, .ok, main > h2, main > p": 7006,
   "main > .media": 168,
+  ".pw-hero": 124,
   ".jbar": 11504,
   "section.buy, section.plane": 1652,
   "main > .gal": 504

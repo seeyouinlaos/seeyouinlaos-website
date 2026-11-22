@@ -317,7 +317,7 @@
    "routes": [
     "/index.html"
    ],
-   "component": ".a-duo .a-map / the venue stage (assets/venue.js)",
+   "component": "the venue plan (assets/venue.js · assets/images/venue/souphattra-site-plan.svg) — an architectural drawing, no photograph since 22 Nov 2026",
    "geometry": {
     "p": 0.855,
     "tp": 0.855,
@@ -342,12 +342,13 @@
      632
     ]
    },
-   "behaviour": "the aerial shown whole at its own ratio (Owner, 22 Sep 2026) — never cover-cropped (the stage chooses the wide or the tall frame of the same aerial)",
+   "behaviour": "the site plan whole on a wide screen; on a phone at a reading size in a frame that scrolls across, and enlarged full screen with − / +",
    "crop": "none"
   },
   "product-gallery": {
    "routes": [
-    "/journeys.html"
+    "/journeys.html",
+    "/pre-wedding-dinner.html"
    ],
    "component": ".p .pgal .ph — a journey product's gallery",
    "geometry": {
@@ -6112,7 +6113,7 @@
    "slot": {
     "route": "/index.html"
    },
-   "role": "venue-map",
+   "role": null,
    "order": "title-ascending",
    "items": [
     {
@@ -6126,19 +6127,13 @@
      "w": 2560,
      "h": 1440,
      "aspect": 1.778,
-     "status": "synced",
-     "asset": "assets/images/venue/souphattra-aerial-1600.jpg",
+     "status": "excluded",
      "match": {
       "bits": 0,
       "confirmedByEye": false
      },
-     "slots": [
-      {
-       "route": "/index.html",
-       "role": "venue-map",
-       "focal": "50% 50%"
-      }
-     ]
+     "slots": [],
+     "note": "not published since 22 Nov 2026: the aerial and its position markers gave way to the architectural site plan (assets/images/venue/souphattra-site-plan.svg, drawn from the hotel's official plan; Owners, HS-058) — the files stay on disk as history (was assets/images/venue/souphattra-aerial-1600.jpg)"
     }
    ],
    "status": "synced",
@@ -14750,8 +14745,7 @@
      "size": 1135232,
      "modifiedTime": "2026-09-26T11:31:35.506Z",
      "kind": "image",
-     "status": "synced",
-     "asset": "assets/images/venue/souphattra-aerial-1600.jpg",
+     "status": "excluded",
      "slots": [],
      "syncedAt": "2026-09-26T20:00:00Z",
      "how": "fingerprint",
@@ -14759,7 +14753,8 @@
       "bits": 0
      },
      "w": 2560,
-     "h": 1440
+     "h": 1440,
+     "note": "not published since 22 Nov 2026: the aerial and its position markers gave way to the architectural site plan (assets/images/venue/souphattra-site-plan.svg, drawn from the hotel's official plan; Owners, HS-058) — the files stay on disk as history (was assets/images/venue/souphattra-aerial-1600.jpg)"
     }
    ],
    "status": "synced",
@@ -22207,6 +22202,11 @@
        "route": "/experience.html?id=vte-camon",
        "role": "experience-gallery",
        "aspect": 0.8
+      },
+      {
+       "route": "/pre-wedding-dinner.html",
+       "role": "product-gallery",
+       "aspect": 0.8
       }
      ],
      "syncedAt": "2026-09-26T20:00:00Z",
@@ -22323,6 +22323,11 @@
       {
        "route": "/experience.html?id=vte-camon",
        "role": "experience-gallery",
+       "aspect": 0.8
+      },
+      {
+       "route": "/pre-wedding-dinner.html",
+       "role": "product-gallery",
        "aspect": 0.8
       }
      ],

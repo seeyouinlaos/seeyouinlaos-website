@@ -48,6 +48,8 @@
 /* THE WHOLE WEDDING (Owners, 18 Nov 2026 — supersedes the fifty of 2 Oct 2026): FIFTY-FOUR PEOPLE IN ALL, the Bride and the Groom
    included. The ceremony is the couple's two places + 52 guest chairs; the dinner is fifty-four chairs, two of them held by the
    couple like every other guest's. Nobody is counted twice: the couple's ceremony places are not guest chairs. */
+import * as PWD from './pre-wedding-dinner.js';   /* HS-058: the Pre-Wedding Dinner's orders live in this ledger under keys of their own */
+
 export const WEDDING_PEOPLE = 54;
 export const RULES = {
   /* C-L-[ROW]-[SEAT] · C-R-[ROW]-[SEAT] · left rows 01–11 × seats 01–02 · right rows 01–10 × seats 01–03 — THE CODE'S PLAN (Owners,
@@ -419,6 +421,18 @@ export class Seating {
     try { identity = JSON.parse(request.headers.get('x-siyl-identity') || 'null'); } catch (e) { identity = null; }
     const couple = coupleOf(request.headers.get('x-siyl-couple'));   /* set only by the Worker, from the register's roles */
 
+    /* THE PRE-WEDDING DINNER (Owners, 22 Nov 2026 · HS-058): the guest's own order — keys pwd:* that no seating operation reads,
+       lists, resets or logs; the guest is the Worker's verified identity, never a name or an id the client sent */
+    if (op === 'pwd-mine' || op === 'pwd-save') {
+      /* only the Worker's /api/pre-wedding-dinner sets this marker; /api/seating deletes it (review, 22 Nov 2026) */
+      if (request.headers.get('x-siyl-pwd') !== '1') return json({ ok: false, error: 'unknown seating operation' }, 404);
+      if (!identity) return json({ ok: false, error: 'unauthorised' }, 401);
+      const body = op === 'pwd-save' ? await safeJson(request) : null;
+      return await this.state.blockConcurrencyWhile(async () => {
+        const r = await PWD.guestOp(this.storage, op === 'pwd-save' ? 'PUT' : 'GET', identity, body, new Date().toISOString());
+        return json(r.body, r.status);
+      });
+    }
     if (identity) await this.learnName(identity);
     if (op === 'read') return json(await this.view(identity || url.searchParams.get('invitation') || '', couple));
 
@@ -587,6 +601,12 @@ export class Seating {
       if (!admin) return json({ ok: false, error: 'unknown seating operation' }, 404);
       const by = 'owners:' + admin;
 
+      /* HS-058: every Pre-Wedding Dinner order in one read; the Owners' release to the restaurant (recorded, never sent) */
+      if (op === 'admin-pwd-read') { const b = request.method === 'POST' ? await safeJson(request) : null; return json(await PWD.adminRead(this.storage, b && b.active, await this.firstNames())); }
+      if (op === 'admin-pwd-release') {
+        const b = await safeJson(request);
+        return await this.state.blockConcurrencyWhile(async () => { const r = await PWD.adminRelease(this.storage, b, by, new Date().toISOString()); return json(r.body, r.status); });
+      }
       if (op === 'admin-read') {
         const cfg = await this.config(), names = await this.firstNames();
         const out = { ok: true, open: !!cfg.open, frozen: !!cfg.frozen, capacity: CAPACITY, people: WEDDING_PEOPLE, events: {}, placed: await this.tombstones(), log: await this.logOf(300) };

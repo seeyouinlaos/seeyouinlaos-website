@@ -24,10 +24,12 @@
           '<a href="1872.html">Champagne Afternoon Tea at 1872</a>' +
           '<a href="experience.html?id=bkk-cannubi">Dinner at Cannubi</a></div>' +
         '<div><h4>The Wedding</h4>' +
+          '<a href="pre-wedding-dinner.html">Pre-Wedding Dinner</a>' +
           '<a href="voyage.html#temple">Temple Ceremony</a>' +
           '<a href="voyage.html#coffee">Coffee &amp; Cake</a>' +
           '<a href="voyage.html#vows">Vow Ceremony</a>' +
-          '<a href="voyage.html#dinner">Wedding Dinner</a></div>' +
+          '<a href="voyage.html#dinner">Wedding Dinner</a>' +
+          '<a href="dress.html">Dress code</a></div>' +
         '<div><h4>Your invitation</h4>' +
           '<a href="your-journey.html">My Trip</a>' +
           '<a href="cart.html">My Bag</a>' +

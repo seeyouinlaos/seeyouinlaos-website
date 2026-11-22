@@ -182,7 +182,7 @@ test('WORDING: no 1 + 1 seating, no blue dress, dinner poolside, China card is t
   for (const f of ['wedding.html', 'review.html', 'voyage.html', 'wedding-preparation.html', 'dress.html']) assert.doesNotMatch(src(f), /Blue Lao Traditional Dress|in blue\b/i, f);
   assert.match(src('wedding.html'), /temple:'Lao Traditional Dress'/);
   for (const f of ['assets/journey.js', 'assets/temple.js', 'voyage.html', 'index.html', 'review.html', 'wedding.html']) assert.doesNotMatch(src(f), /courtyard garden/i, f);
-  assert.match(src('assets/journey.js'), /Souphattra Heritage Vientiane · poolside/); assert.match(src('voyage.html'), /<p class="a-eyebrow">19:30 · Souphattra Heritage · poolside<\/p>/); assert.match(src('voyage.html'), /An evening poolside/);
+  assert.match(src('assets/journey.js'), /Souphattra Heritage Vientiane · Green Doors/); assert.match(src('voyage.html'), /<p class="a-eyebrow">19:30 · Souphattra Heritage · Green Doors<\/p>/); assert.match(src('voyage.html'), /An evening at the Green Doors/);
   /* 21 Sep 2026: the Owner's clip of Impression Lijiang on the China card, its own poster frame beneath (gate V1) */
   /* 26 Sep 2026 · the Owner's folder 002: "03 - China - Kunming" is the China card's film (the card opens the Kunming chapter, #china) */
   assert.match(src('index.html'), /destination\.html#china" data-video="assets\/video\/kunming-card\.mp4" style="background-image:url\(assets\/images\/city\/003-kunming-card-poster\.jpg\)/);

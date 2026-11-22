@@ -205,47 +205,31 @@
       }
 
       /* the long table, seen from above: side A along the top, side B along the
-       * bottom — fifty-four seats (27 + 27, Owners 18 Nov 2026), no fixed position for anyone, poolside. THE
-       * POOL is the landmark: SIDE A is the poolside side (Owner, 15 Sep 2026,
-       * source of truth from the venue plan; the geometry may record 'B' if
-       * the venue ever changes the layout). The water is drawn as water —
-       * a calm band with a few ripples — and named; the other side is named
-       * as the side facing the pool. Nothing childish, nothing bright.
+       * bottom — fifty-four seats (27 + 27, Owners 18 Nov 2026), no fixed position for anyone. THE PLACE
+       * (Owners, 22 Nov 2026): the dinner is at the GREEN DOORS — the pool landmark of 15 Sep 2026 is retired:
+       * no water is drawn and no side is named by it (the config's poolSide stays, unused by the drawing).
+       * Nothing childish, nothing bright.
        * THE TWO RETIRED 13s (Owner, 24 Sep 2026) leave no hole: the chairs
        * stand in the order of their numbers, side by side, and keep their labels. */
       var sides = (v && v.dinner && v.dinner.sides) || { T: [], B: [] };
       var top2s = sides.T || [], bottom = sides.B || [];
       var poolSide = v && v.dinner && v.dinner.poolSide === 'B' ? 'B' : 'T';
-      var n = Math.max(top2s.length, bottom.length, 1), pad2 = 20, headY2 = 30, POOL_H = 62, GAP = 14;
-      var y0 = 44 + (poolSide === 'T' ? POOL_H + GAP : 0);
+      var n = Math.max(top2s.length, bottom.length, 1), pad2 = 20, headY2 = 30;
+      /* THE GREEN DOORS (Owners, 22 Nov 2026): the dinner is no longer beside a pool — no water is drawn and no side is named
+         by it; the table, its two sides and every seat stay exactly as they are */
+      var y0 = 44;
       var W2 = pad2 * 2 + n * U, tableH = 40;
       var yTop = y0, ty = yTop + seat + NAME_H + 8, yBot = ty + tableH + 8, afterBot = yBot + seat + NAME_H + 8;
-      var H2 = afterBot + (poolSide === 'B' ? POOL_H + GAP : 0) + 30;
+      var H2 = afterBot + 30;
       var total = top2s.length + bottom.length;
       var RN = (S.LABELS && S.LABELS.RUNS) || { T: 'A', B: 'B' };
-      var other = poolSide === 'B' ? 'T' : 'B', lenOf = { T: top2s.length, B: bottom.length };
-      var planWords = 'Wedding Dinner seating plan: one long table by the pool, with side ' + RN[poolSide] + ' of ' + lenOf[poolSide] + ' seats along the pool and side ' + RN[other] + ' of ' + lenOf[other] + ' seats facing it';
+      var planWords = 'Wedding Dinner seating plan at the Green Doors: one long table, side ' + RN.T + ' of ' + top2s.length + ' seats and side ' + RN.B + ' of ' + bottom.length + ' seats';
       /* THE LONG TABLE (Owner, 25 Sep 2026 · 54 since 18 Nov 2026): on a phone and a tablet the chairs keep a real tapping size and the plan scrolls sideways
          (the page says so); from 900 px the whole table fits the column — prep.css reads the width as --plan-min */
       var h2 = '<svg class="p-seatmap p-seatmap-table" viewBox="0 0 ' + W2 + ' ' + H2 + '" style="--plan-min:' + Math.round(W2 * 1.15) + 'px" role="group" aria-label="' + esc(planWords) + '">';
-      h2 += '<defs><linearGradient id="siyl-water" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#DCE5E2"/><stop offset="1" stop-color="#CCD9D5"/></linearGradient></defs>';
       h2 += '<line x1="' + pad2 + '" y1="14" x2="' + (W2 - pad2) + '" y2="14" stroke="#313131" stroke-width="1"/>' +
-            '<text x="' + pad2 + '" y="' + headY2 + '" ' + T + '>Wedding Dinner · poolside</text>' +
-            '<text x="' + (W2 - pad2) + '" y="' + headY2 + '" text-anchor="end" ' + T + '>Side ' + RN.T + ' · ' + top2s.length + ' seats' + (poolSide === 'T' ? ' · poolside' : ' · facing the pool') + '</text>';
-      function pool(y) {
-        var w = n * U, cx = pad2 + w / 2, ripple = '', k;
-        for (k = 0; k < 3; k++) {
-          var ry = y + 16 + k * 15, rx = pad2 + 18 + k * 30;
-          ripple += '<path d="M' + rx + ' ' + ry + ' q 7 -4 14 0 t 14 0 t 14 0 t 14 0" fill="none" stroke="#FFFFFF" stroke-opacity=".7" stroke-width="1"/>';
-          ripple += '<path d="M' + (pad2 + w - 60 - k * 30) + ' ' + (ry + 6) + ' q 7 -4 14 0 t 14 0 t 14 0" fill="none" stroke="#FFFFFF" stroke-opacity=".55" stroke-width="1"/>';
-        }
-        return '<g class="pool" role="img" aria-label="The swimming pool, along side ' + RN[poolSide] + '">' +
-               '<rect x="' + pad2 + '" y="' + y + '" width="' + w + '" height="' + POOL_H + '" rx="12" fill="url(#siyl-water)" stroke="#B9C7C2" stroke-width="1"/>' +
-               '<rect x="' + (pad2 + 3) + '" y="' + (y + 3) + '" width="' + (w - 6) + '" height="' + (POOL_H - 6) + '" rx="10" fill="none" stroke="#FFFFFF" stroke-opacity=".5" stroke-width="1"/>' +
-               ripple +
-               '<text x="' + cx + '" y="' + (y + POOL_H / 2 + 3) + '" text-anchor="middle" font-family="' + FONT + '" font-size="9" letter-spacing="3" fill="#3E5A54">Swimming pool</text></g>';
-      }
-      if (poolSide === 'T') h2 += pool(44);
+            '<text x="' + pad2 + '" y="' + headY2 + '" ' + T + '>Wedding Dinner · Green Doors</text>' +
+            '<text x="' + (W2 - pad2) + '" y="' + headY2 + '" text-anchor="end" ' + T + '>Side ' + RN.T + ' · ' + top2s.length + ' seats</text>';
       /* each chair's column is its RANK among the numbers of its side (1 … 12, 14 … 28 → columns 1 … 27): the order and the
          labels are the ledger's, the retired 13 leaves no gap and nothing is drawn beyond the table */
       var numOf = function (s) { var m = /-(\d\d)$/.exec(s.seatId || ''); return m ? Number(m[1]) : 0; };
@@ -255,8 +239,7 @@
       h2 += '<rect x="' + pad2 + '" y="' + ty + '" width="' + (n * U) + '" height="' + tableH + '" rx="6" fill="#F3EEE7" stroke="#313131" stroke-width="1"/>';
       h2 += '<text x="' + (pad2 + (n * U) / 2) + '" y="' + (ty + tableH / 2 + 3) + '" text-anchor="middle" ' + T + '>One long table · ' + total + ' seats</text>';
       bottom.forEach(function (s, j) { h2 += chair(s, pad2 + placeB(s, j) * U + (U - seat) / 2, yBot); });
-      if (poolSide === 'B') h2 += pool(afterBot);
-      h2 += '<text x="' + (W2 - pad2) + '" y="' + (H2 - 10) + '" text-anchor="end" ' + T + '>Side ' + RN.B + ' · ' + bottom.length + ' seats' + (poolSide === 'B' ? ' · poolside' : ' · facing the pool') + '</text>';
+      h2 += '<text x="' + (W2 - pad2) + '" y="' + (H2 - 10) + '" text-anchor="end" ' + T + '>Side ' + RN.B + ' · ' + bottom.length + ' seats</text>';
       return h2 + '</svg>';
     },
 
@@ -284,7 +267,7 @@
       var d = view && view.dinner, RN = (S.LABELS && S.LABELS.RUNS) || { T: 'A', B: 'B' };
       if (!d) return '';
       var ps = d.poolSide === 'B' ? 'B' : 'T', other = ps === 'B' ? 'T' : 'B';
-      return 'Side ' + RN[ps] + ' is along the pool; side ' + RN[other] + ' faces it across the table.';
+      return '';   /* no water at the Green Doors (Owners, 22 Nov 2026): the sides are named, never placed by a pool */
     },
 
     /* draw one event into a container and wire the choice */
