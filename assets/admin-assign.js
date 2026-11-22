@@ -245,7 +245,7 @@
   }
   function dinnerPlan() {
     var m = eff('dinner'), rows = rowsOf('dinner'), pool = (evData('dinner') || {}).poolSide === 'B' ? 'B' : 'T';
-    var side = function (k) { return '<div class="as-side"><span class="as-sl">Side ' + (k === 'T' ? 'A' : 'B') + (pool === k ? ' · along the water' : '') + '</span><div class="as-drow">' + (rows[k] || []).map(function (s) { return seatBtn('dinner', s, m); }).join('') + '</div></div>'; };
+    var side = function (k) { return '<div class="as-side"><span class="as-sl">Side ' + (k === 'T' ? 'A' : 'B') + '' + '</span><div class="as-drow">' + (rows[k] || []).map(function (s) { return seatBtn('dinner', s, m); }).join('') + '</div></div>'; };
     return '<div class="as-plan as-din" role="group" aria-label="Wedding Dinner seating plan: one long table, side A and side B">' + side('T') + '<div class="as-table" aria-hidden="true">One long table</div>' + side('B') + '</div>';
   }
   function filtered(ev) {

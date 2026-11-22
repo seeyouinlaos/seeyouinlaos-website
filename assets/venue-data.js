@@ -29,17 +29,20 @@
     lede: 'Coffee & Cake, the vows, the dinner and the Wedding Stay are all here: the heritage houses around the courtyard, the garden and the pool.',
     /* the site plan: the drawing (vector), its words — no room number, no allocation, no event position */
     plan: {
-      src: V + 'souphattra-site-plan.svg?v=60085b50', w: 900, h: 884,   /* ?v= the first 8 hex of the file's sha256 (test/venue.test.mjs keeps it current) */
+      src: V + 'souphattra-site-plan.svg?v=cd3ed627', w: 900, h: 884,   /* ?v= the first 8 hex of the file's sha256 (test/venue.test.mjs keeps it current) */
       alt: 'Site plan of Souphattra Heritage Vientiane: Buildings A to F, the Lobby, the Peacock Bistro, Peacock Court, the pool and the walkways',
       desc: 'A schematic plan, not to scale: Building A with the Lobby, Buildings B to E, Building F with the Peacock Bistro, Peacock Court, the pool and the walkways. Every place of the venue is listed below.',
       caption: 'Site plan · schematic, not to scale', swipe: 'Swipe across the plan',
+      /* the key says exactly what the drawing says (Owners, 22 Nov 2026): the four guest-room buildings are B, C, D and E;
+         Building F is the Peacock Bistro's block */
       key: [
-        { name: 'Lobby', use: 'Guest arrival, reception & check-in', event: true },
-        { name: 'Peacock Bistro', use: 'Breakfast · Coffee & Cake', event: true },
+        { name: 'Lobby', use: 'Building A · Reception & Check-in', event: true },
+        { name: 'Peacock Bistro', use: 'Building F · Breakfast · Coffee & Cake', event: true },
         { name: 'Green Doors', use: 'Vow Ceremony · Wedding Dinner', event: true },
-        { name: 'Garden', use: 'The central garden' },
+        { name: 'Peacock Court', use: '' },
+        { name: 'Garden', use: '' },
         { name: 'Swimming Pool', use: '' },
-        { name: 'Guest Rooms', use: 'Buildings B to F' }
+        { name: 'Guest Rooms', use: 'Buildings B, C, D and E' }
       ],
       enlarge: 'Enlarge the plan', zoomLabel: 'The site plan, enlarged', larger: 'Larger', smaller: 'Smaller', close: 'Close'
     },
@@ -79,7 +82,7 @@
          of the one long table, and the way to the one detail (#dinner) — no photographs here; the dinner's photographs live in the
          one record, assets/wedding-dinner.js, and are shown once, in the detail's gallery */
       { id: 'dinner', n: '05', label: 'Wedding Dinner · Green Doors', title: 'Wedding Dinner · Green Doors', when: 'Sunday, 28 February 2027 · 19:30',
-        story: 'The long table at the Green Doors — side A along the water, side B facing it.',
+        story: 'One long table at the Green Doors, with side A and side B.',
         href: '#dinner', cta: 'The Wedding Dinner', index: true,
         photos: [] },
       { id: 'pool', n: '06', label: 'Swimming pool', title: 'The swimming pool', when: 'Every day of the stay',

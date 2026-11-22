@@ -277,7 +277,7 @@ test('THAI · every line the Wedding Circle and the plan add has its authored Th
   const core = (await import('../src/i18n-core.js')).default, dict = JSON.parse(src('src/i18n-th.json')), T = core.translator(dict);
   for (const en of ['Who sits where', 'Who stays where', 'Sharing with', 'Not selected yet', 'No seat yet', 'Free', 'Side A', 'Side B', 'Selected', 'Sent to us', 'Front centre', 'Bride', 'Groom', 'places', 'taken', 'Stays',
     'Row 1', 'Row 10', 'Row 11', 'Where everyone stays could not be read just now.', 'Nobody has chosen a stay yet.', 'Could not be read just now.', 'Vow Ceremony seating plan · 54 places · the Bride and the Groom at the front',
-    'Wedding Dinner · one long table · 54 seats', 'One long table · 54 seats', 'Side A · 27 seats · along the water', 'Side B · 27 seats · facing the water', 'Left block · 22 seats', 'Right block · 30 seats',
+    'Wedding Dinner · one long table · 54 seats', 'One long table · 54 seats', 'Side A · 27 seats', 'Side B · 27 seats', 'Left block · 22 seats', 'Right block · 30 seats',
     'Ceremony seating plan: 54 places — the Bride and the Groom at the front centre, then a left block of two seats and a right block of three seats per row, a centre aisle', 'Ceremony, the Groom’s place at the front centre, Suthep',
     'Your place is fixed at the front centre of the plan. Below is the whole ceremony — who sits where. Your dinner seat is chosen below, like everyone else’s.']) {
     const th = T.tr(en); assert.ok(th && th !== en && /[฀-๿]/.test(th), 'Thai for ' + en);

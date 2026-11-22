@@ -88,7 +88,7 @@ test('LABELS · the mapping is a bijection over the ledger, in both directions, 
   const drawn = seatsOf(cfg, 'ceremony', {}).map((s) => s.seatId); assert.deepEqual(drawn.sort(), [...CEREMONY].sort());
   const drawnD = seatsOf(cfg, 'dinner').map((s) => s.seatId); assert.deepEqual(drawnD.sort(), [...DINNER].sort());
   /* words: label first, then the place — no ledger id anywhere */
-  assert.equal(L.describe('C-R-04-02'), 'Right block · row 4'); assert.equal(L.describe('C-L-02-01'), 'Left block · row 2'); assert.equal(L.describe('D-T-17'), 'Long table · side A · along the water'); assert.equal(L.describe('D-B-03'), 'Long table · side B · facing the water');   /* TO-01959 · TO-00355: the seat label carries the number, the words carry the side */
+  assert.equal(L.describe('C-R-04-02'), 'Right block · row 4'); assert.equal(L.describe('C-L-02-01'), 'Left block · row 2'); assert.equal(L.describe('D-T-17'), 'Long table · side A'); assert.equal(L.describe('D-B-03'), 'Long table · side B');   /* TO-01959 · TO-00355: the seat label carries the number, the words carry the side */
   assert.doesNotMatch(L.describe('C-R-04-02') + L.describe('D-B-03'), /C-R|D-B/);
 });
 
@@ -160,7 +160,7 @@ test('PDF · the seat confirmation: a real PDF, the Owner\'s fields, labels only
   /* the ticket reference is the ledger's; the code carries the ticket and nothing secret */
   assert.equal(PASS.refOf(both, both.seats[0]), L.ref('INV-002', 'G001', 'ceremony', 'C-R-04-02'));
   const pl = PASS.payload(both, both.seats[1]);
-  assert.match(pl, /^SEE YOU IN LAOS\nSEAT TICKET SYL-WD-A17-[A-Z0-9]{4}\nPeggy\nWedding Dinner\nSunday, 28 February 2027 · 19:30\nSeat A17 · Long table · side A · along the water\nHELD$/);
+  assert.match(pl, /^SEE YOU IN LAOS\nSEAT TICKET SYL-WD-A17-[A-Z0-9]{4}\nPeggy\nWedding Dinner\nSunday, 28 February 2027 · 19:30\nSeat A17 · Long table · side A\nHELD$/);
   assert.doesNotMatch(pl, /INV-|G001|siyl/);
   assert.equal(PASS.filename(both), 'see-you-in-laos-wedding-seats-peggy.pdf');
   /* a guest without a seat gets no document; a seat the ledger does not hold is never written */
@@ -183,7 +183,7 @@ test('PDF · the hosts: Bride and Groom at the front centre, no seat number, the
   const pdf = PASS.compose(bride);
   /* TO-01736: the seat reads the role, the detail “At the front, between the two blocks”, the state “Front centre” */
   assert.match(pdf, /\(SEAT\) Tj[\s\S]*?\(Bride\) Tj[\s\S]*?\(At the front, between the two blocks\) Tj/); assert.match(pdf, /FRONT CENTRE/); assert.ok(pdf.includes('(B3)'));
-  assert.ok(pdf.includes('(Long table \\267 side B \\267 facing the water)'), 'the dinner place like everyone else\'s');
+  assert.ok(pdf.includes('(Long table \\267 side B)'), 'the dinner place like everyone else\'s');
   assert.doesNotMatch(pdf, /Front Centre|\(E\d|\(A\d+\) Tj[\s\S]*Vow/, 'no seat number at the front centre');
   assert.match(pdf, /SYL-WC-FC-[A-Z0-9]{4}/, 'a fixed position carries its own reference'); assert.match(pdf, /SYL-WD-B3-/);
   assert.doesNotMatch(pdf, /Temple|Wat Ong Teu|08:00|09:00/, 'the Bride\'s front centre belongs to the Vow Ceremony at Souphattra Heritage');

@@ -38,16 +38,16 @@
       ]
     },
     /* the seating of the one long table — the plan's words, never a second dinner */
-    seating: 'The long table at the Green Doors — side A along the water, side B facing it.',
+    seating: 'One long table at the Green Doors, with side A and side B.',
     href: 'voyage.html#dinner',
     media: [
-      { src: E + '056-wedding-dinner-01-poolside-from-above.jpg', alt: 'Poolside at Souphattra Heritage, seen from above', source: 'Drive 056' },
+      { src: E + '056-wedding-dinner-01-poolside-from-above.jpg', alt: 'Souphattra Heritage, seen from above', source: 'Drive 056' },
       { src: E + '056-wedding-dinner-02-villa-wide.jpg', alt: 'The heritage villa across the pool', source: 'Drive 056' },
-      { src: E + '056-wedding-dinner-03-poolside-loungers.jpg', alt: 'The loungers along the pool', source: 'Drive 056' },
-      { src: E + '056-wedding-dinner-04-villa-across-the-water.jpg', alt: 'The villa across the water', source: 'Drive 056' },
+      { src: E + '056-wedding-dinner-03-poolside-loungers.jpg', alt: 'Loungers at Souphattra Heritage', source: 'Drive 056' },
+      { src: E + '056-wedding-dinner-04-villa-across-the-water.jpg', alt: 'The heritage villa', source: 'Drive 056' },
       { src: E + '056-wedding-dinner-05-pool-and-villa.jpg', alt: 'The pool and the villa', source: 'Drive 056' },
       { src: E + '056-wedding-dinner-06-pool-terrace.jpg', alt: 'The pool terrace', source: 'Drive 056' },
-      { src: E + '056-wedding-dinner-07-pool-aerial.jpg', alt: 'The poolside from the air', source: 'Drive 056' },
+      { src: E + '056-wedding-dinner-07-pool-aerial.jpg', alt: 'Souphattra Heritage from the air', source: 'Drive 056' },
       { src: 'assets/images/venue/pool-terrace-oblique-1600.jpg', alt: 'The pool terrace from the upper floor: umbrellas, loungers, the fountain and the balconies', source: 'Drive 13o95npqGfPMooOpwRqd2kcpB_l83nYJO (the venue set)' },
       { src: E + '056-wedding-dinner-08-long-table-candlelight.jpg', alt: 'The long table by candlelight', source: 'Drive 056' },
       { src: E + '056-wedding-dinner-09-lilies.jpg', alt: 'White lilies on the table', source: 'Drive 056' },

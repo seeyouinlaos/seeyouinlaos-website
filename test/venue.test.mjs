@@ -31,7 +31,7 @@ test('DATA · seven places in the Owner\'s order, every one a legend place (no m
   assert.equal(DATA.plan.src.split('?v=')[1], createHash('sha256').update(fs.readFileSync(path.join(ROOT, 'assets/images/venue/souphattra-site-plan.svg'))).digest('hex').slice(0, 8), 'the drawing\'s ?v= is current: a corrected plan reaches every returning visitor');
   assert.ok(DATA.plan.alt && DATA.plan.desc && DATA.plan.caption && DATA.plan.enlarge && DATA.plan.close, 'the plan is named, described and its controls worded');
   assert.equal(DATA.first, 'dinner');
-  assert.equal(DATA.zones.find((z) => z.id === 'dinner').story, 'The long table at the Green Doors — side A along the water, side B facing it.', 'TO-01990');
+  assert.equal(DATA.zones.find((z) => z.id === 'dinner').story, 'One long table at the Green Doors, with side A and side B.', 'TO-01990');
   assert.doesNotMatch(JSON.stringify(DATA), /\b(north|south|east|west)\b/i, 'no compass direction is invented');
   assert.match(DATA.zones.find((z) => z.id === 'ceremony').when, /15:30/); assert.match(DATA.zones.find((z) => z.id === 'dinner').when, /19:30/);
   assert.doesNotMatch(JSON.stringify(DATA), /Temple|Wat Ong Teu|08:00|16:30/, 'the venue is Souphattra Heritage: no temple, no retired time');
@@ -50,6 +50,12 @@ test('ASSETS · the site plan is the corrected architectural drawing (vector, th
     /* the uses of the places, as the Owners confirmed them on 22 Nov 2026 (HS-058.7): the official plan fixes where, the Owners what */
     'RECEPTION', '&amp; CHECK-IN', 'BREAKFAST', 'COFFEE &amp; CAKE', 'Green Doors', 'VOW CEREMONY', 'WEDDING DINNER', 'Garden', 'GUEST ROOMS', 'GUEST ROOMS', 'GUEST ROOMS', 'GUEST ROOMS']);
   assert.match(svg, /<rect class="sp-zone" data-zone="green-doors" x="170" y="530"/, 'the Green Doors: between the Lobby and the Peacock Bistro, as the Owners marked it');
+  /* the key under the plan says what the drawing says — word for word — and the guest rooms are the four buildings B, C, D, E */
+  const plainWords = words.map((w) => w.replace(/&amp;/g, '&').toUpperCase());
+  for (const k of DATA.plan.key) assert.ok(plainWords.includes(k.name.toUpperCase()) || plainWords.join(' ').includes(k.name.toUpperCase()), 'the key names ' + k.name + ' as the plan does');
+  assert.deepEqual([...svg.matchAll(/data-caption-for="([A-F])"/g)].map((m) => m[1]), ['B', 'C', 'D', 'E'], 'GUEST ROOMS stands in B, C, D and E — never in F (the Peacock Bistro block)');
+  assert.equal(DATA.plan.key.find((k) => k.name === 'Guest Rooms').use, 'Buildings B, C, D and E');
+  assert.match(DATA.plan.key.find((k) => k.name === 'Peacock Bistro').use, /^Building F · Breakfast · Coffee & Cake$/); assert.match(DATA.plan.key.find((k) => k.name === 'Lobby').use, /^Building A · Reception & Check-in$/);
   assert.doesNotMatch(svg.replace(/<style>[\s\S]*?<\/style>/, '').replace(/<[^>]*>/g, ' '), /\d/, 'no number anywhere in the drawing\'s text (titles and descriptions included): no room number on the public plan');
   assert.doesNotMatch(svg, /<!--|<tspan/, 'no comment, no hidden text run');
   assert.doesNotMatch(svg, /ROOM REGISTER|COURTYARD|poolside|Suite|Presidential|Haruthai|Suthep/i, 'no register, no retired place, no allocation, no name');
