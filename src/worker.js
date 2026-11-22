@@ -293,13 +293,36 @@ export default {
       if (!grAuthorised(request, env)) return json({ ok: false, error: 'unauthorised' }, 401);
       return handleConfirm(request, env);
     }
+    /* THE PRE-WEDDING DINNER (Owners, 22 Nov 2026 · HS-058): the signed-in guest's own answer and menu order — GET reads it, PUT
+       saves / confirms / reopens it. One code = one guest: the identity is the bearer's, the order is that guest's alone. Kept by
+       the seating ledger under keys of its own (src/pre-wedding-dinner.js); never a Bag line, a trip, a statement or a mail. */
+    if (url.pathname === '/api/pre-wedding-dinner') {
+      if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders(request) });
+      if (request.method !== 'GET' && request.method !== 'PUT') return json({ ok: false, error: 'method not allowed' }, 405, corsHeaders(request));
+      if (!env.SEATING) return json({ ok: false, error: 'the dinner orders are not available just now' }, 503, corsHeaders(request));
+      const who = await identify(request, env);
+      if (!who) return json({ ok: false, error: 'unauthorised' }, 401, corsHeaders(request));
+      if (request.method === 'PUT' && await resetLocked(env)) return json({ ok: false, error: 'the ledger is being reset — try again in a moment', retry: true }, 503, corsHeaders(request));
+      const named = request.method === 'PUT' ? await withFirstName(env, { ...who }, url.origin, null) : who;
+      /* bounded: a dinner order is four lines (review, 22 Nov 2026) */
+      const text = request.method === 'PUT' ? await request.text() : '';
+      if (text.length > 8192) return json({ ok: false, error: 'request too large' }, 413, corsHeaders(request));
+      const headers = new Headers({ 'content-type': 'application/json', 'x-siyl-pwd': '1', 'x-siyl-identity': JSON.stringify({ invitationId: who.invitationId, guestId: who.guestId, partyId: who.partyId || null, ...(named.firstName ? { firstName: named.firstName } : {}) }) });
+      const stub = env.SEATING.get(env.SEATING.idFromName('seating'));
+      const res = await stub.fetch(new Request('https://seating/api/seating/' + (request.method === 'PUT' ? 'pwd-save' : 'pwd-mine'), { method: request.method === 'PUT' ? 'POST' : 'GET', headers, body: request.method === 'PUT' ? text : undefined }));
+      const out = new Response(res.body, res);
+      for (const [k, v] of Object.entries({ ...corsHeaders(request), 'cache-control': 'no-store' })) out.headers.set(k, v);
+      return out;
+    }
     /* THE SEATING LEDGER (G): guests read and hold; Guest Relations configures */
     if (url.pathname === '/api/seating' || url.pathname.startsWith('/api/seating/')) {
       if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders(request) });
       if (!env.SEATING) return json({ ok: false, error: 'seating unavailable' }, 503, corsHeaders(request));
       const op = url.pathname.replace(/^\/api\/seating\/?/, '') || 'read';
+      /* HS-058: the Pre-Wedding Dinner's operations are reached only through /api/pre-wedding-dinner (review, 22 Nov 2026) */
+      if (/(^|\/)(admin-)?pwd-/.test(op)) return json({ ok: false, error: 'unknown seating operation' }, 404, corsHeaders(request));
       const headers = new Headers(request.headers);
-      headers.delete('x-gr-verified'); headers.delete('x-siyl-identity'); headers.delete('x-siyl-couple'); headers.delete('x-siyl-admin');   /* a client can never claim any — the Owners' operations come only through the admin console's routes */
+      headers.delete('x-gr-verified'); headers.delete('x-siyl-identity'); headers.delete('x-siyl-couple'); headers.delete('x-siyl-admin'); headers.delete('x-siyl-pwd');   /* a client can never claim any — the Owners' operations come only through the admin console's routes */
       /* THE COUPLE'S PLACES (Owner, 2 Oct 2026): the two ceremony places belong to the register's Bride and Groom — named for the ledger
          here, from the index's roles, never from a name or anything a client sent */
       try { const cp = await coupleOfIndex(env, url.origin); if (cp) headers.set('x-siyl-couple', JSON.stringify(cp)); } catch (e) { /* the places stay unnamed */ }

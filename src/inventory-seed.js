@@ -78,7 +78,8 @@ export const SEED = {
     extraBeds: [{ label: 'I', beds: 1 }] },
   'wedstay/heritage-grand-premier':  { unit: 'room', capacity: 3,  occupancy: 2, held: 0, name: 'Heritage Grand Premier' },
   'wedstay/noble-courtyard':         { unit: 'room', capacity: 1,  occupancy: 2, held: 0, name: 'Noble Courtyard Suite' },
-  'wedstay/grand-majestic':          { unit: 'room', capacity: 2,  occupancy: 2, held: 0, name: 'Grand Majestic Suite' },   /* opened to everyone (Owner, Edit 5 · 18 Sep 2026) */
+  'wedstay/grand-majestic':          { unit: 'room', capacity: 2,  occupancy: 2, held: 0, name: 'Grand Majestic Suite',   /* opened to everyone (Owner, Edit 5 · 18 Sep 2026) */
+    extraBeds: [{ label: 'B', beds: 1 }] },   /* Room B sleeps three (Owners, 22 Nov 2026 · HS-058) */
   'wedstay/souphattra-majestic':     { unit: 'room', capacity: 1,  occupancy: 2, held: 0, name: 'Souphattra Majestic Suite' },
   'wedstay/souphattra-presidential': { unit: 'room', capacity: 1,  occupancy: 2, held: 0, name: 'Souphattra Presidential', couple: true },   /* the couple's suite (above) */
 

@@ -50,10 +50,12 @@
     ]],
     ['Wellness', 'marsilea.html', null],
     ['The Wedding', 'voyage.html', [
+      ['Pre-Wedding Dinner · 27 February', 'pre-wedding-dinner.html'],
       ['Temple Ceremony', 'voyage.html#temple'],
       ['Coffee &amp; Cake', 'voyage.html#coffee'],
       ['Vow Ceremony', 'voyage.html#vows'],
-      ['Wedding Dinner', 'voyage.html#dinner']
+      ['Wedding Dinner', 'voyage.html#dinner'],
+      ['Dress code', 'dress.html']
     ]],
     ['My Trip', 'your-journey.html', null]
   ];

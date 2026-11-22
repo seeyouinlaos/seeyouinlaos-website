@@ -396,6 +396,16 @@ html{scroll-padding-top:var(--ab-sat,env(safe-area-inset-top,0px))}
 @media(max-width:419px){.ov-list li{flex-wrap:wrap}.ov-list li>span:last-child{white-space:normal;margin-left:auto}.ov-hero .ov-hv{font-size:22px}.ov-kv{font-size:20px}.ov-split{gap:8px}.ov-split>div+div{padding-left:8px}.ov-legend li .ov-lg-v{white-space:normal}.ov-sub2{padding-left:0}}
 @media(prefers-reduced-motion:reduce){.ov *{transition:none!important}}
 @media print{.ab-gs,.ov-areas,.ov-up,.ov-btn,[data-ov-retry]{display:none!important}.ov-card,.ov-kpi,.ov-stat,.ov-hero{box-shadow:none;border:1px solid #DDE1EA;break-inside:avoid}.ov-bar span,.ov-seg,.ov-cseg,.ov-hero{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+/* THE PRE-WEDDING DINNER (HS-058) */
+.pwd-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+.pwd-kpi{border:1px solid #DAD9D7;padding:12px;display:flex;flex-direction:column;gap:4px}
+.pwd-kv{font-family:'PP Editorial Old',serif;font-weight:200;font-size:28px;line-height:1}
+.pwd-kl{font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:#6B6964}
+.pwd-mrow{display:flex;justify-content:space-between;gap:12px;font-size:13px;margin-top:6px}
+.pwd-ok{color:#2F5D3A}.pwd-open{color:#8A5A55}.pwd-mute,.pwd-admin .mute{color:#6B6964}
+.pwd-tick{display:flex;gap:8px;align-items:flex-start;margin:10px 0;font-size:13px}
+.pwd-admin .t-h3{margin-top:22px}.pwd-note{color:#8A5A55;margin-top:10px}
+@media(min-width:900px){.pwd-kpis{grid-template-columns:repeat(6,1fr)}}
 </style>
 <link rel="stylesheet" href="assets/prep.css?v=0a6eb26a">
 </head><body class="prep p-in">
@@ -404,6 +414,7 @@ html{scroll-padding-top:var(--ab-sat,env(safe-area-inset-top,0px))}
 <div class="ab-gs" id="ab-gs" hidden><label for="ab-gs-q">Find a guest</label><svg class="ab-gs-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="ab-gs-q" type="search" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="ab-gs-list" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Name, G-number or INV-…"><ul id="ab-gs-list" role="listbox" aria-label="Guests found" hidden></ul></div>
 <div id="admin" aria-live="polite"></div></main>
 <script src="assets/admin-assign.js?v=a08afe8e"></script>
+<script src="assets/admin-pwd.js?v=874fb080"></script>
 <script src="assets/admin-profile.js?v=bafa8dc9"></script>
 <script src="assets/admin-overview.js?v=3fc4a175"></script>
 <script src="assets/admin-billing.js?v=76c66e81"></script>

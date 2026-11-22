@@ -347,7 +347,8 @@
   },
   "product-gallery": {
    "routes": [
-    "/journeys.html"
+    "/journeys.html",
+    "/pre-wedding-dinner.html"
    ],
    "component": ".p .pgal .ph — a journey product's gallery",
    "geometry": {
@@ -22207,6 +22208,11 @@
        "route": "/experience.html?id=vte-camon",
        "role": "experience-gallery",
        "aspect": 0.8
+      },
+      {
+       "route": "/pre-wedding-dinner.html",
+       "role": "product-gallery",
+       "aspect": 0.8
       }
      ],
      "syncedAt": "2026-09-26T20:00:00Z",
@@ -22323,6 +22329,11 @@
       {
        "route": "/experience.html?id=vte-camon",
        "role": "experience-gallery",
+       "aspect": 0.8
+      },
+      {
+       "route": "/pre-wedding-dinner.html",
+       "role": "product-gallery",
        "aspect": 0.8
       }
      ],

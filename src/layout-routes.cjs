@@ -23,6 +23,7 @@ const ROUTES = [
   { path: '/1872.html', family: 'product-detail' },
   { path: '/marsilea.html', family: 'product-detail' },
   { path: '/dress.html', family: 'product-detail' },
+  { path: '/pre-wedding-dinner.html', family: 'wedding' },   /* HS-058 (Owners, 22 Nov 2026) */
   { path: '/invitation.html', family: 'registration' },
   { path: '/your-journey.html', family: 'journey-overview' },
   { path: '/wedding.html', family: 'wedding' },

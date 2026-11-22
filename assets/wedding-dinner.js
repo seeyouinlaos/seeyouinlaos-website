@@ -21,6 +21,22 @@
     dress: 'Black Tie',
     dressHref: 'wedding-preparation.html#dress-code',
     copy: 'An evening poolside, bringing the wedding day to its final and longest chapter — a Chinese sharing menu at the table, and the night to follow.',
+    /* THE SET MENU (Owners, 22 Nov 2026 · HS-058): ONE shared menu for every guest at the table, served in this order — nothing
+       is chosen per guest. Open with the restaurant (the Owners ask): the number of prawns, and the alternative for guests who do
+       not eat beef; until it is confirmed the page says only that it is being confirmed. */
+    menu: {
+      title: 'The Wedding Dinner set menu',
+      note: 'One menu, shared at the table: nothing to choose. An alternative for guests who do not eat beef is being confirmed with the restaurant.',
+      courses: [
+        { name: 'Dim Sum Selection', detail: 'five pieces', items: ['Har Gow (Steamed Shrimp Dumpling)', 'Abalone Siu Mai', 'Scallop Money Bag', 'Three-Treasure Dumpling', 'Crab Xiao Long Bao'] },
+        { name: 'Peking Duck' },
+        { name: 'Fish Maw Soup' },
+        { name: 'Steamed Sea Bass with Soy Sauce' },
+        { name: 'Stir-Fried Sea Prawns in XO Sauce' },
+        { name: 'Yangzhou Fried Rice with Angus Beef' },
+        { name: 'Black Sesame Glutinous Rice Balls in Young Coconut Milk' }
+      ]
+    },
     /* the seating of the one long table — the plan's words, never a second dinner */
     seating: 'The long table beside the water — side A along the pool, side B facing it.',
     href: 'voyage.html#dinner',
@@ -48,7 +64,17 @@
   function esc(t) { return String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
   /* the frames of the one gallery, for the site's editorial carousel (assets/refgal.js upgrades a .dgal) */
   WD.galleryHtml = function () { return WD.media.map(function (m, i) { return '<img src="' + esc(m.src) + '" alt="' + esc(m.alt) + '"' + (i ? ' loading="lazy" decoding="async"' : ' decoding="async"') + '>'; }).join(''); };
-  WD.fill = function (rootEl) { (rootEl || document).querySelectorAll('[data-wedding-dinner-gallery]').forEach(function (el) { if (!el.getAttribute('data-filled')) { el.setAttribute('data-filled', '1'); el.innerHTML = WD.galleryHtml(); } }); };
+  /* the set menu, drawn from the record (HS-058) — the courses in the order they are served; text only, no photograph */
+  WD.menuHtml = function () {
+    var m = WD.menu; if (!m) return '';
+    return '<p class="a-eyebrow" style="margin-top:14px">' + esc(m.title) + '</p><ol class="wd-courses" style="margin:10px 0 0;padding-left:1.25em;line-height:1.65">' +
+      m.courses.map(function (c) { return '<li><strong>' + esc(c.name) + '</strong>' + (c.detail ? ' · ' + esc(c.detail) : '') + (c.items ? '<br>' + c.items.map(esc).join(' · ') : '') + '</li>'; }).join('') +
+      '</ol><p class="wd-menu-note" style="margin-top:10px;opacity:.78">' + esc(m.note) + '</p>';
+  };
+  WD.fill = function (rootEl) {
+    (rootEl || document).querySelectorAll('[data-wedding-dinner-gallery]').forEach(function (el) { if (!el.getAttribute('data-filled')) { el.setAttribute('data-filled', '1'); el.innerHTML = WD.galleryHtml(); } });
+    (rootEl || document).querySelectorAll('[data-wedding-dinner-menu]').forEach(function (el) { if (!el.getAttribute('data-filled')) { el.setAttribute('data-filled', '1'); el.innerHTML = WD.menuHtml(); } });
+  };
   root.SIYL_WEDDING_DINNER = WD;
   if (typeof document !== 'undefined') WD.fill(document);
 })(typeof window !== 'undefined' ? window : globalThis);
