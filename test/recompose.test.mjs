@@ -23,7 +23,7 @@ test('final run: the dinner venue is Souphattra Heritage Vientiane; C86 carries 
   const D = readFileSync(new URL('../assets/transport-data.js', import.meta.url), 'utf8');
   const WP = readFileSync(new URL('../wedding-preparation.html', import.meta.url), 'utf8');
   for (const [n, s] of [['temple.js', T], ['journey.js', J], ['wedding-preparation.html', WP]]) assert.doesNotMatch(s, /Souphattra Vientiane Hotel/, n);
-  assert.match(T, /place: 'Souphattra Heritage Vientiane · poolside'/);
+  assert.match(T, /place: 'Souphattra Heritage Vientiane · Green Doors'/);
   assert.doesNotMatch(D, /hot meal|dinner window|17:30 – 19:00/i, 'C86 keeps only its own facts');
   assert.match(D, /Departure from Vientiane is at 15:50 on 1 March/);
 });

@@ -61,7 +61,8 @@
         '<p class="t-b2">' + esc(cur.name) + (cur.bed ? ' · your place is the extra bed' : '') + '</p>';
     } else {
       h += '<p class="t-b2">' + esc(cur.name) + (cur.bed ? ' · the extra bed' : '') + '</p>' +
-        '<p class="t-b2 mr-note">Your building and room number appear here as soon as ' + HS + ' have assigned your room.</p>';
+        '<p class="t-b2 mr-note">' + (cur.confirmed ? 'Your building and room number appear here as soon as ' + HS + ' have assigned your room.'
+          : 'Your building and room number appear here once your booking is confirmed.') + '</p>';
     }
     h += '</div>';
     if (V && V.html && V.html.figure && plan) h += '<figure class="venue-stage venue-plan mr-plan is-in" data-mr-plan>' + V.html.figure(plan) + '</figure>';
@@ -76,6 +77,7 @@
       letters.forEach(function (L) {
         var r = svg.querySelector('[data-building="' + L + '"]'); if (!r) return;
         r.classList.add('sp-mine');
+        var cap = svg.querySelector('[data-caption-for="' + L + '"]'); if (cap) cap.setAttribute('display', 'none');   /* "your building" takes the place of "guest rooms" */
         /* two short lines at the top of the block: they fit the narrowest building and never cover a place's own name */
         var x = Number(r.getAttribute('x')) + Number(r.getAttribute('width')) / 2, y = Number(r.getAttribute('y'));
         ['YOUR', 'BUILDING'].forEach(function (w, i) {

@@ -66,7 +66,7 @@ const EVENTS = [
   { key: 'temple', label: 'Temple Ceremony', when: '09:00 – approximately 12:00', place: 'Wat Ong Teu, Vientiane' },
   { key: 'coffee', label: 'Coffee & Cake', when: '12:00 – 15:30', place: 'Souphattra Heritage' },
   { key: 'vows', label: 'Vow Ceremony', when: '15:30', place: 'Souphattra Heritage' },
-  { key: 'dinner', label: 'Wedding Dinner', when: '19:30', place: 'Souphattra Heritage · poolside' },
+  { key: 'dinner', label: 'Wedding Dinner', when: '19:30', place: 'Souphattra Heritage · Green Doors' },
 ];
 /* MY FAVOURITE FLAVOUR (Owner, 18 Sep 2026): one of six; an older record's snack answer counts only when it is one of the six.
    The stored values are matched exactly as they are stored; only the printed form is display()'s (PRQ-06-07) */
@@ -202,7 +202,7 @@ export function journeyModel(record) {
   const labelOf = (ev) => { if (away) return ''; const id = seatId(ev); if (id) { if (retiredLabel(id)) return '';   /* D-29: a hold on a removed 13 is never shown as a seat number — Guest Relations reassigns it */
       return seatLabel(id) || (legacy && !/13$/.test(String(legacy[ev + 'SeatLabel'] || '')) && legacy[ev + 'SeatLabel']) || (/13$/.test(id) ? '' : id); } return (legacy && legacy[ev + 'SeatLabel']) || (ev === 'ceremony' && hosts ? 'Front centre' : ''); };
   const seats = { ceremony: { id: seatId('ceremony'), label: labelOf('ceremony'), when: '15:30', place: 'Souphattra Heritage' },
-    dinner: { id: seatId('dinner'), label: labelOf('dinner'), when: '19:30', place: 'Souphattra Heritage · poolside' } };
+    dinner: { id: seatId('dinner'), label: labelOf('dinner'), when: '19:30', place: 'Souphattra Heritage · Green Doors' } };
   /* about you */
   const profile = Q_PROFILE.filter((q) => !(away && q.wedding)).map((q) => ({ label: q.label, value: profileValue(g0.profile, q.key) })).filter((p) => p.value);
   const allergy = (g0.allergy && g0.allergy.answer) || (gr.allergy && gr.allergy.answer) || (legacy && legacy.allergy && legacy.allergy.answer) || '';

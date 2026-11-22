@@ -117,3 +117,11 @@ html.venue-zoom-on { overflow: hidden; }
 /* HS-058.7 · the guest's own building on the same plan (My Profile only — drawn by the guest's own session, never in the file) */
 .sp .sp-bldg.sp-mine { fill: #EAD9CC; stroke: #8A5A55; stroke-width: 3; }
 .sp .sp-mine-t { font-family: 'Hanken Grotesk', 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 17px; letter-spacing: 2.5px; fill: #8A5A55; }
+/* the plan's key (Owners, 22 Nov 2026): what each place is for — the event places with the plan's own dashed cherry mark */
+.venue-key { list-style: none; margin: 14px 0 0; padding: 0; display: grid; grid-template-columns: 1fr; gap: 0; border-top: 1px solid #DAD9D7; }
+.venue-key li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; padding: 9px 0; border-bottom: 1px solid #EDEBE7; }
+.venue-key-n { font-family: 'PP Editorial Old', Georgia, serif; font-weight: 200; font-size: 17px; color: #313131; }
+.venue-key-u { font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif; font-size: 10.5px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--a-mute); }
+.venue-key li.is-event .venue-key-n::before { content: ''; display: inline-block; width: 12px; height: 9px; margin-right: 8px; border: 1.4px dashed #8A5A55; background: #F6ECE6; vertical-align: 1px; }
+.venue-key li.is-event .venue-key-u { color: #8A5A55; }
+@media (min-width: 768px) { .venue-key { grid-template-columns: 1fr 1fr; column-gap: 32px; } }

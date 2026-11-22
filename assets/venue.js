@@ -49,10 +49,15 @@
       '</div>';
   }
   /* the frame and its caption line (the caption, the phone's swipe hint, the button that enlarges the plan) */
+  function keyHtml(plan) {
+    if (!plan.key || !plan.key.length) return '';
+    return '<ul class="venue-key" aria-label="What each place is for">' + plan.key.map(function (k) {
+      return '<li' + (k.event ? ' class="is-event"' : '') + '><span class="venue-key-n">' + esc(k.name) + '</span>' + (k.use ? '<span class="venue-key-u">' + esc(k.use) + '</span>' : '') + '</li>'; }).join('') + '</ul>';
+  }
   function planFigureHtml(plan) {
     return planHtml(plan) +
       '<figcaption class="venue-cap"><span>' + esc(plan.caption) + '</span><span class="venue-swipe">' + esc(plan.swipe) + '</span>' +
-        '<button type="button" class="venue-zoom-open" data-zoom-open aria-haspopup="dialog">' + esc(plan.enlarge) + '</button></figcaption>';
+        '<button type="button" class="venue-zoom-open" data-zoom-open aria-haspopup="dialog">' + esc(plan.enlarge) + '</button></figcaption>' + keyHtml(plan);
   }
   var planSvg = null;
   /* one read of the drawing (the same file the image shows); a drawing that cannot be read keeps the image — never a blank frame */

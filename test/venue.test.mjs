@@ -23,7 +23,7 @@ const sha = (p) => createHash('sha256').update(fs.readFileSync(path.join(ROOT, p
 
 test('DATA · seven places in the Owner\'s order, every one a legend place (no marker anywhere since 22 Nov 2026); every zone has its story, its time and real photographs; the plan record', () => {
   assert.deepEqual(DATA.zones.map((z) => z.id), ['lobby', 'rooms', 'coffee', 'ceremony', 'dinner', 'pool', 'garden']);
-  assert.deepEqual(DATA.zones.map((z) => z.label), ['Lobby', 'Rooms', 'Coffee & Cake · Breakfast', 'Vow Ceremony', 'Wedding Dinner · poolside', 'Swimming pool', 'Courtyard garden']);   /* TO-01984 · TO-01942 (Window 007) */
+  assert.deepEqual(DATA.zones.map((z) => z.label), ['Lobby · Reception & Check-in', 'Rooms', 'Coffee & Cake · Breakfast', 'Vow Ceremony · Green Doors', 'Wedding Dinner · Green Doors', 'Swimming pool', 'Garden']);   /* TO-01984 · TO-01942 (Window 007) */
   assert.ok(DATA.zones.every((z) => z.marks === undefined && z.anchor === undefined), 'no zone is placed on the plan: Coffee & Cake, the vows and the dinner wait for a confirmed position (Owners, 22 Nov 2026)');
   for (const z of DATA.zones) assert.ok(z.n && z.title && z.when && z.story && (z.index ? z.photos.length === 0 && z.href === '#dinner' : z.photos.length >= 2), z.id + ' is complete' + (z.index ? ' (an index entry: no photograph of its own, the way to the one detail)' : ''));
   assert.equal(DATA.base, undefined, 'the aerial base is gone');
@@ -31,7 +31,7 @@ test('DATA · seven places in the Owner\'s order, every one a legend place (no m
   assert.equal(DATA.plan.src.split('?v=')[1], createHash('sha256').update(fs.readFileSync(path.join(ROOT, 'assets/images/venue/souphattra-site-plan.svg'))).digest('hex').slice(0, 8), 'the drawing\'s ?v= is current: a corrected plan reaches every returning visitor');
   assert.ok(DATA.plan.alt && DATA.plan.desc && DATA.plan.caption && DATA.plan.enlarge && DATA.plan.close, 'the plan is named, described and its controls worded');
   assert.equal(DATA.first, 'dinner');
-  assert.equal(DATA.zones.find((z) => z.id === 'dinner').story, 'The long table beside the water — side A along the pool, side B facing it.', 'TO-01990');
+  assert.equal(DATA.zones.find((z) => z.id === 'dinner').story, 'The long table at the Green Doors — side A along the water, side B facing it.', 'TO-01990');
   assert.doesNotMatch(JSON.stringify(DATA), /\b(north|south|east|west)\b/i, 'no compass direction is invented');
   assert.match(DATA.zones.find((z) => z.id === 'ceremony').when, /15:30/); assert.match(DATA.zones.find((z) => z.id === 'dinner').when, /19:30/);
   assert.doesNotMatch(JSON.stringify(DATA), /Temple|Wat Ong Teu|08:00|16:30/, 'the venue is Souphattra Heritage: no temple, no retired time');
@@ -46,10 +46,13 @@ test('ASSETS · the site plan is the corrected architectural drawing (vector, th
   assert.doesNotMatch(svg, /<image|data:image|<script|\son[a-z]+=|<foreignObject|href="http/i, 'no embedded raster, no script, no external reference');
   /* the visible words: exactly the names the official plan confirms (HS-058 reconciliation, 22 Nov 2026) */
   const words = [...svg.matchAll(/<text [^>]*>([^<]*)<\/text>/g)].map((m) => m[1]);
-  assert.deepEqual(words, ['BUILDING A', 'Lobby', 'Peacock', 'Bistro', 'BUILDING F', 'Peacock', 'Court', 'Pool', 'BUILDING B', 'BUILDING C', 'BUILDING D', 'BUILDING E']);
+  assert.deepEqual(words, ['BUILDING A', 'Lobby', 'Peacock', 'Bistro', 'BUILDING F', 'Peacock', 'Court', 'Swimming Pool', 'BUILDING B', 'BUILDING C', 'BUILDING D', 'BUILDING E',
+    /* the uses of the places, as the Owners confirmed them on 22 Nov 2026 (HS-058.7): the official plan fixes where, the Owners what */
+    'RECEPTION', '&amp; CHECK-IN', 'BREAKFAST', 'COFFEE &amp; CAKE', 'Green Doors', 'VOW CEREMONY', 'WEDDING DINNER', 'Garden', 'GUEST ROOMS', 'GUEST ROOMS', 'GUEST ROOMS', 'GUEST ROOMS']);
+  assert.match(svg, /<rect class="sp-zone" data-zone="green-doors" x="170" y="530"/, 'the Green Doors: between the Lobby and the Peacock Bistro, as the Owners marked it');
   assert.doesNotMatch(svg.replace(/<style>[\s\S]*?<\/style>/, '').replace(/<[^>]*>/g, ' '), /\d/, 'no number anywhere in the drawing\'s text (titles and descriptions included): no room number on the public plan');
   assert.doesNotMatch(svg, /<!--|<tspan/, 'no comment, no hidden text run');
-  assert.doesNotMatch(svg, /ROOM REGISTER|GUEST ROOMS|Garden|COURTYARD|Coffee|Ceremony|Vow|Dinner|Suite|Presidential|Haruthai|Suthep/i, 'no register, no invented area, no event position, no allocation, no name');
+  assert.doesNotMatch(svg, /ROOM REGISTER|COURTYARD|poolside|Suite|Presidential|Haruthai|Suthep/i, 'no register, no retired place, no allocation, no name');
   assert.equal(DATA.plan.drive, undefined, 'no Drive id in the guest-loaded file');
   assert.match(manifest.plan.what, /official plan/); assert.equal(manifest.plan.file, V + 'souphattra-site-plan.svg');
   /* provenance by the production file (the Media Asset Agent, 26 Sep 2026): the guest-loaded record carries no Drive id at all */

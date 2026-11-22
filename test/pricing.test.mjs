@@ -1158,8 +1158,8 @@ test('the retired imagery and the pool-side dinner narrative are gone', () => {
   assert.ok(!/053-wedding-dinner-courtyard-garden/.test(vy), 'the fountain photograph is still there');
   /* Owner, 13 Sep 2026: the Wedding Dinner is POOLSIDE — said so, never "courtyard garden"; the pool stays out of the vow only */
   const dinnerSec = vy.slice(vy.indexOf('id="dinner"'), vy.indexOf('id="dinner"') + 900);
-  assert.match(dinnerSec, /19:30 · Souphattra Heritage · poolside/); assert.match(dinnerSec, /An evening poolside/); /* B6 */
-  assert.ok(!/courtyard garden/i.test(vy), 'the dinner is poolside, not the courtyard garden');
+  assert.match(dinnerSec, /19:30 · Souphattra Heritage · Green Doors/); assert.match(dinnerSec, /An evening at the Green Doors/); /* B6 */
+  assert.ok(!/courtyard garden/i.test(vy), 'the dinner is at the Green Doors, never "courtyard garden"');
   assert.ok(!/Sunset drinks/.test(vy));
   /* and the retired bride frame is not quietly moved to another event */
   for (const f of ['index.html', 'journeys.html', 'accommodation.html', 'destination.html', 'experiences.html']) {
@@ -1178,7 +1178,7 @@ test('the retired imagery and the pool-side dinner narrative are gone', () => {
    * the Owner's set does not contain. The stay is still shown as a room. */
   assert.doesNotMatch(vy, /am-placeholder|Photograph to follow/);
   /* 21 Sep 2026 · the consolidation: the wedding dinner's photographs live in ONE record (assets/wedding-dinner.js — every frame of Drive 056 and the two unique frames of the earlier set) and are drawn into the one gallery under #dinner by that record; the page itself names only the lead frame (test/wedding-dinner.test.mjs holds the set) */
-  assert.match(vy, /id="dinner"[\s\S]{0,400}056-wedding-dinner-01-poolside-from-above\.jpg/, 'the lead image is the poolside from above');
+  assert.match(vy, /id="dinner"[\s\S]{0,400}056-wedding-dinner-01-poolside-from-above\.jpg/, 'the lead image stays the venue from above (Drive 056)');
   assert.doesNotMatch(vy, /053-wedding-dinner-/, 'the earlier dinner frames are not written into the page');
   assert.match(vy, /<div class="dgal" aria-label="The wedding dinner in photographs" data-wedding-dinner-gallery><\/div>/); assert.match(vy, /<script src="assets\/wedding-dinner\.js/); assert.match(vy, /<script src="assets\/refgal\.js/);
   assert.ok(!existsSync(join(ROOT, 'assets/images/event/053-wedding-dinner-courtyard-garden.jpg')), 'the fountain file (not from the Wedding Dinner folder) is retired');

@@ -58,6 +58,7 @@ import { siteKeyOfSelection } from './billing/bookings.js';
 /* THE H&S ADMIN CONSOLE (Owner, 7 Oct 2026): the page, generated from src/admin/billing.html (src/build-admin-page.cjs) */
 import ADMIN_PAGE from './admin-page.js';
 import { confirmationStands, writeConfirmation, CONFIRMATION_ROLE } from './confirmation.js';
+import { obkKey, OBK_INDEX_KEY, readRecord as readOwnerBooking, stateOf as ownerBookingState, OWNER_BOOKING_STATE } from './billing/owner-bookings.js';   /* HS-058.7: read only — is this guest's room a confirmed booking? */
 import { identify, owns, loadIndex } from './auth.js';
 import { authIdOf } from '../register/crypto.mjs';   /* the one-way derivation the register's index is keyed by (the guest's own document read) */
 import { MEDIA_SIZES } from './media-sizes.js';
@@ -293,8 +294,11 @@ export default {
       if (!grAuthorised(request, env)) return json({ ok: false, error: 'unauthorised' }, 401);
       return handleConfirm(request, env);
     }
-    /* HS-058.7 · MY ROOM ON THE SITE PLAN (Owners, 22 Nov 2026): the signed-in guest's OWN Souphattra room(s) — the building and the
-       hotel number the Owners assigned to the unit the guest holds now ("a number is enough"); nothing else, nobody else. The guest
+    /* HS-058.7 · MY ROOM ON THE SITE PLAN (Owners, 22 Nov 2026): the signed-in guest's OWN Souphattra room(s). The building and the
+       hotel number are shown ONLY for a CONFIRMED booking (Owners' binding hardening, 22 Nov 2026): the room is in the guest's sent
+       trip and that trip's confirmation stands (src/confirmation.js) — or the Owners moved the confirmed room (placedFrom) — or the
+       Owners' own recorded booking for this person is CONFIRMED and holds exactly this room. A room only held, chosen or self-added
+       reveals no number and no building. Confirmation rules are read, never changed. Nothing else, nobody else. The guest
        is the bearer's (one code = one guest); no id, no query is read from the request; the answer is never cached in a shared
        cache. The room engine's op is internal (x-gr-verified, set here only). Nothing is written, priced, confirmed or mailed. */
     if (url.pathname === '/api/my-room') {
@@ -308,10 +312,29 @@ export default {
       const res = await stub.fetch(new Request('https://rooms/api/rooms/gr-own-room', { method: 'POST', headers: { 'content-type': 'application/json', 'x-gr-verified': 'yes' }, body: JSON.stringify({ guestId: who.guestId }) }));
       const j = await res.json().catch(() => null);
       if (!res.ok || !j || !j.ok) return json({ ok: false, error: 'the room plan could not be read just now', retry: true }, 503, priv);
+      /* the confirmed rooms of this guest: KV reg/conf of the guest's own invitation, and the Owners' recorded bookings naming them */
+      const confirmedRooms = new Set();
+      if (env.REG_KV) {
+        try {
+          const [rr, cr] = await Promise.all([env.REG_KV.get('reg:' + who.invitationId), env.REG_KV.get('conf:' + who.invitationId)]);
+          const reg = rr ? JSON.parse(rr) : null, conf = cr ? JSON.parse(cr) : null;
+          if (reg && conf && confirmationStands(conf, reg)) for (const k of sentStays(reg)) confirmedRooms.add(k);
+        } catch (e) { /* unreadable: nothing is confirmed, nothing is shown */ }
+        try {
+          const ix = JSON.parse((await env.REG_KV.get(OBK_INDEX_KEY)) || '{}') || {};
+          for (const h of (Array.isArray(ix[who.guestId]) ? ix[who.guestId] : []).slice(0, 4)) {
+            const rec = readOwnerBooking(await env.REG_KV.get(obkKey(h)));
+            if (ownerBookingState(rec) !== OWNER_BOOKING_STATE.CONFIRMED) continue;
+            for (const e of rec.entries) if (e && e.personId === who.guestId && e.held && e.held.key && e.held.label) confirmedRooms.add(canonicalKey(e.held.key) + '|' + String(e.held.label));
+          }
+        } catch (e) { /* unreadable: the Owners' bookings confirm nothing here */ }
+      }
+      const isConfirmed = (x) => { const k = canonicalKey(x.key); return confirmedRooms.has(k + '|' + x.label) || (x.placedFrom || []).some((l) => confirmedRooms.has(k + '|' + l)); };
       /* only what the guest's own card shows: the stay, the room's category, the allocation label the guest already sees, the
          building and number of an assigned unit (else null), and whether the guest sleeps on the extra bed */
-      const stays = (j.stays || []).map((x) => ({ stage: x.stage, name: x.name, label: x.label, bed: !!x.bed, souphattra: /^(prewed|wedstay)\//.test(x.key),
-        building: x.hotelRoom ? x.hotelRoom.building : null, room: x.hotelRoom ? x.hotelRoom.display : null, suite: !!(x.hotelRoom && x.hotelRoom.suite) }));
+      const stays = (j.stays || []).map((x) => { const ok = !!x.hotelRoom && isConfirmed(x);
+        return { stage: x.stage, name: x.name, bed: !!x.bed, souphattra: /^(prewed|wedstay)\//.test(x.key), confirmed: isConfirmed(x),
+          building: ok ? x.hotelRoom.building : null, room: ok ? x.hotelRoom.display : null, suite: ok && !!x.hotelRoom.suite }; });
       return json({ ok: true, guestId: who.guestId, stays }, 200, priv);
     }
     /* THE PRE-WEDDING DINNER (Owners, 22 Nov 2026 · HS-058): the signed-in guest's own answer and menu order — GET reads it, PUT

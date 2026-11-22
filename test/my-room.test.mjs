@@ -43,7 +43,10 @@ test('THE ROUTE · /api/my-room: GET only, the bearer\'s own guest, no id or que
   assert.match(r, /body: JSON\.stringify\(\{ guestId: who\.guestId \}\)/, 'the guest id is the bearer\'s');
   assert.doesNotMatch(r, /url\.searchParams|request\.json\(|request\.text\(/, 'nothing the client sends chooses the guest');
   assert.match(r, /'cache-control': 'private, no-store'/);
-  assert.match(r, /\(\{ stage: x\.stage, name: x\.name, label: x\.label, bed: !!x\.bed, souphattra: [^,]+,\s*building: x\.hotelRoom \? x\.hotelRoom\.building : null, room: x\.hotelRoom \? x\.hotelRoom\.display : null, suite: !!\(x\.hotelRoom && x\.hotelRoom\.suite\) \}\)/, 'only the card\'s fields');
+  assert.match(r, /const ok = !!x\.hotelRoom && isConfirmed\(x\);\s*return \{ stage: x\.stage, name: x\.name, bed: !!x\.bed, souphattra: [^,]+, confirmed: isConfirmed\(x\),\s*building: ok \? x\.hotelRoom\.building : null, room: ok \? x\.hotelRoom\.display : null, suite: ok && !!x\.hotelRoom\.suite \};/, 'only the card\'s fields — building and number only for a CONFIRMED booking (Owners, 22 Nov 2026)');
+  assert.match(r, /if \(reg && conf && confirmationStands\(conf, reg\)\) for \(const k of sentStays\(reg\)\) confirmedRooms\.add\(k\);/, 'a confirmation that stands, for the rooms its trip carried');
+  assert.match(r, /if \(ownerBookingState\(rec\) !== OWNER_BOOKING_STATE\.CONFIRMED\) continue;/, 'an Owners\' booking counts only when CONFIRMED');
+  assert.doesNotMatch(r, /writeConfirmation|applyAction|REG_KV\.put|\.put\(/, 'nothing is written or confirmed here');
 });
 
 test('THE PROFILE · the same plan, the guest\'s building marked "Your Building", the number in the guest\'s own card, a neutral note without a number; nothing personal in any public file', () => {

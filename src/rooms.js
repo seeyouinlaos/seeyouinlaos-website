@@ -409,7 +409,7 @@ export class Rooms {
       if (!/^G\d{3,}$/.test(gid)) return json({ ok: false, error: 'invalid guest' }, 400);
       const own = (await this.occupancies()).filter((o) => !o.placeholder && o.guestId === gid && (stageOf(o.key) === 'prewed' || stageOf(o.key) === 'wedstay'));
       const assigned = (await this.hotelRooms()).rooms;
-      return json({ ok: true, stays: own.map((o) => ({ stage: stageOf(o.key), key: o.key, label: o.label, name: (SEED[o.key] && SEED[o.key].name) || '', bed: !!o.bed, hotelRoom: hotelRoomOf(o.key, o.label, assigned) })) });
+      return json({ ok: true, stays: own.map((o) => ({ stage: stageOf(o.key), key: o.key, label: o.label, name: (SEED[o.key] && SEED[o.key].name) || '', bed: !!o.bed, placedFrom: Array.isArray(o.placedFrom) ? o.placedFrom.map(String) : [], hotelRoom: hotelRoomOf(o.key, o.label, assigned) })) });
     }
     /* WHO STAYS WHERE (Owner, 2 Oct 2026): every real place held — the guest id, the stay and its unit, the first name the engine
        learned — for the Worker's Wedding Circle, which joins it to the joining cohort by guest id and returns no unit label, no

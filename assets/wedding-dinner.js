@@ -16,11 +16,11 @@
     name: 'Wedding Dinner',
     date: 'Sunday, 28 February 2027',
     time: '19:30',
-    place: 'poolside',
+    place: 'Green Doors',
     venue: 'Souphattra Heritage Vientiane',
     dress: 'Black Tie',
     dressHref: 'wedding-preparation.html#dress-code',
-    copy: 'An evening poolside, bringing the wedding day to its final and longest chapter — a Chinese sharing menu at the table, and the night to follow.',
+    copy: 'An evening at the Green Doors, bringing the wedding day to its final and longest chapter — a Chinese sharing menu at the table, and the night to follow.',
     /* THE SET MENU (Owners, 22 Nov 2026 · HS-058): ONE shared menu for every guest at the table, served in this order — nothing
        is chosen per guest. Open with the restaurant (the Owners ask): the number of prawns, and the alternative for guests who do
        not eat beef; until it is confirmed the page says only that it is being confirmed. */
@@ -38,7 +38,7 @@
       ]
     },
     /* the seating of the one long table — the plan's words, never a second dinner */
-    seating: 'The long table beside the water — side A along the pool, side B facing it.',
+    seating: 'The long table at the Green Doors — side A along the water, side B facing it.',
     href: 'voyage.html#dinner',
     media: [
       { src: E + '056-wedding-dinner-01-poolside-from-above.jpg', alt: 'Poolside at Souphattra Heritage, seen from above', source: 'Drive 056' },
