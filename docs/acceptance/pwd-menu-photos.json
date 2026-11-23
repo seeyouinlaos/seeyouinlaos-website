@@ -1,0 +1,596 @@
+{
+ "about": "HS-058.15 (Owners, 23 Nov 2026) · the product photographs and short lines of the Pre-Wedding Dinner menu selection in My Profile (assets/pre-wedding-dinner.js · LOOK). Every photograph is cut from the restaurant's ORIGINAL menu \"Menu Cam On.pdf\" (20 pages, each page one 4961 x 7016 JPEG at 600 ppi; the web copy is assets/pdf/cam-on-menu.pdf): nothing generated, nothing from stock. A photograph is assigned to a code by the code's label beside it, the Lao and English names and what the photograph shows. box900 = [x0, y0, x1, y1] on the page scaled to 900 px wide (x 4961/900 for the original); a \"p+q\" page is a two-page spread. paintedOut900: the menu's own lettering or a neighbour's edge covered with the flat page ground beside it, never on the dish. Food 4:3, drinks 4:5; WebP q74 at 400 and 800 px wide in assets/images/pre-wedding-dinner/menu/.",
+ "notPictured": {
+  "B5": "the plain baguette has no photograph on the menu (text card, \"Not pictured on the menu\")",
+  "page 19": "coffee, smoothies, juice, soft drinks, water and beer: a text list without photographs on the menu (text cards)"
+ },
+ "lineSources": {
+  "A2": "menu English name \"Wagyu Beef Supreme Pho\"",
+  "A4": "menu English name \"Pho Striped Shank Beef\"",
+  "A5": "menu English name \"Pho Tender Oxtail\"",
+  "A6": "menu English name \"Rare Pho\"",
+  "A7": "menu English name \"Beef Well Done Flank Pho\"",
+  "A8": "menu English name \"Meatballs Pho\"",
+  "A9": "menu page 5: \"Our Chicken Pho … a broth that is light, clear, and fragrant\"",
+  "B1": "menu Lao name ເຂົ້າຈີ່ປາເຕ້ (baguette with pâté) and the English \"Bánh Mì Classic\"",
+  "B2": "menu English name \"Bánh Mì Beef\"",
+  "B3": "menu English name \"Bánh Mì Chicken\"",
+  "B4": "menu English name \"Bánh Mì Veggies\"",
+  "B5": "menu: \"Bánh Mì\", LAK 35,000, Chinese 面包 (bread), Lao ເຂົ້າຈີ່ (bread)",
+  "C1": "the dish name bánh bèo (Vietnamese: steamed rice cake); menu photograph",
+  "C2": "the dish name bánh bột lọc nhân tôm (clear tapioca dumpling, shrimp filling); menu Chinese 越式虾仁透明饺",
+  "C3": "menu English \"Summer Rolls\" and Lao ປໍ່ຂາວກຸ້ງ (fresh roll, shrimp); menu photograph",
+  "C4": "the dish name bánh bột lọc (clear tapioca dumpling)",
+  "C5": "menu English \"Pork Spring Rolls\" and Lao ປໍ່ຈືນໝູ (fried roll, pork)",
+  "C6": "menu English \"Veggie Spring Rolls\" and Lao ປໍ່ຈືນຜັກ (fried roll, vegetables)",
+  "C7": "menu English \"Pork Rice Paper Rolls\" and Lao ປໍ່ຂາວໝູ (fresh roll, pork)",
+  "C8": "menu English \"Veggie Rolls\" and Lao ປໍ່ຂາວຜັກ (fresh roll, vegetables)",
+  "D1": "menu page 14: \"the traditional Vietnamese Phin style … the slow drip\"",
+  "D2": "the name cà phê sữa đá (coffee, milk, ice) and Lao ກາເຟເຢັນ (iced coffee)",
+  "D3": "menu English \"Egg Coffee\"; menu photograph",
+  "D4": "menu English \"Dirty Matcha\" (matcha, milk, a shot of coffee); menu photograph",
+  "D5": "menu English \"Coconut Coffee\" and Lao ກາເຟກະທິປັ່ນ (coffee, coconut, blended)",
+  "E1": "menu English \"Peach Ice Tea\"",
+  "E2": "menu English \"Chrysanthemum Iced Tea\"",
+  "E3": "menu English \"Fresh Longan\" and Lao ນ້ຳລຳໄຍ (longan juice)",
+  "E5": "menu English \"Lotus Seed & Longan\"",
+  "E6": "menu English \"Lychee Iced Tea\"",
+  "E7": "menu page 16: \"our Chè (Vietnamese sweet soup)\"; menu photograph"
+ },
+ "items": {
+  "A1": {
+   "page": "6",
+   "box900": [
+    24,
+    355,
+    633,
+    812
+   ],
+   "aspect": "4:3",
+   "files": [
+    "a1-400.webp",
+    "a1-800.webp"
+   ],
+   "paintedOut900": [
+    [
+     60,
+     338,
+     125,
+     378
+    ]
+   ]
+  },
+  "A2": {
+   "page": "7",
+   "box900": [
+    0,
+    85,
+    520,
+    475
+   ],
+   "aspect": "4:3",
+   "files": [
+    "a2-400.webp",
+    "a2-800.webp"
+   ],
+   "paintedOut900": [
+    [
+     424,
+     80,
+     525,
+     170
+    ],
+    [
+     426,
+     170,
+     525,
+     262
+    ],
+    [
+     498,
+     284,
+     525,
+     352
+    ]
+   ]
+  },
+  "A3": {
+   "page": "7",
+   "box900": [
+    418,
+    476,
+    840,
+    793
+   ],
+   "aspect": "4:3",
+   "files": [
+    "a3-400.webp",
+    "a3-800.webp"
+   ],
+   "paintedOut900": [
+    [
+     408,
+     722,
+     432,
+     754
+    ]
+   ]
+  },
+  "A4": {
+   "page": "8",
+   "box900": [
+    480,
+    12,
+    840,
+    282
+   ],
+   "aspect": "4:3",
+   "files": [
+    "a4-400.webp",
+    "a4-800.webp"
+   ]
+  },
+  "A5": {
+   "page": "8",
+   "box900": [
+    60,
+    162,
+    407,
+    422
+   ],
+   "aspect": "4:3",
+   "files": [
+    "a5-400.webp",
+    "a5-800.webp"
+   ]
+  },
+  "A6": {
+   "page": "8",
+   "box900": [
+    495,
+    418,
+    855,
+    688
+   ],
+   "aspect": "4:3",
+   "files": [
+    "a6-400.webp",
+    "a6-800.webp"
+   ]
+  },
+  "A7": {
+   "page": "8",
+   "box900": [
+    88,
+    548,
+    441,
+    813
+   ],
+   "aspect": "4:3",
+   "files": [
+    "a7-400.webp",
+    "a7-800.webp"
+   ]
+  },
+  "A8": {
+   "page": "9",
+   "box900": [
+    105,
+    35,
+    465,
+    305
+   ],
+   "aspect": "4:3",
+   "files": [
+    "a8-400.webp",
+    "a8-800.webp"
+   ]
+  },
+  "A9": {
+   "page": "9",
+   "box900": [
+    482,
+    282,
+    842,
+    552
+   ],
+   "aspect": "4:3",
+   "files": [
+    "a9-400.webp",
+    "a9-800.webp"
+   ]
+  },
+  "A10": {
+   "page": "9",
+   "box900": [
+    36,
+    465,
+    492,
+    807
+   ],
+   "aspect": "4:3",
+   "files": [
+    "a10-400.webp",
+    "a10-800.webp"
+   ]
+  },
+  "B1": {
+   "page": "11",
+   "box900": [
+    378,
+    182,
+    728,
+    444
+   ],
+   "aspect": "4:3",
+   "files": [
+    "b1-400.webp",
+    "b1-800.webp"
+   ]
+  },
+  "B2": {
+   "page": "11",
+   "box900": [
+    80,
+    455,
+    395,
+    691
+   ],
+   "aspect": "4:3",
+   "files": [
+    "b2-400.webp",
+    "b2-800.webp"
+   ]
+  },
+  "B3": {
+   "page": "11",
+   "box900": [
+    555,
+    605,
+    890,
+    856
+   ],
+   "aspect": "4:3",
+   "files": [
+    "b3-400.webp",
+    "b3-800.webp"
+   ]
+  },
+  "B4": {
+   "page": "11",
+   "box900": [
+    75,
+    875,
+    410,
+    1126
+   ],
+   "aspect": "4:3",
+   "files": [
+    "b4-400.webp",
+    "b4-800.webp"
+   ]
+  },
+  "C1": {
+   "page": "12",
+   "box900": [
+    60,
+    157,
+    595,
+    558
+   ],
+   "aspect": "4:3",
+   "files": [
+    "c1-400.webp",
+    "c1-800.webp"
+   ],
+   "paintedOut900": [
+    [
+     545,
+     150,
+     600,
+     225
+    ]
+   ]
+  },
+  "C2": {
+   "page": "12",
+   "box900": [
+    38,
+    872,
+    505,
+    1176
+   ],
+   "aspect": "4:3",
+   "files": [
+    "c2-400.webp",
+    "c2-800.webp"
+   ]
+  },
+  "C3": {
+   "page": "12",
+   "box900": [
+    478,
+    640,
+    878,
+    940
+   ],
+   "aspect": "4:3",
+   "files": [
+    "c3-400.webp",
+    "c3-800.webp"
+   ]
+  },
+  "C4": {
+   "page": "13",
+   "box900": [
+    440,
+    92,
+    875,
+    418
+   ],
+   "aspect": "4:3",
+   "files": [
+    "c4-400.webp",
+    "c4-800.webp"
+   ]
+  },
+  "C5": {
+   "page": "13",
+   "box900": [
+    300,
+    724,
+    881,
+    1160
+   ],
+   "aspect": "4:3",
+   "files": [
+    "c5-400.webp",
+    "c5-800.webp"
+   ],
+   "paintedOut900": [
+    [
+     295,
+     805,
+     368,
+     872
+    ],
+    [
+     296,
+     716,
+     404,
+     758
+    ],
+    [
+     296,
+     756,
+     336,
+     768
+    ],
+    [
+     404,
+     716,
+     450,
+     734
+    ]
+   ]
+  },
+  "C7": {
+   "page": "13",
+   "box900": [
+    40,
+    470,
+    445,
+    774
+   ],
+   "aspect": "4:3",
+   "files": [
+    "c7-400.webp",
+    "c7-800.webp"
+   ]
+  },
+  "D1": {
+   "page": "14+15",
+   "box900": [
+    796,
+    280,
+    1072,
+    625
+   ],
+   "aspect": "4:5",
+   "files": [
+    "d1-400.webp",
+    "d1-800.webp"
+   ]
+  },
+  "D2": {
+   "page": "15",
+   "box900": [
+    434,
+    262,
+    740,
+    645
+   ],
+   "aspect": "4:5",
+   "files": [
+    "d2-400.webp",
+    "d2-800.webp"
+   ]
+  },
+  "D3": {
+   "page": "14",
+   "box900": [
+    444,
+    662,
+    748,
+    1042
+   ],
+   "aspect": "4:5",
+   "files": [
+    "d3-400.webp",
+    "d3-800.webp"
+   ]
+  },
+  "D4": {
+   "page": "15",
+   "box900": [
+    176,
+    525,
+    440,
+    855
+   ],
+   "aspect": "4:5",
+   "files": [
+    "d4-400.webp",
+    "d4-800.webp"
+   ]
+  },
+  "D5": {
+   "page": "15",
+   "box900": [
+    556,
+    645,
+    804,
+    955
+   ],
+   "aspect": "4:5",
+   "files": [
+    "d5-400.webp",
+    "d5-800.webp"
+   ]
+  },
+  "E1": {
+   "page": "16",
+   "box900": [
+    318,
+    210,
+    578,
+    535
+   ],
+   "aspect": "4:5",
+   "files": [
+    "e1-400.webp",
+    "e1-800.webp"
+   ]
+  },
+  "E2": {
+   "page": "16+17",
+   "box900": [
+    768,
+    250,
+    935,
+    459
+   ],
+   "aspect": "4:5",
+   "files": [
+    "e2-400.webp",
+    "e2-800.webp"
+   ]
+  },
+  "E3": {
+   "page": "17",
+   "box900": [
+    40,
+    258,
+    300,
+    583
+   ],
+   "aspect": "4:5",
+   "files": [
+    "e3-400.webp",
+    "e3-800.webp"
+   ]
+  },
+  "E4": {
+   "page": "17",
+   "box900": [
+    306,
+    150,
+    522,
+    420
+   ],
+   "aspect": "4:5",
+   "files": [
+    "e4-400.webp",
+    "e4-800.webp"
+   ]
+  },
+  "E5": {
+   "page": "17",
+   "box900": [
+    588,
+    208,
+    842,
+    526
+   ],
+   "aspect": "4:5",
+   "files": [
+    "e5-400.webp",
+    "e5-800.webp"
+   ]
+  },
+  "E6": {
+   "page": "16",
+   "box900": [
+    575,
+    570,
+    875,
+    945
+   ],
+   "aspect": "4:5",
+   "files": [
+    "e6-400.webp",
+    "e6-800.webp"
+   ]
+  },
+  "E7": {
+   "page": "17",
+   "box900": [
+    312,
+    548,
+    588,
+    893
+   ],
+   "aspect": "4:5",
+   "files": [
+    "e7-400.webp",
+    "e7-800.webp"
+   ]
+  },
+  "G1": {
+   "page": "18",
+   "box900": [
+    330,
+    175,
+    800,
+    527
+   ],
+   "aspect": "4:3",
+   "files": [
+    "g1-400.webp",
+    "g1-800.webp"
+   ]
+  },
+  "G2": {
+   "page": "18",
+   "box900": [
+    115,
+    734,
+    592,
+    1092
+   ],
+   "aspect": "4:3",
+   "files": [
+    "g2-400.webp",
+    "g2-800.webp"
+   ]
+  },
+  "C6": {
+   "sameAs": "C5",
+   "why": "menu page 13 shows ONE photograph for C5 and C6 (Lao ປໍ່ຈືນ = fried); the card says \"Menu photo for C5 & C6\""
+  },
+  "C8": {
+   "sameAs": "C7",
+   "why": "menu page 13 shows ONE photograph for C7 and C8 (Lao ປໍ່ຂາວ = fresh); the card says \"Menu photo for C7 & C8\""
+  }
+ }
+}
