@@ -219,6 +219,28 @@ test('THE RATES · five trips, each under the guest\'s own invitation: each pric
   assert.ok(out.lines.every((l) => l.Bill_To_Holder_ID === l.Holder_ID), 'each on their own invitation unless the Owners set the ledger\'s bill-to');
 });
 
+test('GRAND MAJESTIC ROOM B (HS-058.17) · the third person sleeps on the extra bed: priced by their own row × its Nights_Rule, never the room\'s standard rate — and the suite stays ONE room', async () => {
+  /* synthetic roles and amounts only: two guests of the suite on a complimentary row (rule 2), the third on the bed with an own row
+     (rule 1); the real figures are Google's and gate F1's, never committed here */
+  const items = { 'D1-GM': { Item_ID: 'D1-GM', Billing_Category: 'GUEST_SETTLEMENT_REQUIRED', Rate_Status: 'ACTIVE', Rate_Basis: 'PER_PERSON_PER_NIGHT',
+    Standard_Rate: 99, Currency: 'USD', Quota: 2, Quota_Unit: 'ROOM', Max_Pax: 2, Site_Product_Key: 'wedstay/grand-majestic', 'Number of Nights': 2, Modifiers: ['SECOND_NIGHT_COMPLIMENTARY'] } };
+  const row = (person, rate, nights) => ({ Holder_ID: 'INV-' + person, Person_ID: person, Item_ID: 'D1-GM', Rate_Per_Person_Night: rate, Nights_Rule: String(nights), Rate_Status: 'ACTIVE', Approved_By: 'synthetic' });
+  const bookings = [];
+  for (const g of ['GB1', 'GB2', 'GB3']) {
+    bookings.push(...await bookingsOfSelections({ holderId: 'INV-' + g, personId: g, selections: [{ id: 'wedstay', room: 'grand-majestic', unit: 'B', qty: 1 }], items, source: 'CONFIRMED_REGISTRATION', version: 1 }));
+  }
+  const priced = (specialRates) => calculate(bookings, { items, specialRates, asOf: '2026-11-23' });
+  const withRow = priced([row('GB1', 0, 2), row('GB2', 0, 2), row('GB3', 7, 1)]);
+  assert.deepEqual(withRow.lines.map((l) => [l.Person_ID, l.Room_Unit_ID, l.rateSource, l.payableNights, l.amountCents]), [
+    ['GB1', 'RU·D1-GM·B', 'SPECIAL_RATE', 2, 0], ['GB2', 'RU·D1-GM·B', 'SPECIAL_RATE', 2, 0], ['GB3', 'RU·D1-GM·B', 'SPECIAL_RATE', 1, 700]]);
+  assert.equal(withRow.manualReview.length, 0);
+  assert.deepEqual([withRow.quota['D1-GM'].used, withRow.quota['D1-GM'].overQuota], [1, false], 'three persons in Room B use ONE room of the quota, never a second');
+  /* without the bed guest's own row the engine falls back to the room's standard rate — which is why Issue waits (EXTRA_BED_UNPRICED) */
+  const without = priced([row('GB1', 0, 2), row('GB2', 0, 2)]);
+  assert.deepEqual([without.lines[2].rateSource, without.lines[2].amountCents], ['STANDARD_RATE', 9900]);
+  assert.equal(without.quota['D1-GM'].used, 1);
+});
+
 /* ---- THE PAGE, AS SHIPPED: the browser's room module (assets/rooms.js) reading the real engine for one signed-in guest — the words a
    guest sees for the room, the Choose button's answer, the occupancy sentence; never a second calculation ---- */
 import { page, session, roomsFetch } from './sandbox.mjs';
