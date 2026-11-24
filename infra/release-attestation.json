@@ -2,17 +2,15 @@
  "about": "Signed by src/release-attest.mjs on the release machine; verified by src/release-verify.cjs in the build. Not the Owner's consent — a record that these checks passed for exactly this tree.",
  "payload": {
   "v": 1,
-  "tree": "9cbbc55078b7cf05355e93b06a2e1ec878daf49c",
+  "tree": "c384f2bf7606486e71c1bf67f3e507d2fb2461f8",
   "pricingRef": "268f35f184bf",
   "keyId": "d02a1256537ec29e",
-  "at": "2026-11-23T08:43:41.744Z",
-  "base": "ffd9cfa5f7438eeeff7f2fbcb9f7459beefcf224",
-  "markers": {
-   "OWNER_PRICING_CHANGE": "Wedding stay Grand Majestic Suite Room B extra bed priced by its own 009 row, USD 75 x Nights_Rule 1, 009 row 44 (HS-058.17) [ref 268f35f184bf]"
-  },
+  "at": "2026-11-24T14:41:44.337Z",
+  "base": "c1d8a070bc0da9c76e8faf2c7d67cd77e8a2be75",
+  "markers": {},
   "checks": {
    "npmTest": {
-    "pass": 1185,
+    "pass": 1186,
     "fail": 0
    },
    "releaseCheck": {
@@ -25,5 +23,5 @@
    }
   }
  },
- "signature": "IXR+BvCVIWS69CIdqinu587xv4m2WWJsB5FMaW/P18lv2xPpTS6QgMj2eIWQNJzDieu0FSosmQM42i+6uJINDg=="
+ "signature": "Apmu+C345ubthaPBPOpcbZJexuol48o3XM6oioOwDpPXNyJU1edO+eAtFLkpjYckEKvP2ifDx76uP13bV8f7Dg=="
 }

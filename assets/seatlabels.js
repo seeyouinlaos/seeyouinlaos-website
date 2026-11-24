@@ -35,7 +35,7 @@
   var RUNS = { T: 'A', B: 'B' };
   var EVENT_CODE = { ceremony: 'WC', dinner: 'WD' };   /* WC = Wedding (Vow) Ceremony · WD = Wedding Dinner */
   var EVENT_NAME = { ceremony: 'Vow Ceremony', dinner: 'Wedding Dinner' };
-  var EVENT_VENUE = { ceremony: 'Souphattra Heritage, Vientiane', dinner: 'Souphattra Heritage Vientiane · Green Doors' };
+  var EVENT_VENUE = { ceremony: 'Souphattra Heritage, Vientiane', dinner: 'Souphattra Heritage Vientiane · Pool Area' };
   /* the two dinner seats removed from the plan (Owner, 24 Sep 2026): no label, no seat, never renumbered */
   var RETIRED = ['D-T-13', 'D-B-13'];
   /* THE PERMANENT RULE (Owner, 24 Sep 2026 · D-29): 13 is never a guest-facing seat number — not at the dinner, not at the
@@ -85,7 +85,7 @@
     var c = /^C-([LR])-(\d+)-(\d+)$/.exec(seatId0 || '');
     if (c) return (c[1] === 'L' ? 'Left block' : 'Right block') + ' · row ' + Number(c[2]);
     var d = /^D-([TB])-(\d+)$/.exec(seatId0 || '');
-    if (d) return 'Long table · ' + (d[1] === 'T' ? 'side A' : 'side B');
+    if (d) return 'Long table · ' + (d[1] === 'T' ? 'side A · poolside' : 'side B · facing the pool');
     return '';
   }
 

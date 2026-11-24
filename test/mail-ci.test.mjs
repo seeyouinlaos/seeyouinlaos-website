@@ -43,7 +43,7 @@ test('the guest email · CI, human words, the Worker CTA, no system term, no id,
     assert.match(body, /USD 292/); assert.match(body, /Peanuts/); assert.match(body, /Oolong/); assert.match(body, /Dress code/); assert.match(body, /Acknowledged/); assert.doesNotMatch(body, /Reviewed/);
     assert.match(body, /https:\/\/seeyouinlaos-website\.suthep-hrg\.workers\.dev\/invitation/); assert.match(body, /we never send codes by email/); assert.match(body, /guest\.relation\.seeyouinlaos@gmail\.com/); assert.match(body, /Vientiane · 28 February 2027/);
     assert.doesNotMatch(body, /Passport/, 'an optional document not provided is omitted for the guest');
-    assert.match(body, /Wat Ong Teu/); assert.match(body, /09:00 – approximately 12:00/); assert.match(body, /12:00 – 15:30/); assert.match(body, /15:30/); assert.match(body, /19:30/); assert.match(body, /Green Doors/); assert.match(body, /Not joining/);
+    assert.match(body, /Wat Ong Teu/); assert.match(body, /09:00 – approximately 12:00/); assert.match(body, /12:00 – 15:30/); assert.match(body, /15:30/); assert.match(body, /19:30/); assert.match(body, /Pool Area/); assert.doesNotMatch(body, /Green Doors/); assert.match(body, /Not joining/);
   }
   assert.match(m.html, /background:#F2ECE1/, 'the canonical Warm Ivory'); assert.doesNotMatch(m.html, /#8a5a55|#f4eee5/i, 'no retired colour'); assert.match(m.html, /Georgia, 'Times New Roman'/); assert.match(m.html, /letter-spacing:2px;text-transform:uppercase/); assert.match(m.html, /max-width:640px/); assert.match(m.html, /Open My Trip/);
   assert.match(m.html, /<meta name="viewport"/); assert.doesNotMatch(m.html, /display:\s*grid|display:\s*flex|<script/);

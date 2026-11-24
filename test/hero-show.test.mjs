@@ -17,21 +17,30 @@ test('HERO SYNC · the record is the Drive collection by file id, in its canonic
   const ids = REC.items.map((x) => x.driveId); assert.equal(new Set(ids).size, ids.length, 'one file, one slide');
   /* THE CANONICAL ORDER (Owner, 26 Sep 2026 · Haruthai): the main video plays LAST; the others in Drive title order */
   assert.equal(REC.order, 'explicit'); assert.match(REC.orderNote, /main video .* LAST/);
+  /* HS-058.18 (Owners, 24 Nov 2026): the last slide — the main video, the night traffic with "They say …" — is REMOVED from the Hero; the
+     record keeps it, excluded with its reason (the file stays: collection 002's Bangkok card plays it), and the collection is partial */
+  const main = REC.items.find((x) => x.driveId === '1TcVUGDzOHp7qdsO-5ekMXEYV38SCL1B6');
+  assert.equal(main.status, 'excluded'); assert.match(main.note, /removed from the Hero by the Owners on 24 Nov 2026 \(HS-058\.18\)/); assert.equal(REC.status, 'partial');
+  assert.match(REC.orderNote, /REMOVED FROM THE HERO \(Owners, 24 Nov 2026 · HS-058\.18\)/);
+  const SHOWN = REC.items.filter((x) => x.status === 'synced');
+  assert.deepEqual(SHOWN.map((x) => x.title), ['000 - Hero_Main_Video 02', '001 - Hero', '002 - Hero', '003 - Hero', '004 - Hero'], 'the other five, in their order');
   /* the Drive titles since the Owner's rename of 26 Sep 2026 (same bytes): a rename never reorders an explicit collection */
   assert.deepEqual(REC.items.map((x) => x.title), ['000 - Hero_Main_Video 02', '001 - Hero', '002 - Hero', '003 - Hero', '004 - Hero', '000 - Hero_Main_Video 01']);
   assert.deepEqual(REC.items.map((x) => x.formerTitle), ['000_Hero', '001_Hero', '002_Hero', '003_Hero', '004_Hero', '000 - Hero_Main_Video']);
-  assert.equal(REC.items[5].driveId, '1TcVUGDzOHp7qdsO-5ekMXEYV38SCL1B6', 'the main video, by its Drive id, is the sixth and last slide');
+  assert.equal(REC.items[5].driveId, '1TcVUGDzOHp7qdsO-5ekMXEYV38SCL1B6', 'the main video, by its Drive id, stays the sixth record — excluded from the Hero since 24 Nov 2026');
   assert.deepEqual(REC.items.map((x) => x.kind), ['video', 'image', 'image', 'image', 'image', 'video']);
   assert.equal(spawnSync('node', [join(ROOT, 'src/build-hero.cjs'), '--check'], { encoding: 'utf8' }).status, 0, 'index.html is the record\'s Hero');
   const h = src('index.html');
   for (const x of REC.items) { assert.ok(existsSync(join(ROOT, x.asset)), x.asset); if (x.poster) assert.ok(existsSync(join(ROOT, x.poster)), x.poster); }
   for (const x of REC.items) assert.ok(!h.includes(x.driveId), 'no Drive id on the page');
   assert.doesNotMatch(h, /drive\.google\.com|docs\.google\.com/, 'no Drive URL on the page');
-  const [first, ...rest] = REC.items;
+  const [first, ...rest] = SHOWN;
   assert.match(h, new RegExp('<div class="am" style="background-image:url\\(' + first.poster.replace(/[.]/g, '\\.') + '\\);--fp-p:' + first.focal.p + ';[^"]*" role="img" aria-label="' + first.alt + '" data-hero-show data-hero-video="media/' + first.asset.split('/').pop().replace(/[.]/g, '\\.') + '" data-audio="0">'), 'the first slide is the frame itself: the terrace film over its poster (no audio track), served by the byte-range route');
   const layers = [...h.matchAll(/<span class="a-hero-slide" data-src="([^"]+)"( data-hero-video="([^"]+)" data-audio="([01])")? style="(--fp-p:[^"]+)" aria-hidden="true"><\/span>/g)];
   assert.deepEqual(layers.map((m) => m[3] || m[1]), rest.map((x) => (x.kind === 'video' ? 'media/' + x.asset.split('/').pop() : x.asset)), 'the layers in order');
-  assert.equal(layers.length, 5); assert.equal(layers[4][4], '1', 'the last slide is the main video, with its audio track');
+  assert.equal(layers.length, 4, 'five slides: the frame and four layers — no empty slide'); assert.ok(layers.every((m) => !m[2]), 'the four layers are the photographs; no film after the first');
+  assert.ok(!h.includes('media/hero-000-main.mp4') && !h.includes('hero-000-main-poster'), 'the removed film is nowhere in the Hero');
+  assert.match(h, /<a class="am" href="destination\.html#bangkok" data-video="assets\/video\/hero-000-main\.mp4"/, 'the Bangkok card keeps its film');
   for (const m of layers) assert.match(m[5], /^--fp-p:\d+% \d+%;--fp-tp:\d+% \d+%;--fp-tl:\d+% \d+%;--fp-d:\d+% \d+%$/, 'a focal point per viewport class');
   for (const x of REC.items.filter((y) => y.kind === 'image')) { assert.ok(statSync(join(ROOT, x.asset)).size < 260000, x.asset + ' is web-sized'); assert.equal(readFileSync(join(ROOT, x.asset)).indexOf(Buffer.from('Exif')), -1, x.asset + ' carries no EXIF'); }
   for (const old of ['home-hero-02', 'home-hero-03', 'home-hero-04', 'home-hero-05', 'home-hero-courtyard']) { assert.ok(!existsSync(join(ROOT, 'assets/images/hero/' + old + '.jpg')), old + ' is retired'); assert.ok(!h.includes(old), old + ' is referenced nowhere'); }

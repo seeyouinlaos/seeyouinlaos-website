@@ -491,8 +491,8 @@ test('G · the renderer draws only what it is given: rows facing the ceremony, o
   assert.doesNotMatch(d, /data-label="[AB]13"|>[AB]13</, 'no A13, no B13 drawn'); assert.match(d, /data-label="B12"/); assert.match(d, /data-label="A14"/); assert.match(d, /data-label="A26"/); assert.match(d, /data-label="B26"/); assert.match(d, /data-label="A28"/); assert.match(d, /data-label="B28"/);
   assert.equal((d.match(/seat-taken/g) || []).length, 1);
   assert.doesNotMatch(d, /BRIDE|GROOM|fixed/, 'no fixed position is drawn for anyone');
-  /* the Owners' copy (counts from the plan): “Side A · 27 seats” · “Side B · 27 seats” · “One long table · 54 seats” */
-  assert.match(d, />Side A · 27 seats</); assert.match(d, />Side B · 27 seats</); assert.match(d, />One long table · 54 seats</);
+  /* the Owners' copy (counts from the plan · the pool restored, HS-058.18): “Side A · 27 seats · poolside” · “Side B · 27 seats · facing the pool” · “One long table · 54 seats” */
+  assert.match(d, />Side A · 27 seats · poolside</); assert.match(d, />Side B · 27 seats · facing the pool</); assert.match(d, />One long table · 54 seats</);
   assert.doesNotMatch(d, /48 seats|24 seats|25 seats|50 seats|54 GUEST SEATS|54 PLACES|27 PLACES/i);
   const bookable = [...view.dinner.sides.T, ...view.dinner.sides.B].filter((x) => x.state === 'available' && !/-13$/.test(x.seatId)).length;
   assert.equal((d.match(/role="button"/g) || []).length, bookable, 'every available chair of the 54 — and only those — is selectable');
@@ -522,14 +522,16 @@ test('G · the renderer draws only what it is given: rows facing the ceremony, o
   assert.match(dn, /class="seat-name"[^>]*>Haruthai</); assert.match(dn, /aria-label="Dinner seat A6, taken by Haruthai"/);
   assert.match(dn, /aria-label="Dinner seat A7, Steffie, travelling with you"/, 'TO-01927');
   assert.doesNotMatch(d, /seat-name/, 'no names on a plain view');
-  /* THE POOL (Owner, 15 Sep 2026): side A is poolside — the water is drawn as a landmark along side A, the other side is named as facing the pool */
-  assert.doesNotMatch(dn, /siyl-water|The water|class="pool"/, 'no water is drawn: the dinner is at the Green Doors (Owners, 22 Nov 2026)'); assert.match(dn, />Side A · 27 seats</); assert.match(dn, />Side B · 27 seats</);
-  assert.match(dn, /seating plan at the Green Doors: one long table, side A of 27 seats and side B of 27 seats/); assert.match(dn, />Wedding Dinner · Green Doors</);
-  assert.doesNotMatch(dn, /along|facing the/);
+  /* THE POOL (Owner, 15 Sep 2026 · restored by the Owners on 24 Nov 2026, HS-058.18 — the dinner is back at the Pool Area): side A is
+     poolside — the water is drawn as a landmark along side A, the other side is named as facing the pool */
+  assert.match(dn, />Swimming pool</, 'the pool is drawn'); assert.match(dn, />Side A · 27 seats · poolside</); assert.match(dn, />Side B · 27 seats · facing the pool</);
+  assert.match(dn, /with side A of 27 seats along the pool and side B of 27 seats facing it/); assert.match(dn, />Wedding Dinner · Pool Area</);
+  assert.match(dn, /aria-label="The swimming pool, along side A"/); assert.match(dn, /siyl-water/);
+  assert.doesNotMatch(dn, /Green Doors/, 'the Green Doors are the place of the vows, never of the dinner');
   assert.doesNotMatch(dn, /to be confirmed/, 'nothing about the pool is left open');
   assert.doesNotMatch(dn, /#(1e90ff|2196f3|00bfff|0000ff)/i, 'no bright blue water');
   const poolView = JSON.parse(JSON.stringify(view)); poolView.dinner.poolSide = 'B';
   const dp = S.svg('dinner', poolView, { guestId: PEGGY, selectable: true });
-  assert.doesNotMatch(dp, /The water/); assert.match(dp, />Side B · 27 seats</); 
-  assert.match(dp, /one long table, side A of 27 seats and side B of 27 seats/);
+  assert.match(dp, />Swimming pool</); assert.match(dp, />Side B · 27 seats · poolside</); assert.doesNotMatch(dp, /Side A · 27 seats · poolside/);
+  assert.match(dp, /with side B of 27 seats along the pool and side A of 27 seats facing it/); assert.match(dp, /aria-label="The swimming pool, along side B"/);
 });

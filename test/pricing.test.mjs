@@ -1158,8 +1158,8 @@ test('the retired imagery and the pool-side dinner narrative are gone', () => {
   assert.ok(!/053-wedding-dinner-courtyard-garden/.test(vy), 'the fountain photograph is still there');
   /* Owner, 13 Sep 2026: the Wedding Dinner is POOLSIDE — said so, never "courtyard garden"; the pool stays out of the vow only */
   const dinnerSec = vy.slice(vy.indexOf('id="dinner"'), vy.indexOf('id="dinner"') + 900);
-  assert.match(dinnerSec, /19:30 · Souphattra Heritage · Green Doors/); assert.match(dinnerSec, /An evening at the Green Doors/); /* B6 */
-  assert.ok(!/courtyard garden/i.test(vy), 'the dinner is at the Green Doors, never "courtyard garden"');
+  assert.match(dinnerSec, /19:30 · Souphattra Heritage · Pool Area/); assert.match(dinnerSec, /An evening at the Pool Area/); assert.doesNotMatch(dinnerSec, /green door/i, 'the Green Doors are the vows\' place (HS-058.18)'); /* B6 */
+  assert.ok(!/courtyard garden/i.test(vy), 'the dinner is at the Pool Area, never "courtyard garden"');
   assert.ok(!/Sunset drinks/.test(vy));
   /* and the retired bride frame is not quietly moved to another event */
   for (const f of ['index.html', 'journeys.html', 'accommodation.html', 'destination.html', 'experiences.html']) {
