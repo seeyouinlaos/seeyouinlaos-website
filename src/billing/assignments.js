@@ -98,6 +98,13 @@ export function bookingStateOf(record, conf) {
   if (gr.scope && gr.scope.none) return 'DECLINED';
   return confirmationStands(conf, record) ? 'CONFIRMED' : 'SENT';
 }
+/* does the confirmation decide this record's state? Only for a trip sent and not declined — bookingStateOf answers NOT_SENT and
+   DECLINED before it looks at one, so the routes read `conf:` only where it counts (HS-032: fewer KV reads, the same states) */
+export function confirmationDecides(record) {
+  if (!record || !record.submissionId) return false;
+  const gr = (record.registration && record.registration.guestRecord) || {};
+  return !(gr.scope && gr.scope.none);
+}
 
 /* the room lines a guest SENT for one room product — the label each carries (a line without one would take its billed room from
    the live engine: such a guest is never moved by an assignment) */
@@ -144,8 +151,12 @@ export function rosterOf({ entries, register, records, confs, seating, rooms, co
       rooms: (roomsOf[g.guestId] || []).sort((a, b) => STAYS.findIndex((x) => x.window === a.window) - STAYS.findIndex((x) => x.window === b.window)),
     };
   });
-  return out.sort((a, b) => (clean(a.last) + ' ' + clean(a.first)).localeCompare(clean(b.last) + ' ' + clean(b.first)) || a.guestId.localeCompare(b.guestId));
+  /* in guest-id order (HS-032, 24 Nov 2026): the name order is the console's (assets/admin-assign.js · byName, the same
+     collation), so this read never wakes the ICU collator on the Worker — a cold isolate paid ~5 ms CPU for it */
+  return out.sort((a, b) => byGuestId(a.guestId, b.guestId));
 }
+/* G001 < G099 < G100 < G1000 — the id's digits as a number, never a locale */
+export function byGuestId(a, b) { const x = clean(a), y = clean(b); return x.length - y.length || (x < y ? -1 : x > y ? 1 : 0); }
 
 /* THE STAYS of the room engine, in journey order: per stay its categories and their rooms — with 002's dates where 002 could be
    read (else null, named) and the guests in each room */
