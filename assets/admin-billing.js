@@ -120,6 +120,8 @@
     /* HS-034 + HS-035 · THE OVERVIEW (Owners HS-PROMPT-052, 21 Nov 2026): the programme figures (admin/assignments?overview=1), read
        once per visit after the guest checks and the figures; the open tables and the chosen night kept across a redraw */
     ov: { phase: 'idle', data: null, error: '', night: 'all', open: {}, jump: null }, readyDone: false, backTo: null,
+    /* HS-059 · Section F's own light read (GET admin/arrivals: the base, then the trips in small parts), once per console visit */
+    arr: { phase: 'idle', base: null, facts: {}, data: null, error: '', done: 0, total: 0, failed: 0, at: null },
   };
   /* E17 · OWNER DECIDED (HS-PROMPT-053, 21 Nov 2026): the programme figures load by themselves when the Overview opens, at most once
      per console visit, after the guest checks and the figures, never retried by themselves (HS-032). false = only on the Owners' click. */
@@ -176,6 +178,7 @@
     try { window.scrollTo(0, 0); } catch (e) {}
     ovJump();
     ovMaybe();
+    arrMaybe();
   }
   /* a jump inside the Overview (its area bar, "back to the figure") — scrolled to after the redraw */
   function ovJump() {
@@ -195,6 +198,7 @@
       if (!x.ok) { S.phase = 'error'; S.error = x.j.error || 'The guest list could not be read.'; draw(); return; }
       S.phase = 'ready'; S.overview = x.j; S.status = {}; S.ready = {}; S.checked = 0; S.readyDone = false;
       S.ov = { phase: 'idle', data: null, error: '', night: S.ov.night, open: S.ov.open, jump: null }; ovGen++;
+      S.arr = { phase: 'idle', base: null, facts: {}, data: null, error: '', done: 0, total: 0, failed: 0, at: null }; arrGen++;
       onRoute();
       searchReady();
       checkAll();
@@ -233,7 +237,7 @@
     });
     var size = Number(S.overview.chunk) || 6, i = 0;
     function next() {
-      if (mine !== generation || i >= ids.length) { if (mine === generation) { S.readyDone = true; draw(); ovMaybe(); } return; }
+      if (mine !== generation || i >= ids.length) { if (mine === generation) { S.readyDone = true; draw(); ovMaybe(); arrMaybe(); } return; }
       var part = ids.slice(i, i + size);
       api('admin/readiness?ids=' + encodeURIComponent(part.join(','))).then(function (x) {
         if (mine !== generation) return;
@@ -293,7 +297,7 @@
     api('revenue').then(function (x) {
       if (!x.ok) { S.revenuePhase = 'error'; S.revenueError = x.j.error || 'The revenue overview could not be calculated.'; draw(); return; }
       S.revenue = x.j; S.revenuePhase = 'ready'; S.revenueStale = false; draw();
-    }).then(function () { ovMaybe(); });
+    }).then(function () { ovMaybe(); arrMaybe(); });
   }
   /* THE OVERVIEW'S PROGRAMME FIGURES (HS-034 · E17 decided, HS-PROMPT-053): one read, after the guest checks and the figures, never
      retried by itself — a refusal is said, and "Try again" is the Owners' own click */
@@ -317,7 +321,56 @@
       if (!x.ok) { S.ov.phase = 'error'; S.ov.error = x.j.error || (x.status === 503 ? BUSY_WORDS : 'The programme figures could not be read just now.'); }
       else { S.ov.data = x.j; S.ov.phase = 'ready'; }
       if (S.route.view === 'overview' || S.route.view === 'list') draw();
-    });
+      arrMaybe();
+    }, function () { if (mine !== ovGen) return; S.ov.phase = 'error'; S.ov.error = 'The programme figures could not be read just now.'; if (S.route.view === 'overview' || S.route.view === 'list') draw(); arrMaybe(); });
+  }
+  /* HS-059 · SECTION F'S OWN READ (Owners, 24 Nov 2026): GET admin/arrivals (the guests, the room plan, 002, 012, the Owners'
+     records), then the facts of the sent trips in parts of `factsMax` invitations, one part after the other — every request light
+     (HS-032). Once per console visit, after the guest checks, the figures and the programme figures; never retried by itself —
+     "Try again" is the Owners' click. A part that fails leaves its guests "not read", said on the page. */
+  var arrGen = 0;
+  function arrMaybe() {
+    if (!window.SIYL_ADMIN_OVERVIEW || !window.SIYL_ARRIVALS || (S.route.view !== 'overview' && S.route.view !== 'list')) return;
+    if (S.arr.phase !== 'idle' || !S.readyDone || S.checking) return;
+    if (S.revenuePhase !== 'ready' && S.revenuePhase !== 'error') return;
+    if (S.ov.phase === 'loading') return;
+    loadArr();
+  }
+  function arrDraw() { if (S.route.view === 'overview' || S.route.view === 'list') draw(); }
+  function loadArr() {
+    if (S.arr.phase === 'loading') return;
+    var mine = ++arrGen;
+    S.arr = { phase: 'loading', base: null, facts: {}, data: null, error: '', done: 0, total: 0, failed: 0, at: null };
+    arrDraw();
+    var fail = function (x) {
+      if (mine !== arrGen) return;
+      S.arr.phase = 'error'; S.arr.error = (x && x.j && x.j.error) || (x && x.status === 503 ? BUSY_WORDS : 'The arrivals could not be read just now.'); arrDraw();
+    };
+    api('admin/arrivals').then(function (x) {
+      if (mine !== arrGen) return;
+      if (x.status === 403) { S.phase = 'denied'; searchHide(); draw(); return; }
+      if (!x.ok || !Array.isArray(x.j.guests)) { fail(x); return; }
+      S.arr.base = x.j; S.arr.at = x.j.at || null;
+      var invs = x.j.guests.map(function (g) { return g.invitationId; }), max = Math.max(1, Math.min(12, x.j.factsMax || 12)), parts = [];
+      for (var i = 0; i < invs.length; i += max) parts.push(invs.slice(i, i + max));
+      S.arr.total = invs.length; arrDraw();
+      var k = 0;
+      (function next() {
+        if (mine !== arrGen) return;
+        if (k >= parts.length) {
+          try { S.arr.data = window.SIYL_ARRIVALS.assemble(S.arr.base, S.arr.facts); S.arr.phase = 'ready'; }
+          catch (e) { S.arr.phase = 'error'; S.arr.error = 'The arrivals could not be put together just now.'; }
+          arrDraw(); return;
+        }
+        var part = parts[k++];
+        api('admin/arrivals?facts=' + encodeURIComponent(part.join(','))).then(function (y) {
+          if (mine !== arrGen) return;
+          if (y.ok && y.j.facts) part.forEach(function (inv) { if (Object.prototype.hasOwnProperty.call(y.j.facts, inv)) S.arr.facts[inv] = y.j.facts[inv]; });
+          else S.arr.failed += part.length;
+          S.arr.done += part.length; arrDraw(); next();
+        }, function () { if (mine !== arrGen) return; S.arr.failed += part.length; S.arr.done += part.length; next(); });
+      })();
+    }, fail);
   }
   /* what the Overview is drawn from — the console's own state, nothing else */
   function ovModel() {
@@ -330,7 +383,7 @@
     });
     var d = new Date(), today = d.getFullYear() + '-' + (d.getMonth() < 9 ? '0' : '') + (d.getMonth() + 1) + '-' + (d.getDate() < 10 ? '0' : '') + d.getDate();
     return { holders: H, ac: ac, checked: S.checked, total: H.length, checking: S.checking, readyDone: S.readyDone, revenue: S.revenue, revenuePhase: S.revenuePhase,
-      revenueError: S.revenueError, ov: S.ov, today: today, autoload: OVERVIEW_AUTOLOAD, stale: !!(S.overviewStale || S.revenueStale) };
+      revenueError: S.revenueError, ov: S.ov, arr: S.arr, today: today, autoload: OVERVIEW_AUTOLOAD, stale: !!(S.overviewStale || S.revenueStale) };
   }
   function overviewView() {
     var R = window.SIYL_ADMIN_OVERVIEW;
@@ -2343,7 +2396,12 @@
     on('[data-ov-jump]', 'click', function (el, e) { if (e && e.preventDefault) e.preventDefault(); S.ov.jump = el.getAttribute('data-ov-jump'); ovJump(); });
     on('[data-ov-back]', 'click', function (el) { S.ov.jump = el.getAttribute('data-ov-back'); go('#overview'); });
     on('[data-ov-night]', 'click', function (el) { S.ov.night = el.getAttribute('data-ov-night'); draw(); });
-    on('[data-ov-det]', 'toggle', function (el) { S.ov.open[el.getAttribute('data-ov-det')] = !!el.open; });
+    on('[data-ov-det]', 'toggle', function (el) {
+      var k = el.getAttribute('data-ov-det'), was = !!S.ov.open[k]; S.ov.open[k] = !!el.open;
+      /* a day or a guest of Section F draws its body only when opened (HS-059) */
+      if (el.getAttribute('data-arr-lazy') != null && el.open && !was) draw();
+    });
+    on('[data-arr-retry]', 'click', function () { if (S.arr.phase !== 'loading') { S.arr.phase = 'idle'; loadArr(); } });
     on('[data-ov-retry]', 'click', function () { if (S.ov.phase !== 'loading') { S.ov.phase = 'idle'; loadOv(); } });
     on('[data-ab-backlist]', 'click', function (el, e) { if (e) e.preventDefault(); var to = el.getAttribute('data-ab-backlist'); if (S.overviewStale) { S.overviewStale = false; go(to); start(); } else go(to); });
     if (EXT && EXT.wire) EXT.wire(root, on);
@@ -2403,7 +2461,8 @@
     window.addEventListener('beforeunload', function (e) { if (EXT && EXT.unsaved && EXT.unsaved()) { e.preventDefault(); e.returnValue = ''; } });
     /* signed out, or in as someone else, in another tab: everything held is dropped at once */
     window.addEventListener('storage', function (e) { if (e && e.key === 'siyl.auth') { S = Object.assign(S, { overview: null, status: {}, holder: null, revenue: null, revenuePhase: 'idle', profile: null,
-      ov: { phase: 'idle', data: null, error: '', night: 'all', open: {}, jump: null } }); ovGen++; searchHide(); start(); } });
+      ov: { phase: 'idle', data: null, error: '', night: 'all', open: {}, jump: null } }); ovGen++; searchHide();
+      S.arr = { phase: 'idle', base: null, facts: {}, data: null, error: '', done: 0, total: 0, failed: 0, at: null }; arrGen++; start(); } });
     start();
   }
   window.SIYL_ADMIN_BILLING = { boot: boot, state: function () { return S; }, page: page, matches: matches, review: review, ext: EXT,

@@ -143,7 +143,7 @@
   /* ------------------------------------------------------------ the model the console hands over */
   function parts(M) {
     var rev = M.revenue || null, Q = rev && rev.quick && !rev.quick.status ? rev.quick : null, P = M.ov && M.ov.data && M.ov.data.participation && !M.ov.data.participation.status ? M.ov.data.participation : null;
-    return { Q: Q, P: P, F: Q ? Q.finance : null, ev: M.ov && M.ov.data ? M.ov.data.events || null : null };
+    return { Q: Q, P: P, F: Q ? Q.finance : null, ev: M.ov && M.ov.data ? M.ov.data.events || null : null, A: arvData(M) };
   }
   function weddingDate(X) { var e = X.ev && X.ev.ceremony; return e && e.date ? e.date : null; }
   /* why a part is not drawn yet: still loading, a failure, or the guest checks first */
@@ -185,6 +185,12 @@
      computed (no leg, no date, room dates partly unknown): then it is "not computable", never 0 */
   function legRows(X) { return X.Q && X.Q.legs && X.Q.legs.status === 'OK' ? X.Q.legs.rows : []; }
   function trainNoRoom(X) {
+    /* HS-059: Section F's own read when it is there — the train passengers without a room on their night of arrival */
+    if (X.A) {
+      var tl = X.A.legs.filter(function (x) { return x.key === 'train'; })[0];
+      if (!tl || !tl.arrives) return null;
+      return tl.confirmed.concat(tl.awaiting, tl.notSent).filter(function (g) { var x = X.A.guests[g]; return !x.rooms.some(function (r) { return r.checkIn && r.checkIn <= tl.arrives && r.checkOut > tl.arrives; }); }).sort();
+    }
     if (!X.Q || !X.P || X.P.movements.status !== 'OK') return null;
     var leg = legRows(X).filter(function (l) { return l.id === 'B'; })[0];
     if (!leg || !leg.to || leg.kind !== 'HS_BUYS') return null;
@@ -498,28 +504,160 @@
     return s + '</section>';
   }
 
-  /* ------------------------------------------------------------ F · arrivals and transport */
+  /* ------------------------------------------------------------ F · arrivals and transport (HS-059 · Owners, 24 Nov 2026)
+     Its own light read (GET admin/arrivals, put together by assets/arrivals-model.js): every known guest once, who is where per
+     night, who arrives and leaves per day, the rooms against the persons, the legs, each guest's journey and the data checks.
+     Every count opens the list of exactly its guests (#list=arv.…); names come from the console's own guest list. */
+  var PLACE_W = { BANGKOK: 'Bangkok', VIENTIANE: 'Vientiane', CHINA: 'China', TRAIN: 'Night train' };
+  var TRACK_W = { COUPLE: ['Bride & Groom', C.s6], IN_ROOM_PLAN: ['A room in the room plan', C.s1], TRAVEL_ONLY: ['Travelling with us · no room in the plan', C.s4],
+    STAY_WITHOUT_ROOM: ['A stay booked · no room in the plan yet', C.s2], JOINING_NO_ARRANGEMENT: ['Joining · nothing booked or recorded', C.serious], DECLINED: ['Not joining this trip', C.neutral],
+    NOT_SENT: ['Trip not sent · whereabouts unknown', null], NOT_READ: ['Trip not read just now', C.crit] };
+  var CAT_W = { COUPLE: ['Bride & Groom', C.s6], ROOM_CONFIRMED: ['Room in the plan · trip confirmed', C.s1], ROOM_AWAITING: ['Room in the plan · awaiting confirmation', C.pend],
+    ROOM_NOT_SENT: ['Room in the plan · trip not sent', C.serious], ROOM_NOT_READ: ['Room in the plan · trip not read', C.crit], TRAIN: ['On the night train', C.s4], NOT_RECORDED: ['There · accommodation not recorded', null] };
+  var CHECK_W = { GAP: 'Accommodation not recorded between a booked leg and a room', BANGKOK_NOT_RECORDED: 'Bangkok: arrival and accommodation not recorded', LIST_012: '012 differs from the room plan (room number · nights)',
+    MIXED_STATES: 'The same room, different booking states', PART_NO_ROOM: 'Joins a part as sent · no room in the plan', ROOM_NOT_SENT: 'A room in the plan · trip not sent or declined', NOTHING_DATED: 'Joining · nothing booked or placed',
+    WAITLIST: 'On a waiting list', OWNER_NO_ROOM: 'Recorded by the Owners · no room in the plan', UNACCOUNTED: 'A night between two places · nothing recorded', CONFLICT: 'Two places on one night', UNDATED: 'A room without 002 dates',
+    NOT_READ: 'Trip not read just now', NOT_IN_INDEX: 'In the room plan · not in the register', AMBIGUOUS: 'A guest id on two invitations', DATES_002: '002 nights differ from its own dates' };
+  var STATUS_W = { CONFIRMED: 'trip confirmed', AWAITING: 'awaiting confirmation', NOT_SENT: 'trip not sent', NOT_READ: 'not read', HOSTS: 'the couple\'s own' };
+  var BOOKING_W = { CONFIRMED: 'Trip confirmed', SENT: 'Sent · awaiting confirmation', DECLINED: 'Not joining this trip', NOT_SENT: 'Not sent yet' };
+  var PART_W = { bangkok: 'Bangkok', vientianePreWedding: 'Vientiane · before the wedding', vientianeWedding: 'Vientiane · the wedding', china: 'China' };
+  function arvData(M) { return M.arr && M.arr.phase === 'ready' && M.arr.data ? M.arr.data : null; }
+  function gName(M, g) {
+    if (!M._byG) { M._byG = {}; (M.holders || []).forEach(function (x) { if (x.guestId) M._byG[x.guestId] = x; }); }
+    var x = M._byG[g]; return x && x.name && x.name.full ? x.name.full : '(name not in the guest list)';
+  }
+  function namesLine(M, list, max) {
+    var l = list || [], n = max || 40;
+    return l.slice(0, n).map(function (g) { return E(gName(M, g)) + ' <span class="ov-gid">' + E(g) + '</span>'; }).join(' · ') + (l.length > n ? ' · …' : '');
+  }
+  function legW(D, key) { var l = (D.legs || []).filter(function (x) { return x.key === key; })[0]; return l ? l.name : key; }
+  function arvWaiting(M) {
+    var A = M.arr || {};
+    if (A.phase === 'error') return '<p class="ov-wait unk">' + E(A.error || 'The arrivals could not be read just now.') + ' <button type="button" class="ov-btn" data-arr-retry>Try again</button></p>';
+    if (A.phase === 'loading') return '<p class="ov-wait">Reading rooms, dates and the sent trips · ' + num(A.done || 0) + ' / ' + num(A.total || 0) + '</p>';
+    return '<p class="ov-wait">Arrivals after the guest checks and the figures · ' + num(M.checked) + ' / ' + num(M.total) + '</p>';
+  }
   function areaF(M, X, open, today) {
-    var P = X.P, Q = X.Q, s = '<section class="ov-area" aria-labelledby="ov-f">' + sectionHead('ov-f', 'F', 'Guest Arrivals &amp; Transportation', 'from the room plan — not flights · legs from the figures', go('#assign', 'Room assignments →'));
-    if (!P) return s + '<div class="ov-card">' + waiting(M, 'ov') + '</div></section>';
-    s += presenceNote(P);
-    var cols = P.presence.map(function (n) { var p = dateParts(n.night); return { label: dayWords(n.night), tick: p.day + '', parts: [{ label: 'Bangkok', n: n.BANGKOK.length, color: C.s2, key: 'night.' + n.night + '.BANGKOK' }, { label: 'Vientiane', n: n.VIENTIANE.length, color: C.s1, key: 'night.' + n.night + '.VIENTIANE' }, { label: 'China', n: n.CHINA.length, color: C.s6, key: 'night.' + n.night + '.CHINA' }] }; });
-    s += '<div class="ov-grid ov-g-2"><div class="ov-card"><h4 class="ov-ct">Persons with us per night</h4>' + (cols.length ? columns(cols, { label: 'Persons per night by city' }) : '<p class="ov-empty">No room in the plan yet.</p>') +
-      '<ul class="ov-keys"><li><span class="ov-sw" style="background:' + C.s2 + '"></span>Bangkok</li><li><span class="ov-sw" style="background:' + C.s1 + '"></span>Vientiane</li><li><span class="ov-sw" style="background:' + C.s6 + '"></span>China</li></ul>' +
-      details(open, 'f-nights', 'Show as table', table(['Night', 'Bangkok', 'Vientiane', 'China', 'Total'], P.presence.map(function (n) { return [E(dayWords(n.night)), String(n.BANGKOK.length), String(n.VIENTIANE.length), String(n.CHINA.length), go('#list=night.' + n.night + '.ALL', String(n.total))]; }))) + '</div>';
-    var ad = uniq(P.movements.arrivals.map(function (a) { return a.date; }).concat(P.movements.departures.map(function (d) { return d.date; })));
-    var cols2 = ad.map(function (d) { var a = P.movements.arrivals.filter(function (x) { return x.date === d; })[0], dp = P.movements.departures.filter(function (x) { return x.date === d; })[0]; var p = dateParts(d);
-      return { label: dayWords(d), tick: p.day + ' ' + p.mon, parts: [{ label: 'first nights', n: a ? a.n : 0, color: C.s3, key: 'arr.' + d }, { label: 'departures', n: dp ? dp.n : 0, color: C.s5, key: 'dep.' + d }] }; });
-    s += '<div class="ov-card"><h4 class="ov-ct">First nights and departures per day</h4>' + (cols2.length ? columns(cols2, { label: 'First nights and departures' }) : '<p class="ov-empty">none yet</p>') +
-      '<ul class="ov-keys"><li><span class="ov-sw" style="background:' + C.s3 + '"></span>first night with us</li><li><span class="ov-sw" style="background:' + C.s5 + '"></span>departure after the last night</li></ul>' +
-      details(open, 'f-moves', 'Show as table', table(['Date', 'First nights', 'Departures'], cols2.map(function (c) { return [E(c.label), listLink(c.parts[0].key, c.parts[0].n), listLink(c.parts[1].key, c.parts[1].n)]; }))) + '</div></div>';
-    var tr = trainNoRoom(X);
-    s += '<div class="ov-grid ov-g-3"><div class="ov-card hatch-card"><h4 class="ov-ct">' + icon('plane', 'soft') + ' Arrival airport · flight · time</h4><p>' + stateChip('NOT_RECORDED', 'E22 · E35') + '</p><p class="ov-note">No airport, flight number or time is captured yet. Flight documents are files Guest Relations sees in the profile (status and date only).</p></div>' +
-      '<div class="ov-card hatch-card"><h4 class="ov-ct">' + icon('train', 'soft') + ' Vehicles needed</h4><p>' + stateChip('NOT_COMPUTABLE', 'E21') + '</p><p class="ov-note">Missing: ' + E(P.transport.vehicles.missing.join(', ')) + '. Vehicles confirmed: no record.</p></div>' +
-      '<div class="ov-card"><h4 class="ov-ct">' + icon('flag', 'soft') + ' Checks</h4><ul class="ov-list"><li><span>Night-train passengers without a room on their night of arrival<small>check · E27</small></span><span>' + (tr === null ? stateChip('NOT_COMPUTABLE') : listLink('flag.trainNoRoom', tr.length)) + '</span></li>' +
-      '<li><span>Trip sent, no room in the plan<small>self-booked stays are not in the plan</small></span><span>' + listLink('flag.noRoom', P.movements.withoutRoom.length) + '</span></li></ul></div></div>';
+    var D = arvData(M), s = '<section class="ov-area" aria-labelledby="ov-f">' + sectionHead('ov-f', 'F', 'Guest Arrivals &amp; Transportation',
+      'room plan · sent trips · 002 dates · 012 · the Owners\' records' + (D && M.arr.at ? ' · read ' + clock(M.arr.at) : '') + ' — not flights', go('#assign', 'Room assignments →'));
+    if (!D) return s + '<div class="ov-card">' + arvWaiting(M) + '</div></section>';
+    if (D.gaps.length) s += '<p class="ov-note ov-gap">' + chip('partial', 'warn') + ' ' + E(D.gaps.join(' · ')) + '</p>';
+    /* 1 · every known guest once */
+    var T = D.people.tracks, tp = Object.keys(TRACK_W).map(function (k) { return { key: 'arv.t.' + k, label: TRACK_W[k][0], n: (T[k] || []).length, color: TRACK_W[k][1], hatched: !TRACK_W[k][1] }; }).filter(function (p) { return p.n > 0 || p.key === 'arv.t.COUPLE'; });
+    s += '<div class="ov-card"><h4 class="ov-ct">Every known guest · ' + num(D.people.total) + '</h4><p class="ov-cs">each guest of the register once · the couple counted apart · a room in the room plan is not a confirmed hotel booking until the trip is confirmed</p>' +
+      stack(tp, 'Every known guest') + (D.people.ambiguous.length ? '<p class="ov-note">' + chip('check', 'warn') + ' ' + listLink('arv.k.AMBIGUOUS', D.people.ambiguous.length, D.people.ambiguous.length + ' guest ids on two invitations') + ' — never resolved, not counted</p>' : '') + '</div>';
+    /* 2 · per night, per day */
+    var cats = Object.keys(CAT_W);
+    var cols = D.nights.map(function (n) { var p = dateParts(n.night); return { label: dayWords(n.night), tick: p.day + '', parts: cats.map(function (c) {
+      var k = 0; Object.keys(n.places).forEach(function (pl) { k += (n.places[pl][c] || []).length; });
+      return { label: CAT_W[c][0], n: k, color: CAT_W[c][1], hatched: !CAT_W[c][1], key: 'arv.n.' + n.night + '.' + c }; }) }; });
+    var used = cats.filter(function (c) { return D.nights.some(function (n) { return Object.keys(n.places).some(function (pl) { return (n.places[pl][c] || []).length; }); }); });
+    var placesUsed = ['BANGKOK', 'TRAIN', 'VIENTIANE', 'CHINA'];
+    s += '<div class="ov-grid ov-g-2"><div class="ov-card"><h4 class="ov-ct">Where guests sleep · per night</h4><p class="ov-cs">the night of a date · every guest at most once · from the room plan, the booked night train and the nights between them (never estimated)</p>' +
+      (cols.length ? columns(cols, { label: 'Guests per night by category' }) : '<p class="ov-empty">No night recorded yet.</p>') +
+      '<ul class="ov-keys">' + used.map(function (c) { return '<li><span class="ov-sw' + (CAT_W[c][1] ? '' : ' hatch') + '" style="' + (CAT_W[c][1] ? 'background:' + CAT_W[c][1] : '') + '"></span>' + E(CAT_W[c][0]) + '</li>'; }).join('') + '</ul>' +
+      details(open, 'f-nights', 'Show per place as table', table(['Night'].concat(placesUsed.map(function (p) { return PLACE_W[p]; }), ['Total']), D.nights.map(function (n) {
+        return [E(dayWords(n.night))].concat(placesUsed.map(function (pl) { var k = 0; cats.forEach(function (c) { k += ((n.places[pl] || {})[c] || []).length; }); return listLink('arv.p.' + n.night + '.' + pl, k); }), [listLink('arv.n.' + n.night + '.ALL', n.total)]); }))) +
+      details(open, 'f-nights-cat', 'Show per category as table', table(['Night'].concat(used.map(function (c) { return CAT_W[c][0]; })), D.nights.map(function (n) {
+        return [E(dayWords(n.night))].concat(used.map(function (c) { var k = 0; Object.keys(n.places).forEach(function (pl) { k += (n.places[pl][c] || []).length; }); return listLink('arv.n.' + n.night + '.' + c, k); })); }))) + '</div>';
+    var dc = D.days.filter(function (d) { return Object.keys(d.arrive).length || Object.keys(d.depart).length; }).map(function (d) { var p = dateParts(d.day), a = 0, x = 0;
+      Object.keys(d.arrive).forEach(function (pl) { a += d.arrive[pl].length; }); Object.keys(d.depart).forEach(function (pl) { x += d.depart[pl].length; });
+      return { label: dayWords(d.day), tick: p.day + ' ' + p.mon, day: d.day, parts: [{ label: 'arrive', n: a, color: C.s3, key: 'arv.a.' + d.day + '.ALL' }, { label: 'leave', n: x, color: C.s5, key: 'arv.d.' + d.day + '.ALL' }] }; });
+    s += '<div class="ov-card"><h4 class="ov-ct">Arrivals and departures per day</h4><p class="ov-cs">arriving at or leaving a place (Bangkok · Vientiane · China) · from the room plan and the booked legs · arrival times: not recorded</p>' +
+      (dc.length ? columns(dc, { label: 'Arrivals and departures per day' }) : '<p class="ov-empty">none recorded yet</p>') +
+      '<ul class="ov-keys"><li><span class="ov-sw" style="background:' + C.s3 + '"></span>arrive</li><li><span class="ov-sw" style="background:' + C.s5 + '"></span>leave</li></ul>' +
+      details(open, 'f-moves', 'Show per place as table', table(['Date', 'Place', 'Arrive', 'Leave'], [].concat.apply([], dc.map(function (c) { var d = D.days.filter(function (x) { return x.day === c.day; })[0];
+        return ['BANGKOK', 'VIENTIANE', 'CHINA'].filter(function (pl) { return d.arrive[pl] || d.depart[pl]; }).map(function (pl) { return [E(c.label), E(PLACE_W[pl]), listLink('arv.a.' + c.day + '.' + pl, (d.arrive[pl] || []).length), listLink('arv.d.' + c.day + '.' + pl, (d.depart[pl] || []).length)]; }); })))) + '</div></div>';
+    /* 3 · the rooms against the persons, the legs */
+    s += '<div class="ov-grid ov-g-2"><div class="ov-card"><h4 class="ov-ct">Rooms in the room plan · against persons</h4><p class="ov-cs">a room is not a person: the rooms of a stay, how many hold someone, and who</p><ul class="ov-list">' +
+      D.stays.map(function (st) { return '<li><span>' + icon('bed', 'soft') + E(st.label) + '<small>' + E(st.hotel) + ' · ' + E(st.checkIn ? dayWords(st.checkIn) + ' – ' + dayWords(st.checkOut) : 'dates not readable') + ' · ' + st.occupied + ' of ' + st.units + ' rooms in the plan hold someone' + (st.kept ? ' · ' + st.kept + ' kept places' : '') + '</small></span><span>' + listLink('arv.s.' + st.window, st.persons.length, st.persons.length + ' persons') + '</span></li>'; }).join('') + '</ul>' +
+      details(open, 'f-units', 'Show every room with its guests', D.stays.map(function (st) { return '<p class="ov-ct2">' + E(st.label) + ' · ' + E(st.hotel) + '</p>' + table(['Room', 'Hotel room', 'Places', 'Guests'], st.rooms.map(function (r) { return [E(r.label), E(r.hotelRoom ? r.hotelRoom + (r.building ? ' · building ' + r.building : '') : '—'), String(r.places), r.occupants.length ? namesLine(M, r.occupants) : '<span class="ov-mute">empty</span>']; })); }).join('')) + '</div>' +
+      '<div class="ov-card"><h4 class="ov-ct">Legs between the places</h4><p class="ov-cs">booked in the guest\'s own sent trip or recorded by the Owners · confirmed = the trip is confirmed</p><ul class="ov-list">' +
+      D.legs.map(function (l) { return '<li><span>' + icon(l.key === 'train' || l.key === 'c86' ? 'train' : 'plane', 'soft') + E(l.letter + ' · ' + l.name) + '<small>' + E(l.date ? dayWords(l.date) : 'date not readable') + '</small></span><span>' +
+        listLink('arv.l.' + l.key + '.CONFIRMED', l.confirmed.length, l.confirmed.length + ' confirmed') + (l.awaiting.length ? '<br>' + listLink('arv.l.' + l.key + '.AWAITING', l.awaiting.length, l.awaiting.length + ' awaiting') : '') + (l.notSent.length ? '<br>' + listLink('arv.l.' + l.key + '.NOT_SENT', l.notSent.length, l.notSent.length + ' not sent') : '') + '</span></li>'; }).join('') +
+      '</ul><p class="ov-note">Arrival airport, flight and time: ' + stateChip('NOT_RECORDED', 'E22') + ' · flight document (status only): received ' + listLink('arv.fd.RECEIVED', D.arrival.flightDocument.received.length) + ' · not added ' + listLink('arv.fd.NOT_ADDED', D.arrival.flightDocument.notAdded.length) + ' · trip not sent ' + listLink('arv.fd.NOT_SENT', D.arrival.flightDocument.notSent.length) + '</p></div></div>';
+    /* 4 · day by day */
+    s += '<div class="ov-card"><h4 class="ov-ct">Day by day · ' + E(dayWords(D.window.firstDay)) + ' – ' + E(dayWords(D.window.lastDay)) + '</h4><p class="ov-cs">per place: who arrives, who leaves, who sleeps there · the legs of the day · whom to follow up · open a day</p>' +
+      D.days.map(function (d) { return dayDetails(M, D, d, open); }).join('') + '</div>';
+    /* 5 · each guest */
+    s += '<div class="ov-card"><h4 class="ov-ct">Each guest\'s journey</h4><p class="ov-cs">grouped as in "Every known guest" · open a guest for arrival, rooms, legs, departure, status and sources</p>' +
+      Object.keys(TRACK_W).filter(function (k) { return (T[k] || []).length; }).map(function (k) { var key = 'f-track-' + k;
+        return '<details class="ov-det" data-ov-det="' + key + '" data-arr-lazy' + (open[key] ? ' open' : '') + '><summary><span>' + E(TRACK_W[k][0]) + ' <span class="ov-gid">' + T[k].length + (T[k].length === 1 ? ' guest' : ' guests') + '</span></span></summary>' +
+          (open[key] ? T[k].map(function (g) { return guestDetails(M, D, g, open); }).join('') : '') + '</details>'; }).join('') + '</div>';
+    /* 6 · the data checks */
+    var CK = D.checks, keys = Object.keys(CHECK_W).filter(function (k) { return own(CK, k) && (CK[k].ids.length || CK[k].items.length); });
+    s += '<div class="ov-card"><h4 class="ov-ct">' + icon('flag', 'soft') + ' Data checks · for Guest Relations</h4><p class="ov-cs">what the sources leave open or contradict — nothing is changed here; each check opens its guests</p><ul class="ov-list">' +
+      (keys.length ? keys.map(function (k) { var c = CK[k]; return '<li><span>' + E(CHECK_W[k]) + '</span><span>' + (c.ids.length ? listLink('arv.k.' + k, c.ids.length, c.ids.length + (c.ids.length === 1 ? ' guest' : ' guests')) : E(c.items.length + ' rows')) + '</span></li>'; }).join('') : '<li><span>No open check</span><span></span></li>') + '</ul>' +
+      list012Table(M, D, open) + '</div>';
+    s += '<div class="ov-card hatch-card"><h4 class="ov-ct">' + icon('train', 'soft') + ' Vehicles needed</h4><p>' + stateChip('NOT_COMPUTABLE', 'E21') + '</p><p class="ov-note">Missing: seats per van, luggage capacity, bags per guest, Guest Relations team size. Vehicles confirmed: no record.</p></div>';
     return s + '</section>';
   }
+  function dayDetails(M, D, d, open) {
+    var key = 'f-day-' + d.day, sum = [], body = '';
+    ['BANGKOK', 'VIENTIANE', 'CHINA'].forEach(function (pl) {
+      var a = (d.arrive[pl] || []).length, x = (d.depart[pl] || []).length, nightRow = D.nights.filter(function (n) { return n.night === d.day; })[0], o = 0;
+      if (nightRow && nightRow.places[pl]) Object.keys(nightRow.places[pl]).forEach(function (c) { o += nightRow.places[pl][c].length; });
+      if (a || x || o) sum.push(PLACE_W[pl] + ' ' + (a ? '+' + a + ' ' : '') + (x ? '−' + x + ' ' : '') + (o ? o + ' overnight' : '').trim());
+      if (open[key] && (a || x || o)) body += '<li><span><b>' + E(PLACE_W[pl]) + '</b>' + (a ? '<small>arrive (' + a + '): ' + namesLine(M, d.arrive[pl]) + '</small>' : '') + (x ? '<small>leave (' + x + '): ' + namesLine(M, d.depart[pl]) + '</small>' : '') + '</span><span>' +
+        [a ? listLink('arv.a.' + d.day + '.' + pl, a, '+' + a) : '', x ? listLink('arv.d.' + d.day + '.' + pl, x, '−' + x) : '', o ? listLink('arv.p.' + d.day + '.' + pl, o, o + ' overnight') : ''].filter(Boolean).join('<br>') + '</span></li>';
+    });
+    var nightRow = D.nights.filter(function (n) { return n.night === d.day; })[0], tr = nightRow && nightRow.places.TRAIN ? Object.keys(nightRow.places.TRAIN).reduce(function (k, c) { return k + nightRow.places.TRAIN[c].length; }, 0) : 0;
+    if (tr) { sum.push('night train ' + tr); if (open[key]) body += '<li><span><b>Night train</b><small>' + namesLine(M, [].concat.apply([], Object.keys(nightRow.places.TRAIN).map(function (c) { return nightRow.places.TRAIN[c]; })).sort()) + '</small></span><span>' + listLink('arv.p.' + d.day + '.TRAIN', tr, tr + ' on board') + '</span></li>'; }
+    d.legs.forEach(function (k) { var l = D.legs.filter(function (x) { return x.key === k; })[0]; if (!l) return; var n = l.confirmed.length + l.awaiting.length + l.notSent.length;
+      if (open[key]) body += '<li><span>' + icon(k === 'train' || k === 'c86' ? 'train' : 'plane', 'soft') + E(l.letter + ' · ' + l.name) + '<small>' + l.confirmed.length + ' confirmed · ' + l.awaiting.length + ' awaiting' + (l.notSent.length ? ' · ' + l.notSent.length + ' not sent' : '') + ' · times not recorded</small></span><span>' + listLink('arv.l.' + k + '.ALL', n, n + ' booked') + '</span></li>'; });
+    if (d.followUp.length) { sum.push(d.followUp.length + ' to follow up'); if (open[key]) body += '<li><span>' + icon('flag', 'soft') + 'To follow up<small>' + namesLine(M, d.followUp) + '</small></span><span>' + listLink('arv.f.' + d.day, d.followUp.length) + '</span></li>'; }
+    var summary = '<span>' + E(dayWords(d.day)) + ' <span class="ov-gid">' + E(sum.length ? sum.join(' · ') : 'nothing recorded') + '</span></span>';
+    return '<details class="ov-det" data-ov-det="' + key + '" data-arr-lazy' + (open[key] ? ' open' : '') + '><summary>' + summary + '</summary>' + (open[key] ? '<ul class="ov-list">' + (body || '<li><span>nothing recorded for this day</span><span></span></li>') + '</ul>' : '') + '</details>';
+  }
+  function guestDetails(M, D, g, open) {
+    var x = D.guests[g], key = 'f-g-' + g, st = x.booking ? BOOKING_W[x.booking] || x.booking : 'trip not read';
+    var summary = '<span>' + E(gName(M, g)) + ' <span class="ov-gid">' + E(g) + ' · ' + E(x.couple ? (x.couple === 'BRIDE' ? 'Bride' : 'Groom') : st) + '</span></span>';
+    if (!open[key]) return '<details class="ov-det" data-ov-det="' + key + '" data-arr-lazy><summary>' + summary + '</summary></details>';
+    return '<details class="ov-det" data-ov-det="' + key + '" data-arr-lazy open><summary>' + summary + '</summary><ul class="ov-list">' + journeyLines(M, D, g).map(function (l) { return '<li><span>' + l[0] + '</span><span>' + (l[1] || '') + '</span></li>'; }).join('') + '</ul></details>';
+  }
+  /* one guest's journey in lines: [what, the right-hand side] */
+  function journeyLines(M, D, g) {
+    var x = D.guests[g], out = [];
+    var ids2 = x.invitationId + (x.partyId ? ' · party ' + x.partyId : '');
+    out.push(['<b>Booking</b><small>' + E(x.booking ? BOOKING_W[x.booking] || x.booking : 'trip not read just now') + (x.confirmedAt ? ' · ' + E(dayWords(x.confirmedAt.slice(0, 10))) : '') + (x.sent ? ' · sent version ' + x.sent.version + (x.sent.lastSentAt ? ', ' + E(dayWords(x.sent.lastSentAt.slice(0, 10))) : '') : '') + ' · ' + E(ids2) + '</small>',
+      '<button type="button" class="p-link ab-pf-open" data-ab-profile="' + E(x.invitationId) + '">Profile</button>']);
+    var parts = Object.keys(x.parts || {});
+    if (x.sent && x.sent.scope) out.push(['<b>Joins as sent</b><small>' + (x.sent.scope.none ? 'not joining' : parts.length ? parts.map(function (k) { return E(PART_W[k]) + ' — ' + E(x.parts[k] === 'ROOM_IN_PLAN' ? 'room in the plan' : x.parts[k] === 'TRAVEL_NO_ROOM' ? 'a booked leg, no room in the plan' : 'no room in the plan · accommodation not recorded'); }).join(' · ') : 'no part answered') + '</small>']);
+    ['BANGKOK', 'VIENTIANE', 'CHINA'].forEach(function (pl) {
+      var arr = x.arrivals.filter(function (a) { return a.place === pl; }), dep = x.departures.filter(function (a) { return a.place === pl; }), rooms = x.rooms.filter(function (r) { return r.place === pl; }), gap = x.notRecorded.filter(function (n) { return n.place === pl; });
+      var joins = parts.some(function (k) { return (k === 'bangkok' && pl === 'BANGKOK') || (k === 'china' && pl === 'CHINA') || (/^vientiane/.test(k) && pl === 'VIENTIANE'); });
+      if (!arr.length && !dep.length && !rooms.length && !gap.length && !joins && !(pl === 'BANGKOK' && x.bangkokArrival)) return;
+      var lines = [];
+      lines.push('arrival: ' + (pl === 'BANGKOK' && x.bangkokArrival ? 'not recorded' : arr.length ? arr.map(function (a) { return dayWords(a.day) + (a.basis === 'LEG' ? ' (booked leg)' : a.basis === 'GAP' ? ' (booked leg; accommodation not recorded)' : ''); }).join(', ') : 'not recorded') + ' · time not recorded');
+      rooms.forEach(function (r) { lines.push('room ' + r.label + (r.hotelRoom ? ' · hotel room ' + r.hotelRoom.display + (r.hotelRoom.building ? ' · building ' + r.hotelRoom.building : '') : '') + ' · ' + r.key.split('/')[0] + ' ' + (r.checkIn ? dayWords(r.checkIn) + ' – ' + dayWords(r.checkOut) : 'dates not readable') + ' · ' + (r.sharedWith.length ? 'shared with ' + r.sharedWith.map(function (o) { return gName(M, o) + ' ' + o; }).join(', ') : 'alone') + (r.bed ? ' · extra bed' : '') + ' · ' + STATUS_W[r.status] + (r.source === 'OWNER_RECORDED' ? ' · recorded by the Owners' : '')); });
+      if (!rooms.length) lines.push('accommodation: ' + (gap.length ? 'not recorded for ' + gap.map(function (n) { return dayWords(n.night); }).join(', ') : 'no room in the room plan · not recorded'));
+      else if (gap.length) lines.push('accommodation not recorded for ' + gap.map(function (n) { return dayWords(n.night); }).join(', '));
+      lines.push('leaves: ' + (dep.length ? dep.map(function (a) { return dayWords(a.day); }).join(', ') : 'not recorded'));
+      out.push(['<b>' + E(PLACE_W[pl]) + '</b><small>' + lines.map(E).join('<br>') + '</small>']);
+    });
+    if (x.legs.length) out.push(['<b>Legs</b><small>' + x.legs.map(function (l) { return E(legW(D, l.key) + ' · ' + (l.date ? dayWords(l.date) : 'date not readable') + ' · ' + STATUS_W[l.status] + (l.source === 'OWNER_RECORDED' ? ' · recorded by the Owners' : '')); }).join('<br>') + '</small>']);
+    else out.push(['<b>Legs</b><small>none booked with us · own travel or not recorded</small>']);
+    var lastLeg = x.legs.filter(function (l) { return x.last && l.date && l.date > x.last; });
+    out.push(['<b>After the last night</b><small>' + (x.last ? 'last night recorded ' + E(dayWords(x.last)) + ' · onward travel: ' + (lastLeg.length ? E(lastLeg.map(function (l) { return legW(D, l.key); }).join(', ')) : 'not recorded') : 'no night recorded') + '</small>']);
+    out.push(['<b>Flight information</b><small>document ' + E(x.flightDoc === 'RECEIVED' ? 'received' : x.flightDoc === 'NOT_ADDED' ? 'not added' : 'trip not sent') + ' (status only) · airport, flight, time: not recorded (E22)</small>']);
+    if (x.waitlist.length) out.push(['<b>Waiting list</b><small>' + E(x.waitlist.map(function (w) { return w.stage + (w.position ? ' #' + w.position : ''); }).join(', ')) + '</small>']);
+    var mine = []; Object.keys(D.checks).forEach(function (k) { D.checks[k].items.forEach(function (c) { if (c.guestId === g) mine.push((CHECK_W[k] || k) + ': ' + c.why); }); });
+    if (mine.length) out.push(['<b>' + chip('check', 'warn') + ' To follow up</b><small>' + mine.map(E).join('<br>') + '</small>']);
+    out.push(['<b>Sources</b><small>room plan (Room assignments) · 002 dates' + (x.sent ? ' · sent trip version ' + x.sent.version : '') + (x.confirmedAt ? ' · confirmation' : '') + (x.owner.length ? ' · the Owners\' record ' + E(x.owner.map(function (o) { return o.holderId; }).filter(function (v, i, a) { return a.indexOf(v) === i; }).join(', ')) : '') + '</small>', go('#assign', 'Room assignments →')]);
+    return out;
+  }
+  function list012Table(M, D, open) {
+    var L = D.list012; if (!L || L.status !== 'OK') return '<p class="ov-note">' + stateChip('NOT_AVAILABLE') + ' 012 could not be compared just now.</p>';
+    var rows = L.rows.filter(function (r) { return r.status !== 'SAME'; });
+    var same = L.rows.length - rows.length;
+    return '<p class="ov-ct2">012 · the Owners\' room list against the room plan</p><p class="ov-cs">compared by hotel room number and night — never by a name · 012\'s names are shown exactly as typed there · ' + same + ' of ' + L.rows.length + ' rows agree</p>' +
+      (rows.length ? table(['Room', '012 (as typed)', 'Room plan', 'Difference'], rows.map(function (r) {
+        return [E(r.roomNo || '—') + (r.building ? '<br><small>building ' + E(r.building) + '</small>' : ''), E((ISO_OK(r.checkIn) ? dayWords(r.checkIn) : r.checkIn || '—') + ' – ' + (ISO_OK(r.checkOut) ? dayWords(r.checkOut) : r.checkOut || '—')) + '<br><small>' + E(r.typed.join(', ') || 'no name') + '</small>',
+          r.guests.length ? namesLine(M, r.guests) : '<span class="ov-mute">nobody</span>', E(r.status === 'NOT_COMPARABLE' ? 'not comparable: ' + r.why : r.differences.join(' · '))];
+      })) : '<p class="ov-note">012 and the room plan agree on every room number and night.</p>') +
+      (L.planOnly.length ? '<p class="ov-note">In the room plan with a hotel room number that no 012 row names: ' + L.planOnly.map(function (u) { return E(u.roomNo) + ' (' + namesLine(M, u.guests) + ')'; }).join(' · ') + '</p>' : '');
+  }
+  function ISO_OK(v) { return /^\d{4}-\d{2}-\d{2}$/.test(v || ''); }
 
   /* ------------------------------------------------------------ the Owners' decisions (topics only — the register stays private) */
   var DECISIONS = [['E14', 'Hotel share basis', 'open'], ['E15', 'Souphattra rooms and other guests of the hotel', 'open'], ['E16', 'Dinner capacity', 'open'], ['E17', 'When the programme figures load', 'decided'],
@@ -532,7 +670,7 @@
   }
 
   /* ------------------------------------------------------------ the lists a figure opens */
-  var LIST_RE = /^(fin|ac|ev|rsvp|leg|req|finale|sang|night|arr|dep|doc|allergy|flag)(\.[A-Za-z0-9_-]+){1,3}$/;
+  var LIST_RE = /^(fin|ac|ev|rsvp|leg|req|finale|sang|night|arr|dep|doc|allergy|flag|arv)(\.[A-Za-z0-9_-]+){1,3}$/;
   function listOf(key, M) {
     /* every lookup is an own property — a key like "constructor" is no list, never a function */
     var X = parts(M), F = X.F, P = X.P, Q = X.Q, k = key.split('.'), t = null;
@@ -583,14 +721,58 @@
     if (k[0] === 'doc' && P && own(DK, k[1]) && own(DS, k[2])) t = T(DK[k[1]] + ' · ' + DS[k[2]], own(own(P.care.documents, k[1]), k[2]), 'guest', 'as sent · the profile shows the current state', 'ov-d');
     var AS = { yes: 'yes', no: 'no', notAnswered: 'not answered', notSent: 'trip not sent' };
     if (k[0] === 'allergy' && P && own(AS, k[1])) t = T('Food allergy · ' + AS[k[1]], own(P.care.allergy, k[1]), 'guest', 'as sent · which allergies: in the profile', 'ov-d');
+    if (k[0] === 'arv') t = arvList(k, M);
     return t;
+  }
+  /* HS-059 · the lists of Section F: exactly the guest ids behind each figure, with the facts behind it */
+  function arvList(k, M) {
+    var D = arvData(M); if (!D) return null;
+    var L = function (title, ids, basis, fact) { return Array.isArray(ids) ? { title: title, ids: ids.slice(), kind: 'guest', basis: basis, back: 'ov-f', arv: { key: k.join('.'), fact: fact || null } } : null; };
+    var night = function (n) { return D.nights.filter(function (x) { return x.night === n; })[0]; };
+    var dayOf = function (d) { return D.days.filter(function (x) { return x.day === d; })[0]; };
+    var flat = function (o) { return [].concat.apply([], Object.keys(o || {}).map(function (c) { return o[c]; })); };
+    if (k[1] === 't' && own(TRACK_W, k[2])) return L('Every known guest · ' + TRACK_W[k[2]][0], own(D.people.tracks, k[2]) || [], 'each guest of the register once', 'track');
+    if (k[1] === 'n' && ISO_OK(k[2])) { var n = night(k[2]); if (!n) return null;
+      if (k[3] === 'ALL') return L('Night of ' + dayLong(k[2]) + ' · everyone recorded', [].concat.apply([], Object.keys(n.places).map(function (pl) { return flat(n.places[pl]); })).sort(), 'room plan · booked night train · nights between them', 'night:' + k[2]);
+      if (own(CAT_W, k[3])) return L('Night of ' + dayLong(k[2]) + ' · ' + CAT_W[k[3]][0], [].concat.apply([], Object.keys(n.places).map(function (pl) { return n.places[pl][k[3]] || []; })).sort(), 'room plan · booked night train · nights between them', 'night:' + k[2]); }
+    if (k[1] === 'p' && ISO_OK(k[2]) && own(PLACE_W, k[3])) { var n2 = night(k[2]); if (!n2) return null; return L('Night of ' + dayLong(k[2]) + ' · ' + PLACE_W[k[3]], flat(n2.places[k[3]]).sort(), 'every category of that place', 'night:' + k[2]); }
+    if ((k[1] === 'a' || k[1] === 'd') && ISO_OK(k[2])) { var d = dayOf(k[2]); if (!d) return null; var src = k[1] === 'a' ? d.arrive : d.depart;
+      var list = k[3] === 'ALL' ? [].concat.apply([], Object.keys(src).map(function (pl) { return src[pl]; })) : own(PLACE_W, k[3]) ? src[k[3]] || [] : null;
+      return list ? L((k[1] === 'a' ? 'Arriving · ' : 'Leaving · ') + dayLong(k[2]) + (k[3] === 'ALL' ? '' : ' · ' + PLACE_W[k[3]]), list, 'room plan and booked legs · times not recorded', (k[1] === 'a' ? 'arrive:' : 'depart:') + k[2]) : null; }
+    if (k[1] === 's') { var st = D.stays.filter(function (x) { return x.window === k[2]; })[0]; if (st) return L(st.label + ' · ' + st.hotel + ' · persons in the room plan', st.persons, st.occupied + ' of ' + st.units + ' rooms hold someone', 'stay:' + k[2]); }
+    if (k[1] === 'l') { var l = D.legs.filter(function (x) { return x.key === k[2]; })[0]; if (!l) return null;
+      var S2 = { CONFIRMED: l.confirmed, AWAITING: l.awaiting, NOT_SENT: l.notSent, ALL: l.confirmed.concat(l.awaiting, l.notSent).sort() };
+      if (own(S2, k[3])) return L(l.letter + ' · ' + l.name + ' · ' + (k[3] === 'ALL' ? 'everyone booked' : STATUS_W[k[3]]), S2[k[3]], 'the guest\'s own sent trip or the Owners\' record', 'leg:' + k[2]); }
+    if (k[1] === 'k' && own(CHECK_W, k[2])) return L('To check · ' + CHECK_W[k[2]], own(D.checks, k[2]) ? D.checks[k[2]].ids : [], 'nothing is changed here', 'check:' + k[2]);
+    if (k[1] === 'f' && ISO_OK(k[2])) { var d2 = dayOf(k[2]); if (d2) return L('To follow up · ' + dayLong(k[2]), d2.followUp, 'the checks touching that day', 'day:' + k[2]); }
+    if (k[1] === 'fd') { var FD = { RECEIVED: D.arrival.flightDocument.received, NOT_ADDED: D.arrival.flightDocument.notAdded, NOT_SENT: D.arrival.flightDocument.notSent }, W2 = { RECEIVED: 'received', NOT_ADDED: 'not added', NOT_SENT: 'trip not sent' };
+      if (own(FD, k[2])) return L('Flight information document · ' + W2[k[2]], FD[k[2]], 'as sent · status only · airport, flight and time are not recorded (E22)', 'flight'); }
+    return null;
+  }
+  /* the facts behind one guest's place in a list of Section F */
+  function arvFact(M, fact, g) {
+    var D = arvData(M), x = D && D.guests[g]; if (!x) return '';
+    var f = String(fact || ''), at = f.split(':')[1] || '', out = [];
+    var roomOn = function (n) { return x.rooms.filter(function (r) { return r.checkIn && r.checkIn <= n && r.checkOut > n; })[0]; };
+    var roomW = function (r) { return 'room ' + r.label + (r.hotelRoom ? ' · hotel room ' + r.hotelRoom.display + (r.hotelRoom.building ? ' · building ' + r.hotelRoom.building : '') : '') + ' · ' + r.key.split('/')[0] + ' ' + (r.checkIn ? dayWords(r.checkIn) + ' – ' + dayWords(r.checkOut) : '') + ' · ' + (r.sharedWith.length ? 'shared with ' + r.sharedWith.map(function (o) { return gName(M, o) + ' ' + o; }).join(', ') : 'alone') + ' · ' + STATUS_W[r.status] + (r.source === 'OWNER_RECORDED' ? ' · recorded by the Owners' : ''); };
+    if (/^night/.test(f)) { var r = roomOn(at), tr = x.legs.filter(function (l) { return l.key === 'train' && l.date === at; })[0], gp = x.notRecorded.filter(function (n) { return n.night === at; })[0];
+      out.push(r ? roomW(r) : tr ? 'on the night train · ' + STATUS_W[tr.status] + (tr.source === 'OWNER_RECORDED' ? ' · recorded by the Owners' : '') : gp ? PLACE_W[gp.place] + ' · accommodation not recorded (between a booked leg and a room)' : ''); }
+    else if (/^(arrive|depart)/.test(f)) { var list = /^arrive/.test(f) ? x.arrivals : x.departures; list.filter(function (a) { return a.day === at; }).forEach(function (a) { out.push(PLACE_W[a.place] + ' · ' + (a.basis === 'LEG' ? 'booked leg' : a.basis === 'GAP' ? 'booked leg · accommodation not recorded' : a.basis === 'ROOM' ? 'room plan' : a.basis) + (/^arrive/.test(f) && a.place === 'BANGKOK' && x.bangkokArrival ? '' : '')); }); }
+    else if (/^stay/.test(f)) x.rooms.filter(function (r) { return r.window === at; }).forEach(function (r) { out.push(roomW(r)); });
+    else if (/^leg/.test(f)) x.legs.filter(function (l) { return l.key === at; }).forEach(function (l) { out.push((l.date ? dayWords(l.date) : 'date not readable') + ' · ' + STATUS_W[l.status] + ' · ' + (l.source === 'OWNER_RECORDED' ? 'recorded by the Owners' : 'own sent trip')); });
+    else if (/^check/.test(f)) { var c = D.checks[at]; if (c) c.items.filter(function (i) { return i.guestId === g; }).forEach(function (i) { out.push(i.why); }); }
+    else if (/^day/.test(f)) Object.keys(D.checks).forEach(function (k) { D.checks[k].items.forEach(function (i) { if (i.guestId === g && i.day === at) out.push((CHECK_W[k] || k) + ': ' + i.why); }); });
+    else if (f === 'track') out.push((x.first ? dayWords(x.first) + ' – ' + dayWords(x.last) + ' (nights recorded)' : 'no night recorded') + ' · ' + (x.booking ? BOOKING_W[x.booking] || x.booking : 'trip not read'));
+    else if (f === 'flight') out.push(x.booking ? BOOKING_W[x.booking] || x.booking : 'trip not read');
+    if (!/^(check|day|track|flight)/.test(f)) out.push(x.booking ? BOOKING_W[x.booking] || x.booking : 'trip not read');
+    return out.filter(Boolean).map(function (l) { return '<p class="ov-lsi">' + E(l) + '</p>'; }).join('');
   }
   function renderList(key, M, h) {
     var back = '<p class="t-l1 ov-back"><a href="/admin/billing#overview" data-ab-tab="#overview">← Overview</a></p>';
     if (!LIST_RE.test(key || '')) return '<div class="ov ov-ls">' + back + '<div class="ov-card"><p class="t-b1">This list does not exist.</p></div></div>';
     var L = listOf(key, M), X = parts(M);
     if (!L) {
-      var loading = !X.P || !X.Q || !statusDone(M) || !M.readyDone;
+      var loading = /^arv\./.test(key) ? !arvData(M) : !X.P || !X.Q || !statusDone(M) || !M.readyDone;
       return '<div class="ov ov-ls">' + back + '<div class="ov-card">' + (loading ? '<p class="ov-wait">Loading — the list fills when its figures have arrived (guest checks ' + num(M.checked) + ' / ' + num(M.total) + ').</p>' : '<p class="t-b1">This list does not exist.</p>') + '</div></div>';
     }
     var byInv = {}, byG = {};
@@ -598,11 +780,11 @@
     var rows = L.ids.map(function (id) {
       var x = L.kind === 'holder' ? byInv[id] : byG[id], inv = x ? x.Holder_ID : (/^INV-/.test(id) ? id : null), g = x ? x.guestId : (L.kind === 'guest' ? id : '');
       var name = x && x.name ? x.name.full : '(name not in the guest list)';
-      return '<li class="ov-lsr"><div><p class="ov-lsn">' + E(name) + '</p><p class="ov-lsi">' + E([g, inv].filter(Boolean).join(' · ')) + '</p></div>' +
+      return '<li class="ov-lsr"><div><p class="ov-lsn">' + E(name) + '</p><p class="ov-lsi">' + E([g, inv].filter(Boolean).join(' · ')) + '</p>' + (L.arv ? arvFact(M, L.arv.fact, g) : '') + '</div>' +
         (inv ? '<button type="button" class="p-link ab-pf-open" data-ab-profile="' + E(inv) + '">Profile</button>' : '') + '</li>';
     });
     return '<div class="ov ov-ls">' + back + '<section class="ov-card"><h2 class="ov-h1 small">' + E(L.title) + '</h2><p class="ov-cs">' + L.ids.length + ' ' + (L.ids.length === 1 ? 'guest' : 'guests') + ' · ' + E(L.basis) + '</p>' +
-      (rows.length ? '<ul class="ov-lsl">' + rows.join('') + '</ul>' : '<p class="ov-empty">Nobody.</p>') + '<p class="ov-note">' + '<button type="button" class="ov-up" data-ov-back="' + E(L.back) + '">↑ Back to the figure</button></p></section></div>';
+      (rows.length ? '<ul class="ov-lsl">' + rows.join('') + '</ul>' : '<p class="ov-empty">Nobody.</p>') + '<p class="ov-note">' + '<button type="button" class="ov-up" data-ov-back="' + E(L.back) + '">↑ Back to the figure</button>' + (L.arv ? ' ' + go('#assign', 'Room assignments →') : '') + '</p></section></div>';
   }
 
   window.SIYL_ADMIN_OVERVIEW = { render: render, renderList: renderList, LIST_RE: LIST_RE, actions: function (M) { return actions(M, parts(M)); } };
