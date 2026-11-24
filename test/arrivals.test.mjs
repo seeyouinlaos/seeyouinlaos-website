@@ -29,10 +29,10 @@ const { Rooms } = await import('../src/rooms.js');
 const { doState, page, SUTHEP } = await import('./sandbox.mjs');
 
 /* ------------------------------------------------------------ the fictional world */
-const K = { bkk: 'bkk-stay/u-sathorn-superior-garden', pre: 'prewed/heritage', preX: 'prewed/heritage-executive', pres: 'prewed/souphattra-presidential', wed: 'wedstay/heritage', wedX: 'wedstay/heritage-executive', wpres: 'wedstay/souphattra-presidential', gh: 'guesthouse/guest-house' };
+const K = { muse: 'kempinski/jatu-room', bkk: 'bkk-stay/u-sathorn-superior-garden', pre: 'prewed/heritage', preX: 'prewed/heritage-executive', pres: 'prewed/souphattra-presidential', wed: 'wedstay/heritage', wedX: 'wedstay/heritage-executive', wpres: 'wedstay/souphattra-presidential', gh: 'guesthouse/guest-house' };
 const ITEMS = [['A2', K.bkk, '21.02.2027', '24.02.2027', 3], ['B', 'train', '24.02.2027', '25.02.2027', 1], ['C1', K.pre, '25.02.2027', '27.02.2027', 2], ['C2', K.preX, '25.02.2027', '27.02.2027', 2],
   ['C3', K.pres, '25.02.2027', '27.02.2027', 2], ['D1', K.wed, '27.02.2027', '01.03.2027', 2], ['D2', K.wedX, '27.02.2027', '01.03.2027', 2], ['D3', K.wpres, '27.02.2027', '01.03.2027', 2], ['D4', K.gh, '27.02.2027', '01.03.2027', 2],
-  ['E2', 'mu9646', '01.03.2027', '01.03.2027', 0]];
+  ['E2', 'mu9646', '01.03.2027', '01.03.2027', 0], ['G', 'c86', '04.03.2027', '04.03.2027', 0], ['J', 'kempinski/jatu-room', '06.03.2027', '08.03.2027', 2]];
 function workbook() {
   const L = { Item_ID: (x) => x[0], Billing_Category: () => 'GUEST_SETTLEMENT_REQUIRED', Rate_Status: () => 'ACTIVE', Effective_From: () => '', Effective_To: () => '', Rate_Basis: () => 'PER_PERSON_PER_NIGHT',
     Standard_Rate: () => 99, Quota: () => 4, Quota_Unit: () => 'ROOM', Max_Pax: () => 2, Change_Cutoff: () => '', Cancellation_Cutoff: () => '', Currency: () => 'USD', Site_Product_Key: (x) => x[1],
@@ -44,7 +44,10 @@ function workbook() {
       ['C', 'Heritage Executive', '203', '25.02.2027', '01.03.2027', 'Synthetic Typed-Seven', ''],    /* agrees */
       ['F', 'Souphattra Presidential', '210 / 211', '25.02.2027', '01.03.2027', 'Synthetic Bride', 'Synthetic Groom'],
       ['C', 'Heritage Executive', '204', '25.02.2027', '01.03.2027', 'Synthetic A', 'Synthetic B'],
-      ['C', 'The Heritage', '102', '', '01.03.2027', '', '']],                                         /* a free room */
+      ['C', 'The Heritage', '102', '', '01.03.2027', '', ''],                                          /* a free room */
+      ['B', 'The Heritage', '105', '27.02.2027', '01.03.2027', '', ''],                                /* dated, no name, an empty unit: agrees */
+      ['C', 'The Heritage', '207', '25.02.2027', '27.02.2027', 'Synthetic P', 'Synthetic Q'],           /* one number, two stays, two rows: */
+      ['C', 'The Heritage', '207', '27.02.2027', '01.03.2027', 'Synthetic P', 'Synthetic Q']],          /*   both agree (review F5) */
     '006_Guestlist': [['ID', 'Firstname', 'Surname']], '009_Special_Rates': [['Holder_ID']],
   };
 }
@@ -52,7 +55,7 @@ const INDEX = {};
 const G = (g, p, extra) => { INDEX['k' + g] = { i: 'INV-' + g, g, p: 'INV-' + p, c: 'C' + g, ...(extra || {}) }; };
 G('G048', '001', { h: 1, r: 'B' }); G('G049', '001', { h: 1, r: 'G' });
 ['G901', 'G902'].forEach((g) => G(g, '901')); G('G903', '903'); G('G904', '904'); ['G905', 'G906'].forEach((g) => G(g, '905')); G('G907', '907');
-G('G908', '908'); G('G909', '909'); G('G910', '910'); G('G911', '911'); G('G912', '912');
+G('G908', '908'); G('G909', '909'); G('G910', '910'); G('G911', '911'); G('G912', '912'); G('G914', '914');
 INDEX.amb1 = { i: 'INV-G913', g: 'G913', p: 'INV-913' }; INDEX.amb2 = { i: 'INV-G999', g: 'G913', p: 'INV-999' };   /* one id on two invitations */
 const sent = (g, { scope, legs = [], stays = [], flight, version = 1 } = {}) => ({ submissionId: 'S-' + g, version, lastSentAt: '2026-11-01T10:00:00Z',
   registration: { guestRecord: { scope: scope || { bangkok: true, vientianePreWedding: true, vientianeWedding: true } }, stages: { prewed: 'selected' },
@@ -61,13 +64,14 @@ const sent = (g, { scope, legs = [], stays = [], flight, version = 1 } = {}) => 
 const conf = (v) => ({ confirmedAt: '2026-11-02T10:00:00Z', version: v || 1, submissionId: null });
 const STORE = {
   'reg:INV-G901': sent('G901', { legs: ['train'], stays: ['bkk-stay', 'prewed', 'wedstay'], flight: true }), 'conf:INV-G901': conf(),
-  'reg:INV-G902': sent('G902', { legs: ['train'], stays: ['bkk-stay', 'prewed', 'wedstay'] }), 'conf:INV-G902': conf(),
+  'reg:INV-G902': sent('G902', { legs: ['train'], stays: ['bkk-stay', 'wedstay'] }), 'conf:INV-G902': conf(),            /* no prewed line, a prewed room */
   'reg:INV-G903': sent('G903', { legs: ['train'], stays: ['guesthouse'] }), 'conf:INV-G903': conf(),                       /* train, room only from 27 Feb */
   'reg:INV-G904': sent('G904', { legs: ['train'], stays: ['wedstay'] }), 'conf:INV-G904': conf(),                          /* the same, 012 says from 25 Feb */
   'reg:INV-G905': sent('G905', { legs: ['train'], stays: ['prewed', 'wedstay'] }),                                         /* awaiting */
   'reg:INV-G906': sent('G906', { legs: ['train'], stays: ['prewed', 'wedstay'] }), 'conf:INV-G906': conf(),                /* confirmed, same room */
   'reg:INV-G907': sent('G907', { scope: { vientiane: true }, stays: ['prewed', 'wedstay'] }), 'conf:INV-G907': conf(),     /* a legacy scope, no train */
-  'reg:INV-G909': sent('G909', { scope: { none: true } }), 'conf:INV-G909': conf(),                                       /* declined: conf never read */
+  'reg:INV-G909': sent('G909', { scope: { none: true }, legs: ['train'] }), 'conf:INV-G909': conf(),                     /* declined (a train line left in it): conf never read */
+  'reg:INV-G914': sent('G914', { legs: ['train', 'c86'] }), 'conf:INV-G914': conf(),                                        /* Bangkok, the train, own stay in Laos, Hotel Muse */
   'reg:INV-G910': sent('G910', { scope: { vientianeWedding: true } }), 'conf:INV-G910': conf(),                           /* joining, nothing booked */
   'conf:INV-G908': conf(),                                                                                                   /* never sent: conf never read */
   'obk-index': { G911: ['INV-G048'] },
@@ -84,9 +88,10 @@ async function rooms() {
   await put(K.preX, 'G', 'G905'); await put(K.preX, 'G', 'G906'); await put(K.wedX, 'G', 'G905'); await put(K.wedX, 'G', 'G906');
   await put(K.preX, 'F', 'G907'); await put(K.wedX, 'F', 'G907');
   await put(K.wedX, 'H', 'G911'); await put(K.wedX, 'I', 'G912');
+  await put(K.bkk, 'C', 'G914'); await put(K.muse, 'A', 'G914');
   await put(K.wed, 'D', '~INV-950~1', { placeholder: true });   /* a kept place: nobody */
   await r.storage.put('hotelrooms', { version: 1, at: 'x', by: 'GROOM', rooms: { [K.wed + '|C']: ['202'], [K.preX + '|F']: ['203'], [K.wedX + '|F']: ['203'], [K.preX + '|G']: ['204'], [K.wedX + '|G']: ['204'],
-    [K.pres + '|A']: ['211', '210'], [K.wpres + '|A']: ['210', '211'], [K.pre + '|C']: ['202'] } });
+    [K.pres + '|A']: ['211', '210'], [K.wpres + '|A']: ['210', '211'], [K.pre + '|C']: ['202'], [K.wed + '|B']: ['105'], [K.pre + '|A']: ['207'], [K.wed + '|A']: ['207'] } });
   return r;
 }
 function kv(init) { const m = new Map(Object.entries(init).map(([k, v]) => [k, JSON.stringify(v)])), gets = []; return { m, gets, get: async (k) => { gets.push(k); return m.has(k) ? m.get(k) : null; }, put: async () => {}, delete: async () => {}, list: async () => ({ keys: [], list_complete: true }) }; }
@@ -140,7 +145,7 @@ test('HS-059 · THE BASE — one Google read of exactly 002 + 012, the Rooms pla
   assert.deepEqual(W.env.REG_KV.gets.sort(), ['obk-index', 'obk:INV-G048'], 'no sent trip in the base');
   const text = JSON.stringify(r.j);
   assert.ok(!/Synthetic G9|secret-file/.test(text), 'no occupant name, no file name');
-  assert.deepEqual(r.j.list012.map((x) => x.typed.length), [1, 1, 2, 2], 'only 012 typed names, free rooms left out');
+  assert.deepEqual(r.j.list012.map((x) => x.typed.length), [1, 1, 2, 2, 0, 2, 2], 'only 012 typed names; an undated free room left out, a dated one kept');
   assert.ok(!r.j.plan.units.some((u) => u.occupants.some((o) => !/^G\d{3,}$/.test(o.guestId))), 'a kept place is nobody');
   assert.equal(r.j.plan.units.find((u) => u.key === K.wed && u.label === 'D').kept, 1);
   assert.deepEqual(r.j.ambiguous, ['G913']); assert.ok(!r.j.guests.some((g) => g.guestId === 'G913'));
@@ -187,7 +192,7 @@ test('HS-059 · EVERY KNOWN GUEST ONCE — the tracks partition the register; am
   forgetArrivalSources();
   const W = await world(); const { base, facts } = await readAll(W); const M = model(base, facts);
   const all = Object.values(M.people.tracks).flat();
-  assert.equal(all.length, M.people.total); assert.equal(new Set(all).size, all.length, 'each once'); assert.equal(M.people.total, 14, 'the couple and twelve guests; the ambiguous id apart');
+  assert.equal(all.length, M.people.total); assert.equal(new Set(all).size, all.length, 'each once'); assert.equal(M.people.total, 15, 'the couple and thirteen guests; the ambiguous id apart');
   const T = M.people.tracks;
   assert.deepEqual(T.COUPLE, ['G048', 'G049']); assert.deepEqual(T.DECLINED, ['G909']); assert.deepEqual(T.NOT_SENT, ['G908']); assert.deepEqual(T.JOINING_NO_ARRANGEMENT, ['G910']);
   assert.ok(T.IN_ROOM_PLAN.includes('G911') && T.IN_ROOM_PLAN.includes('G912'));
@@ -204,8 +209,8 @@ test('HS-059 · THE NIGHTS — only where a source places a guest; the couple ap
   const N = (n) => M.nights.find((x) => x.night === n);
   for (const n of M.nights) { const sum = Object.values(n.places).reduce((k, p) => k + Object.values(p).reduce((a, l) => a + l.length, 0), 0); assert.equal(sum, n.total, n.night + ' total = its lists');
     const ids = Object.values(n.places).flatMap((p) => Object.values(p).flat()); assert.equal(new Set(ids).size, ids.length, n.night + ' each guest once'); }
-  assert.deepEqual(N('2027-02-21').places.BANGKOK, { COUPLE: ['G048', 'G049'], ROOM_CONFIRMED: ['G901', 'G902'] }, 'Bangkok: the couple apart, two guests in the plan');
-  assert.deepEqual(N('2027-02-24').places.TRAIN.TRAIN, ['G901', 'G902', 'G903', 'G904', 'G905', 'G906', 'G911'], 'everyone holding the train — the Owners\' record too');
+  assert.deepEqual(N('2027-02-21').places.BANGKOK, { COUPLE: ['G048', 'G049'], ROOM_CONFIRMED: ['G901', 'G902', 'G914'] }, 'Bangkok: the couple apart, three guests in the plan');
+  assert.deepEqual(N('2027-02-24').places.TRAIN.TRAIN, ['G901', 'G902', 'G903', 'G904', 'G905', 'G906', 'G911', 'G914'], 'everyone holding the train — the Owners\' record too; never a declined trip');
   const v25 = N('2027-02-25').places.VIENTIANE;
   assert.deepEqual(v25.NOT_RECORDED, ['G903', 'G904', 'G911'], 'arrived by train (their own trip or the Owners\' record), no room until 27 Feb — counted, said, never invented');
   assert.deepEqual(v25.ROOM_CONFIRMED, ['G901', 'G902', 'G906', 'G907']); assert.deepEqual(v25.ROOM_AWAITING, ['G905']);
@@ -224,10 +229,10 @@ test('HS-059 · THE DAYS — arriving and leaving a place from the rooms and the
   forgetArrivalSources();
   const W = await world(); const { base, facts } = await readAll(W); const M = model(base, facts);
   const D = (d) => M.days.find((x) => x.day === d);
-  assert.deepEqual(D('2027-02-24').depart.BANGKOK, ['G048', 'G049', 'G901', 'G902', 'G903', 'G904', 'G905', 'G906', 'G911'], 'leaving Bangkok: the room ends or the train leaves — arrival there not recorded for some');
+  assert.deepEqual(D('2027-02-24').depart.BANGKOK, ['G048', 'G049', 'G901', 'G902', 'G903', 'G904', 'G905', 'G906', 'G911', 'G914'], 'leaving Bangkok: the room ends or the train leaves — arrival there not recorded for some');
   assert.deepEqual(D('2027-02-24').legs, ['train']);
   assert.ok(!D('2027-02-24').arrive.TRAIN && !D('2027-02-25').depart.TRAIN);
-  assert.deepEqual(D('2027-02-25').arrive.VIENTIANE, ['G048', 'G049', 'G901', 'G902', 'G903', 'G904', 'G905', 'G906', 'G907', 'G911']);
+  assert.deepEqual(D('2027-02-25').arrive.VIENTIANE, ['G048', 'G049', 'G901', 'G902', 'G903', 'G904', 'G905', 'G906', 'G907', 'G911', 'G914']);
   assert.deepEqual(D('2027-03-01').depart.VIENTIANE.length, 11);
   assert.ok(D('2027-02-25').followUp.includes('G903') && D('2027-02-25').followUp.includes('G904'));
 });
@@ -242,15 +247,16 @@ test('HS-059 · THE CHECKS — 012 by room number and night (never a name), mixe
   assert.equal(M.list012.rows.find((r) => r.roomNo === '203').status, 'SAME');
   assert.equal(M.list012.rows.find((r) => r.roomNo === '210 / 211').status, 'SAME', 'a suite compared as a set of numbers');
   assert.equal(M.list012.rows.find((r) => r.roomNo === '204').status, 'SAME');
+  assert.equal(M.list012.rows.find((r) => r.roomNo === '105').status, 'SAME', 'a dated row without a name over an empty room: no difference');
   assert.ok(M.checks.LIST_012.ids.includes('G904'));
   assert.deepEqual(M.checks.MIXED_STATES.ids, ['G905', 'G906']);
   assert.deepEqual(M.checks.BANGKOK_NOT_RECORDED.ids, ['G903', 'G904', 'G905', 'G906', 'G911']);
   assert.deepEqual(M.checks.GAP.ids, ['G903', 'G904', 'G911']);
   assert.deepEqual(M.checks.ROOM_NOT_SENT.ids, ['G912']); assert.ok(!M.checks.ROOM_NOT_SENT.ids.includes('G911'), 'the Owners\' record is no false alarm');
-  assert.deepEqual(M.checks.PART_NO_ROOM.ids, ['G910']);
+  assert.deepEqual(M.checks.PART_NO_ROOM.ids, ['G910', 'G914'], 'joining the wedding as sent, no room in the plan: their own stay, said');
   assert.deepEqual(M.checks.AMBIGUOUS.ids, ['G913']);
   const st = M.stays.find((s) => s.window === 'bkk-stay');
-  assert.deepEqual([st.units, st.occupied, st.persons.length], [6, 2, 4], 'rooms are never people: 2 of 6 rooms, 4 persons');
+  assert.deepEqual([st.units, st.occupied, st.persons.length], [6, 3, 5], 'rooms are never people: 3 of 6 rooms, 5 persons');
   assert.ok(!/Synthetic G9|secret-file/.test(JSON.stringify(M)), 'name-free but for 012 as typed');
   assert.deepEqual(M.legs.find((l) => l.key === 'train').ownerRecorded, ['G911']);
   assert.equal(M.arrival.status, 'NOT_RECORDED'); assert.deepEqual(M.arrival.flightDocument.received, ['G901']);
@@ -266,4 +272,32 @@ test('HS-059 · THE PIECES — planOf / list012Of / factsOf / arrivalsBase on th
   assert.equal(factsOf(null, null).booking, 'NOT_SENT');
   const b = arrivalsBase({ entries: INDEX, plan: null, dates: { [K.wed]: { item: 'D1', checkIn: '2027-02-27', checkOut: '2027-03-01', nights: 2 }, sangkhathan: { item: 'T', checkIn: '2027-02-28' } }, list012: null, owner: {}, gaps: [] });
   assert.deepEqual(Object.keys(b.dates), [K.wed], 'only stays and legs'); assert.equal(b.guests.find((g) => g.guestId === 'G048').couple, 'BRIDE');
+});
+
+test('HS-059 · REVIEW FIXES — no Bangkok nights invented across a trip to Laos (F1); the train within China leaves no place (F2); a declined trip holds no leg (F3); a 002 typo is said, never drawn (F4); one room number over two stays (F5); flight "not read" apart (F7); a room the sent trip does not list (F11)', async () => {
+  forgetArrivalSources();
+  const W = await world(); const { base, facts } = await readAll(W); const M = model(base, facts);
+  const x = M.guests.G914;
+  assert.deepEqual(x.notRecorded, [], 'F1: between the Bangkok stay and Hotel Muse lies a trip to Laos — nothing is filled');
+  assert.ok(!M.nights.some((n) => n.night > '2027-02-24' && n.night < '2027-03-06' && n.places.BANGKOK && Object.values(n.places.BANGKOK).flat().includes('G914')), 'never in Bangkok in between');
+  assert.ok(M.checks.UNACCOUNTED.ids.includes('G914'), 'the nights in between are named for Guest Relations');
+  const c86 = M.days.find((d) => d.day === '2027-03-04');
+  assert.ok(!(c86.depart.CHINA || []).includes('G914') && !(c86.arrive.CHINA || []).includes('G914'), 'F2: Kunming → Lijiang neither leaves nor reaches China');
+  assert.deepEqual(c86.legs, ['c86']);
+  assert.equal(M.guests.G909.track, 'DECLINED'); assert.deepEqual(M.guests.G909.legs, [], 'F3: a declined trip joins nothing');
+  assert.ok(!M.legs.find((l) => l.key === 'train').notSent.includes('G909'));
+  const r207 = M.list012.rows.filter((r) => r.roomNo === '207');
+  assert.deepEqual(r207.map((r) => r.status), ['SAME', 'SAME'], 'F5: each row of the number against the plan\'s nights for it');
+  assert.deepEqual(M.checks.ROOM_NOT_IN_TRIP.ids, ['G902'], 'F11: a prewed room, no prewed line in the sent trip — said, nothing changed');
+  assert.equal(M.guests.G902.rooms.find((r) => r.window === 'prewed').status, 'CONFIRMED');
+  /* F4: one 002 date with the wrong year */
+  const typo = JSON.parse(JSON.stringify(base)); typo.dates[K.gh] = { item: 'D4', checkIn: '2026-02-27', checkOut: '2026-03-01', nights: 2 };
+  const T = model(typo, facts);
+  assert.equal(T.window.firstNight, '2027-02-21', 'the window stays the journey\'s'); assert.ok(T.window.lastNight <= '2027-03-08');
+  assert.ok(T.gaps.some((g) => /lie far from the journey/.test(g))); assert.ok(T.checks.DATES_002.items.some((i) => /D4: 2026-02-27 lies far from the journey/.test(i.why)));
+  /* F7: a trip not read is never "trip not sent" on the flight document */
+  const partial = { ...facts }; delete partial['INV-G903'];
+  const P = model(base, partial);
+  assert.ok(P.arrival.flightDocument.notRead.includes('G903') && !P.arrival.flightDocument.notSent.includes('G903'));
+  const fd = P.arrival.flightDocument; assert.equal(fd.received.length + fd.notAdded.length + fd.notSent.length + fd.notRead.length, P.people.total, 'the flight lists partition every guest');
 });

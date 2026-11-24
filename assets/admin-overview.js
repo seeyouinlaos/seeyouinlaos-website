@@ -513,12 +513,12 @@
     STAY_WITHOUT_ROOM: ['A stay booked · no room in the plan yet', C.s2], JOINING_NO_ARRANGEMENT: ['Joining · nothing booked or recorded', C.serious], DECLINED: ['Not joining this trip', C.neutral],
     NOT_SENT: ['Trip not sent · whereabouts unknown', null], NOT_READ: ['Trip not read just now', C.crit] };
   var CAT_W = { COUPLE: ['Bride & Groom', C.s6], ROOM_CONFIRMED: ['Room in the plan · trip confirmed', C.s1], ROOM_AWAITING: ['Room in the plan · awaiting confirmation', C.pend],
-    ROOM_NOT_SENT: ['Room in the plan · trip not sent', C.serious], ROOM_NOT_READ: ['Room in the plan · trip not read', C.crit], TRAIN: ['On the night train', C.s4], NOT_RECORDED: ['There · accommodation not recorded', null] };
+    ROOM_NOT_SENT: ['Room in the plan · trip not sent', C.serious], ROOM_DECLINED: ['Room in the plan · trip declined', C.crit], ROOM_NOT_READ: ['Room in the plan · trip not read', C.crit], TRAIN: ['On the night train', C.s4], NOT_RECORDED: ['There · accommodation not recorded', null] };
   var CHECK_W = { GAP: 'Accommodation not recorded between a booked leg and a room', BANGKOK_NOT_RECORDED: 'Bangkok: arrival and accommodation not recorded', LIST_012: '012 differs from the room plan (room number · nights)',
     MIXED_STATES: 'The same room, different booking states', PART_NO_ROOM: 'Joins a part as sent · no room in the plan', ROOM_NOT_SENT: 'A room in the plan · trip not sent or declined', NOTHING_DATED: 'Joining · nothing booked or placed',
     WAITLIST: 'On a waiting list', OWNER_NO_ROOM: 'Recorded by the Owners · no room in the plan', UNACCOUNTED: 'A night between two places · nothing recorded', CONFLICT: 'Two places on one night', UNDATED: 'A room without 002 dates',
-    NOT_READ: 'Trip not read just now', NOT_IN_INDEX: 'In the room plan · not in the register', AMBIGUOUS: 'A guest id on two invitations', DATES_002: '002 nights differ from its own dates' };
-  var STATUS_W = { CONFIRMED: 'trip confirmed', AWAITING: 'awaiting confirmation', NOT_SENT: 'trip not sent', NOT_READ: 'not read', HOSTS: 'the couple\'s own' };
+    ROOM_NOT_IN_TRIP: 'A room in the plan for a stay the sent trip does not list', NOT_READ: 'Trip not read just now', NOT_IN_INDEX: 'In the room plan · not in the register', AMBIGUOUS: 'A guest id on two invitations', DATES_002: '002 nights differ from its own dates' };
+  var STATUS_W = { CONFIRMED: 'trip confirmed', AWAITING: 'awaiting confirmation', NOT_SENT: 'trip not sent', DECLINED: 'trip declined', NOT_READ: 'not read', HOSTS: 'the couple\'s own' };
   var BOOKING_W = { CONFIRMED: 'Trip confirmed', SENT: 'Sent · awaiting confirmation', DECLINED: 'Not joining this trip', NOT_SENT: 'Not sent yet' };
   var PART_W = { bangkok: 'Bangkok', vientianePreWedding: 'Vientiane · before the wedding', vientianeWedding: 'Vientiane · the wedding', china: 'China' };
   function arvData(M) { return M.arr && M.arr.phase === 'ready' && M.arr.data ? M.arr.data : null; }
@@ -575,7 +575,7 @@
       '<div class="ov-card"><h4 class="ov-ct">Legs between the places</h4><p class="ov-cs">booked in the guest\'s own sent trip or recorded by the Owners · confirmed = the trip is confirmed</p><ul class="ov-list">' +
       D.legs.map(function (l) { return '<li><span>' + icon(l.key === 'train' || l.key === 'c86' ? 'train' : 'plane', 'soft') + E(l.letter + ' · ' + l.name) + '<small>' + E(l.date ? dayWords(l.date) : 'date not readable') + '</small></span><span>' +
         listLink('arv.l.' + l.key + '.CONFIRMED', l.confirmed.length, l.confirmed.length + ' confirmed') + (l.awaiting.length ? '<br>' + listLink('arv.l.' + l.key + '.AWAITING', l.awaiting.length, l.awaiting.length + ' awaiting') : '') + (l.notSent.length ? '<br>' + listLink('arv.l.' + l.key + '.NOT_SENT', l.notSent.length, l.notSent.length + ' not sent') : '') + '</span></li>'; }).join('') +
-      '</ul><p class="ov-note">Arrival airport, flight and time: ' + stateChip('NOT_RECORDED', 'E22') + ' · flight document (status only): received ' + listLink('arv.fd.RECEIVED', D.arrival.flightDocument.received.length) + ' · not added ' + listLink('arv.fd.NOT_ADDED', D.arrival.flightDocument.notAdded.length) + ' · trip not sent ' + listLink('arv.fd.NOT_SENT', D.arrival.flightDocument.notSent.length) + '</p></div></div>';
+      '</ul><p class="ov-note">Arrival airport, flight and time: ' + stateChip('NOT_RECORDED', 'E22') + ' · flight document (status only): received ' + listLink('arv.fd.RECEIVED', D.arrival.flightDocument.received.length) + ' · not added ' + listLink('arv.fd.NOT_ADDED', D.arrival.flightDocument.notAdded.length) + ' · trip not sent ' + listLink('arv.fd.NOT_SENT', D.arrival.flightDocument.notSent.length) + (D.arrival.flightDocument.notRead.length ? ' · trip not read ' + listLink('arv.fd.NOT_READ', D.arrival.flightDocument.notRead.length) : '') + '</p></div></div>';
     /* 4 · day by day */
     s += '<div class="ov-card"><h4 class="ov-ct">Day by day · ' + E(dayWords(D.window.firstDay)) + ' – ' + E(dayWords(D.window.lastDay)) + '</h4><p class="ov-cs">per place: who arrives, who leaves, who sleeps there · the legs of the day · whom to follow up · open a day</p>' +
       D.days.map(function (d) { return dayDetails(M, D, d, open); }).join('') + '</div>';
@@ -587,7 +587,8 @@
     /* 6 · the data checks */
     var CK = D.checks, keys = Object.keys(CHECK_W).filter(function (k) { return own(CK, k) && (CK[k].ids.length || CK[k].items.length); });
     s += '<div class="ov-card"><h4 class="ov-ct">' + icon('flag', 'soft') + ' Data checks · for Guest Relations</h4><p class="ov-cs">what the sources leave open or contradict — nothing is changed here; each check opens its guests</p><ul class="ov-list">' +
-      (keys.length ? keys.map(function (k) { var c = CK[k]; return '<li><span>' + E(CHECK_W[k]) + '</span><span>' + (c.ids.length ? listLink('arv.k.' + k, c.ids.length, c.ids.length + (c.ids.length === 1 ? ' guest' : ' guests')) : E(c.items.length + ' rows')) + '</span></li>'; }).join('') : '<li><span>No open check</span><span></span></li>') + '</ul>' +
+      (keys.length ? keys.map(function (k) { var c = CK[k]; return '<li><span>' + E(CHECK_W[k]) + '</span><span>' + (c.ids.length ? listLink('arv.k.' + k, c.ids.length, c.ids.length + (c.ids.length === 1 ? ' guest' : ' guests')) : E(c.items.length + (c.items.length === 1 ? ' row' : ' rows'))) + '</span></li>' +
+        (c.ids.length ? '' : c.items.map(function (i) { return '<li><span class="ov-sub2">' + E(i.why) + '</span><span></span></li>'; }).join('')); }).join('') : '<li><span>No open check</span><span></span></li>') + '</ul>' +
       list012Table(M, D, open) + '</div>';
     s += '<div class="ov-card hatch-card"><h4 class="ov-ct">' + icon('train', 'soft') + ' Vehicles needed</h4><p>' + stateChip('NOT_COMPUTABLE', 'E21') + '</p><p class="ov-note">Missing: seats per van, luggage capacity, bags per guest, Guest Relations team size. Vehicles confirmed: no record.</p></div>';
     return s + '</section>';
@@ -745,7 +746,7 @@
       if (own(S2, k[3])) return L(l.letter + ' · ' + l.name + ' · ' + (k[3] === 'ALL' ? 'everyone booked' : STATUS_W[k[3]]), S2[k[3]], 'the guest\'s own sent trip or the Owners\' record', 'leg:' + k[2]); }
     if (k[1] === 'k' && own(CHECK_W, k[2])) return L('To check · ' + CHECK_W[k[2]], own(D.checks, k[2]) ? D.checks[k[2]].ids : [], 'nothing is changed here', 'check:' + k[2]);
     if (k[1] === 'f' && ISO_OK(k[2])) { var d2 = dayOf(k[2]); if (d2) return L('To follow up · ' + dayLong(k[2]), d2.followUp, 'the checks touching that day', 'day:' + k[2]); }
-    if (k[1] === 'fd') { var FD = { RECEIVED: D.arrival.flightDocument.received, NOT_ADDED: D.arrival.flightDocument.notAdded, NOT_SENT: D.arrival.flightDocument.notSent }, W2 = { RECEIVED: 'received', NOT_ADDED: 'not added', NOT_SENT: 'trip not sent' };
+    if (k[1] === 'fd') { var FD = { RECEIVED: D.arrival.flightDocument.received, NOT_ADDED: D.arrival.flightDocument.notAdded, NOT_SENT: D.arrival.flightDocument.notSent, NOT_READ: D.arrival.flightDocument.notRead || [] }, W2 = { RECEIVED: 'received', NOT_ADDED: 'not added', NOT_SENT: 'trip not sent', NOT_READ: 'trip not read just now' };
       if (own(FD, k[2])) return L('Flight information document · ' + W2[k[2]], FD[k[2]], 'as sent · status only · airport, flight and time are not recorded (E22)', 'flight'); }
     return null;
   }
@@ -772,6 +773,7 @@
     if (!LIST_RE.test(key || '')) return '<div class="ov ov-ls">' + back + '<div class="ov-card"><p class="t-b1">This list does not exist.</p></div></div>';
     var L = listOf(key, M), X = parts(M);
     if (!L) {
+      if (/^arv\./.test(key) && M.arr && M.arr.phase === 'error') return '<div class="ov ov-ls">' + back + '<div class="ov-card">' + arvWaiting(M) + '</div></div>';
       var loading = /^arv\./.test(key) ? !arvData(M) : !X.P || !X.Q || !statusDone(M) || !M.readyDone;
       return '<div class="ov ov-ls">' + back + '<div class="ov-card">' + (loading ? '<p class="ov-wait">Loading — the list fills when its figures have arrived (guest checks ' + num(M.checked) + ' / ' + num(M.total) + ').</p>' : '<p class="t-b1">This list does not exist.</p>') + '</div></div>';
     }

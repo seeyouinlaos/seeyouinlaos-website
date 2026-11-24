@@ -148,3 +148,10 @@ test('HS-059 · A DAY AND A GUEST OPEN ON A CLICK — the body is drawn only whe
   assert.match(h, /accommodation not recorded for Thu 25 Feb, Fri 26 Feb/);
   assert.match(h, /Bangkok<\/b><small>arrival: not recorded/);
 });
+
+test('HS-059 · A LIST OF SECTION F WHEN ITS READ FAILED — the reason and Try again, never "Loading" for ever (review F8)', async () => {
+  let n = 0;
+  const { root } = load({ 'admin/arrivals': () => { n++; return res(503, { ok: false }); } }, { hash: '#list=arv.t.COUPLE' });
+  await tick(60);
+  assert.equal(n, 1); assert.doesNotMatch(root.innerHTML, /Loading/); assert.match(root.innerHTML, /limiting heavy requests just now/); assert.ok(el(root, 'data-arr-retry'));
+});
