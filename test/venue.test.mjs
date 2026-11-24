@@ -23,7 +23,7 @@ const sha = (p) => createHash('sha256').update(fs.readFileSync(path.join(ROOT, p
 
 test('DATA · seven places in the Owner\'s order, every one a legend place (no marker anywhere since 22 Nov 2026); every zone has its story, its time and real photographs; the plan record', () => {
   assert.deepEqual(DATA.zones.map((z) => z.id), ['lobby', 'rooms', 'coffee', 'ceremony', 'dinner', 'pool', 'garden']);
-  assert.deepEqual(DATA.zones.map((z) => z.label), ['Lobby · Reception & Check-in', 'Rooms', 'Coffee & Cake · Breakfast', 'Vow Ceremony · Green Doors', 'Wedding Dinner · Green Doors', 'Swimming pool', 'Garden']);   /* TO-01984 · TO-01942 (Window 007) */
+  assert.deepEqual(DATA.zones.map((z) => z.label), ['Lobby · Reception & Check-in', 'Rooms', 'Coffee & Cake · Breakfast', 'Vow Ceremony · Green Doors', 'Wedding Dinner · Pool Area', 'Swimming pool', 'Garden']);   /* TO-01984 · TO-01942 (Window 007) */
   assert.ok(DATA.zones.every((z) => z.marks === undefined && z.anchor === undefined), 'no zone is placed on the plan: Coffee & Cake, the vows and the dinner wait for a confirmed position (Owners, 22 Nov 2026)');
   for (const z of DATA.zones) assert.ok(z.n && z.title && z.when && z.story && (z.index ? z.photos.length === 0 && z.href === '#dinner' : z.photos.length >= 2), z.id + ' is complete' + (z.index ? ' (an index entry: no photograph of its own, the way to the one detail)' : ''));
   assert.equal(DATA.base, undefined, 'the aerial base is gone');
@@ -31,7 +31,7 @@ test('DATA · seven places in the Owner\'s order, every one a legend place (no m
   assert.equal(DATA.plan.src.split('?v=')[1], createHash('sha256').update(fs.readFileSync(path.join(ROOT, 'assets/images/venue/souphattra-site-plan.svg'))).digest('hex').slice(0, 8), 'the drawing\'s ?v= is current: a corrected plan reaches every returning visitor');
   assert.ok(DATA.plan.alt && DATA.plan.desc && DATA.plan.caption && DATA.plan.enlarge && DATA.plan.close, 'the plan is named, described and its controls worded');
   assert.equal(DATA.first, 'dinner');
-  assert.equal(DATA.zones.find((z) => z.id === 'dinner').story, 'One long table at the Green Doors, with side A and side B.', 'TO-01990');
+  assert.equal(DATA.zones.find((z) => z.id === 'dinner').story, 'The long table beside the water — side A along the pool, side B facing it.', 'TO-01990 · HS-058.18');
   assert.doesNotMatch(JSON.stringify(DATA), /\b(north|south|east|west)\b/i, 'no compass direction is invented');
   assert.match(DATA.zones.find((z) => z.id === 'ceremony').when, /15:30/); assert.match(DATA.zones.find((z) => z.id === 'dinner').when, /19:30/);
   assert.doesNotMatch(JSON.stringify(DATA), /Temple|Wat Ong Teu|08:00|16:30/, 'the venue is Souphattra Heritage: no temple, no retired time');
@@ -46,10 +46,17 @@ test('ASSETS · the site plan is the corrected architectural drawing (vector, th
   assert.doesNotMatch(svg, /<image|data:image|<script|\son[a-z]+=|<foreignObject|href="http/i, 'no embedded raster, no script, no external reference');
   /* the visible words: exactly the names the official plan confirms (HS-058 reconciliation, 22 Nov 2026) */
   const words = [...svg.matchAll(/<text [^>]*>([^<]*)<\/text>/g)].map((m) => m[1]);
-  assert.deepEqual(words, ['BUILDING A', 'Lobby', 'Peacock', 'Bistro', 'BUILDING F', 'Peacock', 'Court', 'Swimming Pool', 'BUILDING B', 'BUILDING C', 'BUILDING D', 'BUILDING E',
-    /* the uses of the places, as the Owners confirmed them on 22 Nov 2026 (HS-058.7): the official plan fixes where, the Owners what */
+  assert.deepEqual(words, ['BUILDING A', 'Lobby', 'Peacock', 'Bistro', 'BUILDING F', 'Peacock', 'Court', 'Pool Area', 'BUILDING B', 'BUILDING C', 'BUILDING D', 'BUILDING E',
+    /* the uses of the places, as the Owners confirmed them on 22 Nov 2026 (HS-058.7) — the Wedding Dinner moved to the Pool Area on
+       24 Nov 2026 (HS-058.18): the official plan fixes where, the Owners what */
     'RECEPTION', '&amp; CHECK-IN', 'BREAKFAST', 'COFFEE &amp; CAKE', 'Green Doors', 'VOW CEREMONY', 'WEDDING DINNER', 'Garden', 'GUEST ROOMS', 'GUEST ROOMS', 'GUEST ROOMS', 'GUEST ROOMS']);
   assert.match(svg, /<rect class="sp-zone" data-zone="green-doors" x="170" y="530"/, 'the Green Doors: between the Lobby and the Peacock Bistro, as the Owners marked it');
+  /* HS-058.18 (Owners, 24 Nov 2026): the Wedding Dinner at the POOL AREA — its zone round the pool and its deck (inside the walkways, drawn
+     under the water so the pool stays water), the caption under the pool's name; the Green Doors carry the Vow Ceremony alone */
+  assert.match(svg, /<rect class="sp-zone" data-zone="pool-area" x="435" y="571" width="257" height="215"\/>\n<rect class="sp-water" x="441" y="648"/);
+  assert.match(svg, />Pool Area<\/text>\n[\s\S]*?<text class="sp-event" x="545" y="742" text-anchor="middle">WEDDING DINNER<\/text>/);
+  assert.equal(words.filter((w) => w === 'WEDDING DINNER').length, 1, 'one dinner caption'); assert.equal(words.indexOf('VOW CEREMONY'), words.indexOf('Green Doors') + 1);
+  assert.deepEqual(DATA.plan.key.filter((k) => k.event).map((k) => k.name + ' — ' + k.use), ['Lobby — Building A · Reception & Check-in', 'Peacock Bistro — Building F · Breakfast · Coffee & Cake', 'Green Doors — Vow Ceremony', 'Pool Area — Wedding Dinner']);
   /* the key under the plan says what the drawing says — word for word — and the guest rooms are the four buildings B, C, D, E */
   const plainWords = words.map((w) => w.replace(/&amp;/g, '&').toUpperCase());
   for (const k of DATA.plan.key) assert.ok(plainWords.includes(k.name.toUpperCase()) || plainWords.join(' ').includes(k.name.toUpperCase()), 'the key names ' + k.name + ' as the plan does');

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" class="sp" viewBox="95 186 900 884" width="900" height="884" role="img" aria-labelledby="sp-title sp-desc">
 <title id="sp-title">Souphattra Heritage Vientiane · site plan</title>
-<desc id="sp-desc">Schematic site plan, not to scale, drawn from the hotel's official plan: Building A with the Lobby, reception and check-in; Building F with the Peacock Bistro, for breakfast and Coffee and Cake; the Green Doors between them, for the Vow Ceremony and the Wedding Dinner; Peacock Court; the central garden; the swimming pool; the guest rooms in Buildings B, C, D and E; and the walkways between them.</desc>
+<desc id="sp-desc">Schematic site plan, not to scale, drawn from the hotel's official plan: Building A with the Lobby, reception and check-in; Building F with the Peacock Bistro, for breakfast and Coffee and Cake; the Green Doors between them, for the Vow Ceremony; Peacock Court; the central garden; the Pool Area, the swimming pool and its deck, for the Wedding Dinner; the guest rooms in Buildings B, C, D and E; and the walkways between them.</desc>
 <style>
 .sp .sp-ground{fill:#F7F3EC}
 .sp .sp-site{fill:#FBF8F2;stroke:#B9B2A6;stroke-width:1.5}
@@ -28,6 +28,7 @@
 <rect class="sp-bldg" data-building="F" x="160" y="733" width="198" height="200"/>
 <rect class="sp-court" x="458" y="451" width="47" height="66"/>
 <path class="sp-open" d="M441 573 H684 V779 H650 V648 H441 Z"/>
+<rect class="sp-zone" data-zone="pool-area" x="435" y="571" width="257" height="215"/>
 <rect class="sp-water" x="441" y="648" width="209" height="122"/>
 <rect class="sp-zone" data-zone="green-doors" x="170" y="530" width="190" height="197"/>
 <rect class="sp-garden" data-area="garden" x="606" y="390" width="116" height="158"/>
@@ -42,7 +43,7 @@
 <text class="sp-cap" x="160" y="1046" text-anchor="start">BUILDING F</text>
 <text class="sp-name sm" x="516" y="481" text-anchor="start">Peacock</text>
 <text class="sp-name sm" x="516" y="506" text-anchor="start">Court</text>
-<text class="sp-name" x="545" y="717" text-anchor="middle">Swimming Pool</text>
+<text class="sp-name" x="545" y="712" text-anchor="middle">Pool Area</text>
 <text class="sp-cap" x="550" y="262" text-anchor="middle">BUILDING B</text>
 <text class="sp-cap" x="813" y="338" text-anchor="middle">BUILDING C</text>
 <text class="sp-cap" x="796" y="988" text-anchor="middle">BUILDING D</text>
@@ -53,7 +54,7 @@
 <text class="sp-event" x="259" y="901" text-anchor="middle">COFFEE &amp; CAKE</text>
 <text class="sp-name sm" x="265" y="644" text-anchor="middle">Green Doors</text>
 <text class="sp-event" x="265" y="671" text-anchor="middle">VOW CEREMONY</text>
-<text class="sp-event" x="265" y="692" text-anchor="middle">WEDDING DINNER</text>
+<text class="sp-event" x="545" y="742" text-anchor="middle">WEDDING DINNER</text>
 <text class="sp-name sm" x="664" y="476" text-anchor="middle">Garden</text>
 <text class="sp-use" data-caption-for="B" x="550" y="342" text-anchor="middle">GUEST ROOMS</text>
 <text class="sp-use" data-caption-for="C" x="813" y="486" text-anchor="middle">GUEST ROOMS</text>

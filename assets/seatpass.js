@@ -259,7 +259,7 @@
   /* ---- the seat ticket ---------------------------------------------------- */
   /* Owner, Edit 2 (15 Sep 2026): the Wedding (Vow) Ceremony at Souphattra Heritage, 15:30; the dinner poolside, 19:30 */
   var EVENT_TIME = { ceremony: '15:30', dinner: '19:30' };
-  var EVENT_HEAD = { ceremony: 'Vow Ceremony · Souphattra Heritage', dinner: 'Wedding Dinner · Green Doors' };
+  var EVENT_HEAD = { ceremony: 'Vow Ceremony · Souphattra Heritage', dinner: 'Wedding Dinner · Pool Area' };
   var ALPHA = '23456789BCDFGHJKMNPQRSTVWXZ';
   /* the hosts' ceremony place, in words: their role when the record names it */
   function fixedWords(role) { return role === 'BRIDE' ? 'Bride' : role === 'GROOM' ? 'Groom' : 'Bride & Groom'; }

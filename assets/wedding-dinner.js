@@ -16,11 +16,11 @@
     name: 'Wedding Dinner',
     date: 'Sunday, 28 February 2027',
     time: '19:30',
-    place: 'Green Doors',
+    place: 'Pool Area',
     venue: 'Souphattra Heritage Vientiane',
     dress: 'Black Tie',
     dressHref: 'wedding-preparation.html#dress-code',
-    copy: 'An evening at the Green Doors, bringing the wedding day to its final and longest chapter — a Chinese sharing menu at the table, and the night to follow.',
+    copy: 'An evening at the Pool Area, bringing the wedding day to its final and longest chapter — a Chinese sharing menu at the table, and the night to follow.',
     /* THE SET MENU (Owners, 22 Nov 2026 · HS-058): ONE shared menu for every guest at the table, served in this order — nothing
        is chosen per guest. Open with the restaurant (the Owners ask): the number of prawns, and the alternative for guests who do
        not eat beef; until it is confirmed the page says only that it is being confirmed. */
@@ -38,16 +38,16 @@
       ]
     },
     /* the seating of the one long table — the plan's words, never a second dinner */
-    seating: 'One long table at the Green Doors, with side A and side B.',
+    seating: 'The long table beside the water — side A along the pool, side B facing it.',
     href: 'voyage.html#dinner',
     media: [
-      { src: E + '056-wedding-dinner-01-poolside-from-above.jpg', alt: 'Souphattra Heritage, seen from above', source: 'Drive 056' },
+      { src: E + '056-wedding-dinner-01-poolside-from-above.jpg', alt: 'Poolside at Souphattra Heritage, seen from above', source: 'Drive 056' },
       { src: E + '056-wedding-dinner-02-villa-wide.jpg', alt: 'The heritage villa across the pool', source: 'Drive 056' },
-      { src: E + '056-wedding-dinner-03-poolside-loungers.jpg', alt: 'Loungers at Souphattra Heritage', source: 'Drive 056' },
-      { src: E + '056-wedding-dinner-04-villa-across-the-water.jpg', alt: 'The heritage villa', source: 'Drive 056' },
+      { src: E + '056-wedding-dinner-03-poolside-loungers.jpg', alt: 'The loungers along the pool', source: 'Drive 056' },
+      { src: E + '056-wedding-dinner-04-villa-across-the-water.jpg', alt: 'The villa across the water', source: 'Drive 056' },
       { src: E + '056-wedding-dinner-05-pool-and-villa.jpg', alt: 'The pool and the villa', source: 'Drive 056' },
       { src: E + '056-wedding-dinner-06-pool-terrace.jpg', alt: 'The pool terrace', source: 'Drive 056' },
-      { src: E + '056-wedding-dinner-07-pool-aerial.jpg', alt: 'Souphattra Heritage from the air', source: 'Drive 056' },
+      { src: E + '056-wedding-dinner-07-pool-aerial.jpg', alt: 'The poolside from the air', source: 'Drive 056' },
       { src: 'assets/images/venue/pool-terrace-oblique-1600.jpg', alt: 'The pool terrace from the upper floor: umbrellas, loungers, the fountain and the balconies', source: 'Drive 13o95npqGfPMooOpwRqd2kcpB_l83nYJO (the venue set)' },
       { src: E + '056-wedding-dinner-08-long-table-candlelight.jpg', alt: 'The long table by candlelight', source: 'Drive 056' },
       { src: E + '056-wedding-dinner-09-lilies.jpg', alt: 'White lilies on the table', source: 'Drive 056' },

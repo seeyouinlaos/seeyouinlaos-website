@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Version** | 1.0 · 24. November 2026 (angelegt **vor** der Änderung HS-058.18) |
+| **Version** | 1.1 · 24. November 2026 (v1.0 angelegt **vor** der Änderung HS-058.18, Commit c1d8a07; v1.1 nach der Umsetzung, Abschnitt 9) |
 | **Basis** | `main` 60ef6e8 (live) · Task-Branch `hs-058-18-pool-area` |
 | **Auftrag** | Owners, 24.11.2026 (HS-058.18): Wedding Dinner zurück an den Poolbereich, Wedding Schedule website-weit abgleichen, Karte zurück auf Pool Area, letztes Hero-Video entfernen |
 | **Zweck** | Eine Stelle, an der der verbindliche Ablauf und alle Seiten, Komponenten und Datenquellen stehen, die ihn zeigen. Jede künftige Änderung am Programm prüft diese Liste. |
@@ -188,3 +188,32 @@ Nicht geändert: Buchungen, Preise, Zahlungen, Gästezuordnungen, Sitzplätze un
 | Version | Datum | Inhalt |
 |---|---|---|
 | 1.0 | 24.11.2026 | Angelegt vor HS-058.18: verbindlicher Ablauf, Backup des Stands 60ef6e8, geplante Änderungen |
+| 1.1 | 24.11.2026 | HS-058.18 umgesetzt (lokal, Branch `hs-058-18-pool-area`, nicht veröffentlicht): Abschnitt 9 |
+
+---
+
+## 9. Umsetzung HS-058.18 (v1.1)
+
+**Geänderte Dateien und Komponenten**
+
+| Bereich | Dateien |
+|---|---|
+| Datensätze Programm | `assets/temple.js`, `assets/journey.js`, `assets/wedding-dinner.js` (Ort, Text, Sitzordnung, Galerie-Beschreibungen) |
+| Sitzplan, Tickets, Admin | `assets/seating.js` (Tafel mit Pool, wie vor dem 22.11.), `assets/seatlabels.js`, `assets/seatpass.js`, `assets/admin-assign.js`, `src/billing/assignments.js` |
+| Karte | `assets/images/venue/souphattra-site-plan.svg`, `assets/venue-data.js` |
+| Seiten | `index.html`, `voyage.html`, `wedding.html`, `wedding-preparation.html`, `profile.html`, `experiences.html` (+ `assets/experiences.js`), `journey/index.html` (nicht ausgeliefert) |
+| E-Mails | `src/mail-templates.js` |
+| Thai | `src/i18n-th.json` (16 neue Einträge, nichts überschrieben) → erzeugt `assets/i18n/th.js`, `src/i18n-th.dict.js`, `assets/i18n/catalog.js` |
+| Hero | `src/media/manifest.json` (Sammlung 001 „partial“, Element „000 - Hero_Main_Video 01“ „excluded“ mit Begründung) → erzeugt `index.html` |
+| Gate und Tests | `src/release-check.cjs` (P8), `test/*` (Pool-Area-Prüfungen, neuer website-weiter Test in `test/wedding-dinner.test.mjs`) |
+| Versionsstempel | alle Seiten, `src/admin-page.js` (erzeugt) |
+
+**Ergebnis:** Das Wedding Dinner steht überall um 19:30 an der Pool Area; die Vow Ceremony bleibt um 15:30 an den Green Doors; Temple Ceremony
+und Coffee & Cake unverändert. Der Lageplan zeigt „Pool Area · WEDDING DINNER“ in einer gestrichelten Zone um Pool und Deck. Der Hero
+zeigt 5 Elemente mit 5 Punkten; das Video „They say …“ erscheint nicht mehr.
+
+**Offene Punkte für die Owners:**
+- Der Pool heißt auf dem Plan und in der Legende jetzt „Pool Area“; der Ortseintrag 06 mit Fotos heißt weiter „Swimming pool“.
+- Seat Tickets nennen Seite A immer „poolside“ (Regel vom 15.09.2026); falls Guest Relations die Poolseite je auf B stellt, müsste das
+  angepasst werden. Heute ist Seite A die Poolseite.
+- Abweichungen in anderen Quellen (Abschnitt 7) bleiben unverändert.

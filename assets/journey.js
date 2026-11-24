@@ -70,7 +70,7 @@
       place: 'Souphattra Heritage Vientiane',
       note: 'Hosted by Haruthai & Suthep.', anchor: 'voyage.html#vows' },
     { key: 'dinner', title: 'Wedding Dinner', when: '19:30',
-      place: 'Souphattra Heritage Vientiane · Green Doors',
+      place: 'Souphattra Heritage Vientiane · Pool Area',
       note: 'Hosted by Haruthai & Suthep.', anchor: 'voyage.html#dinner' }
   ];
 
