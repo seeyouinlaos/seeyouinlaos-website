@@ -57,7 +57,8 @@
   }
   /* THE NAME ORDER (HS-032, 24 Nov 2026): the Worker answers in guest-id order; the console orders by last name, then first name,
      then guest id — the collation the Worker applied before ('en', the root order) — and the hotel checks follow their guests in
-     that order, as they did. The same lists, the same order; the Worker no longer wakes the ICU collator for it. */
+     that order, as they did. Seating and Room assignments show the same lists in the same order; the Worker no longer wakes the ICU
+     collator for it. (The Overview's Sangkhathan lists, filled in roster order, now come in guest-id order like every other Overview list.) */
   function byName(d) {
     if (!d || !Array.isArray(d.roster)) return d;
     var key = function (g) { return (String(g.last == null ? '' : g.last).trim() + ' ' + String(g.first == null ? '' : g.first).trim()); };
