@@ -294,7 +294,26 @@ test('HS-059 · REVIEW FIXES — no Bangkok nights invented across a trip to Lao
   const typo = JSON.parse(JSON.stringify(base)); typo.dates[K.gh] = { item: 'D4', checkIn: '2026-02-27', checkOut: '2026-03-01', nights: 2 };
   const T = model(typo, facts);
   assert.equal(T.window.firstNight, '2027-02-21', 'the window stays the journey\'s'); assert.ok(T.window.lastNight <= '2027-03-08');
-  assert.ok(T.gaps.some((g) => /lie far from the journey/.test(g))); assert.ok(T.checks.DATES_002.items.some((i) => /D4: 2026-02-27 lies far from the journey/.test(i.why)));
+  assert.ok(T.gaps.some((g) => /dates far from the journey/.test(g))); assert.ok(T.checks.DATES_002.items.some((i) => /D4: 2026-02-27 – 2026-03-01 lies far from the journey/.test(i.why)));
+  assert.ok(T.checks.UNDATED.ids.includes('G903'), 'its room counts as undated — said, its nights not drawn');
+  /* R4: a check-out typed a year late never stretches the window */
+  const late = JSON.parse(JSON.stringify(base)); late.dates[K.wed] = { item: 'D1', checkIn: '2027-02-27', checkOut: '2028-03-01', nights: 2 };
+  const LT = model(late, facts);
+  assert.ok(LT.window.lastNight <= '2027-03-08', 'the window stays the journey\'s: ' + LT.window.lastNight); assert.ok(LT.checks.DATES_002.items.some((i) => /D1: 2027-02-27 – 2028-03-01/.test(i.why)));
+  /* R1 · R2 · R3: a room in Kunming only, the train within China and the flight back; a guest with Bangkok and Hotel Muse and only the flight back */
+  const B2 = JSON.parse(JSON.stringify(base)), F2 = JSON.parse(JSON.stringify(facts));
+  B2.dates['kmg/elegant-residence'] = { item: 'F', checkIn: '2027-03-01', checkOut: '2027-03-04', nights: 3 }; B2.dates.return = { item: 'I', checkIn: '2027-03-06', checkOut: '2027-03-06', nights: 0 };
+  B2.plan.units.push({ key: 'kmg/elegant-residence', window: 'kmg', label: 'A', kind: 'room', places: 2, kept: 0, hotelRoom: null, occupants: [{ guestId: 'G915' }] },
+    { key: K.muse, window: 'kempinski', label: 'B', kind: 'room', places: 2, kept: 0, hotelRoom: null, occupants: [{ guestId: 'G915' }, { guestId: 'G916' }] },
+    { key: K.bkk, window: 'bkk-stay', label: 'D', kind: 'room', places: 2, kept: 0, hotelRoom: null, occupants: [{ guestId: 'G916' }] });
+  B2.guests.push({ guestId: 'G915', invitationId: 'INV-G915', partyId: 'INV-915', couple: null }, { guestId: 'G916', invitationId: 'INV-G916', partyId: 'INV-916', couple: null });
+  const fx = (legs) => ({ booking: 'CONFIRMED', confirmedAt: null, sent: { version: 1, lastSentAt: null, scope: null, stages: {} }, legs, stays: [], flightDoc: 'NOT_ADDED' });
+  F2['INV-G915'] = fx(['c86', 'return']); F2['INV-G916'] = fx(['return']);
+  const M2 = model(B2, F2);
+  assert.deepEqual(M2.guests.G915.notRecorded, [{ night: '2027-03-04', place: 'CHINA' }, { night: '2027-03-05', place: 'CHINA' }], 'R1: the train within China never blocks the nights in China');
+  assert.deepEqual(M2.guests.G915.departures.map((d) => d.place + ' ' + d.day), ['CHINA 2027-03-06', 'BANGKOK 2027-03-08'], 'R1: one departure from China (on the flight), then from Bangkok after Hotel Muse');
+  assert.deepEqual(M2.guests.G916.notRecorded, [], 'R2: the flight back from Lijiang lies between the two Bangkok stays — nothing filled');
+  assert.ok(M2.checks.UNACCOUNTED.items.some((i) => i.guestId === 'G916' && /bangkok and bangkok again/.test(i.why)), 'R3: the nights in between are named');
   /* F7: a trip not read is never "trip not sent" on the flight document */
   const partial = { ...facts }; delete partial['INV-G903'];
   const P = model(base, partial);

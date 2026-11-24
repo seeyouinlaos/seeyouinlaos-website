@@ -57,7 +57,15 @@
     var gaps = (B.gaps || []).slice();
     var guests = (B.guests || []).slice().sort(function (a, b) { return byId(a.guestId, b.guestId); });
     var known = {}; guests.forEach(function (g) { known[g.guestId] = g; });
-    function dateOf(key) { var d = dates && own(dates, key); return d && ISO.test(d.checkIn || '') ? d : null; }
+    /* the journey's span from 002's own check-ins (one per stay or leg): a 002 date more than 30 days from their middle is a typo —
+       that product counts as undated (said, never drawn), so the window never stretches (re-review R4) */
+    var ins = [], far = {};
+    if (dates) Object.keys(dates).forEach(function (k) { var d = dates[k]; if (d && (PLACE_OF[windowOf(k)] || LEG[k]) && ISO.test(d.checkIn || '')) ins.push(d.checkIn); });
+    ins.sort();
+    var mid = ins.length ? ins[Math.floor(ins.length / 2)] : null, lo = mid ? addDay(mid, -30) : null, hi = mid ? addDay(mid, 30) : null;
+    if (dates && mid) Object.keys(dates).forEach(function (k) { var d = dates[k]; if (!d || !(PLACE_OF[windowOf(k)] || LEG[k]) || !ISO.test(d.checkIn || '')) return;
+      if (d.checkIn < lo || d.checkIn > hi || (ISO.test(d.checkOut || '') && (d.checkOut < lo || d.checkOut > hi))) far[k] = d; });
+    function dateOf(key) { var d = dates && own(dates, key); return d && ISO.test(d.checkIn || '') && !far[key] ? d : null; }
     var unread = guests.filter(function (g) { return !own(FX, g.invitationId); }).map(function (g) { return g.guestId; });
     if (unread.length) gaps.push('the trips of ' + unread.length + ' guest' + (unread.length === 1 ? '' : 's') + ' could not be read just now — they are listed as "not read"');
 
@@ -97,7 +105,7 @@
       /* the nights: ROOM, then the train night, then GAP between two dated facts at the same place */
       var night = {};
       rooms.forEach(function (r) {
-        if (!r.dates || !r.dates.checkOut) { flag('UNDATED', g, 'room ' + r.label + ' of ' + r.key + ': 002 gives no dates just now'); return; }
+        if (!r.dates || !r.dates.checkOut) { flag('UNDATED', g, 'room ' + r.label + ' of ' + r.key + ': ' + (far[r.key] ? '002 dates far from the journey (' + far[r.key].checkIn + ' – ' + (far[r.key].checkOut || '?') + ')' : '002 gives no dates just now') + ' — its nights are not counted'); return; }
         nightsBetween(r.dates.checkIn, r.dates.checkOut).forEach(function (n) {
           if (night[n]) { if (night[n].key !== r.key) flag('CONFLICT', g, 'two rooms on the night of ' + n + ' (' + night[n].key + ' · ' + r.key + ')', n); return; }
           night[n] = { place: r.place, basis: 'ROOM', status: r.status, key: r.key, label: r.label };
@@ -110,30 +118,36 @@
       }
       var roomNights = Object.keys(night).filter(function (n) { return night[n].basis === 'ROOM'; }).sort();
       /* nothing else between: no night already placed and no other leg leaving or arriving there (review F1) */
-      function quiet(from, to, except) {
+      function quiet(from, to, except, place) {
         if (nightsBetween(from, to).some(function (n) { return !!night[n]; })) return false;
-        return !legs.some(function (o) { return o !== except && [o.date, o.arrives].some(function (d) { return d && d >= from && d < to; }); });
+        return !legs.some(function (o) {
+          if (o === except) return false;
+          var L = LEG[o.key];
+          if (L.from === L.to && L.from === place) return false;   /* within the place (Kunming → Lijiang): nothing in between (R1) */
+          if ([o.date, o.arrives].some(function (d) { return d && d >= from && d < to; })) return true;
+          return o.date === to && L.from !== place;                 /* arriving from elsewhere on the boundary day (R2) */
+        });
       }
       function fill(from, to, place, why) { nightsBetween(from, to).forEach(function (n) { if (!night[n]) { night[n] = { place: place, basis: 'GAP', status: 'NOT_RECORDED' }; flag('GAP', g, why + ' — accommodation not recorded for the night of ' + n, n); } }); }
       legs.forEach(function (l) {
         if (!l.arrives) return;
         var next = roomNights.filter(function (n) { return n >= l.arrives; })[0];
-        if (next && next > l.arrives && night[next].place === LEG[l.key].to && quiet(l.arrives, next, l)) fill(l.arrives, next, LEG[l.key].to, 'arrives ' + l.arrives + ' (' + LEG[l.key].name + '), first room night ' + next);
+        if (next && next > l.arrives && night[next].place === LEG[l.key].to && quiet(l.arrives, next, l, LEG[l.key].to)) fill(l.arrives, next, LEG[l.key].to, 'arrives ' + l.arrives + ' (' + LEG[l.key].name + '), first room night ' + next);
       });
       legs.forEach(function (l) {
         if (!l.date) return;
         var before = roomNights.filter(function (n) { return n < l.date; }).pop();
-        if (before && night[before].place === LEG[l.key].from && addDay(before, 1) < l.date && quiet(addDay(before, 1), l.date, l)) fill(addDay(before, 1), l.date, LEG[l.key].from, 'last room night ' + before + ', leaves ' + l.date);
+        if (before && night[before].place === LEG[l.key].from && addDay(before, 1) < l.date && quiet(addDay(before, 1), l.date, l, LEG[l.key].from)) fill(addDay(before, 1), l.date, LEG[l.key].from, 'last room night ' + before + ', leaves ' + l.date);
       });
       for (var i = 1; i < roomNights.length; i++) {
         var a = roomNights[i - 1], b = roomNights[i];
-        if (addDay(a, 1) < b && night[a].place === night[b].place && quiet(addDay(a, 1), b, null)) fill(addDay(a, 1), b, night[a].place, 'between two rooms in ' + night[a].place.toLowerCase());
+        if (addDay(a, 1) < b && night[a].place === night[b].place && quiet(addDay(a, 1), b, null, night[a].place)) fill(addDay(a, 1), b, night[a].place, 'between two rooms in ' + night[a].place.toLowerCase());
       }
       /* a night between two places with nothing recorded — named for Guest Relations, never filled */
       var seq = Object.keys(night).sort();
       for (var j = 1; j < seq.length; j++) {
         var p = seq[j - 1], q = seq[j];
-        if (addDay(p, 1) < q && night[p].place !== night[q].place) nightsBetween(addDay(p, 1), q).forEach(function (n) { flag('UNACCOUNTED', g, 'night of ' + n + ': between ' + night[p].place.toLowerCase() + ' and ' + night[q].place.toLowerCase() + ', nothing recorded', n); });
+        if (addDay(p, 1) < q) nightsBetween(addDay(p, 1), q).forEach(function (n) { flag('UNACCOUNTED', g, 'night of ' + n + ': between ' + night[p].place.toLowerCase() + (night[p].place === night[q].place ? ' and ' + night[q].place.toLowerCase() + ' again' : ' and ' + night[q].place.toLowerCase()) + ', nothing recorded', n); });
       }
       seq = Object.keys(night).sort();
       /* the day facts: arrive at / leave a place (the train is a leg, never a place one arrives at) */
@@ -180,6 +194,7 @@
       if ((waitOf[g] || []).length) flag('WAITLIST', g, 'on the waiting list: ' + waitOf[g].map(function (w) { return w.stage + (w.position ? ' #' + w.position : ''); }).join(', '));
       if (ownStay && !rooms.length) flag('OWNER_NO_ROOM', g, 'a stay recorded by the Owners, no room in the room plan');
       if (track === 'NOT_READ') flag('NOT_READ', g, 'the sent trip could not be read just now');
+      /* only where the sent trip lists stays at all: an older trip shape carries no stay lines, and would flag every room (R8) */
       if (!gg.couple && f && (booking === 'CONFIRMED' || booking === 'SENT') && f.stays.length) {
         var sentStages = f.stays.map(STAGE);
         rooms.forEach(function (r) { if (r.source !== 'OWNER_RECORDED' && sentStages.indexOf(STAGE(r.window)) < 0) flag('ROOM_NOT_IN_TRIP', g, 'room ' + r.label + ' of ' + r.key + ' in the room plan — the sent trip lists no ' + STAGE(r.window) + ' stay'); });
@@ -200,20 +215,14 @@
       if (d && d.nights != null && PLACE_OF[windowOf(key)] && ISO.test(d.checkIn || '') && ISO.test(d.checkOut || '') && nightsBetween(d.checkIn, d.checkOut).length !== Number(d.nights)) flag('DATES_002', null, '002 ' + (d.item || key) + ': ' + d.nights + ' nights stated, ' + nightsBetween(d.checkIn, d.checkOut).length + ' between ' + d.checkIn + ' and ' + d.checkOut);
     });
 
-    /* the window: from the guests' own nights and legs (review F4) — a date far from the rest (a 002 typo) is said, never drawn */
-    var spot = [];
-    guests.forEach(function (gg) { Object.keys(nightOf[gg.guestId]).forEach(function (n) { spot.push(n); }); G[gg.guestId].legs.forEach(function (l) { if (l.date) spot.push(l.date); }); });
-    spot.sort();
-    var mid = spot.length ? spot[Math.floor(spot.length / 2)] : null, lo = mid ? addDay(mid, -45) : null, hi = mid ? addDay(mid, 45) : null;
-    var inside = spot.filter(function (d) { return d >= lo && d <= hi; }), outside = spot.filter(function (d) { return d < lo || d > hi; });
-    if (outside.length) {
-      gaps.push(outside.length + ' date' + (outside.length === 1 ? '' : 's') + ' of the room plan or the legs lie far from the journey (' + ids(outside).slice(0, 3).join(', ') + ') — probably a 002 date; not drawn');
-      if (dates) Object.keys(dates).forEach(function (k) { var d = dates[k]; if (d && (PLACE_OF[windowOf(k)] || LEG[k]) && ISO.test(d.checkIn || '') && (d.checkIn < lo || d.checkIn > hi)) flag('DATES_002', null, '002 ' + (d.item || k) + ': ' + d.checkIn + ' lies far from the journey (' + lo + ' – ' + hi + ')'); });
-    }
-    var firstDay = inside[0] || null, lastNight = null;
-    guests.forEach(function (gg) { Object.keys(nightOf[gg.guestId]).forEach(function (n) { if (n >= lo && n <= hi && (!lastNight || n > lastNight)) lastNight = n; }); });
-    var lastDay = inside.length ? inside[inside.length - 1] : null;
-    if (lastNight && addDay(lastNight, 1) > lastDay) lastDay = addDay(lastNight, 1);
+    /* the window: from the guests' own nights and legs — every date of them lies within the journey (R4) */
+    if (Object.keys(far).length) gaps.push(Object.keys(far).length + ' 002 product' + (Object.keys(far).length === 1 ? '' : 's') + ' with dates far from the journey — not counted (see the checks)');
+    Object.keys(far).forEach(function (k) { flag('DATES_002', null, '002 ' + (far[k].item || k) + ': ' + far[k].checkIn + ' – ' + (far[k].checkOut || '?') + ' lies far from the journey (' + lo + ' – ' + hi + ')'); });
+    var firstDay = null, lastDay = null;
+    guests.forEach(function (gg) {
+      Object.keys(nightOf[gg.guestId]).forEach(function (n) { if (!firstDay || n < firstDay) firstDay = n; var o = addDay(n, 1); if (!lastDay || o > lastDay) lastDay = o; });
+      G[gg.guestId].legs.forEach(function (l) { [l.date, l.arrives].forEach(function (d) { if (d) { if (!firstDay || d < firstDay) firstDay = d; if (!lastDay || d > lastDay) lastDay = d; } }); });
+    });
     var nightList = firstDay && lastDay ? nightsBetween(firstDay, lastDay) : [];
     var dayList = firstDay && lastDay ? nightsBetween(firstDay, addDay(lastDay, 1)) : [];
 
@@ -278,13 +287,13 @@
     var byNo = {};
     units.forEach(function (u) { if (!u.hotelRoom) return; var k = keyOf(u.hotelRoom.numbers); (byNo[k] = byNo[k] || []).push(u); });
     function held(k) {
-      var out = {}, undated = false;
+      var out = {}, undated = false, undatedGuests = [];
       (byNo[k] || []).forEach(function (u) {
         var d = dateOf(u.key);
-        if (!d || !d.checkOut) { if (u.occupants.length) undated = true; return; }
+        if (!d || !d.checkOut) { if (u.occupants.length) { undated = true; u.occupants.forEach(function (o) { undatedGuests.push(o.guestId); }); } return; }
         nightsBetween(d.checkIn, d.checkOut).forEach(function (n) { u.occupants.forEach(function (o) { (out[n] = out[n] || {})[o.guestId] = 1; }); });
       });
-      return { nights: out, undated: undated };
+      return { nights: out, undated: undated, undatedGuests: ids(undatedGuests) };
     }
     var rows = list.map(function (r) {
       return { row: r.row, building: r.building, roomType: r.roomType, roomNo: r.roomNo, checkIn: r.checkIn, checkOut: r.checkOut, typed: r.typed || [], count: (r.typed || []).length,
@@ -300,21 +309,27 @@
       mine.forEach(function (r) {
         if (!byNo[k]) { r.status = 'NOT_COMPARABLE'; r.why = 'no unit of the room plan carries room ' + r.roomNo; return; }
         if (!ISO.test(r.checkIn || '') || !ISO.test(r.checkOut || '')) { r.status = 'NOT_COMPARABLE'; r.why = '012 ' + (!ISO.test(r.checkIn || '') ? 'check-in' : 'check-out') + ' date ' + (r.checkIn === 'BAD' || r.checkOut === 'BAD' ? 'not readable' : 'missing'); r.guests = everyone; return; }
-        if (h.undated) { r.status = 'NOT_COMPARABLE'; r.why = 'the room plan\'s dates for room ' + r.roomNo + ' are not readable just now'; r.guests = everyone; return; }
+        if (h.undated) { r.status = 'NOT_COMPARABLE'; r.why = 'the room plan\'s dates for room ' + r.roomNo + ' are not readable just now'; r.guests = ids(everyone.concat(h.undatedGuests)); return; }
         r.n012 = nightsBetween(r.checkIn, r.checkOut); r.who = {}; dated.push(r);
       });
       if (!dated.length) return;
       var listed = {}; dated.forEach(function (r) { r.n012.forEach(function (n) { listed[n] = 1; }); });
       dated.forEach(function (r) {
         var only012 = r.n012.filter(function (n) { return !holders(n).length; });
-        if (only012.length && r.count) { r.differences.push('012 lists the room on ' + only012.join(', ') + '; the room plan holds nobody there'); everyone.forEach(function (g) { r.who[g] = 1; }); }
+        if (only012.length && r.count) {
+          r.differences.push('012 lists the room on ' + only012.join(', ') + '; the room plan holds nobody there');
+          /* the guests who hold the room nearest to those nights (R6) */
+          var heldN = Object.keys(h.nights).sort(), near = null, dist = Infinity;
+          heldN.forEach(function (n) { var dd = Math.abs(dayNo(n) - dayNo(only012[0])); if (dd < dist) { dist = dd; near = n; } });
+          if (near) holders(near).forEach(function (g) { r.who[g] = 1; });
+        }
         r.n012.forEach(function (n) { var c = holders(n).length; if (c && c !== r.count) { r.differences.push('on ' + n + ' 012 names ' + r.count + ', the room plan holds ' + c); holders(n).forEach(function (g) { r.who[g] = 1; }); } });
         r.planNights = Object.keys(h.nights).sort().filter(function (n) { return r.n012.indexOf(n) >= 0; });
       });
       /* the plan's nights in this room that no 012 row lists — at the nearest row */
-      var stray = {};
+      var stray = {}, open = mine.some(function (r) { return r.status === 'NOT_COMPARABLE'; });
       Object.keys(h.nights).sort().forEach(function (n) {
-        if (listed[n]) return;
+        if (listed[n] || open) return;   /* a row of the number that cannot be compared may list them (R5) */
         var best = null, dist = Infinity;
         dated.forEach(function (r) { var dd = Math.min(Math.abs(dayNo(n) - dayNo(r.checkIn)), Math.abs(dayNo(n) - dayNo(r.checkOut))); if (dd < dist) { dist = dd; best = r; } });
         (stray[best.row] = stray[best.row] || { r: best, n: [] }).n.push(n);
