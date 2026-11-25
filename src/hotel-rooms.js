@@ -89,7 +89,9 @@ export function hotelRoomOf(key, label, assigned) {
   if (!isSouphattraKey(key)) return null;
   const nos = assigned && assigned[clean(key) + '|' + clean(label).toUpperCase()];
   if (!Array.isArray(nos) || !nos.length) return null;
-  const rows = nos.map((n) => BY_NO.get(clean(n))).filter(Boolean).sort((a, b) => a.no.localeCompare(b.no));
+  /* the house's numbers are three digits each (the official list, tested): a plain comparison orders them exactly as
+     localeCompare did, without waking the ICU collator on a read path (HS-032, 24 Nov 2026) */
+  const rows = nos.map((n) => BY_NO.get(clean(n))).filter(Boolean).sort((a, b) => (a.no < b.no ? -1 : a.no > b.no ? 1 : 0));
   if (rows.length !== nos.length) return null;
   const buildings = [...new Set(rows.map((r) => r.building))];
   return { hotel: SOUPHATTRA, numbers: rows.map((r) => r.no), display: rows.map((r) => r.no).join(' + '), building: buildings.join(' / '),

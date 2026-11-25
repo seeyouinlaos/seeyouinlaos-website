@@ -41,7 +41,7 @@ import { GoogleSheetsUnavailable, batchReadRanges } from './google-sheets.js';
 import { calculate, perPerson, matchSpecialRate, COUPLE_PERSONS } from './billing/engine.js';
 import { unitOf as roomUnitOf, COUPLE_GUESTS } from './rooms.js';
 import { SEED as ROOM_SEED } from './inventory-seed.js';
-import { ASSIGNMENTS_VERSION, EVENTS as ASSIGNMENT_EVENTS, coupleOfEntries, guestsOfIndex, personName, attendanceOf, rosterOf, staysOf, occupancyOf, hotelRoomsMeta, hotelChecksOf, seatChangeOf, roomChangeOf, roomMovesOf, sentRoomLines } from './billing/assignments.js';
+import { ASSIGNMENTS_VERSION, EVENTS as ASSIGNMENT_EVENTS, coupleOfEntries, guestsOfIndex, personName, attendanceOf, rosterOf, staysOf, occupancyOf, hotelRoomsMeta, hotelChecksOf, seatChangeOf, roomChangeOf, roomMovesOf, sentRoomLines, confirmationDecides } from './billing/assignments.js';
 import { priceDifference } from './billing/price-difference.js';
 import {
   buildSnapshot, canIssue, dueDateFor, freezeFx, inPreferredCurrency,
@@ -2433,12 +2433,17 @@ async function engineAdmin(env, ns, name, op, admin, body, couple) {
   if (!j) throw new SourceDataError(ns + '_UNREADABLE', 'the ' + name + ' engine did not answer');
   return { status: res.status, j };
 }
-/* the sent trips and their confirmations of the given invitations — read in small groups, a read that fails is null (named, never guessed) */
+/* the sent trips and their confirmations of the given invitations — read in small groups, a read that fails is null (named, never guessed).
+   A confirmation is read only where it decides the state (assignments.confirmationDecides: a trip sent and not declined) —
+   HS-032, 24 Nov 2026: the same booking states with fewer KV reads */
 async function recordsOf(env, invs) {
   const records = {}, confs = {};
   const list = [...new Set(invs)].filter((i) => /^INV-[A-Z0-9-]+$/.test(i));
   for (let i = 0; i < list.length; i += 16) {
-    await Promise.all(list.slice(i, i + 16).map(async (inv) => { records[inv] = await kvJson(env, 'reg:' + inv); confs[inv] = await kvJson(env, 'conf:' + inv); }));
+    await Promise.all(list.slice(i, i + 16).map(async (inv) => {
+      records[inv] = await kvJson(env, 'reg:' + inv);
+      confs[inv] = confirmationDecides(records[inv]) ? await kvJson(env, 'conf:' + inv) : null;
+    }));
   }
   return { records, confs };
 }
@@ -2465,6 +2470,31 @@ async function assignmentSources(env, waitMs) {
     clearTimeout(timer);
     return { register: null, datesOf: null, gaps: ['Google could not be read just now — names are the guests\' first names, stay dates are not shown'] };
   }
+}
+
+/* THE SOURCES OF THE OWNERS' READ, KEPT FIVE MINUTES (HS-032, 24 Nov 2026): Seating and Room assignments read admin/assignments
+   again after every change, and a seat or a room never changes 006 or 002 — so a complete read (no gap) of this isolate is used
+   again for five minutes instead of asking Google and parsing both tabs once more. Only the names this read shows (first, last,
+   nickname) and 002's dates are kept, frozen; a read with a gap is never kept; nothing in flight is shared between requests.
+   ONLY the read route uses it — a write (adminSeatingApply) still asks Google itself. A 006 name or 002 date edited in Google
+   shows here within five minutes. */
+export const ASSIGNMENT_SOURCES_MS = 5 * 60 * 1000;
+let assignmentSourcesKept = null;
+export function forgetAssignmentSources() { assignmentSourcesKept = null; }
+async function assignmentSourcesForRead(env) {
+  const id = cfgOf(env).spreadsheetId, now = Date.now(), k = assignmentSourcesKept;
+  if (k && k.id === id && now >= k.at && now - k.at < ASSIGNMENT_SOURCES_MS) return k.value;
+  const v = await assignmentSources(env);
+  if (v && !(v.gaps && v.gaps.length) && v.register && v.datesOf) {
+    const register = {};
+    for (const [cid, r] of Object.entries(v.register)) register[cid] = Object.freeze(r && r.ambiguous ? { ambiguous: true } : { first: r.first, last: r.last, nick: r.nick });
+    const datesOf = {};
+    for (const [key, d] of Object.entries(v.datesOf)) datesOf[key] = Object.freeze({ ...d });
+    const value = Object.freeze({ register: Object.freeze(register), datesOf: Object.freeze(datesOf), gaps: Object.freeze([]) });
+    assignmentSourcesKept = { id, at: now, value };
+    return value;
+  }
+  return v;
 }
 
 /* HS-058 · THE PRE-WEDDING DINNER (Owners, 22 Nov 2026): every active guest's own order in ONE read of the seating ledger, and the
@@ -2507,7 +2537,7 @@ async function adminAssignments(env, identity, url, cors) {
   const [seat, room, src, kv] = await Promise.all([
     engineAdmin(env, 'SEATING', 'seating', 'admin-read', admin, null, couple),
     engineAdmin(env, 'ROOMS', 'rooms', 'admin-read', admin),
-    assignmentSources(env),
+    assignmentSourcesForRead(env),
     recordsOf(env, Object.values(guests).map((g) => g.invitationId)),
   ]);
   if (!seat.j.ok || !room.j.ok) return jsonRes({ ok: false, retry: true, error: 'the seating ledger or the room engine could not be read just now' }, 503, cors);

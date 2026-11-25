@@ -52,8 +52,23 @@
     return C.api('admin/assignments').then(function (x) {
       if (!x.ok) { X.phase = 'error'; X.error = x.j.error || 'The seating plans and the rooms could not be read just now.'; C.draw(); return; }
       /* a review describes the plan it was made on: after any read it is over — the Owner reviews again */
-      X.data = x.j; X.phase = 'ready'; X.review = null; X.rreview = null; X.rapprove = false; cleanDrafts(); C.draw();
+      X.data = byName(x.j); X.phase = 'ready'; X.review = null; X.rreview = null; X.rapprove = false; cleanDrafts(); C.draw();
     });
+  }
+  /* THE NAME ORDER (HS-032, 24 Nov 2026): the Worker answers in guest-id order; the console orders by last name, then first name,
+     then guest id — the collation the Worker applied before ('en', the root order) — and the hotel checks follow their guests in
+     that order, as they did. Seating and Room assignments show the same lists in the same order; the Worker no longer wakes the ICU
+     collator for it. (The Overview's Sangkhathan lists, filled in roster order, now come in guest-id order like every other Overview list.) */
+  function byName(d) {
+    if (!d || !Array.isArray(d.roster)) return d;
+    var key = function (g) { return (String(g.last == null ? '' : g.last).trim() + ' ' + String(g.first == null ? '' : g.first).trim()); };
+    d.roster.sort(function (a, b) { return key(a).localeCompare(key(b), 'en') || String(a.guestId).localeCompare(String(b.guestId), 'en'); });
+    var rank = {}; d.roster.forEach(function (g, i) { rank[g.guestId] = i; });
+    var R = d.rooms;
+    if (R && Array.isArray(R.hotelChecks)) R.hotelChecks = R.hotelChecks.map(function (c, i) { return { c: c, i: i }; })
+      .sort(function (a, b) { var x = rank[a.c.guestId], y = rank[b.c.guestId]; x = x == null ? 1e9 : x; y = y == null ? 1e9 : y; return x - y || a.i - b.i; })
+      .map(function (o) { return o.c; });
+    return d;
   }
   function roster() { return (X.data && X.data.roster) || []; }
   function guest(id) { return roster().filter(function (g) { return g.guestId === id; })[0] || null; }
