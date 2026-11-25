@@ -41,6 +41,7 @@ import { GoogleSheetsUnavailable, batchReadRanges } from './google-sheets.js';
 import { calculate, perPerson, matchSpecialRate, COUPLE_PERSONS } from './billing/engine.js';
 import { unitOf as roomUnitOf, COUPLE_GUESTS } from './rooms.js';
 import { SEED as ROOM_SEED } from './inventory-seed.js';
+import { arrivalsBase, factsOf as arrivalFactsOf, confirmationNeeded as arrivalConfirmationNeeded, ARRIVAL_FACTS_MAX, ARRIVALS_VERSION } from './billing/arrivals.js';
 import { ASSIGNMENTS_VERSION, EVENTS as ASSIGNMENT_EVENTS, coupleOfEntries, guestsOfIndex, personName, attendanceOf, rosterOf, staysOf, occupancyOf, hotelRoomsMeta, hotelChecksOf, seatChangeOf, roomChangeOf, roomMovesOf, sentRoomLines, confirmationDecides } from './billing/assignments.js';
 import { priceDifference } from './billing/price-difference.js';
 import {
@@ -2561,6 +2562,87 @@ async function adminAssignments(env, identity, url, cors) {
   return jsonRes(body, 200, cors);
 }
 
+/* ======================================================================================================================
+   HS-059 · GUEST ARRIVALS & TRANSPORTATION (Owners, 24 Nov 2026) — Section F of the Overview on its own LIGHT read, BILLING_ADMIN
+   only (the gate above every admin route). src/billing/arrivals.js shapes it; here it is read, once each:
+     · the served index (cached) · the Rooms engine's `plan` (Guest Relations' read: the units and their occupants, no log, no
+       digest) · every guest's sent trip `reg:` and, only where it decides the state, its confirmation `conf:` · the index of the
+       Owners' recorded bookings and the records it names · ONE Google read of 002 (dates) and 012 (the Owners' room list) —
+       never 006, 009, 004 or 007, never the seating ledger, never the billing engine, no collator.
+   Name-free (guest ids; the console names them from its own guest list) except 012's names exactly as the Owners typed them.
+   Nothing is written, priced, confirmed or sent. 002 / 012 of a complete read are used again for five minutes; a read with a
+   gap is never kept; nothing in flight is shared between requests.
+   ====================================================================================================================== */
+export const ARRIVAL_SOURCES_MS = 5 * 60 * 1000;
+let arrivalSourcesKept = null;
+export function forgetArrivalSources() { arrivalSourcesKept = null; }
+async function arrivalSources(env) {
+  const id = cfgOf(env).spreadsheetId, now = Date.now(), k = arrivalSourcesKept;
+  if (k && k.id === id && now >= k.at && now - k.at < ARRIVAL_SOURCES_MS) return k.value;
+  const ranges = [rangeOfTab(BUDGET_TABS.items), rangeOfTab(BUDGET_TABS.roomList)];
+  let timer, grids = null;
+  try { grids = await Promise.race([batchReadRanges(env, id, ranges), new Promise((res) => { timer = setTimeout(() => res(null), 8000); })]); }
+  catch (e) { grids = null; }
+  finally { clearTimeout(timer); }
+  if (!grids) return { dates: null, keyOfItem: {}, list012: null, gaps: ['Google could not be read just now — no date and no comparison with 012 are shown'] };
+  const gaps = [], keyOfItem = {};
+  let dates = null, list012 = null;
+  try {
+    const items = await loadItems(env, { ...cfgOf(env), grids: { [ranges[0]]: grids[0] } });
+    const display = parseItemDisplay(grids[0]).items || {};
+    const { index } = siteProductKeyIndex(items);
+    dates = {};
+    for (const [key, itemId] of Object.entries(index)) { const d = display[itemId] || {}; dates[key.split(/[,|]/)[0]] = Object.freeze({ item: itemId, checkIn: d.checkIn || null, checkOut: d.checkOut || null, nights: nightsOfItem(items[itemId]) }); }
+    for (const [itemId, it] of Object.entries(items)) { const key = clean(it && it.Site_Product_Key).split(/[,|]/)[0]; if (key) keyOfItem[itemId] = key; }
+  } catch (e) { dates = null; gaps.push('002 could not be read just now — no date is shown'); }
+  try { list012 = parseRoomList012(grids[1]).map((r) => Object.freeze({ ...r, guests: Object.freeze([...r.guests]) })); } catch (e) { list012 = null; gaps.push('012 could not be read just now — no comparison with 012'); }
+  const value = Object.freeze({ dates: dates && Object.freeze(dates), keyOfItem: Object.freeze(keyOfItem), list012: list012 && Object.freeze(list012), gaps: Object.freeze(gaps) });
+  if (!gaps.length) arrivalSourcesKept = { id, at: now, value };
+  return value;
+}
+/* the Owners' recorded bookings (src/billing/owner-bookings.js): the index of recorded persons, then each record it names */
+async function arrivalOwnerEntries(env) {
+  if (!env.REG_KV) return { entries: [], gap: null };
+  let index;
+  try { index = JSON.parse((await env.REG_KV.get(OBK_INDEX_KEY)) || '{}') || {}; } catch (e) { return { entries: [], gap: 'the bookings recorded by the Owners could not be read just now' }; }
+  const holders = [...new Set(Object.values(index).flatMap((l) => (Array.isArray(l) ? l : [])).map(clean).filter(Boolean))];
+  const entries = []; let unreadable = 0;
+  await Promise.all(holders.map(async (h) => {
+    let rec; try { rec = readRecord(await env.REG_KV.get(obkKey(h))); } catch (e) { unreadable += 1; return; }
+    const state = ownerStateOf(rec);
+    for (const e of rec.entries) { const g = clean(e && e.personId); if (/^G\d{3,}$/.test(g)) entries.push({ guestId: g, holderId: h, entryId: e.id == null ? null : e.id, itemId: clean(e.itemId), state }); }
+  }));
+  return { entries, gap: unreadable ? unreadable + ' record(s) of the bookings the Owners recorded could not be read just now' : null };
+}
+/** GET admin/arrivals — the base: the guests, the room plan, 002's dates, 012, the Owners' records; nothing is written.
+    GET admin/arrivals?facts=INV-…,INV-… — at most ARRIVAL_FACTS_MAX invitations of the register: their own sent trip's facts. */
+async function adminArrivals(env, identity, url, cors) {
+  const entries = await loadIndex(env, url.origin, false);
+  if (!entries || !Object.keys(entries).length) return jsonRes({ ok: false, retry: true, error: 'the register index is not readable just now' }, 503, cors);
+  const facts = url.searchParams.get('facts');
+  if (facts != null) {
+    const known = new Set(Object.values(guestsOfIndex(entries)).filter((g) => !g.ambiguous).map((g) => g.invitationId));
+    const invs = [...new Set(facts.split(',').map(clean).filter(Boolean))];
+    if (!invs.length || invs.length > ARRIVAL_FACTS_MAX || invs.some((i) => !known.has(i))) return jsonRes({ ok: false, error: 'facts: 1 to ' + ARRIVAL_FACTS_MAX + ' invitations of the register' }, 400, cors);
+    const out = {};
+    await Promise.all(invs.map(async (inv) => {
+      const record = await kvJson(env, 'reg:' + inv);
+      const conf = arrivalConfirmationNeeded(record) ? await kvJson(env, 'conf:' + inv) : null;
+      out[inv] = arrivalFactsOf(record, conf);
+    }));
+    return jsonRes({ ok: true, version: ARRIVALS_VERSION, at: new Date().toISOString(), facts: out }, 200, cors);
+  }
+  const [plan, src, obk] = await Promise.all([roomsGr(env, 'plan').catch(() => null), arrivalSources(env), arrivalOwnerEntries(env)]);
+  const owner = {}, gaps = [...src.gaps];
+  if (obk.gap) gaps.push(obk.gap);
+  if (!plan || plan.ok === false || !plan.units) gaps.push('the room plan could not be read just now — no room is shown');
+  let unkeyed = 0;
+  for (const x of obk.entries) { const key = src.keyOfItem[x.itemId]; if (!key) { unkeyed += 1; continue; } (owner[x.guestId] = owner[x.guestId] || []).push({ holderId: x.holderId, entryId: x.entryId, key, state: x.state }); }
+  if (unkeyed && src.dates) gaps.push(unkeyed + ' booking(s) recorded by the Owners name a product 002 does not list');
+  const base = arrivalsBase({ entries, plan: plan && plan.ok !== false ? plan : null, dates: src.dates, list012: src.list012, owner, gaps });
+  return jsonRes({ ok: true, at: new Date().toISOString(), audience: adminLabel(identity), factsMax: ARRIVAL_FACTS_MAX, ...base }, 200, cors);
+}
+
 /* the guests a write names, resolved from the index: guest id → { invitationId, partyId, name } — or the ids that resolve to nobody */
 function resolveGuests(entries, ids, register) {
   const g = guestsOfIndex(entries), out = {}, unknown = [];
@@ -3020,6 +3102,7 @@ export async function handleBilling(request, env, url, cors, deps) {
         return await adminExtraBed(env, identity, request, cors);
       /* THE OWNERS' SEATING & ROOM ASSIGNMENTS (Owners, 18 Nov 2026) — read with GET, every write a POST */
       case 'admin/assignments': return await adminAssignments(env, identity, url, cors);
+      case 'admin/arrivals': return await adminArrivals(env, identity, url, cors);
       case 'admin/pwd': return await adminPwd(env, identity, url, cors);
       case 'admin/pwd/release':
         if (request.method !== 'POST') return jsonRes({ ok: false, error: 'POST only' }, 405, cors);

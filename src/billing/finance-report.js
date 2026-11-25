@@ -69,7 +69,7 @@ export function nameLikeness(name012, guestName) {
 }
 export const unitId = (stay, u) => stay + '|' + u.key + '|' + u.label;
 /** 012 dates as written there: DD.MM.YYYY, D/M/YYYY or YYYY-MM-DD (or a sheet serial). '' → null; anything else → 'BAD'. */
-function date012(v) {
+export function date012(v) {
   const t = clean(v);
   if (!t) return null;
   const iso = /^(\d{4})-(\d{2})-(\d{2})$/.exec(t);
