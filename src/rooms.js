@@ -132,6 +132,7 @@ export function unitsOf(key) {
       places: s.occupancy === 1 ? 1 : s.honourOccupancy ? s.occupancy : PLACES,
       reservedFor: null,
       ...(s.couple ? { couple: true } : {}),
+      ...(s.ownersOnly ? { ownersOnly: true } : {}),
       ...(bed && Number(bed.beds) > 0 ? { extraBeds: Number(bed.beds) } : {}) });
   }
   /* A DEDICATED ROOM (002 · W · Owner, 29 Sep 2026): one more unit of the same category, for one register id only — its own
@@ -169,6 +170,8 @@ export function mayJoin(unit, identity) {
   if (!identity) return { ok: false, error: 'unauthorised' };
   /* the couple's suite (Owners, 19 Nov 2026): Haruthai's and Suthep's alone */
   if (unit.couple && !isCouple(identity)) return { ok: false, error: 'the couple\'s suite' };
+  /* the Owners' placement only (Owners, 27 Nov 2026 · HS-060): never taken by a guest — its holders keep the place the Owners gave them */
+  if (unit.ownersOnly) return { ok: false, error: 'not offered' };
   return { ok: true };
 }
 
@@ -341,10 +344,13 @@ export class Rooms {
         const beds = bedsFor(u);
         /* the couple's suite is seen as the room it is — and never as a free place by anyone but the couple (Owners, 19 Nov 2026) */
         const closed = !!u.couple && !isCouple(identity);
+        /* the Owners' placement only (HS-060) is never a free place for anyone: its holders see their own place in it */
+        const shut = closed || !!u.ownersOnly;
         return { key, label: u.label, name: u.name, kind: u.kind, places: u.places, reservedFor: null, ...(u.dedicatedTo ? { dedicated: true, rate: u.rate } : {}),
                  ...(u.couple ? { couple: true } : {}),
+                 ...(u.ownersOnly ? { ownersOnly: true } : {}),
                  ...(beds ? { extraBeds: beds } : {}),
-                 eligible: elig.ok, occupants, taken, free: closed ? 0 : Math.max(0, u.places + beds - taken), full: closed || taken >= u.places + beds };
+                 eligible: elig.ok, occupants, taken, free: shut ? 0 : Math.max(0, u.places + beds - taken), full: shut || taken >= u.places + beds };
       });
     }
     if (identity) for (const o of occ) if (!o.placeholder && o.guestId === identity.guestId) mine[stageOf(o.key)] = { key: o.key, label: o.label };
@@ -488,6 +494,11 @@ export class Rooms {
             if (!hasIt) return json({ ...(await this.view(identity)), ok: false, error: 'complimentary closed', deadline: dl }, 409);
           }
         }
+        /* THE OWNERS' PLACEMENT ONLY (HS-060): the guest the Owners placed there asking for it again keeps it, nothing is written;
+           anyone else is refused below (mayJoin) */
+        if (unit.ownersOnly && (await this.occupancies()).some((o) => !o.placeholder && o.key === key && o.label === label && o.guestId === guestId)) {
+          return json({ ...(await this.view(identity)), ok: true, unchanged: true });
+        }
         const may = mayJoin(unit, identity);
         if (!may.ok) return json({ ...(await this.view(identity)), ok: false, error: may.error }, 403);
         const occ = await this.occupancies();
@@ -605,7 +616,7 @@ export class Rooms {
         const fin = (await this.storage.get('final')) || null;
         const units = {};
         for (const key of Object.keys(SEED)) {
-          units[key] = unitsOf(key).map((u) => ({ label: u.label, name: u.name, kind: u.kind, places: u.places, extraBeds: u.extraBeds || 0, dedicated: !!u.dedicatedTo, ...(u.couple ? { couple: true } : {}),
+          units[key] = unitsOf(key).map((u) => ({ label: u.label, name: u.name, kind: u.kind, places: u.places, extraBeds: u.extraBeds || 0, dedicated: !!u.dedicatedTo, ...(u.couple ? { couple: true } : {}), ...(u.ownersOnly ? { ownersOnly: true } : {}),
             kept: occ.filter((o) => o.placeholder && o.key === key && o.label === u.label).length,
             occupants: realOf(occ, key, u.label).map((o) => ({ guestId: o.guestId, invitationId: o.invitationId || null, partyId: o.partyId || null, name: shownName(o, names), at: o.at || null,
               ...(o.bed ? { bed: true } : {}), ...(o.by ? { by: o.by } : {}), ...(o.placedAt ? { placedAt: o.placedAt } : {}), ...(Array.isArray(o.placedFrom) ? { placedFrom: o.placedFrom } : {}) })) }));
@@ -681,6 +692,79 @@ export class Rooms {
           await Promise.all(writes);
           console.log('[rooms] the Owners re-arranged ' + key, admin, changes.length);
           return json({ ok: true, key, changes, impacts, by: admin, at: now });
+        });
+      }
+
+      /* THE OWNERS' REBOOKING (Owners, 27 Nov 2026 · HS-060): a booking change the Owners make themselves — named guests move to
+         ANOTHER category of the SAME stay. Only through the Worker's admin/rebook, which changes the sent trip, the draft and the
+         statement's basis with it (never here). All or nothing, in one serialised step: every guest holds exactly the place named
+         (else CHANGED — nothing is written); a stay never changes; after every move no room holds more than its own places; a place
+         kept for a party, an extra bed, a dedicated room and the couple's suite are never touched. A guest already at the target
+         (a re-run) is left as is. Logged as REBOOK. */
+      if (op === 'admin-rebook') {
+        const body = await safeJson(request);
+        const list = Array.isArray(body && body.moves) ? body.moves : null;
+        if (!list || !list.length || list.length > 12) return json({ ok: false, error: 'a rebooking names 1 to 12 moves', reason: 'INVALID' }, 400);
+        const moves = [];
+        for (const m of list) {
+          const f = m && m.from, t = m && m.to, g = String(m && m.guestId || '');
+          if (!/^G\d{3,}$/.test(g) || !f || !t || typeof f.key !== 'string' || typeof t.key !== 'string') return json({ ok: false, error: 'invalid move', reason: 'INVALID' }, 400);
+          moves.push({ guestId: g, from: { key: canonicalKey(f.key), label: String(f.label || '').toUpperCase() }, to: { key: canonicalKey(t.key), label: String(t.label || '').toUpperCase() } });
+        }
+        return await this.state.blockConcurrencyWhile(async () => {
+          const occ = await this.occupancies();
+          const problems = [], seen = new Set(), todo = [], done = [];
+          const at = (g, p) => occ.find((o) => !o.placeholder && o.guestId === g && o.key === p.key && o.label === p.label) || null;
+          for (const m of moves) {
+            const stage = stageOf(m.from.key), id = m.guestId + '|' + stage;
+            if (seen.has(id)) { problems.push({ guestId: m.guestId, reason: 'TWICE', stage }); continue; }
+            seen.add(id);
+            if (stageOf(m.to.key) !== stage) { problems.push({ guestId: m.guestId, reason: 'STAGE_CHANGE', why: 'a rebooking never changes the stay' }); continue; }
+            if (m.to.key === m.from.key) { problems.push({ guestId: m.guestId, reason: 'SAME_CATEGORY', why: 'a move inside one category is an assignment (admin-apply)' }); continue; }
+            const fu = unitOf(m.from.key, m.from.label), tu = unitOf(m.to.key, m.to.label);
+            if (!fu || !tu) { problems.push({ guestId: m.guestId, reason: 'UNKNOWN_ROOM' }); continue; }
+            if (fu.dedicatedTo || tu.dedicatedTo) problems.push({ guestId: m.guestId, reason: 'DEDICATED' });
+            if (fu.couple || tu.couple) problems.push({ guestId: m.guestId, reason: 'COUPLE_ONLY' });
+            const here = at(m.guestId, m.from), there = at(m.guestId, m.to);
+            if (!here && there) { done.push(m); continue; }   /* a re-run: already where the Owners placed them */
+            if (!here) { problems.push({ guestId: m.guestId, reason: 'CHANGED', now: occ.filter((o) => !o.placeholder && o.guestId === m.guestId && stageOf(o.key) === stage).map((o) => o.key + '|' + o.label) }); continue; }
+            if (here.bed) problems.push({ guestId: m.guestId, reason: 'EXTRA_BED' });
+            todo.push({ ...m, row: here });
+          }
+          /* every room the change touches, after all its moves: its own places only — no extra bed, no place kept for a party */
+          const touched = new Map();
+          for (const m of todo) for (const p of [m.from, m.to]) touched.set(p.key + '|' + p.label, p);
+          for (const [k, p] of touched) {
+            const u = unitOf(p.key, p.label);
+            const stay = occ.filter((o) => !o.placeholder && o.key === p.key && o.label === p.label && !todo.some((m) => m.guestId === o.guestId && m.from.key === p.key && m.from.label === p.label));
+            const coming = todo.filter((m) => m.to.key === p.key && m.to.label === p.label && !stay.some((o) => o.guestId === m.guestId));
+            const kept = occ.filter((o) => o.placeholder && o.key === p.key && o.label === p.label).length;
+            if (kept) problems.push({ unit: k, reason: 'KEPT_PLACES' });
+            if (u.extraBeds || occ.some((o) => !o.placeholder && o.key === p.key && o.label === p.label && o.bed)) problems.push({ unit: k, reason: 'EXTRA_BED' });
+            if (stay.length + coming.length > u.places) problems.push({ unit: k, reason: 'BEYOND_PLACES', places: u.places, after: stay.length + coming.length });
+          }
+          if (problems.length) {
+            const conflict = problems.some((p) => p.reason === 'CHANGED');
+            return json({ ok: false, error: conflict ? 'the rooms changed since they were read — nothing was changed' : 'the rebooking cannot be made — nothing was changed', reason: conflict ? 'CONFLICT' : 'REFUSED', problems }, 409);
+          }
+          const plan = todo.map((m) => ({ guestId: m.guestId, from: m.from, to: m.to })), already = done.map((m) => ({ guestId: m.guestId, to: m.to }));
+          if (body.dryRun) return json({ ok: true, dryRun: true, moves: plan, already });
+          if (!todo.length) return json({ ok: true, moves: [], already, unchanged: true });
+          const now = new Date().toISOString(), batch = now + '·' + admin, writes = [];
+          const order = String(body.order || '').slice(0, 40);
+          /* the log first (it lists the store), then every write of the change in one batch — as admin-apply writes */
+          const lw = await this.logWrites(todo.map((m) => ({ type: 'REBOOK', guestId: m.guestId, from: m.from.key.split('/')[1] + ' · Room ' + m.from.label,
+            to: m.to.key.split('/')[1] + ' · Room ' + m.to.label, stage: stageOf(m.from.key), by: admin, status: 'APPLIED', batch, ...(order ? { order } : {}) })));
+          for (const m of todo) {
+            writes.push(this.storage.delete(this.rowKey(m.row)));
+            writes.push(this.storage.put(this.keyOf(m.to.key, m.to.label, m.guestId), { invitationId: m.row.invitationId, partyId: m.row.partyId || null, name: m.row.name, at: m.row.at,
+              by, placedAt: now, rebookedFrom: { key: m.from.key, label: m.from.label } }));
+          }
+          for (const [k, v] of Object.entries(lw.puts)) writes.push(this.storage.put(k, v));
+          for (const k of lw.dels) writes.push(this.storage.delete(k));
+          await Promise.all(writes);
+          console.log('[rooms] the Owners rebooked', admin, todo.length);
+          return json({ ok: true, moves: plan, already, by: admin, at: now });
         });
       }
 
@@ -776,6 +860,8 @@ export class Rooms {
           if (unit.dedicatedTo && o.contactId !== unit.dedicatedTo) { refused.push({ ...o, error: 'dedicated room' }); continue; }
           /* the couple's suite is the couple's alone — before any capacity rule, `force` included (Owners, 19 Nov 2026) */
           if (unit.couple && !isCouplePerson({ guestId, invitationId: o.invitationId })) { refused.push({ ...o, error: 'the couple\'s suite' }); continue; }
+          /* the Owners' placement only (HS-060): placed by the Owners' rebooking alone (admin-rebook), never by an assignment or a recorded booking */
+          if (unit.ownersOnly) { refused.push({ ...o, error: 'not offered' }); continue; }
           const occ = await this.occupancies();
           const others = occ.filter((x) => x.key === key && x.label === label && x.guestId !== guestId).length;
           /* the room's extra bed counts like its places (Owners, 17 Nov 2026); beyond it only the Owners' force */

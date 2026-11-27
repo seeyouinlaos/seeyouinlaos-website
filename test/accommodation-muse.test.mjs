@@ -45,7 +45,7 @@ test('THE SERVER ENFORCES IT · a sent line keeps a personal charge only for its
   const pre = { id: 'prewed', stay: 'souphattra', room: 'heritage-executive', rate: 130, pay: 2, price: 0, personal: 'special', qty: 1 };
   assert.equal(verifiedLines([pre], giftsFor('CON010'))[0].price, 225); assert.equal(verifiedLines([pre], giftsFor('CON006'))[0].price, 260);
   /* who pays is never a change of the guest's selection */
-  assert.match(src('src/worker.js'), /const DERIVED_LINE_KEYS = new Set\(\[[^\]]*'gift', 'personal', 'paidByHS', 'prepaidUnverified'\]\)/);
+  assert.match(src('src/worker.js'), /const DERIVED_LINE_KEYS = new Set\(\[[^\]]*'gift', 'personal', 'paidByHS', 'prepaidUnverified', 'owners'\]\)/);
   /* the list is served to its holder only */
   assert.match(src('src/worker.js'), /giftsFor\(person && person\.contactId\)/);
 });
@@ -101,6 +101,12 @@ test('THE WEDDING-STAY-ONLY SUITES · Noble Courtyard, Grand Majestic and the So
     assert.equal(P.items('prewed', slug).length, 0); assert.ok(P.items('wedstay', slug).length === 1);
   }
   const { SEED } = await import('../src/inventory-seed.js');
-  for (const slug of ['noble-courtyard', 'grand-majestic', 'souphattra-majestic']) { assert.equal(SEED['prewed/' + slug], undefined); assert.ok(SEED['wedstay/' + slug]); }
+  /* HS-060 (Owners, 27 Nov 2026): the pre-wedding Noble Courtyard exists for the Owners' placement ONLY — never offered (above), never
+     taken by a guest (src/rooms.js · mayJoin), never assigned or recorded; the other two suites have no pre-wedding stock at all */
+  for (const slug of ['grand-majestic', 'souphattra-majestic']) { assert.equal(SEED['prewed/' + slug], undefined); assert.ok(SEED['wedstay/' + slug]); }
+  assert.deepEqual(SEED['prewed/noble-courtyard'], { unit: 'room', capacity: 1, occupancy: 2, held: 0, name: 'Noble Courtyard Suite', ownersOnly: true });
+  assert.ok(SEED['wedstay/noble-courtyard'] && !SEED['wedstay/noble-courtyard'].ownersOnly);
+  const { unitsOf, mayJoin } = await import('../src/rooms.js');
+  assert.equal(mayJoin(unitsOf('prewed/noble-courtyard')[0], { invitationId: 'INV-G001', guestId: 'G001' }).ok, false, 'no guest takes the Owners\' placement');
   assert.match(src('room.html'), /This suite is offered for the Wedding Stay only\./);
 });

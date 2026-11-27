@@ -61,10 +61,13 @@ test('NO RESERVATIONS, NO FIXED ARRANGEMENT (Owner, 15 Sep 2026 · reaffirmed 19
     if (u.couple) {
       for (const who of [PEGGY, LIN, HARUTHAI, SUTHEP]) assert.equal(mayJoin(u, asId(who)).ok, false, key + ' ' + u.label + ' is the couple\'s suite, not ' + who.guestId + '\'s');
       for (const who of [BRIDE, GROOM]) assert.equal(mayJoin(u, asId(who)).ok, true, key + ' ' + u.label + ' is ' + who.preferredName + '\'s');
-    } else for (const who of [PEGGY, LIN, HARUTHAI, SUTHEP]) assert.equal(mayJoin(u, asId(who)).ok, true, key + ' ' + u.label + ' is open to ' + who.preferredName);
+    /* HS-060 (Owners, 27 Nov 2026): the Owners' placement only — no guest takes it, the couple included; nothing is held there in advance */
+    } else if (u.ownersOnly) for (const who of [PEGGY, LIN, HARUTHAI, SUTHEP, BRIDE, GROOM]) assert.equal(mayJoin(u, asId(who)).ok, false, key + ' ' + u.label + ' is placed by the Owners only');
+    else for (const who of [PEGGY, LIN, HARUTHAI, SUTHEP]) assert.equal(mayJoin(u, asId(who)).ok, true, key + ' ' + u.label + ' is open to ' + who.preferredName);
     assert.equal(mayJoin(u, null).ok, false, 'nobody joins without an identity');
   }
   assert.deepEqual(Object.keys(SEED).filter((k) => SEED[k].couple), ['prewed/souphattra-presidential', 'wedstay/souphattra-presidential'], 'the couple\'s suite is the only room kept for anyone');
+  assert.deepEqual(Object.keys(SEED).filter((k) => SEED[k].ownersOnly), ['prewed/noble-courtyard'], 'the Owners\' placement only (HS-060) is the pre-wedding Noble Courtyard alone');
   assert.equal(mayJoin(null, asId(PEGGY)).ok, false, 'no unit, no place');
   /* the former Bride & Groom rooms: nobody's before a booking; the first guest to choose them has them; the hosts hold nothing there */
   const E = engine();

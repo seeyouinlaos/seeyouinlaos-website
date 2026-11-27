@@ -70,11 +70,11 @@ body{background:#F3EEE7;color:#313131;font-family:'Hanken Grotesk',Helvetica,Ari
 <script src="assets/aman.js?v=83431ff0"></script>
 <script src="assets/rooms-data.js?v=6f38c0f8"></script>
 <script src="assets/billing-client.js?v=421fbc48"></script>
-<script src="assets/pricing.js?v=fe0aae54"></script>
+<script src="assets/pricing.js?v=3be22448"></script>
 <script src="assets/stage-graph.js?v=f5f4dc76"></script>
 <script src="assets/questionnaire.js?v=1dc3e01d"></script>
 <script src="assets/guest.js?v=f30d0df8"></script>
-<script src="assets/draft.js?v=711f98ae"></script>
+<script src="assets/draft.js?v=92dfb7a0"></script>
 <script src="assets/guest-note.js?v=625f88b5"></script>
 <script src="assets/rules-gate.js?v=d49dabdc"></script>
 <script src="assets/docs.js?v=ec768fd9"></script>
@@ -357,7 +357,7 @@ function mailLine(){
   return '<p class="t-b1 measure" data-mail="failed">We could not send your copy by email just now. <button type="button" class="p-link" id="mail-retry">Send the copy again</button></p>'}
 function smallPrint(){
   var d=D(),s=d&&d.submission?d.submission():null,w=tripWords();
-  var ref=(s&&s.submissionId)||(lastAnswer&&lastAnswer.submissionId)||'',upd=!!((s&&s.version>1)||(lastAnswer&&lastAnswer.kind==='update'));
+  var ref=(s&&s.submissionId)||(lastAnswer&&lastAnswer.submissionId)||'',upd=!!((s&&s.version>1&&!(s.byOwners&&Number(s.ownersFrom)===1))||(lastAnswer&&lastAnswer.kind==='update'));
   var at=w.at||(d&&d.sentAt?d.sentAt():null);
   if(w.key==='confirmed')at=d&&d.sentAt?d.sentAt():at;
   return '<p class="t-b2">'+(upd?'Updated on ':'Sent on ')+esc(when(at))+(ref?' · your reference <span style="white-space:nowrap">'+esc(ref)+'</span>':'')+'</p>'}
@@ -370,7 +370,7 @@ var d=D(),w=tripWords(),elsewhere=!!(d&&d.sentElsewhere&&d.sentElsewhere());
 document.body.classList.toggle('journey-confirmed',w.key==='confirmed');
 var h='';
 if(w.key==='sent'){
-  var s=d&&d.submission?d.submission():null,upd=!!((s&&s.version>1)||(lastAnswer&&lastAnswer.kind==='update'));
+  var s=d&&d.submission?d.submission():null,upd=!!((s&&s.version>1&&!(s.byOwners&&Number(s.ownersFrom)===1))||(lastAnswer&&lastAnswer.kind==='update'));
   if(w.declined)h='<div class="p-card"><h2 class="t-h1">Reply sent · '+esc(w.date)+'</h2><p class="t-b1 measure">We will miss you, and we are grateful you let us know. If your plans change, simply tick the parts you can join in My Trip and send us the update.</p>';
   else if(upd)h='<div class="p-card"><h2 class="t-h1">Thank you — we have your update</h2><p class="t-b1 measure">It replaces what you sent before. Guest Relations will look through the changes and confirm each arrangement with you personally.</p>';
   else h='<div class="p-card"><h2 class="t-h1">Thank you — we have your trip</h2><p class="t-b1 measure">Khun Ket and Khun Paddy of Guest Relations will look through it and confirm each arrangement with you personally; until they do, nothing is booked. If anything changes, change it in My Trip and send us the update.</p>';

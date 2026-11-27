@@ -1,10 +1,10 @@
 {
  "about": "Gate F1 (src/pricing-guard.mjs): the Owner's last acknowledged state of the financial cells of Google 002 and 009, as SHA-256 digests only — no id, no amount, no guest. Changed only with --accept on an explicit Owner order and a commit carrying OWNER-PRICING-CHANGE: <order> [ref <ref>]. Google stays the only source of every figure.",
- "ref": "268f35f184bf",
- "digest002": "af0a7777ba0da0718c95ba40cde68dd195c2d43881d0fbb98dd9f89755d039e8",
- "digest009": "2076ad7bbd40500123df8a0b18f599fa8d9ada37f0bce10ac03b4f47047c9f23",
- "products": 26,
- "rows009": 43,
+ "ref": "c16db7f0db63",
+ "digest002": "134e1a9741320fb28c92223f0dfeb26de8a0bb98fef59b67fb143ad392586eae",
+ "digest009": "a6f3e450d125c888dbff693ffcbc8452b260d7b9c82760d0d84cbccad2f10b95",
+ "products": 27,
+ "rows009": 47,
  "acknowledged": [
   {
    "at": "2026-10-08T11:08:13.446Z",
@@ -40,6 +40,11 @@
    "at": "2026-11-23T08:39:17.373Z",
    "ref": "268f35f184bf",
    "changes": 1
+  },
+  {
+   "at": "2026-11-27T15:15:00.510Z",
+   "ref": "c16db7f0db63",
+   "changes": 5
   }
  ]
 }

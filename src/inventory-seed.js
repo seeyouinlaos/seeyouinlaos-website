@@ -59,8 +59,12 @@ export const SEED = {
   'prewed/heritage':                 { unit: 'room', capacity: 5,  occupancy: 2, held: 0, name: 'The Heritage' },
   'prewed/heritage-executive':       { unit: 'room', capacity: 13, occupancy: 2, held: 0, name: 'Heritage Executive' },
   /* NOT BEFORE THE WEDDING (002 · G21 / H21 / I21, 28 Sep 2026): the Noble Courtyard, the Grand Majestic and the Souphattra
-     Majestic suites are offered for the Wedding Stay only — no pre-wedding stock (no guest held one) */
+     Majestic suites are offered for the Wedding Stay only — no pre-wedding stock a guest could take */
   'prewed/heritage-grand-premier':   { unit: 'room', capacity: 3,  occupancy: 2, held: 0, name: 'Heritage Grand Premier' },
+  /* THE OWNERS' PLACEMENT ONLY (Owners, 27 Nov 2026 · HS-060): the Noble Courtyard Suite for the pre-wedding nights, as the Owners
+     arranged it with the house — ONE unit, never offered: no guest takes, is given or is kept a place in it; only the Owners'
+     rebooking (src/rooms.js · admin-rebook) places guests here, priced by their own 009 rows (002 item DRAFT, no list rate). */
+  'prewed/noble-courtyard':          { unit: 'room', capacity: 1,  occupancy: 2, held: 0, name: 'Noble Courtyard Suite', ownersOnly: true },
   /* THE COUPLE'S SUITE (Owners, 19 Nov 2026 — the one exception to "no reservation" above): the Souphattra Presidential is ONE suite
      (two numbers of the house, one booking unit), the couple's alone. ONE unit of TWO places — no further guest place, never two
      rooms: one booking unit, one room of the hotel's purchase. `couple` = nobody else may hold, be given or be kept a place in it

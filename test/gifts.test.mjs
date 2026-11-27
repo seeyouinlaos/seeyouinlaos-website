@@ -60,7 +60,12 @@ test('THE LIST · one person (the register id, never a name), one window, one ro
     { contactId: 'CON003', window: 'prewed', room: 'heritage-executive', kind: 'special', charge: 130 },
     { contactId: 'CON004', window: 'prewed', room: 'heritage-executive', kind: 'special', charge: 130 },
     /* U Sathorn, settled through the statement (Owners, 19 Nov 2026 · HS-031.8) */
-    { contactId: 'CON010', window: 'bkk-stay', room: 'u-sathorn-superior-garden', kind: 'statement', charge: null }]);
+    { contactId: 'CON010', window: 'bkk-stay', room: 'u-sathorn-superior-garden', kind: 'statement', charge: null },
+    /* HS-060 · the Owners' rebooking (27 Nov 2026): the complimentary upgrade keeps each person's own charge */
+    { contactId: 'CON083', window: 'prewed', room: 'noble-courtyard', kind: 'special', charge: 325 },
+    { contactId: 'CON084', window: 'prewed', room: 'noble-courtyard', kind: 'special', charge: 325 },
+    { contactId: 'CON083', window: 'wedstay', room: 'noble-courtyard', kind: 'special', charge: 170 },
+    { contactId: 'CON084', window: 'wedstay', room: 'noble-courtyard', kind: 'special', charge: 170 }]);
   assert.deepEqual(giftsFor('CON005'), [
     { window: 'prewed', room: 'heritage-executive', kind: 'special', charge: 225 },
     { window: 'wedstay', room: 'heritage-executive', kind: 'gift', charge: 0, by: 'bride-groom' },

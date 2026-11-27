@@ -210,7 +210,7 @@ test('F · the token never reaches the client, and the surface never confirms it
    * the stored one, or nothing was sent from here */
   assert.match(rv, /elsewhere=!!\(d&&d\.sentElsewhere&&d\.sentElsewhere\(\)\)/);
   const dj = src('assets/draft.js');
-  assert.match(dj, /var mine = deviceSent\(\); if \(!mine \|\| mine\.invitationId !== a\.invitationId\) return true;\s*return Number\(mine\.version \|\| 0\) !== Number\(s\.version \|\| 0\);/, 'another device only on another version');
+  assert.match(dj, /var mine = deviceSent\(\); if \(!mine \|\| mine\.invitationId !== a\.invitationId\) return true;\s*\/\*[^*]*\*\/\s*if \(s\.byOwners && s\.ownersFrom != null && Number\(mine\.version \|\| 0\) === Number\(s\.ownersFrom\)\) return false;\s*return Number\(mine\.version \|\| 0\) !== Number\(s\.version \|\| 0\);/, 'another device only on another version — never the Owners\' rebooking of the version this device sent (HS-060)');
   assert.match(rv, /Your confirmed trip was sent from another device, so it is not shown here\./);
 });
 

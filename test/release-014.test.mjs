@@ -49,7 +49,8 @@ test('NO FIXED ARRANGEMENT · the seed holds nothing for anyone; no unit is rese
   for (const k of Object.keys(SEED)) for (const u of unitsOf(k)) {
     assert.equal(u.reservedFor, null, k + ' ' + u.label);
     /* the one exception (Owners, 19 Nov 2026): the couple's suite — the allowlisted couple only; a host flag alone opens nothing */
-    assert.equal(mayJoin(u, PEG).ok, !u.couple, k + ' ' + u.label); assert.equal(mayJoin(u, HAR).ok, !u.couple, k + ' ' + u.label);
+    /* …and the Owners' placement only (HS-060, 27 Nov 2026): no guest takes it */
+    assert.equal(mayJoin(u, PEG).ok, !(u.couple || u.ownersOnly), k + ' ' + u.label); assert.equal(mayJoin(u, HAR).ok, !(u.couple || u.ownersOnly), k + ' ' + u.label);
   }
   assert.equal(mayJoin(unitsOf('bkk-stay/u-sathorn-superior-garden')[0], null).ok, false, 'no identity, no place');
   const rooms = new Rooms(doState());
