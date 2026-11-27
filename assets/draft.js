@@ -403,6 +403,8 @@
     sentElsewhere: function () {
       var s = state.submission, a = auth(); if (!s || !s.submissionId || !a) return false;
       var mine = deviceSent(); if (!mine || mine.invitationId !== a.invitationId) return true;
+      /* the latest version is the Owners' rebooking (HS-060): what this device sent is the version before it, not another device's */
+      if (s.byOwners && s.ownersFrom != null && Number(mine.version || 0) === Number(s.ownersFrom)) return false;
       return Number(mine.version || 0) !== Number(s.version || 0);
     },
     /* ---- PER LINE, FROM THE LAST SENT SNAPSHOT (PRQ-01-07 · PRQ-04-05) ---- */

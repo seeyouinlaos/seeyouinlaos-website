@@ -363,7 +363,7 @@
   function logPanel(list, area) {
     list = list || [];
     var open = area === 'seating' ? X.logOpen : X.rlogOpen, shown = open ? list : list.slice(0, 8);
-    var T = { ASSIGN: 'Assigned', MOVE: 'Moved', SWAP: 'Swapped', RELEASE: 'Released', FINAL_RELEASED: 'Final released', FINAL_WITHDRAWN: 'Final withdrawn', SELF_SERVICE: 'Guests\' own choice', HOTEL_ROOMS: 'Hotel room numbers set' };
+    var T = { ASSIGN: 'Assigned', MOVE: 'Moved', SWAP: 'Swapped', RELEASE: 'Released', FINAL_RELEASED: 'Final released', FINAL_WITHDRAWN: 'Final withdrawn', SELF_SERVICE: 'Guests\' own choice', HOTEL_ROOMS: 'Hotel room numbers set', REBOOK: 'Room category changed' };
     var h = '<div class="p-card ab-panel" data-as-log="' + area + '"><p class="t-l1">Change log · ' + list.length + '</p>';
     if (!list.length) return h + '<p class="t-b2 ab-mute">No change has been made here yet.</p></div>';
     h += '<div class="ab-table-wrap"><table class="ab-table"><thead><tr><th>When</th><th>Who</th><th>Change</th><th>Guest</th><th>Before</th><th>After</th><th>Status</th></tr></thead><tbody>';

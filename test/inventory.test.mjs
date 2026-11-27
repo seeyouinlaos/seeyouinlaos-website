@@ -30,8 +30,12 @@ test('the Souphattra stock is the Sheet stock: 26 rooms, per window', () => {
                 'grand-majestic', 'souphattra-majestic', 'souphattra-presidential'];
   /* the Wedding Stay holds the whole house; before the wedding the three suites are not offered (002 · G21 / H21 / I21, 28 Sep 2026) */
   assert.equal(cats.reduce((t, c) => t + SEED[`wedstay/${c}`].capacity, 0), 26, 'wedstay must hold the whole house');
-  assert.equal(cats.reduce((t, c) => t + (SEED[`prewed/${c}`] ? SEED[`prewed/${c}`].capacity : 0), 0), 22, 'prewed: the house without the Noble Courtyard, the Grand Majestic and the Souphattra Majestic');
-  for (const c of ['noble-courtyard', 'grand-majestic', 'souphattra-majestic']) assert.equal(SEED[`prewed/${c}`], undefined, c + ' is not offered before the wedding');
+  /* HS-060 (Owners, 27 Nov 2026): the Noble Courtyard before the wedding is the Owners' placement only (002 C-NOBLE-COURTYARD, DRAFT,
+     one room) — never offered; the Grand Majestic and the Souphattra Majestic have no pre-wedding stock */
+  assert.equal(cats.reduce((t, c) => t + (SEED[`prewed/${c}`] && !SEED[`prewed/${c}`].ownersOnly ? SEED[`prewed/${c}`].capacity : 0), 0), 22, 'prewed offered: the house without the Noble Courtyard, the Grand Majestic and the Souphattra Majestic');
+  assert.equal(cats.reduce((t, c) => t + (SEED[`prewed/${c}`] ? SEED[`prewed/${c}`].capacity : 0), 0), 23, 'prewed stock: the 22 offered rooms and the Owners\' placement');
+  for (const c of ['grand-majestic', 'souphattra-majestic']) assert.equal(SEED[`prewed/${c}`], undefined, c + ' is not offered before the wedding');
+  assert.equal(SEED['prewed/noble-courtyard'].ownersOnly, true, 'the pre-wedding Noble Courtyard is placed by the Owners only');
   /* the individual counts, from Budget_Room - Rate column C */
   assert.equal(SEED['prewed/heritage'].capacity, 5);
   assert.equal(SEED['prewed/heritage-executive'].capacity, 13);
@@ -67,7 +71,7 @@ test('nothing is reserved for anyone in the seed (Owner, 19 Sep 2026 · no fixed
   assert.ok(!/heldFor:/.test(seedSrc), 'no seed entry carries heldFor');
   assert.ok(!existsSync(join(ROOT, 'assets/arranged.js')), 'assets/arranged.js is deleted');
   /* mayJoin asks for an identity and nothing else — but for the couple's suite, which asks for the allowlisted couple (Owners, 19 Nov 2026) */
-  assert.match(readFileSync(join(ROOT, 'src/rooms.js'), 'utf8'), /export function mayJoin\(unit, identity\) \{\s*if \(!unit\) return \{ ok: false, error: 'unknown room' \};\s*if \(!identity\) return \{ ok: false, error: 'unauthorised' \};\s*\/\*[^*]*\*\/\s*if \(unit\.couple && !isCouple\(identity\)\) return \{ ok: false, error: 'the couple\\'s suite' \};\s*return \{ ok: true \};/, 'mayJoin asks for an identity and nothing else — the couple\'s suite for the couple');
+  assert.match(readFileSync(join(ROOT, 'src/rooms.js'), 'utf8'), /export function mayJoin\(unit, identity\) \{\s*if \(!unit\) return \{ ok: false, error: 'unknown room' \};\s*if \(!identity\) return \{ ok: false, error: 'unauthorised' \};\s*\/\*[^*]*\*\/\s*if \(unit\.couple && !isCouple\(identity\)\) return \{ ok: false, error: 'the couple\\'s suite' \};\s*\/\*[^*]*\*\/\s*if \(unit\.ownersOnly\) return \{ ok: false, error: 'not offered' \};\s*return \{ ok: true \};/, 'mayJoin asks for an identity and nothing else — the couple\'s suite for the couple, the Owners\' placement for nobody (HS-060)');
 });
 
 test('a party consumes rooms, not seats — ceil(guests ÷ occupancy)', () => {
@@ -122,7 +126,8 @@ test('every selectable room in the shop is stock-controlled', () => {
   for (const key of Object.keys(R)) {
     for (const w of R[key].windows) {
       for (const room of R[key].rooms) {
-        if (room.notIn && room.notIn.includes(w.id)) { if (SEED[`${w.id}/${room.slug}`]) missing.push('stock for a room not offered: ' + w.id + '/' + room.slug); continue; }
+        /* a room not offered in a window has no stock there — but for the Owners' placement only (HS-060), which no guest can take */
+        if (room.notIn && room.notIn.includes(w.id)) { const s = SEED[`${w.id}/${room.slug}`]; if (s && !s.ownersOnly) missing.push('stock for a room not offered: ' + w.id + '/' + room.slug); continue; }
         if (!SEED[`${w.id}/${room.slug}`]) missing.push(`${w.id}/${room.slug}`);
       }
     }
@@ -360,7 +365,7 @@ test('the hosts have no special room and the Bag carries only actual selections 
   assert.equal(G.party().hosts, true, 'the host flag is explicit');
   const v = U.view();
   assert.deepEqual(plain(v.mine), {}, 'nothing is held before booking'); assert.equal(v.fixed, undefined, 'the view knows no fixed arrangement');
-  assert.ok(Object.values(v.units).every((list) => list.every((u) => u.eligible === !u.couple && u.reservedFor === null && u.taken === 0)), 'every unit of every category is open to the hosts, none is theirs in advance — the couple\'s suite only to the allowlisted couple (a host flag alone opens nothing)');
+  assert.ok(Object.values(v.units).every((list) => list.every((u) => u.eligible === !(u.couple || u.ownersOnly) && u.reservedFor === null && u.taken === 0)), 'every unit of every category is open to the hosts, none is theirs in advance — the couple\'s suite only to the allowlisted couple (a host flag alone opens nothing)');
   assert.deepEqual(plain(v.units['bkk-stay/u-sathorn-superior-garden'].map((u) => [u.label, u.free])), [['A', 2], ['B', 2], ['C', 2], ['D', 2], ['E', 2], ['F', 2]]);
   assert.equal(v.summary['bkk-stay/u-sathorn-superior-garden'].ownerReservedRooms, 0); assert.equal(v.summary['wedstay/souphattra-presidential'].reservedFor, null); assert.equal(v.summary['wedstay/souphattra-presidential'].free, 0, 'never free to anyone but the allowlisted couple');
   /* the inert names of the old rule */

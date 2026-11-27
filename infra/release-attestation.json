@@ -2,15 +2,17 @@
  "about": "Signed by src/release-attest.mjs on the release machine; verified by src/release-verify.cjs in the build. Not the Owner's consent — a record that these checks passed for exactly this tree.",
  "payload": {
   "v": 1,
-  "tree": "b8d43ed0cbe4720e888373b8b2520fa8f68c7fa3",
-  "pricingRef": "268f35f184bf",
+  "tree": "9b3e65dbf20946b717b5de8322c24dc3f6ea63ca",
+  "pricingRef": "c16db7f0db63",
   "keyId": "d02a1256537ec29e",
-  "at": "2026-11-25T05:30:04.812Z",
-  "base": "b86e95a128441fd2b24bfc23d742e48576c9506f",
-  "markers": {},
+  "at": "2026-11-27T15:18:29.139Z",
+  "base": "4ff0a873e0b50a66ca792b8daa1285b19547fb64",
+  "markers": {
+   "OWNER_PRICING_CHANGE": "Owners' order 27 Nov 2026 (HS-060), figures confirmed 27 Nov 2026: complimentary upgrade of two guests to the Noble Courtyard Suite, room 101, Pre-Wedding + Wedding Stay 25.02.-01.03.2027, prices unchanged; 009 rows 45-48: C-NOBLE-COURTYARD USD 162.50 x Nights_Rule 2, D1-NOBLE-COURTYARD USD 170 x Nights_Rule 1 per person; new 002 product C-NOBLE-COURTYARD (DRAFT, no Standard_Rate) [ref c16db7f0db63]"
+  },
   "checks": {
    "npmTest": {
-    "pass": 1207,
+    "pass": 1213,
     "fail": 0
    },
    "releaseCheck": {
@@ -23,5 +25,5 @@
    }
   }
  },
- "signature": "p3Rwk8sd/o1QFjIYlFKAK557qlexite8XOVCfOupccNhzHB9ujNGDhlPu/g9Z00gp4uVybxHzDnBu3AXn3HjBg=="
+ "signature": "eXV1G5SQByMZAQzhJgd7S3KFubTp4N+2XGUn0vTFgMoLE4Fg1Szzdw0HE1zSUpkDs737gTnqhxzAgGS5fYBCDA=="
 }

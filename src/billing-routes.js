@@ -1046,9 +1046,13 @@ async function assessIssue(env, holderId, src, asOf, origin, opts) {
   reasons.push(...statementBlockers);
 
   const hash = await sourceHash({ items: src.items, specialRates: src.specialRates });
+  /* HS-060 · THE OWNERS' REBOOKING (Owners, 27 Nov 2026): the version after it keeps the replaced version's due date and carries the
+     Owners' note — only while that version is still the issued one, never a date before the issue day; an explicit override wins */
+  const intent = await rebookIntentOf(env, holderId, state.issuedRevision, asOf);
+  const dueDateOverride = clean(o.dueDateOverride) || (intent && intent.dueDate) || '';
   const proposal = pref.channel ? buildSnapshot({
     settlementId: null, revision: null, holderId, result: current.result,
-    items: src.items, specialRates: src.specialRates, fx, issueDate: asOf, dueDateOverride: clean(o.dueDateOverride),
+    items: src.items, specialRates: src.specialRates, fx, issueDate: asOf, dueDateOverride,
     evidenceStatus: clean(o.evidenceStatus), sourceHash: hash, calculatedAt: null, paymentPreference: pref.channel,
   }) : null;
   /* NOTHING NEW, NOTHING ISSUED (review, 7 Oct 2026): a revision whose substance is exactly the issued one's would only
@@ -1060,9 +1064,10 @@ async function assessIssue(env, holderId, src, asOf, origin, opts) {
   const bankNow = paymentBank && !paymentBank.missing ? paymentBank : null;
   const frozen = { layout: CURRENT_LAYOUT, recipient: names.recipient, persons: names.personNames, words: words.words, options: paymentOptions.length ? paymentOptions : null, bank: bankNow };
   const frozenOf = (r) => (r ? { layout: r.Pdf_Layout || null, recipient: r.Recipient || null, persons: r.Person_Names || null, words: r.Item_Words || null, options: r.Payment_Options || null, bank: r.Payment_Bank || null } : null);
-  const correction = issuedNow && proposal ? correctionOf(issuedNow, proposal, words.words, { legacy: !(state.issuedRecord && state.issuedRecord.Pdf_Layout),
+  const corrected = issuedNow && proposal ? correctionOf(issuedNow, proposal, words.words, { legacy: !(state.issuedRecord && state.issuedRecord.Pdf_Layout),
     wasOptions: state.issuedRecord ? state.issuedRecord.Payment_Options : null, nowOptions: paymentOptions,
     wasBank: state.issuedRecord ? state.issuedRecord.Payment_Bank : null, nowBank: bankNow }) : null;
+  const correction = corrected && intent && intent.note ? { ...corrected, reason: withNote(corrected.reason, intent.note) } : corrected;
   if (issuedNow && proposal && substance(proposal) === substance(issuedNow) && stableJson(frozenOf(state.issuedRecord)) === stableJson(frozen)) {
     reasons.push('NO_CHANGE: revision ' + issuedNow.Revision + ' already holds exactly this statement');
   }
@@ -1078,7 +1083,28 @@ async function assessIssue(env, holderId, src, asOf, origin, opts) {
     gate: { stored: gate.approved, now: gateNow ? { approved: gateNow.approved, open: gateNow.open || [] } : null },
     allowed: reasons.length === 0, reasons, proposal, proposalHash, sourceHash: hash,
     names, words, paymentOptions, paymentBank: bankNow, correction, frozen, statementBlockers,
+    dueDateOverride, intent: intent || null,
   };
+}
+
+/* HS-060 · the statement intent of an Owners' rebooking — REG_KV `rebook-intent:<Holder_ID>`, written by admin/rebook:
+   { order, by, at, replacesRevision, dueDate, note }. It answers only while the version it was written against is still the issued
+   one (a later issue ends it), and its due date only when it is not before the issue day. */
+const REBOOK_INTENT = 'rebook-intent:';
+export { rebookIntentOf, withNote, REBOOK_INTENT };   /* HS-060 · read by the tests (test/rebook.test.mjs) */
+async function rebookIntentOf(env, holderId, issued, asOf) {
+  if (!env.REG_KV || !issued) return null;
+  let r = null; try { r = JSON.parse(await env.REG_KV.get(REBOOK_INTENT + clean(holderId)) || 'null'); } catch (e) { r = null; }
+  if (!r || Number(r.replacesRevision) !== Number(issued.Revision)) return null;
+  const due = /^\d{4}-\d{2}-\d{2}$/.test(clean(r.dueDate)) && clean(r.dueDate) >= clean(asOf) ? clean(r.dueDate) : '';
+  return { order: clean(r.order), dueDate: due, keptDueDate: clean(r.dueDate) || null, note: clean(r.note).slice(0, 140) };
+}
+/* the correction's own words, then the Owners' note — never longer than the ledger keeps (200) */
+function withNote(reason, note) {
+  const base = clean(reason), n = clean(note);
+  if (!n) return base.slice(0, 200);
+  const room = 200 - base.length - 2;
+  return room >= 12 ? base + '; ' + (n.length > room ? n.slice(0, room - 1) + '…' : n) : base.slice(0, 200);
 }
 
 /**
@@ -1208,7 +1234,8 @@ async function adminIssue(env, identity, request, cors) {
     holderId, revision, by,
     items: src.items, specialRates: src.specialRates, fx, sourceGaps,
     sourceHash: a.sourceHash,
-    issueDate: asOf, dueDateOverride: clean(body.dueDateOverride),
+    /* the due date the preview showed (HS-060: the intent of an Owners' rebooking, else the request's own) — never rebuilt differently */
+    issueDate: asOf, dueDateOverride: a.dueDateOverride || '',
     evidenceStatus: clean(body.evidenceStatus), calculatedAt: new Date().toISOString(),
     paymentPreference: pref.channel, paymentPreferenceSource: pref.source, paymentPreferenceBasis: pref.basis || null,
     /* the ledger freezes this exact method or refuses: its destination is the one checked above */
@@ -1224,6 +1251,8 @@ async function adminIssue(env, identity, request, cors) {
     return jsonRes({ ok: false, error: (issued && issued.error) || 'the ledger refused the issue',
       reasons: (issued && issued.reasons) || [], immutable: !!(issued && issued.immutable), revision }, 409, cors);
   }
+  /* the Owners' rebooking intent has served its one version (HS-060) */
+  if (a.intent && env.REG_KV) { try { await env.REG_KV.delete(REBOOK_INTENT + clean(holderId)); } catch (e) { /* inert anyway: it names the replaced version */ } }
   return jsonRes({
     ok: true, Settlement_ID: snapshot.Settlement_ID, revision: snapshot.Revision,
     issueDate: snapshot.Issue_Date, dueDate: snapshot.Due_Date,
@@ -1883,7 +1912,11 @@ async function adminPreviewPdf(env, identity, url, cors) {
   const today = utcDay();
   const asOf = held.issuedRevision && today < ISSUE_RULES.floor ? ISSUE_RULES.floor : today;
   const src = await loadSource(env, asOf, { register: true });
-  const a = await assessIssue(env, holderId, src, asOf, url.origin);
+  /* HS-060 · `assumeVersion=<n>`: the sent version n as if confirmed (the confirmation dialog's own what-if) — so the Owners see the
+     corrected statement before they confirm the changed booking; still a preview, nothing stored */
+  const assumeVersion = url.searchParams.get('assumeVersion') != null ? Number(url.searchParams.get('assumeVersion')) : null;
+  if (assumeVersion != null && !(Number.isInteger(assumeVersion) && assumeVersion >= 1)) return jsonRes({ ok: false, error: 'assumeVersion must be a version number' }, 400, cors);
+  const a = await assessIssue(env, holderId, src, asOf, url.origin, assumeVersion != null ? { assumeConfirmedVersion: assumeVersion } : undefined);
   if (!a.proposal) return jsonRes({ ok: false, error: 'no statement can be previewed for this guest just now', reasons: a.reasons }, 409, cors);
   if (a.names.reasons.length || a.words.missing.length) return jsonRes({ ok: false, error: 'the statement cannot name its recipient or products', reasons: a.statementBlockers }, 409, cors);
   const revision = (Number(a.state.latestRevision) || 0) + 1;
@@ -2735,6 +2768,67 @@ async function adminRoomsApply(env, identity, request, url, cors, deps) {
   const out = await engineAdmin(env, 'ROOMS', 'rooms', 'admin-apply', adminLabel(identity), { target: change.target, expect: change.expect, approveRoomCount: change.approveRoomCount, dryRun: change.dryRun });
   return jsonRes(out.j, out.status, cors);
 }
+/** POST admin/rebook { order: 'HS-nnn', note, notes: { '<INV>': note }, changes: [{ invitationId, guestId, stage, from: { room }, to: { room, unit }, img? }],
+ *  expect: { '<INV>': version }, apply } — HS-060 · THE OWNERS' REBOOKING (Owners, 27 Nov 2026): a named guest's stay moved to ANOTHER
+ *  room category of the SAME stay, by the Owners' own order. Dry run unless `apply: true`. The new room is priced by the server for
+ *  that very person (002 / 009, read fresh — a room without an amount for them is refused); the room engine moves every guest of the
+ *  request in ONE serialised step (src/rooms.js · admin-rebook), then each trip and draft follows (worker.js · rebookTrips) — never an
+ *  e-mail, never a confirmation: the new version waits for the Owners' Confirm booking. The next statement version of each holder
+ *  keeps the replaced version's due date and carries the Owners' note (the intent, read by assessIssue). */
+async function adminRebook(env, identity, request, url, cors, deps) {
+  const body = await request.json().catch(() => null);
+  if (!deps || typeof deps.rebook !== 'function') return jsonRes({ ok: false, error: 'the rebooking is not available here' }, 503, cors);
+  const order = clean(body && body.order), apply = !!(body && body.apply === true);
+  /* the Owners' note on the next statement version: one per holder (`notes`), else the request's own (`note`) — at most 140 characters */
+  const noteOf = (inv) => clean((body && body.notes && typeof body.notes === 'object' && body.notes[inv]) || (body && body.note)).slice(0, 140);
+  if (!/^HS-\d{3}(\.\d{1,2})?$/.test(order)) return jsonRes({ ok: false, error: 'the Owners\' order is required (HS-nnn)' }, 400, cors);
+  const changes = body && Array.isArray(body.changes) ? body.changes : [];
+  if (!changes.length || changes.length > 8) return jsonRes({ ok: false, error: 'a rebooking names 1 to 8 changes' }, 400, cors);
+  /* the note is printed on a frozen statement: only what the PDF can print (pdf.js · isPrintable) */
+  for (const inv of new Set(changes.map((c) => clean(c && c.invitationId)))) { const n = noteOf(inv); if (n && !isPrintable(n)) return jsonRes({ ok: false, error: 'the note for ' + inv + ' has characters the statement cannot print' }, 400, cors); }
+  const asOf = utcDay();
+  const src = await pricing(env, asOf, true);
+  const { index } = siteProductKeyIndex(src.items);
+  const priced = [];
+  for (const c of changes) {
+    const key = canonicalKey(clean(c && c.stage) + '/' + clean(c && c.to && c.to.room));
+    const itemId = index[key];
+    if (!itemId) return jsonRes({ ok: false, error: 'no 002 product is sold as ' + key + ' — nothing was changed' }, 409, cors);
+    const q = quoteOfItem(itemId, src.items[itemId], src, clean(c.invitationId), clean(c.guestId), asOf);
+    if (q.total == null || q.manualReview) return jsonRes({ ok: false, error: key + ' has no amount for ' + clean(c.guestId) + ' (' + (q.manualReview || 'no rate') + ') — nothing was changed' }, 409, cors);
+    priced.push({ ...c, quote: { total: q.total, nights: q.nights, payableNights: q.payableNights, ratePerNight: q.ratePerNight, listRate: q.listRate, rateSource: q.rateSource, paidByHS: q.paidByHS },
+      owners: !!(ROOM_SEED[key] && ROOM_SEED[key].ownersOnly), itemId });
+  }
+  const by = adminLabel(identity), expect = body && body.expect && typeof body.expect === 'object' ? body.expect : null;
+  const quotes = priced.map((c) => ({ invitationId: clean(c.invitationId), guestId: clean(c.guestId), stage: clean(c.stage), itemId: c.itemId, ...c.quote }));
+  const plan = await deps.rebook(env, url.origin, { changes: priced, by, order, expect, apply: false });
+  if (plan.status !== 200 || !apply) return jsonRes({ ...plan.body, quotes }, plan.status, cors);
+  if (deps.resetLocked && await deps.resetLocked(env)) return jsonRes({ ok: false, retry: true, reason: 'RESET', error: 'the clean reset is running — try again in a moment' }, 503, cors);
+  /* 1 · the room engine: every move of the request in one serialised, all-or-nothing step */
+  const moves = plan.body.plans.flatMap((p) => p.changes.filter((c) => c.engine && c.engine !== 'done').map((c) => ({ guestId: p.guestId, from: c.engine.from, to: c.engine.to })));
+  if (moves.length) {
+    const out = await engineAdmin(env, 'ROOMS', 'rooms', 'admin-rebook', by, { moves, order });
+    if (!out.j || out.j.ok !== true) return jsonRes({ ok: false, error: 'the room engine refused the rebooking — nothing was changed', engine: out.j }, out.status === 200 ? 409 : out.status, cors);
+  }
+  /* 2 · each trip and draft, exactly as a send would leave them — no mail */
+  const drafts = Object.fromEntries(plan.body.plans.map((p) => [p.invitationId, p.draftAt || null]));
+  const res = await deps.rebook(env, url.origin, { changes: priced, by, order, expect, drafts, apply: true });
+  /* 3 · the statement intent of every holder whose trip now stands on the new room */
+  const intents = [];
+  /* only for a trip THIS run wrote (a re-run of a finished rebooking never re-arms a statement already corrected) */
+  for (const a of (res.body && res.body.applied) || []) {
+    if (!a.ok || a.version == null) continue;
+    const st = await holderState(env, a.invitationId).catch(() => null), issued = st && st.issuedRevision;
+    if (!st) { intents.push({ holderId: a.invitationId, skipped: 'the ledger could not be read — no statement intent written' }); continue; }
+    if (!issued || !env.REG_KV) { intents.push({ holderId: a.invitationId, skipped: 'no statement issued yet' }); continue; }
+    const rec = { order, by, at: new Date().toISOString(), replacesRevision: issued.Revision, dueDate: clean(issued.Due_Date) || null, note: noteOf(a.invitationId) };
+    await env.REG_KV.put(REBOOK_INTENT + a.invitationId, JSON.stringify(rec), { expirationTtl: 60 * 60 * 24 * 45 });
+    intents.push({ holderId: a.invitationId, settlementId: clean(issued.Settlement_ID) || null, replaces: 'V' + issued.Revision, keepsDueDate: rec.dueDate });
+  }
+  if (deps.cohortStale) deps.cohortStale(env);
+  return jsonRes({ ...res.body, engine: moves.length ? 'moved' : 'already', quotes, intents }, res.status, cors);
+}
+
 /** POST admin/rooms/hotel { set: { '<key>|<label>': ['105'] | ['210', '211'] | null }, expectVersion, note, dryRun } — the Owners' hotel
     room numbers of the Souphattra's units (src/hotel-rooms.js · the room engine checks them against the official list and keeps
     them). A number never moves a guest, never changes a place, a booking, a rate, a statement or a cost. */
@@ -2947,6 +3041,10 @@ async function adminOwnerBookingsPost(env, identity, request, url, cors) {
     if (key && ROOM_SEED[key] && ROOM_SEED[key].couple && !COUPLE_GUESTS.includes(clean(body.entry.personId))) {
       return jsonRes({ ok: false, error: 'the Souphattra Presidential is the couple\'s suite — Haruthai\'s and Suthep\'s alone; nothing was written', reasons: ['COUPLE_SUITE: ' + key] }, 409, cors);
     }
+    /* THE OWNERS' PLACEMENT ONLY (HS-060): a room no stay offers is placed by the Owners' rebooking alone (admin/rebook) */
+    if (key && ROOM_SEED[key] && ROOM_SEED[key].ownersOnly) {
+      return jsonRes({ ok: false, error: 'this room is placed by the Owners\' rebooking only — nothing was written', reasons: ['OWNERS_ONLY: ' + key] }, 409, cors);
+    }
   }
   const r = applyAction(rec, action, { entry: body.entry, entryId: body.entryId, by: adminLabel(identity), at: new Date().toISOString(), items: src.items, persons });
   if (!r.ok) return jsonRes({ ok: false, error: r.error }, 409, cors);
@@ -3122,6 +3220,10 @@ export async function handleBilling(request, env, url, cors, deps) {
       case 'admin/rooms/final':
         if (request.method !== 'POST') return jsonRes({ ok: false, error: 'POST only' }, 405, cors);
         return await adminRoomsFinal(env, identity, request, cors, deps);
+      /* HS-060 · the Owners' rebooking: a stay moved to another room category (dry run unless apply) */
+      case 'admin/rebook':
+        if (request.method !== 'POST') return jsonRes({ ok: false, error: 'POST only' }, 405, cors);
+        return await adminRebook(env, identity, request, url, cors, deps);
       case 'admin/rooms/hotel':
         if (request.method !== 'POST') return jsonRes({ ok: false, error: 'POST only' }, 405, cors);
         return await adminRoomsHotel(env, identity, request, cors);

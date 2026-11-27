@@ -817,10 +817,7 @@ async function handleRegister(request, env) {
       if (prev) {
         let prevObj = null; try { prevObj = JSON.parse(prev); } catch (e) {}
         if (!prevObj || (prevObj.lastSentAt || prevObj.submittedAt) !== now) {
-          await env.REG_KV.put(regKey + ':prev:' + now, prev, {
-            metadata: { invitationId, supersededBy: now },
-            expirationTtl: 60 * 60 * 24 * 90,
-          });
+          await keepPrevious(env, regKey, prev, now, invitationId);
         }
       }
       stored = true;
@@ -889,6 +886,192 @@ function parseDraftContent(keys) {
 }
 async function sha256Hex(text) { const d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text)); return [...new Uint8Array(d)].map((b) => b.toString(16).padStart(2, '0')).join(''); }
 /* the trip as the server can prove it, in the graph's words (see src/stage-graph.js · completion) */
+/* ---- THE OWNERS' REBOOKING (Owners, 27 Nov 2026 · HS-060) ---------------------------------------------------------------------
+   A booking change the Owners make themselves: a named guest's stay moves to ANOTHER room category of the SAME stay. The room engine
+   (src/rooms.js · admin-rebook, moved by the billing route before this runs), the stored draft and the sent trip change together,
+   exactly as a send would leave them — but NOTHING is e-mailed (no journey mail, no copy to the guest), the guest's own unsent edits
+   are never overwritten (a draft whose stay line differs from the sent one is refused), and the confirmation is not touched: the new
+   version waits for the Owners' Confirm booking like every other change. Served by admin/rebook (BILLING_ADMIN only).
+   A change: { invitationId, guestId, stage, from: { room }, to: { room, unit }, quote, img?, owners? } — `quote` is the server's own
+   price of the new room for this person (billing-routes.js · quoteOfItem), `owners` marks a room the website does not offer in that
+   stay (its Bag line stays known: assets/pricing.js · known). Dry run unless `apply`; a re-run completes what a failed run left. */
+const REBOOK_MAX = 8;
+/* THE REGISTRATION HISTORY: the record a send — or the Owners' rebooking — supersedes, kept 90 days beside the new one under
+   reg:<inv>:prev:<when> (the one expiry in this Worker; an upload never expires) */
+async function keepPrevious(env, regKey, prev, now, invitationId) {
+  await env.REG_KV.put(regKey + ':prev:' + now, prev, { metadata: { invitationId, supersededBy: now }, expirationTtl: 60 * 60 * 24 * 90 });
+}
+/* the selection a line stands for — every key the selection fingerprint reads (worker.js · selectionOf), the room label aside */
+function lineSelection(l) { return JSON.stringify(Object.keys(l || {}).filter((k) => !DERIVED_LINE_KEYS.has(k) && k !== 'unit').sort().map((k) => [k, l[k]])); }
+/* the line of the new room, as the stay page writes it: the window's own fields kept (dates, nights, note, breakfast, the house), the
+   room's own set — the room, its label, the category in the line's words, the server's price for this person */
+function rebookedLine(line, c) {
+  const out = { ...line, room: c.toRoom, unit: c.toUnit, unitName: 'Room ' + c.toUnit };
+  const meta = String(line.meta || ''), cut = meta.lastIndexOf(' · ');
+  out.meta = (cut >= 0 ? meta.slice(0, cut) + ' · ' : '') + SEED[c.toKey].name;
+  if (c.img) out.img = c.img;
+  const q = c.quote || {};
+  out.price = q.total; out.pay = q.payableNights; out.nights = q.nights;
+  out.rate = q.listRate != null ? q.listRate : q.ratePerNight;
+  delete out.pricePending; delete out.priceOnRequest; delete out.gift; delete out.personal; delete out.owners;
+  /* the guest's own arrangement, as the page names it (assets/pricing.js · quote): a Named Special Rate is "special" */
+  if (q.rateSource === 'SPECIAL_RATE' && q.total > 0 && !q.paidByHS) out.personal = 'special';
+  if (c.owners) out.owners = true;
+  return out;
+}
+/* a restored line goes back where the sent trip has it — the Bag's order is part of what the trip reads as sent */
+function withRestored(bag, restores, sel) {
+  const out = bag.slice();
+  const sentAt = (l) => sel.findIndex((x) => x === l || (x && l && x.id === l.id && String(x.room || '') === String(l.room || '')));
+  for (const r of restores) {
+    const at = sel.indexOf(r);
+    let pos = 0;
+    out.forEach((l, i) => { const k = sentAt(l); if (k >= 0 && k < at) pos = i + 1; });
+    out.splice(pos, 0, r);
+  }
+  return out;
+}
+async function rebookTrips(env, origin, req) {
+  const list = Array.isArray(req && req.changes) ? req.changes : [];
+  const refuse = (status, error, problems, reason) => ({ status, body: { ok: false, error, ...(reason ? { reason } : {}), ...(problems ? { problems } : {}) } });
+  if (!list.length || list.length > REBOOK_MAX) return refuse(400, 'a rebooking names 1 to ' + REBOOK_MAX + ' changes');
+  if (!env.REG_KV || !env.DRAFTS || !env.ROOMS) return refuse(503, 'the trip stores are not reachable just now');
+  const apply = req.apply === true, by = String(req.by || '').slice(0, 40), order = String(req.order || '').slice(0, 40);
+  const SLUG = /^[a-z0-9-]{1,48}$/, problems = [], byInv = new Map();
+  const entries = await loadIndex(env, origin, false);
+  for (const c of list) {
+    const inv = String(c && c.invitationId || ''), g = String(c && c.guestId || ''), stage = String(c && c.stage || '');
+    const fromRoom = String(c && c.from && c.from.room || ''), toRoom = String(c && c.to && c.to.room || ''), toUnit = String(c && c.to && c.to.unit || '').toUpperCase();
+    const q = c && c.quote, img = String(c && c.img || '');
+    if (!/^INV-[A-Za-z0-9_-]{1,32}$/.test(inv) || !/^G\d{3,}$/.test(g) || !SLUG.test(stage) || !SLUG.test(fromRoom) || !SLUG.test(toRoom) || !/^[A-Z]{1,2}$/.test(toUnit)) return refuse(400, 'invalid change');
+    /* the new room's own picture, as the stay page shows it — the page never rebuilds a line's picture by itself */
+    if (!/^assets\/images\/[A-Za-z0-9/_.-]{1,140}$/.test(img) || img.includes('..')) return refuse(400, 'every change names the new room\'s picture (assets/images/…)');
+    if (!q || typeof q !== 'object' || !(Number(q.total) >= 0) || !Number.isInteger(Number(q.nights)) || !Number.isInteger(Number(q.payableNights))) return refuse(400, 'the new room carries no server price');
+    const fromKey = canonicalKey(stage + '/' + fromRoom), toKey = canonicalKey(stage + '/' + toRoom);
+    if (!SEED[fromKey] || !SEED[toKey] || fromKey === toKey) { problems.push({ invitationId: inv, guestId: g, reason: 'UNKNOWN_ROOM' }); continue; }
+    const e = Object.values(entries || {}).find((x) => x && x.i === inv && x.g === g);
+    if (!e) { problems.push({ invitationId: inv, guestId: g, reason: 'UNKNOWN_GUEST' }); continue; }
+    if (!byInv.has(inv)) byInv.set(inv, { who: { invitationId: inv, guestId: g, partyId: e.p || null, hosts: e.h === 1 }, changes: [] });
+    const x = byInv.get(inv);
+    if (x.who.guestId !== g) { problems.push({ invitationId: inv, guestId: g, reason: 'ONE_GUEST_PER_INVITATION' }); continue; }
+    if (x.changes.some((y) => y.stage === stage)) { problems.push({ invitationId: inv, guestId: g, reason: 'TWICE', stage }); continue; }
+    x.changes.push({ stage, fromRoom, toRoom, toUnit, fromKey, toKey, img, owners: c.owners === true,
+      quote: { total: Number(q.total), nights: Number(q.nights), payableNights: Number(q.payableNights), ratePerNight: q.ratePerNight == null ? null : Number(q.ratePerNight),
+        listRate: q.listRate == null ? null : Number(q.listRate), rateSource: q.rateSource == null ? null : String(q.rateSource), paidByHS: q.paidByHS ? String(q.paidByHS) : null } });
+  }
+  if (problems.length) return refuse(409, 'the rebooking cannot be made — nothing was changed', problems);
+
+  const plans = [];
+  for (const [inv, x] of byInv) {
+    let record = null;
+    try { record = JSON.parse(await env.REG_KV.get('reg:' + inv) || 'null'); } catch (e) { return refuse(503, 'the sent trip of ' + inv + ' cannot be read just now', null, apply ? 'TRIPS_PENDING' : undefined); }
+    if (!record || !record.submissionId || !record.registration || !Array.isArray(record.registration.selections)) { problems.push({ invitationId: inv, reason: 'NOT_SENT' }); continue; }
+    { const gr = record.registration.guestRecord || {}; if (gr.scope && gr.scope.none) { problems.push({ invitationId: inv, reason: 'NOT_JOINING' }); continue; } }
+    if (req.expect && req.expect[inv] != null && Number(req.expect[inv]) !== Number(record.version || 1)) { problems.push({ invitationId: inv, reason: 'VERSION_CHANGED', now: record.version || 1 }); continue; }
+    /* a confirmation that names no version stands on its date alone (src/confirmation.js) — it would outlive the change: refused */
+    let conf = null; try { conf = JSON.parse(await env.REG_KV.get('conf:' + inv) || 'null'); } catch (e) { return refuse(503, 'the confirmation of ' + inv + ' cannot be read just now', null, apply ? 'TRIPS_PENDING' : undefined); }
+    if (conf && conf.confirmedAt && conf.version == null) { problems.push({ invitationId: inv, reason: 'CONFIRMATION_WITHOUT_VERSION' }); continue; }
+    const dr = await draftOp(env, inv, 'get');
+    let bag = null; try { bag = dr.ok && dr.draft && dr.draft.keys ? JSON.parse(dr.draft.keys['siyl.bag'] || '[]') : null; } catch (e) { bag = null; }
+    if (!Array.isArray(bag)) { problems.push({ invitationId: inv, reason: 'DRAFT_UNREADABLE' }); continue; }
+    const rooms = await engineRooms(env, x.who);
+    const sel = record.registration.selections, steps = [];
+    for (const c of x.changes) {
+      const isLine = (l, room) => !!l && typeof l === 'object' && !l.interest && l.id === c.stage && canonicalKey(c.stage + '/' + String(l.room || '').trim()) === canonicalKey(c.stage + '/' + room);
+      const sentOld = sel.filter((l) => isLine(l, c.fromRoom)), sentNew = sel.filter((l) => isLine(l, c.toRoom));
+      const bagOld = bag.filter((l) => isLine(l, c.fromRoom)), bagNew = bag.filter((l) => isLine(l, c.toRoom));
+      const held = rooms && rooms[c.stage] && !rooms[c.stage].waitlisted ? { key: canonicalKey(rooms[c.stage].key), label: String(rooms[c.stage].label || '') } : null;
+      const sentDone = !sentOld.length && sentNew.length === 1 && String(sentNew[0].unit || '').toUpperCase() === c.toUnit;
+      /* a page may clear a line's room label while the engine and the draft disagree for a moment (assets/stay.js · sync) */
+      const bagDone = !bagOld.length && bagNew.length === 1 && (!bagNew[0].unit || String(bagNew[0].unit).toUpperCase() === c.toUnit);
+      const engineDone = !!held && held.key === c.toKey && held.label === c.toUnit;
+      /* a page of an earlier release may have dropped the Owners' line from the draft after the change: the sent line comes back */
+      const restore = !bagOld.length && !bagNew.length && sentDone ? sentNew[0] : null;
+      if (!sentDone && sentOld.length !== 1) problems.push({ invitationId: inv, stage: c.stage, reason: 'NOT_SENT_AS_NAMED', lines: sentOld.length });
+      if (!bagDone && !restore && bagOld.length !== 1) problems.push({ invitationId: inv, stage: c.stage, reason: 'DRAFT_NOT_AS_NAMED', lines: bagOld.length });
+      /* the stay keeps its nights: a category of the same stay, never another length */
+      for (const l of [sentOld[0], bagOld[0]]) if (l && l.nights != null && Number(l.nights) !== c.quote.nights) problems.push({ invitationId: inv, stage: c.stage, reason: 'NIGHTS_DIFFER' });
+      /* the guest's own unsent edits of this stay are theirs: never overwritten */
+      if (!sentDone && !bagDone && sentOld.length === 1 && bagOld.length === 1 && lineSelection(sentOld[0]) !== lineSelection(bagOld[0])) problems.push({ invitationId: inv, stage: c.stage, reason: 'UNSENT_EDITS' });
+      if (!engineDone && !(held && held.key === c.fromKey)) problems.push({ invitationId: inv, stage: c.stage, reason: 'ENGINE_NOT_AS_NAMED', now: held });
+      steps.push({ c, held, sentDone, bagDone, engineDone, restore, sentOld: sentOld[0] || null, bagOld: bagOld[0] || null, sentNew: sentNew[0] || null });
+    }
+    /* THE GUEST'S UNSENT CHANGES ANYWHERE IN THE TRIP are theirs (review, 27 Nov 2026): the rebooking writes the trip as sent, so it never
+       runs over a trip that reads "changes not sent". Before anything moved: the guest's own trip state. After a partial run: the trip
+       as it stood when last sent — the Owners' lines and rooms put back as the sent record has them — against the sent fingerprint.
+       (In the apply step of the same request the engine has just moved; the dry run of that request decided.) */
+    if (!apply && !problems.some((x) => x.invitationId === inv)) {
+      const moved = steps.some((t) => t.engineDone || t.sentDone || t.bagDone || t.restore);
+      let unsent = null;
+      if (!moved || (steps.every((t) => t.sentDone) && !steps.some((t) => t.restore))) unsent = (await submissionFor(env, x.who, dr.draft)).hasUnsentChanges;
+      else if (record.selectionFingerprint) {
+        const back = withRestored(bag.map((l) => { const t = steps.find((u) => u.bagDone && !u.sentDone && l && l.id === u.c.stage && canonicalKey(u.c.stage + '/' + String(l.room || '').trim()) === u.c.toKey); return t ? t.sentOld : l; }),
+          steps.filter((t) => t.restore).map((t) => t.restore), sel);
+        const seats = await engineSeats(env, x.who), sentRooms = record.rooms && typeof record.rooms === 'object' ? record.rooms : {};
+        const roomsBack = { ...(rooms || {}) }; for (const t of steps) if (!t.sentDone && sentRooms[t.c.stage]) roomsBack[t.c.stage] = sentRooms[t.c.stage];
+        const d = { ...dr.draft, keys: { ...dr.draft.keys, 'siyl.bag': JSON.stringify(back) } };
+        const f = await fingerprintsOf(d, roomsBack, seats, ['v3']);
+        unsent = record.selectionFingerprint !== await canonicalV3(f, roomsBack, seats);
+      }
+      if (unsent !== false) problems.push({ invitationId: inv, reason: unsent === null ? 'UNSENT_UNKNOWN' : 'UNSENT_CHANGES', why: 'the trip reads "changes not sent" — the guest sends it, or the Owners wait' });
+    }
+    plans.push({ inv, who: x.who, record, draft: dr.draft, epoch: dr.epoch || null, bag, steps });
+  }
+  if (problems.length) return apply
+    ? refuse(409, 'the rooms have moved, but the trips could not follow yet — nothing else was changed; run the rebooking again', problems, 'TRIPS_PENDING')
+    : refuse(409, 'the rebooking cannot be made — nothing was changed', problems, 'REFUSED');
+  /* `draftAt`: the draft the dry run judged — the apply step writes on exactly that draft or not at all (a guest's save in between is theirs) */
+  const view = (p) => ({ invitationId: p.inv, guestId: p.who.guestId, version: p.record.version || 1, draftAt: (p.draft && p.draft.updatedAt) || null,
+    selectionFingerprint: !!p.record.selectionFingerprint, changes: p.steps.map((s) => ({ stage: s.c.stage,
+    from: s.c.fromKey, to: s.c.toKey + '|' + s.c.toUnit, engine: s.engineDone ? 'done' : s.held ? { from: s.held, to: { key: s.c.toKey, label: s.c.toUnit } } : null,
+    sent: s.sentDone ? 'done' : { before: s.sentOld, after: rebookedLine(s.sentOld, s.c) },
+    draft: s.bagDone ? 'done' : s.restore ? { restored: s.restore } : { before: s.bagOld, after: rebookedLine(s.bagOld, s.c) } })) });
+  if (!apply) return { status: 200, body: { ok: true, dryRun: true, plans: plans.map(view) } };
+
+  /* APPLY — the engine has moved (the billing route's admin-rebook); anything not yet where the Owners put it stops here */
+  const notMoved = plans.flatMap((p) => p.steps.filter((s) => !s.engineDone).map((s) => ({ invitationId: p.inv, stage: s.c.stage })));
+  if (notMoved.length) return refuse(409, 'the room engine has not moved these stays yet — nothing was changed', notMoved, 'ENGINE_PENDING');
+  const done = [];
+  for (const p of plans) {
+    const now = new Date().toISOString(), result = { invitationId: p.inv, guestId: p.who.guestId };
+    /* the draft the dry run judged must still be the draft: a save of the guest's since then is refused here, the re-run decides it */
+    const judged = req.drafts && typeof req.drafts === 'object' ? req.drafts[p.inv] : undefined;
+    if (judged !== undefined && (judged || null) !== ((p.draft && p.draft.updatedAt) || null)) { done.push({ ...result, ok: false, error: 'the guest saved their trip a moment ago — run the rebooking again' }); continue; }
+    if (p.steps.some((s) => !s.bagDone)) {
+      const bag = withRestored(p.bag.map((l) => { const s = p.steps.find((t) => !t.bagDone && !t.restore && t.bagOld === l); return s ? rebookedLine(l, s.c) : l; }),
+        p.steps.filter((t) => t.restore).map((t) => t.restore), p.record.registration.selections);
+      const r = await draftOp(env, p.inv, 'put', { keys: { 'siyl.bag': JSON.stringify(bag) }, baseUpdatedAt: p.draft && p.draft.updatedAt ? p.draft.updatedAt : null,
+        reason: 'owner-rebook', guestId: p.who.guestId, seenReset: p.epoch || undefined });
+      if (!r.ok) { done.push({ ...result, ok: false, error: r.error === 'stale' ? 'the guest saved their trip a moment ago — run the rebooking again' : (r.error || 'the draft could not be written') }); continue; }
+      result.draft = r.draft && r.draft.updatedAt;
+    }
+    if (p.steps.some((s) => !s.sentDone)) {
+      const selections = p.record.registration.selections.map((l) => { const s = p.steps.find((t) => !t.sentDone && t.sentOld === l); return s ? rebookedLine(l, s.c) : l; });
+      /* the fingerprints of the trip as it now stands — the stored draft, the engine and the seats — exactly as a send keeps them */
+      const fps = await journeyFingerprints(env, p.who);
+      const selectionFingerprint = await canonicalV3(fps, fps.rooms, fps.seats);
+      const words = p.steps.filter((s) => !s.sentDone).map((s) => s.c.stage + ': ' + SEED[s.c.fromKey].name + ' → ' + SEED[s.c.toKey].name + ', Room ' + s.c.toUnit);
+      const { mailSummary, ...prior } = p.record;
+      const record = { ...prior, version: (p.record.version || 1) + 1, kind: 'owner-rebook', updatedAt: now,
+        rebook: { order, by, at: now, previousVersion: p.record.version || 1, changes: words },
+        registration: { ...p.record.registration, selections }, rooms: fps.rooms,
+        draftFingerprint: fps.v1, contentFingerprint: fps.v2, selectionFingerprint, fingerprintVersion: 3, mail: null,
+        text: String(p.record.text || '') + '\n\nOWNERS\' ROOM CHANGE · ' + now.slice(0, 10) + (order ? ' · ' + order : '') + '\n' + words.join('\n') };
+      const key = 'reg:' + p.inv, prev = await env.REG_KV.get(key);
+      /* the trip read at the start is still the trip: a send in between is the guest's, never overwritten */
+      let now0 = null; try { now0 = JSON.parse(prev || 'null'); } catch (e) { now0 = null; }
+      if (!now0 || Number(now0.version || 1) !== Number(p.record.version || 1)) { done.push({ ...result, ok: false, error: 'the guest sent their trip a moment ago — run the rebooking again' }); continue; }
+      await env.REG_KV.put(key, JSON.stringify(record), { metadata: { invitationId: p.inv, submittedAt: record.submittedAt, submissionId: record.submissionId, version: record.version, lastSentAt: record.lastSentAt } });
+      if (prev) await keepPrevious(env, key, prev, now, p.inv);
+      result.version = record.version;
+    }
+    done.push({ ...result, ok: true });
+  }
+  if (env.REG_KV) cohortStale(env);
+  const failed = done.filter((d) => !d.ok);
+  return { status: failed.length ? 409 : 200, body: { ok: !failed.length, applied: done, ...(failed.length ? { reason: 'TRIPS_PENDING', error: 'the rooms have moved; not every trip could follow yet — run the rebooking again' } : {}) } };
+}
+
 async function completionOf(env, who, registration, rooms) {
   const reg = registration && typeof registration === 'object' ? registration : {};
   const gr = reg.guestRecord && typeof reg.guestRecord === 'object' ? reg.guestRecord : {};
@@ -982,7 +1165,7 @@ function contentOf(v) {
    room, class, menu, quantity and unit — never what the website charges for it. An amount the website corrects (a rate, a line's
    price, its wording and frame) is derived from the selection, so a host-side correction never reads as a change of the guest's. */
 /* `gift` (Owner, 28 Sep 2026 · src/gifts.js): who pays is the Bride & Groom's decision, never a change of the guest's selection */
-const DERIVED_LINE_KEYS = new Set(['price', 'rate', 'roomRate', 'pay', 'nightsList', 'windowFixed', 'note', 'noteBy', 'breakfast', 'img', 'name', 'meta', 'basis', 'unitName', 'gift', 'personal', 'paidByHS', 'prepaidUnverified']);   /* `personal` (28 Sep 2026): a personal rate is who pays, not what was chosen */
+const DERIVED_LINE_KEYS = new Set(['price', 'rate', 'roomRate', 'pay', 'nightsList', 'windowFixed', 'note', 'noteBy', 'breakfast', 'img', 'name', 'meta', 'basis', 'unitName', 'gift', 'personal', 'paidByHS', 'prepaidUnverified', 'owners']);   /* `owners` (HS-060): the Owners' placement in a room the stay does not offer — a mark of who placed it, never the guest's selection */   /* `personal` (28 Sep 2026): a personal rate is who pays, not what was chosen */
 function selectionOf(content) {
   const c = contentOf(content);
   const bag = c && c.draft && Array.isArray(c.draft['siyl.bag']) ? c.draft['siyl.bag'] : null;
@@ -1086,7 +1269,9 @@ function submissionStateOf(record, hasUnsentChanges, conf) {
   return { submissionStatus: hasUnsentChanges ? 'changes-not-sent' : 'sent', submissionId: record.submissionId, submittedAt: record.submittedAt, lastSentAt: record.lastSentAt || record.submittedAt, version: record.version || 1, hasUnsentChanges: !!hasUnsentChanges, mail: record.mailSummary || null,
     /* the last send as the guest's own pages read it: a "not joining" reply or a trip, and the Bag lines it carried */
     declined: !!(gr.scope && gr.scope.none), sentSelections: Array.isArray(reg.selections) ? canonicalLines(reg.selections) : [],
-    confirmed, confirmedAt: confirmed ? conf.confirmedAt : null, confirmedVersion: conf && conf.confirmedAt ? (conf.version != null ? conf.version : null) : null, lapsed: !!(conf && conf.confirmedAt) && !confirmed };
+    confirmed, confirmedAt: confirmed ? conf.confirmedAt : null, confirmedVersion: conf && conf.confirmedAt ? (conf.version != null ? conf.version : null) : null, lapsed: !!(conf && conf.confirmedAt) && !confirmed,
+    /* HS-060 · the latest version is the Owners' rebooking, not a send from another device of the guest's */
+    ...(record.kind === 'owner-rebook' ? { byOwners: true, ownersFrom: record.rebook && record.rebook.previousVersion != null ? record.rebook.previousVersion : null } : {}) };
 }
 /* `pre` (Guest Relations' overview, 28 Sep 2026): the record, the confirmation and the engine views already read for everyone —
    nothing is read again, and the overview never writes (the one-time keeping of the selection fingerprint is the guest's own read's) */
@@ -1710,7 +1895,9 @@ const BILLING_DEPS = Object.freeze({ sendMail: (...a) => sendMail(...a),
      no write while the clean reset sweeps the engines */
   cohortStale: (env) => { if (env && env.REG_KV) cohortStale(env); }, resetLocked: (env) => resetLocked(env),
   /* HS-035 P1 · the admin guest profile (Owners, 21 Nov 2026): one invitation, read only — served by admin/profile */
-  profileOf: (env, origin, entry, entries) => profileOf(env, origin, entry, entries) });
+  profileOf: (env, origin, entry, entries) => profileOf(env, origin, entry, entries),
+  /* HS-060 · the Owners' rebooking (Owners, 27 Nov 2026): a stay moved to another room category — trip, draft, fingerprints; never a mail */
+  rebook: (env, origin, req) => rebookTrips(env, origin, req) });
 /* the email provider — the API key is a Worker secret, never in the repository:
  *   BREVO_API_KEY   → https://api.brevo.com/v3/smtp/email (sender = MAIL_FROM, a sender validated in Brevo)
  *   RESEND_API_KEY  → https://api.resend.com/emails       (sender = MAIL_FROM, a domain verified in Resend)

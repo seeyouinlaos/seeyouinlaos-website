@@ -338,9 +338,9 @@ test('WAITING LIST · a place held resolves the line: a join clears the guest\'s
   assert.equal(r.d.ok, true); assert.equal(r.d.dryRun, false); assert.equal(r.d.cleared, 2); assert.equal(r.d.waitlistCleared, 1); assert.equal(r.d.remaining, 0); assert.equal(r.d.waitlistRemaining, 0); assert.equal(r.d.fixed, 0);
   r = await call(rooms, 'read', null, LIN);
   assert.deepEqual(r.d.mine, {}); assert.deepEqual(r.d.waitlist, {}); assert.deepEqual(r.d.waiting, {});
-  assert.ok(Object.entries(r.d.summary).every(([k, s]) => (SEED[k].couple ? s.free === 0 && s.soldOut === true : s.free === s.places && s.soldOut === false)), 'every place of every category is free again — nothing was held in advance, so nothing remains; the couple\'s suite is never free to a guest');
+  assert.ok(Object.entries(r.d.summary).every(([k, s]) => (SEED[k].couple || SEED[k].ownersOnly ? s.free === 0 && s.soldOut === true : s.free === s.places && s.soldOut === false)), 'every place of every category is free again — nothing was held in advance, so nothing remains; the couple\'s suite and the Owners\' placement (HS-060) are never free to a guest');
   r = await call(rooms, 'read', null, HAR);
-  assert.ok(Object.entries(r.d.summary).every(([, s]) => s.free === s.places && s.soldOut === false), 'to the couple every place is free again, their suite included');
+  assert.ok(Object.entries(r.d.summary).every(([k, s]) => (SEED[k].ownersOnly ? s.free === 0 && s.soldOut === true : s.free === s.places && s.soldOut === false)), 'to the couple every place is free again, their suite included — the Owners\' placement (HS-060) is nobody\'s to take');
   assert.equal((await call(rooms, 'plan', null, null, true)).d.waitlist.length, 0);
 });
 

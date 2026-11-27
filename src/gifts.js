@@ -43,6 +43,13 @@ export const GIFTS = Object.freeze([
      the guest's statement to Haruthai & Suthep (USD 203.42 open on it) — the page and the trip e-mail must not send the guest to pay the
      hotel a second time. Her booking, her price and her open amount are the engine's and are not touched here. */
   E('CON010', 'bkk-stay', 'u-sathorn-superior-garden', 'statement', null),
+  /* HS-060 · THE OWNERS' REBOOKING (Owners, 27 Nov 2026): a complimentary upgrade to the Noble Courtyard Suite for the pre-wedding and
+     the wedding nights for these two register ids — each keeps their own charge (009 rows on the new rooms): USD 325 for the two
+     pre-wedding nights (162.50 per night), USD 170 for the wedding stay (the second night hosted). A later send keeps these amounts. */
+  E('CON083', 'prewed', 'noble-courtyard', 'special', 325),
+  E('CON084', 'prewed', 'noble-courtyard', 'special', 325),
+  E('CON083', 'wedstay', 'noble-courtyard', 'special', 170),
+  E('CON084', 'wedstay', 'noble-courtyard', 'special', 170),
 ]);
 
 /* the entries of one person, in the form the guest's own pages read (never the person id) */

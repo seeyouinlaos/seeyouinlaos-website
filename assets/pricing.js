@@ -418,6 +418,9 @@
         if (room2) { q.nightly = money(cents(gift.charge / (pay || nights || 1))) + ' per room per night'; q.roomNightly = ''; }
         /* a stay H&S already paid is no discount on a listed rate: no listed rate beside it, no room rate under it */
         if (gift.kind === 'prepaid') q.roomNightly = '';
+        /* THE OWNERS' PLACEMENT (HS-060, 27 Nov 2026): a room this stay does not offer has no listed rate to stand beside the guest's
+           own — a catalogue figure Google does not state for it is never shown */
+        if (room && room.notIn && room.notIn.indexOf(at.win.id) >= 0) { q.nightly = ''; q.roomNightly = ''; q.hotelTotal = null; }
         q.contribution = q.personalWords + ' · ' + q.nightsLine + (q.nightly && gift.kind !== 'prepaid' ? (room2 ? ' · ' : ' · the listed rate: ') + q.nightly : '');
         q.hostedBasis = q.per + ' · ' + q.personalWords.charAt(0).toLowerCase() + q.personalWords.slice(1) + ' · ' + q.nightsLine;
         q.basis = q.amount + ' ' + q.per + ' · ' + q.personalWords.charAt(0).toLowerCase() + q.personalWords.slice(1) + ' · ' + q.nightsLine + (q.nightsCovered ? ': ' + q.nightsCovered : '');
@@ -661,6 +664,9 @@
       if (!at) return false;
       if (!room) return true;
       var r = roomOf(at.stay, room);
+      /* THE OWNERS' PLACEMENT (HS-060, 27 Nov 2026): a room this stay does not offer, where the Owners placed the guest (the line says
+         so: `owners`), stays the guest's own line — it is still never offered to anyone (items · the stay pages) */
+      if (r && r.notIn && r.notIn.indexOf(at.win.id) >= 0 && x && typeof x === 'object' && x.owners === true) return true;
       return !!r && !(r.notIn && r.notIn.indexOf(at.win.id) >= 0);
     },
     /* THE BOOKING METHOD of a window (002 · "Note for Guest", 28 Sep 2026): 'self' — the guest books the hotel themselves (the
